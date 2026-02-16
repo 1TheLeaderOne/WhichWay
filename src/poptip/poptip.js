@@ -1,0 +1,45 @@
+const WhichWayPopTipsConfig = {
+  //回合轮
+  huihelun: {
+    name: "回合轮",
+    info: ["回合轮", "指一名角色上一轮其回合开始（若本轮为第一轮则改为本轮开始时）到其本轮回合开始这一时间段。"],
+    type: "rule",
+    trim: true
+  },
+  AveMujica: {
+    info: ["AveMujica角色", "丰川祥子、若叶睦、祐天寺若麦、三角初华、八幡海铃"],
+    trim: true
+  },
+  centralArea: {
+    name: "中央区",
+    info: "特指本回合进入弃牌堆的牌"
+  },
+  cardUseType: {
+    name: "牌的结算方法",
+    info: "『牌的结算方法』<br>使用、打出、重铸、弃置"
+  },
+  byRecast: {
+    name: "以重铸的方式",
+    info: ["以重铸的方式", "将一张牌同时执行重铸效果和其他效果"],
+    trim: true
+  },
+  zhiheng: {
+    name: "制衡",
+    info: ["制衡", "往往以“制衡X”的描述出现，效果为“弃置X张牌，然后摸X张牌”"],
+    trim: true
+  },
+  jishipai: {
+    name: "即时牌",
+    info: ["即时牌", "即普通锦囊牌和基本牌"],
+    trim: true
+  },
+  enchanting: {
+    name: "附魔",
+    info: ["若附魔的是：", "属性：令附魔对象的属性或特性改为附魔词条。", "牌：令附魔对象的作用效果加入附魔词条中的作用效果，附魔牌的作用效果于附魔对象的作用效果后执行。", "技能：令附魔对象的拥有者在附魔对象或附魔事件的结算过程中视为拥有附魔词条中包含的技能。"],
+    trim: true
+  }
+};
+export {
+  WhichWayPopTipsConfig
+};
+//# sourceMappingURL=poptip.js.map
