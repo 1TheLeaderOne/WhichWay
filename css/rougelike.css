@@ -1,0 +1,245 @@
+/* 背景 */
+.backgroundSJZX {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-attachment: fixed;
+    z-index: 20;
+}
+
+/* 透明图层 */
+.noneSJZX {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0);
+    z-index: 99;
+}
+
+/* 开始界面容器 */
+.fatherSJZX {
+    width: 100%;
+    height: 100%;
+    margin-top: 100px;
+    z-index: 21;
+}
+
+/* logo */
+.logoSammisSJZX {
+    width: 33%;
+    height: 25%;
+    background-size: 100% 100%;
+    z-index: 21;
+    position: relative;
+    left: 50px;
+}
+
+/* 游戏开始 */
+.startSam {
+    width: 20%;
+    height: 50%;
+    position: absolute;
+    bottom: 15%;
+    right: 1%;
+}
+
+.startSam .gameStartLogoSJZX {
+    width: 100%;
+    height: 80%;
+    background-size: 100% 100%;
+    background-image: url(./../image/mode/rougelike/Saamis/orther/gameStart.png);
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+}
+
+.startSam .loadSaveLogoSJZX {
+    background-image: url(./../image/mode/rougelike/Saamis/orther/continueGames.png) !important;
+}
+
+.startSam .delSave {
+    width: 100%;
+    height: 20%;
+    position: absolute;
+    background-size: 100% 100%;
+    background-image: url(./../image/mode/rougelike/Saamis/orther/delSave.png);
+    top: 0px;
+    left: 0px;
+}
+
+.gameStartLogoSJZX {
+    width: 20%;
+    height: 30%;
+    background-size: 100% 100%;
+    position: absolute;
+    bottom: 15%;
+    right: 1%;
+}
+
+/* 文化比较 前瞻投资 挑战自然 字体设置 */
+.outSystemSamiss-textSJZX {
+    font-size: 120%;
+    color: white;
+    position: relative;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    right: 10%;
+}
+
+.outSystemSamiss-levelText {
+    font-size: 200%;
+    color: white;
+    position: relative;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    left: 30%;
+}
+
+
+/* 文化比较 */
+.buffSammisSJZX {
+    width: 20%;
+    height: 8%;
+    background-size: 100% 100%;
+    position: absolute;
+    bottom: 40%;
+    left: 2%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.buffSammis-compelet {
+    width: 20%;
+    height: 90%;
+    position: relative;
+    background-size: 100% 100%;
+    left: 30%;
+}
+
+/* 前瞻性投资 */
+.cannotSammisSJZX {
+    width: 20%;
+    height: 8%;
+    background-size: 100% 100%;
+    position: absolute;
+    bottom: 30%;
+    left: 2%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* 挑战自然（难度选择） difficulty*/
+
+.battleNatureSJZX {
+    width: 20%;
+    height: 8%;
+    background-size: 100% 100%;
+    position: absolute;
+    bottom: 20%;
+    left: 2%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* 菜单容器 */
+.fatherMenuSJZX {
+    width: 100%;
+    height: 5%;
+    z-index: 30;
+    margin-top: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+    position: absolute;
+}
+
+/* 重启游戏 */
+.back-buttonSJZX {
+    width: 6%;
+    height: 90%;
+    background-size: 100% 100%;
+    z-index: 30;
+    position: relative;
+    float: left;
+}
+
+/* 菜单界面 */
+.main-menuSJZX {
+    width: 12%;
+    height: 90%;
+    background-size: 100% 100%;
+    z-index: 30;
+    position: relative;
+    float: left;
+    border-left: 5px solid black;
+}
+
+/* 声音调节 */
+.sound-buttonSJZX {
+    width: 6%;
+    height: 90%;
+    background-size: 100% 100%;
+    z-index: 30;
+    position: relative;
+    float: left;
+    border-left: 5px solid black;
+}
+
+
+/* 科考记录（等级）容器 */
+.level-ScientificSJZX {
+    width: 20%;
+    height: 10%;
+    background-size: 100% 100%;
+    z-index: 22;
+    position: relative;
+    float: right;
+    margin-top: 10px;
+    margin-right: 10px;
+}
+
+/* 科考记录logo */
+.level-expeditionsRecordsLogo {
+    width: 20%;
+    height: 100%;
+    position: relative;
+    float: right;
+    background-size: 100% 100%;
+}
+
+/* 科考记录logo2 */
+.level-expeditionsRecordsLogo2 {
+    width: 60%;
+    height: 100%;
+    position: relative;
+    float: right;
+    background-size: 100% 100%;
+}
+
+/* 等级显示 */
+.level-LV-BG {
+    width: 20%;
+    height: 100%;
+    position: relative;
+    float: right;
+}
+
+.level-LVlogo {
+    width: 100%;
+    height: 20%;
+    margin-top: 20%;
+    background-size: 100% 100%;
+    position: relative;
+}
+
+.level-LVtext {
+    width: 100%;
+    height: 40%;
+    font-size: 40px;
+    color: blue;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

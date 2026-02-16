@@ -1,0 +1,1875 @@
+{
+  "version": "1.1.2",
+  "data": {
+    "aibulanamrfz": {
+      "name": "aibulanamrfz",
+      "skins": {
+        "夏卉": {
+          "name": "夏卉.jpg",
+          "path": "extension/WhichWay/image/skin/aibulanamrfz/夏卉.jpg"
+        }
+      }
+    },
+    "ailinimrfz": {
+      "name": "ailinimrfz",
+      "skins": {
+        "至高审判": {
+          "name": "至高审判.jpg",
+          "path": "extension/WhichWay/image/skin/ailinimrfz/至高审判.jpg"
+        },
+        "飞羽": {
+          "name": "飞羽.jpg",
+          "path": "extension/WhichWay/image/skin/ailinimrfz/飞羽.jpg"
+        }
+      }
+    },
+    "ailisimrfz": {
+      "name": "ailisimrfz",
+      "skins": {
+        "镜中采访": {
+          "name": "镜中采访.jpg",
+          "path": "extension/WhichWay/image/skin/ailisimrfz/镜中采访.jpg"
+        }
+      }
+    },
+    "amiyamrfz": {
+      "name": "amiyamrfz",
+      "skins": {
+        "报童": {
+          "name": "报童.jpg",
+          "path": "extension/WhichWay/image/skin/amiyamrfz/报童.jpg"
+        },
+        "播种者": {
+          "name": "播种者.jpg",
+          "path": "extension/WhichWay/image/skin/amiyamrfz/播种者.jpg"
+        },
+        "见习联结者": {
+          "name": "见习联结者.jpg",
+          "path": "extension/WhichWay/image/skin/amiyamrfz/见习联结者.jpg"
+        }
+      }
+    },
+    "amrfz": {
+      "name": "amrfz",
+      "skins": {
+        "妙手玄心": {
+          "name": "妙手玄心.jpg",
+          "path": "extension/WhichWay/image/skin/amrfz/妙手玄心.jpg"
+        },
+        "百面郎中": {
+          "name": "百面郎中.jpg",
+          "path": "extension/WhichWay/image/skin/amrfz/百面郎中.jpg"
+        }
+      }
+    },
+    "anjielinamrfz": {
+      "name": "anjielinamrfz",
+      "skins": {
+        "夏卉": {
+          "name": "夏卉.jpg",
+          "path": "extension/WhichWay/image/skin/anjielinamrfz/夏卉.jpg"
+        },
+        "素质访客": {
+          "name": "素质访客.jpg",
+          "path": "extension/WhichWay/image/skin/anjielinamrfz/素质访客.jpg"
+        }
+      }
+    },
+    "anzhelamrfz": {
+      "name": "anzhelamrfz",
+      "skins": {
+        "暗矢": {
+          "name": "暗矢.jpg",
+          "path": "extension/WhichWay/image/skin/anzhelamrfz/暗矢.jpg"
+        }
+      }
+    },
+    "ashmrfz": {
+      "name": "ashmrfz",
+      "skins": {
+        "游侠": {
+          "name": "游侠.jpg",
+          "path": "extension/WhichWay/image/skin/ashmrfz/游侠.jpg"
+        }
+      }
+    },
+    "asikalunmrfz": {
+      "name": "asikalunmrfz",
+      "skins": {
+        "趋光之暗": {
+          "name": "趋光之暗.jpg",
+          "path": "extension/WhichWay/image/skin/asikalunmrfz/趋光之暗.jpg"
+        }
+      }
+    },
+    "bafanhailingmrfz": {
+      "name": "bafanhailingmrfz",
+      "skins": {
+        "月下执行者": {
+          "name": "月下执行者.jpg",
+          "path": "extension/WhichWay/image/skin/bafanhailingmrfz/月下执行者.jpg"
+        }
+      }
+    },
+    "baijinmrfz": {
+      "name": "baijinmrfz",
+      "skins": {
+        "灿阳朝露": {
+          "name": "灿阳朝露.jpg",
+          "path": "extension/WhichWay/image/skin/baijinmrfz/灿阳朝露.jpg"
+        }
+      }
+    },
+    "baimianxiaomrfz": {
+      "name": "baimianxiaomrfz",
+      "skins": {
+        "抚云间": {
+          "name": "抚云间.jpg",
+          "path": "extension/WhichWay/image/skin/baimianxiaomrfz/抚云间.jpg"
+        },
+        "林野": {
+          "name": "林野.jpg",
+          "path": "extension/WhichWay/image/skin/baimianxiaomrfz/林野.jpg"
+        }
+      }
+    },
+    "baitiemrfz": {
+      "name": "baitiemrfz",
+      "skins": {
+        "沙滩护卫": {
+          "name": "沙滩护卫.jpg",
+          "path": "extension/WhichWay/image/skin/baitiemrfz/沙滩护卫.jpg"
+        },
+        "空心王冠": {
+          "name": "空心王冠.jpg",
+          "path": "extension/WhichWay/image/skin/baitiemrfz/空心王冠.jpg"
+        }
+      }
+    },
+    "bohuimrfz": {
+      "name": "bohuimrfz",
+      "skins": {
+        "软绒": {
+          "name": "软绒.jpg",
+          "path": "extension/WhichWay/image/skin/bohuimrfz/软绒.jpg"
+        }
+      }
+    },
+    "caidumrfz": {
+      "name": "caidumrfz",
+      "skins": {
+        "桂影窗": {
+          "name": "桂影窗.jpg",
+          "path": "extension/WhichWay/image/skin/caidumrfz/桂影窗.jpg"
+        }
+      }
+    },
+    "Castle3mrfz": {
+      "name": "Castle3mrfz",
+      "skins": {
+        "夏卉": {
+          "name": "夏卉.jpg",
+          "path": "extension/WhichWay/image/skin/Castle3mrfz/夏卉.jpg"
+        }
+      }
+    },
+    "chengfengmrfz": {
+      "name": "chengfengmrfz",
+      "skins": {
+        "异乡的云": {
+          "name": "异乡的云.jpg",
+          "path": "extension/WhichWay/image/skin/chengfengmrfz/异乡的云.jpg"
+        }
+      }
+    },
+    "chengshanmrfz": {
+      "name": "chengshanmrfz",
+      "skins": {
+        "喜夜侍者": {
+          "name": "喜夜侍者.jpg",
+          "path": "extension/WhichWay/image/skin/chengshanmrfz/喜夜侍者.jpg"
+        },
+        "夏卉": {
+          "name": "夏卉.jpg",
+          "path": "extension/WhichWay/image/skin/chengshanmrfz/夏卉.jpg"
+        },
+        "花房茶话会": {
+          "name": "花房茶话会.jpg",
+          "path": "extension/WhichWay/image/skin/chengshanmrfz/花房茶话会.jpg"
+        }
+      }
+    },
+    "chenmrfz": {
+      "name": "chenmrfz",
+      "skins": {
+        "岁红霞": {
+          "name": "岁红霞.jpg",
+          "path": "extension/WhichWay/image/skin/chenmrfz/岁红霞.jpg"
+        }
+      }
+    },
+    "chizuimrfz": {
+      "name": "chizuimrfz",
+      "skins": {
+        "偶尔陶醉": {
+          "name": "偶尔陶醉.jpg",
+          "path": "extension/WhichWay/image/skin/chizuimrfz/偶尔陶醉.jpg"
+        },
+        "记叙": {
+          "name": "记叙.jpg",
+          "path": "extension/WhichWay/image/skin/chizuimrfz/记叙.jpg"
+        }
+      }
+    },
+    "chongyuemrfz": {
+      "name": "chongyuemrfz",
+      "skins": {
+        "何处栖": {
+          "name": "何处栖.jpg",
+          "path": "extension/WhichWay/image/skin/chongyuemrfz/何处栖.jpg"
+        },
+        "全能演员": {
+          "name": "全能演员.jpg",
+          "path": "extension/WhichWay/image/skin/chongyuemrfz/全能演员.jpg"
+        }
+      }
+    },
+    "Christinemrfz": {
+      "name": "Christinemrfz",
+      "skins": {
+        "fakeChristine": {
+          "name": "fakeChristine.jpg",
+          "path": "extension/WhichWay/image/skin/Christinemrfz/fakeChristine.jpg"
+        }
+      }
+    },
+    "chuxuemrfz": {
+      "name": "chuxuemrfz",
+      "skins": {
+        "开斯特之霜": {
+          "name": "开斯特之霜.jpg",
+          "path": "extension/WhichWay/image/skin/chuxuemrfz/开斯特之霜.jpg"
+        }
+      }
+    },
+    "cuoemrfz": {
+      "name": "cuoemrfz",
+      "skins": {
+        "彼有": {
+          "name": "彼有.jpg",
+          "path": "extension/WhichWay/image/skin/cuoemrfz/彼有.jpg"
+        }
+      }
+    },
+    "dekesasimrfz": {
+      "name": "dekesasimrfz",
+      "skins": {
+        "寒冬信使": {
+          "name": "寒冬信使.jpg",
+          "path": "extension/WhichWay/image/skin/dekesasimrfz/寒冬信使.jpg"
+        },
+        "意志": {
+          "name": "意志.jpg",
+          "path": "extension/WhichWay/image/skin/dekesasimrfz/意志.jpg"
+        }
+      }
+    },
+    "docmrfz": {
+      "name": "docmrfz",
+      "skins": {
+        "展览": {
+          "name": "展览.jpg",
+          "path": "extension/WhichWay/image/skin/docmrfz/展览.jpg"
+        }
+      }
+    },
+    "duoluoximrfz": {
+      "name": "duoluoximrfz",
+      "skins": {
+        "命运主宰": {
+          "name": "命运主宰.jpg",
+          "path": "extension/WhichWay/image/skin/duoluoximrfz/命运主宰.jpg"
+        }
+      }
+    },
+    "elamrfz": {
+      "name": "elamrfz",
+      "skins": {
+        "密室": {
+          "name": "密室.jpg",
+          "path": "extension/WhichWay/image/skin/elamrfz/密室.jpg"
+        }
+      }
+    },
+    "feiyameitamrfz": {
+      "name": "feiyameitamrfz",
+      "skins": {
+        "审判日": {
+          "name": "审判日.jpg",
+          "path": "extension/WhichWay/image/skin/feiyameitamrfz/审判日.jpg"
+        },
+        "至圣宣言": {
+          "name": "至圣宣言.jpg",
+          "path": "extension/WhichWay/image/skin/feiyameitamrfz/至圣宣言.jpg"
+        }
+      }
+    },
+    "fengchuanxiangzimrfz": {
+      "name": "fengchuanxiangzimrfz",
+      "skins": {
+        "旋律的主人": {
+          "name": "旋律的主人.jpg",
+          "path": "extension/WhichWay/image/skin/fengchuanxiangzimrfz/旋律的主人.jpg"
+        }
+      }
+    },
+    "fengdimrfz": {
+      "name": "fengdimrfz",
+      "skins": {
+        "皇后一号": {
+          "name": "皇后一号.jpg",
+          "path": "extension/WhichWay/image/skin/fengdimrfz/皇后一号.jpg"
+        },
+        "皇家近卫": {
+          "name": "皇家近卫.jpg",
+          "path": "extension/WhichWay/image/skin/fengdimrfz/皇家近卫.jpg"
+        },
+        "风笛声声": {
+          "name": "风笛声声.jpg",
+          "path": "extension/WhichWay/image/skin/fengdimrfz/风笛声声.jpg"
+        }
+      }
+    },
+    "fengwanmrfz": {
+      "name": "fengwanmrfz",
+      "skins": {
+        "幻影轻悄": {
+          "name": "幻影轻悄.jpg",
+          "path": "extension/WhichWay/image/skin/fengwanmrfz/幻影轻悄.jpg"
+        }
+      }
+    },
+    "fulankamrfz": {
+      "name": "fulankamrfz",
+      "skins": {
+        "林虹之间": {
+          "name": "林虹之间.jpg",
+          "path": "extension/WhichWay/image/skin/fulankamrfz/林虹之间.jpg"
+        }
+      }
+    },
+    "gelaokesimrfz": {
+      "name": "gelaokesimrfz",
+      "skins": {
+        "广场扫荡客": {
+          "name": "广场扫荡客.jpg",
+          "path": "extension/WhichWay/image/skin/gelaokesimrfz/广场扫荡客.jpg"
+        }
+      }
+    },
+    "geleidiyamrfz": {
+      "name": "geleidiyamrfz",
+      "skins": {
+        "我即潮汐": {
+          "name": "我即潮汐.jpg",
+          "path": "extension/WhichWay/image/skin/geleidiyamrfz/我即潮汐.jpg"
+        },
+        "返航": {
+          "name": "返航.jpg",
+          "path": "extension/WhichWay/image/skin/geleidiyamrfz/返航.jpg"
+        }
+      }
+    },
+    "guiyanmrfz": {
+      "name": "guiyanmrfz",
+      "skins": {
+        "冒险启程": {
+          "name": "冒险启程.jpg",
+          "path": "extension/WhichWay/image/skin/guiyanmrfz/冒险启程.jpg"
+        }
+      }
+    },
+    "haidimrfz": {
+      "name": "haidimrfz",
+      "skins": {
+        "书信零落": {
+          "name": "书信零落.jpg",
+          "path": "extension/WhichWay/image/skin/haidimrfz/书信零落.jpg"
+        }
+      }
+    },
+    "haimomrfz": {
+      "name": "haimomrfz",
+      "skins": {
+        "及山海": {
+          "name": "及山海.jpg",
+          "path": "extension/WhichWay/image/skin/haimomrfz/及山海.jpg"
+        },
+        "搁浅": {
+          "name": "搁浅.jpg",
+          "path": "extension/WhichWay/image/skin/haimomrfz/搁浅.jpg"
+        }
+      }
+    },
+    "hainimrfz": {
+      "name": "hainimrfz",
+      "skins": {
+        "翻涌": {
+          "name": "翻涌.jpg",
+          "path": "extension/WhichWay/image/skin/hainimrfz/翻涌.jpg"
+        }
+      }
+    },
+    "haojiaomrfz": {
+      "name": "haojiaomrfz",
+      "skins": {
+        "化花": {
+          "name": "化花.jpg",
+          "path": "extension/WhichWay/image/skin/haojiaomrfz/化花.jpg"
+        }
+      }
+    },
+    "hedeleimrfz": {
+      "name": "hedeleimrfz",
+      "skins": {
+        "沉思之庭": {
+          "name": "沉思之庭.jpg",
+          "path": "extension/WhichWay/image/skin/hedeleimrfz/沉思之庭.jpg"
+        }
+      }
+    },
+    "heijianmrfz": {
+      "name": "heijianmrfz",
+      "skins": {
+        "变奏": {
+          "name": "变奏.jpg",
+          "path": "extension/WhichWay/image/skin/heijianmrfz/变奏.jpg"
+        }
+      }
+    },
+    "heimrfz": {
+      "name": "heimrfz",
+      "skins": {
+        "厚礼": {
+          "name": "厚礼.jpg",
+          "path": "extension/WhichWay/image/skin/heimrfz/厚礼.jpg"
+        },
+        "天际线": {
+          "name": "天际线.jpg",
+          "path": "extension/WhichWay/image/skin/heimrfz/天际线.jpg"
+        }
+      }
+    },
+    "helagemrfz": {
+      "name": "helagemrfz",
+      "skins": {
+        "歧路幻影": {
+          "name": "歧路幻影.jpg",
+          "path": "extension/WhichWay/image/skin/helagemrfz/歧路幻影.jpg"
+        }
+      }
+    },
+    "hongmrfz": {
+      "name": "hongmrfz",
+      "skins": {
+        "清风": {
+          "name": "清风.jpg",
+          "path": "extension/WhichWay/image/skin/hongmrfz/清风.jpg"
+        }
+      }
+    },
+    "hongxuemrfz": {
+      "name": "hongxuemrfz",
+      "skins": {
+        "字句中的雪原": {
+          "name": "字句中的雪原.jpg",
+          "path": "extension/WhichWay/image/skin/hongxuemrfz/字句中的雪原.jpg"
+        },
+        "行梦侧畔": {
+          "name": "行梦侧畔.jpg",
+          "path": "extension/WhichWay/image/skin/hongxuemrfz/行梦侧畔.jpg"
+        }
+      }
+    },
+    "huangmrfz": {
+      "name": "huangmrfz",
+      "skins": {
+        "易爆蓝焰": {
+          "name": "易爆蓝焰.jpg",
+          "path": "extension/WhichWay/image/skin/huangmrfz/易爆蓝焰.jpg"
+        },
+        "爆裂菲林": {
+          "name": "爆裂菲林.jpg",
+          "path": "extension/WhichWay/image/skin/huangmrfz/爆裂菲林.jpg"
+        }
+      }
+    },
+    "huoerhaiyamrfz": {
+      "name": "huoerhaiyamrfz",
+      "skins": {
+        "历世流风": {
+          "name": "历世流风.jpg",
+          "path": "extension/WhichWay/image/skin/huoerhaiyamrfz/历世流风.jpg"
+        },
+        "恒久祭礼": {
+          "name": "恒久祭礼.jpg",
+          "path": "extension/WhichWay/image/skin/huoerhaiyamrfz/恒久祭礼.jpg"
+        }
+      }
+    },
+    "innamrfz": {
+      "name": "innamrfz",
+      "skins": {
+        "镜廊": {
+          "name": "镜廊.jpg",
+          "path": "extension/WhichWay/image/skin/innamrfz/镜廊.jpg"
+        }
+      }
+    },
+    "jianmrfz": {
+      "name": "jianmrfz",
+      "skins": {
+        "暗月的影子": {
+          "name": "暗月的影子.jpg",
+          "path": "extension/WhichWay/image/skin/jianmrfz/暗月的影子.jpg"
+        }
+      }
+    },
+    "jicimrfz": {
+      "name": "jicimrfz",
+      "skins": {
+        "惬意": {
+          "name": "惬意.jpg",
+          "path": "extension/WhichWay/image/skin/jicimrfz/惬意.jpg"
+        },
+        "锋潮": {
+          "name": "锋潮.jpg",
+          "path": "extension/WhichWay/image/skin/jicimrfz/锋潮.jpg"
+        }
+      }
+    },
+    "jingzhemrfz": {
+      "name": "jingzhemrfz",
+      "skins": {
+        "遗迹游学者": {
+          "name": "遗迹游学者.jpg",
+          "path": "extension/WhichWay/image/skin/jingzhemrfz/遗迹游学者.jpg"
+        }
+      }
+    },
+    "kaierximrfz": {
+      "name": "kaierximrfz",
+      "skins": {
+        "时遗": {
+          "name": "时遗.jpg",
+          "path": "extension/WhichWay/image/skin/kaierximrfz/时遗.jpg"
+        },
+        "时遗2": {
+          "name": "时遗2.jpg",
+          "path": "extension/WhichWay/image/skin/kaierximrfz/时遗2.jpg"
+        },
+        "残余": {
+          "name": "残余.jpg",
+          "path": "extension/WhichWay/image/skin/kaierximrfz/残余.jpg"
+        }
+      }
+    },
+    "kamimrfz": {
+      "name": "kamimrfz",
+      "skins": {
+        "今昔须臾之梦": {
+          "name": "今昔须臾之梦.jpg",
+          "path": "extension/WhichWay/image/skin/kamimrfz/今昔须臾之梦.jpg"
+        }
+      }
+    },
+    "kanielianmrfz": {
+      "name": "kanielianmrfz",
+      "skins": {
+        "灿阳朝露": {
+          "name": "灿阳朝露.jpg",
+          "path": "extension/WhichWay/image/skin/kanielianmrfz/灿阳朝露.jpg"
+        },
+        "霍恩洛厄的寒沙": {
+          "name": "霍恩洛厄的寒沙.jpg",
+          "path": "extension/WhichWay/image/skin/kanielianmrfz/霍恩洛厄的寒沙.jpg"
+        }
+      }
+    },
+    "keebomrfz": {
+      "name": "keebomrfz",
+      "skins": {
+        "夏卉": {
+          "name": "夏卉.jpg",
+          "path": "extension/WhichWay/image/skin/keebomrfz/夏卉.jpg"
+        },
+        "无拘无束": {
+          "name": "无拘无束.jpg",
+          "path": "extension/WhichWay/image/skin/keebomrfz/无拘无束.jpg"
+        }
+      }
+    },
+    "kongxianmrfz": {
+      "name": "kongxianmrfz",
+      "skins": {
+        "宣传策略": {
+          "name": "宣传策略.jpg",
+          "path": "extension/WhichWay/image/skin/kongxianmrfz/宣传策略.jpg"
+        },
+        "至虔者荣光": {
+          "name": "至虔者荣光.jpg",
+          "path": "extension/WhichWay/image/skin/kongxianmrfz/至虔者荣光.jpg"
+        }
+      }
+    },
+    "kuiyingmrfz": {
+      "name": "kuiyingmrfz",
+      "skins": {
+        "梦魇之梦": {
+          "name": "梦魇之梦.jpg",
+          "path": "extension/WhichWay/image/skin/kuiyingmrfz/梦魇之梦.jpg"
+        },
+        "焦点": {
+          "name": "焦点.jpg",
+          "path": "extension/WhichWay/image/skin/kuiyingmrfz/焦点.jpg"
+        }
+      }
+    },
+    "laiyimrfz": {
+      "name": "laiyimrfz",
+      "skins": {
+        "幻梦高空": {
+          "name": "幻梦高空.jpg",
+          "path": "extension/WhichWay/image/skin/laiyimrfz/幻梦高空.jpg"
+        }
+      }
+    },
+    "Lancet2mrfz": {
+      "name": "Lancet2mrfz",
+      "skins": {
+        "海岸改装救援": {
+          "name": "海岸改装救援.jpg",
+          "path": "extension/WhichWay/image/skin/Lancet2mrfz/海岸改装救援.jpg"
+        }
+      }
+    },
+    "landumrfz": {
+      "name": "landumrfz",
+      "skins": {
+        "浅滩律动": {
+          "name": "浅滩律动.jpg",
+          "path": "extension/WhichWay/image/skin/landumrfz/浅滩律动.jpg"
+        },
+        "艾律西昂夜曲": {
+          "name": "艾律西昂夜曲.jpg",
+          "path": "extension/WhichWay/image/skin/landumrfz/艾律西昂夜曲.jpg"
+        }
+      }
+    },
+    "laolimrfz": {
+      "name": "laolimrfz",
+      "skins": {
+        "坊间凉茶铺": {
+          "name": "坊间凉茶铺.jpg",
+          "path": "extension/WhichWay/image/skin/laolimrfz/坊间凉茶铺.jpg"
+        },
+        "手到牌来": {
+          "name": "手到牌来.jpg",
+          "path": "extension/WhichWay/image/skin/laolimrfz/手到牌来.jpg"
+        },
+        "鉴浮生": {
+          "name": "鉴浮生.jpg",
+          "path": "extension/WhichWay/image/skin/laolimrfz/鉴浮生.jpg"
+        }
+      }
+    },
+    "lindongmrfz": {
+      "name": "lindongmrfz",
+      "skins": {
+        "乌萨斯": {
+          "name": "乌萨斯.jpg",
+          "path": "extension/WhichWay/image/skin/lindongmrfz/乌萨斯.jpg"
+        },
+        "整装待发": {
+          "name": "整装待发.jpg",
+          "path": "extension/WhichWay/image/skin/lindongmrfz/整装待发.jpg"
+        }
+      }
+    },
+    "linglanmrfz": {
+      "name": "linglanmrfz",
+      "skins": {
+        "弃土花开": {
+          "name": "弃土花开.jpg",
+          "path": "extension/WhichWay/image/skin/linglanmrfz/弃土花开.jpg"
+        },
+        "春之颂": {
+          "name": "春之颂.jpg",
+          "path": "extension/WhichWay/image/skin/linglanmrfz/春之颂.jpg"
+        },
+        "雪霁": {
+          "name": "雪霁.jpg",
+          "path": "extension/WhichWay/image/skin/linglanmrfz/雪霁.jpg"
+        }
+      }
+    },
+    "lingmrfz": {
+      "name": "lingmrfz",
+      "skins": {
+        "崖高梦远": {
+          "name": "崖高梦远.jpg",
+          "path": "extension/WhichWay/image/skin/lingmrfz/崖高梦远.jpg"
+        },
+        "濯缨": {
+          "name": "濯缨.jpg",
+          "path": "extension/WhichWay/image/skin/lingmrfz/濯缨.jpg"
+        }
+      }
+    },
+    "linguangmrfz": {
+      "name": "linguangmrfz",
+      "skins": {
+        "灿阳朝露": {
+          "name": "灿阳朝露.jpg",
+          "path": "extension/WhichWay/image/skin/linguangmrfz/灿阳朝露.jpg"
+        }
+      }
+    },
+    "lingzhimrfz": {
+      "name": "lingzhimrfz",
+      "skins": {
+        "先驱": {
+          "name": "先驱.jpg",
+          "path": "extension/WhichWay/image/skin/lingzhimrfz/先驱.jpg"
+        }
+      }
+    },
+    "linmrfz": {
+      "name": "linmrfz",
+      "skins": {
+        "列瑶台": {
+          "name": "列瑶台.jpg",
+          "path": "extension/WhichWay/image/skin/linmrfz/列瑶台.jpg"
+        },
+        "夏卉": {
+          "name": "夏卉.jpg",
+          "path": "extension/WhichWay/image/skin/linmrfz/夏卉.jpg"
+        }
+      }
+    },
+    "linshimrfz": {
+      "name": "linshimrfz",
+      "skins": {
+        "林间暖阳": {
+          "name": "林间暖阳.jpg",
+          "path": "extension/WhichWay/image/skin/linshimrfz/林间暖阳.jpg"
+        }
+      }
+    },
+    "liumingmrfz": {
+      "name": "liumingmrfz",
+      "skins": {
+        "灿海浮梦": {
+          "name": "灿海浮梦.jpg",
+          "path": "extension/WhichWay/image/skin/liumingmrfz/灿海浮梦.jpg"
+        },
+        "雨霓行游客": {
+          "name": "雨霓行游客.jpg",
+          "path": "extension/WhichWay/image/skin/liumingmrfz/雨霓行游客.jpg"
+        }
+      }
+    },
+    "longshelanmrfz": {
+      "name": "longshelanmrfz",
+      "skins": {
+        "巅峰现场": {
+          "name": "巅峰现场.jpg",
+          "path": "extension/WhichWay/image/skin/longshelanmrfz/巅峰现场.jpg"
+        },
+        "开牌制胜": {
+          "name": "开牌制胜.jpg",
+          "path": "extension/WhichWay/image/skin/longshelanmrfz/开牌制胜.jpg"
+        }
+      }
+    },
+    "luogesimrfz": {
+      "name": "luogesimrfz",
+      "skins": {
+        "辉煌的静谧": {
+          "name": "辉煌的静谧.jpg",
+          "path": "extension/WhichWay/image/skin/luogesimrfz/辉煌的静谧.jpg"
+        }
+      }
+    },
+    "lutuomrfz": {
+      "name": "lutuomrfz",
+      "skins": {
+        "寄遥思": {
+          "name": "寄遥思.jpg",
+          "path": "extension/WhichWay/image/skin/lutuomrfz/寄遥思.jpg"
+        }
+      }
+    },
+    "maennamrfz": {
+      "name": "maennamrfz",
+      "skins": {
+        "苍茫怒号": {
+          "name": "苍茫怒号.jpg",
+          "path": "extension/WhichWay/image/skin/maennamrfz/苍茫怒号.jpg"
+        },
+        "远路": {
+          "name": "远路.jpg",
+          "path": "extension/WhichWay/image/skin/maennamrfz/远路.jpg"
+        }
+      }
+    },
+    "maizhelunmrfz": {
+      "name": "maizhelunmrfz",
+      "skins": {
+        "回味冰霜雪": {
+          "name": "回味冰霜雪.jpg",
+          "path": "extension/WhichWay/image/skin/maizhelunmrfz/回味冰霜雪.jpg"
+        },
+        "辰白微星": {
+          "name": "辰白微星.jpg",
+          "path": "extension/WhichWay/image/skin/maizhelunmrfz/辰白微星.jpg"
+        }
+      }
+    },
+    "maluxiermrfz": {
+      "name": "maluxiermrfz",
+      "skins": {
+        "泰拉探索": {
+          "name": "泰拉探索.jpg",
+          "path": "extension/WhichWay/image/skin/maluxiermrfz/泰拉探索.jpg"
+        }
+      }
+    },
+    "medical_amiyamrfz": {
+      "name": "medical_amiyamrfz",
+      "skins": {
+        "寰宇独奏": {
+          "name": "寰宇独奏.jpg",
+          "path": "extension/WhichWay/image/skin/medical_amiyamrfz/寰宇独奏.jpg"
+        }
+      }
+    },
+    "meiermrfz": {
+      "name": "meiermrfz",
+      "skins": {
+        "庭院寻梦尖兵": {
+          "name": "庭院寻梦尖兵.jpg",
+          "path": "extension/WhichWay/image/skin/meiermrfz/庭院寻梦尖兵.jpg"
+        }
+      }
+    },
+    "midiexiangmrfz": {
+      "name": "midiexiangmrfz",
+      "skins": {
+        "拥抱新生": {
+          "name": "拥抱新生.jpg",
+          "path": "extension/WhichWay/image/skin/midiexiangmrfz/拥抱新生.jpg"
+        },
+        "轻盈一梦": {
+          "name": "轻盈一梦.jpg",
+          "path": "extension/WhichWay/image/skin/midiexiangmrfz/轻盈一梦.jpg"
+        }
+      }
+    },
+    "mingjiaomrfz": {
+      "name": "mingjiaomrfz",
+      "skins": {
+        "来路": {
+          "name": "来路.jpg",
+          "path": "extension/WhichWay/image/skin/mingjiaomrfz/来路.jpg"
+        }
+      }
+    },
+    "miumiumrfz": {
+      "name": "miumiumrfz",
+      "skins": {
+        "新枝": {
+          "name": "新枝.jpg",
+          "path": "extension/WhichWay/image/skin/miumiumrfz/新枝.jpg"
+        },
+        "漫步于黄金之梦": {
+          "name": "漫步于黄金之梦.jpg",
+          "path": "extension/WhichWay/image/skin/miumiumrfz/漫步于黄金之梦.jpg"
+        }
+      }
+    },
+    "mositimamrfz": {
+      "name": "mositimamrfz",
+      "skins": {
+        "幻语月痕": {
+          "name": "幻语月痕.jpg",
+          "path": "extension/WhichWay/image/skin/mositimamrfz/幻语月痕.jpg"
+        },
+        "除魅": {
+          "name": "除魅.jpg",
+          "path": "extension/WhichWay/image/skin/mositimamrfz/除魅.jpg"
+        }
+      }
+    },
+    "mowangmrfz": {
+      "name": "mowangmrfz",
+      "skins": {
+        "追悼": {
+          "name": "追悼.jpg",
+          "path": "extension/WhichWay/image/skin/mowangmrfz/追悼.jpg"
+        }
+      }
+    },
+    "narentuyamrfz": {
+      "name": "narentuyamrfz",
+      "skins": {
+        "链锯陪护者": {
+          "name": "链锯陪护者.jpg",
+          "path": "extension/WhichWay/image/skin/narentuyamrfz/链锯陪护者.jpg"
+        }
+      }
+    },
+    "nengtianshimrfz": {
+      "name": "nengtianshimrfz",
+      "skins": {
+        "午夜邮差": {
+          "name": "午夜邮差.jpg",
+          "path": "extension/WhichWay/image/skin/nengtianshimrfz/午夜邮差.jpg"
+        },
+        "城市骑手": {
+          "name": "城市骑手.jpg",
+          "path": "extension/WhichWay/image/skin/nengtianshimrfz/城市骑手.jpg"
+        },
+        "野地秘行": {
+          "name": "野地秘行.jpg",
+          "path": "extension/WhichWay/image/skin/nengtianshimrfz/野地秘行.jpg"
+        }
+      }
+    },
+    "nianmrfz": {
+      "name": "nianmrfz",
+      "skins": {
+        "乐逍遥": {
+          "name": "乐逍遥.jpg",
+          "path": "extension/WhichWay/image/skin/nianmrfz/乐逍遥.jpg"
+        },
+        "霹雳导演": {
+          "name": "霹雳导演.jpg",
+          "path": "extension/WhichWay/image/skin/nianmrfz/霹雳导演.jpg"
+        }
+      }
+    },
+    "nifumrfz": {
+      "name": "nifumrfz",
+      "skins": {
+        "甜美配方": {
+          "name": "甜美配方.jpg",
+          "path": "extension/WhichWay/image/skin/nifumrfz/甜美配方.jpg"
+        }
+      }
+    },
+    "niyanmrfz": {
+      "name": "niyanmrfz",
+      "skins": {
+        "砾瓦": {
+          "name": "砾瓦.jpg",
+          "path": "extension/WhichWay/image/skin/niyanmrfz/砾瓦.jpg"
+        },
+        "静谧午夜": {
+          "name": "静谧午夜.jpg",
+          "path": "extension/WhichWay/image/skin/niyanmrfz/静谧午夜.jpg"
+        },
+        "黑曜石": {
+          "name": "黑曜石.jpg",
+          "path": "extension/WhichWay/image/skin/niyanmrfz/黑曜石.jpg"
+        }
+      }
+    },
+    "palasimrfz": {
+      "name": "palasimrfz",
+      "skins": {
+        "传承": {
+          "name": "传承.jpg",
+          "path": "extension/WhichWay/image/skin/palasimrfz/传承.jpg"
+        },
+        "山川的酿造": {
+          "name": "山川的酿造.jpg",
+          "path": "extension/WhichWay/image/skin/palasimrfz/山川的酿造.jpg"
+        }
+      }
+    },
+    "peipeimrfz": {
+      "name": "peipeimrfz",
+      "skins": {
+        "星移": {
+          "name": "星移.jpg",
+          "path": "extension/WhichWay/image/skin/peipeimrfz/星移.jpg"
+        }
+      }
+    },
+    "PhonoR0mrfz": {
+      "name": "PhonoR0mrfz",
+      "skins": {
+        "最初的颂歌": {
+          "name": "最初的颂歌.jpg",
+          "path": "extension/WhichWay/image/skin/PhonoR0mrfz/最初的颂歌.jpg"
+        }
+      }
+    },
+    "puruisaisimrfz": {
+      "name": "puruisaisimrfz",
+      "skins": {
+        "追悼？": {
+          "name": "追悼？.jpg",
+          "path": "extension/WhichWay/image/skin/puruisaisimrfz/追悼？.jpg"
+        }
+      }
+    },
+    "qinliumrfz": {
+      "name": "qinliumrfz",
+      "skins": {
+        "夏卉": {
+          "name": "夏卉.jpg",
+          "path": "extension/WhichWay/image/skin/qinliumrfz/夏卉.jpg"
+        },
+        "识芳": {
+          "name": "识芳.jpg",
+          "path": "extension/WhichWay/image/skin/qinliumrfz/识芳.jpg"
+        }
+      }
+    },
+    "qiubaimrfz": {
+      "name": "qiubaimrfz",
+      "skins": {
+        "礼遇": {
+          "name": "礼遇.jpg",
+          "path": "extension/WhichWay/image/skin/qiubaimrfz/礼遇.jpg"
+        },
+        "霜林醉": {
+          "name": "霜林醉.jpg",
+          "path": "extension/WhichWay/image/skin/qiubaimrfz/霜林醉.jpg"
+        }
+      }
+    },
+    "ruoyemumrfz": {
+      "name": "ruoyemumrfz",
+      "skins": {
+        "提线的本我": {
+          "name": "提线的本我.jpg",
+          "path": "extension/WhichWay/image/skin/ruoyemumrfz/提线的本我.jpg"
+        }
+      }
+    },
+    "saileiyamrfz": {
+      "name": "saileiyamrfz",
+      "skins": {
+        "坚城": {
+          "name": "坚城.jpg",
+          "path": "extension/WhichWay/image/skin/saileiyamrfz/坚城.jpg"
+        },
+        "铁律": {
+          "name": "铁律.jpg",
+          "path": "extension/WhichWay/image/skin/saileiyamrfz/铁律.jpg"
+        }
+      }
+    },
+    "sanjiaochuhuamrfz": {
+      "name": "sanjiaochuhuamrfz",
+      "skins": {
+        "笼中歌者": {
+          "name": "笼中歌者.jpg",
+          "path": "extension/WhichWay/image/skin/sanjiaochuhuamrfz/笼中歌者.jpg"
+        }
+      }
+    },
+    "semrfz": {
+      "name": "semrfz",
+      "skins": {
+        "缤纷奇境": {
+          "name": "缤纷奇境.jpg",
+          "path": "extension/WhichWay/image/skin/semrfz/缤纷奇境.jpg"
+        },
+        "自由": {
+          "name": "自由.jpg",
+          "path": "extension/WhichWay/image/skin/semrfz/自由.jpg"
+        }
+      }
+    },
+    "senranmrfz": {
+      "name": "senranmrfz",
+      "skins": {
+        "熔断铸匠": {
+          "name": "熔断铸匠.jpg",
+          "path": "extension/WhichWay/image/skin/senranmrfz/熔断铸匠.jpg"
+        }
+      }
+    },
+    "shanlingmrfz": {
+      "name": "shanlingmrfz",
+      "skins": {
+        "静谧午夜": {
+          "name": "静谧午夜.jpg",
+          "path": "extension/WhichWay/image/skin/shanlingmrfz/静谧午夜.jpg"
+        }
+      }
+    },
+    "shanmrfz": {
+      "name": "shanmrfz",
+      "skins": {
+        "乌云": {
+          "name": "乌云.jpg",
+          "path": "extension/WhichWay/image/skin/shanmrfz/乌云.jpg"
+        },
+        "读者": {
+          "name": "读者.jpg",
+          "path": "extension/WhichWay/image/skin/shanmrfz/读者.jpg"
+        }
+      }
+    },
+    "shendianmrfz": {
+      "name": "shendianmrfz",
+      "skins": {
+        "待晴日": {
+          "name": "待晴日.jpg",
+          "path": "extension/WhichWay/image/skin/shendianmrfz/待晴日.jpg"
+        }
+      }
+    },
+    "shenxunmrfz": {
+      "name": "shenxunmrfz",
+      "skins": {
+        "层流": {
+          "name": "层流.jpg",
+          "path": "extension/WhichWay/image/skin/shenxunmrfz/层流.jpg"
+        }
+      }
+    },
+    "shijunzhemrfz": {
+      "name": "shijunzhemrfz",
+      "skins": {
+        "夜之终局": {
+          "name": "夜之终局.jpg",
+          "path": "extension/WhichWay/image/skin/shijunzhemrfz/夜之终局.jpg"
+        }
+      }
+    },
+    "shixiemrfz": {
+      "name": "shixiemrfz",
+      "skins": {
+        "无形晚悼": {
+          "name": "无形晚悼.jpg",
+          "path": "extension/WhichWay/image/skin/shixiemrfz/无形晚悼.jpg"
+        },
+        "面纱之下": {
+          "name": "面纱之下.jpg",
+          "path": "extension/WhichWay/image/skin/shixiemrfz/面纱之下.jpg"
+        }
+      }
+    },
+    "shuangyemrfz": {
+      "name": "shuangyemrfz",
+      "skins": {
+        "破冰": {
+          "name": "破冰.jpg",
+          "path": "extension/WhichWay/image/skin/shuangyemrfz/破冰.jpg"
+        }
+      }
+    },
+    "shuiyuemrfz": {
+      "name": "shuiyuemrfz",
+      "skins": {
+        "夏日餮宴": {
+          "name": "夏日餮宴.jpg",
+          "path": "extension/WhichWay/image/skin/shuiyuemrfz/夏日餮宴.jpg"
+        },
+        "永恒玩家": {
+          "name": "永恒玩家.jpg",
+          "path": "extension/WhichWay/image/skin/shuiyuemrfz/永恒玩家.jpg"
+        }
+      }
+    },
+    "shumrfz": {
+      "name": "shumrfz",
+      "skins": {
+        "春日宴": {
+          "name": "春日宴.jpg",
+          "path": "extension/WhichWay/image/skin/shumrfz/春日宴.jpg"
+        },
+        "洪荒": {
+          "name": "洪荒.jpg",
+          "path": "extension/WhichWay/image/skin/shumrfz/洪荒.jpg"
+        },
+        "海晏河清": {
+          "name": "海晏河清.jpg",
+          "path": "extension/WhichWay/image/skin/shumrfz/海晏河清.jpg"
+        }
+      }
+    },
+    "sikadimrfz": {
+      "name": "sikadimrfz",
+      "skins": {
+        "下一顿午茶": {
+          "name": "下一顿午茶.jpg",
+          "path": "extension/WhichWay/image/skin/sikadimrfz/下一顿午茶.jpg"
+        },
+        "驭浪": {
+          "name": "驭浪.jpg",
+          "path": "extension/WhichWay/image/skin/sikadimrfz/驭浪.jpg"
+        }
+      }
+    },
+    "siyemrfz": {
+      "name": "siyemrfz",
+      "skins": {
+        "叙拉古的彼面": {
+          "name": "叙拉古的彼面.jpg",
+          "path": "extension/WhichWay/image/skin/siyemrfz/叙拉古的彼面.jpg"
+        }
+      }
+    },
+    "spamiyamrfz": {
+      "name": "spamiyamrfz",
+      "skins": {
+        "于万千宇宙之中": {
+          "name": "于万千宇宙之中.jpg",
+          "path": "extension/WhichWay/image/skin/spamiyamrfz/于万千宇宙之中.jpg"
+        },
+        "于万千宇宙之中2": {
+          "name": "于万千宇宙之中2.jpg",
+          "path": "extension/WhichWay/image/skin/spamiyamrfz/于万千宇宙之中2.jpg"
+        },
+        "触及星晨": {
+          "name": "触及星晨.jpg",
+          "path": "extension/WhichWay/image/skin/spamiyamrfz/触及星晨.jpg"
+        }
+      }
+    },
+    "spdegoumrfz": {
+      "name": "spdegoumrfz",
+      "skins": {
+        "幽兰秘辛": {
+          "name": "幽兰秘辛.jpg",
+          "path": "extension/WhichWay/image/skin/spdegoumrfz/幽兰秘辛.jpg"
+        },
+        "破翼者": {
+          "name": "破翼者.jpg",
+          "path": "extension/WhichWay/image/skin/spdegoumrfz/破翼者.jpg"
+        }
+      }
+    },
+    "spfenmrfz": {
+      "name": "spfenmrfz",
+      "skins": {
+        "纯净乐段": {
+          "name": "纯净乐段.jpg",
+          "path": "extension/WhichWay/image/skin/spfenmrfz/纯净乐段.jpg"
+        }
+      }
+    },
+    "spfurongmrfz": {
+      "name": "spfurongmrfz",
+      "skins": {
+        "浪漫满厢": {
+          "name": "浪漫满厢.jpg",
+          "path": "extension/WhichWay/image/skin/spfurongmrfz/浪漫满厢.jpg"
+        }
+      }
+    },
+    "sphemomrfz": {
+      "name": "sphemomrfz",
+      "skins": {
+        "栖息": {
+          "name": "栖息.jpg",
+          "path": "extension/WhichWay/image/skin/sphemomrfz/栖息.jpg"
+        }
+      }
+    },
+    "spjiaweiermrfz": {
+      "name": "spjiaweiermrfz",
+      "skins": {
+        "悠然假日": {
+          "name": "悠然假日.jpg",
+          "path": "extension/WhichWay/image/skin/spjiaweiermrfz/悠然假日.jpg"
+        }
+      }
+    },
+    "spjicimrfz": {
+      "name": "spjicimrfz",
+      "skins": {
+        "无际之帆": {
+          "name": "无际之帆.jpg",
+          "path": "extension/WhichWay/image/skin/spjicimrfz/无际之帆.jpg"
+        }
+      }
+    },
+    "spjiexikamrfz": {
+      "name": "spjiexikamrfz",
+      "skins": {
+        "上任达伟镇": {
+          "name": "上任达伟镇.jpg",
+          "path": "extension/WhichWay/image/skin/spjiexikamrfz/上任达伟镇.jpg"
+        }
+      }
+    },
+    "splapulandemrfz": {
+      "name": "splapulandemrfz",
+      "skins": {
+        "无序的谦卑": {
+          "name": "无序的谦卑.jpg",
+          "path": "extension/WhichWay/image/skin/splapulandemrfz/无序的谦卑.jpg"
+        }
+      }
+    },
+    "splinguangmrfz": {
+      "name": "splinguangmrfz",
+      "skins": {
+        "复现荣光": {
+          "name": "复现荣光.jpg",
+          "path": "extension/WhichWay/image/skin/splinguangmrfz/复现荣光.jpg"
+        }
+      }
+    },
+    "spshihuaiyamrfz": {
+      "name": "spshihuaiyamrfz",
+      "skins": {
+        "律动方格": {
+          "name": "律动方格.jpg",
+          "path": "extension/WhichWay/image/skin/spshihuaiyamrfz/律动方格.jpg"
+        }
+      }
+    },
+    "spsikadimrfz": {
+      "name": "spsikadimrfz",
+      "skins": {
+        "升华": {
+          "name": "升华.jpg",
+          "path": "extension/WhichWay/image/skin/spsikadimrfz/升华.jpg"
+        },
+        "红女爵": {
+          "name": "红女爵.jpg",
+          "path": "extension/WhichWay/image/skin/spsikadimrfz/红女爵.jpg"
+        }
+      }
+    },
+    "spsongzangrenmrfz": {
+      "name": "spsongzangrenmrfz",
+      "skins": {
+        "众志归一": {
+          "name": "众志归一.jpg",
+          "path": "extension/WhichWay/image/skin/spsongzangrenmrfz/众志归一.jpg"
+        },
+        "蒸汽寻踪者": {
+          "name": "蒸汽寻踪者.jpg",
+          "path": "extension/WhichWay/image/skin/spsongzangrenmrfz/蒸汽寻踪者.jpg"
+        }
+      }
+    },
+    "spweicaomrfz": {
+      "name": "spweicaomrfz",
+      "skins": {
+        "博物": {
+          "name": "博物.jpg",
+          "path": "extension/WhichWay/image/skin/spweicaomrfz/博物.jpg"
+        },
+        "夏卉": {
+          "name": "夏卉.jpg",
+          "path": "extension/WhichWay/image/skin/spweicaomrfz/夏卉.jpg"
+        },
+        "闪焰之夜": {
+          "name": "闪焰之夜.jpg",
+          "path": "extension/WhichWay/image/skin/spweicaomrfz/闪焰之夜.jpg"
+        }
+      }
+    },
+    "spweinamrfz": {
+      "name": "spweinamrfz",
+      "skins": {
+        "光耀之途": {
+          "name": "光耀之途.jpg",
+          "path": "extension/WhichWay/image/skin/spweinamrfz/光耀之途.jpg"
+        }
+      }
+    },
+    "spxiaoyangmrfz": {
+      "name": "spxiaoyangmrfz",
+      "skins": {
+        "远行前的野餐": {
+          "name": "远行前的野餐.jpg",
+          "path": "extension/WhichWay/image/skin/spxiaoyangmrfz/远行前的野餐.jpg"
+        }
+      }
+    },
+    "spyinhuimrfz": {
+      "name": "spyinhuimrfz",
+      "skins": {}
+    },
+    "spyoulingshamrfz": {
+      "name": "spyoulingshamrfz",
+      "skins": {
+        "生而为一": {
+          "name": "生而为一.jpg",
+          "path": "extension/WhichWay/image/skin/spyoulingshamrfz/生而为一.jpg"
+        }
+      }
+    },
+    "spzzxpmrfz": {
+      "name": "spzzxpmrfz",
+      "skins": {
+        "万重山": {
+          "name": "万重山.jpg",
+          "path": "extension/WhichWay/image/skin/spzzxpmrfz/万重山.jpg"
+        },
+        "悠悠假日": {
+          "name": "悠悠假日.jpg",
+          "path": "extension/WhichWay/image/skin/spzzxpmrfz/悠悠假日.jpg"
+        },
+        "悠然假日": {
+          "name": "悠然假日.jpg",
+          "path": "extension/WhichWay/image/skin/spzzxpmrfz/悠然假日.jpg"
+        },
+        "重装芯片": {
+          "name": "重装芯片.jpg",
+          "path": "extension/WhichWay/image/skin/spzzxpmrfz/重装芯片.jpg"
+        }
+      }
+    },
+    "suxinmrfz": {
+      "name": "suxinmrfz",
+      "skins": {
+        "无唯我识": {
+          "name": "无唯我识.jpg",
+          "path": "extension/WhichWay/image/skin/suxinmrfz/无唯我识.jpg"
+        }
+      }
+    },
+    "talaidingzhenmrfz": {
+      "name": "talaidingzhenmrfz",
+      "skins": {
+        "放箭放箭": {
+          "name": "放箭放箭.jpg",
+          "path": "extension/WhichWay/image/skin/talaidingzhenmrfz/放箭放箭.jpg"
+        }
+      }
+    },
+    "teleixiyamrfz": {
+      "name": "teleixiyamrfz",
+      "skins": {
+        "昔日": {
+          "name": "昔日.jpg",
+          "path": "extension/WhichWay/image/skin/teleixiyamrfz/昔日.jpg"
+        }
+      }
+    },
+    "THRMEXmrfz": {
+      "name": "THRMEXmrfz",
+      "skins": {
+        "双料四分卫": {
+          "name": "双料四分卫.jpg",
+          "path": "extension/WhichWay/image/skin/THRMEXmrfz/双料四分卫.jpg"
+        }
+      }
+    },
+    "tianhuomrfz": {
+      "name": "tianhuomrfz",
+      "skins": {
+        "温差": {
+          "name": "温差.jpg",
+          "path": "extension/WhichWay/image/skin/tianhuomrfz/温差.jpg"
+        }
+      }
+    },
+    "tifengmrfz": {
+      "name": "tifengmrfz",
+      "skins": {
+        "北地引路人": {
+          "name": "北地引路人.jpg",
+          "path": "extension/WhichWay/image/skin/tifengmrfz/北地引路人.jpg"
+        },
+        "温差": {
+          "name": "温差.jpg",
+          "path": "extension/WhichWay/image/skin/tifengmrfz/温差.jpg"
+        }
+      }
+    },
+    "wanqingmrfz": {
+      "name": "wanqingmrfz",
+      "skins": {
+        "万顷阳光": {
+          "name": "万顷阳光.jpg",
+          "path": "extension/WhichWay/image/skin/wanqingmrfz/万顷阳光.jpg"
+        }
+      }
+    },
+    "weinamrfz": {
+      "name": "weinamrfz",
+      "skins": {
+        "摧城": {
+          "name": "摧城.jpg",
+          "path": "extension/WhichWay/image/skin/weinamrfz/摧城.jpg"
+        },
+        "遗石": {
+          "name": "遗石.jpg",
+          "path": "extension/WhichWay/image/skin/weinamrfz/遗石.jpg"
+        }
+      }
+    },
+    "weishidaiermrfz": {
+      "name": "weishidaiermrfz",
+      "skins": {
+        "超新星": {
+          "name": "超新星.jpg",
+          "path": "extension/WhichWay/image/skin/weishidaiermrfz/超新星.jpg"
+        }
+      }
+    },
+    "weiweiannamrfz": {
+      "name": "weiweiannamrfz",
+      "skins": {
+        "寄至奥格尼斯科": {
+          "name": "寄至奥格尼斯科.jpg",
+          "path": "extension/WhichWay/image/skin/weiweiannamrfz/寄至奥格尼斯科.jpg"
+        },
+        "照明": {
+          "name": "照明.jpg",
+          "path": "extension/WhichWay/image/skin/weiweiannamrfz/照明.jpg"
+        }
+      }
+    },
+    "wendimrfz": {
+      "name": "wendimrfz",
+      "skins": {
+        "倾听": {
+          "name": "倾听.jpg",
+          "path": "extension/WhichWay/image/skin/wendimrfz/倾听.jpg"
+        },
+        "糖果仙子": {
+          "name": "糖果仙子.jpg",
+          "path": "extension/WhichWay/image/skin/wendimrfz/糖果仙子.jpg"
+        }
+      }
+    },
+    "wenmimrfz": {
+      "name": "wenmimrfz",
+      "skins": {
+        "街角暖绒": {
+          "name": "街角暖绒.jpg",
+          "path": "extension/WhichWay/image/skin/wenmimrfz/街角暖绒.jpg"
+        }
+      }
+    },
+    "wmrfz": {
+      "name": "wmrfz",
+      "skins": {
+        "恍惚": {
+          "name": "恍惚.jpg",
+          "path": "extension/WhichWay/image/skin/wmrfz/恍惚.jpg"
+        }
+      }
+    },
+    "wuerbianmrfz": {
+      "name": "wuerbianmrfz",
+      "skins": {
+        "注视深渊": {
+          "name": "注视深渊.jpg",
+          "path": "extension/WhichWay/image/skin/wuerbianmrfz/注视深渊.jpg"
+        }
+      }
+    },
+    "xiaguangmrfz": {
+      "name": "xiaguangmrfz",
+      "skins": {
+        "异月灾异": {
+          "name": "异月灾异.jpg",
+          "path": "extension/WhichWay/image/skin/xiaguangmrfz/异月灾异.jpg"
+        }
+      }
+    },
+    "xiaomanmrfz": {
+      "name": "xiaomanmrfz",
+      "skins": {
+        "步芳兰": {
+          "name": "步芳兰.jpg",
+          "path": "extension/WhichWay/image/skin/xiaomanmrfz/步芳兰.jpg"
+        }
+      }
+    },
+    "xiaoyangmrfz": {
+      "name": "xiaoyangmrfz",
+      "skins": {
+        "夏卉": {
+          "name": "夏卉.jpg",
+          "path": "extension/WhichWay/image/skin/xiaoyangmrfz/夏卉.jpg"
+        },
+        "棉绒小魔女": {
+          "name": "棉绒小魔女.jpg",
+          "path": "extension/WhichWay/image/skin/xiaoyangmrfz/棉绒小魔女.jpg"
+        }
+      }
+    },
+    "xigymrfz": {
+      "name": "xigymrfz",
+      "skins": {
+        "染尘烟": {
+          "name": "染尘烟.jpg",
+          "path": "extension/WhichWay/image/skin/xigymrfz/染尘烟.jpg"
+        }
+      }
+    },
+    "xingjimrfz": {
+      "name": "xingjimrfz",
+      "skins": {
+        "奇工妙想": {
+          "name": "奇工妙想.jpg",
+          "path": "extension/WhichWay/image/skin/xingjimrfz/奇工妙想.jpg"
+        },
+        "寻耀": {
+          "name": "寻耀.jpg",
+          "path": "extension/WhichWay/image/skin/xingjimrfz/寻耀.jpg"
+        },
+        "殿堂上的游禽": {
+          "name": "殿堂上的游禽.jpg",
+          "path": "extension/WhichWay/image/skin/xingjimrfz/殿堂上的游禽.jpg"
+        }
+      }
+    },
+    "xingxiongmrfz": {
+      "name": "xingxiongmrfz",
+      "skins": {
+        "狩标浪人": {
+          "name": "狩标浪人.jpg",
+          "path": "extension/WhichWay/image/skin/xingxiongmrfz/狩标浪人.jpg"
+        }
+      }
+    },
+    "xingyuanmrfz": {
+      "name": "xingyuanmrfz",
+      "skins": {
+        "所愿": {
+          "name": "所愿.jpg",
+          "path": "extension/WhichWay/image/skin/xingyuanmrfz/所愿.jpg"
+        }
+      }
+    },
+    "xiyinmrfz": {
+      "name": "xiyinmrfz",
+      "skins": {
+        "别枝": {
+          "name": "别枝.jpg",
+          "path": "extension/WhichWay/image/skin/xiyinmrfz/别枝.jpg"
+        }
+      }
+    },
+    "yanweimrfz": {
+      "name": "yanweimrfz",
+      "skins": {
+        "小健将": {
+          "name": "小健将.jpg",
+          "path": "extension/WhichWay/image/skin/yanweimrfz/小健将.jpg"
+        }
+      }
+    },
+    "yaxinmrfz": {
+      "name": "yaxinmrfz",
+      "skins": {
+        "孤攀客": {
+          "name": "孤攀客.jpg",
+          "path": "extension/WhichWay/image/skin/yaxinmrfz/孤攀客.jpg"
+        },
+        "高原访客": {
+          "name": "高原访客.jpg",
+          "path": "extension/WhichWay/image/skin/yaxinmrfz/高原访客.jpg"
+        }
+      }
+    },
+    "yelamrfz": {
+      "name": "yelamrfz",
+      "skins": {
+        "灵巧侍者": {
+          "name": "灵巧侍者.jpg",
+          "path": "extension/WhichWay/image/skin/yelamrfz/灵巧侍者.jpg"
+        }
+      }
+    },
+    "yemomrfz": {
+      "name": "yemomrfz",
+      "skins": {
+        "光影": {
+          "name": "光影.jpg",
+          "path": "extension/WhichWay/image/skin/yemomrfz/光影.jpg"
+        },
+        "湖畔的少女": {
+          "name": "湖畔的少女.jpg",
+          "path": "extension/WhichWay/image/skin/yemomrfz/湖畔的少女.jpg"
+        }
+      }
+    },
+    "yeyingmrfz": {
+      "name": "yeyingmrfz",
+      "skins": {
+        "挽歌": {
+          "name": "挽歌.jpg",
+          "path": "extension/WhichWay/image/skin/yeyingmrfz/挽歌.jpg"
+        },
+        "流辉": {
+          "name": "流辉.jpg",
+          "path": "extension/WhichWay/image/skin/yeyingmrfz/流辉.jpg"
+        }
+      }
+    },
+    "yifulitemrfz": {
+      "name": "yifulitemrfz",
+      "skins": {
+        "儿童派对": {
+          "name": "儿童派对.jpg",
+          "path": "extension/WhichWay/image/skin/yifulitemrfz/儿童派对.jpg"
+        },
+        "日晒": {
+          "name": "日晒.jpg",
+          "path": "extension/WhichWay/image/skin/yifulitemrfz/日晒.jpg"
+        }
+      }
+    },
+    "yindelaiximrfz": {
+      "name": "yindelaiximrfz",
+      "skins": {
+        "耀目之蓝": {
+          "name": "耀目之蓝.jpg",
+          "path": "extension/WhichWay/image/skin/yindelaiximrfz/耀目之蓝.jpg"
+        }
+      }
+    },
+    "yineisimrfz": {
+      "name": "yineisimrfz",
+      "skins": {
+        "燃烧天穹下": {
+          "name": "燃烧天穹下.jpg",
+          "path": "extension/WhichWay/image/skin/yineisimrfz/燃烧天穹下.jpg"
+        },
+        "蝶舞华章": {
+          "name": "蝶舞华章.jpg",
+          "path": "extension/WhichWay/image/skin/yineisimrfz/蝶舞华章.jpg"
+        }
+      }
+    },
+    "yinhuimrfz": {
+      "name": "yinhuimrfz",
+      "skins": {
+        "不融冰": {
+          "name": "不融冰.jpg",
+          "path": "extension/WhichWay/image/skin/yinhuimrfz/不融冰.jpg"
+        },
+        "探寻着": {
+          "name": "探寻着.jpg",
+          "path": "extension/WhichWay/image/skin/yinhuimrfz/探寻着.jpg"
+        },
+        "约克的寒风": {
+          "name": "约克的寒风.jpg",
+          "path": "extension/WhichWay/image/skin/yinhuimrfz/约克的寒风.jpg"
+        }
+      }
+    },
+    "yintuoluomrfz": {
+      "name": "yintuoluomrfz",
+      "skins": {
+        "悍将": {
+          "name": "悍将.jpg",
+          "path": "extension/WhichWay/image/skin/yintuoluomrfz/悍将.jpg"
+        }
+      }
+    },
+    "youtiansiruomaimrfz": {
+      "name": "youtiansiruomaimrfz",
+      "skins": {
+        "情热魔术师": {
+          "name": "情热魔术师.jpg",
+          "path": "extension/WhichWay/image/skin/youtiansiruomaimrfz/情热魔术师.jpg"
+        }
+      }
+    },
+    "yuanyamrfz": {
+      "name": "yuanyamrfz",
+      "skins": {
+        "捉风": {
+          "name": "捉风.jpg",
+          "path": "extension/WhichWay/image/skin/yuanyamrfz/捉风.jpg"
+        }
+      }
+    },
+    "yueyuemrfz": {
+      "name": "yueyuemrfz",
+      "skins": {
+        "夏卉": {
+          "name": "夏卉.jpg",
+          "path": "extension/WhichWay/image/skin/yueyuemrfz/夏卉.jpg"
+        }
+      }
+    },
+    "yumaobimrfz": {
+      "name": "yumaobimrfz",
+      "skins": {
+        "夏卉": {
+          "name": "夏卉.jpg",
+          "path": "extension/WhichWay/image/skin/yumaobimrfz/夏卉.jpg"
+        }
+      }
+    },
+    "yunxingmrfz": {
+      "name": "yunxingmrfz",
+      "skins": {
+        "石墨": {
+          "name": "石墨.jpg",
+          "path": "extension/WhichWay/image/skin/yunxingmrfz/石墨.jpg"
+        }
+      }
+    },
+    "zaolumrfz": {
+      "name": "zaolumrfz",
+      "skins": {
+        "杰作": {
+          "name": "杰作.jpg",
+          "path": "extension/WhichWay/image/skin/zaolumrfz/杰作.jpg"
+        }
+      }
+    },
+    "zhanchemrfz": {
+      "name": "zhanchemrfz",
+      "skins": {
+        "领主": {
+          "name": "领主.jpg",
+          "path": "extension/WhichWay/image/skin/zhanchemrfz/领主.jpg"
+        }
+      }
+    },
+    "zhisongmrfz": {
+      "name": "zhisongmrfz",
+      "skins": {
+        "幻火": {
+          "name": "幻火.jpg",
+          "path": "extension/WhichWay/image/skin/zhisongmrfz/幻火.jpg"
+        }
+      }
+    },
+    "zhuhuangmrfz": {
+      "name": "zhuhuangmrfz",
+      "skins": {
+        "夜归人": {
+          "name": "夜归人.jpg",
+          "path": "extension/WhichWay/image/skin/zhuhuangmrfz/夜归人.jpg"
+        }
+      }
+    },
+    "zuolemrfz": {
+      "name": "zuolemrfz",
+      "skins": {
+        "少年游": {
+          "name": "少年游.jpg",
+          "path": "extension/WhichWay/image/skin/zuolemrfz/少年游.jpg"
+        },
+        "无息破局": {
+          "name": "无息破局.jpg",
+          "path": "extension/WhichWay/image/skin/zuolemrfz/无息破局.jpg"
+        }
+      }
+    }
+  }
+}

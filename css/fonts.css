@@ -1,0 +1,34 @@
+@font-face {
+    font-family: 'charname';
+    src: url('./../font/Charname_min_20241105.TTF') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'dy_sjzx';
+    src: url('./../font/DouyinSansBold.TTF') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'lishu';
+    src: url('./../font/fangzhenglishu.TTF') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'SJZX_youyuan';
+    src: url('./../font/youyuan.TTF') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'SJZX_hanyi';
+    src: url('./../font/HanYiZhongLiShuFan-1.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}

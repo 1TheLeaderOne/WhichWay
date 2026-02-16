@@ -1,0 +1,124 @@
+/*嵯峨幻有*/
+.handcards.huanyoumrfz > .card.decade-card[data-skilltag="huanyoumrfz"] {
+    background-image: url("../image/character/cuoemrfz.jpg") !important;
+    background-position: center;
+    background-size: cover !important;
+}
+
+.handcards.huanyoumrfz>.card[data-skilltag="huanyoumrfz"]>*{
+    visibility:hidden !important
+}
+
+.washTip {
+    width: 100%;
+    height: 100% !important;
+    position: absolute !important;
+    background: black;
+    z-index: 114514;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    font-size: xx-large;
+    font-family: 'huangcao';
+    top: 0 !important;
+    left: 0 !important;
+}
+
+/* 雅雅相关的 */
+.canonization-simple {
+	position: absolute;
+	width: 50px;
+	height: 50px;
+	background-size: 100% 100%;
+	background-image: url("./../image/skill/Vortex.webp");
+	user-select: none;
+	border-radius: 50%;
+	top: 30%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	z-index: 19;
+}
+
+.canonization-simple .simpleText {
+	font-size: 25px;
+	color: red;
+	font-family: charname;
+}
+
+.canonization {
+	border: 2px solid #333;
+	width: 100%;
+	height: 100%;
+	top:0;
+	left:0;
+	z-index: -5;
+	position: absolute;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	background-size: 100% 100%;
+	background-image: url("./../image/skill/Vortex.webp");
+	user-select: none;
+}
+
+.canonization .title,
+.canonization .subtitle,
+.canonization .text {
+	position: relative;
+	margin: 0;
+	padding: 0;
+	line-height: 1.2;
+}
+
+.canonization .title {
+	font-size: 25px;
+	color: red;
+	font-family: charname;
+}
+
+.canonization .subtitle {
+	font-size: 12px;
+	color: rgb(222 127 148);
+	font-family: dy_sjzx;
+}
+
+.canonization .text {
+	font-size: 15px;
+	color: rgb(4, 233, 245);
+	font-family: dy_sjzx;
+}
+
+/* 还是雅雅相关的 */
+.specialDialogWrapper {
+	display: flex !important;
+	position: relative !important;
+	width: 100% !important;
+	height: 40px !important;
+	justify-content: center;
+}
+
+.specialDialogWrapper .buttons,
+.specialDialogWrapper .caption {
+	position: relative !important;
+}
+
+.specialDialogWrapper .buttons {
+	width: auto !important;
+}
+
+/* 还是雅雅的，没想到吧 */
+body:has(> [class="canonization"]) #arena .card.thrown {
+  opacity: 0.3 !important;
+}
+
+/* 防止 吉占+牌堆顶的牌对你可见 这两个组合起来刷光牌堆 */
+.fuckJiZhan {
+    opacity: var(--SJZX-fuckJiZhan) !important;
+}
