@@ -194,13 +194,13 @@ class WhichWayPackHooks {
 	) => void;
 
 	declare character: (
-		key: string | Record<string, WhichWayCharacter>,
-		content?: WhichWayCharacter
+		key: string | Record<string, WhichWayCharacterPending>,
+		content?: WhichWayCharacterPending
 	) => void;
 
 	declare skill: (
-		key: string | Record<string, Record<string, Skill>>,
-		content?: Record<string, Skill>
+		key: string | Record<string, ExtendedSkill>,
+		content?: Record<string, ExtendedSkill>
 	) => void;
 
 	declare dynamicTranslate: (
@@ -220,5 +220,5 @@ export const {
 	characterTitle,
 	characterReplace,
 	dynamicTranslate,
-	pendingRun
+	pendingRun,
 } = packHooks;

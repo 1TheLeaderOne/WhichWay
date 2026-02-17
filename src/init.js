@@ -38,11 +38,18 @@ export const whichWayInit = async () => {
     //导入配置
     await import("./config/index.js");
 
-    //导入武将
-    await import("./character/index.js");
+    //————————————武将包————————————//
 
-    //导入卡牌
+    /**
+     * 牢的添加将包的方法
+     */
+    await import("./character/index.js");
     await import("./card/index.js");
+
+    /**
+     * 新的添加将包的方法
+     */
+    await import("./packs/index.ts");
 
     //导入明日方舟数据
     await import("./arknight/index.ts");

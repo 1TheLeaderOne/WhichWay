@@ -64,21 +64,21 @@ export default {
 			group: "samrfz",
 			designer: "涵涵",
 		},
-		wangmrfz:{
-			sex:"male",
-			hp:4,
-			skills:["qushimrfz","dingshengmrfz"],
-			group:"suimrfz",
-		},
+		// wangmrfz:{
+		// 	sex:"male",
+		// 	hp:4,
+		// 	skills:["qushimrfz","dingshengmrfz"],
+		// 	group:"suimrfz",
+		// },
 	},
 	skill: {
 		//望 二哥
-		qushimrfz:{
-			audio:["作战中1", "作战中2","作战中3", "作战中4","部署1","部署2","行动出发","行动开始"],
-		},
-		dingshengmrfz:{
-			audio:["精英化晋升2","编入队伍"],
-		},
+		// qushimrfz:{
+		// 	audio:["作战中1", "作战中2","作战中3", "作战中4","部署1","部署2","行动出发","行动开始"],
+		// },
+		// dingshengmrfz:{
+		// 	audio:["精英化晋升2","编入队伍"],
+		// },
 
 		//缇缇
 		xiushimrfz: {
