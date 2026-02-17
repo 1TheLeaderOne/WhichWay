@@ -204,8 +204,6 @@ const epic2 = {
         const target = player.storage.youchenmrfz;
         return target && target.isAlive() && player.countCards("h") - target.countCards("h") < 0;
       },
-      async cost(event, trigger, player) {
-      },
       async content(event, trigger, player) {
         player.refreshSkill("clananran");
         const target = player.storage.youchenmrfz;
