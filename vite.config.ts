@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => ({
 				{ src: "dynamicSkin", dest: "" },
 				{ src: "css", dest: "" },
 				{ src: "./src/updateLog/updateContent.txt", dest: "./src/updateLog/" },
-				{ src: "readme.md", dest: "" },
+				{ src: "README.md", dest: "" },
 			],
 		}) as PluginOption,
 	],
