@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => ({
 				{ src: "dynamicSkin", dest: "" },
 				{ src: "css", dest: "" },
 				{ src: "./src/updateLog/updateContent.txt", dest: "./src/updateLog/" },
-				// {src:"./src/character/packs",dest:"./src/character/"}
+				{ src: "readme.md", dest: "" },
 			],
 		}) as PluginOption,
 	],
@@ -37,7 +37,7 @@ export default defineConfig(({ mode }) => ({
 		emptyOutDir: true,
 		rollupOptions: {
 			preserveEntrySignatures: "strict",
-			external: [/^noname(\/.*)?$/, "vue","pinyin-pro"],
+			external: [/^noname(\/.*)?$/, "vue", "pinyin-pro"],
 			output: {
 				preserveModules: true,
 				preserveModulesRoot: "./",
