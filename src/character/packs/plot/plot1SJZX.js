@@ -441,7 +441,7 @@ export default {
 				});
 				// @ts-ignore
 				event._result = { bool: true, targets: targets };
-				("step 1");
+				"step 1";
 				// @ts-ignore
 				if (result.bool) {
 					// @ts-ignore
@@ -528,7 +528,7 @@ export default {
 				"step 0";
 				// @ts-ignore
 				player.discardPlayerCard(trigger.target, get.prompt("guanyongmrfz", trigger.target), true).set("att", get.attitude(player, trigger.target) <= 0);
-				("step 1");
+				"step 1";
 				// @ts-ignore
 				if (result.bool && result.links && result.links.length) {
 					// @ts-ignore
@@ -750,7 +750,7 @@ export default {
 				event.pd = [];
 				// @ts-ignore
 				player.storage.poqiongmrfz = true;
-				("step 1");
+				"step 1";
 				// @ts-ignore
 				if (event.num < 6) {
 					// @ts-ignore
@@ -761,7 +761,7 @@ export default {
 				}
 				// @ts-ignore
 				else event.goto(3);
-				("step 2");
+				"step 2";
 				// @ts-ignore
 				if (result.cards) {
 					var cards1 = game.cardsGotoOrdering(get.cards(1)).cards;
@@ -799,7 +799,7 @@ export default {
 				event.num++;
 				// @ts-ignore
 				event.goto(1);
-				("step 3");
+				"step 3";
 				// @ts-ignore
 				if (event.lose < 3) {
 					var num = Math.random();
@@ -902,7 +902,7 @@ export default {
 						"step 0";
 						// @ts-ignore
 						player.addMark("xingyoumrfz_dis", false);
-						("step 1");
+						"step 1";
 						if (
 							game.countPlayer(function (current) {
 								// @ts-ignore
@@ -942,7 +942,7 @@ export default {
 				event.targets = target.remove(player);
 				// @ts-ignore
 				player.draw(Math.max(event.targets.length + 1, player.recastCount()));
-				("step 1");
+				"step 1";
 				// @ts-ignore
 				if (event.targets.length) {
 					// @ts-ignore
@@ -952,7 +952,7 @@ export default {
 				}
 				// @ts-ignore
 				else event.goto(3);
-				("step 2");
+				"step 2";
 				// @ts-ignore
 				if (result.cards) {
 					// @ts-ignore
@@ -964,7 +964,7 @@ export default {
 				event.targets.remove(target);
 				// @ts-ignore
 				event.goto(1);
-				("step 3");
+				"step 3";
 				// @ts-ignore
 				game.countPlayer(function (current) {
 					// @ts-ignore
@@ -1006,7 +1006,7 @@ export default {
 					// @ts-ignore
 					return get.attitude(player, target) > 0;
 				};
-				("step 1");
+				"step 1";
 				// @ts-ignore
 				if (result.bool) {
 					// @ts-ignore
@@ -1135,7 +1135,7 @@ export default {
 					// @ts-ignore
 					return get.attitude(player, target) > 2 && target.hp > 0;
 				};
-				("step 1");
+				"step 1";
 				// @ts-ignore
 				if (result.bool) {
 					// @ts-ignore
@@ -1163,7 +1163,7 @@ export default {
 						"step 0";
 						// @ts-ignore
 						player.chooseBool("【希冀】:是否失去所有体力上限？");
-						("step 1");
+						"step 1";
 						// @ts-ignore
 						if (result.bool) {
 							// @ts-ignore
@@ -1365,7 +1365,7 @@ export default {
 				} else {
 					switchToAuto();
 				}
-				("step 1");
+				"step 1";
 				// @ts-ignore
 				var map = event.result || result;
 				if (map && map.skills && map.skills.length) {
@@ -1579,7 +1579,7 @@ export default {
 				} else {
 					switchToAuto();
 				}
-				("step 1");
+				"step 1";
 				// @ts-ignore
 				var map = event.result || result;
 				// @ts-ignore
@@ -1621,7 +1621,7 @@ export default {
 				}).length;
 				// @ts-ignore
 				player.gainMaxHp(num);
-				("step 1");
+				"step 1";
 				// @ts-ignore
 				var num2 = trigger.card.number;
 				// @ts-ignore
@@ -1663,7 +1663,7 @@ export default {
 				player.awakenSkill("xuehengmrfz");
 				// @ts-ignore
 				player.removeSkill("juhuomrfz");
-				("step 1");
+				"step 1";
 				// @ts-ignore
 				var hasfriendDeath = function (player, identity) {
 					var bool = false;
@@ -1787,7 +1787,7 @@ export default {
 					// @ts-ignore
 					if (player.identity == i.identity) i.addMark("hantianmrfz");
 				}
-				("step 1");
+				"step 1";
 				var targets = game.filterPlayer(current => {
 					return current.hasMark("hantianmrfz");
 				});
@@ -1801,7 +1801,7 @@ export default {
 				for (var i of targets) {
 					i.gainMaxHp(num - i.maxHp);
 				}
-				("step 2");
+				"step 2";
 				var targets = game.filterPlayer(current => {
 					return current.hasMark("hantianmrfz");
 				});
@@ -1850,7 +1850,7 @@ export default {
 							.sortBySeat();
 						// @ts-ignore
 						event.targets = trigger.targets;
-						("step 1");
+						"step 1";
 						// @ts-ignore
 						var current = event.sources.shift();
 						var targets = [];
@@ -1883,7 +1883,7 @@ export default {
 								.set("logSkill", "hantianmrfz")
 								.set("addCount", false);
 						}
-						("step 2");
+						"step 2";
 						// @ts-ignore
 						if (result.bool) event.draw.draw();
 						// @ts-ignore

@@ -21,7 +21,7 @@ export default {
 			content: function () {
 				"step 0";
 				player.draw();
-				("step 1");
+				"step 1";
 				if (player.isMaxHandcard(true)) {
 					player.addTempSkill("shantanmrfz_ban", { global: "roundStart" });
 				}
@@ -53,7 +53,7 @@ export default {
 					content: function () {
 						"step 0";
 						if (player.countCards("he") > 0) player.chooseToDiscard(true, 1, "he", "【善谈】:请弃置一张牌");
-						("step 1");
+						"step 1";
 						if (result.cards) {
 							var targets = [],
 								cardsList = [];

@@ -198,7 +198,7 @@ export default {
 						//if(game.hasPlayer(current=>{current!=player&&current.hasSkill('shengcaimrfz')&&get.attitude(player,current)>2})) return game.findPlayer(current=>{current!=player&&current.hasSkill('shengcaimrfz')});
 						return att > 2;
 					});
-				("step 1");
+				"step 1";
 				if (result.bool) {
 					var target = result.targets[0],
 						list = [];
@@ -231,7 +231,7 @@ export default {
 							});
 					}
 				} else event.finish();
-				("step 2");
+				"step 2";
 				if (result.control == "你使用【杀】的次数+1") {
 					event.target.addMark("amy_qingyanmrfz", false);
 					player.storage.amy_qingyanmrfz_time = true;
@@ -391,7 +391,7 @@ export default {
 				player.storage.yingxiaomrfz = true;
 				player.awakenSkill(event.name);
 				event.num = 0;
-				("step 1");
+				"step 1";
 				if (event.num < 3) {
 					if (event.num == 2) {
 						player.addTempSkill("yingxiaomrfz_damage", "useCardAfter");
@@ -421,7 +421,7 @@ export default {
 					event.num++;
 					if (event.num < 3) event.redo();
 				}
-				("step 2");
+				"step 2";
 				player.draw(player.countMark("yingxiaomrfz_total"));
 				player.addSkill("yingxiaomrfz_handlit");
 				player.addSkill("yingxiaomrfz_round2");
@@ -677,12 +677,12 @@ export default {
 				player.addTempSkill("xiqiaomrfz_used", "phaseEnd");
 				var next = player.chooseToDiscard("he", true);
 				next.set("prompt", "【细巧】:你可以弃置一张牌，然后摸一张牌并展示之，若类型不同，视为使用或打出一张【闪】");
-				("step 1");
+				"step 1";
 				if (result.cards) {
 					event.card = result.cards[0];
 					player.draw("visible");
 				} else event.finish();
-				("step 2");
+				"step 2";
 				var card = result[0];
 				var cardl = event.card;
 				if (get.type2(card) != get.type2(cardl)) {
@@ -792,7 +792,7 @@ export default {
 					})
 					.set("card", trigger.card)
 					.setHiddenSkill(event.name);
-				("step 1");
+				"step 1";
 				if (result.bool) {
 					if (!event.isMine() && !event.isOnline()) game.delayx();
 					for (var i = 0; i < result.targets.length; i++) {
@@ -881,11 +881,11 @@ export default {
 				event.target.push(target.getPrevious());
 				if (event.target.includes(player)) event.target.remove(player);
 				player.give(cards, target);
-				("step 1");
+				"step 1";
 				if (event.target.length && event.targetx.countCards("he") > 0) {
 					event.targetx.chooseCard(true, "【导流】:请交给" + get.translation(event.target[0]) + "一张牌", "he");
 				} else event.goto(3);
-				("step 2");
+				"step 2";
 				if (result.cards) {
 					var card = result.cards[0];
 					event.targetx.give(card, event.target[0]);
@@ -893,7 +893,7 @@ export default {
 				}
 				event.target.remove(event.target[0]);
 				event.goto(1);
-				("step 3");
+				"step 3";
 				if (event.discard.length) {
 					if (event.discard[0].countCards("he") > 0) event.discard[0].chooseToDiscard(true, "he", "【导流】:请弃置一张牌");
 					event.discard.remove(event.discard[0]);
@@ -1044,11 +1044,11 @@ export default {
 				};
 				event.num = 0;
 				event.skip = 0;
-				("step 1");
+				"step 1";
 				if (result.targets) {
 					event.target = result.targets[0];
 				} else event.finish();
-				("step 2");
+				"step 2";
 				if (!event.target.isAlive()) {
 					event.goto(4);
 				} else
@@ -1057,14 +1057,14 @@ export default {
 						if (color == "red") return 4;
 						return -4;
 					});
-				("step 3");
+				"step 3";
 				if (result.color == "red") {
 					player.useCard({ name: "sha", isCard: true }, false, event.target);
 					event.skip++;
 				}
 				event.num++;
 				if (event.num < 3) event.goto(2);
-				("step 4");
+				"step 4";
 				if (event.skip > 1) {
 					player.skip("phaseUse");
 				}
@@ -1102,13 +1102,13 @@ export default {
 				if (!player.storage.xuanmumrfz_roundcount) player.storage.xuanmumrfz_roundcount = 0;
 				player.storage.xuanmumrfz_roundcount++;
 				player.choosePlayerCard(trigger.targets[0], true, "h");
-				("step 1");
+				"step 1";
 				if (result.cards) {
 					var card = result.cards[0];
 					event.card = result.cards[0];
 					player.showCards(card, get.translation(player) + "对" + get.translation(trigger.target) + "发动了【炫目】");
 				}
-				("step 2");
+				"step 2";
 				if (!canRespond(trigger.card, event.card)) {
 					trigger.directHit.addArray(
 						game.filterPlayer(function (current) {
@@ -1176,7 +1176,7 @@ export default {
 			content: function () {
 				"step 0";
 				player.draw("visible");
-				("step 1");
+				"step 1";
 				if (result) {
 					var card = result[0];
 					if ((card.suit == "heart" || card.suit == "spade") && card.number == 6) {
@@ -1223,12 +1223,12 @@ export default {
 				if (player.getExpansions("tadianmrfz").length > 0) {
 					player.gain(player.getExpansions("tadianmrfz"), "gain2");
 				}
-				("step 1");
+				"step 1";
 				player.draw(3);
 				player.chooseCard(true, 3, "【踏垫】:请选择将三张手牌置于你武将牌上").set("ai", function (card) {
 					return 8 - get.value(card);
 				});
-				("step 2");
+				"step 2";
 				if (result.cards) {
 					player.addToExpansion(result.cards, player, "giveAuto").gaintag.add("tadianmrfz");
 				}
@@ -1270,7 +1270,7 @@ export default {
 						});
 						if (cards.length) player.chooseButton(["你可以选择移去一张与其使用的牌的牌名相同的“踏垫”，令其流失所有体力", cards]);
 						else event.finish();
-						("step 1");
+						"step 1";
 						if (result.bool) {
 							player.loseToDiscardpile(result.links);
 							player.draw(3);
@@ -1313,7 +1313,7 @@ export default {
 						cards2 = cards.splice(0, player.getExpansions("tadianmrfz").length);
 					return [cards2, cards];
 				});
-				("step 1");
+				"step 1";
 				if (result.bool) {
 					var pushs = result.moved[0],
 						gains = result.moved[1];
@@ -1619,7 +1619,7 @@ export default {
 					.set("ai", function (card) {
 						return 10 - get.value(card);
 					});
-				("step 1");
+				"step 1";
 				if (result.bool) {
 					player.chooseTarget("【五肽】：请选择一名角色", true, function (card, player, target) {
 						return !target.hasSkill("wutaimrfz_eff");
@@ -1629,7 +1629,7 @@ export default {
 						return att;
 					};
 				} else event.finish();
-				("step 2");
+				"step 2";
 				if (result.targets) {
 					player.logSkill("wutaimrfz_eff", result.targets[0]);
 					player.addTempSkill("wutaimrfz_eff", { player: "phaseBegin" });
@@ -1704,16 +1704,16 @@ export default {
 									return get.attitude(player, target);
 								});
 						} else event.finish();
-						("step 1");
+						"step 1";
 						if (result.targets) {
 							player.logSkill("huabumrfz", event.targets);
 							event.targets = result.targets[0];
 						} else event.finish();
-						("step 2");
+						"step 2";
 						if (event.targets) {
 							event.targets.draw();
 						} else event.finish();
-						("step 3");
+						"step 3";
 						if (result) {
 							var card = result[0];
 							var cards = player.getCards("h");
@@ -1740,7 +1740,7 @@ export default {
 								.set("is", event.is)
 								.set("target", event.targets);
 						} else event.finish();
-						("step 4");
+						"step 4";
 						if (result.control) {
 							var bool = result.control == "有" ? true : false;
 							if (event.is == bool) {
@@ -1817,7 +1817,7 @@ export default {
 						var player = _status.event.player;
 						return get.damageEffect(target, player, player);
 					});
-				("step 1");
+				"step 1";
 				if (result.bool) {
 					var target = result.targets[0];
 					target.damage("player");
@@ -1872,7 +1872,7 @@ export default {
 				var target = _status.currentPhase;
 				if (!target || target.countCards("he") == 0) event.finish();
 				else player.discardPlayerCard(target, "he", true);
-				("step 1");
+				"step 1";
 				if (result.cards) {
 					if (get.suit(result.cards[0]) == get.suit(trigger.card)) {
 						event.goto(0);
@@ -2117,7 +2117,7 @@ export default {
 						return get.value(card) <= 6;
 					});
 				else event.finish();
-				("step 1");
+				"step 1";
 				if (result.cards) {
 					var cards = result.cards;
 					player.addTempSkill("jianyumrfz_dam", "jianyumrfzAfter");
@@ -2167,7 +2167,7 @@ export default {
 				//抄的郭嘉
 				"step 0";
 				event.count = 1; //唯一有实质性改动的地方
-				("step 1");
+				"step 1";
 				event.count--;
 				event.cards = game.cardsGotoOrdering(get.cards(2)).cards;
 				if (_status.connectMode)
@@ -2175,7 +2175,7 @@ export default {
 						_status.noclearcountdown = true;
 					});
 				event.given_map = {};
-				("step 2");
+				"step 2";
 				if (event.cards.length > 1) {
 					player.chooseCardButton("【速递】:请选择要分配的牌", true, event.cards, [1, event.cards.length]).set("ai", function (button) {
 						if (ui.selected.buttons.length == 0) return 1;
@@ -2186,7 +2186,7 @@ export default {
 				} else {
 					event.finish();
 				}
-				("step 3");
+				"step 3";
 				if (result.bool) {
 					event.cards.removeArray(result.links);
 					event.togive = result.links.slice(0);
@@ -2204,7 +2204,7 @@ export default {
 						})
 						.set("enemy", get.value(event.togive[0], player, "raw") < 0);
 				}
-				("step 4");
+				"step 4";
 				if (result.targets.length) {
 					var id = result.targets[0].playerid,
 						map = event.given_map;
@@ -2212,7 +2212,7 @@ export default {
 					map[id].addArray(event.togive);
 				}
 				if (cards.length > 0) event.goto(2);
-				("step 5");
+				"step 5";
 				if (_status.connectMode) {
 					game.broadcastAll(function () {
 						delete _status.noclearcountdown;
@@ -2230,11 +2230,11 @@ export default {
 					giver: player,
 					animate: "draw",
 				}).setContent("gaincardMultiple");
-				("step 6");
+				"step 6";
 				if (event.count > 0 && player.hasSkill(event.name) && !get.is.blocked(event.name, player)) {
 					player.chooseBool(get.prompt2(event.name)).set("frequentSkill", event.name);
 				} else event.finish();
-				("step 7");
+				"step 7";
 				if (result.bool) {
 					player.logSkill(event.name);
 					event.goto(1);
@@ -2290,7 +2290,7 @@ export default {
 					player.draw(num || 2);
 					event.finish();
 				}
-				("step 1");
+				"step 1";
 				if (result.index == 0) {
 					var num = 2 + player.storage.shiyumrfz_buff;
 					player.draw(num || 2);
@@ -2503,7 +2503,7 @@ export default {
 								player.addTempSkill("huquanmrfz_ban", { global: "phaseEnd" });
 								event.finish();
 							}
-							("step 1");
+							"step 1";
 							if (result.index == 0) {
 								player.storage.suijiamrfz["damage"] = +1;
 							} else player.storage.suijiamrfz["del"] = true;
@@ -2709,7 +2709,7 @@ export default {
 				player.chooseTarget(true, [1, num], "【暖香】:请选择至多" + get.cnNumber(num) + "名角色").ai = function (target) {
 					return get.attitude(player, target) > 0;
 				};
-				("step 1");
+				"step 1";
 				if (result.targets) {
 					player.logSkill("nuanxiangmrfz");
 					for (var i of result.targets) {
@@ -2763,21 +2763,21 @@ export default {
 				player.chooseCard(true, "【水獭】:请选择至多三张牌并标记为‘咪啵’", [1, 3]).set("ai", function (card) {
 					return get.type(card) != "equip" && get.type(card) != "delay";
 				});
-				("step 1");
+				"step 1";
 				if (result.cards) {
 					player.addGaintag(result.cards, "shuitamrfzx");
 					for (i of result.cards) {
 						i.storage.shuitamrfzx = true;
 					}
 				}
-				("step 2");
+				"step 2";
 				player
 					.chooseControl("爆破", "迷惑")
 					.set("prompt", "【水獭】:请选择获得一个技能")
 					.set("ai", function () {
 						return [0, 1].randomGet();
 					});
-				("step 3");
+				"step 3";
 				if (result.index == 0) {
 					player.addSkill("baopomrfz");
 				} else if (result.index == 1) {
@@ -2808,7 +2808,7 @@ export default {
 								return get.value(button.link);
 							};
 						}
-						("step 1");
+						"step 1";
 						if (result.links) {
 							for (i of result.links) {
 								i.storage.shuitamrfzx = true;
@@ -2844,7 +2844,7 @@ export default {
 					content: function () {
 						"step 0";
 						if (trigger.delay == false) game.delay();
-						("step 1");
+						"step 1";
 						var cards = [];
 						for (var i = 0; i < trigger.cards2.length; i++) {
 							var card = trigger.cards2[i];
@@ -2898,12 +2898,12 @@ export default {
 				}).ai = function (target) {
 					return get.damageEffect(target, player) && !target.hasSkillTag("nofire");
 				};
-				("step 1");
+				"step 1";
 				if (result.targets) {
 					event.targets = result.targets;
 					event.cards = [];
 				} else event.finish();
-				("step 2");
+				"step 2";
 				if (event.targets.length) {
 					event.targets[0].judge(function (card) {
 						if (get.color(card) == "red") return -4;
@@ -2912,7 +2912,7 @@ export default {
 						return result.bool == false ? true : false;
 					};
 				} else event.goto(4);
-				("step 3");
+				"step 3";
 				if (result.bool == false) {
 					event.targets[0].damage(2, "fire");
 					player.logSkill("baopomrfz", event.targets[0]);
@@ -2920,7 +2920,7 @@ export default {
 				event.cards.push(result.card);
 				event.targets.shift();
 				if (event.targets.length > 0) event.goto(2);
-				("step 4");
+				"step 4";
 				if (event.cards) {
 					var cards = [];
 					for (var i = 0; i < event.cards.length; i++) {
@@ -2958,7 +2958,7 @@ export default {
 			content: function () {
 				"step 0";
 				trigger.source.choosePlayerCard(player, "h", true);
-				("step 1");
+				"step 1";
 				player.showCards(result.cards, get.translation(trigger.source) + "展示了" + get.translation(player) + "一张牌</br>此牌" + (result.cards[0].storage.shuitamrfzx ? "<font color=#FF0000>有</font>" : "<font color=#00FF1A>无</font>") + "‘咪啵’标记");
 				if (result.cards[0].storage.shuitamrfzx) {
 					player.discard(result.cards[0]);
@@ -2981,18 +2981,18 @@ export default {
 			content: function () {
 				"step 0";
 				player.chooseCard("【冬将】:请选择你要分配的牌", true, [1, Infinity]);
-				("step 1");
+				"step 1";
 				event.cards = result.cards;
 				player.chooseTarget("【冬将】:请选择你要分配的角色（" + get.translation(event.cards) + "）", true, function (card, player, target) {
 					return target != player;
 				}).ai = function (target) {
 					return get.attitude(target, player) > 0;
 				};
-				("step 2");
+				"step 2";
 				player.give(event.cards, result.targets[0]);
-				("step 3");
+				"step 3";
 				if (player.countCards("h") > 0) event.goto(0);
-				("step 4");
+				"step 4";
 				if (player.canUseToAnyone("sha")) {
 					player.addTempSkill("dongjiangmrfz_dam", "useCardAfter");
 					player
@@ -3035,10 +3035,10 @@ export default {
 						break;
 					}
 				}
-				("step 1");
+				"step 1";
 				player.draw();
 				event.goto(0);
-				("step 2");
+				"step 2";
 				player
 					.chooseToUse("【先领】:请使用一张牌", true)
 					.set("complexSelect", true)
@@ -3047,7 +3047,7 @@ export default {
 					})
 					.set("addCount", false)
 					.set("forced", true);
-				("step 3");
+				"step 3";
 				if (game.roundNumber != 1) {
 					player.chooseTarget("【先领】:你可以令一名其他角色执行一次相同的流程", function (card, player, target) {
 						return target != player;
@@ -3055,11 +3055,11 @@ export default {
 						return get.attitude(target, player) > 0;
 					};
 				} else event.finish();
-				("step 4");
+				"step 4";
 				if (result.targets) {
 					event.target = result.targets[0];
 				} else event.finish();
-				("step 5");
+				"step 5";
 				var cards = event.target.getCards("h");
 				if (event.target.countCards("h") < 1) event.goto(6);
 				for (var i of cards) {
@@ -3068,10 +3068,10 @@ export default {
 						break;
 					}
 				}
-				("step 6");
+				"step 6";
 				event.target.draw();
 				event.goto(5);
-				("step 7");
+				"step 7";
 				event.target
 					.chooseToUse("【先领】:请使用一张牌")
 					.set("complexSelect", true)
@@ -3252,7 +3252,7 @@ export default {
 						var num1 = card.number,
 							num2 = trigger.card.number;
 						if (num1 != num2) {
-							("step 0");
+							"step 0";
 							var type = get.type2(card);
 							var eff = get.effect(player, trigger.card, trigger.player, trigger.player);
 							trigger.player
@@ -3268,7 +3268,7 @@ export default {
 								})
 								.set("eff", eff)
 								.set("type", type);
-							("step 1");
+							"step 1";
 							if (result.bool == false) {
 								trigger.targets.remove(player);
 								trigger.getParent().triggeredTargets2.remove(player);
@@ -3278,7 +3278,7 @@ export default {
 								player.addTempSkill("yxliumingmrfz_ban", { global: "phaseEnd" });
 							}
 						}
-						("step 1");
+						"step 1";
 						var card = player.getExpansions("yxliumingmrfz")[0];
 						if (get.suit(card) == get.suit(trigger.card)) {
 							player.gain(card, "gain2");
@@ -3565,7 +3565,7 @@ export default {
 								})
 								.set("card", trigger.card);
 						}
-						("step 1");
+						"step 1";
 						var storage = player.storage.rujingmrfz,
 							number = trigger.card.number,
 							suit = trigger.card.suit;
@@ -3663,7 +3663,7 @@ export default {
 						})
 						.set("list", event.list);
 				}
-				("step 1");
+				"step 1";
 				if (result.bool) {
 					var names = result.links.map(i => i[2]),
 						target = trigger.player;
@@ -3737,7 +3737,7 @@ export default {
 					}
 					return get.attitude(player, target) > 0;
 				};
-				("step 1");
+				"step 1";
 				if (result.targets) {
 					var target = result.targets[0];
 					target.addMark("rumianmrfz", false);
@@ -3882,7 +3882,7 @@ export default {
 							.set("ai", function (card) {
 								return -get.value(card);
 							});
-						("step 1");
+						"step 1";
 						if (result.cards) {
 							result.cards[0].storage.yihuomrfz = true;
 						}
@@ -3967,7 +3967,7 @@ export default {
 				for (var i of cards) {
 					i.storage.huchimrfz = true;
 				}
-				("step 1");
+				"step 1";
 				var view = get.autoViewAs({ name: "sha" }, cards);
 				target
 					.chooseTarget("【互持】:请选择使用【杀】的目标", function (card, player, target) {
@@ -3981,7 +3981,7 @@ export default {
 					var player = _status.event.playerx;
 					return get.effect(target, view, player, player);
 				};
-				("step 2");
+				"step 2";
 				if (result.targets) {
 					var card = get.autoViewAs({ name: "sha" }, cards);
 					if (
@@ -4044,7 +4044,7 @@ export default {
 							})
 							.set("source", trigger.source)
 							.set("playerx", trigger.player);
-						("step 1");
+						"step 1";
 						if (result.bool) {
 							trigger.player.give(result.cards, result.targets[0]);
 							trigger.player.draw();
@@ -4089,7 +4089,7 @@ export default {
 							})
 							.set("source", trigger.source)
 							.set("playerx", trigger.player);
-						("step 1");
+						"step 1";
 						if (result.bool) {
 							trigger.player.give(result.cards, result.targets[0]);
 							trigger.player.draw();
@@ -4220,7 +4220,7 @@ export default {
 			content: function () {
 				"step 0";
 				player.give(cards, target);
-				("step 1");
+				"step 1";
 				var num = cards.length;
 				if (num >= 1) {
 					player.recover();
@@ -4259,7 +4259,7 @@ export default {
 			content: function () {
 				"step 0";
 				player.adjustHandCardTo(player.hp);
-				("step 1");
+				"step 1";
 				if (result.cards) {
 					player.recover(Math.min(result.cards.length, 2));
 				}
@@ -5944,7 +5944,7 @@ export default {
 						return get.attitude(_status.currentPhase, _status.event.targetx) > 0;
 					})
 					.set("targetx", player);
-				("step 1");
+				"step 1";
 				if (result.bool) {
 					var target = _status.currentPhase;
 					player.addTempSkill("qinghemrfz_ban", "phaseEnd");
@@ -5958,7 +5958,7 @@ export default {
 						};
 					}
 				} else event.finish();
-				("step 2");
+				"step 2";
 				if (result.links) {
 					player.logSkill("qinghemrfz");
 					player.gain(result.links, "gain2");
@@ -8961,7 +8961,7 @@ export default {
 						}
 						cards2.forEach(i => i.delete());
 						if (player == game.me) ui.updatehl();
-						("step 1");
+						"step 1";
 						var cards = player.getExpansions("xingzhumrfz");
 						var cardsx = cards.map(card => {
 							var cardx = ui.create.card();

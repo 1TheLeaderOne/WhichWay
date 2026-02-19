@@ -263,6 +263,7 @@ interface SkillFieldOverrides {
 	audio?: number | string | boolean | [string, number] | Array<AudioTitle>;
 	locked?: boolean | ((skill: string, player: Player) => boolean);
 	filter?:(event: GameEvent, player: Player,name:string,target:Player)=>any;
+	subSkill?: Record<string, ExtendedSkill>;
 }
 
 type AudioTitle = "任命助理" | "交谈1" | "交谈2" | "交谈3" | "晋升后交谈1" | "晋升后交谈2" | "信赖提升后交谈1" | "信赖提升后交谈2" | "信赖提升后交谈3" | "闲置" | "干员报到" | "观看作战记录" | "精英化晋升1" | "精英化晋升2" | "编入队伍" | "任命队长" | "行动出发" | "行动开始" | "选中干员1" | "选中干员2" | "部署1" | "部署2" | "作战中1" | "作战中2" | "作战中3" | "作战中4" | "完成高难行动" | "3星结束行动" | "非3星结束行动" | "行动失败" | "进驻设施" | "戳一下" | "信赖触摸" | "标题" | "新年祝福" | "问候" | "生日" | "周年庆典";

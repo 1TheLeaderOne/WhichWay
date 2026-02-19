@@ -262,7 +262,7 @@ export const weinaData = {
 								return target != player;
 							})
 							.set("ai", target => get.attitude2(player) < 0);
-						("step 1");
+						"step 1";
 						if (result.targets) player.gainPlayerCard("hej", result.targets[0], true).set("target", result.targets[0]).set("complexSelect", false).set("ai", lib.card.shunshou.ai.button);
 					},
 				},

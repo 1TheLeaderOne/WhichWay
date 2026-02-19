@@ -295,7 +295,7 @@ export default {
 						return _status.event.cs;
 					})
 					.set("cs", cs);
-				("step 1");
+				"step 1";
 				// @ts-ignore
 				if (result.control) {
 					var list = ["basic", "trick", "equip"];
@@ -429,7 +429,7 @@ export default {
 				"step 0";
 				// @ts-ignore
 				player.loseHp();
-				("step 1");
+				"step 1";
 				// @ts-ignore
 				if (player.isAlive()) {
 					// @ts-ignore
@@ -474,7 +474,7 @@ export default {
 								return 8 - get.value(card);
 							});
 						}
-						("step 1");
+						"step 1";
 						// @ts-ignore
 						if (result.bool == false) {
 							// @ts-ignore
@@ -521,7 +521,7 @@ export default {
 				}
 				// @ts-ignore
 				player.give(cards, target);
-				("step 1");
+				"step 1";
 				// @ts-ignore
 				if (player.canUse("sha", target, false)) {
 					// @ts-ignore
@@ -562,7 +562,7 @@ export default {
 							// @ts-ignore
 							if (storage.includes(i.suit)) event.cards.push(i);
 						}
-						("step 1");
+						"step 1";
 						// @ts-ignore
 						if (event.cards.length) player.gain(event.cards, "gain2");
 						// @ts-ignore

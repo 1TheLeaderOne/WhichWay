@@ -1,7 +1,7 @@
 import { Card, Player } from "@/library/element";
-import { status } from "./../../../../noname/status/index.js";
+import { status } from "noname";
 
-declare module "./../../../../noname/status/index.js" {
+declare module "noname" {
     interface status {
 
         /**
