@@ -2041,14 +2041,14 @@ export default {
 							}
 							//@ts-ignore
 						} else event.finish();
-						("step 1");
+						"step 1";
 						//@ts-ignore
 						if (player.getExpansions("kenyemrfz").length > 0) {
 							//@ts-ignore
 							event.goto(0);
 							//@ts-ignore
 						} else event.finish();
-						("step 2");
+						"step 2";
 						//@ts-ignore
 						if (player.getExpansions("kenyemrfz").length > 0) {
 							//@ts-ignore
@@ -2059,7 +2059,7 @@ export default {
 							});
 							//@ts-ignore
 						} else event.finish();
-						("step 3");
+						"step 3";
 						//@ts-ignore
 						if (result.bool) {
 							//@ts-ignore
@@ -2124,7 +2124,7 @@ export default {
 						.set("num", event.type.length);
 						//@ts-ignore
 				} else event.goto(2);
-				("step 1");
+				"step 1";
 				//@ts-ignore
 				if (result.targets) {
 					//@ts-ignore
@@ -2151,7 +2151,7 @@ export default {
 					//@ts-ignore
 					event.finish();
 				}
-				("step 2");
+				"step 2";
 				//@ts-ignore
 				player
 				//@ts-ignore
@@ -2164,7 +2164,7 @@ export default {
 					.set("prompt2", get.skillInfoTranslation("heyingmrfz").replace(/<\/br>[\s\S]*/, ""))
 					//@ts-ignore
 					.set("target", trigger.player);
-				("step 3");
+				"step 3";
 				//@ts-ignore
 				if (result.bool) {
 					//@ts-ignore
@@ -2198,7 +2198,7 @@ export default {
 					//@ts-ignore
 					event.finish();
 				}
-				("step 4");
+				"step 4";
 				//@ts-ignore
 				if (result.targets) {
 					//@ts-ignore

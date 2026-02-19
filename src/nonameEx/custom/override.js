@@ -120,7 +120,7 @@ if (!lib.card.binglinchengxia) {
 					});
 				// @ts-ignore
 			} else event.finish();
-			("step 1");
+			"step 1";
 			// @ts-ignore
 			if (result.control == "discard_card") {
 				// @ts-ignore
