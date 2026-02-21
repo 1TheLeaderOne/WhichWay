@@ -2849,7 +2849,7 @@ export default {
 			group: ["danweimrfz_use"],
 			subSkill: {
 				use: {
-					audio:"danweimrfz",
+					audio: "danweimrfz",
 					trigger: { player: ["respond", "useCard"] },
 					usable: 2,
 					filter: function (event, player) {
@@ -2880,7 +2880,7 @@ export default {
 			async content(event, trigger, player) {
 				const { target } = event;
 
-				let result
+				let result;
 				if (player.countCards("h") == 0) result = { index: 1 };
 				if (player.countMark("danweimrfz") == 0) result = { index: 0 };
 				if (player.countMark("danweimrfz") > 0 && player.countCards("h") > 0)
@@ -2899,7 +2899,8 @@ export default {
 							)
 								return 0;
 							return 1;
-						}).forResult();;
+						})
+						.forResult();
 				if (result && result.index == 0) {
 					await player.chooseToDiscard(true, "h", "弃置一张手牌");
 				} else {
@@ -2949,29 +2950,29 @@ export default {
 				player.removeMark("danweimrfz", 5);
 
 				let num = 0;
-				while(num < 2){
+				while (num < 2) {
 					await player.chooseUseTarget(
-					{
-						name: "sha",
-						nature: "thunder",
-						isCard: true,
-					},
-					"请选择雷【杀】的目标（雷【杀】：" + num + "/2；普通【杀】:0/1）",
-					false,
-					"nodistance"
-				);
-				num++;
-				}
-
-				player.chooseUseTarget(
 						{
 							name: "sha",
+							nature: "thunder",
 							isCard: true,
 						},
-						"请选择【杀】的目标（雷【杀】：2/2；普通【杀】:1/1）",
+						"请选择雷【杀】的目标（雷【杀】：" + num + "/2；普通【杀】:0/1）",
 						false,
 						"nodistance"
 					);
+					num++;
+				}
+
+				player.chooseUseTarget(
+					{
+						name: "sha",
+						isCard: true,
+					},
+					"请选择【杀】的目标（雷【杀】：2/2；普通【杀】:1/1）",
+					false,
+					"nodistance"
+				);
 			},
 		},
 		chencaidanmrfz: {
@@ -2998,7 +2999,8 @@ export default {
 						var player = _status.event.player,
 							target = _status.event.getTrigger().player;
 						return get.attitude(player, target) > 2;
-					}).forResult();
+					})
+					.forResult();
 				if (result.bool) {
 					const { bool } = await player
 						.chooseBool(
@@ -3025,22 +3027,23 @@ export default {
 							if (player.hp < 3) return false;
 							return get.attitude(player, target) > 2;
 						})
-						.set("name", trigger.card.name).forResult();
-					if(bool === true){
+						.set("name", trigger.card.name)
+						.forResult();
+					if (bool === true) {
 						player.draw();
-					player.addMark("danweimrfz");
-					player.addTempSkill("newjingsimrfz_ban", "phaseEnd");
-					var target = trigger.target;
-					trigger.targets.remove(target);
-					//@ts-ignore
-					trigger.getParent().triggeredTargets1.remove(target);
-					trigger.untrigger();
-					game.delayx();
-					trigger.targets.push(player);
-				trigger.player.line(player, "fire");
-				game.log(trigger.card, "的目标被改为", player);
-				//@ts-ignore
-				player.logSkill("newjingsimrfz");
+						player.addMark("danweimrfz");
+						player.addTempSkill("newjingsimrfz_ban", "phaseEnd");
+						var target = trigger.target;
+						trigger.targets.remove(target);
+						//@ts-ignore
+						trigger.getParent().triggeredTargets1.remove(target);
+						trigger.untrigger();
+						game.delayx();
+						trigger.targets.push(player);
+						trigger.player.line(player, "fire");
+						game.log(trigger.card, "的目标被改为", player);
+						//@ts-ignore
+						player.logSkill("newjingsimrfz");
 					}
 				}
 			},
@@ -3079,7 +3082,7 @@ export default {
 			group: ["luanhuomrfz_fire", "luanhuomrfz_times", "luanhuomrfz_clear", "luanhuomrfz_damage"],
 			subSkill: {
 				fire: {
-					audio:"luanhuomrfz",
+					audio: "luanhuomrfz",
 					trigger: { source: "damageBegin" },
 					forced: true,
 					charlotte: true,
@@ -3113,7 +3116,7 @@ export default {
 					},
 				},
 				damage: {
-					audio:"luanhuomrfz",
+					audio: "luanhuomrfz",
 					trigger: { player: "phaseZhunbeiBegin" },
 					async content(event, trigger, player) {
 						var num = player.countMark("luanhuomrfz");
@@ -3127,41 +3130,47 @@ export default {
 								.set("ai", function (target) {
 									var player = _status.event.player;
 									return get.damageEffect(target, player, player);
-								}).forResult();
-								if(targets) targets[0].damage();
-						} else {
-							const {control} = await player.chooseControl(str1, str2).set("ai", function (event, player) {
-								if (num > 2) return 0;
-								return 1;
-							}).forResult();
-							if(control === str1 && num>1){
-								player.storage.luanhuomrfz_damage = true;
-							let {targets} = await player
-								.chooseTarget(
-									[1, num],
-									"对至多" + get.cnNumber(num, true) + "名其他角色造成一点伤害",
-									function (card, player, target) {
-										return player != target;
-									}
-								)
-								.set("ai", function (target) {
-									var player = _status.event.player;
-									return get.damageEffect(target, player, player);
-								}).forResult();
-								if(!targets) return;
-								for (var i = 0; i < targets.length; i++) targets[i].damage(player)
-							} else if(control === str2 && num>1){
-								player.storage.luanhuomrfz_damage = false;
-							let {targets} = await player
-								.chooseTarget("对一名其他角色造成" + get.cnNumber(num, true) + "点伤害", function (card, player, target) {
-									return player != target;
 								})
-								.set("ai", function (target) {
-									var player = _status.event.player;
-									return get.damageEffect(target, player, player);
-								}).forResult();
-								if(!targets) return;
-								targets[0].damage(num)
+								.forResult();
+							if (targets) targets[0].damage();
+						} else {
+							const { control } = await player
+								.chooseControl(str1, str2)
+								.set("ai", function (event, player) {
+									if (num > 2) return 0;
+									return 1;
+								})
+								.forResult();
+							if (control === str1 && num > 1) {
+								player.storage.luanhuomrfz_damage = true;
+								let { targets } = await player
+									.chooseTarget(
+										[1, num],
+										"对至多" + get.cnNumber(num, true) + "名其他角色造成一点伤害",
+										function (card, player, target) {
+											return player != target;
+										}
+									)
+									.set("ai", function (target) {
+										var player = _status.event.player;
+										return get.damageEffect(target, player, player);
+									})
+									.forResult();
+								if (!targets) return;
+								for (var i = 0; i < targets.length; i++) targets[i].damage(player);
+							} else if (control === str2 && num > 1) {
+								player.storage.luanhuomrfz_damage = false;
+								let { targets } = await player
+									.chooseTarget("对一名其他角色造成" + get.cnNumber(num, true) + "点伤害", function (card, player, target) {
+										return player != target;
+									})
+									.set("ai", function (target) {
+										var player = _status.event.player;
+										return get.damageEffect(target, player, player);
+									})
+									.forResult();
+								if (!targets) return;
+								targets[0].damage(num);
 							}
 						}
 					},
@@ -3188,7 +3197,7 @@ export default {
 				});
 				if (list.length >= 3) {
 					const result = await player.chooseBool("【勤研】：是否于本回合结束后额外执行一个回合？").forResult();
-					if(!result.bool) return;
+					if (!result.bool) return;
 					player.insertPhase();
 					player.addMark("qingyanmrfz", 1);
 					//@ts-ignore
@@ -3238,8 +3247,8 @@ export default {
 				var cards = player.getExpansions("xuyingmrfz").filter(function (magic) {
 					return get.type2(magic) != get.type2(trigger.card);
 				});
-				if (!cards.length) return; 
-					const {links} = await player.chooseButton(["你可以选择移去一张与你使用的牌类型不同的“虚影”，令此牌结算两次", cards]).forResult();
+				if (!cards.length) return;
+				const { links } = await player.chooseButton(["你可以选择移去一张与你使用的牌类型不同的“虚影”，令此牌结算两次", cards]).forResult();
 				if (links) {
 					//@ts-ignore
 					player.logSkill("xuyingmrfz");
@@ -3285,13 +3294,19 @@ export default {
 						let result;
 
 						if (cards.length && num + cards.length <= 3) {
-							result = await player.chooseButton(["虚影：选择置于武将牌上的牌", cards], [1, cards.length]).set("ai", function (button) {
-								return get.value(button.link, _status.event.player, "raw");
-							}).forResult();
+							result = await player
+								.chooseButton(["虚影：选择置于武将牌上的牌", cards], [1, cards.length])
+								.set("ai", function (button) {
+									return get.value(button.link, _status.event.player, "raw");
+								})
+								.forResult();
 						} else if (cards.length) {
-							result = await player.chooseButton(["虚影：选择置于武将牌上的牌", cards], [1, 3 - num]).set("ai", function (button) {
-								return get.value(button.link, _status.event.player, "raw");
-							}).forResult();
+							result = await player
+								.chooseButton(["虚影：选择置于武将牌上的牌", cards], [1, 3 - num])
+								.set("ai", function (button) {
+									return get.value(button.link, _status.event.player, "raw");
+								})
+								.forResult();
 						}
 
 						if (result && result.bool && result.links && result.links.length) {
@@ -3319,13 +3334,19 @@ export default {
 
 						let result;
 						if (card + num <= 3)
-							result = await player.chooseButton(["虚影：选择置于武将牌上的牌", trigger.cards], [1, card]).set("ai", function (button) {
-								return get.value(button.link, _status.event.player, "raw");
-							}).forResult();
+							result = await player
+								.chooseButton(["虚影：选择置于武将牌上的牌", trigger.cards], [1, card])
+								.set("ai", function (button) {
+									return get.value(button.link, _status.event.player, "raw");
+								})
+								.forResult();
 						else
-							result = await player.chooseButton(["虚影：选择置于武将牌上的牌", trigger.cards], [1, 3 - num]).set("ai", function (button) {
-								return get.value(button.link, _status.event.player, "raw");
-							}).forResult();
+							result = await player
+								.chooseButton(["虚影：选择置于武将牌上的牌", trigger.cards], [1, 3 - num])
+								.set("ai", function (button) {
+									return get.value(button.link, _status.event.player, "raw");
+								})
+								.forResult();
 
 						if (result && result.links && result.bool && result.links.length) {
 							//@ts-ignore
@@ -3341,10 +3362,12 @@ export default {
 					popup: false,
 					lastDo: true,
 					filter: function (event, player) {
-						return event.parent && event.parent.xuyingmrfz_buff == player && event.targets.length == event.parent.triggeredTargets4.length;
+						return (
+							event.parent && event.parent.xuyingmrfz_buff == player && event.targets.length == event.parent.triggeredTargets4.length
+						);
 					},
 					async content(event, trigger, player) {
-						if(!trigger.parent) return;
+						if (!trigger.parent) return;
 						trigger.parent.targets = trigger.parent.targets.concat(trigger.targets);
 						trigger.parent.triggeredTargets4 = trigger.parent.triggeredTargets4.concat(trigger.targets);
 						player.removeSkill("xuyingmrfz_buff");
@@ -3367,19 +3390,25 @@ export default {
 				});
 			},
 			async content(event, trigger, player) {
-				const result = await player.chooseTarget("请选择【血歌】的目标", "对一名你的攻击范围内其他角色造成一点伤害", true, function (card, player, target) {
-					return target != player && player.inRange(target);
-				}).set("ai",target=>-get.attitude(player, target)).forResult();
+				const result = await player
+					.chooseTarget("请选择【血歌】的目标", "对一名你的攻击范围内其他角色造成一点伤害", true, function (card, player, target) {
+						return target != player && player.inRange(target);
+					})
+					.set("ai", target => -get.attitude(player, target))
+					.forResult();
 
 				if (result.targets) {
 					player.line(result.targets);
 					result.targets[0].damage();
 					if (result.targets[0].hp > player.hp || player.getExpansions("xuyingmrfz").length >= 3) event.finish();
 				}
-				
+
 				if (player.countCards("he") && player.getExpansions("xuyingmrfz").length >= 3) return;
 
-				const { cards } = await player.chooseCard("你可以将一张牌置于武将牌上作为“虚影”", "he").set("ai",card=>6 - get.value(card)).forResult();
+				const { cards } = await player
+					.chooseCard("你可以将一张牌置于武将牌上作为“虚影”", "he")
+					.set("ai", card => 6 - get.value(card))
+					.forResult();
 				if (cards && cards.length) {
 					player.addToExpansion(cards, player, "giveAuto").gaintag.add("xuyingmrfz");
 				}
@@ -3420,14 +3449,19 @@ export default {
 			async content(event, trigger, player) {
 				var num = lib.skill.huanshimrfz.getNum();
 				("step 0");
-				const result = await player.chooseTarget(
-					get.prompt("huanshimrfz"),
-					"你可以选择至多" + get.cnNumber(num) + "名角色令其下个回合内：①其使用的第一张【杀】指定目标时，取消之，然后其获得这张【杀】。",
-					[1, num],
-					function (card, player, target) {
-						return target != player && !player.hasSkill("huanshimrfz_buff1");
-					}
-				).set("ai",target=>-get.attitude(player, target)).forResult();
+				const result = await player
+					.chooseTarget(
+						get.prompt("huanshimrfz"),
+						"你可以选择至多" +
+							get.cnNumber(num) +
+							"名角色令其下个回合内：①其使用的第一张【杀】指定目标时，取消之，然后其获得这张【杀】。",
+						[1, num],
+						function (card, player, target) {
+							return target != player && !player.hasSkill("huanshimrfz_buff1");
+						}
+					)
+					.set("ai", target => -get.attitude(player, target))
+					.forResult();
 				if (result.targets) {
 					for (var i of result.targets) {
 						i.addSkill(["huanshimrfz_buff1", "huanshimrfz_buff2"]);
@@ -3557,7 +3591,7 @@ export default {
 								true,
 								"h"
 							);
-							//@ts-ignore
+						//@ts-ignore
 						player.logSkill("jiemimrfz");
 					},
 				},
@@ -3651,7 +3685,7 @@ export default {
 							break;
 						}
 					}
-					if(!target) return "这是一个占位符"; 
+					if (!target) return "这是一个占位符";
 					return (
 						"你的手牌上限" +
 						(player.storage.nanjiaomrfz > 0 ? "+" : "") +
@@ -3936,9 +3970,12 @@ export default {
 					direct: true,
 					trigger: { player: "phaseUseBegin" },
 					async content(event, trigger, player) {
-						const result = await player.chooseTarget("选择一名其他角色视为对其使用一张【杀】", function (card, player, target) {
-							return target != player && player.inRange(target);
-						}).set("ai",target=>-get.attitude(player, target)).forResult();
+						const result = await player
+							.chooseTarget("选择一名其他角色视为对其使用一张【杀】", function (card, player, target) {
+								return target != player && player.inRange(target);
+							})
+							.set("ai", target => -get.attitude(player, target))
+							.forResult();
 
 						if (result.targets) {
 							var target = result.targets[0];
@@ -3960,10 +3997,13 @@ export default {
 			direct: true,
 			trigger: { global: "roundStart" },
 			async content(event, trigger, player) {
-				const result = await player.chooseTarget("你可以选择一名角色，令其获得‘笼’标记", function (card, player, target) {
-					return target != player;
-				}).set("ai",target=>get.attitude(player, target)).forResult();
-				
+				const result = await player
+					.chooseTarget("你可以选择一名角色，令其获得‘笼’标记", function (card, player, target) {
+						return target != player;
+					})
+					.set("ai", target => get.attitude(player, target))
+					.forResult();
+
 				if (result.targets) {
 					result.targets[0].addMark("qiulongmrfz");
 					//@ts-ignore
@@ -4128,27 +4168,32 @@ export default {
 				if (player.countMark("polongmrfz_mark1") < 3) list.add("摸牌");
 				if (player.countMark("polongmrfz_mark2") < 2) list.add("回血");
 				if (player.getDamagedHp() != 0) {
-					const result = await player.chooseControl(list, "cancel2").set("prompt", get.prompt("polongmrfz")).set("prompt2", "回复一点体力或摸一张牌").set("ai",()=>{
-						let player = get.player();
-						if (player.hp == 1 && player.isDamaged()) return "回血";
+					const result = await player
+						.chooseControl(list, "cancel2")
+						.set("prompt", get.prompt("polongmrfz"))
+						.set("prompt2", "回复一点体力或摸一张牌")
+						.set("ai", () => {
+							let player = get.player();
+							if (player.hp == 1 && player.isDamaged()) return "回血";
 							return "摸牌";
-					}).forResult();
+						})
+						.forResult();
 					if (result.control != "cancel2") {
-					game.countPlayer((current)=> {
-						current.removeMark("qiulongmrfz_huan");
-						return true;
-					});
-					//@ts-ignore
-					player.logSkill("polongmrfz");
-					if (result.control == "摸牌") {
-						player.draw();
-						player.addMark("polongmrfz_mark1", 1);
+						game.countPlayer(current => {
+							current.removeMark("qiulongmrfz_huan");
+							return true;
+						});
+						//@ts-ignore
+						player.logSkill("polongmrfz");
+						if (result.control == "摸牌") {
+							player.draw();
+							player.addMark("polongmrfz_mark1", 1);
+						}
+						if (result.control == "回血") {
+							player.recover();
+							player.addMark("polongmrfz_mark2", 1);
+						}
 					}
-					if (result.control == "回血") {
-						player.recover();
-						player.addMark("polongmrfz_mark2", 1);
-					}
-				}
 				} else {
 					player.draw();
 					//@ts-ignore
@@ -4270,9 +4315,9 @@ export default {
 				let result;
 
 				var mark = player.countMark("cangfengmrfz");
-				
+
 				await player.addMark("cangfengmrfz", trigger.num, false);
-				
+
 				if (mark / 2 >= 1 && player.getDamagedHp() > 0) {
 					result = await player.chooseControl("摸牌", "回血").set("prompt", "摸一张牌或回一点血").forResult();
 				} else if (mark / 2 < 1) return;
@@ -4282,7 +4327,7 @@ export default {
 				player.logSkill("cangfengmrfz");
 				await player.removeMark("cangfengmrfz", 2);
 				//@ts-ignore
-				if (mark / 2 >= 1) await lib.skill.cangfengmrfz.content(event,trigger,player);
+				if (mark / 2 >= 1) await lib.skill.cangfengmrfz.content(event, trigger, player);
 			},
 		},
 		yuexiangmrfz: {
@@ -4398,7 +4443,7 @@ export default {
 						return event.card.name == "sha" && event.parent && event.targets.length == event.parent.triggeredTargets4.length;
 					},
 					async content(event, trigger, player) {
-						if(!trigger.parent) return;
+						if (!trigger.parent) return;
 						trigger.parent.targets = trigger.parent.targets.concat(trigger.targets);
 						trigger.parent.triggeredTargets4 = trigger.parent.triggeredTargets4.concat(trigger.targets);
 						//@ts-ignore
@@ -4583,7 +4628,7 @@ export default {
 					charlotte: true,
 					trigger: { source: "damageEnd" },
 					filter: function (event, player) {
-						return !event.player.hasMark("shuipaomrfz_j") && event.player != player && event.parent &&event.parent.name != "danpaomrfz";
+						return !event.player.hasMark("shuipaomrfz_j") && event.player != player && event.parent && event.parent.name != "danpaomrfz";
 					},
 					async content(event, trigger, player) {
 						if (player.hasMark("shuipaomrfz")) trigger.player.addSkill("shuipaomrfz_j2");
@@ -4636,7 +4681,13 @@ export default {
 		jiepimrfz2: {
 			mod: {
 				canBeDiscarded: function (card) {
-					if (get.position(card) == "e" && _status.currentPhase && _status.currentPhase.isAlive() && _status.currentPhase.hasSkill("jiepimrfz")) return false;
+					if (
+						get.position(card) == "e" &&
+						_status.currentPhase &&
+						_status.currentPhase.isAlive() &&
+						_status.currentPhase.hasSkill("jiepimrfz")
+					)
+						return false;
 				},
 			},
 		},
@@ -4742,46 +4793,77 @@ export default {
 				return false;
 			},
 			direct: true,
-			content: function () {
-				"step 0";
-				if (player.countCards("h") >= player.countMark("shanxiemrfz") && player.countMark("shanxiemrfz") > 0) {
-					player
-						.chooseToDiscard(
-							get.prompt("shanxiemrfz"),
-							"你可以弃置" + get.cnNumber(player.countMark("shanxiemrfz")) + "张牌获得此装备牌",
-							false,
-							player.countMark("shanxiemrfz")
-						)
-						.set("ai", function (card) {
-							return 6 - get.value(card);
-						});
-				} else if (player.countMark("shanxiemrfz") == 0) event.goto(2);
-				("step 1");
-				if (trigger.delay == false) game.delay();
-				if (!result.cards) event.finish();
-				("step 2");
-				var cards = [],
-					cards2 = trigger.cards.slice(0),
-					evt = trigger.getl(player);
-				if (evt && evt.cards) cards2.removeArray(evt.cards);
-				for (var i = 0; i < cards2.length; i++) {
-					if (cards2[i].original != "j" && get.type(cards2[i], trigger.player) == "equip" && get.position(cards2[i], true) == "d") {
-						cards.push(cards2[i]);
+			async content(event, trigger, player) {
+				let result;
+
+				while (true) {
+					// step 0
+					let skipStep1 = false;
+					if (player.countCards("h") >= player.countMark("shanxiemrfz") && player.countMark("shanxiemrfz") > 0) {
+						result = await player
+							.chooseToDiscard(
+								get.prompt("shanxiemrfz"),
+								"你可以弃置" + get.cnNumber(player.countMark("shanxiemrfz")) + "张牌获得此装备牌",
+								false,
+								player.countMark("shanxiemrfz")
+							)
+							.set("ai", card => {
+								return 6 - get.value(card);
+							})
+							.forResult();
+					} else if (player.countMark("shanxiemrfz") === 0) {
+						skipStep1 = true; // goto 2: 跳过 step 1 直接执行 step 2
 					}
-				}
-				event.num = cards.length;
-				if (cards.length) {
-					player.chooseButton(["擅械：请选择获得一张牌", cards], 1).set("ai", function (button) {
-						return get.value(button.link, _status.event.player, "raw");
-					});
-				}
-				("step 3");
-				if (result.bool) {
-					event.num--;
-					player.logSkill("shanxiemrfz");
-					player.gain(result.links, "gain2", "log");
-					player.addMark("shanxiemrfz", false);
-					if (event.num > 0) event.goto(0);
+
+					// step 1 (可能被 goto(2) 跳过)
+					if (!skipStep1) {
+						if (trigger.delay === false) {
+							await game.delay();
+						}
+						if (!result?.cards) {
+							break; // event.finish()
+						}
+					}
+
+					// step 2
+					const equipCards = [];
+					const cards2 = trigger.cards.slice(0);
+					const evt = trigger.getl(player);
+					if (evt?.cards) {
+						cards2.removeArray(evt.cards);
+					}
+
+					for (const card of cards2) {
+						//@ts-ignore
+						if (card.original !== "j" && get.type(card, trigger.player) === "equip" && get.position(card, true) === "d") {
+							equipCards.push(card);
+						}
+					}
+					event.num = equipCards.length;
+
+					if (equipCards.length > 0) {
+						result = await player
+							.chooseButton(["擅械：请选择获得一张牌", equipCards], 1)
+							.set("ai", button => {
+								return get.value(button.link, _status.event.player, "raw");
+							})
+							.forResult();
+					}
+
+					// step 3
+					if (result?.bool) {
+						event.num--;
+						//@ts-ignore
+						player.logSkill("shanxiemrfz");
+						await player.gain(result.links, "gain2", "log");
+						player.addMark("shanxiemrfz", 1);
+
+						if (event.num > 0) {
+							continue; // goto 0: 回到循环开头
+						}
+					}
+
+					break; // 流程正常结束
 				}
 			},
 			group: ["shanxiemrfz_sha", "shanxiemrfz_usesha", "shanxiemrfz_remove"],
