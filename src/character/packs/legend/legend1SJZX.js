@@ -5928,7 +5928,7 @@ export default {
 					await player.drawTo(game.players.length);
 				}
 				//@ts-ignore
-				event.getParent("phaseUse")?.skipped = true;
+				if(event.getParent("phaseUse")) event.getParent("phaseUse").skipped = true;
 				player.addTempSkill("zuimengmrfz_skip");
 			},
 			subSkill: {
