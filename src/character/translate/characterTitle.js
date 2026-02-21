@@ -137,8 +137,8 @@ const characterTitle = {
   baidurenmrfz: "<font color = #a52a2a>血色旧往</font>",
   titimrfz: "<font color = #a52a2a>拂扫除垢</font>",
   xiangshimrfz: "<font color = #a52a2a>特殊渠道顾问</font>",
-  sptiaoxiangshimrfz: "<font color = green>百里香</font>",
-  wangmrfz: "<font color = #2263b766>胜天半子</font>"
+  sptiaoxiangshimrfz: "<font color = green>百里香</font>"
+  // wangmrfz:"<font color = #2263b766>胜天半子</font>",
 };
 export {
   characterTitle as default

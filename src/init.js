@@ -13,6 +13,7 @@ const whichWayInit = async () => {
   await import("./config/index.js");
   await import("./character/index.js");
   await import("./card/index.js");
+  await import("./packs/index.js");
   await import("./arknight/index.js");
   await import("./audio/index.js");
   await import("./skin/index.js");
