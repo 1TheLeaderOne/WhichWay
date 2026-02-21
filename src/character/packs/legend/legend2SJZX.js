@@ -69,7 +69,12 @@ export default {
 			forced: true,
 			firstDo: true,
 			filter(event, player) {
-				return event.card && get.name(event.card) === "sha" && event.card.cards && event.card.cards.some(card => ["red", "black"].includes(get.color(card) || ""));
+				return (
+					event.card &&
+					get.name(event.card) === "sha" &&
+					event.card.cards &&
+					event.card.cards.some(card => ["red", "black"].includes(get.color(card) || ""))
+				);
 			},
 			async content(event, trigger, player) {
 				let color = ["red", "black"];
@@ -227,7 +232,12 @@ export default {
 							player.getHistory("lose", evt => {
 								let cardid = event[event.player === player ? "card1" : "card2"].cardid;
 								//@ts-ignore
-								if (evt.gaintag_map && Object.keys(evt.gaintag_map).includes(cardid) && evt.gaintag_map[cardid].includes("guqiumrfz_number")) return true;
+								if (
+									evt.gaintag_map &&
+									Object.keys(evt.gaintag_map).includes(cardid) &&
+									evt.gaintag_map[cardid].includes("guqiumrfz_number")
+								)
+									return true;
 							}).length > 0
 						);
 					},
@@ -261,7 +271,10 @@ export default {
 				event.result = await player
 					.chooseTarget()
 					.set("prompt", get.prompt("newpolongmrfz"))
-					.set("prompt2", `你可以令一名角色A与角色B(角色B不能为你)拼点，若角色A赢，你将判定区的牌翻面，然后摸2X张牌，且你因此获得的牌本回合无距离次数限制。（X=你因此翻面的牌数）`)
+					.set(
+						"prompt2",
+						`你可以令一名角色A与角色B(角色B不能为你)拼点，若角色A赢，你将判定区的牌翻面，然后摸2X张牌，且你因此获得的牌本回合无距离次数限制。（X=你因此翻面的牌数）`
+					)
 					.set("targetprompt", ["角色A", "角色B"])
 					.set("filterTarget", (card, player, target) => {
 						if (target.countCards("h") < 1) return false;
@@ -335,7 +348,10 @@ export default {
 					if (player.countCards("h") < 1) continue;
 					const { cards } = await player
 						.chooseCard("h", true)
-						.set("prompt", `你可以重铸一张手牌，若重铸的牌与判定牌颜色(${get.translation(color)})一致，你摸${lib.skill.wuweimrfz.getNum(player, event.name)}张牌。`)
+						.set(
+							"prompt",
+							`你可以重铸一张手牌，若重铸的牌与判定牌颜色(${get.translation(color)})一致，你摸${lib.skill.wuweimrfz.getNum(player, event.name)}张牌。`
+						)
 						.set("ai", card => {
 							//@ts-ignore
 							let { player, color, num } = get.event();
@@ -429,7 +445,8 @@ export default {
 						let info = get.skillInfoTranslation("wuweimrfz");
 						if (!player.storage.wuweimrfz) return info;
 						for (let skill of skills) {
-							if (lib.skill.wuweimrfz.getNum(player, skill) > 0) return info.replace(`（X=你本轮触发过的${get.poptip("sjzx_cardUseType")}数）`, "");
+							if (lib.skill.wuweimrfz.getNum(player, skill) > 0)
+								return info.replace(`（X=你本轮触发过的${get.poptip("sjzx_cardUseType")}数）`, "");
 						}
 						return info;
 					};
@@ -462,7 +479,18 @@ export default {
 			trigger: {
 				player: "recastAfter",
 			},
-			validSkills: ["songyuemrfz", "yuxiangmrfz", "lingwomrfz", "pojianmrfz", "leigumrfz", "jiaoyingmrfz", "weimianmrfz", "weiquanmrfz", "chendiemrfz", "umiri_chenxianmrfz"],
+			validSkills: [
+				"songyuemrfz",
+				"yuxiangmrfz",
+				"lingwomrfz",
+				"pojianmrfz",
+				"leigumrfz",
+				"jiaoyingmrfz",
+				"weimianmrfz",
+				"weiquanmrfz",
+				"chendiemrfz",
+				"umiri_chenxianmrfz",
+			],
 			filter(event, player) {
 				return Object.keys(player.storage.wuweimrfz).length < 1;
 			},
@@ -635,7 +663,12 @@ export default {
 					},
 					filter(event, player) {
 						//@ts-ignore
-						return event.card.storage?.huanyoumrfz && event.cards.length === 1 && !event.card.failToUse && !event.getParent().noTriggerHuanyoumrfz;
+						return (
+							event.card.storage?.huanyoumrfz &&
+							event.cards.length === 1 &&
+							!event.card.failToUse &&
+							!event.getParent().noTriggerHuanyoumrfz
+						);
 					},
 					async content(event, trigger, player) {
 						trigger.cards.forEach(card => {
@@ -703,7 +736,12 @@ export default {
 					lastDo: true,
 					filter(event, player) {
 						//@ts-ignore
-						return player.countCards("h", card => card.storage.huanyoumrfz) > 0 && event.card.storage?.huanyoumrfz && event.cards.length === 1 && !event.getParent().noTriggerHuanyoumrfz;
+						return (
+							player.countCards("h", card => card.storage.huanyoumrfz) > 0 &&
+							event.card.storage?.huanyoumrfz &&
+							event.cards.length === 1 &&
+							!event.getParent().noTriggerHuanyoumrfz
+						);
 					},
 					async cost(event, trigger, player) {
 						event.result = await player
@@ -738,7 +776,10 @@ export default {
 								return evt.card.name === "cuoe_huanyoumrfzCard" ? get.name(evt.card.cards[0]) : evt.card.name;
 							});
 						//@ts-ignore
-						return (useList.length === 0 || (useList[0] === "ying" && new Set(useList).size === 1)) && !player.getHistory("skipped").includes("phaseUse");
+						return (
+							(useList.length === 0 || (useList[0] === "ying" && new Set(useList).size === 1)) &&
+							!player.getHistory("skipped").includes("phaseUse")
+						);
 					},
 					async content(event, trigger, player) {
 						game.log(player, "使命失败");
@@ -769,7 +810,12 @@ export default {
 				player: "useCardBegin",
 			},
 			filter(event, player) {
-				return event.card.storage?.huanyoumrfz && !event.card.storage?.zhishuimrfz && event.card.cards.length === 1 && !player.hasUseTarget(event.card.cards[0].name);
+				return (
+					event.card.storage?.huanyoumrfz &&
+					!event.card.storage?.zhishuimrfz &&
+					event.card.cards.length === 1 &&
+					!player.hasUseTarget(event.card.cards[0].name)
+				);
 			},
 			async content(event, trigger, player) {
 				await player.useCard(
@@ -1118,7 +1164,10 @@ export default {
 				event.result = await player
 					.chooseTarget()
 					.set("prompt", get.prompt("guishimrfz"))
-					.set("prompt2", `你可以失去一点体力，然后令一名角色摸${get.cnNumber(Math.min(player.getDamagedHp(), 5))}张牌，若该角色不为你，你可以在结束阶段再次发动【鬼势】`)
+					.set(
+						"prompt2",
+						`你可以失去一点体力，然后令一名角色摸${get.cnNumber(Math.min(player.getDamagedHp(), 5))}张牌，若该角色不为你，你可以在结束阶段再次发动【鬼势】`
+					)
 					.set("ai", target => {
 						let player = get.player();
 						let num = Math.max(player.hp, 0);
@@ -1172,7 +1221,7 @@ export default {
 		zhanyemrfz: {
 			audio: 4,
 			derivation: ["wozhimrfz_rewrite", "guishimrfz_rewrite"],
-			dutySkill:true,
+			dutySkill: true,
 			group: ["zhanyemrfz_revenge", "zhanyemrfz_achieve", "zhanyemrfz_fail"],
 			subSkill: {
 				revenge: {
@@ -1433,7 +1482,10 @@ export default {
 							let toPos = findElementPosition(fakeMoved, to.link);
 
 							if (fromPos && toPos) {
-								[fakeMoved[fromPos.arrayIndex][fromPos.elementIndex], fakeMoved[toPos.arrayIndex][toPos.elementIndex]] = [fakeMoved[toPos.arrayIndex][toPos.elementIndex], fakeMoved[fromPos.arrayIndex][fromPos.elementIndex]];
+								[fakeMoved[fromPos.arrayIndex][fromPos.elementIndex], fakeMoved[toPos.arrayIndex][toPos.elementIndex]] = [
+									fakeMoved[toPos.arrayIndex][toPos.elementIndex],
+									fakeMoved[fromPos.arrayIndex][fromPos.elementIndex],
+								];
 							}
 						} else {
 							if (fakeMoved[0].includes(from.link)) fakeMoved[0].remove(from.link);
@@ -1536,7 +1588,10 @@ export default {
 									})
 									.set("complexCard", true)
 									.set("selectCard", target.countMark("fuyingmrfz"))
-									.set("prompt", `请弃置${target.countMark("fuyingmrfz")}张花色不同的牌或失去${target.countMark("fuyingmrfz")}点体力`)
+									.set(
+										"prompt",
+										`请弃置${target.countMark("fuyingmrfz")}张花色不同的牌或失去${target.countMark("fuyingmrfz")}点体力`
+									)
 									.forResult();
 					if (bool === false) target.loseHp(target.countMark("fuyingmrfz"));
 					target.removeMark("fuyingmrfz", target.countMark("fuyingmrfz"));
@@ -1824,7 +1879,10 @@ export default {
 					const { cards } = await player
 						.chooseCard("h")
 						.set("prompt", get.prompt("zhengningmrfz"))
-						.set("prompt2", "<font color = red>选择“确定”即不弃置【影】</font><br>你可以弃置任意张【影】、横置至多等量角色并摸等量张牌，然后你展示所有手牌并令一名横置且本回合未以此法选择过的角色进行判定，若你手牌中有与判定牌花色相同的牌，你可以弃置之并对其造成一点雷属性伤害，若其受到伤害，你可以重复此流程。")
+						.set(
+							"prompt2",
+							"<font color = red>选择“确定”即不弃置【影】</font><br>你可以弃置任意张【影】、横置至多等量角色并摸等量张牌，然后你展示所有手牌并令一名横置且本回合未以此法选择过的角色进行判定，若你手牌中有与判定牌花色相同的牌，你可以弃置之并对其造成一点雷属性伤害，若其受到伤害，你可以重复此流程。"
+						)
 						.set("filterCard", card => get.name(card) === "ying")
 						.set("selectCard", [0, Infinity])
 						.set("ai", card => {
@@ -1982,7 +2040,7 @@ export default {
 						if (event.name === "phase") return true;
 						return event.cards && event.cards.some(card => cardsx.includes(card));
 					})
-					.then(() => {
+					.step(async (event, trigger, player) => {
 						if (trigger.name === "phase") return;
 						trigger.num = 0;
 					});
@@ -2000,7 +2058,7 @@ export default {
 						if (bool) event.kenyemrfz_checked = true;
 						return bool;
 					})
-					.then(() => {
+					.step(async (event, trigger, player) => {
 						if (trigger.name === "phase") return;
 						//@ts-ignore
 						player.addToExpansion(trigger.cards, player, "give").gaintag.add("kenyemrfz");
@@ -2019,57 +2077,47 @@ export default {
 						if (player.getExpansions("kenyemrfz").length < 1) return false;
 						return player.canUse("wuzhong", player) || player.canUse("tao", player);
 					},
-					content: function () {
-						"step 0";
-						//@ts-ignore
-						if (player.getExpansions("kenyemrfz").length > 0) {
-							var list = [];
-							//@ts-ignore
-							if (player.canUseToAnyone("tao")) list.add("tao");
-							//@ts-ignore
-							if (player.canUseToAnyone("wuzhong")) list.add("wuzhong");
-							if (list.length == 1) {
-								//@ts-ignore
-								player.useCard({ name: list[0] }, [player.getExpansions("kenyemrfz")[0]], player);
+					async content(event, trigger, player) {
+						let result;
+
+						while (player.getExpansions("kenyemrfz").length > 0) {
+							// step 0
+							const list = [];
+							if (player.hasUseTarget("tao")) list.add("tao");
+							if (player.hasUseTarget("wuzhong")) list.add("wuzhong");
+
+							if (list.length === 1) {
+								await player.useCard({ name: list[0] }, [player.getExpansions("kenyemrfz")[0]], player);
 								//@ts-ignore
 								player.logSkill("kenyemrfz");
+							} else if (list.length > 1) {
+								result = await player
+									.chooseBool("【垦野】:选择'确定'使用【桃】，选择'取消'使用【无中生有】")
+									.set("ai", () => {
+										const aiPlayer = _status.event.player;
+										if (aiPlayer.hp < 3) return 0;
+										return [0, 1].randomGet();
+									})
+									.forResult();
+
+								// step 3 (内联，因原流程中 step 3 仅在 chooseBool 后执行)
+								if (result.bool) {
+									await player.useCard({ name: "tao" }, [player.getExpansions("kenyemrfz")[0]], player);
+								} else {
+									await player.useCard({ name: "wuzhong" }, [player.getExpansions("kenyemrfz")[0]], player);
+								}
+								//@ts-ignore
+								player.logSkill("kenyemrfz");
+								// goto(0): while 循环自动回到开头
+								continue;
 							} else {
-								//@ts-ignore
-								event.list = list;
-								//@ts-ignore
-								event.goto(2);
+								break; // 无可用卡牌，结束流程
 							}
-							//@ts-ignore
-						} else event.finish();
-						"step 1";
-						//@ts-ignore
-						if (player.getExpansions("kenyemrfz").length > 0) {
-							//@ts-ignore
-							event.goto(0);
-							//@ts-ignore
-						} else event.finish();
-						"step 2";
-						//@ts-ignore
-						if (player.getExpansions("kenyemrfz").length > 0) {
-							//@ts-ignore
-							player.chooseBool("【垦野】:选择‘确定’使用【桃】，选择‘取消’使用【无中生有】").set("ai", function () {
-								var player = _status.event.player;
-								if (player.hp < 3) return 0;
-								return [0, 1].randomGet();
-							});
-							//@ts-ignore
-						} else event.finish();
-						"step 3";
-						//@ts-ignore
-						if (result.bool) {
-							//@ts-ignore
-							player.useCard({ name: "tao" }, [player.getExpansions("kenyemrfz")[0]], player);
-							//@ts-ignore
-						} else player.useCard({ name: "wuzhong" }, [player.getExpansions("kenyemrfz")[0]], player);
-						//@ts-ignore
-						player.logSkill("kenyemrfz");
-						//@ts-ignore
-						event.goto(0);
+
+							// step 1 (原 goto(0) 由 while 循环条件控制)
+							// 循环条件 player.getExpansions("kenyemrfz").length > 0 已隐含此判断
+						}
+						// 循环条件不满足时自动结束，等价于 event.finish()
 					},
 				},
 			},
@@ -2081,146 +2129,131 @@ export default {
 				var evt = event.getParent("phaseDraw");
 				if (evt && evt.player == event.player) return false;
 				if (!event.cards || event.cards.length < 2) return false;
+				//@ts-ignore
 				if (event.getParent(1).name != "draw") return false;
-				return event.player.canUseToAnyone("wugu");
+				return event.player.hasUseTarget("wugu");
 			},
 			usable: 1,
 			direct: true,
-			content: function () {
-				"step 0";
-				//@ts-ignore
-				var target = trigger.player,
-					//@ts-ignore
-					cards = trigger.cards,
-					type = [];
-				for (var i of cards) {
-					if (type.includes(get.type2(i))) continue;
-					type.add(get.type2(i));
+			async content(event, trigger, player) {
+				let result;
+
+				// step 0
+				const target = trigger.player;
+				const cards = trigger.cards;
+				const type = [];
+				for (const card of cards) {
+					if (type.includes(get.type2(card))) continue;
+					type.add(get.type2(card));
 				}
 				//@ts-ignore
 				event.type = type;
-				//@ts-ignore
-				if (target == player) {
-					//@ts-ignore
-					player
-					//@ts-ignore
-						.chooseTarget(`【禾盈】:你可以将${get.translation(trigger.cards)}当做至多指定${get.cnNumber(type.length)}角色且结算${get.cnNumber(type.length)}次的【五谷丰登】使用`)
+
+				let skipToStep2 = false;
+				if (target === player) {
+					result = await player
+						.chooseTarget(
+							`【禾盈】:你可以将${get.translation(trigger.cards)}当做至多指定${get.cnNumber(type.length)}角色且结算${get.cnNumber(type.length)}次的【五谷丰登】使用`
+						)
 						.set("selectTarget", [1, type.length])
-						.set("filterTarget", function (card, player, target) {
+						.set("filterTarget", (card, player, target) => {
 							return player.canUse("wugu", target);
 						})
 						.set("prompt2", get.skillInfoTranslation("heyingmrfz").replace(/<\/br>[\s\S]*/, ""))
-						.set("ai", function (target) {
-							var player = _status.event.player,
-								cards = _status.event.cards,
-								num = _status.event.num;
-							if (cards.length >= num * 2) return false;
-							if (get.value(cards) > 8) return false;
-							return get.effect(target, get.autoViewAs({ name: "wugu" }, cards), player, player);
+						.set("ai", target => {
+							const aiPlayer = _status.event.player;
+							const aiCards = _status.event.cards;
+							const num = _status.event.num;
+							if (aiCards.length >= num * 2) return false;
+							if (get.value(aiCards) > 8) return false;
+							return get.effect(target, get.autoViewAs({ name: "wugu" }, aiCards), aiPlayer, aiPlayer);
 						})
-						//@ts-ignore
 						.set("cards", trigger.cards)
-						//@ts-ignore
-						.set("num", event.type.length);
-						//@ts-ignore
-				} else event.goto(2);
-				"step 1";
-				//@ts-ignore
-				if (result.targets) {
-					//@ts-ignore
-					trigger.player
-						.when("useCard")
-						.filter((event, player) => {
-							return event.card && get.name(event.card) == "wugu" && event.card.storage.heyingmrfz == true;
-						})
-						.then(() => {
-							//@ts-ignore
-							trigger.effectCount = type.length;
-						})
-						//@ts-ignore
-						.vars({ type: event.type });
-						//@ts-ignore
-					trigger.player.useCard({ name: "wugu", storage: { heyingmrfz: true } }, trigger.cards, result.targets);
-					//@ts-ignore
-					player.logSkill("heyingmrfz", result.targets);
-					//@ts-ignore
-					event.finish();
+						.set("num", event.type.length)
+						.forResult();
 				} else {
-					//@ts-ignore
-					player.storage.counttrigger.heyingmrfz--;
-					//@ts-ignore
-					event.finish();
+					skipToStep2 = true;
 				}
-				"step 2";
-				//@ts-ignore
-				player
-				//@ts-ignore
+
+				// step 1 (only if target === player)
+				if (!skipToStep2) {
+					if (result && result.targets) {
+						trigger.player
+							.when("useCard")
+							.filter((event, player) => {
+								return event.card && get.name(event.card) === "wugu" && event.card.storage.heyingmrfz === true;
+							})
+							.step(async (event, trigger, player) => {
+								trigger.effectCount = type.length;
+							})
+							.vars({ type: event.type });
+						await trigger.player.useCard({ name: "wugu", storage: { heyingmrfz: true } }, trigger.cards, result.targets);
+						//@ts-ignore
+						player.logSkill("heyingmrfz", result.targets);
+						return;
+					} else {
+						player.storage.counttrigger.heyingmrfz--;
+						return;
+					}
+				}
+
+				// step 2
+				result = await player
 					.chooseBool(`【禾盈】:是否令${get.translation(trigger.player)}选择是否将此次摸的牌当做五谷丰登使用？`)
-					.set("ai", function () {
-						var player = _status.event.player,
-							target = _status.event.target;
-						return get.attitude(target, player) > 0;
+					.set("ai", () => {
+						const aiPlayer = _status.event.player;
+						const aiTarget = _status.event.target;
+						return get.attitude(aiTarget, aiPlayer) > 0;
 					})
 					.set("prompt2", get.skillInfoTranslation("heyingmrfz").replace(/<\/br>[\s\S]*/, ""))
-					//@ts-ignore
-					.set("target", trigger.player);
-				"step 3";
-				//@ts-ignore
+					.set("target", trigger.player)
+					.forResult();
+
+				// step 3
 				if (result.bool) {
-					//@ts-ignore
-					trigger.player
-					//@ts-ignore
-						.chooseTarget(`【禾盈】:你可以将${get.translation(trigger.cards)}当做至多指定${get.cnNumber(event.type.length)}角色且结算${get.cnNumber(event.type.length)}次的【五谷丰登】使用`)
-						//@ts-ignore
+					result = await trigger.player
+						.chooseTarget(
+							`【禾盈】:你可以将${get.translation(trigger.cards)}当做至多指定${get.cnNumber(event.type.length)}角色且结算${get.cnNumber(event.type.length)}次的【五谷丰登】使用`
+						)
 						.set("selectTarget", [1, event.type.length])
-						.set("filterTarget", function (card, player, target) {
+						.set("filterTarget", (card, player, target) => {
 							return player.canUse("wugu", target);
 						})
 						.set("prompt2", get.skillInfoTranslation("heyingmrfz").replace(/<\/br>[\s\S]*/, ""))
-						.set("ai", function (target) {
-							//@ts-ignore
-							var player = _status.event.playerx,
-								cards = _status.event.cards,
-								num = _status.event.num;
-							if (cards.length >= num * 2) return false;
-							if (get.value(cards) > 8) return false;
-							return get.effect(target, get.autoViewAs({ name: "wugu" }, cards), player, player);
+						.set("ai", target => {
+							const aiPlayer = _status.event.playerx;
+							const aiCards = _status.event.cards;
+							const num = _status.event.num;
+							if (aiCards.length >= num * 2) return false;
+							if (get.value(aiCards) > 8) return false;
+							return get.effect(target, get.autoViewAs({ name: "wugu" }, aiCards), aiPlayer, aiPlayer);
 						})
-						//@ts-ignore
 						.set("cards", trigger.cards)
-						//@ts-ignore
 						.set("playerx", trigger.player)
-						//@ts-ignore
-						.set("num", event.type.length);
+						.set("num", event.type.length)
+						.forResult();
 				} else {
-					//@ts-ignore
 					player.storage.counttrigger.heyingmrfz--;
-					//@ts-ignore
-					event.finish();
+					return;
 				}
-				"step 4";
-				//@ts-ignore
+
+				// step 4
 				if (result.targets) {
-					//@ts-ignore
 					trigger.player
 						.when("useCard")
 						.filter((event, player) => {
-							return event.card && get.name(event.card) == "wugu" && event.card.storage.heyingmrfz == true;
+							return event.card && get.name(event.card) === "wugu" && event.card.storage.heyingmrfz === true;
 						})
-						.then(() => {
-							//@ts-ignore
+						.step(async (event, trigger, player) => {
 							trigger.effectCount = type.length;
 						})
-						//@ts-ignore
 						.vars({ type: event.type });
-						//@ts-ignore
-					trigger.player.useCard({ name: "wugu", storage: { heyingmrfz: true } }, 
-						//@ts-ignore
-						trigger.cards, result.targets);
+					await trigger.player.useCard({ name: "wugu", storage: { heyingmrfz: true } }, trigger.cards, result.targets);
 					//@ts-ignore
-						trigger.player.logSkill("heyingmrfz", result.targets);
-						//@ts-ignore
-				} else player.storage.counttrigger.heyingmrfz--;
+					trigger.player.logSkill("heyingmrfz", result.targets);
+				} else {
+					player.storage.counttrigger.heyingmrfz--;
+				}
 			},
 		},
 		rancuimrfz: {
@@ -2233,7 +2266,7 @@ export default {
 			skillAnimation: true,
 			animationColor: "wood",
 			forceDie: true,
-			content: async function (event,trigger,player) {
+			content: async function (event, trigger, player) {
 				var list = player.storage.kenyemrfz;
 				for (var i of game.players) {
 					if (i == player || !list.includes(i)) continue;
@@ -2250,9 +2283,10 @@ export default {
 			trigger: { player: "drawAfter" },
 			filter: function (event, player) {
 				if (player.hasSkill("liangtianmrfz_ban")) return false;
+				//@ts-ignore
 				return event.getParent(2).name != "liangtianmrfz";
 			},
-			content: async function (event,trigger,player) {
+			content: async function (event, trigger, player) {
 				var list = ["phaseZhunbei", "phaseJudge", "phaseDraw", "phaseUse", "phaseDiscard", "phaseJieshu"],
 					phase;
 				for (var i of list) {
@@ -3032,7 +3066,10 @@ export default {
 					.chooseControl("选项一", "选项二", "cancel2")
 					.set("prompt", get.prompt("feiyimrfz"))
 					.set("prompt2", `1`)
-					.set("choiceList", ["你可以令你本回合的攻击距离+1，然后直到下个准备阶段开始时，其他角色计算与你的距离-1。", "你可以令你本回合的攻击距离-1，然后直到下个准备阶段开始时，其他角色计算与你的距离+1。"])
+					.set("choiceList", [
+						"你可以令你本回合的攻击距离+1，然后直到下个准备阶段开始时，其他角色计算与你的距离-1。",
+						"你可以令你本回合的攻击距离-1，然后直到下个准备阶段开始时，其他角色计算与你的距离+1。",
+					])
 					.set("ai", () => 1)
 					.forResult();
 				if (typeof index === "number")
@@ -3328,7 +3365,10 @@ export default {
 					.chooseCard()
 					.set("filterCard", (card, player) => player.canRecast(card))
 					.set("prompt", get.prompt("youhuomrfz"))
-					.set("prompt2", `你可以重铸一张手牌，若此牌为伤害类牌，此牌(${get.translation(trigger.card)})额外结算${num}次，且若此牌造成伤害，你本回合使用【杀】的次数+1`)
+					.set(
+						"prompt2",
+						`你可以重铸一张手牌，若此牌为伤害类牌，此牌(${get.translation(trigger.card)})额外结算${num}次，且若此牌造成伤害，你本回合使用【杀】的次数+1`
+					)
 					.set("ai", card => {
 						let num = 6 - get.value(card);
 						if (get.tag(card, "damage")) num += 2;
@@ -3443,7 +3483,13 @@ export default {
 							let prompt = [];
 							if (sourceDamage.includes(char)) prompt.push("使用【杀】");
 							if (damage.includes(char)) prompt.push("使用【桃】");
-							if (prompt.length > 0) whichWayTips.addPrompt(char, prompt.length > 1 ? prompt.map(text => `<span class = "promptTextSJZX">${text}</span>`).join("<br>") : prompt[0], "pingyimrfz", "uncheckBegin");
+							if (prompt.length > 0)
+								whichWayTips.addPrompt(
+									char,
+									prompt.length > 1 ? prompt.map(text => `<span class = "promptTextSJZX">${text}</span>`).join("<br>") : prompt[0],
+									"pingyimrfz",
+									"uncheckBegin"
+								);
 						}
 						return all.includes(target);
 					})
@@ -3724,7 +3770,7 @@ export default {
 						.set("aiChooseResult", aiChoose(target))
 						.set("banCard", cardsCompare)
 						.forResult();
-					if(!cards) return;
+					if (!cards) return;
 					const cardsDebate = cards[0];
 
 					cardMaps.push([target, [cardsCompare, cardsDebate]]);
@@ -3739,8 +3785,11 @@ export default {
 				//@ts-ignore
 				let targetCompare = targets.filter(target => Object.keys(compareMaps).includes(target.playerid));
 				let targetDebate = targets.filter(target => debateMaps.map(arr => arr[0]).includes(target));
-				let  result1 = await player.chooseToCompare(targetCompare).set("fixedResult", compareMaps).forResult();
-				let result2  = await player.chooseToDebate([...targetDebate, player]).set("fixedResult", debateMaps).forResult();
+				let result1 = await player.chooseToCompare(targetCompare).set("fixedResult", compareMaps).forResult();
+				let result2 = await player
+					.chooseToDebate([...targetDebate, player])
+					.set("fixedResult", debateMaps)
+					.forResult();
 				[...targetDebate, player].forEach(target => target.removeGaintag("yizhamrfz_tip2"));
 				let compareResult = {
 					win: [],
@@ -3767,10 +3816,11 @@ export default {
 				} else if (result2.opinion === "red") {
 					for (let char of compareResult.win) {
 						//@ts-ignore
-						if (char.countDiscardableCards(player, "he")) await player.discardPlayerCard(char, true, 2, "he").set("ai", lib.card.guohe.ai.button);
+						if (char.countDiscardableCards(player, "he"))
+							await player.discardPlayerCard(char, true, 2, "he").set("ai", lib.card.guohe.ai.button);
 					}
 				} else {
-					const {targets:targetsx} = await player
+					const { targets: targetsx } = await player
 						.chooseTarget()
 						.set("prompt", "【刈诈】：你可以对任意名角色造成一点伤害")
 						.set("selectTarget", [1, Infinity])
@@ -3869,7 +3919,7 @@ export default {
 				player.addTempSkill("ronghuimrfz_lose", { player: "phaseUseEnd" });
 				player
 					.when({ player: "phaseUseEnd" })
-					.then(() => {})
+					.step(async (event,trigger,player) =>{})
 					.assign({
 						mod: {
 							cardUsable(card, player, num) {
@@ -3924,7 +3974,11 @@ export default {
 						};
 						let filterCards = function (cards) {
 							//@ts-ignore
-							return cards.filter(card => player.getCardUsable2(card) > 0 && (get.type(card) === "basic" || (get.type(card) !== "basic" && player.countUsed(card) < 1)));
+							return cards.filter(
+								card =>
+									player.getCardUsable2(card) > 0 &&
+									(get.type(card) === "basic" || (get.type(card) !== "basic" && player.countUsed(card) < 1))
+							);
 						};
 						let cards = filterCards(player.getCards("h"));
 						let discardPlie = filterCards(Array.from(ui.discardPile.childNodes));
