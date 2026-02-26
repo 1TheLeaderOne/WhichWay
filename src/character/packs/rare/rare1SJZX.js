@@ -259,56 +259,39 @@ export default {
 			audio: 2,
 			forced: true,
 			trigger: { player: "phaseUseBegin" },
-			content: function () {
-				"step 0";
+			async content(event, trigger, player) {
 				var cs = 1;
-				// @ts-ignore
 				if (player.hp < 2 && player.countCards("h", "tao") > 0) cs = 2;
-				// @ts-ignore
 				else if (
-					// @ts-ignore
 					player.hasSha() &&
-					// @ts-ignore
 					player.countCards("h", function (card) {
 						return get.type(card) == "equip";
-						// @ts-ignore
 					}) < 3 &&
-					// @ts-ignore
 					player.canUseCardAtt("sha", false, true)
 				)
 					cs = 2;
-				// @ts-ignore
 				else if (
-					// @ts-ignore
 					player.countCards("h", function (card) {
 						return get.type2(card) == "trick" && card.name != "wuxie";
 					}) > 2
 				)
 					cs = 0;
-				// @ts-ignore
-				player
+				const result = await player
 					.chooseControl()
 					.set("choiceList", ["基本：使用牌无距离限制且不可响应", "锦囊：摸两张牌", "装备：本阶段使用的第一张带有伤害类标签的牌伤害值或回复值+1"])
 					.set("prompt", "【蚕吟】:请选择你不能使用的类型")
 					.set("ai", function () {
-						// @ts-ignore
 						return _status.event.cs;
 					})
-					.set("cs", cs);
-				"step 1";
-				// @ts-ignore
+					.set("cs", cs).forResult();
+
 				if (result.control) {
 					var list = ["basic", "trick", "equip"];
 					for (var i = 0; i < list.length; i++) {
-						// @ts-ignore
 						if (result.index == i) {
-							// @ts-ignore
 							if (result.index != 1) player.addTempSkill("canyinmrfz_" + list[i], "phaseUseEnd");
-							// @ts-ignore
 							else player.draw(2);
-							// @ts-ignore
 							player.addTempSkill("canyinmrfz_ban", "phaseUseEnd");
-							// @ts-ignore
 							player.storage.canyinmrfz = list[i];
 							break;
 						}
@@ -423,24 +406,16 @@ export default {
 				var target = player == event.player ? event.target : event.player;
 				return "【冰刃】:你可以<span class=firetext>流失一点体力</span>并视为对" + get.translation(target) + "使用一张冰【杀】";
 			},
-			content: function () {
+			async content(event, trigger, player) {
 				//成为目标 player==trigger.target
 				//指定目标 player==trigger.player
-				"step 0";
-				// @ts-ignore
-				player.loseHp();
-				"step 1";
-				// @ts-ignore
+				await player.loseHp();
+
 				if (player.isAlive()) {
-					// @ts-ignore
 					var target = player == trigger.player ? trigger.target : trigger.player;
-					// @ts-ignore
 					player.addTempSkill("bingrenmrfz_dam", "bingrenmrfzAfter");
-					// @ts-ignore
 					player.useCard({ name: "sha", nature: "ice", isCard: true, bingrenmrfz: true }, target).set("addCount", false);
 				}
-				// @ts-ignore
-				else event.finish();
 			},
 			subSkill: {
 				dam: {
@@ -456,31 +431,23 @@ export default {
 						// @ts-ignore
 						return event.card.bingrenmrfz == true;
 					},
-					content: function () {
-						"step 0";
-						// @ts-ignore
+					async content(event, trigger, player) {
+						let result;
 						if (trigger.player.countCards("he") < 2) {
-							// @ts-ignore
 							player.removeSkill("bingrenmrfz_dam");
-							// @ts-ignore
 							trigger.player.turnOver();
-							// @ts-ignore
-							event.finish();
+							return;
 						} else {
-							// @ts-ignore
-							trigger.player.chooseToDiscard("【冰刃】:请弃置两张牌，或选择取消翻面", 2, "he").set("ai", function (card) {
+							result = await trigger.player.chooseToDiscard("【冰刃】:请弃置两张牌，或选择取消翻面", 2, "he").set("ai", function (card) {
 								var player = _status.event.player;
 								if (player.isTurnedOver()) return -1;
 								return 8 - get.value(card);
-							});
+							}).forResult();
 						}
-						"step 1";
-						// @ts-ignore
+
 						if (result.bool == false) {
-							// @ts-ignore
 							trigger.player.turnOver();
 						}
-						// @ts-ignore
 						player.removeSkill("bingrenmrfz_dam");
 					},
 				},
@@ -513,24 +480,18 @@ export default {
 			discard: false,
 			lose: false,
 			delay: false,
-			content: function () {
-				"step 0";
-				// @ts-ignore
+			async content(event, trigger, player) {
+				const { cards, target } = event;
 				for (var i of cards) {
 					i.storage.xiyumrfz_give = true;
 				}
-				// @ts-ignore
-				player.give(cards, target);
-				"step 1";
-				// @ts-ignore
+				
+				await player.give(cards, target);
+
 				if (player.canUse("sha", target, false)) {
-					// @ts-ignore
 					player.storage.xiyumrfz = target;
-					// @ts-ignore
 					target.addTempSkill("xiyumrfz_suit", { global: "phaseUseEnd" });
-					// @ts-ignore
 					player.addTempSkill("xiyumrfz_gain", "phaseUseEnd");
-					// @ts-ignore
 					player.useCard({ name: "sha", storage: { xiyumrfz: true } }, target).set("addCount", false);
 				}
 			},
@@ -544,30 +505,26 @@ export default {
 					filter: function (event, player) {
 						return event.card && event.card.storage.xiyumrfz == true;
 					},
-					content: function () {
-						"step 0";
-						// @ts-ignore
+					async content(event, trigger, player) {
 						var target = player.storage.xiyumrfz,
 							cards = target.getCards("he"),
 							suit = target.getCards("he", card => {
 								return card.storage.xiyumrfz_give;
 							});
-						// @ts-ignore
+
 						event.cards = [];
 						var storage = target.storage.xiyumrfz_suit;
 						for (var i of suit) {
 							if (!storage.includes(i.suit)) storage.add(i.suit);
 						}
 						for (var i of cards) {
-							// @ts-ignore
 							if (storage.includes(i.suit)) event.cards.push(i);
 						}
-						"step 1";
-						// @ts-ignore
+
 						if (event.cards.length) player.gain(event.cards, "gain2");
-						// @ts-ignore
+
 						player.removeSkill("xiyumrfz_gain");
-						// @ts-ignore
+
 						player.removeSkill("xiyumrfz_suit");
 					},
 				},

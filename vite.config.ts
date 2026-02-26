@@ -2,10 +2,16 @@ import { defineConfig, type PluginOption } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import info from "./info.json";
+import path from "node:path";
 
 export default defineConfig(({ mode }) => ({
 	define: {
 		"process.env.NODE_ENV": JSON.stringify(mode),
+	},
+	resolve:{
+		alias:{
+			"@":path.resolve(__dirname, '../../../apps/core/noname'),
+		},
 	},
 	plugins: [
 		vue() as PluginOption,

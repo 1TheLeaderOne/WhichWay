@@ -18,10 +18,9 @@ export default {
 				return event.player != player && !player.hasSkill("shantanmrfz_ban");
 			},
 			prompt: "【善谈】:是否摸一张牌？",
-			content: function () {
-				"step 0";
-				player.draw();
-				"step 1";
+			async content(event, trigger, player) {
+				await player.draw();
+
 				if (player.isMaxHandcard(true)) {
 					player.addTempSkill("shantanmrfz_ban", { global: "roundStart" });
 				}
@@ -50,10 +49,10 @@ export default {
 					prompt: function (event, player) {
 						return "【善谈】:你可以弃置一张牌令" + get.translation(event.player) + "获得其弃置的牌";
 					},
-					content: function () {
-						"step 0";
-						if (player.countCards("he") > 0) player.chooseToDiscard(true, 1, "he", "【善谈】:请弃置一张牌");
-						"step 1";
+					async content(event, trigger, player) {
+						if (player.countCards("he") <= 0) return;
+						const result = await player.chooseToDiscard(true, 1, "he", "【善谈】:请弃置一张牌").set("card",card=>get.value(card) < 8).forResult();
+
 						if (result.cards) {
 							var targets = [],
 								cardsList = [];
