@@ -8,7 +8,7 @@ import { whichWayUtil } from "../../../utill.js";
  */
 export default {
 	character: {
-        maizhelunmrfz: ["female", "lymrfz", 3, ["kanchamrfz", "longtengmrfz"], []],
+		maizhelunmrfz: ["female", "lymrfz", 3, ["kanchamrfz", "longtengmrfz"], []],
 		palasimrfz: ["female", "mimrfz", 4, ["yingzhumrfz", "yingdanmrfz", "yingfenmrfz"], []],
 		xiaguangmrfz: ["female", "kamrfz", 4, ["rencimrfz", "huiguangmrfz", "jiandunmrfz"], []],
 		zaolumrfz: ["female", "wumrfz", 4, ["zhongxiemrfz", "rusuimrfz"], []],
@@ -33,7 +33,7 @@ export default {
 		nifumrfz: ["female", "luomrfz", 3, ["xunxinmrfz", "chixinmrfz", "kuixinmrfz"], []],
 		narentuyamrfz: ["female", "samrfz", "4/6", ["eyanmrfz", "shafeimrfz"], []],
 		peipeimrfz: ["female", "samrfz", 3, ["boqingmrfz", "kuisuimrfz", "lianwenmrfz"], []],
-    },
+	},
 	skill: {
 		//麦哲伦
 		kanchamrfz: {
@@ -765,63 +765,76 @@ export default {
 			filter: function (event, player) {
 				return event.num > 0 && !event.numFixed;
 			},
-			content: function () {
-				"step 0";
+			async content(event, trigger, player) {
+				let result;
+
+				// step 0
 				player.storage.xinbangmrfz = [];
-				var num = get.copy(trigger.num);
-				player.chooseTarget(
-					get.prompt("xinbangmrfz"),
-					"选择至多" + get.translation(num) + "名其他角色，其选择让你定向摸牌，然后你少摸等量的牌",
-					[1, num],
-					function (card, player, target) {
-						return player != target;
-					},
-					function (target) {
-						var att = get.attitude(_status.event.player, target);
+				const num = get.copy(trigger.num);
+				result = await player
+					.chooseTarget(
+						get.prompt("xinbangmrfz"),
+						"选择至多" + get.translation(num) + "名其他角色，其选择让你定向摸牌，然后你少摸等量的牌",
+						[1, num],
+						(card, player, target) => {
+							return player !== target;
+						}
+					)
+					.set("ai", target => {
+						const att = get.attitude(_status.event.player, target);
 						return att > 0;
-					}
-				);
-				("step 1");
-				if (result.bool) {
+					})
+					.forResult();
+
+				// step 1
+				if (result && result.targets) {
 					event.targets = result.targets;
-					event.num = 0;
 					trigger.num -= result.targets.length;
+
+					// step 2, 3, 4 loop (original event.goto(2))
+					for (let i = 0; i < event.targets.length; i++) {
+						const target = event.targets[i];
+						const att = get.attitude(target, player);
+						target.addTempSkill("xinbangmrfz2", {
+							player: "phaseUseEnd",
+						});
+						result = await target
+							.chooseControl("basic", "trick", "equip")
+							.set("prompt", "【兴邦】：请让" + get.translation(player) + "摸一张指定类型牌，当此牌造成伤害时，你与其各摸一张牌")
+							.set("ai", () => {
+								if (att > 0) return [1, 2].randomGet();
+								return 0;
+							})
+							.forResult();
+
+						// step 3
+						const card = get.cardPile2(c => {
+							return get.type(c, "trick") === result.control;
+						});
+						if (card) {
+							const next = player.gain(card, "gain2");
+							next.gaintag = ["xinbangmrfz"];
+							await next;
+						} else {
+							player.chat("牌堆中没有" + get.translation(result.control) + "牌了！");
+						}
+
+						// step 4
+						const cards = player.getCards("h", c => {
+							return c.hasGaintag("xinbangmrfz");
+						});
+						for (const c of cards) {
+							c.storage.xinbangmrfz = true;
+						}
+					}
 				} else {
-					event.finish();
+					return;
 				}
-				("step 2");
-				var target = event.targets[event.num];
-				var att = get.attitude(target, player);
-				target.addTempSkill("xinbangmrfz2", {
-					player: "phaseUseEnd",
-				});
-				target
-					.chooseControl("basic", "trick", "equip")
-					.set("prompt", "【兴邦】：请让" + get.translation(player) + "摸一张指定类型牌，当此牌造成伤害时，你与其各摸一张牌")
-					.set("ai", function (player) {
-						if (att > 0) return [1, 2].randomGet();
-						return 0;
-					});
-				("step 3");
-				var card = get.cardPile2(function (card) {
-					return get.type(card, "trick") == result.control;
-				});
-				if (card) {
-					player.gain(card, "gain2").gaintag = ["xinbangmrfz"];
-				} else player.chat("牌堆中没有" + get.translation(result.control) + "牌了！");
-				("step 4");
-				var cards = player.getCards("h", function (card) {
-					return card.hasGaintag("xinbangmrfz");
-				});
-				for (i of cards) {
-					i.storage.xinbangmrfz = true;
+
+				// step 5
+				if (trigger.num <= 0) {
+					await game.delay();
 				}
-				if (event.num < event.targets.length - 1) {
-					event.num++;
-					event.goto(2);
-				}
-				("step 5");
-				if (trigger.num <= 0) game.delay();
 			},
 			group: ["xinbangmrfz_draw", "xinbangmrfz_lose"],
 			subSkill: {
@@ -833,18 +846,17 @@ export default {
 						return event.card.storage && event.card.storage.xinbangmrfz == true;
 					},
 					forced: true,
-					content: function () {
-						"step 0";
-						player
+					async content(event, trigger, player) {
+						const result = await player
 							.chooseTarget("【兴邦】:请选择一名其他角色，然后你与其各摸一张牌", true, function (card, player, target) {
 								return target != player && target.hasSkill("xinbangmrfz2");
 							})
 							.set("ai", function (target) {
 								var player = _status.event.player;
 								return get.attitude(player, target) > 0;
-							});
-						("step 1");
-						if (result.bool) {
+							})
+							.forResult();
+						if (result.targets) {
 							result.targets[0].draw();
 							player.draw();
 						}
@@ -860,7 +872,7 @@ export default {
 							}) > 0
 						);
 					},
-					content: function () {
+					async content(event, trigger, player) {
 						player.removeGaintag("xinbangmrfz");
 					},
 				},
@@ -881,21 +893,20 @@ export default {
 				if (!list.includes(get.type2(event.card, player))) return true;
 				return false;
 			},
-			content: function () {
-				"step 0";
+			async content(event, trigger, player) {
 				if (!player.storage.xinbangmrfz2) {
 					player.addTempSkill("xinbangmrfz2");
 					player.storage.xinbangmrfz2 = [];
 				}
 				player.storage.xinbangmrfz2.add(get.type2(trigger.card, player));
-				player.draw();
-				("step 1");
-				if (Array.isArray(result) && result.length > 0) {
-					var card = result[0],
+				const result = await player.draw().forResult();
+
+				if (result.cards) {
+					const card = result.cards[0],
 						cards = player.getCards("h"),
 						list = [];
 					for (var i of cards) {
-						if (i == result[0]) continue;
+						if (i == card) continue;
 						list.add(get.suit(i, player));
 					}
 					if (!list.includes(get.suit(card, player))) player.draw();
