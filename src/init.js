@@ -9,7 +9,7 @@ export const whichWayInit = async () => {
     /**
      * 别问,我也不知道为什么,删了就报错
      */
-    await new Promise(resolve => setTimeout(resolve, 600));
+    // await new Promise(resolve => setTimeout(resolve, 600));
 
     //配置中文翻译
     lib.translate.extension_WhichWay = "驶舰之向";

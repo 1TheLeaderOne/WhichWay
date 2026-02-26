@@ -10,7 +10,8 @@ import { skillCustomFunc } from "./custom/skill.ts";
 import { ArrayExt } from "./jsExt/ArrayExt.js";
 import { HTMLDivElementExt } from "./jsExt/HTMLDivElementExt.js";
 import { weinaData } from "./custom/weina.js";
-
+// import { Player } from "@/library/element/index.js";
+// import { Card } from "@/library/element/index.js";
 
 window.whichWaySave.weinaData = weinaData;
 
@@ -35,8 +36,8 @@ nonameEx["HTMLDivElementExt"] = patchPrototypeWhitherHelm(HTMLDivElementExt, HTM
 onBeforeContent({
 	name: "WhichWayNonameEx",
 	fn: async () => {
-		// nonameEx["CardExt"] = patchPrototypeWhitherHelm(CardExt, Card.prototype);
-		// nonameEx["PlayerExt"] = patchPrototypeWhitherHelm(PlayerExt, lib.element.player.prototype);
+		nonameEx["CardExt"] = patchPrototypeWhitherHelm(CardExt, lib.element.card);
+		nonameEx["PlayerExt"] = patchPrototypeWhitherHelm(PlayerExt,lib.element.player);
 		nonameEx["GameExt"] = patchPrototypeWhitherHelm(GameExt, Game.prototype);
 		nonameEx["GetExt"] = patchPrototypeWhitherHelm(GetExt, Get.prototype);
 		nonameEx["GameEventExt"] = patchPrototypeWhitherHelm(GameEventExt, lib.element.GameEvent.prototype);
@@ -44,11 +45,11 @@ onBeforeContent({
 		nonameEx["ContentExt"] = ContentExt;
 		Object.assign(lib.element.content, ContentExt);
 
-		nonameEx["CardExt"] = new CardExt();
-		Object.assign(lib.element.card, nonameEx["CardExt"]);
+		// nonameEx["CardExt"] = CardExt.prototype;
+		// Object.assign(lib.element.card, nonameEx["CardExt"]);
 
-		nonameEx["PlayerExt"] = new PlayerExt();
-		Object.assign(lib.element.player, nonameEx["PlayerExt"]);
+		// nonameEx["PlayerExt"] = PlayerExt.prototype;
+		// Object.assign(lib.element.player, nonameEx["PlayerExt"]);
 
 		await import("./custom/override.js");
 	},
