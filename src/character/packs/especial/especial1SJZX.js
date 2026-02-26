@@ -1,4 +1,4 @@
-import { game, _status, get } from "noname";
+import { get, game, _status } from "noname";
 window.whichWaySave.tmpSave;
 const especial1SJZX = {
   character: {},
@@ -7,13 +7,12 @@ const especial1SJZX = {
     shantanmrfz: {
       audio: 2,
       trigger: { global: "gainAfter" },
-      filter: function(event, player2) {
-        return event.player != player2 && !player2.hasSkill("shantanmrfz_ban");
+      filter: function(event, player) {
+        return event.player != player && !player.hasSkill("shantanmrfz_ban");
       },
       prompt: "【善谈】:是否摸一张牌？",
-      content: function() {
-        "step 0";
-        player.draw();
+      async content(event, trigger, player) {
+        await player.draw();
         if (player.isMaxHandcard(true)) {
           player.addTempSkill("shantanmrfz_ban", { global: "roundStart" });
         }
@@ -25,26 +24,26 @@ const especial1SJZX = {
           trigger: {
             global: ["loseAfter", "loseAsyncAfter"]
           },
-          filter: function(event, player2) {
+          filter: function(event, player) {
             if (event.type != "discard") return false;
-            if (player2.countCards("he") < 1) return false;
-            if (player2.hasSkill("shantanmrfz_used")) return false;
+            if (player.countCards("he") < 1) return false;
+            if (player.hasSkill("shantanmrfz_used")) return false;
             return game.hasPlayer((current) => {
-              if (current == player2) return false;
+              if (current == player) return false;
               var evt = event.getl(current);
               if (!evt || !evt.cards2 || evt.cards2.filterInD("d").length < 1) return false;
               return true;
             });
           },
-          check: function(event, player2) {
-            return get.attitude(player2, event.player) > 0;
+          check: function(event, player) {
+            return get.attitude(player, event.player) > 0;
           },
-          prompt: function(event, player2) {
+          prompt: function(event, player) {
             return "【善谈】:你可以弃置一张牌令" + get.translation(event.player) + "获得其弃置的牌";
           },
-          content: function() {
-            "step 0";
-            if (player.countCards("he") > 0) player.chooseToDiscard(true, 1, "he", "【善谈】:请弃置一张牌");
+          async content(event, trigger, player) {
+            if (player.countCards("he") <= 0) return;
+            const result = await player.chooseToDiscard(true, 1, "he", "【善谈】:请弃置一张牌").set("card", (card) => get.value(card) < 8).forResult();
             if (result.cards) {
               var targets = [], cardsList = [];
               var players = game.filterPlayer().sortBySeat(_status.currentPhase);

@@ -1,4 +1,4 @@
-import { Game, Get, lib } from "noname";
+import { lib, Game, Get } from "noname";
 import { ContentExt } from "./library/element/content.js";
 import { PlayerExt } from "./library/element/player.js";
 import { CardExt } from "./library/element/card.js";
@@ -22,15 +22,13 @@ nonameEx["HTMLDivElementExt"] = patchPrototypeWhitherHelm(HTMLDivElementExt, HTM
 onBeforeContent({
   name: "WhichWayNonameEx",
   fn: async () => {
+    nonameEx["CardExt"] = patchPrototypeWhitherHelm(CardExt, lib.element.card);
+    nonameEx["PlayerExt"] = patchPrototypeWhitherHelm(PlayerExt, lib.element.player);
     nonameEx["GameExt"] = patchPrototypeWhitherHelm(GameExt, Game.prototype);
     nonameEx["GetExt"] = patchPrototypeWhitherHelm(GetExt, Get.prototype);
     nonameEx["GameEventExt"] = patchPrototypeWhitherHelm(GameEventExt, lib.element.GameEvent.prototype);
     nonameEx["ContentExt"] = ContentExt;
     Object.assign(lib.element.content, ContentExt);
-    nonameEx["CardExt"] = new CardExt();
-    Object.assign(lib.element.card, nonameEx["CardExt"]);
-    nonameEx["PlayerExt"] = new PlayerExt();
-    Object.assign(lib.element.player, nonameEx["PlayerExt"]);
     await import("./custom/override.js");
   }
 });

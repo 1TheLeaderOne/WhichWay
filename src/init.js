@@ -2,7 +2,6 @@ import { lib } from "noname";
 import { whichWayHooksApi } from "./hooks/index.js";
 import { whichWayVersion } from "./version.js";
 const whichWayInit = async () => {
-  await new Promise((resolve) => setTimeout(resolve, 600));
   lib.translate.extension_WhichWay = "驶舰之向";
   whichWayVersion.checkVersionCompatible();
   await import("./toast/index.js");
