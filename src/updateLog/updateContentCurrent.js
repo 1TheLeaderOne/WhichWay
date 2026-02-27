@@ -10,10 +10,11 @@ let info = {
 		"新增模组：无",
 		"修复明日方舟武将样式卡阵营没有正确显示的bug",
 		"修改了武将图片路径获取的方式,增强了兼容性",
-		"修复酒神仍旧使用已经废弃的API的bug",
+		"修复酒神、顾烛煌【燎原】仍旧使用已经废弃的API的bug",
 		"修复模组图标无法正常显示的bug",
 		"将所有的StepContent改为AsyncContent",
-		"修复PlayerExt和CardExt未被正确注入的bug"
+		"修复PlayerExt和CardExt未被正确注入的bug",
+
 	],
 	player: [],
 	cards: [],
