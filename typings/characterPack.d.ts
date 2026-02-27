@@ -237,7 +237,13 @@ interface WhichWayCharacterPrototype {
 
 declare interface WhichWayCharacter extends WhichWayCharacterPrototype {
 	whichWay: WhichWayCharConfig;
+
+	designer: string | Array<string>;
+
+	pack: characterSort[number];
 }
+
+declare type characterSort = ["epicSJZX", "legendSJZX", "especialSJZX", "plotSJZX", "specialSJZX", "rareSJZX", "mediocreSJZX", "normalSJZX"];
 
 declare interface WhichWayCharacterPending extends WhichWayCharacterPrototype {
 	/**
@@ -247,6 +253,8 @@ declare interface WhichWayCharacterPending extends WhichWayCharacterPrototype {
 	designer?: string | Array<string>;
 
 	whichWay?: WhichWayCharConfig;
+
+	pack?: characterSort[number];
 }
 
 declare interface WhichWayCharacterPack {

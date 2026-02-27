@@ -317,7 +317,7 @@ class WhichWayCharacterPack {
 
 const whichWayCharacterPack = new WhichWayCharacterPack();
 
-export const { getDesigner, getCamp } = whichWayCharacterPack;
+export const { getDesigner, getCamp , designer} = whichWayCharacterPack;
 
 await whichWayCharacterPack.init();
 

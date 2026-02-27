@@ -1,5 +1,9 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 
+type HookName = typeof WhichWayPackHooks._STRING_HOOKS[number] | typeof WhichWayPackHooks._ARRAY_HOOKS[number] | typeof WhichWayPackHooks._OBJECT_HOOKS[number] | typeof WhichWayPackHooks._FUNCTION_HOOKS[number];
+
+type executeFn = (obj: any, key: string, hookName: string) => any | Promise<any>;
+
 class WhichWayPackHooks {
 	constructor() {
 		this._generateHooks();
@@ -7,20 +11,52 @@ class WhichWayPackHooks {
 
 	private _autoId = 0;
 
+	private _execute: Record<HookName | string, executeFn[]> = {};
+
 	// ===== 钩子分组定义 =====
-	private _stringHooks = ["translate", "characterIntro", "characterTitle"]; // string: string
-	private _arrayHooks = ["characterReplace"]; // string: Array<any>
-	private _objectHooks = ["character", "skill"]; // string: Object
-	private _functionHooks = ["dynamicTranslate"]; // string: (player) => string
+	static readonly _STRING_HOOKS = ["translate", "characterIntro", "characterTitle"] as const;
+	static readonly _ARRAY_HOOKS = ["characterReplace"] as const;
+	static readonly _OBJECT_HOOKS = ["character", "skill"] as const;
+	static readonly _FUNCTION_HOOKS = ["dynamicTranslate"] as const;
+
 
 	private _hooks: Record<string, Array<Record<string, any>>> = {};
 
+	// ===== 新增：注册 execute 预处理函数 =====
+	/**
+	 * 为指定 hook 注册预处理函数
+	 * @param hookName 钩子名称（如 "translate"）
+	 * @param executeFn 预处理函数，接收 (obj, key, hookName)，返回处理后的值
+	 */
+	public registerExecute = (
+		hookName: HookName, 
+		executeFn: (obj: any, key: string, hookName: string) => any
+	): void => {
+		// 校验 hook 是否存在
+		if (!this._hooks[hookName]) {
+			const available = Object.keys(this._hooks).join(", ");
+			throw new Error(
+				`[WhichWayPackHooks] Cannot register execute for unknown hook: "${hookName}". ` +
+				`Available hooks: ${available || "none (call _generateHooks first)"}`
+			);
+		}
+		// 校验函数类型
+		if (typeof executeFn !== "function") {
+			throw new Error(
+				`[WhichWayPackHooks] executeFn must be a function for hook "${hookName}", got ${typeof executeFn}`
+			);
+		}
+		this._execute[hookName].push(executeFn);
+	}
+
 	private _generateHooks() {
 		this._hooks = {};
+		this._execute = {};
 
 		// ===== 第一组：string: string 钩子 =====
-		for (const name of this._stringHooks) {
+		for (const name of WhichWayPackHooks._STRING_HOOKS) {
 			this._hooks[name] = [];
+			this._execute[name] = [];
 			this[name] = ((...args: any[]) => {
 				this._registerTypedHook(name, args, "string");
 			}) as any;
@@ -28,8 +64,9 @@ class WhichWayPackHooks {
 		}
 
 		// ===== 第二组：string: Array 钩子 =====
-		for (const name of this._arrayHooks) {
+		for (const name of WhichWayPackHooks._ARRAY_HOOKS) {
 			this._hooks[name] = [];
+			this._execute[name] = [];
 			this[name] = ((...args: any[]) => {
 				this._registerTypedHook(name, args, "array");
 			}) as any;
@@ -37,8 +74,9 @@ class WhichWayPackHooks {
 		}
 
 		// ===== 第三组：string: Object 钩子 =====
-		for (const name of this._objectHooks) {
+		for (const name of WhichWayPackHooks._OBJECT_HOOKS) {
 			this._hooks[name] = [];
+			this._execute[name] = [];
 			this[name] = ((...args: any[]) => {
 				this._registerTypedHook(name, args, "object");
 			}) as any;
@@ -46,8 +84,9 @@ class WhichWayPackHooks {
 		}
 
 		// ===== 第四组：string: Function 钩子 =====
-		for (const name of this._functionHooks) {
+		for (const name of WhichWayPackHooks._FUNCTION_HOOKS) {
 			this._hooks[name] = [];
+			this._execute[name] = [];
 			this[name] = ((...args: any[]) => {
 				this._registerTypedHook(name, args, "function");
 			}) as any;
@@ -78,22 +117,22 @@ class WhichWayPackHooks {
 		}
 
 		// 错误提示
-		const typeDesc = {
+		const typeDesc: Record<typeof valueType, string> = {
 			string: "string",
 			array: "Array",
 			object: "object",
 			function: "Function"
-		}[valueType];
+		};
 
-		const examples = {
+		const examples: Record<typeof valueType, string> = {
 			string: `  ${hookName}("key", "value")\n  ${hookName}({ key1: "value1", key2: "value2" })`,
 			array: `  ${hookName}("key", ["item1", "item2"])\n  ${hookName}({ key1: ["a"], key2: ["b", "c"] })`,
 			object: `  ${hookName}("key", { prop: value })\n  ${hookName}({ key1: { ... }, key2: { ... } })`,
 			function: `  ${hookName}("key", (player) => "text")\n  ${hookName}({ key1: (p) => "a", key2: (p) => "b" })`
-		}[valueType];
+		};
 
 		throw new Error(
-			`[${hookName}] Invalid invocation. Expected:\n${examples}`
+			`[${hookName}] Invalid invocation. Expected:\n${examples[valueType]}`
 		);
 	}
 
@@ -139,7 +178,7 @@ class WhichWayPackHooks {
 		// 注册到钩子队列
 		this._hooks[hookName].push({
 			key,
-			obj: value // 所有值都通过 obj 存储，运行时直接赋值
+			obj: value
 		});
 	}
 
@@ -162,7 +201,19 @@ class WhichWayPackHooks {
 			}
 
 			try {
-				lib[hookName][key] = obj; // 直接赋值（所有钩子统一使用 obj）
+				// ===== execute 预处理逻辑 =====
+				let finalValue = obj;
+				
+				// 如果该 hook 注册了 execute 函数，则先执行预处理
+				if (this._execute[hookName] && this._execute[hookName].length>0) {
+					for(const fn of this._execute[hookName]){
+						finalValue = fn(obj, key, hookName) || finalValue;
+					}
+				}
+
+				// 使用处理后的值进行赋值
+				lib[hookName][key] = finalValue;
+				
 			} catch (err) {
 				console.error(`[WhichWayPackHooks] Error setting hook "${String(key)}" (${hookName}):`, err);
 				throw err;
@@ -207,7 +258,6 @@ class WhichWayPackHooks {
 		key: string | Record<string, (player: Player) => string>,
 		content?: (player: Player) => string
 	) => void;
-	// ======================
 }
 
 const packHooks = new WhichWayPackHooks();
@@ -221,4 +271,5 @@ export const {
 	characterReplace,
 	dynamicTranslate,
 	pendingRun,
+	registerExecute
 } = packHooks;
