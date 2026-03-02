@@ -191,7 +191,7 @@ class WhichWayCharacterPack {
       if (info.designer) {
         info.whichWay.designer = Array.isArray(info.designer) ? info.designer : [info.designer];
         this.designer[key] ??= [];
-        this.designer[key].push(...info.whichWay.designer.filter((designer) => !this.designer[key].includes(designer)));
+        this.designer[key].push(...info.whichWay.designer.filter((designer2) => !this.designer[key].includes(designer2)));
       } else {
         info.whichWay.designer = this.getDesigner(info, false, true);
       }
@@ -260,7 +260,7 @@ class WhichWayCharacterPack {
   }
 }
 const whichWayCharacterPack = new WhichWayCharacterPack();
-const { getDesigner, getCamp } = whichWayCharacterPack;
+const { getDesigner, getCamp, designer } = whichWayCharacterPack;
 await whichWayCharacterPack.init();
 onSetDev({
   name: "whichWayCharacterPack_dev",
@@ -270,6 +270,7 @@ onSetDev({
 });
 window.whichWay.register("characterPack", whichWayCharacterPack);
 export {
+  designer,
   getCamp,
   getDesigner
 };

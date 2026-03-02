@@ -4,41 +4,66 @@ class WhichWayPackHooks {
     this._generateHooks();
   }
   _autoId = 0;
+  _execute = {};
   // ===== 钩子分组定义 =====
-  _stringHooks = ["translate", "characterIntro", "characterTitle"];
-  // string: string
-  _arrayHooks = ["characterReplace"];
-  // string: Array<any>
-  _objectHooks = ["character", "skill"];
-  // string: Object
-  _functionHooks = ["dynamicTranslate"];
-  // string: (player) => string
+  static _STRING_HOOKS = ["translate", "characterIntro", "characterTitle"];
+  static _ARRAY_HOOKS = ["characterReplace"];
+  static _OBJECT_HOOKS = ["character", "skill"];
+  static _FUNCTION_HOOKS = ["dynamicTranslate"];
   _hooks = {};
+  getHooks(hookName) {
+    return this._hooks[hookName] || [];
+  }
+  // ===== 新增：注册 execute 预处理函数 =====
+  /**
+   * 为指定 hook 注册预处理函数
+   * @param hookName 钩子名称（如 "translate"）
+   * @param executeFn 预处理函数，接收 (obj, key, hookName)，返回处理后的值
+   */
+  registerExecute = (hookName, executeFn) => {
+    if (!this._hooks[hookName]) {
+      const available = Object.keys(this._hooks).join(", ");
+      throw new Error(
+        `[WhichWayPackHooks] Cannot register execute for unknown hook: "${hookName}". Available hooks: ${available || "none (call _generateHooks first)"}`
+      );
+    }
+    if (typeof executeFn !== "function") {
+      throw new Error(
+        `[WhichWayPackHooks] executeFn must be a function for hook "${hookName}", got ${typeof executeFn}`
+      );
+    }
+    this._execute[hookName].push(executeFn);
+  };
   _generateHooks() {
     this._hooks = {};
-    for (const name of this._stringHooks) {
+    this._execute = {};
+    for (const name of WhichWayPackHooks._STRING_HOOKS) {
       this._hooks[name] = [];
+      this._execute[name] = [];
       this[name] = ((...args) => {
         this._registerTypedHook(name, args, "string");
       });
       this.pendingRun.push(() => this._runHooks(name));
     }
-    for (const name of this._arrayHooks) {
+    for (const name of WhichWayPackHooks._ARRAY_HOOKS) {
       this._hooks[name] = [];
+      this._execute[name] = [];
       this[name] = ((...args) => {
         this._registerTypedHook(name, args, "array");
       });
       this.pendingRun.push(() => this._runHooks(name));
     }
-    for (const name of this._objectHooks) {
+    for (const name of WhichWayPackHooks._OBJECT_HOOKS) {
       this._hooks[name] = [];
+      this._execute[name] = [];
       this[name] = ((...args) => {
         this._registerTypedHook(name, args, "object");
       });
       this.pendingRun.push(() => this._runHooks(name));
     }
-    for (const name of this._functionHooks) {
+    for (const name of WhichWayPackHooks._FUNCTION_HOOKS) {
       this._hooks[name] = [];
+      this._execute[name] = [];
       this[name] = ((...args) => {
         this._registerTypedHook(name, args, "function");
       });
@@ -68,10 +93,10 @@ class WhichWayPackHooks {
   ${hookName}({ key1: { ... }, key2: { ... } })`,
       function: `  ${hookName}("key", (player) => "text")
   ${hookName}({ key1: (p) => "a", key2: (p) => "b" })`
-    }[valueType];
+    };
     throw new Error(
       `[${hookName}] Invalid invocation. Expected:
-${examples}`
+${examples[valueType]}`
     );
   }
   // ========== 类型校验与注册 ==========
@@ -109,7 +134,6 @@ ${examples}`
     this._hooks[hookName].push({
       key,
       obj: value
-      // 所有值都通过 obj 存储，运行时直接赋值
     });
   }
   // ========== 运行钩子 ==========
@@ -125,7 +149,13 @@ ${examples}`
         );
       }
       try {
-        lib[hookName][key] = obj;
+        let finalValue = obj;
+        if (this._execute[hookName] && this._execute[hookName].length > 0) {
+          for (const fn of this._execute[hookName]) {
+            finalValue = fn(obj, key, hookName) || finalValue;
+          }
+        }
+        lib[hookName][key] = finalValue;
       } catch (err) {
         console.error(`[WhichWayPackHooks] Error setting hook "${String(key)}" (${hookName}):`, err);
         throw err;
@@ -133,7 +163,6 @@ ${examples}`
     }
   }
   pendingRun = [];
-  // ======================
 }
 const packHooks = new WhichWayPackHooks();
 const {
@@ -144,7 +173,8 @@ const {
   characterTitle,
   characterReplace,
   dynamicTranslate,
-  pendingRun
+  pendingRun,
+  registerExecute
 } = packHooks;
 export {
   character,
@@ -152,7 +182,9 @@ export {
   characterReplace,
   characterTitle,
   dynamicTranslate,
+  packHooks,
   pendingRun,
+  registerExecute,
   skill,
   translate
 };

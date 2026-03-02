@@ -21,7 +21,7 @@ class WhichWayArknightRedirect {
   /**
    * 转化
    * @param {string} name 角色名
-   * @param {"normal" | "amiya"} target 目标
+   * @param {"normal" | "amiya"} [target = "normal"] 目标
    * @returns {string}
    */
   transfer(name, target = "normal") {

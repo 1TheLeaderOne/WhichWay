@@ -13742,9 +13742,7 @@ const legend1SJZX = {
             let showCards = player2.storage.liaoyuanmrfz[trigger2.card.id].filter((card) => get.position(card) === "h");
             await player2.gain(showCards, "gain2");
             if (player2.isUnderControl(true) && !_status.auto) {
-              const {
-                result: { targets, cards }
-              } = await player2.chooseCardTarget({
+              const { targets, cards } = await player2.chooseCardTarget({
                 showCards,
                 prompt: "【燎原】:你可以将其中任意张牌当作指定等量目标的【火·万箭齐发】使用",
                 prompt2: "请选择目标和牌",
@@ -13759,7 +13757,7 @@ const legend1SJZX = {
                 filterOk() {
                   return ui.selected.targets.length === ui.selected.cards.length;
                 }
-              });
+              }).forResult();
               if (!(targets && cards)) return;
               player2.useCard(
                 {
