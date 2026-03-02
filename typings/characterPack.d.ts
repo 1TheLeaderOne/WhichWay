@@ -235,15 +235,19 @@ interface WhichWayCharacterPrototype {
 	isNull?: boolean;
 }
 
+declare type WhichWayCharacterPackNames = "epicSJZX" |"legendSJZX"|"especialSJZX"|"plotSJZX"|"specialSJZX"|"rareSJZX"|"mediocreSJZX"|"normalSJZX";
+
 declare interface WhichWayCharacter extends WhichWayCharacterPrototype {
+	/**
+	 * 驶舰之向角色设置
+	 */
 	whichWay: WhichWayCharConfig;
-
+	/**
+	 * 设计者
+	 */
 	designer: string | Array<string>;
-
-	pack: characterSort[number];
+	pack: WhichWayCharacterPackNames;
 }
-
-declare type characterSort = ["epicSJZX", "legendSJZX", "especialSJZX", "plotSJZX", "specialSJZX", "rareSJZX", "mediocreSJZX", "normalSJZX"];
 
 declare interface WhichWayCharacterPending extends WhichWayCharacterPrototype {
 	/**
@@ -252,9 +256,15 @@ declare interface WhichWayCharacterPending extends WhichWayCharacterPrototype {
 	 */
 	designer?: string | Array<string>;
 
+	/**
+	 * 驶舰之向角色设置
+	 */
 	whichWay?: WhichWayCharConfig;
 
-	pack?: characterSort[number];
+	/**
+	 * 所属将包(会自动添加到对应将包)
+	 */
+	pack?: WhichWayCharacterPackNames;
 }
 
 declare interface WhichWayCharacterPack {

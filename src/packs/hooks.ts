@@ -22,6 +22,10 @@ class WhichWayPackHooks {
 
 	private _hooks: Record<string, Array<Record<string, any>>> = {};
 
+	public getHooks(hookName: HookName): Array<Record<string, any>> {
+		return this._hooks[hookName] || [];
+	}
+
 	// ===== 新增：注册 execute 预处理函数 =====
 	/**
 	 * 为指定 hook 注册预处理函数
@@ -260,7 +264,7 @@ class WhichWayPackHooks {
 	) => void;
 }
 
-const packHooks = new WhichWayPackHooks();
+export const packHooks = new WhichWayPackHooks();
 
 export const {
 	skill,

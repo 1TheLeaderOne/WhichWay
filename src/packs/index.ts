@@ -1,11 +1,12 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { whichWayFile } from "../file.js";
-import { onAfterInit, onContent, onSetDev } from "../hooks/index.js";
-import { pendingRun, registerExecute } from "./hooks.js";
+import { onAfterInit, onSetDev, onInit, onAfterContent, onBeforeInit } from "../hooks/index.js";
+import { packHooks, pendingRun, registerExecute } from "./hooks.js";
 import { initCharConfig } from "../character/extCharConfig.js";
 import { designer, getDesigner } from "../character/index.js";
 import { whichWayUtil } from "../utill.js";
 import { groupData } from "../character/groups.js";
+import { whichWayArknight } from "../arknight/index.js";
 
 class WhichWayPackManager {
 	static readonly CHARACTER_PACKS = [
@@ -40,7 +41,7 @@ class WhichWayPackManager {
 
 		// const cardPack = await whichWayFile.getFileTree("src:packs/card");
 
-		onContent({
+		onBeforeInit({
 			name: "whichWayPackManager_init",
 			fn: async () => {
 				for (const fn of this.pendingRun) {
@@ -69,6 +70,8 @@ class WhichWayPackManager {
 			}
 		}
 
+		this.register();
+
 		//将包初始化
 		for (const name of WhichWayPackManager.CHARACTER_PACKS) {
 			lib.characterPack[name] ??= {};
@@ -84,8 +87,6 @@ class WhichWayPackManager {
 
 		//初始化武将
 		registerExecute("character", (char: WhichWayCharacter, name) => {
-			if (!window.whichWaySave.allCharacters.includes(name)) window.whichWaySave.allCharacters.push(name);
-
 			//@ts-ignore
 			if (Array.isArray(char)) char = get.convertedCharacter(char);
 
@@ -133,29 +134,37 @@ class WhichWayPackManager {
 				if (!lib.translate["sjzx_group"]) lib.translate["sjzx_group"] = "泰拉";
 			}
 
-			onAfterInit({
-				name: `whichWayCharacterWhichWayExtraConfig_${name}`,
-				fn: () => {
-					char.whichWay.supportingEquipment = char.whichWay.arknight.tags.includes("支援机器");
-					char.whichWay.linkage = char.whichWay.arknight.avaiableLangs.includes("LINKAGE");
-				},
-			});
+			//————设置Arknight配置————//
+			whichWayArknight.addShcema(name);
+
+			whichWayArknight.initCharArknight(char);
+
+			// onAfterInit({
+			// 	name:`whichWayPackManager_ArknightInit_${name}`,
+			// 	fn: (func) => {
+			// 		func(char);
+
+			// 		char.whichWay.supportingEquipment = char.whichWay.arknight.tags.includes("支援机器");
+			// 		char.whichWay.linkage = char.whichWay.arknight.avaiableLangs.includes("LINKAGE");
+
+			// 		console.log(char);
+			// 	}
+			// })
+
+			// char.whichWay.supportingEquipment = char.whichWay.arknight.tags.includes("支援机器");
+			// char.whichWay.linkage = char.whichWay.arknight.avaiableLangs.includes("LINKAGE");
 
 			return char;
 		});
 
 		//初始化技能
-		registerExecute("skill", (info, name) => {
-			if (!window.whichWaySave.allSkills.includes(name)) {
-				window.whichWaySave.allSkills.push(name);
-			}
-
-			return info;
-		});
+		// registerExecute("skill", (info, name) => {
+		// 	return info;
+		// });
 	}
 
 	getPackTranslation(str: string, index?: number) {
-		let translateMap: Record<characterSort[number], string[]> = {
+		let translateMap: Record<WhichWayCharacterPackNames, string[]> = {
 			legendSJZX: ["6星", "SJZXStar6"],
 			epicSJZX: ["5星", "SJZXStar5"],
 			rareSJZX: ["4星", "SJZXStar4"],
@@ -204,9 +213,33 @@ class WhichWayPackManager {
 		return obj;
 	}
 
+	/**
+	 * 为allCharacters和allSkills添加数据
+	 */
+	register():void{
+		const characters = this._hooks.getHooks("character");
+		const skills = this._hooks.getHooks("skill");
+		for (const char of characters) {
+			const name = char.key
+			if (!window.whichWaySave.allCharacters.includes(name)) {
+				window.whichWaySave.allCharacters.push(name);
+			}
+		}
+		for (const skill of skills) {
+			const name = skill.key
+			if (!window.whichWaySave.allSkills.includes(name)) {
+				window.whichWaySave.allSkills.push(name);
+			}
+		}
+	}
+
+
+
 	pendingRun: Function[] = [];
 
 	private _addedGroup = false;
+
+	private _hooks = packHooks;
 }
 
 export const whichWayPackManager = new WhichWayPackManager();
