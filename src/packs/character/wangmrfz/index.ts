@@ -149,7 +149,7 @@ const years: Record<string, ExtendedSkill> = {
 			const vcards = names.map(name => [get.type(name), "", name]);
 			const result = await player
 				.chooseButton()
-				.set("createDialog",["塑土", [vcards, "vcard"]])
+				.set("createDialog",["颉", [vcards, "vcard"]])
 				.set("prompt", `颉：视为使用一张你本回合使用过的基本牌`)
 				.set("prompt2", whichWayUtil.colorize("#r就这样吧#"))
 				.set("ai", button => {
