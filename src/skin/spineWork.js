@@ -436,6 +436,13 @@ class SpineWorker {
       whichWayToast.showToast("不是合法的Spine对象");
       return;
     }
+    const parseZoomFactor = (zoomStr) => {
+      if (!zoomStr) return 1;
+      if (typeof zoomStr === "number") return zoomStr;
+      const match = zoomStr.toString().trim().match(/^([\d.]+)%?$/);
+      return match ? match[0].includes("%") ? parseFloat(match[1]) / 100 : parseFloat(match[1]) : 1;
+    };
+    const zoomFactor = parseZoomFactor(lib.config.ui_zoom);
     whichWayToast.showToast("已开启动皮拖拽");
     const copyBtn = document.createElement("button");
     copyBtn.id = "copySketeonPostionBtnSJZX";
@@ -500,8 +507,8 @@ class SpineWorker {
         lastLogTime = now;
         let zoom = dycSave.dycZoom || 1;
         if (!dycSave.skeletonPostion) dycSave.skeletonPostion = {};
-        dycSave.skeletonPostion.x = percentX / zoom;
-        dycSave.skeletonPostion.y = percentY / zoom;
+        dycSave.skeletonPostion.x = percentX / zoom / zoomFactor;
+        dycSave.skeletonPostion.y = percentY / zoom / zoomFactor;
       }
     };
     const onMouseUp = () => {
@@ -520,7 +527,7 @@ class SpineWorker {
       skeleton.scaleX = skeleton.scaleY = newScale;
       whichWayToast.showToast(`当前骨骼缩放: scale=${newScale.toFixed(2)}`, true, "topLeft", "dragging_scale");
       if (!dycSave.skeletonPostion) dycSave.skeletonPostion = {};
-      dycSave.skeletonPostion.scale = newScale;
+      dycSave.skeletonPostion.scale = newScale / zoomFactor;
     };
     spineWorker.eventListenersMap.set(domElement, { onMouseDown, onMouseMove, onMouseUp, onWheel });
     domElement.addEventListener("mousedown", onMouseDown);

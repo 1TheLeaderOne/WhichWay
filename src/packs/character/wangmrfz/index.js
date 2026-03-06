@@ -109,7 +109,7 @@ const years = {
         //@ts-ignore
       ).filter((name2) => player.hasUseTarget(name2, true, false));
       const vcards = names.map((name2) => [get.type(name2), "", name2]);
-      const result = await player.chooseButton().set("createDialog", ["塑土", [vcards, "vcard"]]).set("prompt", `颉：视为使用一张你本回合使用过的基本牌`).set("prompt2", whichWayUtil.colorize("#r就这样吧#")).set("ai", (button) => {
+      const result = await player.chooseButton().set("createDialog", ["颉", [vcards, "vcard"]]).set("prompt", `颉：视为使用一张你本回合使用过的基本牌`).set("prompt2", whichWayUtil.colorize("#r就这样吧#")).set("ai", (button) => {
         const player2 = get.player();
         const name2 = button.link[2];
         return player2.getUseValue(name2, true, false);
@@ -299,6 +299,14 @@ skill({
         player.chat("绝杀无解！");
       }
       player.awakenSkill(event.name);
+    },
+    ai: {
+      order: 1,
+      result: {
+        player(player, target) {
+          return Object.keys(yearsMap).length >= 4;
+        }
+      }
     }
   },
   ...Object.fromEntries(Object.entries(years).map(([key, value]) => [`wangmrfz_${key}`, value]))
@@ -308,7 +316,7 @@ characterIntro(
   "望，曾担任炎国军事顾问，现为无业棋手。年、夕、令等人的兄长，重岳的弟弟。经重岳先生介绍来到罗德岛养病，偶尔会为作战任务提供建议。"
 );
 function getVaildEquipSkills(player) {
-  const equips = Object.keys(lib.card).filter((name) => get.subtype(name) !== "equip1");
+  const equips = Object.keys(lib.card).filter((name) => get.subtype(name) === "equip1");
   const skills = [];
   const playerSkills = player.getSkills();
   for (let equipName of equips) {

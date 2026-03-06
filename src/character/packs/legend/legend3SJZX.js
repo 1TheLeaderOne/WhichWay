@@ -1580,6 +1580,7 @@ const legend3SJZX = {
         next.target = player;
         next.player = target;
         next.setContent(lib.skill.duwu.content);
+        await next;
         let cardsx = cards.filter((card) => !get.tag(card, "damage") && get.position(card) === "d");
         if (cardsx.length) {
           player.gain(cardsx, "gain2");

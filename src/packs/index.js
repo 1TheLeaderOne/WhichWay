@@ -26,8 +26,8 @@ class WhichWayPackManager {
     this.pendingRun = pendingRun;
     await this.initCharacterPack();
     registerExecute("translate", (trans, name) => {
-      if (trans.endsWith("_prefix")) {
-        let tran = this.setNamePrefix(name);
+      if (name.endsWith("_prefix")) {
+        let tran = this.setNamePrefix(trans);
         trans = tran.name || trans;
       }
       trans = whichWayUtil.colorize(trans);
@@ -55,7 +55,7 @@ class WhichWayPackManager {
         try {
           await __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({}), `./character/${folder.name}/index.js`, 4);
         } catch (e) {
-          await __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./character/wangmrfz/index.ts": () => import("./character/wangmrfz/index.js") }), `./character/${folder.name}/index.ts`, 4);
+          await __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./character/fengxumrfz/index.ts": () => import("./character/fengxumrfz/index.js"), "./character/jumrfz/index.ts": () => import("./character/jumrfz/index.js"), "./character/sbchenmrfz/index.ts": () => import("./character/sbchenmrfz/index.js"), "./character/wangmrfz/index.ts": () => import("./character/wangmrfz/index.js") }), `./character/${folder.name}/index.ts`, 4);
         }
       }
     }

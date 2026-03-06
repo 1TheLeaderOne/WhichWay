@@ -67,7 +67,7 @@ function sjzxDycInit(dyc) {
   return dyc;
 }
 let data = {
-  //近卫阿米娅 
+  //近卫阿米娅
   spamiyamrfz: {
     于万千宇宙之中: {
       name: "dyn_illust_char_1001_amiya2_sale16",
@@ -629,6 +629,17 @@ let data = {
       alpha: true,
       background: `岁兽`
     },
+    青玉砚: {
+      name: "dyn_illust_char_2015_dusk_nian12",
+      x: [0, 0.4],
+      y: [0, -1.11],
+      scale: 0.3,
+      version: "3.8",
+      action: ["Idle", "Special", "Interact"],
+      speed: 1,
+      alpha: true,
+      background: `岁兽`
+    },
     染尘烟: {
       name: "rcy",
       x: [0, 0.49],
@@ -670,6 +681,31 @@ let data = {
       x: [0, 0.77],
       y: [0, -1.32],
       scale: 0.31,
+      version: "3.8",
+      action: ["Idle", "Special", "Interact"],
+      speed: 1,
+      alpha: true,
+      background: `岁兽`
+    },
+    方遒卷: {
+      name: "dyn_illust_char_2023_ling_nian12",
+      x: [0, 0.48],
+      y: [0, -1.27],
+      scale: 0.33,
+      version: "3.8",
+      action: ["Idle", "Special", "Interact"],
+      speed: 1,
+      alpha: true,
+      background: `岁兽`
+    }
+  },
+  // 望
+  wangmrfz: {
+    经典形象: {
+      name: "dyn_illust_char_2027_wang",
+      x: [0, 0.36],
+      y: [0, -1.11],
+      scale: 0.34,
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
@@ -934,6 +970,17 @@ let data = {
       x: [0, 0.46],
       y: [0, -0.65],
       scale: 0.21,
+      version: "3.8",
+      action: ["Idle", "Special", "Interact"],
+      speed: 1,
+      alpha: true,
+      background: `岁兽`
+    },
+    愿清晓: {
+      name: "dyn_illust_char_2026_yu_nian12",
+      x: [0, 0.46],
+      y: [0, -1.29],
+      scale: 0.34,
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,

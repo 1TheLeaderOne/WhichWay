@@ -179,7 +179,7 @@ const mediocre1SJZX = {
           }).set("selectTarget", [1, Infinity]).set("namex", name).forResult();
           if (resultx.bool === true) result[name] = resultx;
         }
-        if (!result.isEmpty()) {
+        if (Object.keys(result).length > 0) {
           event.result = {
             bool: true,
             cost_data: result

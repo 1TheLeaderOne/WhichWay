@@ -10,6 +10,7 @@ const whichWayInit = async () => {
   await import("./override/index.js");
   await import("./nonameEx/index.js");
   await import("./config/index.js");
+  await import("./AlphaVideoPlayer/index.js");
   await import("./character/index.js");
   await import("./card/index.js");
   await import("./packs/index.js");
