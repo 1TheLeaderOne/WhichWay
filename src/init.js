@@ -38,6 +38,9 @@ export const whichWayInit = async () => {
     //导入配置
     await import("./config/index.js");
 
+    //导入视频播放组件
+    await import("./AlphaVideoPlayer/index.js");
+
     //————————————武将包————————————//
 
     /**

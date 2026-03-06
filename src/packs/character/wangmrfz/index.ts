@@ -391,6 +391,14 @@ skill({
 
 			player.awakenSkill(event.name);
 		},
+		ai:{
+			order:1,
+			result:{
+				player(player,target){
+					return Object.keys(yearsMap).length >= 4;
+				},
+			},
+		},
 	},
 	...Object.fromEntries(Object.entries(years).map(([key, value]) => [`wangmrfz_${key}`, value])),
 });
@@ -401,7 +409,7 @@ characterIntro(
 );
 
 function getVaildEquipSkills(player: Player): string[] {
-	const equips = Object.keys(lib.card).filter(name => get.subtype(name) !== "equip1");
+	const equips = Object.keys(lib.card).filter(name => get.subtype(name) === "equip1");
 	const skills = [];
 	const playerSkills = player.getSkills();
 	for (let equipName of equips) {

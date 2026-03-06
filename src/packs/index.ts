@@ -29,8 +29,8 @@ class WhichWayPackManager {
 
 		//初始化翻译
 		registerExecute("translate", (trans: string, name) => {
-			if (trans.endsWith("_prefix")) {
-				let tran = this.setNamePrefix(name);
+			if (name.endsWith("_prefix")) {
+				let tran = this.setNamePrefix(trans);
 				trans = tran.name || trans;
 			}
 

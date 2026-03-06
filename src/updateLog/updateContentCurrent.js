@@ -12,7 +12,11 @@ let info = {
 		"修复模组图标无法正常显示的bug",
 		"将所有的StepContent改为AsyncContent",
 		"修复PlayerExt和CardExt未被正确注入的bug",
-
+		"修复Lancet-2【临援】使用了已经被废弃了API的bug",
+		"修复调用game.import时参数game被错误的拼写成game2的bug",
+		"修复明椒【游移】没有检测links是否存在而报错的bug",
+		"修复天火【坠火】没有正确从event中解构target和cards的bug",
+		"修复临光【互持】报错的bug"
 	],
 	player: ["wangmrfz","jumrfz"],
 	cards: [],

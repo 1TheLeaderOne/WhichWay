@@ -27,6 +27,7 @@ export default defineConfig(({ mode }) => ({
 				{ src: "css", dest: "" },
 				{ src: "./src/updateLog/updateContent.txt", dest: "./src/updateLog/" },
 				{ src: "README.md", dest: "" },
+				{ src:"vedio", dest: "" }
 			],
 		}) as PluginOption,
 	],
