@@ -3029,14 +3029,14 @@ export default {
 							game.log(player, "收回了" + get.translation(cards));
 							//@ts-ignore
 							player.logSkill("shuitamrfz");
-							event.finish();
+							return;
 						} else {
 							result = await player
 								.chooseButton(["【水獭】:请选择获得其中一张牌", cards])
 								.set("ai", button => get.value(button.links))
 								.forResult();
 						}
-						("step 1");
+
 						if (result?.links) {
 							for (let i of result.links) {
 								i.storage.shuitamrfzx = true;
@@ -4112,6 +4112,8 @@ export default {
 			lose: false,
 			delay: false,
 			async content(event, trigger, player) {
+				const { target, cards } = event;
+
 				player.storage.zhuihuomrfz.add(target);
 				//@ts-ignore
 				target.addJudge({ name: "sjzx_zhuihuomrfz" }, cards);
@@ -4503,8 +4505,8 @@ export default {
 					},
 					async content(event, trigger, player) {
 						if (!player.storage.chongyaomrfz_mark) player.storage.chongyaomrfz_mark = 0;
-						for (var i of ["huchimrfz", "huchimrfz_gain", "huchimrfz_recover"]) {
-							if (!player.storage.counttrigger[trigger.name] && i != "huchimrfz") continue;
+						for (const i of ["huchimrfz", "huchimrfz_gain", "huchimrfz_recover"]) {
+							if (!player.storage?.counttrigger?.[trigger.name] && i != "huchimrfz") continue;
 							if (player.storage.chongyaomrfz_mark["skill"].includes(trigger.name)) continue;
 							if (i == "huchimrfz" && trigger.name == "huchimrfz") {
 								player.storage.chongyaomrfz_mark["count"]++;
@@ -7276,6 +7278,7 @@ export default {
 									return _status.event.player.getUseValue({ name: button.link[2] }, undefined, true);
 								})
 								.forResult();
+				if (!links2) return;
 				player.chooseUseTarget({ name: links2[0][2] }, true);
 			},
 		},
@@ -7870,8 +7873,9 @@ export default {
 				},
 				{
 					get(target, prop) {
+						let value;
 						if (typeof prop !== "symbol") {
-							const value = Number(prop);
+							value = Number(prop);
 						} else {
 							return target["baka"];
 						}

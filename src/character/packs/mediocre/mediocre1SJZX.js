@@ -218,7 +218,7 @@ export default {
 						.forResult();
 					if (resultx.bool === true) result[name] = resultx;
 				}
-				if (!result.isEmpty()) {
+				if (Object.keys(result).length > 0) {
 					event.result = {
 						bool: true,
 						cost_data: result,

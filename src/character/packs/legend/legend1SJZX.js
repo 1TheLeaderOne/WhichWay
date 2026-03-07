@@ -15697,9 +15697,7 @@ export default {
 						let showCards = player.storage.liaoyuanmrfz[trigger.card.id].filter(card => get.position(card) === "h");
 						await player.gain(showCards, "gain2");
 						if (player.isUnderControl(true) && !_status.auto) {
-							const {
-								result: { targets, cards },
-							} = await player.chooseCardTarget({
+							const { targets, cards } = await player.chooseCardTarget({
 								showCards: showCards,
 								prompt: "【燎原】:你可以将其中任意张牌当作指定等量目标的【火·万箭齐发】使用",
 								prompt2: "请选择目标和牌",
@@ -15714,7 +15712,7 @@ export default {
 								filterOk() {
 									return ui.selected.targets.length === ui.selected.cards.length;
 								},
-							});
+							}).forResult();
 							if (!(targets && cards)) return;
 							player.useCard(
 								{

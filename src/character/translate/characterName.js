@@ -300,7 +300,7 @@ const characterName = {
 	xiangshimrfz:"响石",
 	sptiaoxiangshimrfz:"撷英调香师",
 	sptiaoxiangshimrfz_prefix:"撷英",
-	wangmrfz:"望",
+	// wangmrfz:"望",
 }
 
 export  default  characterName;

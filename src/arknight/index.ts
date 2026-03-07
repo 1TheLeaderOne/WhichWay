@@ -113,6 +113,41 @@ class WhichWayArknight {
 	}
 
 	/**
+	 * 添加到映射表
+	 */
+	async addShcema(id:string) {
+		const {
+			character: { whichWayUID: extUID, chineseName: cn, arknightUID: arkUID },
+		} = this.shcema;
+		const arkData: Record<string, ArknightCharacter> = this.arknightData.character_table;
+		//判断是什么id
+		if(window.whichWaySave.allCharacters.includes(id)){
+			for(let key in arkData){
+				const info = arkData[key];
+				if(!this.isCharacter(info)) continue;
+				if(this.redirect.transfer(get.translation(id)) === info.name){
+					extUID[id] = key;
+					arkUID[key] = id;
+					cn.set([key, id], info.name);
+					return;
+				}
+			}
+			console.warn(`角色${id}不存在`);
+		} else if(id in arkData){
+			const info = arkData[id];
+			if(this.isCharacter(info)){
+				const whichWayName = window.whichWaySave.allCharacters.find(i => this.redirect.transfer(get.translation(i)) === info.name)!;
+				extUID[whichWayName] = id;
+				arkUID[id] = id;
+				cn.set([id, whichWayName], info.name);
+				return;
+			} else{
+				console.warn(`角色${id}不存在`);
+			}
+		}
+	}
+
+	/**
 	 * 是否是干员
 	 * @param { ArknightCharacter | string } info 明日方舟角色信息或明日方舟角色uid
 	 * @returns { boolean }

@@ -240,7 +240,7 @@ watch(
 	position: relative;
 }
 .intro-list li::before {
-	content: "•";
+	content: "·";
 	color: #ff9a9e;
 	font-weight: bold;
 	position: absolute;

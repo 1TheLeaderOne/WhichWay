@@ -2,7 +2,7 @@ import { lib, game, ui, get, ai, _status } from "noname";
 import { whichWayHooksApi } from "./src/hooks/index.js";
 import { whichWayInit } from "./src/init.js";
 import { whichWayUtil } from "./src/utill.js";
-import { whichWayVersion } from "./src/version.js";
+import { mainPackage } from "./src/package/index.js";
 
 await start();
 
@@ -26,26 +26,7 @@ export default function () {
         },
 		config: whichWayHooksApi.config,
 		help: {},
-		package: {
-			character: {
-				character: {},
-				translate: {},
-			},
-			card: {
-				card: {},
-				translate: {},
-				list: [],
-			},
-			skill: {
-				skill: {},
-				translate: {},
-			},
-			intro: "",
-			author: "TheLeaderOne、圣晴天空",
-			diskURL: "",
-			forumURL: "",
-			version: whichWayVersion.ext,
-		},
+		package: mainPackage(),
 		files: { character: [], card: [], skill: [], audio: [] },
 		connect: true,
 	};

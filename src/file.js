@@ -15,6 +15,7 @@ class WhichWayFile {
 	 */
 	pathShceme = {
 		"noname:": "",
+		"video:":`${this.extDir}vedio/`,
 		"src:": `${this.extDir}src/`,
 		"pack:": `${this.extDir}src/character/packs/`,
 		"bg:": `${this.extDir}image/background/`,
@@ -94,7 +95,9 @@ class WhichWayFile {
 	 */
 	async download(url, dir, filename, onprogress) {
 		if (typeof game.download !== "function") {
-			throw new Error(`Download function ( game.download ) not available in current environment (${this.detectPlatform()}) .`);
+			// throw new Error(`Download function ( game.download ) not available in current environment (${this.detectPlatform()}) .`);
+			console.warn(`[WhichWayFile] Download function ( game.download ) not available in current environment (${this.detectPlatform()}) .`);
+			return false;
 		}
 
 		dir = this.compilePath(dir);
