@@ -1,7 +1,8 @@
 import "noname";
 let info = {
   intro: [
-    "新增干员：望、矩",
+    "对扩展进行工程化，并上传至github",
+    "新增干员：望、矩、风絮、赤刃明霄陈",
     "新增动态皮肤：令【方遒卷】、望【经典形象】、余【愿清晓】、夕【青玉砚】",
     "新增皮肤：添加了明日方舟截止到【除岁行】的所有皮肤",
     "删除水陈多余的皮肤【悠悠假日】",
@@ -17,7 +18,7 @@ let info = {
     "修复天火【坠火】没有正确从event中解构target和cards的bug",
     "修复临光【互持】报错的bug"
   ],
-  player: ["wangmrfz", "jumrfz"],
+  player: ["wangmrfz", "jumrfz", "sbchenmrfz", "fengxumrfz"],
   cards: []
 };
 const upDataContentCurrent = info;

@@ -1,0 +1,8 @@
+import _sfc_main from "./control.vue2.js";
+/* empty css             */
+import _export_sfc from "../../../../_virtual/_plugin-vue_export-helper.js";
+const control = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-fa35e4d4"]]);
+export {
+  control as default
+};
+//# sourceMappingURL=control.vue.js.map

@@ -182,6 +182,18 @@ class WhichWayUtil {
     });
   };
   /**
+   * 将百分比转化成小数
+   * @param {string} zoomStr
+   *
+   * @returns {number}
+   */
+  parseZoomFactor(zoomStr) {
+    if (!zoomStr) return 1;
+    if (typeof zoomStr === "number") return zoomStr;
+    const match = zoomStr.toString().trim().match(/^([\d.]+)%?$/);
+    return match ? match[0].includes("%") ? parseFloat(match[1]) / 100 : parseFloat(match[1]) : 1;
+  }
+  /**
    * 切换背景
    */
   setBgI() {
@@ -310,7 +322,9 @@ class WhichWayUtil {
       try {
         const fnStr = Function.prototype.toString.call(fn).trim();
         if (fnStr.startsWith("function") || fnStr.startsWith("async function")) {
-          console.warn("[measureExecutionTime] Detected a regular function. Consider using an arrow function to avoid unexpected `this` binding.");
+          console.warn(
+            "[measureExecutionTime] Detected a regular function. Consider using an arrow function to avoid unexpected `this` binding."
+          );
         }
       } catch (e) {
       }

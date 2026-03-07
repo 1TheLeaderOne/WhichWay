@@ -160,7 +160,7 @@ const _sfc_main = {
     };
   }
 };
-const UpdateNotice = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-0eb8b0cc"]]);
+const UpdateNotice = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-b694d1e0"]]);
 export {
   UpdateNotice as default
 };

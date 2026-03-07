@@ -53,6 +53,17 @@ const whichWayOriginConfig = {
       priority: 888
     }
   },
+  fetchGithub: {
+    name: "<button type=`button`>获取最新版本</button>",
+    clear: true,
+    onclick() {
+      window.open("https://github.com/1TheLeaderOne/WhichWay");
+      whichWayToast.showToast("[驶舰之向] 已打开本扩展仓库<br>如果没有弹出页面,请注意是否被拦截了!", 5e3, "topLeft", "configTips_fetchGithub");
+    },
+    whichWayConfig: {
+      priority: 887
+    }
+  },
   settip: {
     name: "<font color=#ed7e78><————设置————></font></a>",
     clear: true,

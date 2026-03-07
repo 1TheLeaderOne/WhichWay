@@ -1,6 +1,9 @@
 import { whichWayUtil } from "../../../utill.js";
 import { character, characterTitle, translate, skill, characterIntro } from "../../hooks.js";
-import { get, lib, game } from "noname";
+import { get, lib, game, ui } from "noname";
+import control from "./control.vue.js";
+import { createApp } from "vue";
+import { dataManager } from "../../../dataManager/index.js";
 character("wangmrfz", {
   sex: "male",
   group: "suimrfz",
@@ -76,7 +79,7 @@ const years = {
       player: "useCardAfter"
     },
     filter(event, player) {
-      return player.hasUseTarget(get.autoViewAs("jiu"));
+      return player.hasUseTarget("jiu");
     },
     async content(event, trigger, player) {
       await player.chooseUseTarget(get.autoViewAs("jiu")).set("prompt", `令：视为使用一张【酒】`).set("prompt2", whichWayUtil.colorize("#r直抒胸臆，酣畅淋漓。#"));
@@ -242,17 +245,38 @@ skill({
       get.type(event.card) === "trick" && !Object.values(yearsMap).includes(event.card.name) && Object.keys(yearsMap).length < 12;
     },
     async content(event, trigger, player) {
-      const list = Object.keys(years).filter((year) => !yearsMap[`wangmrfz_${year}`]).map((year) => [get.translation(`wangmrfz_${year}`), get.skillInfoTranslation(`wangmrfz_${year}`)]);
-      const result = await player.chooseControl(
-        Object.keys(years).filter((year) => !yearsMap[`wangmrfz_${year}`]).map((i) => `wangmrfz_${i}`)
-      ).set("prompt", `【取势】:为${get.translation(trigger.card)}分配一个效果`).set(
-        "choiceList",
-        list.map((i) => i.join(":"))
-      ).set("ai", () => get.rand(0, get.event().list.length - 1)).set("list", list).set("displayIndex", false).forResult();
-      if (result.control) {
-        yearsMap[result.control] = trigger.card.name;
-        game.log(`将${get.translation(trigger.card)}的效果分配给${get.translation(result.control)}`);
-        player.addSkill(result.control);
+      const list = Object.keys(years).filter((year) => !yearsMap[`wangmrfz_${year}`]).map((year) => [`wangmrfz_${year}`, get.skillInfoTranslation(`wangmrfz_${year}`)]);
+      if (event.isMine()) {
+        game.pause2();
+        const layout = ui.create.div(
+          ".whichWay-control-layout",
+          {
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            zIndex: 100
+          },
+          document.body
+        );
+        dataManager.set("list", list);
+        dataManager.set("prompt", `【取势】:为${get.translation(trigger.card)}分配一个效果`);
+        createApp(control).mount(layout);
+        dataManager.on("selected", async (control2, key) => {
+          game.resume2();
+          layout.remove();
+          dataManager.offAll("selected");
+          dataManager.remove(["list", "prompt", "selected"]);
+          if (control2) act(control2);
+        });
+      } else {
+        act(list.map((i) => i[0]).randomGet());
+      }
+      function act(control2) {
+        yearsMap[control2] = trigger.card.name;
+        game.log(`将${get.translation(trigger.card)}的效果分配给${get.translation(control2)}`);
+        player.addSkill(control2);
       }
     }
   },
