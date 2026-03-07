@@ -1,6 +1,9 @@
 import { whichWayUtil } from "../../../utill.js";
 import { character, characterIntro, characterTitle, skill, translate } from "../../hooks.ts";
-import { get, game, lib } from "noname";
+import { get, game, lib, ui } from "noname";
+import control from "./control.vue";
+import { createApp } from "vue";
+import { dataManager } from "../../../dataManager/index.ts";
 
 character("wangmrfz", {
 	sex: "male",
@@ -99,7 +102,7 @@ const years: Record<string, ExtendedSkill> = {
 			player: "useCardAfter",
 		},
 		filter(event, player) {
-			return player.hasUseTarget(get.autoViewAs("jiu"));
+			return player.hasUseTarget("jiu");
 		},
 		async content(event, trigger, player) {
 			await player
@@ -149,7 +152,7 @@ const years: Record<string, ExtendedSkill> = {
 			const vcards = names.map(name => [get.type(name), "", name]);
 			const result = await player
 				.chooseButton()
-				.set("createDialog",["颉", [vcards, "vcard"]])
+				.set("createDialog", ["颉", [vcards, "vcard"]])
 				.set("prompt", `颉：视为使用一张你本回合使用过的基本牌`)
 				.set("prompt2", whichWayUtil.colorize("#r就这样吧#"))
 				.set("ai", button => {
@@ -315,28 +318,43 @@ skill({
 		async content(event, trigger, player) {
 			const list = Object.keys(years)
 				.filter(year => !yearsMap[`wangmrfz_${year}`])
-				.map(year => [get.translation(`wangmrfz_${year}`), get.skillInfoTranslation(`wangmrfz_${year}`)]);
+				.map(year => [`wangmrfz_${year}`, get.skillInfoTranslation(`wangmrfz_${year}`)]);
 
-			//TODO:暂时这么写着 有时间用Vue做一个帅的
-			const result = await player
-				.chooseControl(
-					Object.keys(years)
-						.filter(year => !yearsMap[`wangmrfz_${year}`])
-						.map(i => `wangmrfz_${i}`)
-				)
-				.set("prompt", `【取势】:为${get.translation(trigger.card)}分配一个效果`)
-				.set(
-					"choiceList",
-					list.map(i => i.join(":"))
-				)
-				.set("ai", () => get.rand(0, get.event().list.length - 1))
-				.set("list", list)
-				.set("displayIndex", false)
-				.forResult();
-			if (result.control) {
-				yearsMap[result.control] = trigger.card.name;
-				game.log(`将${get.translation(trigger.card)}的效果分配给${get.translation(result.control)}`);
-				player.addSkill(result.control);
+			if (event.isMine()) {
+				game.pause2();
+				const layout = ui.create.div(
+					".whichWay-control-layout",
+					{
+						position: "absolute",
+						top: 0,
+						left: 0,
+						width: "100%",
+						height: "100%",
+						zIndex: 100,
+					},
+					document.body
+				);
+
+				dataManager.set("list", list);
+				dataManager.set("prompt", `【取势】:为${get.translation(trigger.card)}分配一个效果`);
+
+				createApp(control).mount(layout);
+
+				dataManager.on("selected", async (control: string, key) => {
+					game.resume2();
+					layout.remove();
+					dataManager.offAll("selected");
+					dataManager.remove(["list", "prompt", "selected"]);
+					if (control) act(control);
+				});
+			} else {
+				act(list.map(i => i[0]).randomGet());
+			}
+
+			function act(control: string) {
+				yearsMap[control] = trigger.card.name;
+				game.log(`将${get.translation(trigger.card)}的效果分配给${get.translation(control)}`);
+				player.addSkill(control);
 			}
 		},
 	},
@@ -360,41 +378,41 @@ skill({
 			const unusedTricks = lib.inpile.filter(name => get.type(name) === "trick" && !usedTricks.includes(name));
 
 			const gains = [];
-			for(let name of usedTricks){
+			for (let name of usedTricks) {
 				let card = get.cardPile(name);
 				//@ts-ignore
-				if(card) gains.push(card);
+				if (card) gains.push(card);
 				else player.chat(`没有${get.translation(name)}了！`);
 			}
 
-			if(gains.length){
+			if (gains.length) {
 				await player.gain(gains, "gain2", "log");
-			} else{
+			} else {
 				player.chat("你布局了个什么？？？");
 			}
 
 			const enemyGains = [];
-			for(let name of unusedTricks){
+			for (let name of unusedTricks) {
 				let card = get.cardPile(name);
 				//@ts-ignore
-				if(card) enemyGains.push(card);
+				if (card) enemyGains.push(card);
 			}
 
-			if(enemyGains.length){
-				for(let char of game.players){
-					if(char===player) continue;
+			if (enemyGains.length) {
+				for (let char of game.players) {
+					if (char === player) continue;
 					await char.gain(enemyGains.randomGet(), "gain2");
 				}
-			} else{
+			} else {
 				player.chat("绝杀无解！");
 			}
 
 			player.awakenSkill(event.name);
 		},
-		ai:{
-			order:1,
-			result:{
-				player(player,target){
+		ai: {
+			order: 1,
+			result: {
+				player(player, target) {
 					return Object.keys(yearsMap).length >= 4;
 				},
 			},

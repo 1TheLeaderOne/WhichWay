@@ -1,3 +1,5 @@
+import { whichWayUtil } from "../../../utill.js";
+import { VideoPlayer } from "../../../videoPlayer/index.ts";
 import { character, characterIntro, characterTitle, skill, translate } from "../../hooks.ts";
 import { get, game, lib, ui, _status } from "noname";
 
@@ -9,6 +11,8 @@ character("sbchenmrfz", {
 	group: "yanmrfz",
 	sex: "female",
 });
+
+characterTitle("sbchenmrfz",whichWayUtil.colorize("#r当明则明#"));
 
 translate({
 	sbchenmrfz: "赤刃明霄陈",
@@ -23,7 +27,7 @@ translate({
 
 skill({
 	xiaoshimrfz: {
-		audio: ["作战中1", "作战中2", "作战中3", "作战中4"],
+		audio: ["部署2", "选中干员2"],
 		trigger: { player: "useCardAfter" },
 		filter(event, player, name, target) {
 			return event.card && event.cards && event.cards.length>0 && Array.isArray(getAdjacentCard(event.card));
@@ -77,7 +81,7 @@ skill({
             function removeVirtualCards(){
                 const cards = player.getCards("hejs",card=>card.storage.virtualCard_xiaoshimrfz===true);
                 cards.forEach(card=>card.delete());
-                ui.updateh();
+                ui.updatehl();
             }
         },
         async content(event,trigger,player){
@@ -94,7 +98,7 @@ skill({
         },
 	},
 	tiankuimrfz: {
-		audio: ["部署2", "选中干员2"],
+		audio: ["作战中1", "作战中2", "作战中3", "作战中4"],
         limited:true,
         trigger:{global:"phaseJieshuAfter"},
         filter(event, player, name, target) {
@@ -103,8 +107,18 @@ skill({
         prompt2(event, player) {
             return `可使用的牌:${get.translation(getDifferent(player))}`
         },
+        skillAnimation:false,
         async content(event,trigger,player){
             player.awakenSkill(event.name);
+
+            game.pause2();
+
+            new VideoPlayer({
+                src:"tiankuimrfz",
+                async onEnded() {
+                    game.resume2();
+                },
+            })
 
             const cards = getDifferent(player) as VCard[];
             const showCards = [...cards]
@@ -128,7 +142,7 @@ function getDifferent(player:Player,getNum:boolean = false):VCard[] | number{
     let num = 0;
 
     for(const name of lib.inpile){
-        if(!["trick","basic"].includes(get.type(name))) continue;
+        if(!["trick","basic"].includes(get.type(name)) && !getNum) continue;
         if(name === "sha"){
             ["fire","thunder","ice",undefined].forEach(nature=>simples.push({name:"sha",nature}))
         }

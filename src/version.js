@@ -9,7 +9,7 @@ const whichWayVersionInfo = {
         //最低版本
 		over: "1.11.2",
 	},
-	ext: "1.1.2",
+	ext: "1.2",
 };
 
 class WhichWayVersion {
