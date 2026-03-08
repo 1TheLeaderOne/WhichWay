@@ -1,5 +1,6 @@
+import { whichWayUtil } from "../../../utill.js";
 import { VideoPlayer } from "../../../videoPlayer/index.js";
-import { character, translate, skill } from "../../hooks.js";
+import { character, characterTitle, translate, skill } from "../../hooks.js";
 import { game, get, ui, lib } from "noname";
 character("sbchenmrfz", {
   hp: 4,
@@ -9,6 +10,7 @@ character("sbchenmrfz", {
   group: "yanmrfz",
   sex: "female"
 });
+characterTitle("sbchenmrfz", whichWayUtil.colorize("#r当明则明#"));
 translate({
   sbchenmrfz: "赤刃明霄陈",
   sbchenmrfz_prefix: "赤刃明霄",

@@ -1,4 +1,5 @@
 import { get, ui, game, _status, lib } from "noname";
+import { whichWayUtil } from "../../../utill.js";
 const legend1SJZX = {
   character: {
     ailinimrfz: ["female", "yimrfz", 3, ["zhidengmrfz", "shenpanmrfz", "liechaomrfz"], []],
@@ -12960,8 +12961,10 @@ const legend1SJZX = {
       onremove(player2) {
         for (let i of game.players) {
           i.removeSkill("xingxingmrfz");
+          i.unmarkSkill("xingxingmrfz");
         }
         game.broadcastAll(function() {
+          whichWayUtil.setBgI();
         });
       },
       audio: 2,
@@ -13007,11 +13010,15 @@ const legend1SJZX = {
       subSkill: {
         expire: {
           charlotte: true,
+          silent: true,
+          forceDie: true,
           onremove(player2) {
             for (let i of game.players) {
               i.removeSkill("xingxingmrfz");
+              i.unmarkSkill("xingxingmrfz");
             }
             game.broadcastAll(function() {
+              whichWayUtil.setBgI();
             });
           }
         }
@@ -13022,6 +13029,10 @@ const legend1SJZX = {
       audio: 2,
       direct: true,
       trigger: { global: "phaseEnd" },
+      mark: true,
+      intro: {
+        content: "“我将杀死冠冕”"
+      },
       filter(event2, player2) {
         return event2.player && event2.player.isIn() && !event2.player.hasSkill("xingxingmrfz");
       },
