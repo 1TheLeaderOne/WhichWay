@@ -1,4 +1,5 @@
 import { lib, game, ui, get, ai, _status } from "noname";
+import { whichWayUtil } from "../../../utill";
 
 /**
  * 六星武将第一部分
@@ -14794,9 +14795,10 @@ export default {
 			onremove(player) {
 				for (let i of game.players) {
 					i.removeSkill("xingxingmrfz");
+					i.unmarkSkill("xingxingmrfz");
 				}
 				game.broadcastAll(function () {
-					// whitherHelm.setBgI();
+					whichWayUtil.setBgI();
 				});
 			},
 			audio: 2,
@@ -14844,12 +14846,15 @@ export default {
 			subSkill: {
 				expire: {
 					charlotte: true,
+					silent:true,
+					forceDie:true,
 					onremove(player) {
 						for (let i of game.players) {
 							i.removeSkill("xingxingmrfz");
+							i.unmarkSkill("xingxingmrfz");
 						}
 						game.broadcastAll(function () {
-							// whitherHelm.setBgI();
+							whichWayUtil.setBgI();
 						});
 					},
 				},
@@ -14860,6 +14865,10 @@ export default {
 			audio: 2,
 			direct: true,
 			trigger: { global: "phaseEnd" },
+			mark:true,
+			intro:{
+				content:"“我将杀死冠冕”",
+			},
 			filter(event, player) {
 				return event.player && event.player.isIn() && !event.player.hasSkill("xingxingmrfz");
 			},

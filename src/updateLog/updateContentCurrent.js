@@ -18,6 +18,8 @@ let info = {
 		"修复明椒【游移】没有检测links是否存在而报错的bug",
 		"修复天火【坠火】没有正确从event中解构target和cards的bug",
 		"修复临光【互持】报错的bug",
+		"修复弑君者【烽烟】的场地效果在其阵亡后不会消失的bug",
+		"修复特克诺【塑偶】无法正确切换角色的bug"
 	],
 	player: ["wangmrfz","jumrfz","sbchenmrfz","fengxumrfz"],
 	cards: [],
