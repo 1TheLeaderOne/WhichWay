@@ -8930,6 +8930,7 @@ export default {
 		suoumrfz: {
 			init(player) {
 				game.addGlobalSkill("autoswap");
+				player.suoumrfz = player;
 			},
 			onremove(player) {
 				for (let i of game.players) {
@@ -9025,11 +9026,8 @@ export default {
 						],
 					},
 					filter(event, player) {
-						return (
-							!event.player.isUnderControl(true) &&
-							!_status.auto &&
-							(event.player.suoumrfz || event.player === player.storage.suoumrfz_swap)
-						);
+						if(_status.auto || !event.player.suoumrfz || !game.me?.suoumrfz) return false;
+						return !event.player.isUnderControl(true);
 					},
 					async content(event, trigger, player) {
 						game.swapPlayer(trigger.player);
