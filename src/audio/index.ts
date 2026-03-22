@@ -338,6 +338,8 @@ class WhichWayAudio {
 				delete info.whichWayWebPlay;
 			} else if(lang !== "CUSTOM"){
 				info.whichWayWebPlay = new whichWayWebPlay(skill, char);
+			} else {
+				console.warn(`[whichWayAudio] 角色 ${char} 的技能 ${skill} 的语言设置为 ${lang}，但音频文件不存在！`)
 			}
 		} else if (typeof audio === "string") {
 			if (audio.startsWith("ext:")) {

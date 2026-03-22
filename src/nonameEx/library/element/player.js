@@ -319,7 +319,7 @@ export class PlayerExt extends lib.element.Player {
 	 */
 	changeMarkImage(mark, path, bool = false) {
 		if (bool) path = 'url("' + path + '")';
-		else path = 'url("extension/驶舰之向/image/orther/' + path + '.png")';
+		else path = 'url("extension/WhichWay/image/skill/' + path + '.png")';
 		if (this.marks[mark]) {
 			this.marks[mark].style.backgroundImage = path;
 		}

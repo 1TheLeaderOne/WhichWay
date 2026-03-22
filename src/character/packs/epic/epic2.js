@@ -1397,7 +1397,9 @@ export default {
 					let node = ui.create.buttonPresets.character(characterName, "character", null, false);
 					node.style.width = "100%";
 					let hpNode = node.querySelector(".hp .text");
-					//@ts-ignore
+					
+					if(hpNode === null) return;
+
 					hpNode.innerHTML = Array.isArray(hp) ? hp.join("/") : "1/2";
 					lib.translate[`${name}_info`] = `锁定技，你视为拥有技能${skills.map(s => "〖" + get.translation(s) + "〗").join("、")}，此牌不因【化影】而离开你的装备区后，销毁之。<br>` + node.outerHTML + "<br>";
 					let append = "";
@@ -2162,7 +2164,7 @@ export default {
 									if (event.name !== "useCard") return true;
 									return !event.card?.storage?.pojianmrfz && event.card !== damageCard;
 								})
-								.then(() => {
+								.then(async (event,trigger,player) => {
 									player.unmarkSkill("pojianmrfz");
 									if (trigger.name !== "useCard") return;
 									//@ts-ignore
@@ -4173,7 +4175,7 @@ export default {
 					lib.translate["qixiemrfz_" + skill + "_append"] = '<div class="skill">【' + get.translation(skill) + '】</div><div><span style="font-family: yuanli">' + get.skillInfoTranslation(skill) + "</span></div><br><br>";
 					var card = {
 						fullimage: true,
-						image: "ext:whitherHelm/image/orther/alannamrfz_equip.png",
+						image: "ext:WhichWay/image/skill/alannamrfz_equip.png",
 						type: "equip",
 						enable: true,
 						selectTarget: -1,

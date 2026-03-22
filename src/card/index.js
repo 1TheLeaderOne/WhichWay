@@ -393,23 +393,23 @@ game.import('card', function (lib, game, ui, get, ai, _status) {
 				blankCard: true,
 				fullimage: true,
 				wuxieable: false,
-				effect: function () {
-					'step 0'
+				/** @type {ContentFuncByAll} */
+				async effect(event,trigger,player) {
+					let result;
 					var card = get.autoViewAs(event.cards[0]);
 					card.storage.sjzx_zhuihuomrfz = true;
-					if (player.countCards('he') > 1) player.chooseToDiscard(2, 'he', '【坠火】:请选择弃置两张牌，选择取消则受到一点火焰伤害')
+					if (player.countCards('he') > 1) result = await player.chooseToDiscard(2, 'he', '【坠火】:请选择弃置两张牌，选择取消则受到一点火焰伤害')
 						.set('ai', function (card) {
 							var player = _status.event.player;
 							if (player.hp < 2 && player.countCards('hs', card => { return card.name == 'tao' || card.name == 'jiu' }) < 1) return -1;
 							return 8 - get.value(card);
-						});
+						}).forResult();
 					else {
 						player.damage('fire', 'nosource');
 						player.loseToDiscardpile(event.cards[0]);
 						event.finish();
 					}
-					'step 1'
-					if (result.bool) {
+					if (result?.bool) {
 						//game.log(player,'弃置了',result.cards);
 						player.loseToDiscardpile(event.cards[0]);
 					}

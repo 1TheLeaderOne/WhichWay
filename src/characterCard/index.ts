@@ -27,9 +27,9 @@ class WhichWayCharacterCard {
 					enumerable: true,
 				});
 				whichWayAPIOverride.appendHook("ui.click.charactercard", {
-					before: async function (name, sourcenode, noedit, resume, avatar, audioName) {
+					before: function (name, sourcenode, noedit, resume, avatar, audioName) {
 						if (whichWayUtil.config("enableWhichWayCharacterCardStyle")) {
-							await whichWayCharacterCard.create(name, sourcenode, noedit, resume, avatar, audioName);
+							whichWayCharacterCard.create(name, sourcenode, noedit, resume, avatar, audioName);
 							return false;
 						}
 					},

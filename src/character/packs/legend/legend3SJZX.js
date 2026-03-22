@@ -2068,7 +2068,7 @@ export default {
 				game.getGlobalHistory("changeHp", evt => {
 					let evtx = evt.parent;
 					//@ts-ignore
-					if (evtx?.name === "recover" && evtx?.source === player && !Object.isEmpty(evtx?.getParent("phaseUse"))) recoverPlayer.add(evtx.player);
+					if (evtx?.name === "recover" && evtx?.source === player && Object.keys(evtx?.getParent("phaseUse")).length > 0) recoverPlayer.add(evtx.player);
 				});
 
 				for (let char of game.players.concat(game.dead)) {
@@ -2076,7 +2076,7 @@ export default {
 						char.getHistory("gain", evt => {
 							let evtx = evt.parent;
 							//@ts-ignore
-							return evtx?.name === "draw" && evtx?.source === player && !Object.isEmpty(evtx?.getParent("phaseUse"));
+							return evtx?.name === "draw" && evtx?.source === player && Object.keys(evtx?.getParent("phaseUse")).length > 0;
 						}).length > 0
 					)
 						//@ts-ignore

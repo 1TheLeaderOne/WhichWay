@@ -21,21 +21,21 @@ class WhichWayAPIOverride {
 	 * @type {Record<string, any>}
 	 */
 	apis = {
-		lib:lib,
-		game:game,
-		ui:ui,
-		get:get,
-		ai:ai,
-		_status:_status,
-	}
+		lib: lib,
+		game: game,
+		ui: ui,
+		get: get,
+		ai: ai,
+		_status: _status,
+	};
 
 	/**
 	 * 是否是合法的API
 	 * @param {string} name
-	 * 
-	 * @returns {boolean} 
+	 *
+	 * @returns {boolean}
 	 */
-	isVaildAPI(name){
+	isVaildAPI(name) {
 		return Object.keys(this.apis).includes(name);
 	}
 
@@ -64,7 +64,7 @@ class WhichWayAPIOverride {
 		const prop = parts.pop();
 		let obj = this.apis;
 
-		if(!this.isVaildAPI(parts[0])){
+		if (!this.isVaildAPI(parts[0])) {
 			throw new Error(`Invalid API name: ${parts[0]} , must be one of ${Object.keys(this.apis)}`);
 		}
 
@@ -90,34 +90,39 @@ class WhichWayAPIOverride {
 			throw new Error(`Target API '${apiName}' is not a function — hooks only work on functions`);
 		}
 
-		// 创建包装函数
-		const wrapped = async function (...args) {
-			// === 执行 before 钩子 ===
-			if (before) {
-				//@ts-ignore
-				const beforeResult = await before.apply(this, args);
-				if (beforeResult === false) {
-					// 阻止执行原函数
-					return undefined;
+		const isAsync = isAsyncFunction(original);
+
+		let wrapped;
+
+		if (isAsync) {
+			wrapped = async function (...args) {
+				if (before) {
+					const beforeResult = await before.apply(this, args);
+					if (beforeResult === false) return undefined;
+					if (Array.isArray(beforeResult)) args = beforeResult;
 				}
-				if (Array.isArray(beforeResult)) {
-					// 允许修改参数
-					args = beforeResult;
+				let result = await original.apply(this, args);
+				if (after) {
+					const afterResult = await after.call(this, result, ...args);
+					return afterResult !== undefined ? afterResult : result;
 				}
-			}
-
-			//@ts-ignore
-			const result = await original.apply(this, args);
-
-			// === 执行 after 钩子 ===
-			if (after) {
-				//@ts-ignore
-				const afterResult = await after.call(this, result, ...args);
-				return afterResult !== undefined ? afterResult : result;
-			}
-
-			return result;
-		};
+				return result;
+			};
+		} else {
+			wrapped = function (...args) {
+				if (before) {
+					const beforeResult = before.apply(this, args);
+					if (beforeResult === false) return undefined;
+					if (Array.isArray(beforeResult)) args = beforeResult;
+				}
+				let result = original.apply(this, args);
+				if (after) {
+					const afterResult = after.call(this, result, ...args);
+					return afterResult !== undefined ? afterResult : result;
+				}
+				return result;
+			};
+		}
 
 		const record = {
 			original,
@@ -138,6 +143,16 @@ class WhichWayAPIOverride {
 			//@ts-ignore
 			throw new Error(`Failed to hook '${apiName}': ${e.message}`);
 		}
+
+		function isAsyncFunction(fn) {
+			if (typeof fn !== "function") return false;
+			return (
+				fn[Symbol.toStringTag] === "AsyncFunction" ||
+				fn.constructor?.name === "AsyncFunction" ||
+				fn.toString().startsWith("async ") ||
+				fn.toString().startsWith("async function")
+			);
+		}
 	}
 
 	/**
@@ -152,7 +167,7 @@ class WhichWayAPIOverride {
 		const prop = parts.pop();
 		let obj = this.apis;
 
-		if(!this.isVaildAPI(parts[0])){
+		if (!this.isVaildAPI(parts[0])) {
 			throw new Error(`Invalid API name: ${parts[0]} , must be one of ${Object.keys(this.apis)}`);
 		}
 

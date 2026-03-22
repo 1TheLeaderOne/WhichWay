@@ -35,6 +35,8 @@ skill({
 		},
 		async cost(event, trigger, player) {
 			const adjoins = getAdjacentCard(trigger.card)?.filter(card => player.hasUseTarget(card, true, false)) as VCard[];
+
+			if (!Array.isArray(adjoins) || adjoins.length < 1) return;
 			if (adjoins.length < 2) {
 				const result = await player
 					.chooseBool(`【霄式】:是否视为使用一张${get.translation(adjoins[0])}(无距离次数限制)？`)
@@ -149,6 +151,7 @@ function getDifferent(player: Player, getNum: boolean = false): VCard[] | number
 	let num = 0;
 
 	for (const name of lib.inpile) {
+		if (getNum && get.type(name) !== "basic") continue;
 		if (!["trick", "basic"].includes(get.type(name)) && !getNum) continue;
 		if (name === "sha") {
 			["fire", "thunder", "ice", undefined].forEach(nature => simples.push({ name: "sha", nature }));

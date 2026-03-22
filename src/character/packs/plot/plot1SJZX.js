@@ -1247,7 +1247,7 @@ export default {
 					if (event.control) event.control.close();
 				};
 
-				const chooseButton = function (list, skills) {
+				const chooseButton = async function (list, skills,resolve) {
 					const event = _status.event;
 					if (!event._result) event._result = {};
 					event._result.skills = [];
@@ -1299,6 +1299,7 @@ export default {
 						event.control.close();
 						game.resume();
 						_status.imchoosing = false;
+						if(resolve) resolve(true);
 					});
 
 					for (let i = 0; i < event.dialog.buttons.length; i++) {
@@ -1309,7 +1310,9 @@ export default {
 				};
 
 				if (event.isMine()) {
-					chooseButton(list, skills);
+					await new Promise(resolve => {
+						chooseButton(list, skills,resolve);
+					})
 				} else if (event.isOnline()) {
 					event.player.send(chooseButton, list, skills);
 					event.player.wait();
@@ -1389,7 +1392,7 @@ export default {
 					game.swapPlayerAuto(player);
 				}
 
-				const chooseButton = function (phases) {
+				const chooseButton = function (phases,resolve) {
 					const event = _status.event;
 					if (!event._result) event._result = {};
 					event._result.phases = [];
@@ -1477,6 +1480,7 @@ export default {
 						event.control.close();
 						game.resume();
 						_status.imchoosing = false;
+						if(resolve) resolve(true);
 					});
 
 					for (let i = 0; i < event.dialog.buttons.length; i++) {
@@ -1496,7 +1500,9 @@ export default {
 				};
 
 				if (event.isMine()) {
-					chooseButton(trigger.phaseList);
+					await new Promise(resolve => {
+						chooseButton(trigger.phaseList,resolve);
+					});
 				} else if (event.isOnline()) {
 					event.player.send(chooseButton, trigger.phaseList);
 					event.player.wait();
@@ -3232,7 +3238,7 @@ export default {
 				player.addSkill("bengjiemrfz");
 				player.sex = "male";
 				game.log(player, "将性别变为了", "#y男性");
-				player.node.avatar.setBackgroundImage("extension/whitherHelm/image/orther/shuangwang2mrfz.jpg");
+				player.node.avatar.setBackgroundImage("extension/whitherHelm/image/skill/shuangwang2mrfz.jpg");
 			},
 		},
 		jiangqingmrfz: {
