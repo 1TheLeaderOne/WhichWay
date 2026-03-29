@@ -4647,17 +4647,15 @@ export default {
 			async content(event, trigger, player) {
 				let cards = lib.skill.mushoumrfz.getCanUseCard(trigger, player);
 				while (true) {
-					const {
-						result: { bool, links },
-					} = await player
+					const { bool, links } = await player
 						.chooseButton(["【牧兽】：是否使用这些牌？", cards])
 						.set("filterButton", button => {
 							return _status.event.player.hasUseTarget(button.link);
 						})
 						.set("ai", button => {
 							return _status.event.player.getUseValue(button.link);
-						});
-					if (!bool) return;
+						}).forResult();
+					if (!bool || !links) return;
 					cards.remove(links[0]);
 					player.$gain2(links[0], false);
 					player.chooseUseTarget(links[0], true);

@@ -4,7 +4,7 @@ import { character, characterIntro, characterTitle, dynamicTranslate, skill, tra
 import { get, game, lib, ui, _status } from "noname";
 
 character("jiemrfz", {
-	hp: 3,
+	hp: 4,
 	sex: "female",
 	group: "suimrfz",
 	pack: "plotSJZX",

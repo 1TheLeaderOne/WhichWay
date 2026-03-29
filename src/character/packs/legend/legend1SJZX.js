@@ -5459,132 +5459,120 @@ export default {
 				return true;
 			},
 			async content(event, trigger, player) {
-				let result;
-
-				// step 0
-				let skipToStep4 = false;
-				if (player.getExpansions("shixingmrfz").length <= 1 && player.getExpansions("shixingmrfz").length) {
-					result = await player
-						.chooseControl("弃置", "增加")
-						.set("prompt", "选择弃置所有置于武将牌上的牌或往武将牌上放置牌")
-						.set("ai", (event, player) => {
-							const num = Math.random();
-							if (
-								player.getExpansions("shixingmrfz").filter(magic => {
-									return get.type2(magic) === "equip";
-								}).length &&
-								player.countCards("h") < 4
-							)
-								return 1;
-							if (num <= 0.6) return 0;
-							return 1;
-						})
-						.forResult();
-				} else if (player.getExpansions("shixingmrfz").length === 0) {
-					skipToStep4 = true;
-				}
-
-				// step 1 (可能被 goto(4) 跳过)
-				if (!skipToStep4) {
-					if (result?.control === "弃置" || player.getExpansions("shixingmrfz").length > 1) {
-						event.num = 0;
-						// 清平弃置：basic 类型 expansion → 摸基本牌
-						if (
-							player.getExpansions("shixingmrfz").filter(magic => {
-								return get.type2(magic) === "basic";
-							}).length
-						) {
-							await player.gain(
-								get.cardPile(card => {
-									return get.type(card) === "basic";
-								}),
-								"gain2"
-							);
-						}
-						// 弦惊选角色：equip 类型 expansion → 弃置其他角色牌
-						if (
-							player.getExpansions("shixingmrfz").filter(magic => {
-								return get.type2(magic) === "equip";
-							}).length
-						) {
-							event.num++;
-							result = await player
-								.chooseTarget("【诗型】:弃置一名其他角色的一张牌", false, (card, target, player) => {
-									return target !== player;
-								})
-								.set("ai", target => {
-									return -get.attitude(_status.event.player, target);
-								})
-								.forResult();
-						}
-						// 逍遥弃置：trick 类型 expansion → 摸牌+回复
-						if (
-							player.getExpansions("shixingmrfz").filter(magic => {
-								return get.type2(magic) === "trick";
-							}).length
-						) {
-							await player.draw();
-							await player.recover();
-						}
-					}
-					if (result?.control === "增加") {
-						skipToStep4 = true;
+				const expansions = player.getExpansions("shixingmrfz");
+				let prompt = (player)=>{
+					const exps = player.getExpansions("shixingmrfz");
+					if(exps.length === 0) return "【诗形】:请选择至多两张至于你的武将牌上";
+					else if(exps.length === 1){
+						return `【诗形】:请选择将一张${get.translation(exps[0])}牌至于你的武将牌上，或弃置因此技能而置于武将牌上的所有牌，并重新选择两张牌置于武将牌上`;
+					} else{
+						return `【诗形】：弃置因此技能而置于武将牌上的所有牌（当前武将牌上的牌的类型：${get.translation(exps[0])}），然后选择两张牌置于武将牌上`
 					}
 				}
+				const { cards } = await player.chooseCard("h")
+					.set("prompt",prompt(player))
+					.set("filterCard",(card)=>{
+						const player = get.player(),cards = ui.selected.cards;
+						if(cards.length>0) return get.type2(card) === get.type2(cards[0]);
+						return true;
+					})
+					.set("selectCard",[1,2])
+					.set("ai",card=>{
+						const player = get.player(),exps = player.getExpansions("shixingmrfz");
+						let val = 0;
+						if(exps.some(card=>get.type2(card)==="equip")){
+							if(get.type2(card) ==="equip") return -1;
+							val -= 8 * Math.random();
+						}
+						if(get.value(card) < 8) val += 2;
+						if(player.hp < 2 && exps.some(card=>get.type2(card)==="trick")) val += 2;
+						if(get.type2(card) === "trick"){ 
+							if(player.skipList.includes("phaseUse")){
+								val -= 10;
+							}
+							else val += 4
+						}
+						return val;
+					})
+					.set("forced",true)
+					.set("complexCard",true)
+					.set("complexSelect",true)
+					.forResult();
+				if(!cards) return;
 
-				// step 2 (可能被跳过)
-				if (!skipToStep4 && result && result.targets && event.num === 1) {
-					await player.discardPlayerCard(result.targets[0], "he", true);
-				}
-
-				// step 3 (可能被跳过)
-				if (!skipToStep4) {
-					player.loseToDiscardpile(player.getExpansions("shixingmrfz"));
-				}
-
-				// step 4-5 loop (step 5 可能 goto 4)
-				while (!skipToStep4) {
-					// step 4
-					let hasValidCard = false;
-					if (!player.getExpansions("shixingmrfz").length) {
-						hasValidCard = true;
+				if(expansions.length < 1){
+					player.addToExpansion(cards,player,"giveAuto").gaintag.add("shixingmrfz");
+				} else{
+					if(expansions.length === 1 && cards.length === 1 && get.type2(cards[0]) === get.type2(expansions[0])){
+						player.addToExpansion(cards,player,"giveAuto").gaintag.add("shixingmrfz");
 					} else {
-						hasValidCard = player.hasCard(card => {
-							return player.getExpansions("shixingmrfz").filter(magic => {
-								return get.type2(magic) === get.type2(card);
-							}).length;
-						}, "he");
+						await player.discard(expansions);
+						player.addToExpansion(cards,player,"giveAuto").gaintag.add("shixingmrfz");
 					}
-
-					if (hasValidCard) {
-						result = await player
-							.chooseCard("he", "依次将最多两张牌至于武将牌上", (card, player) => {
-								if (player.getExpansions("shixingmrfz").length) {
-									return player.getExpansions("shixingmrfz").filter(magic => {
-										return get.type2(magic) === get.type2(card);
-									}).length;
-								}
-								return true;
-							})
-							.forResult();
-					} else {
-						break; // event.finish()
-					}
-
-					// step 5
-					if (result?.cards?.length) {
-						const next = player.addToExpansion(result.cards, player, "giveAuto");
-						next.gaintag.add("shixingmrfz");
-						await next;
-					}
-					if (result?.cards && player.getExpansions("shixingmrfz").length < 1) {
-						continue; // goto 4
-					}
-					break;
 				}
 			},
-			group: ["shixingmrfz_basic", "shixingmrfz_trick", "shixingmrfz_equip"],
+			group: ["shixingmrfz_basic", "shixingmrfz_trick", "shixingmrfz_equip","shixingmrfz_lose"],
 			subSkill: {
+				//失去标记
+				lose:{
+					audio:"shixingmrfz",
+					charlotte:true,
+					forced:true,
+					trigger:{
+						player:"loseAfter"
+					},
+					filter(event,player){
+						const tags = event.gaintag_map;
+						return tags && event.cards.some(card=>{
+							const id = (card.cardid || "");
+							return Object.keys(tags).includes(id) && tags[id].includes("shixingmrfz");
+						});
+					},
+					async content(event,trigger,player){
+						const tags = trigger.gaintag_map;
+						if(!tags) return;
+						const cards = trigger.cards.filter(card=>{
+							const id = (card.cardid || "");
+							return Object.keys(tags).includes(id) && tags[id].includes("shixingmrfz");
+						});
+						if(!cards) return;
+						const type = get.type(cards[0]);
+						switch(type){
+							case "basic":{
+								const card = get.cardPile(card => {
+									return get.type2(card) === "basic";
+								});
+								if(card){
+									player.gain(card, "gain2");
+								} else {
+									player.chat("牌堆中没有基本牌！");
+								}
+								break;
+							}
+							case "trick":{
+								player.recover();
+								player.draw();
+								break;
+							}
+							case "equip":{
+								if(game.hasPlayer(char=>char !== player && char.countCards("he")>0)){
+									const { targets } = await player.chooseTarget()
+										.set("prompt","是否发动【诗形】？")
+										.set("prompt2","你可以弃置一名其他角色一张牌")
+										.set("filterTarget",(card,player,target)=>{
+											return target !== player && target.countCards("he") > 0;
+										})
+										.set("ai",target=>get.attitude2(target)<0)
+										.forResult();
+									if(!targets) break;
+									player.discardPlayerCard(targets[0],true,"he")
+										.set("prompt","【诗形】:请选择你要弃置的牌");
+								}
+							}
+						}
+					},
+				},
+
 				//清平
 				basic: {
 					audio: "shixingmrfz",
@@ -5614,16 +5602,16 @@ export default {
 						game.log(player, "移去了一张'清平'");
 
 						// step 2
-						const card = get.cardPile(card => {
-							return get.type(card) === "basic";
-						});
-						if (
-							player.getExpansions("shixingmrfz").filter(magic => {
-								return get.type2(magic) === "basic";
-							}).length < 1
-						) {
-							await player.gain(card, "gain2");
-						}
+						// const card = get.cardPile(card => {
+						// 	return get.type(card) === "basic";
+						// });
+						// if (
+						// 	player.getExpansions("shixingmrfz").filter(magic => {
+						// 		return get.type2(magic) === "basic";
+						// 	}).length < 1
+						// ) {
+						// 	await player.gain(card, "gain2");
+						// }
 					},
 				},
 				//弦惊
@@ -5723,14 +5711,14 @@ export default {
 						}
 
 						// step 3
-						if (
-							player.getExpansions("shixingmrfz").filter(magic => {
-								return get.type2(magic) === "trick";
-							}).length < 1
-						) {
-							await player.recover();
-							await player.draw();
-						}
+						// if (
+						// 	player.getExpansions("shixingmrfz").filter(magic => {
+						// 		return get.type2(magic) === "trick";
+						// 	}).length < 1
+						// ) {
+						// 	await player.recover();
+						// 	await player.draw();
+						// }
 					},
 					ai: {
 						respondSha: true,
@@ -8525,9 +8513,6 @@ export default {
 					},
 					async content(event, trigger, player) {
 						// step 0
-						const card = get.cardPile2(c => {
-							return get.subtype(c) === "equip1";
-						});
 						//@ts-ignore
 						player.logSkill("nianshoumrfz");
 						event.num = 0;
@@ -8536,6 +8521,9 @@ export default {
 						// step 1 loop (original event.redo())
 						while (event.num < 2) {
 							event.num++;
+							const card = get.cardPile2(c => {
+								return get.subtype(c) === "equip1";
+							});
 							if (card) {
 								await player.gain(card, "gain2", "log");
 							} else {
@@ -8545,23 +8533,21 @@ export default {
 					},
 				},
 				usesha: {
-					direct: true,
+					audio:"nianshoumrfz",
 					trigger: { player: "useCardToPlayered" },
 					filter: function (event, player) {
-						var targetx = event.targets,
+						let targetx = event.targets,
 							num = 0;
-						if (event.card.name != "sha" || player.getExpansions("nianshoumrfz").length == 0) return false;
+						if (targetx.length<1 || event.card.name != "sha" || player.getExpansions("nianshoumrfz").length == 0) return false;
 						if (!event.parent || event.parent.triggeredTargets3.length > 1) return false;
 						for (var i = 0; i < targetx.length; i++) {
 							if (targetx[i].getExpansions("nianshoumrfz").length < 2) num++;
 						}
 						return num > 0;
 					},
-					async content(event, trigger, player) {
-						let result;
-
-						// step 0
-						result = await player
+					async cost(event,trigger,player){
+						if(trigger.targets.length === 1){
+							const { bool } = await player
 							.chooseBool(
 								"是否将一个'巨剑'置于" +
 									(trigger.targets.length === 1 ? get.translation(trigger.targets[0]) : "其中一个目标") +
@@ -8572,41 +8558,14 @@ export default {
 							})
 							.forResult();
 
-						// step 1
-						if (result.bool && trigger.targets.length === 1) {
-							//@ts-ignore
-							player.logSkill("nianshoumrfz");
-							const cards = player.getExpansions("nianshoumrfz");
-							if (cards.length) {
-								result = await player.chooseButton(["选择一个'巨剑'", cards], true).forResult();
-							} else {
-								return;
+							event.result = {
+								bool:bool,
+								cost_data:{
+									target:trigger.targets[0]
+								},
 							}
-						} else {
-							// goto 4: skip to multi-target branch
-						}
-
-						// step 2 & 3 (single target branch)
-						if (result.bool && trigger.targets.length === 1) {
-							// step 2
-							if (result.links && result.links.length) {
-								const next = player.gain(result.links, "gain2");
-								next.gaintag.add("nianshoumrfz2");
-								await next;
-							}
-							// step 3
-							if (result.cards && result.cards.length) {
-								const cards3 = player.getCards("h", card => {
-									return card.hasGaintag("nianshoumrfz2");
-								});
-								trigger.targets[0].addToExpansion(cards3, trigger.targets[0], "give").gaintag.add("nianshoumrfz");
-							}
-							return;
-						}
-
-						// step 4 (multi-target branch)
-						if (result.bool && trigger.targets.length > 1) {
-							result = await player
+						} else{
+							const result = await player
 								.chooseTarget(true, (card, player, target) => {
 									return _status.event.targets.includes(target);
 								})
@@ -8615,37 +8574,24 @@ export default {
 									return get.attitude(_status.event.player, target) < 2;
 								})
 								.forResult();
-						} else {
-							return;
-						}
-
-						// step 5
-						if (result.bool && result.targets && result.targets.length) {
-							event.target = result.targets[0];
-							const cards = player.getExpansions("nianshoumrfz");
-							if (cards.length) {
-								result = await player.chooseButton(["选择一个'巨剑'", cards], true).forResult();
-							} else {
-								return;
+							event.result = {
+								...result,
+								cost_data:{
+									target:result?.targets?.[0]
+								}
 							}
-						} else {
-							return;
 						}
+					},
+					async content(event,trigger,player){
+						/**
+						 * @type { Player }
+						 */
+						const target = event.cost_data.target;
+						const { links } = await player.chooseButton(["选择一个'巨剑'", player.getExpansions("nianshoumrfz")], true).forResult();
 
-						// step 6
-						if (result.links && result.links.length) {
-							const next = player.gain(result.links, "gain2");
-							next.gaintag.add("nianshoumrfz2");
-							await next;
-						}
+						if((links?.length || 0) < 1) return;
 
-						// step 7
-						if (result.cards && result.cards.length) {
-							const cards3 = player.getCards("h", card => {
-								return card.hasGaintag("nianshoumrfz2");
-							});
-							event.target.addToExpansion(cards3, event.target, "give").gaintag.add("nianshoumrfz");
-						}
+						target.addToExpansion(links, "give").gaintag.add("nianshoumrfz");
 					},
 				},
 				eff1: {
@@ -8669,28 +8615,34 @@ export default {
 					},
 				},
 				eff2: {
+					audio:false,
 					trigger: {
-						player: "gainAfter",
+						player:"loseAfter"
 					},
 					filter: function (event, player) {
-						return (
-							event.fromStorage == true ||
-							game.hasPlayer2(function (current) {
-								var evt = event.getl(current);
-								return evt && evt.xs && evt.xs.length > 0;
-							})
-						);
+						const tags = event.gaintag_map;
+						if(!tags) return false;
+						return event.type === "loseToExpansion" && event.cards.some(card=>{
+							const id = (card.cardid || "");
+							return Object.keys(tags).includes(id) && tags[id].includes("nianshoumrfz");
+						});
 					},
+					lastDo:true,
 					direct: true,
 					charlotte: true,
 					async content(event, trigger, player) {
-						if (Array.isArray(trigger.cards))
-							for (var i of trigger.cards) {
-								var names = i.name + "_skill";
-								if (lib.skill[names] && player.hasSkill(names)) {
-									player.removeSkill(names);
-								} //QQQ
+						const tags = trigger.gaintag_map;
+						if(!tags) return;
+						const cards = trigger.cards.filter(card=>{
+							const id = (card.cardid || "");
+							return Object.keys(tags).includes(id) && tags[id].includes("nianshoumrfz");
+						})
+						for(const card of cards){
+							const name = card.name + "_skill";
+							if(lib.skill[name] && player.hasSkill(name)){
+								player.removeSkill(name);
 							}
+						}
 					},
 				},
 				eff3: {

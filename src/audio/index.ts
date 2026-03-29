@@ -7,6 +7,8 @@ import { whichWayWebPlay } from "./webPlay.ts";
 import { whichWayWebPlayDie } from "./webPlayDie.ts";
 import { whichWayAPIOverride } from "../override/index.js";
 import { whichWayToast } from "../toast/index.ts";
+import { createApp } from "vue";
+import AudioDownloadDialog from "./AudioDownloadDialog.vue";
 
 const audioSave = window.whichWaySave.audioConfig;
 
@@ -101,6 +103,25 @@ class WhichWayAudio {
 			},
 			priority: 774,
 		});
+
+		onConfig({
+			name: "whichWayAudioDownloadAllMissing_add",
+			obj: {
+				name: "downloadAllMissingAudio",
+				options: {
+					name: "<button type='button'>一键下载所有缺失配音</button>",
+					intro: "自动检测并下载所有缺失的技能配音和死亡配音",
+					clear: true,
+					onclick: async function () {
+						const allLangs = await whichWayAudio.showDownloadModeDialog();
+						if (allLangs !== null) {
+							await whichWayAudio.downloadAllMissingAudio(undefined, allLangs);
+						}
+					},
+				},
+			},
+			priority: 860,
+		});
 	}
 
 	/**
@@ -186,9 +207,151 @@ class WhichWayAudio {
 			whichWayToast.removeToastById(`whichWayAudioDownLoad_${file}`);
 		}
 
-		if(!dieAudio) await this.initAudio(skill,char);
+		if (!dieAudio) await this.initAudio(skill, char);
 		//@ts-ignore
 		else await this.initDieAudio(get.character(char));
+	}
+
+	/**
+	 * 获取所有缺失配音的信息列表
+	 * @param {boolean} [allLangs=false] 是否获取所有可用语言的配音，而不仅仅是当前语言
+	 * @returns {Promise<Array<{type: 'skill'|'die', skill?: string, char: string, urls: string[], lang: string}>>}
+	 */
+	async getMissingAudioList(
+		allLangs: boolean = false
+	): Promise<Array<{ type: "skill" | "die"; skill?: string; char: string; urls: string[]; lang: string }>> {
+		const tasks: Array<{ type: "skill" | "die"; skill?: string; char: string; urls: string[]; lang: string }> = [];
+		const allChars = window.whichWaySave.allCharacters;
+
+		for (const char of allChars) {
+			const charData = get.character(char);
+			if (!charData?.skills) continue;
+
+			const avaiableLangs = whichWayArknight.getAviableLangs(char) || [];
+			const defaultLang = this.getCharacterLang(char);
+			const langsToCheck = allLangs ? avaiableLangs.filter(l => l !== "CUSTOM") : [defaultLang];
+
+			for (const skill of charData.skills) {
+				if (!window.whichWaySave.allSkills.includes(skill)) continue;
+
+				for (const lang of langsToCheck) {
+					if (lang === "CUSTOM") continue;
+					if (!(await this.exsitAudio(skill, char)) || allLangs) {
+						const info = lib.skill[skill];
+						let voiceTitles: string[] = [];
+
+						if (Array.isArray(info.audio)) {
+							voiceTitles = info.audio;
+						} else if (typeof info.audio === "number") {
+							const audioConfig = window.whichWaySave.audioConfig;
+							const cacheKey = `${skill}_${lang}`;
+							voiceTitles =
+								audioConfig.onlineVoicesTitle[cacheKey] ||
+								["选中干员1", "选中干员2", "部署1", "部署2", "作战中1", "作战中2", "作战中3", "作战中4"].randomGets(2);
+							audioConfig.onlineVoicesTitle[cacheKey] = voiceTitles;
+						}
+
+						const urls = voiceTitles.map(title => this.compileVoicePath(char, lang, title));
+						if (urls.length > 0) {
+							tasks.push({
+								type: "skill",
+								skill,
+								char,
+								urls,
+								lang,
+							});
+						}
+					}
+				}
+			}
+
+			for (const lang of langsToCheck) {
+				if (lang === "CUSTOM") continue;
+				const dieFilePath = `audio:${lang}/die/${char}.mp3`;
+				const fileExists = await whichWayFile.exsitFile(dieFilePath);
+
+				if (!fileExists || allLangs) {
+					const urls = ["行动失败"].map(title => this.compileVoicePath(char, lang, title));
+					if (urls.length > 0) {
+						tasks.push({
+							type: "die",
+							char,
+							urls,
+							lang,
+						});
+					}
+				}
+			}
+		}
+
+		return tasks;
+	}
+
+	/**
+	 * 显示下载模式选择对话框
+	 * @returns {Promise<boolean|null>} 用户选择：true=下载所有语言，false=仅下载当前语言，null=取消
+	 */
+	async showDownloadModeDialog(): Promise<boolean | null> {
+		return new Promise(resolve => {
+			const container = document.createElement("div");
+			document.body.appendChild(container);
+
+			const app = createApp(AudioDownloadDialog, {
+				onSelect: (mode: boolean) => {
+					app.unmount();
+					container.remove();
+					resolve(mode);
+				},
+				onClose: () => {
+					app.unmount();
+					container.remove();
+					resolve(null);
+				},
+			});
+
+			app.mount(container);
+		});
+	}
+
+	/**
+	 * 一键下载所有缺失配音
+	 * @param {Function} [onProgress] 进度回调函数 (current: number, total: number, info: string) => void
+	 * @param {boolean} [allLangs] 是否下载所有语言，true=所有语言，false=仅当前语言
+	 */
+	async downloadAllMissingAudio(onProgress?: (current: number, total: number, info: string) => void, allLangs?: boolean): Promise<void> {
+		const tasks = await this.getMissingAudioList(allLangs ?? false);
+
+		if (tasks.length === 0) {
+			whichWayToast.showToast("没有发现缺失的配音文件", 3000, "topRight", "whichWayAudioDownloadAll");
+			return;
+		}
+
+		const langLabel = allLangs ? "所有可用语言" : this.getCharacterLang(tasks[0]?.char);
+
+		whichWayToast.showToast(`发现 ${tasks.length} 个缺失配音（${langLabel}），开始下载...`, 5000, "topRight", "whichWayAudioDownloadAll");
+
+		let successCount = 0;
+		let failCount = 0;
+
+		for (let i = 0; i < tasks.length; i++) {
+			const task = tasks[i];
+			const current = i + 1;
+
+			if (onProgress) {
+				onProgress(current, tasks.length, `正在下载 ${task.char}${task.skill ? ` - ${task.skill}` : " 死亡配音"} [${task.lang}]`);
+			}
+
+			try {
+				await this.downloadAudio(task.skill || "", task.char, task.urls, task.lang, task.type === "die");
+				successCount++;
+			} catch (e) {
+				failCount++;
+				console.warn(`下载失败: ${task.char}${task.skill ? ` - ${task.skill}` : " 死亡配音"}`, e);
+			}
+		}
+
+		const message = `下载完成！成功 ${successCount} 个${failCount > 0 ? `，失败 ${failCount} 个` : ""}`;
+		whichWayToast.showToast(message, 5000, "topRight", "whichWayAudioDownloadAll");
 	}
 
 	/**
@@ -336,10 +499,10 @@ class WhichWayAudio {
 			if (await this.exsitAudio(skill, char)) {
 				info.audio = `ext:WhichWay/audio/${lang}:${audio}`;
 				delete info.whichWayWebPlay;
-			} else if(lang !== "CUSTOM"){
+			} else if (lang !== "CUSTOM") {
 				info.whichWayWebPlay = new whichWayWebPlay(skill, char);
 			} else {
-				console.warn(`[whichWayAudio] 角色 ${char} 的技能 ${skill} 的语言设置为 ${lang}，但音频文件不存在！`)
+				console.warn(`[whichWayAudio] 角色 ${char} 的技能 ${skill} 的语言设置为 ${lang}，但音频文件不存在！`);
 			}
 		} else if (typeof audio === "string") {
 			if (audio.startsWith("ext:")) {
@@ -347,7 +510,7 @@ class WhichWayAudio {
 				const num = info.audio.split(":")[2];
 				info.audio = `ext:WhichWay/audio/${lang}:${num}`;
 				if (!(await this.exsitAudio(skill, char))) {
-					if(lang !== "CUSTOM") info.whichWayWebPlay = new whichWayWebPlay(skill, char);
+					if (lang !== "CUSTOM") info.whichWayWebPlay = new whichWayWebPlay(skill, char);
 				} else delete info.whichWayWebPlay;
 				return;
 			}
@@ -357,7 +520,7 @@ class WhichWayAudio {
 			info.audio = `ext:WhichWay/audio/${lang}:${audio.length}`;
 			if (!(await this.exsitAudio(skill, char))) {
 				//@ts-ignore
-				if(lang !== "CUSTOM") info.whichWayWebPlay = new whichWayWebPlay(skill, char, audio);
+				if (lang !== "CUSTOM") info.whichWayWebPlay = new whichWayWebPlay(skill, char, audio);
 			} else delete info.whichWayWebPlay;
 		}
 	}
@@ -373,10 +536,10 @@ class WhichWayAudio {
 		char.dieAudios = [true, whichWayFile.compilePath(`audio:${this.getCharacterLang(name)}/die/${name}.mp3`)];
 
 		if (!(await this.exsitAudio(null!, name, true))) {
-			if(whichWayArknight.inArknightChars(name)) char.whichWay.dieAudio = new whichWayWebPlayDie(char);
-		} else{
+			if (whichWayArknight.inArknightChars(name)) char.whichWay.dieAudio = new whichWayWebPlayDie(char);
+		} else {
 			//@ts-ignore
-			if(char.whichWay.dieAudio) char.whichWay.dieAudio = undefined;
+			if (char.whichWay.dieAudio) char.whichWay.dieAudio = undefined;
 		}
 	}
 
