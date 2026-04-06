@@ -5,11 +5,11 @@ import { onExtension, onSetDev } from "./hooks/index.js";
 const whichWayVersionInfo = {
 	noname: {
         //最佳版本
-		new: "1.11.2",
+		new: "1.11.3",
         //最低版本
-		over: "1.11.2",
+		over: "1.11.3",
 	},
-	ext: "1.2",
+	ext: "1.3",
 };
 
 class WhichWayVersion {

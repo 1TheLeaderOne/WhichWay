@@ -3,6 +3,7 @@ import { lib, game, ui, get, ai, _status } from "noname";
 let info = {
 	intro: [
 		"新增干员：颉、复奏、贝洛内",
+		"整合了群友（Flandre）的皮肤包",
 		"删除白面鸮重复的皮肤",
 		"新增“一键下载缺失配音”的功能",
 		"重构WhichWayTips组件的逻辑",
@@ -19,7 +20,7 @@ let info = {
 		"修复特克诺【塑偶】无法正确切换角色的bug",
 		"修复因AI修复而造成迷迭香【念手】、令【诗形】的bug"
 	],
-	player: ["jiemrfz","fuzoumrfz"],
+	player: ["jiemrfz","fuzoumrfz","beiluoneimrfz"],
 	cards: [],
 };
 

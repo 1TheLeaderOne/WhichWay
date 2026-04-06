@@ -235,7 +235,7 @@ interface WhichWayCharacterPrototype {
 	isNull?: boolean;
 }
 
-declare type WhichWayCharacterPackNames = "epicSJZX" |"legendSJZX"|"especialSJZX"|"plotSJZX"|"specialSJZX"|"rareSJZX"|"mediocreSJZX"|"normalSJZX";
+declare type WhichWayCharacterPackNames = "epicSJZX" | "legendSJZX" | "especialSJZX" | "plotSJZX" | "specialSJZX" | "rareSJZX" | "mediocreSJZX" | "normalSJZX";
 
 declare interface WhichWayCharacter extends WhichWayCharacterPrototype {
 	/**
@@ -280,7 +280,7 @@ declare interface WhichWayObjectificationCharacterPack {
 interface SkillFieldOverrides {
 	audio?: number | string | boolean | [string, number] | Array<AudioTitle>;
 	locked?: boolean | ((skill: string, player: Player) => boolean);
-	filter?:(event: GameEvent, player: Player,name:string,target:Player)=>any;
+	filter?: (event: GameEvent, player: Player, name: string, target: Player) => any;
 	subSkill?: Record<string, ExtendedSkill>;
 }
 

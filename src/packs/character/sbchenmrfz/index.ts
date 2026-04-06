@@ -39,7 +39,8 @@ skill({
 			if (!Array.isArray(adjoins) || adjoins.length < 1) return;
 			if (adjoins.length < 2) {
 				const result = await player
-					.chooseBool(`【霄式】:是否视为使用一张${get.translation(adjoins[0])}(无距离次数限制)？`)
+					.chooseBool()
+					.set("prompt",`【霄式】:是否视为使用一张${get.translation(adjoins[0])}(无距离次数限制)？`)
 					.set("ai", () => {
 						const player = get.player();
 						const card = get.event().adjoin as VCard;
@@ -93,7 +94,8 @@ skill({
 		async content(event, trigger, player) {
 			const { name, nature } = event.cost_data;
 			const { cards: [card] = [] } = await player
-				.chooseUseTarget({ name: name, nature: nature })
+				.chooseUseTarget()
+				.set("card",{name: name, nature: nature})
 				.set("forced", true)
 				.set("addCount", false)
 				.set("nodistance", true)

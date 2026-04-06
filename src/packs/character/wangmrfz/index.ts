@@ -89,7 +89,8 @@ const years: Record<string, ExtendedSkill> = {
 		},
 		async content(event, trigger, player) {
 			await player
-				.chooseUseTarget({ name: "sha", nature: "stab", isCard: true })
+				.chooseUseTarget()
+				.set("card",{ name: "sha", nature: "stab", isCard: true })
 				.set("prompt", `望：视为使用一张刺【杀】`)
 				.set("prompt2", whichWayUtil.colorize("#r眼观全局，胜负不在一处。#"))
 				.set("addCount", false)
@@ -165,7 +166,8 @@ const years: Record<string, ExtendedSkill> = {
 			if (!result.links) return;
 			const name = result.links[0][2];
 			player
-				.chooseUseTarget({ name: name, isCard: true })
+				.chooseUseTarget()
+				.set("card",{ name: name, isCard: true })
 				.set("forced", true)
 				.set("prompt", `颉：视为使用一张你本回合使用过的基本牌`)
 				.set("prompt2", whichWayUtil.colorize("#r就这样吧#"))
@@ -259,7 +261,9 @@ const years: Record<string, ExtendedSkill> = {
 		audio: "qizaomrfz",
 		async content(event, trigger, player) {
 			const result = await player
-				.chooseControl("basic", "trick", "equip")
+				.chooseControl({
+					controls:["basic", "trick", "equip"]
+				})
 				.set("prompt", "余：选择从牌堆中获得任意类型的一张牌。")
 				.set("prompt2", whichWayUtil.colorize("#r热锅冷油，火候正好#"))
 				.set("ai", function () {
@@ -275,9 +279,12 @@ const years: Record<string, ExtendedSkill> = {
 				.forResult();
 			const card = get.cardPile(function (card) {
 				return get.type(card, "trick") == result.control;
-			});
+			}) as Card;
 			if (card) {
-				await player.gain(card, "gain2", "log");
+				await player.gain({
+					cards:[card],
+					animate:"gain2"
+				});
 			}
 		},
 	},
@@ -386,7 +393,10 @@ skill({
 			}
 
 			if (gains.length) {
-				await player.gain(gains, "gain2", "log");
+				await player.gain({
+					cards: gains,
+					animate: "gain2",
+				});
 			} else {
 				player.chat("你布局了个什么？？？");
 			}
