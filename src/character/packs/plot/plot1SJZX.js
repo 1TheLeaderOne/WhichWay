@@ -16,7 +16,7 @@ export default {
 		qiaojiakelifumrfz: ["male", "gemrfz", 4, ["chongxiemrfz", "qj_chongjimrfz", "leitingmrfz"], []],
 		puruisaisimrfz: ["female", "qianmrfz", 3, ["qianmianmrfz", "neihuamrfz"], []],
 		shuangwangmrfz: ["female", "kaizidaiermrfz", 8, ["chenke1mrfz", "chenke2mrfz", "chenke3mrfz", "gujimrfz", "jiangqingmrfz"], []],
-		keluxiermrfz: ["female", "bamrfz", 4, ["fuzhimrfz", "kuorongmrfz"], []],
+		plot_keluxiermrfz: ["female", "bamrfz", 4, ["fuzhimrfz", "kuorongmrfz"], []],
 		minermrfz: {
 			group: "wumrfz",
 			sex: "male",

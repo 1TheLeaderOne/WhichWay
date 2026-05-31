@@ -382,10 +382,7 @@ class WhichWayUtil {
 			try {
 				const fnStr = Function.prototype.toString.call(fn).trim();
 				if (fnStr.startsWith("function") || fnStr.startsWith("async function")) {
-					console.warn(
-						"[measureExecutionTime] Detected a regular function. " +
-							"Consider using an arrow function to avoid unexpected `this` binding."
-					);
+					console.warn("[measureExecutionTime] Detected a regular function. " + "Consider using an arrow function to avoid unexpected `this` binding.");
 				}
 			} catch (e) {}
 		}
@@ -400,6 +397,36 @@ class WhichWayUtil {
 		}
 
 		return { result, duration };
+	}
+
+	/**
+	 * 播放音频
+	 * @param {string} url - 音频文件的URL
+	 * @param {boolean} [compilePath=true] - 是否编译路径
+	 */
+	async playSound(url,compilePath = true) {
+		if (typeof url !== "string") {
+			console.error("url must be a string");
+			return;
+		}
+
+		url = compilePath ? window.whichWay.file.compilePath(url) : url;
+
+		const audio = new Audio(url);
+
+		const cleanup = () => {
+			audio.remove();
+			audio.removeEventListener("ended", cleanup);
+			audio.removeEventListener("error", cleanup);
+		};
+
+		audio.addEventListener("ended", cleanup);
+		audio.addEventListener("error", cleanup);
+
+		const playPromise = audio.play();
+		if (playPromise !== undefined) {
+			playPromise.catch(cleanup);
+		}
 	}
 }
 
