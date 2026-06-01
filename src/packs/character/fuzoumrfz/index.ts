@@ -32,12 +32,12 @@ skill({
             source:"damageSource"
         },
         filter(event, player, name, target) {
-            return player.getHistory("lose",(evt:GameEvent)=>event.cards.map(i=>i.cardid).some((id:any)=>evt.gaintag_map[id]?.includes("visible_mutuanmrfz"))).length>0;
+            return player.getHistory("lose",(evt:GameEvent)=>event.cards.map(i=>i.cardid).some((id:any)=>evt.gaintag_map?.[id]?.includes("visible_mutuanmrfz"))).length>0;
         },
         async content(event,trigger,player){
-            const card = get.cardPile(card=>get.color(card)==="black");
+            const card = get.cardPile(card=>get.color(card)==="black") as Card;
             if(card){
-                player.gain(card);
+                player.gain({cards:[card]});
             } else {
                 player.chat("牌堆中没有黑色牌!");
             }

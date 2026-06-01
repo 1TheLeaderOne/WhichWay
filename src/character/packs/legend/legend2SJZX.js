@@ -1312,7 +1312,9 @@ export default {
 						for (let i = 0; i < 5; i++) {
 							let targets = game.filterPlayer(c => isMinHp(c, copy) && c !== player);
 							await player
-								.chooseUseTarget({ name: "sha", isCard: true })
+								.chooseUseTarget({
+									card:get.autoViewAs({name:"sha"})
+								})
 								.set("filterTarget", (card, player, target) => {
 									return targets.includes(target);
 								})
@@ -1320,7 +1322,7 @@ export default {
 								.set("nodistance", true)
 								.set("addCount", false);
 						}
-						player.loseMaxHp(2);
+						player.loseMaxHp({num:2});
 
 						function isMinHp(player, players, only, raw) {
 							return players.every(value => {
@@ -2554,7 +2556,7 @@ export default {
 							return evt.cards && evt.cards.some(card => result.includes(card));
 						});
 					})
-					.then(() => {
+					.then(async (event, trigger, player) => {
 						game.broadcastAll(player => {
 							delete player.storage.xinyunmrfz;
 							delete player.storage.xinyunmrfz_ban;
@@ -3506,11 +3508,12 @@ export default {
 				if (name.length === 1) prompt = prompt + `【${get.translation(name[0])}】`;
 				else prompt = prompt + `【${get.translation(name[0])}】或【${get.translation(name[1])}】`;
 				await player
-					.chooseToUse(target)
+					.chooseToUse()
+					.set("target",target)
 					.set("prompt", prompt)
 					.set("filterCard", (card, player, event) => {
 						//@ts-ignore
-						return get.event().namex.includes(get.name(card));
+						return get.event()?.namex?.includes(get.name(card));
 					})
 					.set("namex", name);
 				if (player.storage.pingyimrfz_check) {

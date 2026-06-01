@@ -639,7 +639,9 @@ export default {
 				const targets = trigger.list.filter(char => char !== player);
 				const random = whichWayUtil.getRandomNumber();
 				await player
-					.chooseUseTarget({ name: "sha", isCard: true, storage: { tiankonghe_zhenlimrfz: random } })
+					.chooseUseTarget({
+						card:get.autoViewAs({ name: "sha", storage: { tiankonghe_zhenlimrfz: random } }),
+					})
 					.set("forced", true)
 					.set("addCount", false)
 					.set("nodistance", true)
@@ -1241,10 +1243,12 @@ export default {
 					.forResult();
 				if (cards && cards.length > 0) {
 					await target.give(cards, player, true);
-					player.chooseUseTarget({ name: "tao", isCard: true }).set("forced", true);
+					player.chooseUseTarget({
+						card:get.autoViewAs({name:"tao"})
+					}).set("forced", true);
 				} else {
 					player.disableSkill("hanshengmrfz", ["hanshengmrfz"]);
-					player.when({ global: "phaseEnd" }).then(() => {
+					player.when({ global: "phaseEnd" }).then(async (event,trigger,player) => {
 						player.enableSkill("hanshengmrfz");
 					});
 				}

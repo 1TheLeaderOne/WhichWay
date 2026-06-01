@@ -2045,8 +2045,8 @@ export default {
 							.forResult();
 						if (result.targets) {
 							player.line(result.targets);
-							if (trigger.targets.includes(event.targets[0])) trigger.targets.removeArray(event.targets);
-							else trigger.targets.addArray(event.targets);
+							if (trigger.targets.includes(result.targets[0])) trigger.targets.removeArray(result.targets);
+							else trigger.targets.addArray(result.targets);
 						}
 					},
 				},
@@ -3333,7 +3333,7 @@ export default {
 				if (result.targets) {
 					player.line(result.targets);
 					result.targets[0].damage();
-					if (result.targets[0].hp > player.hp || player.getExpansions("xuyingmrfz").length >= 3) event.finish();
+					if (result.targets[0].hp > player.hp || player.getExpansions("xuyingmrfz").length >= 3) return;
 				}
 
 				if (player.countCards("he") && player.getExpansions("xuyingmrfz").length >= 3) return;
@@ -3343,7 +3343,11 @@ export default {
 					.set("ai", card => 6 - get.value(card))
 					.forResult();
 				if (cards && cards.length) {
-					player.addToExpansion(cards, player, "giveAuto").gaintag.add("xuyingmrfz");
+					player.addToExpansion({
+						cards:cards,
+						source:player,
+						animate:"giveAuto",
+					}).gaintag.add("xuyingmrfz")
 				}
 			},
 		},

@@ -8,9 +8,9 @@ export default defineConfig(({ mode }) => ({
 	define: {
 		"process.env.NODE_ENV": JSON.stringify(mode),
 	},
-	resolve:{
-		alias:{
-			"@":path.resolve(__dirname, '../../../apps/core/noname'),
+	resolve: {
+		alias: {
+			"@": path.resolve(__dirname, "../../../apps/core/noname"),
 		},
 	},
 	plugins: [
@@ -27,7 +27,8 @@ export default defineConfig(({ mode }) => ({
 				{ src: "css", dest: "" },
 				{ src: "./src/updateLog/updateContent.txt", dest: "./src/updateLog/" },
 				{ src: "README.md", dest: "" },
-				{ src:"vedio", dest: "" }
+				{ src: "vedio", dest: "" },
+				{ src: "src/card/index.js", dest: "src/card/" },
 			],
 		}) as PluginOption,
 	],
@@ -44,7 +45,7 @@ export default defineConfig(({ mode }) => ({
 		emptyOutDir: true,
 		rollupOptions: {
 			preserveEntrySignatures: "strict",
-			external: [/^noname(\/.*)?$/, "vue", "pinyin-pro"],
+			external: [/^noname(\/.*)?$/, "vue", "pinyin-pro", /src\/card\/index\.js$/],
 			output: {
 				preserveModules: true,
 				preserveModulesRoot: "./",

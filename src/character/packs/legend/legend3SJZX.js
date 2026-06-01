@@ -285,7 +285,9 @@ export default {
 			async content(event, trigger, player) {
 				const name = player.countCards("h") === 2 ? "wuzhong" : "huogong";
 				await player
-					.chooseUseTarget({ name: name })
+					.chooseUseTarget({
+						card:get.autoViewAs({name:name})
+					})
 					.set("forced", true)
 					.set("prompt", `请选择【${get.translation(name)}】的目标`)
 					.forResult();

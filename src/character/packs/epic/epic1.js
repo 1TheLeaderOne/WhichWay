@@ -947,7 +947,7 @@ export default {
 
 				// step 1 & 2 loop (original event.goto(1))
 				while (event.targets.length && event.targetx.countCards("he") > 0) {
-					const currentTarget = event.target[0];
+					const currentTarget = event.targets[0];
 					const result = await event.targetx
 						.chooseCard("【导流】:请交给" + get.translation(currentTarget) + "一张牌", "he")
 						.set("forced", true)
@@ -10067,9 +10067,9 @@ export default {
 				});
 
 				while (cards.length) {
-					let card = { name: cards.shift(), isCard: true };
+					let card = get.autoViewAs({ name: cards.shift(), isCard: true });
 					if (player.hasUseTarget(card)) {
-						await player.chooseUseTarget(card).set("prompt2", `待使用：${get.translation(cards)}`);
+						await player.chooseUseTarget({card:card}).set("prompt2", `待使用：${get.translation(cards)}`);
 					}
 				}
 			},

@@ -4393,7 +4393,7 @@ export default {
 							var next = game.createEvent("kuxiumrfz_draw", false, _status.event.getParent());
 							next.cards = links.cards;
 							next.player = player;
-							next.setContent(function () {
+							next.setContent(async function (event,trigger,player) {
 								let num = player.getCards("j").length;
 								if (num > 0) player.draw(num);
 							});
@@ -6502,7 +6502,7 @@ export default {
 			direct: true,
 			async content(event, trigger, player) {
 				const {
-					result: { cards, targets },
+					cards, targets
 				} = await player
 					.chooseCardTarget({
 						prompt: `【射祖】:你可以弃置一张‘死魂灵’并对一名距离${get.translation(trigger.player)}不大于3的角色（不能是你或${get.translation(trigger.player)}）造成一点火焰伤害`,
@@ -6519,11 +6519,12 @@ export default {
 					})
 					.set("targetx", trigger.player)
 					.forResult();
-				if (!cards || !targets) return;
-				//@ts-ignore
-				player.logSkill("shezumrfz", targets[0]);
-				player.discard(cards);
-				targets[0].damage(player, "fire");
+				if(cards && targets){
+					//@ts-ignore
+					player.logSkill("shezumrfz", targets[0]);
+					player.discard({cards:cards});
+					targets[0].damage({source:player,nature:"fire"});
+				}
 			},
 		},
 
@@ -7143,11 +7144,10 @@ export default {
 						})
 						.then(async (event, trigger, player) => {
 							if (trigger.name == "damage") {
-								trigger.num += number;
+								trigger.num += num;
 							}
 							player.storage.newjiyinmrfz_tmp.remove(trigger.card);
-						})
-						.vars({ number: num });
+						});
 				}
 			},
 			group: "newjiyinmrfz_sha",
@@ -7842,7 +7842,7 @@ export default {
 				return get.attitude(player, event.player) < 0;
 			},
 			async content(event, trigger, player) {
-				const { result } = await player.chooseToCompare(trigger.player).forResult();
+				const result = await player.chooseToCompare(trigger.player).forResult();
 				if (result.bool) {
 					var discards = lib.skill.zheqimrfz_eff2.getDiscard(trigger);
 					const { links } =
@@ -7877,7 +7877,11 @@ export default {
 							false
 						)
 					) {
-						player.useCard({ name: "sha", nature: "thunder" }, cards, trigger.player);
+						player.useCard({
+							card:get.autoViewAs({name:"sha",nature:"thunder"}),
+							cards:cards,
+							targets:[trigger.player]
+						});
 					}
 				}
 			},
