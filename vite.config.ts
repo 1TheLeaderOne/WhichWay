@@ -29,6 +29,7 @@ export default defineConfig(({ mode }) => ({
 				{ src: "README.md", dest: "" },
 				{ src: "vedio", dest: "" },
 				{ src: "src/card/index.js", dest: "src/card/" },
+				{ src: ".gitignore",dest:""}
 			],
 		}) as PluginOption,
 	],
