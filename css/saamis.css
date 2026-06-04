@@ -1,0 +1,1497 @@
+/* 高亮 */
+.highlighted_yellow {
+  background-color: lightyellow;
+}
+
+.highlighted_green {
+  background-color: lightgreen;
+}
+
+.highlighted_red {
+  background-color: lightcoral;
+}
+
+.highlighted_black {
+  background-color: rgba(0, 0, 0);
+}
+
+/* 文字设置 */
+.rightSJZX {
+  display: flex;
+  justify-content: right;
+  align-items: center;
+}
+
+.leftSJZX {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+}
+
+.centerSJZX {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.underlineSJZX {
+  text-decoration: underline;
+}
+
+/* 对话框 */
+.dialogBox {
+  width: auto;
+  height: auto;
+}
+
+.dialogBox-name {
+  width: auto;
+  height: 20%;
+  font-size: large;
+  background-image: url("../image/mode/rougelike/Saamis/orther/dialogBox2.png");
+  background-size: 100% 100%;
+  position: relative;
+  float: left;
+}
+
+.dialogBox-text {
+  width: 100%;
+  height: auto;
+  font-size: medium;
+  background-image: url("../image/mode/rougelike/Saamis/orther/dialogBox.png");
+  background-size: 100% 100%;
+  position: relative;
+  float: left;
+  word-wrap: break-word;
+  white-space: normal;
+  color: rgb(100, 108, 116);
+  max-width: 100%;
+  min-height: 40%;
+  padding-top: 2.5%;
+  padding-left: 2.5%;
+}
+
+/* 杂七杂八 */
+.display-none {
+  display: none !important;
+}
+
+.lockedBoxSJZX {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 99;
+}
+
+.lockedBoxSJZX .lockedBoxImage {
+  width: 20%;
+  padding-bottom: 40%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-size: 100% 100%;
+  background-image: url("../image/mode/rougelike/Saamis/leftBottomButton/culture/locked.png");
+}
+
+.lockedBoxSJZX .introBox {
+  width: 100%;
+  height: 30%;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-items: center;
+  justify-content: center;
+  bottom: 10%;
+}
+
+.selectedSJZX {
+  box-shadow: rgba(0, 0, 0, 0.2) 0 0 0 1px, rgba(255, 0, 0, 0.4) 0 0 5px,
+    rgba(255, 0, 0, 0.4) 0 0 12px, rgba(227, 216, 216, 0.8) 0 0 15px !important;
+  transform: scale(1.1);
+}
+
+.confirmSJZX {
+  width: auto;
+  height: auto;
+  background-image: url("../image/mode/rougelike/Saamis/orther/confirm.png");
+  background-size: 100% 100%;
+  position: absolute;
+  bottom: 5%;
+}
+
+/* 挑战自然界面 */
+.battleNatrueContainSJZX {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 25;
+}
+
+.battleNatueContainLeftSJZX {
+  width: 35%;
+  height: 100%;
+  position: relative;
+  float: left;
+  margin-top: 100px;
+}
+
+.battleNatueContainLeftUpSJZX {
+  width: 100%;
+  height: 40%;
+  position: relative;
+  /* float: left; */
+  flex-wrap: wrap;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20%;
+  margin-left: 2%;
+}
+
+.battleNatrueTipsContain {
+  width: 40%;
+  height: 50%;
+  position: relative;
+}
+
+.battleNatrueTipsText {
+  font-size: 150%;
+  color: white;
+  position: relative;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.battleNatrueTipsLogo {
+  background-size: 100% 100%;
+  width: 100%;
+  height: 80%;
+  position: relative;
+}
+
+.battleNatrueBoundary {
+  background-size: 100% 100%;
+  width: 100%;
+  height: 0.5%;
+  position: relative;
+  /* position: absolute;
+    margin-top: 45%; */
+}
+
+.battleNatueContainRightSJZX {
+  width: 65%;
+  height: 85%;
+  position: relative;
+  float: left;
+  margin-top: 100px;
+  display: flex;
+  flex-wrap: wrap;
+  overflow-y: auto;
+}
+
+.battleNatueContainRightSamllBoxSJZX {
+  width: 100%;
+  height: 20%;
+  background-size: 100% 100%;
+  position: relative;
+  margin-left: 3%;
+  margin-top: 0.1%;
+}
+
+.battleNatueBoxText {
+  width: 30%;
+  height: 100%;
+  font-size: 200%;
+  color: blue;
+  position: relative;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  float: left;
+}
+
+.battleNatrueBoxBoundarySJZX {
+  width: 1%;
+  height: 80%;
+  position: relative;
+  background-size: 100% 100%;
+  float: left;
+  margin-top: 1.5%;
+}
+
+.battleNatueBox2SJZX {
+  width: 40%;
+  height: 80%;
+  position: relative;
+  float: left;
+  margin-left: 3%;
+  margin-top: 1.5%;
+}
+
+.battleNatueAdditionSJZX {
+  width: 40%;
+  height: 20%;
+  background-size: 100% 100%;
+  position: relative;
+  float: left;
+  margin-top: 1.5%;
+}
+
+.battleNatueBox2Text {
+  width: 100%;
+  height: 60%;
+  font-size: 100%;
+  color: white;
+  position: relative;
+  font-family: "Courier New", Courier, monospace;
+  position: relative;
+  float: left;
+}
+
+/* 前瞻性投资 */
+.cannotImageSJZX {
+  width: 100%;
+  height: 80%;
+  background-size: 100% 100%;
+  position: relative;
+  margin-top: 5%;
+}
+
+.cannotIntro {
+  height: auto;
+  width: 100%;
+  position: relative;
+  float: left;
+  display: flex;
+  flex-direction: column;
+}
+
+.cannotIntro .title {
+  height: 40%;
+  width: 60%;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+}
+
+.cannotIntro .title .logo {
+  height: 100%;
+  width: 10%;
+  position: relative;
+  float: left;
+  background-size: 100% 100%;
+  background-image: url("../image/mode/rougelike/Saamis/leftBottomButton/cannot/investmentLogo.png");
+}
+
+.cannotIntro .title .text {
+  height: auto;
+  width: auto;
+  font-size: 200%;
+  color: white;
+  font-weight: bold;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Courier New", Courier, monospace;
+  float: left;
+}
+
+.cannotIntro .introBox {
+  height: auto;
+  width: 80%;
+  float: left;
+  position: relative;
+  margin-top: 1%;
+  margin-left: 10%;
+}
+
+.cannotIntro .introBox .text {
+  font-size: 100%;
+  color: rgb(132, 122, 122);
+  font-weight: bold;
+}
+
+.cannotPhase {
+  width: 10%;
+  height: 60%;
+  float: left;
+  position: relative;
+  margin-top: 3%;
+}
+
+.cannotPhaseText {
+  width: 50%;
+  height: 100%;
+  float: left;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.cannotPhaseText .text {
+  height: auto;
+  width: 100%;
+  font-size: medium;
+  color: rgb(52, 199, 23);
+  position: relative;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cannotPhaseText .unlocked {
+  color: rgb(84, 77, 77);
+}
+
+.cannotPhaseImage {
+  width: 30%;
+  height: 100%;
+  float: left;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.cannotPhaseImage .diamond {
+  width: 80%;
+  padding-bottom: 80%;
+  background-color: rgb(52, 199, 23);
+  position: relative;
+  transform: rotate(45deg);
+  margin-top: 15%;
+  margin-left: 15%;
+}
+
+.cannotPhaseImage .line {
+  width: 1%;
+  height: 80%;
+  background-color: rgb(52, 199, 23);
+  position: relative;
+  margin-left: 52.5%;
+  margin-top: 18%;
+}
+
+.cannotPhaseImage .unlocked {
+  background-color: rgb(84, 77, 77);
+}
+
+.cannotMoney {
+  width: 30%;
+  height: 60%;
+  display: flex;
+  flex-wrap: wrap;
+  position: relative;
+  float: left;
+  margin-top: 3%;
+}
+
+.cannotMoney .image {
+  width: 100%;
+  height: 60%;
+  background-image: url("../image/mode/rougelike/Saamis/leftBottomButton/cannot/money.png");
+  background-size: 100% 100%;
+  position: relative;
+  float: left;
+}
+
+.cannotMoney .textBox {
+  width: 100%;
+  height: 40%;
+  position: relative;
+  float: left;
+  margin-top: 15%;
+  margin-left: 5%;
+}
+
+.cannotMoney .textBox .Box {
+  width: 40%;
+  height: 100%;
+  position: relative;
+  float: left;
+}
+
+.cannotMoney .textBox .Box .title {
+  width: 100%;
+  height: 20%;
+  font-size: large;
+  color: rgb(196, 204, 194);
+  position: relative;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cannotMoney .textBox .Box .text {
+  width: 100%;
+  height: 30%;
+  font-size: medium;
+  color: rgb(53, 227, 19);
+  position: relative;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cannotGainBuff {
+  width: 40%;
+  height: 80%;
+  overflow-y: auto;
+  position: relative;
+  float: left;
+  margin-top: 3%;
+}
+
+.cannotGainBuff .showBox {
+  width: 100%;
+  height: 15%;
+  position: relative;
+  background-size: 100% 100%;
+  background-image: url("../image/mode/rougelike/Saamis/leftBottomButton/cannot/cannotShowPhase.png");
+}
+
+.cannotGainBuff .showBox .text {
+  font-size: 200%;
+  color: white;
+}
+
+/* 文化比较 */
+.cultureContainSJZX {
+  width: 100%;
+  height: 100%;
+  background-size: 100% 100%;
+  background-image: url("../image/mode/rougelike/Saamis/leftBottomButton/culture/bg.png");
+  z-index: 25;
+}
+
+.cultureLeftSJZX {
+  width: 35%;
+  height: 100%;
+  position: relative;
+  float: left;
+  margin-top: 100px;
+}
+
+.cultureLeftSJZX .titleBox {
+  width: 80%;
+  height: 20%;
+  margin-left: 5%;
+  float: left;
+  position: relative;
+  background-size: 100% 100%;
+  background-image: url("../image/mode/rougelike/Saamis/leftBottomButton/culture/titleBg.png");
+}
+
+.cultureLeftSJZX .titleBox .image {
+  height: 100%;
+  width: 40%;
+  position: relative;
+  float: left;
+  background-size: 100% 100%;
+  background-image: url("../image/mode/rougelike/Saamis/leftBottomButton/culture/cultureLogo.png");
+}
+
+.cultureLeftSJZX .titleBox .text {
+  height: 100%;
+  width: 40%;
+  position: relative;
+  float: left;
+  margin-left: 5%;
+  color: white;
+  font-size: 200%;
+  font-weight: bold;
+}
+
+.cultureLeftSJZX .BuffListBox {
+  width: 80%;
+  height: 60%;
+  margin-left: 5%;
+  margin-top: 2%;
+  float: left;
+  position: relative;
+  background-size: 100% 100%;
+  background-image: url("../image/mode/rougelike/Saamis/leftBottomButton/culture/gainBuffListBg.png");
+}
+
+.cultureLeftSJZX .BuffListBox .textBox {
+  width: 80%;
+  height: 90%;
+  float: left;
+  position: relative;
+  overflow-y: auto;
+  margin-top: 5%;
+  margin-left: 6%;
+  margin-right: 6%;
+  margin-bottom: 5%;
+}
+
+.cultureLeftSJZX .BuffListBox .textBox .text {
+  width: 100%;
+  height: auto;
+  float: left;
+  position: relative;
+  color: rgb(150, 228, 150);
+  font-size: medium;
+  font-weight: bold;
+  margin-top: 5%;
+}
+
+.cultureRightSJZX {
+  width: 60%;
+  height: 95%;
+  position: relative;
+  float: left;
+  margin-top: 2%;
+  margin-left: 2.5%;
+  background-size: 100% 100%;
+  background-image: url("../image/mode/rougelike/Saamis/leftBottomButton/culture/chooseBuffBG.png");
+}
+
+.cultureRightSJZX .Container {
+  width: 90%;
+  height: 83%;
+  position: relative;
+  margin-top: 5%;
+  margin-left: 4%;
+  margin-right: 5%;
+  overflow-y: auto;
+  float: left;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.cultureRightSJZX .Container .PhaseBox {
+  width: 100%;
+  height: 10%;
+  position: relative;
+  margin-top: 1%;
+  float: left;
+  background-size: 100% 100%;
+  background-image: url("../image/mode/rougelike/Saamis/leftBottomButton/culture/Boundary1.png");
+}
+
+.cultureRightSJZX .Container .PhaseBox .text {
+  width: auto;
+  height: 100%;
+  position: relative;
+  color: rgb(168, 18, 227);
+  float: left;
+  font-size: larger;
+  font-weight: bold;
+  margin-left: 5%;
+}
+
+.cultureRightSJZX .Container .PhaseBox .costBox {
+  width: 40%;
+  height: 100%;
+  position: relative;
+  margin-right: 5%;
+  float: right;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.cultureRightSJZX .Container .PhaseBox .costBox .text {
+  width: auto;
+  height: 100%;
+  color: rgb(18, 63, 227);
+  font-size: 100%;
+  position: relative;
+  font-weight: bold;
+}
+
+.cultureRightSJZX .Container .PhaseBox .costBox .image {
+  width: 25px;
+  height: 25px;
+  position: relative;
+  background-size: 100% 100%;
+  background-image: url("../image/mode/rougelike/Saamis/leftBottomButton/culture/point.png");
+}
+
+.cultureRightSJZX .Container .buffBox {
+  width: 30%;
+  height: 40%;
+  position: relative;
+  float: left;
+  margin-left: 1%;
+  margin-top: 1%;
+  background-size: 100% 100%;
+  background-image: url("../image/mode/rougelike/Saamis/leftBottomButton/culture/showBuffBG.png");
+}
+
+.cultureRightSJZX .Container .buffBox .image {
+  width: 45%;
+  height: 45%;
+  position: relative;
+  float: left;
+  margin-top: 5%;
+  margin-left: 5%;
+  background-size: 100% 100%;
+}
+
+.cultureRightSJZX .Container .buffBox .title {
+  width: 45%;
+  height: 45%;
+  position: relative;
+  float: left;
+  margin-top: 5%;
+  margin-left: 1%;
+  color: red;
+  font-size: large;
+  font-weight: bold;
+}
+
+.cultureRightSJZX .Container .buffBox .unlocked {
+  color: green;
+}
+
+.cultureRightSJZX .Container .buffBox .text {
+  width: 90%;
+  height: 45%;
+  position: relative;
+  float: left;
+  margin-top: 1%;
+  margin-left: 5%;
+  color: rgb(218, 224, 188);
+  font-size: medium;
+}
+
+.cultureRightSJZX .Container .buffBoxSpecial {
+  width: 100%;
+  height: 60%;
+  position: relative;
+  float: left;
+  margin-left: 1%;
+  margin-top: 1%;
+  background-size: 100% 100%;
+  background-image: url("../image/mode/rougelike/Saamis/leftBottomButton/culture/natureGift.png");
+}
+
+.cultureRightSJZX .Container .buffBoxSpecial .image {
+  width: 30%;
+  height: 45%;
+  position: relative;
+  float: left;
+  margin-top: 5%;
+  margin-left: 5%;
+  background-size: 100% 100%;
+}
+
+.cultureRightSJZX .Container .buffBoxSpecial .free {
+  width: 25%;
+  height: 25%;
+  position: relative;
+  float: left;
+  margin-top: 5%;
+  margin-left: 1%;
+  background-size: 100% 100%;
+  background-image: url("../image/mode/rougelike/Saamis/leftBottomButton/culture/free.png");
+}
+
+.cultureRightSJZX .Container .buffBoxSpecial .title {
+  width: 30%;
+  height: 45%;
+  position: relative;
+  float: left;
+  margin-top: 5%;
+  margin-left: 1%;
+  color: red;
+  font-size: large;
+  font-weight: bold;
+}
+
+.cultureRightSJZX .Container .buffBoxSpecial .unlocked {
+  color: green;
+}
+
+.cultureRightSJZX .Container .buffBoxSpecial .text {
+  width: 90%;
+  height: 45%;
+  position: relative;
+  float: left;
+  margin-top: 1%;
+  margin-left: 5%;
+  color: rgb(218, 224, 188);
+  font-size: medium;
+}
+
+.cultureRightSJZX .pointShow {
+  width: 90%;
+  height: 7%;
+  position: relative;
+  margin-top: 1%;
+  margin-left: 4%;
+  margin-right: 5%;
+  float: left;
+  background-size: 100% 100%;
+  background-image: url("../image/mode/rougelike/Saamis/leftBottomButton/culture/Boundary1.png");
+}
+
+.cultureRightSJZX .pointShow .showBox {
+  width: 40%;
+  height: 100%;
+  position: relative;
+  margin-left: 40%;
+  float: left;
+}
+
+.cultureRightSJZX .pointShow .showBox .image {
+  width: 20%;
+  height: 100%;
+  position: relative;
+  float: left;
+  background-image: url("../image/mode/rougelike/Saamis/leftBottomButton/culture/point.png");
+  background-size: 100% 100%;
+}
+
+.cultureRightSJZX .pointShow .showBox .text {
+  width: auto;
+  height: 100%;
+  position: relative;
+  float: left;
+  color: rgb(18, 63, 227);
+  font-size: 150%;
+  margin-left: 5%;
+}
+
+/* 雪花特效 */
+.snow-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  /* 禁止鼠标事件，确保雪花不影响页面其他元素的交互 */
+}
+
+.snowflake {
+  position: absolute;
+  top: -10px;
+  width: 5px;
+  height: 5px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.8;
+  pointer-events: none;
+  animation: fall linear infinite;
+}
+
+@keyframes fall {
+  to {
+    transform: translate(calc(-100vw + 10vw), 100vh);
+  }
+}
+
+/* 指挥经验 */
+.CommandLevel {
+  width: 10%;
+  height: 5%;
+  position: absolute;
+  left: 22%;
+  top: 2%;
+  display: flex;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  z-index: 22;
+  background-color: rgb(85, 80, 80);
+}
+
+.CommandLevel .icon {
+  width: 20%;
+  height: 100%;
+  background-size: 100% 100%;
+  position: relative;
+}
+
+.CommandLevel .text {
+  width: 80%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.CommandLevel .text .titleBox {
+  width: 100%;
+  height: 50%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-items: center;
+  position: relative;
+}
+
+.CommandLevel .text .titleBox .title {
+  font-size: 100%;
+  color: #ffffff;
+  position: relative;
+}
+
+.CommandLevel .text .valueBox {
+  width: 100%;
+  height: 48%;
+  margin-top: 2%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-items: center;
+  background-color: gray;
+  position: relative;
+}
+
+.CommandLevel .text .valueBox .value {
+  margin-left: 5%;
+  font-size: 90%;
+  color: #52efa1;
+}
+
+/* 目标生命 */
+.targetLifes {
+  width: 10%;
+  height: 5%;
+  position: absolute;
+  left: 10%;
+  top: 2%;
+  display: flex;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  z-index: 22;
+  background-color: rgb(9, 9, 126);
+}
+
+.targetLifes .icon {
+  width: 20%;
+  height: 100%;
+  background-image: url("../image/mode/rougelike/Saamis/orther/targetLifes.png");
+  /* 替换为实际图标的URL */
+  background-size: 100% 100%;
+  position: relative;
+}
+
+.targetLifes .text {
+  width: 80%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.targetLifes .text .titleBox {
+  width: 100%;
+  height: 50%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-items: center;
+  position: relative;
+}
+
+.targetLifes .text .titleBox .title {
+  font-size: 100%;
+  color: #ffffff;
+  position: relative;
+}
+
+.targetLifes .text .valueBox {
+  width: 100%;
+  height: 48%;
+  margin-top: 2%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-items: center;
+  background-color: gray;
+  position: relative;
+}
+
+.targetLifes .text .valueBox .value {
+  margin-left: 5%;
+  font-size: 90%;
+  color: #1db4ff;
+}
+
+/* 源石锭 */
+.monenySJZXBox {
+  width: 10%;
+  height: 5%;
+  display: flex;
+  position: absolute;
+  top: 2%;
+  right: 2%;
+  z-index: 22;
+}
+
+.monenySJZXBox .imageM {
+  width: 40%;
+  height: 100%;
+  position: relative;
+  background-size: 100% 100%;
+  background-color: rgb(6, 140, 39);
+  background-image: url("../image/mode/rougelike/Saamis/leftBottomButton/cannot/money.png");
+}
+
+.monenySJZXBox .textM {
+  width: 60%;
+  height: 100%;
+  position: relative;
+  background-color: gray;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  font-size: larger;
+}
+
+/* 希望 */
+.wishSJZXBox {
+  width: 10%;
+  height: 5%;
+  display: flex;
+  position: absolute;
+  top: 2%;
+  right: 14%;
+  z-index: 22;
+}
+
+.wishSJZXBox .image {
+  width: 40%;
+  height: 100%;
+  position: relative;
+  background-size: 100% 100%;
+  background-color: rgb(165, 165, 5);
+  background-image: url("../image/mode/rougelike/Saamis/orther/wish.png");
+}
+
+.wishSJZXBox .text {
+  width: 60%;
+  height: 100%;
+  position: relative;
+  background-color: gray;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  font-size: larger;
+}
+
+/* 开始选择分队界面 */
+.chooseTeamBoxSJZX {
+  width: 100%;
+  height: 80%;
+  display: flex;
+  z-index: 21;
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+  align-items: flex-end;
+  margin-top: 5%;
+  flex-wrap: nowrap;
+}
+
+/* 底部面板 */
+.FatherBottomBox {
+  width: 100%;
+  height: 10%;
+  bottom: 0px;
+  left: 0px;
+  z-index: 21;
+  position: absolute;
+  background-color: black;
+}
+
+.FatherBottomBox .teamIconShow {
+  left: 1.5%;
+  top: 0px;
+  position: relative;
+  height: 100%;
+  aspect-ratio: 1;
+  float: left;
+}
+
+.FatherBottomBox .teamIconShow .icon {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  position:absolute;
+  background-size: 100% 100%;
+  z-index: 1;
+}
+
+.FatherBottomBox .teamIconShow .difShow {
+  left: 0px;
+  bottom: 0px;
+  width: 30%;
+  aspect-ratio: 1;
+  background-size: 100% 100%;
+  background-image: url(./../image/mode/rougelike/Saamis/orther/teamIMG/icon_dif_show.png);
+  position: absolute;
+}
+
+.FatherBottomBox .teamIconShow .difShow .num {
+  width: 100%;
+  height: 100%;
+  color: white;
+  position: absolute;
+  display: flex;
+  font-size: large;
+  align-items: center;
+  justify-content: center;
+}
+
+.FatherBottomBox .collectionsIcon {
+  margin-left: 4%;
+  top: 7.5%;
+  position: relative;
+  height: 85%;
+  aspect-ratio: 1;
+  float: left;
+  background-image: url(./../image/mode/rougelike/Saamis/orther/bottom/collectionIcon.png);
+  background-size: 100% 100%;
+}
+
+.FatherBottomBox .collectionsList {
+  margin-left: 1%;
+  top: 7.5%;
+  position: relative;
+  height: 85%;
+  width: 30%;
+  float: left;
+  overflow-y: auto;
+  display: flex;
+}
+
+.collectContainer {
+  width: 20%;
+  height: 20%;
+  position: relative;
+  display: flex;
+  overflow-y: auto;
+  flex-wrap: wrap;
+  margin-top: 1%;
+  margin-left: 1%;
+  background-color: rgba(77, 76, 76, 0.8);
+  border-radius: 10px;
+}
+
+.collectContainer .colStyle {
+  width: 20% !important;
+  height: auto !important;
+  left: 1% !important;
+  top: 1% !important;
+}
+
+.collectContainer .colStyle2 {
+  left: 1% !important;
+  top: 1% !important;
+}
+
+.FatherBottomBox .prayersIcon {
+  margin-right: 2.5%;
+  top: 7.5%;
+  position: relative;
+  height: 85%;
+  aspect-ratio: 3;
+  float: right;
+  background-image: url(./../image/mode/rougelike/Saamis/orther/bottom/prayersIcon.png);
+  background-size: 100% 100%;
+}
+
+.FatherBottomBox .teamsIcon {
+  margin-right: 3%;
+  top: 7.5%;
+  position: relative;
+  height: 85%;
+  aspect-ratio: 1;
+  float: right;
+  background-image: url(./../image/mode/rougelike/Saamis/orther/bottom/teamsIcon.png);
+  background-size: 100% 100%;
+}
+
+.FatherBottomBox .operatorsIcon {
+  top: 7.5%;
+  position: relative;
+  height: 85%;
+  aspect-ratio: 1;
+  float: right;
+  background-image: url(./../image/mode/rougelike/Saamis/orther/bottom/operatorsIcon.png);
+  background-size: 100% 100%;
+}
+
+.FatherBottomBox .operatorsNums {
+  top: 7.5%;
+  position: relative;
+  height: 85%;
+  aspect-ratio: 1;
+  float: right;
+  font-size: xx-large;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.FatherBottomBox .closeIcon {
+  background-image: url(./../image/mode/rougelike/Saamis/orther/bottom/close.png) !important;
+  background-size: 100% 100%;
+}
+
+.FatherBottomBox .closeIcon::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  background: white;
+  z-index: -1;
+  box-shadow: 
+    0 0 5px rgba(255, 255, 255, 0.2),
+    0 0 10px rgba(255, 255, 255, 0.3),
+    0 0 15px rgba(255, 255, 255, 0.4),
+    0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+/* 抗干扰指数 */
+.anti-interference {
+  width: 30%;
+  height: 20%;
+  z-index: 21;
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.anti-interference .textBox {
+  width: 100%;
+  height: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: white;
+  font-size: large;
+  font-weight: bolder;
+}
+
+/* 额外增援 */
+.addtionalSupprot {
+  width: 100%;
+  height: 80%;
+  display: flex;
+  z-index: 21;
+  position: relative;
+  margin-top: 5%;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+/* 初始选择干员 */
+.initRecruit {
+  width: 80%;
+  height: 80%;
+  display: flex;
+  z-index: 21;
+  position: absolute;
+  top: 5%;
+  left: 0px;
+  align-items: flex-end;
+  justify-content: center;
+  overflow-x: auto;
+}
+
+.GoIce {
+  width: 20%;
+  height: 80%;
+  display: flex;
+  z-index: 21;
+  position: absolute;
+  top: 5%;
+  right: 0px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.GoIce .icon {
+  width: 100%;
+  aspect-ratio: 1;
+  background-size: 100% 100%;
+  background-image: url(./../image/mode/rougelike/Saamis/orther/recruit/start.png);
+  position: relative;
+}
+
+/* 招募干员 */
+.recruit {
+  width: 100%;
+  height: 90%;
+  left: 0px;
+  bottom: 10%;
+  position: absolute;
+  z-index: 22;
+  background-color: grey;
+}
+
+.recruit .title {
+  position: absolute;
+  width: 50%;
+  height: 20%;
+  top: 1%;
+  transform: translateX(50%);
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  background-color: rgba(218, 196, 196, 0.1);
+  border-radius: 10%;
+}
+
+.recruit .title .name {
+  position: relative;
+  width: 100%;
+  height: 60%;
+  align-items: flex-end;
+  justify-content: center;
+  display: flex;
+  font-size: xx-large;
+  color: black;
+  font-weight: bolder;
+}
+
+.recruit .title .wish {
+  position: relative;
+  width: 100%;
+  height: 15%;
+  display: flex;
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+
+.recruit .title .wish .icon {
+  height: 100%;
+  aspect-ratio: 1;
+  position: relative;
+  background-image: url(./../image/mode/rougelike/Saamis/orther/wish.png);
+  background-size: 100% 100%;
+}
+
+.recruit .title .wish .num {
+  width: auto;
+  height: 100%;
+  position: relative;
+  margin-left: 2px;
+  font-size: large;
+  color: yellow;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.recruit .chooseBox {
+  width: 100%;
+  height: 78%;
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-x: auto;
+}
+
+/* 干员招募中干员卡片 */
+.charRecruit {
+  width: 30%;
+  height: 100%;
+  position: relative;
+  background-image: url(./../image/mode/rougelike/Saamis/orther/recruit/charBG.png);
+  background-size: 100% 100%;
+}
+
+.charRecruit .charIMG {
+  left: 2%;
+  top: 2%;
+  width: 30%;
+  height: 40%;
+  position: absolute;
+  background-size: 100% 100%;
+  border-radius: 5%;
+}
+
+.charRecruit .charIMG .additionEff {
+  width: 80%;
+  height: 10%;
+  position: absolute;
+  left: 10%;
+  bottom: 2%;
+  font-size: medium;
+  background-color: rgba(149, 143, 143,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: red;
+}
+
+.charRecruit .refresh {
+  left: 32%;
+  top: 2%;
+  width: 20%;
+  height: 20%;
+  position: absolute;
+}
+
+.charRecruit .refresh .iconCR {
+  width: 100%;
+  height: 90%;
+  background-image: url(./../image/mode/rougelike/Saamis/orther/recruit/refresh.png);
+  background-size: 100% 100%;
+  position: relative;
+}
+
+.charRecruit .refresh .introRE {
+  width: 100%;
+  height: 10%;
+  display: flex;
+  position: relative;
+}
+
+.charRecruit .refresh .introRE .textRE {
+  height: 100%;
+  width: 100%;
+  font-size: small;
+  color: red;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.charRecruit .refresh .introRE .wishRE {
+  background-image: url(./../image/mode/rougelike/Saamis/orther/wish.png);
+  background-size: 100% 100%;
+  height: 100%;
+  aspect-ratio: 1;
+  position: relative;
+}
+
+.charRecruit .info {
+  right : 5%;
+  top:2%;
+  width: 40%;
+  height: 40%;
+  position: absolute;
+  background-size: 100% 100%;
+  background-image: url(./../image/mode/rougelike/Saamis/orther/recruit/charNameBG.png);
+}
+
+.charRecruit .info .title2 {
+  width: 90%;
+  height: 5%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  left: 2%;
+  top:2%;
+  font-size: small;
+}
+
+.charRecruit .info .name {
+  width: 90%;
+  height: 15%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  left: 2%;
+  font-size: large;
+  color: white;
+}
+
+.charRecruit .info .hpSJZX {
+  width: 90%;
+  height: 15%;
+  margin: 2%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: medium;
+  color: black;
+  position: relative;
+}
+
+.charRecruit .info .content {
+  position: relative;
+  width: 90%;
+  height: 60%;
+  left: 2%;
+  margin-top: 2%;
+  overflow-y: auto;
+  font-size: medium;
+  color: black;
+  background-color: rgba(131, 127, 127, 0.6);
+}
+
+.charRecruit .skills{
+  width: 90%;
+  height: 50%;
+  top:45%;
+  left: 2%;
+  position: absolute;
+  overflow-y: auto;
+  background-color: rgba(131, 127, 127, 0.6);
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.charRecruit .skills .skillName {
+  width: 30%;
+  height: 10%;
+  position:relative;
+  margin-top: 2%;
+  margin-left: 5%;
+  background-image: url(./../image/mode/rougelike/Saamis/orther/recruit/skills.png);
+  background-size: 100% 100%;
+}
+
+.charRecruit .skills .skillName .text {
+  top:0px;
+  left: 10%;
+  width: auto;
+  height: 100%;
+  position: absolute;
+  display: flex;
+  color: #ad7ac1;
+  font-size: medium;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.charRecruit .skills .info2 {
+  width: 98%;
+  height: auto;
+  margin-bottom: 2%;
+  margin-left: 5%;
+  position: relative;
+  color: white;
+  font-size: small;
+}

@@ -1,0 +1,801 @@
+.container-CC-SJZX {
+	width: 100%;
+	height: 100%;
+	background-size: 100% 100%;
+	z-index: 20;
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+
+.container-CC-SJZX .imageLimit {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+.camplogo-wrapper {
+	position: absolute;
+	width: 256px;
+	height: 256px;
+	left: 1%;
+    top : 8.3%;
+	z-index: -1;
+	pointer-events: none;
+}
+
+.camplogo-wrapper .arknightCamp {
+    filter: invert(1);
+	opacity: 0.3;
+}
+
+.camplogo-wrapper .img-def {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.camplogo-wrapper .img-def .group-text {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	font-size: 160px;
+	font-weight: bolder;
+	font-family: huangcao, xinwei;
+	color: #000000;
+	-webkit-text-stroke: 0.5px rgb(255, 255, 255);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.skinnameAudio-wrapper {
+	position: absolute;
+	bottom: 180px;
+	left: 1%;
+	width: 250px;
+	transition: all 0.3s ease-in-out;
+}
+
+.skinnameAudio-wrapper .imageWrapper {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 30px;
+	height: 30px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.skinnameAudio-wrapper .textWrapper {
+	position: absolute;
+	top: 0;
+	left: 25px;
+	width: calc(100% - 30px);
+	height: 30px;
+	font-size: 16px;
+	line-height: 30px;
+	text-align: center;
+	color: #f5f5f5;
+}
+
+.skinnameAudio-wrapper .collapseWrapper {
+	position: absolute;
+	top: 0;
+	right: 0;
+	height: 30px;
+	aspect-ratio: 1 / 1;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.skinnameAudio-wrapper > .skinnameWrapper,
+.skinnameAudio-wrapper > .designerWrapper
+{
+	width: 250px;
+	height: 30px;
+	background-color: rgba(0, 0, 0, 0.6);
+	overflow: hidden;
+	transition: all 0.3s ease-in-out;
+	margin-bottom: 10px;
+	position: relative;
+}
+
+.skinnameAudio-wrapper > .skinnameWrapper > .titleWrapper ,
+.skinnameAudio-wrapper > .designerWrapper > .titleWrapper
+{
+	width: 100%;
+	height: 100%;
+}
+
+.skinnameAudio-wrapper > .audioWrapper > .audioTitleWrapper {
+	width: 100%;
+	height: 100%;
+}
+
+.skinnameAudio-wrapper > .audioWrapper {
+	width: 250px;
+	height: 30px;
+	background-color: rgba(0, 0, 0, 0.6);
+	overflow: hidden;
+	transition: all 0.3s ease-in-out;
+	position: relative;
+}
+
+.skinnameAudio-wrapper > .audioWrapper > .content {
+	position: absolute;
+	width: 100%;
+	top: 40px;
+	left: 0;
+}
+
+.skinnameAudio-wrapper > .audioWrapper > .content > .selectWrapper {
+	width: 100%;
+	height: 30px;
+	position: relative;
+	margin-bottom: 10px;
+	cursor: pointer;
+}
+
+.skinnameAudio-wrapper > .audioWrapper > .content > .selectWrapper .selectTextSJZX {
+	position: absolute;
+	top: 0;
+	left: 15px;
+	height: 28px;
+	font-size: 14px;
+	line-height: 28px;
+	color: #f5f5f5;
+}
+
+.skinnameAudio-wrapper > .audioWrapper > .content > .selectWrapper > .nochoice-contentTextWrapper {
+	position: absolute;
+	top: 0;
+	left: 20px;
+	width: calc(100% - 30px);
+	height: 30px;
+	background-image: linear-gradient(to left, rgba(0, 0, 0, 0.4), transparent);
+	background-repeat: no-repeat;
+	border: 1px solid;
+	border-image: linear-gradient(to left, rgba(255, 255, 255, 0.6), transparent) 1;
+	box-sizing: border-box;
+}
+
+.skinnameAudio-wrapper > .audioWrapper > .content > .selectWrapper > .choice-contentTextWrapper {
+	position: absolute;
+	top: 0;
+	left: 20px;
+	width: calc(100% - 30px);
+	height: 30px;
+	background-color: #0097da;
+	border: 1px solid #1ac2fd;
+	box-sizing: border-box;
+}
+
+.skinnameAudio-wrapper > .audioWrapper > .content > .selectWrapper > .nochoice {
+	position: absolute;
+	top: 5px;
+	left: 10px;
+	width: 20px;
+	height: 20px;
+	background-size: 100% 100%;
+	background-color: rgba(0, 0, 0, 0.2);
+	z-index: 1;
+	border: 1px solid rgba(255, 255, 255, 0.5);
+	box-sizing: border-box;
+}
+
+.skinnameAudio-wrapper > .audioWrapper > .content > .selectWrapper > .choice {
+	position: absolute;
+	top: 5px;
+	left: 10px;
+	width: 20px;
+	height: 20px;
+	background-color: rgba(0, 0, 0, 0.2);
+	background-image: url(./../image/ui/check.png);
+	background-size: 100% 100%;
+	z-index: 1;
+	box-shadow: 0 0 5px #f5f5f5;
+}
+
+.charName-wrapper {
+	position: absolute;
+	transition: all 0.3s ease-in-out;
+	width: 25%;
+	bottom: 2%;
+	left: 1%;
+}
+
+.charName-wrapper > .hpWrapper {
+	position: relative;
+	width: 100%;
+	height: 25px;
+	display: flex;
+}
+
+.charName-wrapper > .hpWrapper > .hpNumWrapper {
+	position: relative;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	margin-right: 2%;
+}
+
+.charName-wrapper > .hpWrapper > .hpNumWrapper > .hpNumText {
+	position: relative;
+	margin-left: 4%;
+	font-size: 20px;
+	display: flex;
+	align-items: center;
+}
+
+.charName-wrapper > .hpWrapper .actualHpSJZX {
+	position: relative;
+	width: 25px;
+	height: 25px;
+	background-size: 100% 100%;
+	background-image: url("./../image/ui/actualHp.png");
+}
+
+.charName-wrapper > .hpWrapper .emptyHpSJZX {
+	position: relative;
+	width: 25px;
+	height: 25px;
+	background-size: 100% 100%;
+	background-image: url("./../image/ui/emptyHp.png");
+}
+
+.charName-wrapper > .hpWrapper .shieldSJZX {
+	position: relative;
+	width: 25px;
+	height: 25px;
+	background-size: 100% 100%;
+	background-image: url("./../image/ui/shield.png");
+}
+
+.charName-wrapper > .charNameTextWrapper {
+	position: relative;
+	width: 100%;
+	height: 60px;
+	white-space: nowrap;
+	overflow-x: auto;
+	overflow-y: hidden;
+}
+
+.charName-wrapper > .charNameTextWrapper > .charNameText {
+	position: relative;
+	font-size: 52px;
+	line-height: 60px;
+	font-family: dy_sjzx;
+	color: #fff;
+	text-shadow: -2px -2px 0 rgba(0, 0, 0, 0.3), 2px -2px 0 rgba(0, 0, 0, 0.3), -2px 2px 0 rgba(0, 0, 0, 0.3), 2px 2px 0 rgba(0, 0, 0, 0.3);
+	transition: all 0.3s ease-in-out;
+	white-space: nowrap;
+}
+
+.charName-wrapper > .charNameTitleWrapper {
+	position: relative;
+	width: 100%;
+	height: 22px;
+	white-space: nowrap;
+	overflow-x: auto;
+	overflow-y: hidden;
+}
+
+.charName-wrapper > .charNameTitleWrapper > .charNameTitle {
+	position: relative;
+	font-size: 21px;
+	line-height: 21px;
+	font-family: sans-serif;
+	color: #fff;
+	transition: all 0.3s ease-in-out;
+	overflow-x: auto;
+	overflow-y: hidden;
+	white-space: nowrap;
+}
+
+.charImageWrapper {
+	position: absolute;
+	height: 90%;
+	bottom: 0;
+	width: 30%;
+	right: 42%;
+	display: inline-block;
+}
+
+.charImageWrapper > .charImage {
+	mask-image: radial-gradient(circle at center, rgba(255, 255, 255, 1) 60%, rgba(255, 255, 255, 0) 80%);
+	mask-repeat: no-repeat;
+	mask-size: 100% 100%;
+	-webkit-mask-image: radial-gradient(circle at center, rgba(255, 255, 255, 1) 60%, rgba(255, 255, 255, 0) 80%);
+	-webkit-mask-repeat: no-repeat;
+	-webkit-mask-size: 100% 100%;
+	width: 100%;
+	aspect-ratio: 2/3;
+	background-size: cover;
+	background-position: center center;
+}
+
+.charImageWrapper > .charSkinBottomUIWrapper {
+	position: absolute;
+	width: 100%;
+	height: 10%;
+	bottom: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.charImageWrapper > .charSkinBottomUIWrapper > .buttonWrapper {
+	width: 200px;
+	height: 38px;
+	background-color: rgba(0, 0, 0, 0.6);
+	cursor: pointer;
+	vertical-align: top;
+	position: relative;
+	border: 1px solid grey;
+	border-radius: 2px;
+	box-sizing: border-box;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.charImageWrapper > .charSkinBottomUIWrapper > .buttonWrapper-enableSkinBG {
+	background-color: rgba(26, 194, 253, 0.6) !important;
+}
+
+.charImageWrapper > .charSkinBottomUIWrapper > .buttonText {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	color: white;
+	font-family: dy_sjzx;
+	font-size: 20px;
+	font-weight: bolder;
+}
+
+.displayArenaSJZX {
+	position: absolute;
+	width: 40%;
+	right: 0;
+	bottom: 0;
+	height: 80%;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.displayArenaSJZX > .skinListWrapper {
+	position: relative;
+	width: 70%;
+	height: 100px;
+	background-color: rgba(143, 143, 143, 0.5);
+	overflow: hidden;
+	box-shadow: 0 0 5px #313131;
+	margin-bottom: 5px;
+	margin-right: 29%;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+}
+
+.displayArenaSJZX > .skinListSelectedWrapper {
+	background-color: rgb(0 133 255) !important;
+	border: 2px solid rgb(255 203 0) !important;
+}
+
+.displayArenaSJZX > .skinListWrapper > .skinSelectedSJZX {
+	position: absolute;
+	bottom: -10px;
+	right: -10px;
+	width: 50px;
+	height: 50px;
+	background-image: url(./../image/ui/skinSelect.png);
+	background-size: cover;
+	opacity: 0.6;
+}
+
+.displayArenaSJZX > .skinListWrapper > .skinTextWrapper {
+	height: 100%;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.displayArenaSJZX > .skinListWrapper > .skinTextWrapper > .skinText {
+	font-size: 30px;
+	font-family: SJZX_youyuan;
+}
+
+.displayArenaSJZX .skinAvatorWrapper {
+	height: 90%;
+	aspect-ratio: 0.7/1;
+	display: block;
+	border-top-left-radius: 7px;
+	border-top-right-radius: 7px;
+	border-bottom-right-radius: 7px;
+	border-bottom-left-radius: 7px;
+	transition: background-image 0s;
+	position: relative;
+	margin-left: 5px;
+}
+
+.displayArenaSJZX .skinAvatorWrapper > .imageSkin {
+	z-index: 34;
+	width: calc(100%);
+	height: calc(100%);
+	left: calc(0%);
+	top: calc(0%);
+	display: block;
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+	border-top-left-radius: 7px;
+	border-top-right-radius: 7px;
+	border-bottom-right-radius: 7px;
+	border-bottom-left-radius: 7px;
+	transition: background-image 0s;
+	border: none;
+	box-shadow: 0px 0px 0px 0px;
+}
+
+.displayArenaSJZX > .charModulesWrapper {
+	position: relative;
+	width: 90%;
+	background-color: rgba(143, 143, 143, 0.5);
+	overflow: hidden;
+	box-shadow: 0 0 5px #313131;
+	margin-bottom: 5px;
+	margin-right: 5px;
+	cursor: pointer;
+}
+
+.displayArenaSJZX > .charModulesWrapper > .modulesTitle {
+	position: relative;
+	width: 100%;
+	height: 40px;
+	background-color: rgb(0, 0, 0);
+	overflow: hidden;
+	cursor: pointer;
+	font-family: SJZX_hanyi;
+	font-size: 30px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.displayArenaSJZX > .charModulesWrapper > .modulesInfoWrapper {
+	position: relative;
+	width: 99.8%;
+	max-height: 120px;
+	cursor: pointer;
+	margin-top: 10px;
+	margin-left: 0.2%;
+	margin-bottom: 5px;
+	display: flex;
+	align-items: center;
+	overflow-y: auto;
+}
+
+.displayArenaSJZX > .charModulesWrapper > .modulesInfoWrapper > .modulesImage {
+	position: relative;
+	width: 100px;
+	height: 100px;
+	background-size: 100% 100%;
+	overflow-y: hidden;
+}
+
+.displayArenaSJZX > .charModulesWrapper > .modulesInfoWrapper > .modulesInfo {
+	position: absolute;
+	width: calc(100% - 100px);
+	overflow-y: scroll;
+	left: 105px;
+	margin: 0;
+}
+
+.displayArenaSJZX > .charModulesWrapper > .modulesInfoWrapper > .modulesInfo > .infoText {
+	margin: 0;
+	position: relative;
+	width: 100%;
+	font-size: 20px;
+	font-family: SJZX_youyuan;
+}
+
+.displayArenaSJZX > .charModulesWrapper > .modulesEffectTitle {
+	position: relative;
+	width: 100%;
+	height: 40px;
+	overflow: hidden;
+	cursor: pointer;
+	font-family: SJZX_youyuan;
+	font-size: 25px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-top: 3px solid #000000;
+}
+
+.displayArenaSJZX > .modulesSelectedWrapper {
+	background-color: rgb(0 133 255) !important;
+	border: 2px solid rgb(255 203 0) !important;
+}
+
+.displayArenaSJZX > .charModulesWrapper > .modulesSelectedSJZX {
+	position: absolute;
+	bottom: -10px;
+	right: -10px;
+	width: 100px;
+	height: 100px;
+	background-image: url(./../image/ui/skinSelect.png);
+	background-size: cover;
+	opacity: 0.6;
+}
+
+.displayArenaSJZX > .charModulesWrapper > .modulesEffectInfo {
+	position: relative;
+	width: 99.6%;
+	max-height: 150px;
+	overflow: auto;
+	cursor: pointer;
+	margin: 0.2%;
+	font-size: 20px;
+	font-family: SJZX_youyuan;
+}
+
+.displayArenaSJZX > .charInfoWrapper {
+	position: relative;
+	width: 90%;
+	background-color: rgba(143, 143, 143, 0.5);
+	overflow: hidden;
+	box-shadow: 0 0 5px #313131;
+	margin-bottom: 5px;
+	margin-right: 5px;
+	cursor: pointer;
+}
+
+.displayArenaSJZX > .charInfoWrapper > .charTitle {
+	position: relative;
+	width: 100%;
+	height: 40px;
+	background-color: rgb(0, 0, 0);
+	overflow: hidden;
+	cursor: pointer;
+	font-family: SJZX_hanyi;
+	font-size: 30px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.displayArenaSJZX > .charInfoWrapper > .charInfo {
+	position: relative;
+	width: 100%;
+	height: 90%;
+	overflow: hidden;
+	cursor: pointer;
+	margin-top: 10px;
+	font-size: 20px;
+	font-family: SJZX_youyuan;
+	margin-left: 5px;
+	margin-bottom: 5px;
+}
+
+.displayArenaSJZX > .skillWrapper > .headWrapper > .dragHandle {
+	position: absolute;
+	right: 1%;
+	display: flex;
+    align-items: center;
+    justify-content: center;
+	font-size: 30px;
+	padding: 0 8px;
+  	cursor: move;
+  	user-select: none;
+  	opacity: 0.6;
+}
+
+.displayArenaSJZX > .skillWrapper > .headWrapper > .dragHandle:hover {
+	opacity: 1;
+}
+
+.displayArenaSJZX > .skillWrapper {
+	position: relative;
+	width: 90%;
+	background-color: rgba(49, 49, 49, 0.5);
+	overflow: hidden;
+	box-shadow: 0 0 5px #313131;
+	margin-bottom: 5px;
+	margin-right: 5px;
+	cursor: pointer;
+}
+
+.displayArenaSJZX > .skillWrapper > .skillInfo {
+	position: relative;
+	width: 100%;
+	margin-top: 10px;
+	font-size: 20px;
+	font-family: SJZX_youyuan;
+	margin-bottom: 5px;
+}
+
+.displayArenaSJZX > .skillWrapper > .headWrapper {
+	position: relative;
+	width: 100%;
+	height: 5%;
+	margin-top: 5px;
+	margin-left: 5px;
+	display: flex;
+	align-items: center;
+}
+
+.displayArenaSJZX > .skillWrapper > .headWrapper > .autoSkill {
+	position: absolute;
+	font-size: 20px;
+	color: white;
+	right: 10px;
+	top: 0;
+	font-family: SJZX_youyuan;
+	height: 25px;
+}
+
+.displayArenaSJZX > .skillWrapper > .headWrapper > .autoSkillOpened {
+	background-color: rgba(0, 128, 0, 0.65);
+	border: green 2px solid;
+}
+
+.displayArenaSJZX > .skillWrapper > .headWrapper > .autoSkillClosed {
+	background-color: rgba(252, 55, 9, 0.65);
+	border: red 2px solid;
+	color: gray !important;
+}
+
+.displayArenaSJZX > .skillWrapper > .headWrapper > .skillname {
+	position: relative;
+	font-size: 30px;
+	color: white;
+	background: linear-gradient(90deg, #005f70, #cebf28);
+	border-radius: 20px;
+	padding-left: 8px;
+	padding-right: 8px;
+	margin-right: 5px;
+	font-family: SJZX_hanyi;
+}
+
+.displayArenaSJZX > .skillWrapper > .headWrapper > .dskillname {
+	position: relative;
+	font-size: 30px;
+	color: blue;
+	background: linear-gradient(90deg, #70000d, #d01eb0);
+	border-radius: 20px;
+	padding-left: 8px;
+	padding-right: 8px;
+	margin-right: 5px;
+	font-family: SJZX_hanyi;
+}
+
+.displayArenaSJZX > .skillWrapper > .headWrapper > .audioBtn {
+	position: relative;
+	width: 25px;
+	height: 25px;
+	background-size: 100% 100%;
+	background-image: url("./../image/ui/Play.png");
+	background-color: white;
+	border-radius: 50%;
+}
+
+.displayArenaSJZX > .skillWrapper > .headWrapper > .audioBtnPlaying {
+	background-image: url("./../image/ui/Pause.png") !important;
+}
+
+.topMenu-wrapper {
+	position: absolute;
+	left: 10px;
+	width: 60%;
+	height: 8%;
+	transition: all 0.3s ease-in-out;
+	display: flex;
+	align-items: center;
+}
+
+.topMenu-wrapper > .btn-back {
+	position: relative;
+	width: 38px;
+	height: 38px;
+	background-color: rgba(0, 0, 0, 0.7);
+	cursor: pointer;
+	display: inline-block;
+	box-sizing: border-box;
+	transition: 0.3s ease-in-out;
+	border-radius: 2px;
+	border-width: 1px;
+	border-style: solid;
+	border-color: rgb(153, 153, 153);
+	border-image: initial;
+}
+
+.topMenu-wrapper > .btn-back > .imageBox {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.topMenu-wrapper > .btn-background {
+	width: 100px;
+	height: 38px;
+	background-color: rgba(0, 0, 0, 0.6);
+	cursor: pointer;
+	display: inline-block;
+	vertical-align: top;
+	margin-left: 15px;
+	position: relative;
+	border: 1px solid grey;
+	border-radius: 2px;
+	box-sizing: border-box;
+}
+
+.topMenu-wrapper > .btn-selected-SJZX {
+	background-color: rgb(0 133 255 / 80%) !important;
+	border: 2px solid rgb(255 203 0) !important;
+}
+
+.topMenu-wrapper > .btn-background > .btn-enSJZX {
+	position: absolute;
+	top: 2px;
+	left: 30px;
+	width: auto;
+	height: 18px;
+	line-height: 18px;
+	font-size: 18px;
+	font-weight: 700;
+	color: transparent;
+	-webkit-text-stroke: 1px #999;
+	font-family: sans-serif;
+	transform: skewX(-20deg);
+	transition: all 0.3s ease-in-out;
+	filter: drop-shadow(0 0 3px #000);
+	z-index: 0;
+}
+
+.topMenu-wrapper > .btn-background > .btn-cnSJZX {
+	position: absolute;
+	top: 15px;
+	left: 40px;
+	width: auto;
+	height: 22px;
+	line-height: 22px;
+	font-size: 22px;
+	color: #f5f5f5;
+	font-family: dy_sjzx;
+	filter: drop-shadow(0 0 3px #000);
+	transition: all 0.3s ease-in-out;
+	z-index: 2;
+}
+
+.topMenu-wrapper > .btn-background > .btnImage-wrapper {
+	position: absolute;
+	top: -10px;
+	left: -5px;
+	width: 50px;
+	height: 50px;
+	display: flex;
+	align-items: center;
+	transition: all 0.3s ease-in-out;
+}
+
+.topMenu-wrapper > .btn-background > .btnImage-wrapper > .btn-img {
+	width: 50px;
+	filter: drop-shadow(0 0 3px #000);
+	z-index: 1;
+}
