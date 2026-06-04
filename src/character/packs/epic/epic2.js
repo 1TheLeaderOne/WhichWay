@@ -485,7 +485,7 @@ export default {
 			onremove: true,
 			async cost(event, trigger, player) {
 				event.result = await player
-					.chooseCard("he")
+					.chooseCard({position:"he"})
 					.set("prompt", get.prompt("wenchoumrfz"))
 					.set("prompt2", whichWayUtil.colorize(`你可以重铸一张牌,若你重铸的牌是：<br>①【杀】或武器牌：令包含你在内的至多两名角色将手牌调整至#r${player.storage.wenchoumrfz || 4}#并跳过此阶段；<br>②非伤害类基本牌：你视为使用一张无距离和次数限制的【杀】，然后此技能本回合失效，并令此技能中的红色数字-1。`))
 					.set("ai", card => {
@@ -527,8 +527,8 @@ export default {
 						//@ts-ignore
 						targets: [target],
 					} = await player
-						.chooseTarget(true, [0, 1])
-						.set("prompt", whichWayUtil.colorize(`【问丑】：请选择一名其他角色，令其和#r你#将手牌调整至${player.storage.wenchoumrfz || 4}`))
+						.chooseTarget({forced:true,selectTarget:[0,1]})
+						.set("prompt", whichWayUtil.colorize(`【问仇】：请选择一名其他角色，令其和#r你#将手牌调整至${player.storage.wenchoumrfz || 4}`))
 						.set("prompt2", whichWayUtil.colorize(`#s或许，旧时的恩怨已经结束了#`))
 						.set("filterTarget", lib.filter.notMe)
 						.set(
@@ -550,7 +550,7 @@ export default {
 						if (target.countCards("h") < num) target.drawTo(num);
 						else if (target.countCards("h") > num) {
 							target
-								.chooseToDiscard(target.countCards("h") - num, true)
+								.chooseToDiscard({selectCard:target.countCards("h") - num,forced:true})
 								.set("ai", card => -get.value(card))
 								.set("prompt", `【问仇】：将手牌调整至${num}张`)
 								.set("prompt2", whichWayUtil.colorize(`#s化干戈为玉帛，也是需要代价的#`));
@@ -558,7 +558,7 @@ export default {
 					}
 				}
 				if (get.type(card) === "basic" && !get.tag(card, "damage")) {
-					await player.chooseUseTarget({ name: "sha", isCard: true }).set("forced", true).set("addCount", false).set("nodistance", true).set("prompt", "你视为使用一张无距离和次数限制的【杀】，然后此技能本回合失效").set("prompt2", whichWayUtil.colorize(`#s血债血偿！#`));
+					await player.chooseUseTarget({card:get.autoViewAs({ name: "sha", isCard: true })}).set("forced", true).set("addCount", false).set("nodistance", true).set("prompt", "你视为使用一张无距离和次数限制的【杀】，然后此技能本回合失效").set("prompt2", whichWayUtil.colorize(`#s血债血偿！#`));
 					player.storage.wenchoumrfz--;
 					player.disableSkill("wenchoumrfz", ["wenchoumrfz"]);
 					player.when({ global: "phaseEnd" }).step(async (event, trigger, player) => {

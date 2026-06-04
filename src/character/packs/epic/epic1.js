@@ -7743,6 +7743,7 @@ export default {
 			},
 			filter(event, player) {
 				let storage = player.storage.lanjuanmrfz;
+				if(!storage) return false;
 				return storage["name"].length > 0 && storage["suit"].length > 0 && storage["number"].length > 0;
 			},
 			async content(event, trigger, player) {
