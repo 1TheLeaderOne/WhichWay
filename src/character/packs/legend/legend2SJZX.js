@@ -2584,7 +2584,9 @@ const legend2SJZX = {
         }
       },
       async cost(event, trigger, player) {
-        const { index } = await player.chooseControl("选项一", "选项二", "cancel2").set("prompt", get.prompt("feiyimrfz")).set("prompt2", `1`).set("choiceList", [
+        const { index } = await player.chooseControl({
+          controls: ["选项一", "选项二", "cancel2"]
+        }).set("prompt", get.prompt("feiyimrfz")).set("choiceList", [
           "你可以令你本回合的攻击距离+1，然后直到下个准备阶段开始时，其他角色计算与你的距离-1。",
           "你可以令你本回合的攻击距离-1，然后直到下个准备阶段开始时，其他角色计算与你的距离+1。"
         ]).set("ai", () => 1).forResult();
@@ -2600,8 +2602,8 @@ const legend2SJZX = {
       async content(event, trigger, player) {
         const { index } = event.cost_data;
         player.markSkill("feiyimrfz");
-        player.when({ player: "phaseBegin" }).then(() => {
-          player.unmarkSkill("feiyimrfz");
+        player.when({ player: "phaseBegin" }).then(async (event2, trigger2, player2) => {
+          player2.unmarkSkill("feiyimrfz");
         }).assign({
           mod: {
             globalTo(from, to, distance) {
@@ -2652,8 +2654,8 @@ const legend2SJZX = {
           player.draw(2);
           player.markSkill("mingzhengmrfz");
           player.addTempSkill("mingzhengmrfz_ig", { player: "phaseEnd" });
-          player.when({ player: "phaseEnd" }).then(() => {
-            player.unmarkSkill("mingzhengmrfz");
+          player.when({ player: "phaseEnd" }).then(async (event2, trigger2, player2) => {
+            player2.unmarkSkill("mingzhengmrfz");
           }).assign({
             mod: {
               targetInRange: function() {
@@ -2714,7 +2716,11 @@ const legend2SJZX = {
           targets: []
         };
         for (let target of targets) {
-          const { cards } = await player.choosePlayerCard("h", true, target).set("ai", () => get.rand(0, 1)).set("prompt", `展示${target}一张手牌`).forResult();
+          const { cards } = await player.choosePlayerCard({
+            position: "h",
+            forced: true,
+            target
+          }).set("ai", () => get.rand(0, 1)).set("prompt", `展示${get.translation(target)}一张手牌`).forResult();
           if (!cards) return;
           let card = cards[0];
           if (card) {
