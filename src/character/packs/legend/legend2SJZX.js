@@ -3065,9 +3065,10 @@ export default {
 			},
 			async cost(event, trigger, player) {
 				const { index } = await player
-					.chooseControl("选项一", "选项二", "cancel2")
+					.chooseControl({
+						controls:["选项一", "选项二", "cancel2"]
+					})
 					.set("prompt", get.prompt("feiyimrfz"))
-					.set("prompt2", `1`)
 					.set("choiceList", [
 						"你可以令你本回合的攻击距离+1，然后直到下个准备阶段开始时，其他角色计算与你的距离-1。",
 						"你可以令你本回合的攻击距离-1，然后直到下个准备阶段开始时，其他角色计算与你的距离+1。",
@@ -3088,7 +3089,7 @@ export default {
 				player.markSkill("feiyimrfz");
 				player
 					.when({ player: "phaseBegin" })
-					.then(() => {
+					.then(async (event,trigger,player) => {
 						player.unmarkSkill("feiyimrfz");
 					})
 					.assign({
@@ -3143,7 +3144,7 @@ export default {
 					player.addTempSkill("mingzhengmrfz_ig", { player: "phaseEnd" });
 					player
 						.when({ player: "phaseEnd" })
-						.then(() => {
+						.then(async (event,trigger,player) => {
 							player.unmarkSkill("mingzhengmrfz");
 						})
 						.assign({
@@ -3210,9 +3211,13 @@ export default {
 				};
 				for (let target of targets) {
 					const { cards } = await player
-						.choosePlayerCard("h", true, target)
+						.choosePlayerCard({
+							position:"h",
+							forced:true,
+							target:target,
+						})
 						.set("ai", () => get.rand(0, 1))
-						.set("prompt", `展示${target}一张手牌`)
+						.set("prompt", `展示${get.translation(target)}一张手牌`)
 						.forResult();
 					if (!cards) return;
 					let card = cards[0];
