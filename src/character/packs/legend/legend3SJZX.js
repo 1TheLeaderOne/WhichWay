@@ -708,7 +708,9 @@ export default {
 				//@ts-ignore
 				lib.skill.fulingmrfz.init(player, "fulingmrfz");
 				const result = await player
-					.chooseControl("一", "二", "三", "cancel2")
+					.chooseControl({
+						controls:["一", "二", "三", "cancel2"],
+					})
 					.set("prompt", get.prompt("fulingmrfz"))
 					.set("prompt2", `你可以摸至多三张牌，然后你的回合结束时，若你执行选项的数量少于你摸的牌数，你失去X点体力。(X=你摸的牌数 - 你执行的项数)`)
 					.set("ai", () => {

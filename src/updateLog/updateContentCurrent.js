@@ -2,11 +2,11 @@ import { lib, game, ui, get, ai, _status } from "noname";
 
 let info = {
 	intro: [
-		"新增干员：可露希尔、乌啾、维伊、怒潮凛冬、裂响、伯塔尼",
-		"新增动态皮肤：无",
-		"新增皮肤：无",
+		"新增干员：可露希尔、乌啾、维伊、怒潮凛冬、裂响、伯塔尼、雷狼龙S空爆、GALLUS²、焰狐龙梓兰、守望者凯尔希（凯尔希·思衡托）",
+		"整合了来自Flandre的皮肤包（包含静态和动态皮肤）",
 		"将原有的“可露希尔”更名为“剧可露希尔”，用以和实装的“可露希尔”区分。",
 		"现在src/card/index.js文件将会直接被复制至打包目录",
+		"修复合并设计者时报错的bug",
 		"修复维什戴尔【射祖】使用已经被废弃的api导致的bug",
 		"修复复奏【募团】部分情况报错的bug",
 		"修复天空盒【真理】部分情况报错的bug",
@@ -25,7 +25,7 @@ let info = {
 		"修复莎草【行路】在没有【览卷】技能时会报错的bug",
 		"修复蕾缪安【追凶】技能提示不正确的bug",
 	],
-	player: ["keluxiermrfz","weiyimrfz","wujiumrfz","splingdongmrfz","liexiangmrfz","botanimrfz"],
+	player: ["keluxiermrfz","weiyimrfz","wujiumrfz","splingdongmrfz","liexiangmrfz","botanimrfz","spkongbaomrfz","gallusmrfz","spzilanmrfz","spkaierximrfz"],
 	cards: [],
 };
 

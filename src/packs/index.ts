@@ -113,7 +113,7 @@ class WhichWayPackManager {
 			if (char.designer) {
 				char.whichWay.designer = Array.isArray(char.designer) ? char.designer : [char.designer];
 				designer[name] ??= [];
-				designer[name].push(...char.whichWay.designer.filter(designer => !char.designer[name].includes(designer)));
+				designer[name].push(...char.whichWay.designer.filter(designerx => !designer[name].includes(designerx)));
 			} else {
 				char.whichWay.designer = getDesigner(char, false, true);
 			}
