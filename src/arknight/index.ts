@@ -82,6 +82,22 @@ class WhichWayArknight {
 			let info = arkData[key];
 			if (!this.isCharacter(info)) continue;
 
+			//先判断对应的Character是否有arkuid
+			const hasArkCharacters = characters.filter(i => {
+				const char = get.character(i) as WhichWayCharacterPending;
+				return typeof char.arkuid === "string";
+			});
+			if (hasArkCharacters.length) {
+				for (let name of hasArkCharacters) {
+					const char = get.character(name) as WhichWayCharacterPending;
+					if (char.arkuid === key) {
+						extUID[name] = key;
+						arkUID[key] = name;
+						cn.set([key, name], get.translation(name));
+					}
+				}
+			}
+
 			const trans = characters.map(i => this.redirect.transfer(get.translation(i)));
 
 			if (trans.includes(info.name)) {
@@ -115,17 +131,34 @@ class WhichWayArknight {
 	/**
 	 * 添加到映射表
 	 */
-	async addShcema(id:string) {
+	async addShcema(id: string) {
 		const {
 			character: { whichWayUID: extUID, chineseName: cn, arknightUID: arkUID },
 		} = this.shcema;
 		const arkData: Record<string, ArknightCharacter> = this.arknightData.character_table;
+		const characters = window.whichWaySave.allCharacters;
 		//判断是什么id
-		if(window.whichWaySave.allCharacters.includes(id)){
-			for(let key in arkData){
+		if (characters.includes(id)) {
+			for (let key in arkData) {
 				const info = arkData[key];
-				if(!this.isCharacter(info)) continue;
-				if(this.redirect.transfer(get.translation(id)) === info.name){
+				if (!this.isCharacter(info)) continue;
+				//先判断对应的Character是否有arkuid
+				const hasArkCharacters = characters.filter(i => {
+					const char = get.character(i) as WhichWayCharacterPending;
+					return typeof char.arkuid === "string";
+				});
+				if (hasArkCharacters.length) {
+					for (let name of hasArkCharacters) {
+						const char = get.character(name) as WhichWayCharacterPending;
+						if (char.arkuid === key) {
+							extUID[name] = key;
+							arkUID[key] = name;
+							cn.set([key, name], get.translation(name));
+							return;
+						}
+					}
+				}
+				if (this.redirect.transfer(get.translation(id)) === info.name) {
 					extUID[id] = key;
 					arkUID[key] = id;
 					cn.set([key, id], info.name);
@@ -133,15 +166,15 @@ class WhichWayArknight {
 				}
 			}
 			console.warn(`角色${id}不存在`);
-		} else if(id in arkData){
+		} else if (id in arkData) {
 			const info = arkData[id];
-			if(this.isCharacter(info)){
+			if (this.isCharacter(info)) {
 				const whichWayName = window.whichWaySave.allCharacters.find(i => this.redirect.transfer(get.translation(i)) === info.name)!;
 				extUID[whichWayName] = id;
 				arkUID[id] = id;
 				cn.set([id, whichWayName], info.name);
 				return;
-			} else{
+			} else {
 				console.warn(`角色${id}不存在`);
 			}
 		}
@@ -163,13 +196,13 @@ class WhichWayArknight {
 	 * @param {string} name 角色名（驶舰之向角色）
 	 * @returns {boolean}
 	 */
-	inArknightChars(name:string):boolean{
+	inArknightChars(name: string): boolean {
 		const chars = window.whichWaySave.allCharacters;
-		if(!chars){
+		if (!chars) {
 			console.warn("allCharacters is not initialized!");
 			return false;
 		}
-		if(!chars.includes(name)) return false;
+		if (!chars.includes(name)) return false;
 		return !!this.shcema.transfer(name, "character", "whichWayUID");
 	}
 
@@ -179,7 +212,11 @@ class WhichWayArknight {
 	 */
 	initCharArknight(char: WhichWayCharacter) {
 		//@ts-ignore 设置明日方舟uid
-		char.whichWay.arknight.charId = this.shcema.transfer(char.whichWay.charId, "character", "whichWayUID");
+		if (char.arkuid) {
+			char.whichWay.arknight.charId = char.arkuid;
+		} else {
+			char.whichWay.arknight.charId = this.shcema.transfer(char.whichWay.charId, "character", "whichWayUID") as string;
+		}
 
 		//@ts-ignore 设置对应阵容
 		char.whichWay.arknight.camp = this.getCamp(char);
@@ -221,7 +258,7 @@ class WhichWayArknight {
 	 * @returns {string | undefined}
 	 */
 	getVoiceLangTranslation(lang: string): string | undefined {
-		if(lang === "CUSTOM") return "本地"
+		if (lang === "CUSTOM") return "本地";
 		let langs = this.arknightData.charword_table.voiceLangTypeDict;
 		if (!langs[lang]) return;
 		return langs[lang].name;
@@ -291,10 +328,9 @@ class WhichWayArknight {
 		const { files } = await whichWayFile.getFileTree("json:arknight/");
 		const fileNames = files.map(file => file.name);
 
-		if (fileNames.length < 1 || !this.updateFile.every(file => fileNames.includes(file + '.json'))) {
+		if (fileNames.length < 1 || !this.updateFile.every(file => fileNames.includes(file + ".json"))) {
 			await this.updateArknigtData();
-		}
-		else if (whichWayVersion.extVersionChanged) {
+		} else if (whichWayVersion.extVersionChanged) {
 			await this.updateArknigtData();
 		}
 		return true;
@@ -305,7 +341,7 @@ class WhichWayArknight {
 	 */
 	async updateArknigtData() {
 		const { updateFile, updateUrl } = this;
-		whichWayToast.showToast(`[驶舰之向] 正在更新明日方舟数据...`, 3000, "topRight","whichWayArknightUpdateTitle");
+		whichWayToast.showToast(`[驶舰之向] 正在更新明日方舟数据...`, 3000, "topRight", "whichWayArknightUpdateTitle");
 		for (const file of updateFile) {
 			const url = `${updateUrl}${file}.json`;
 			await whichWayFile.download(url, `json:arknight/`, `${file}.json`, ({ percent, total, loaded }) => {

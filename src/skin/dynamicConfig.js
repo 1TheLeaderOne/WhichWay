@@ -1,96 +1,93 @@
-import { lib, game, ui, get, ai, _status } from "noname";
-import { whichWayFile } from "../file.js";
-
+import { get } from "noname";
+import "../file.js";
 const sjzxDycPath = {
-	bg: `../../../WhichWay/dynamicSkin/background/{xxx}.png`,
-	illust: `../../../WhichWay/dynamicSkin/illust/{xxx}/{yyy}/{zzz}`,
+  bg: `../../../WhichWay/dynamicSkin/background/{xxx}.png`,
+  illust: `../../../WhichWay/dynamicSkin/illust/{xxx}/{yyy}/{zzz}`
 };
-
 function sjzxDycInit(dyc) {
-	for (let char in dyc) {
-		const character = dyc[char];
-		for (let key in character) {
-			const illust = character[key];
-			if (illust.background) {
-				illust.background = sjzxDycPath.bg.replace("{xxx}", illust.background);
-			}
-			if (illust.name) {
-				illust.name = sjzxDycPath.illust.replace("{xxx}", char).replace("{yyy}", key).replace("{zzz}", illust.name);
-			}
-			if (illust.alpha === undefined) illust.alpha = true;
-			if (illust.speed === undefined) illust.speed = 1.5;
-			if (!Array.isArray(illust.x)) illust.x = [0, 0];
-			if (!Array.isArray(illust.y)) illust.y = [0, 0];
-			if (illust.scale === undefined) illust.scale = 0;
-			if (illust.action === undefined) illust.action = "Idle";
-			if (illust.version === undefined) illust.version = "3.8";
-			if (illust.weighting === undefined) {
-				illust.weighting = [8];
-				let actions = Array.isArray(illust.action) ? illust.action : [illust.action];
-				if (illust.action.length > 1) {
-					let avg = 2 / (actions.length - 1);
-					for (let i = 0; i < actions.length - 1; i++) {
-						illust.weighting.push(avg);
-					}
-				} else illust.weighting = [1];
-			}
-			for (let effectKey in illust) {
-				const effect = illust[effectKey];
-				if (!get.is.object(effect)) continue;
-				if (window.whichWaySave.dycOtherEffect !== true) {
-					delete dyc[char][key][effectKey];
-					continue;
-				}
-				if (effect.name) {
-					effect.name = sjzxDycPath.illust.replace("{xxx}", char).replace("{yyy}", key).replace("{zzz}", effect.name);
-				} else effect.name = illust.name;
-				if (effect.alpha === undefined) effect.alpha = false;
-				if (effect.speed === undefined) effect.speed = 1.5;
-				if (!Array.isArray(effect.x)) effect.x = [0, 0];
-				if (!Array.isArray(effect.y)) effect.y = [0, 0];
-				if (effect.scale === undefined) effect.scale = 0;
-				if (effect.version === undefined) effect.version = "3.8";
-				if (effectKey === "gongji" && effect.action === undefined) effect.action = "Special";
-				if (effectKey === "chuchang" && effect.action === undefined) effect.action = "Interact";
-				if (effectKey === "teshu" && effect.action === undefined) effect.action = "Special";
-				if (effect.weighting === undefined) {
-					effect.weighting = [8];
-					let actions = Array.isArray(effect.action) ? effect.action : [effect.action];
-					if (effect.action.length > 1) {
-						let avg = 2 / (actions.length - 1);
-						for (let i = 0; i < actions.length - 1; i++) {
-							effect.weighting.push(avg);
-						}
-					} else effect.weighting = [1];
-				}
-			}
-		}
-	}
-	return dyc;
+  for (let char in dyc) {
+    const character = dyc[char];
+    for (let key in character) {
+      const illust = character[key];
+      if (illust.background) {
+        illust.background = sjzxDycPath.bg.replace("{xxx}", illust.background);
+      }
+      if (illust.name) {
+        illust.name = sjzxDycPath.illust.replace("{xxx}", char).replace("{yyy}", key).replace("{zzz}", illust.name);
+      }
+      if (illust.alpha === void 0) illust.alpha = true;
+      if (illust.speed === void 0) illust.speed = 1.5;
+      if (!Array.isArray(illust.x)) illust.x = [0, 0];
+      if (!Array.isArray(illust.y)) illust.y = [0, 0];
+      if (illust.scale === void 0) illust.scale = 0;
+      if (illust.action === void 0) illust.action = "Idle";
+      if (illust.version === void 0) illust.version = "3.8";
+      if (illust.weighting === void 0) {
+        illust.weighting = [8];
+        let actions = Array.isArray(illust.action) ? illust.action : [illust.action];
+        if (illust.action.length > 1) {
+          let avg = 2 / (actions.length - 1);
+          for (let i = 0; i < actions.length - 1; i++) {
+            illust.weighting.push(avg);
+          }
+        } else illust.weighting = [1];
+      }
+      for (let effectKey in illust) {
+        const effect = illust[effectKey];
+        if (!get.is.object(effect)) continue;
+        if (window.whichWaySave.dycOtherEffect !== true) {
+          delete dyc[char][key][effectKey];
+          continue;
+        }
+        if (effect.name) {
+          effect.name = sjzxDycPath.illust.replace("{xxx}", char).replace("{yyy}", key).replace("{zzz}", effect.name);
+        } else effect.name = illust.name;
+        if (effect.alpha === void 0) effect.alpha = false;
+        if (effect.speed === void 0) effect.speed = 1.5;
+        if (!Array.isArray(effect.x)) effect.x = [0, 0];
+        if (!Array.isArray(effect.y)) effect.y = [0, 0];
+        if (effect.scale === void 0) effect.scale = 0;
+        if (effect.version === void 0) effect.version = "3.8";
+        if (effectKey === "gongji" && effect.action === void 0) effect.action = "Special";
+        if (effectKey === "chuchang" && effect.action === void 0) effect.action = "Interact";
+        if (effectKey === "teshu" && effect.action === void 0) effect.action = "Special";
+        if (effect.weighting === void 0) {
+          effect.weighting = [8];
+          let actions = Array.isArray(effect.action) ? effect.action : [effect.action];
+          if (effect.action.length > 1) {
+            let avg = 2 / (actions.length - 1);
+            for (let i = 0; i < actions.length - 1; i++) {
+              effect.weighting.push(avg);
+            }
+          } else effect.weighting = [1];
+        }
+      }
+    }
+  }
+  return dyc;
 }
-
 let data = {
-	//近卫阿米娅
+    //近卫阿米娅 
 	spamiyamrfz: {
-		于万千宇宙之中: {
-			name: "dyn_illust_char_1001_amiya2_sale16",
-			x: [0, 0.235],
-			y: [0, -1.841],
+		于万千宇宙之中:{
+			name:'dyn_illust_char_1001_amiya2_sale16',
+			x: [0,0.235],
+			y: [0,-1.841],
 			scale: 0.36,
-			version: "3.8",
-			action: ["Idle", "Special", "Interact"],
-			speed: 1,
+			version:'3.8',
+			action:["Idle","Special","Interact"],
+			speed:1,
 			alpha: false,
 			background: `场景_庆典`,
 		},
-		于万千宇宙之中2: {
-			name: "sp_dyn_illust_char_1001_amiya2_sale16",
-			x: [0, 0.438],
-			y: [0, -1.663],
+		于万千宇宙之中2:{
+			name:'sp_dyn_illust_char_1001_amiya2_sale16',
+			x: [0,0.438],
+			y: [0,-1.663],
 			scale: 0.32,
-			version: "3.8",
-			action: ["Idle", "Special", "Interact"],
-			speed: 1,
+			version:'3.8',
+			action:["Idle","Special","Interact"],
+			speed:1,
 			alpha: false,
 			json: true,
 			background: `场景_庆典`,
@@ -124,25 +121,25 @@ let data = {
 			alpha: false,
 			background: `废墟`,
 		},
-		时遗: {
-			name: "dyn_illust_char_003_kalts_sale14",
-			x: [0, 0.26],
-			y: [0, -1.03],
-			scale: 0.4,
-			version: "3.8",
-			action: ["Idle", "Special", "Interact"],
-			speed: 1,
-			alpha: false,
+		时遗:{
+			name:'dyn_illust_char_003_kalts_sale14',
+			x:[0,0.26],
+			y:[0,-1.03],
+			scale:0.40,
+			version:'3.8',
+			action:["Idle","Special","Interact"],
+			speed:1,
+			alpha: true,
 			background: `废墟`,
 		},
-		时遗2: {
-			name: "sp_dyn_illust_char_003_kalts_sale14_2",
-			x: [0, 0.52],
-			y: [0, -1.03],
-			scale: 0.2,
-			version: "3.8",
-			action: ["Idle", "Special", "Interact"],
-			speed: 1,
+		时遗2:{
+			name:'sp_dyn_illust_char_003_kalts_sale14_2',
+			x:[0,0.52],
+			y:[0,-1.03],
+			scale:0.20,
+			version:'3.8',
+			action:["Idle","Special","Interact"],
+			speed:1,
 			alpha: false,
 			background: `废墟`,
 		},
@@ -297,6 +294,7 @@ let data = {
 			scale: 0.28,
 			version: "3.8",
 			action: ["Idle", "Special", "Interact"],
+			alpha: false,
 			speed: 1,
 			background: `场景_庆典`,
 		},
@@ -349,7 +347,7 @@ let data = {
 			version: "3.8",
 			action: ["Idle", "Special", "Interact"],
 			speed: 1,
-			alpha: false,
+			alpha: true,
 			background: `生于黑夜`,
 		},
 	},
@@ -367,7 +365,7 @@ let data = {
 			alpha: false,
 			background: `崔林特尔梅之金`,
 		},
-		无唯我识: {
+		无我唯识: {
 			name: "dyn_illust_char_245_cello_sale12",
 			x: [0, 0.39],
 			y: [0, -2.03],
@@ -539,7 +537,7 @@ let data = {
 			version: "3.8",
 			action: ["Idle", "Special", "Interact"],
 			speed: 1,
-			alpha: false,
+			alpha: true,
 			background: `长夜临光`,
 		},
 	},
@@ -655,17 +653,6 @@ let data = {
 			alpha: true,
 			background: `岁兽`,
 		},
-		青玉砚: {
-			name: "dyn_illust_char_2015_dusk_nian12",
-			x: [0, 0.4],
-			y: [0, -1.11],
-			scale: 0.3,
-			version: "3.8",
-			action: ["Idle", "Special", "Interact"],
-			speed: 1,
-			alpha: true,
-			background: `岁兽`,
-		},
 		染尘烟: {
 			name: "rcy",
 			x: [0, 0.49],
@@ -676,6 +663,17 @@ let data = {
 			speed: 1,
 			alpha: true,
 			background: `岁兽`,
+		},
+		青玉砚:{
+			name:'dyn_illust_char_2015_dusk_nian12',
+			x: [0,0.478],
+			y: [0,-1.359],
+			scale: 0.3,
+			version:'3.8',
+			action:["Idle","Special","Interact"],
+			speed:1,
+			alpha: false,
+			background: `场景_游园`,
 		},
 	},
 
@@ -714,31 +712,16 @@ let data = {
 			alpha: true,
 			background: `岁兽`,
 		},
-		方遒卷: {
-			name: "dyn_illust_char_2023_ling_nian12",
-			x: [0, 0.48],
-			y: [0, -1.27],
-			scale: 0.33,
-			version: "3.8",
-			action: ["Idle", "Special", "Interact"],
-			speed: 1,
-			alpha: true,
-			background: `岁兽`,
-		},
-	},
-
-	// 望
-	wangmrfz: {
-		经典形象: {
-			name: "dyn_illust_char_2027_wang",
-			x: [0, 0.36],
-			y: [0, -1.11],
-			scale: 0.34,
-			version: "3.8",
-			action: ["Idle", "Special", "Interact"],
-			speed: 1,
-			alpha: true,
-			background: `岁兽`,
+		方遒卷:{
+			name:'dyn_illust_char_2023_ling_nian12',
+			x: [0,0.57],
+			y: [0,-1.39],
+			scale: 0.3,
+			version:'3.8',
+			action:["Idle","Special","Interact"],
+			speed:1,
+			alpha: false,
+			background: `场景_游园`,
 		},
 	},
 
@@ -862,6 +845,17 @@ let data = {
 			speed: 1,
 			alpha: true,
 			background: `拉特兰`,
+		},
+		寻翼之歌: {
+			name: "dyn_illust_char_1041_angel2_iteration6",
+			x: [0,0.651],
+			y: [0,-1.625],
+			scale: 0.4,
+			version: "3.8",
+			action: ["Idle", "Special", "Interact"],
+			speed: 1,
+			alpha: false,
+			background: `场景_庆典`,
 		},
 	},
 
@@ -1018,16 +1012,16 @@ let data = {
 			alpha: true,
 			background: `岁兽`,
 		},
-		愿清晓: {
-			name: "dyn_illust_char_2026_yu_nian12",
-			x: [0, 0.46],
-			y: [0, -1.29],
-			scale: 0.34,
-			version: "3.8",
-			action: ["Idle", "Special", "Interact"],
-			speed: 1,
-			alpha: true,
-			background: `岁兽`,
+		愿清晓:{
+			name:'dyn_illust_char_2026_yu_nian12',
+			x: [0,0.595],
+			y: [0,-1.285],
+			scale: 0.3,
+			version:'3.8',
+			action:["Idle","Special","Interact"],
+			speed:1,
+			alpha: false,
+			background: `场景_游园`,
 		},
 	},
 
@@ -1043,6 +1037,17 @@ let data = {
 			speed: 1,
 			alpha: false,
 			background: `海滩`,
+		},
+		超然序曲: {
+			name: "dyn_illust_char_350_surtr_ambienceSynesthesia6",
+			x: [0,0.595],
+			y: [0,-0.618],
+			scale: 0.3,
+			version: "3.8",
+			action: ["Idle", "Special", "Interact"],
+			speed: 1,
+			alpha: false,
+			background: `场景_庆典`,
 		},
 	},
 
@@ -1202,14 +1207,42 @@ let data = {
 			background: `喀兰`,
 		},
 	},
-
+	
 	//隐德来希
 	yindelaiximrfz: {
-		耀目之蓝: {
-			name: "dyn_illust_char_4010_etlchi_winter5",
-			x: [0, 0.593],
-			y: [0, -0.746],
+		耀目之蓝:{
+			name:'dyn_illust_char_4010_etlchi_winter5',
+			x: [0,0.593],
+			y: [0,-0.746],
 			scale: 0.25,
+			version:'3.8',
+			action:["Idle","Special","Interact"],
+			speed:1,
+			alpha: false,
+			background: `场景_庆典`,
+		},
+	},
+	//望
+	wangmrfz: {
+	    经典形象:{
+			name:'dyn_illust_char_2027_wang',
+			x: [0,0.559],
+			y: [0,-1.029],
+			scale: 0.3,
+			version:'3.8',
+			action:["Idle","Special","Interact"],
+			speed:1,
+			alpha: false,
+			background: `场景_游园`,
+		},
+	},
+	// 塞雷娅
+	saileiyamrfz: {
+		黑白冷峻: {
+			name: "dyn_illust_char_202_demkni_ambienceSynesthesia7",
+			x: [0,0.65],
+			y: [0,-1.87],
+			scale: 0.4,
 			version: "3.8",
 			action: ["Idle", "Special", "Interact"],
 			speed: 1,
@@ -1217,10 +1250,49 @@ let data = {
 			background: `场景_庆典`,
 		},
 	},
+	// 遥
+	ziyeyaomrfz: {
+		常世之幻: {
+			name: "dyn_illust_char_4202_haruka_iteration6",
+			x: [0,0.724],
+			y: [0,-1.271],
+			scale: 0.35,
+			version: "3.8",
+			action: ["Idle", "Special", "Interact"],
+			speed: 1,
+			alpha: false,
+			background: `场景_庆典`,
+		},
+	},
+	// mon3tr
+	mon3trmrfz: {
+		锋锐: {
+			name: "dyn_illust_char_4179_monstr_boc11",
+			x: [0,0.494],
+			y: [0,-1.906],
+			scale: 0.45,
+			version: "3.8",
+			action: ["Idle", "Special", "Interact"],
+			speed: 1,
+			alpha: false,
+			background: `场景_庆典`,
+		},
+	},
+	//凯尔希·思衡托
+	spkaierximrfz: {
+	经典形象:{
+			name:'dyn_illust_char_1052_kalts2',
+			x: [0,0.324],
+			y: [0,-0.645],
+			scale: 0.36,
+			version:'3.8',
+			action:["Idle","Special","Interact"],
+			speed:1,
+			alpha: false,
+			background: `场景_执着`,
+		},
+	},
 };
-
 data = sjzxDycInit(data);
-
 window.whichWaySave.dycSave.assets = data;
-
-export const sjzxDycAssets = data;
+//# sourceMappingURL=dynamicConfig.js.map
