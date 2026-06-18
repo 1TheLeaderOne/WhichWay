@@ -8,7 +8,7 @@ const whichWayVersionInfo = {
     //最低版本
     over: "1.11.3"
   },
-  ext: "1.3"
+  ext: "1.4"
 };
 class WhichWayVersion {
   get lastCheckedExtVersion() {
