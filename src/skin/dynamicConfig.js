@@ -67,7 +67,7 @@ function sjzxDycInit(dyc) {
   return dyc;
 }
 let data = {
-  //近卫阿米娅
+  //近卫阿米娅 
   spamiyamrfz: {
     于万千宇宙之中: {
       name: "dyn_illust_char_1001_amiya2_sale16",
@@ -127,7 +127,7 @@ let data = {
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
-      alpha: false,
+      alpha: true,
       background: `废墟`
     },
     时遗2: {
@@ -285,6 +285,7 @@ let data = {
       scale: 0.28,
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
+      alpha: false,
       speed: 1,
       background: `场景_庆典`
     }
@@ -335,7 +336,7 @@ let data = {
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
-      alpha: false,
+      alpha: true,
       background: `生于黑夜`
     }
   },
@@ -352,7 +353,7 @@ let data = {
       alpha: false,
       background: `崔林特尔梅之金`
     },
-    无唯我识: {
+    无我唯识: {
       name: "dyn_illust_char_245_cello_sale12",
       x: [0, 0.39],
       y: [0, -2.03],
@@ -517,7 +518,7 @@ let data = {
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
-      alpha: false,
+      alpha: true,
       background: `长夜临光`
     }
   },
@@ -629,17 +630,6 @@ let data = {
       alpha: true,
       background: `岁兽`
     },
-    青玉砚: {
-      name: "dyn_illust_char_2015_dusk_nian12",
-      x: [0, 0.4],
-      y: [0, -1.11],
-      scale: 0.3,
-      version: "3.8",
-      action: ["Idle", "Special", "Interact"],
-      speed: 1,
-      alpha: true,
-      background: `岁兽`
-    },
     染尘烟: {
       name: "rcy",
       x: [0, 0.49],
@@ -650,6 +640,17 @@ let data = {
       speed: 1,
       alpha: true,
       background: `岁兽`
+    },
+    青玉砚: {
+      name: "dyn_illust_char_2015_dusk_nian12",
+      x: [0, 0.478],
+      y: [0, -1.359],
+      scale: 0.3,
+      version: "3.8",
+      action: ["Idle", "Special", "Interact"],
+      speed: 1,
+      alpha: false,
+      background: `场景_游园`
     }
   },
   // 令
@@ -689,28 +690,14 @@ let data = {
     },
     方遒卷: {
       name: "dyn_illust_char_2023_ling_nian12",
-      x: [0, 0.48],
-      y: [0, -1.27],
-      scale: 0.33,
+      x: [0, 0.57],
+      y: [0, -1.39],
+      scale: 0.3,
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
-      alpha: true,
-      background: `岁兽`
-    }
-  },
-  // 望
-  wangmrfz: {
-    经典形象: {
-      name: "dyn_illust_char_2027_wang",
-      x: [0, 0.36],
-      y: [0, -1.11],
-      scale: 0.34,
-      version: "3.8",
-      action: ["Idle", "Special", "Interact"],
-      speed: 1,
-      alpha: true,
-      background: `岁兽`
+      alpha: false,
+      background: `场景_游园`
     }
   },
   // 重岳
@@ -828,6 +815,17 @@ let data = {
       speed: 1,
       alpha: true,
       background: `拉特兰`
+    },
+    寻翼之歌: {
+      name: "dyn_illust_char_1041_angel2_iteration6",
+      x: [0, 0.651],
+      y: [0, -1.625],
+      scale: 0.4,
+      version: "3.8",
+      action: ["Idle", "Special", "Interact"],
+      speed: 1,
+      alpha: false,
+      background: `场景_庆典`
     }
   },
   // 佩佩
@@ -978,14 +976,14 @@ let data = {
     },
     愿清晓: {
       name: "dyn_illust_char_2026_yu_nian12",
-      x: [0, 0.46],
-      y: [0, -1.29],
-      scale: 0.34,
+      x: [0, 0.595],
+      y: [0, -1.285],
+      scale: 0.3,
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
-      alpha: true,
-      background: `岁兽`
+      alpha: false,
+      background: `场景_游园`
     }
   },
   // 史尔特尔
@@ -1000,6 +998,17 @@ let data = {
       speed: 1,
       alpha: false,
       background: `海滩`
+    },
+    超然序曲: {
+      name: "dyn_illust_char_350_surtr_ambienceSynesthesia6",
+      x: [0, 0.595],
+      y: [0, -0.618],
+      scale: 0.3,
+      version: "3.8",
+      action: ["Idle", "Special", "Interact"],
+      speed: 1,
+      alpha: false,
+      background: `场景_庆典`
     }
   },
   // 澄闪
@@ -1162,6 +1171,76 @@ let data = {
       speed: 1,
       alpha: false,
       background: `场景_庆典`
+    }
+  },
+  //望
+  wangmrfz: {
+    经典形象: {
+      name: "dyn_illust_char_2027_wang",
+      x: [0, 0.559],
+      y: [0, -1.029],
+      scale: 0.3,
+      version: "3.8",
+      action: ["Idle", "Special", "Interact"],
+      speed: 1,
+      alpha: false,
+      background: `场景_游园`
+    }
+  },
+  // 塞雷娅
+  saileiyamrfz: {
+    黑白冷峻: {
+      name: "dyn_illust_char_202_demkni_ambienceSynesthesia7",
+      x: [0, 0.65],
+      y: [0, -1.87],
+      scale: 0.4,
+      version: "3.8",
+      action: ["Idle", "Special", "Interact"],
+      speed: 1,
+      alpha: false,
+      background: `场景_庆典`
+    }
+  },
+  // 遥
+  ziyeyaomrfz: {
+    常世之幻: {
+      name: "dyn_illust_char_4202_haruka_iteration6",
+      x: [0, 0.724],
+      y: [0, -1.271],
+      scale: 0.35,
+      version: "3.8",
+      action: ["Idle", "Special", "Interact"],
+      speed: 1,
+      alpha: false,
+      background: `场景_庆典`
+    }
+  },
+  // mon3tr
+  mon3trmrfz: {
+    锋锐: {
+      name: "dyn_illust_char_4179_monstr_boc11",
+      x: [0, 0.494],
+      y: [0, -1.906],
+      scale: 0.45,
+      version: "3.8",
+      action: ["Idle", "Special", "Interact"],
+      speed: 1,
+      alpha: false,
+      background: `场景_庆典`
+    }
+  },
+  //凯尔希·思衡托
+  spkaierximrfz: {
+    经典形象: {
+      name: "dyn_illust_char_1052_kalts2",
+      x: [0, 0.324],
+      y: [0, -0.645],
+      scale: 0.36,
+      version: "3.8",
+      action: ["Idle", "Special", "Interact"],
+      speed: 1,
+      alpha: false,
+      background: `场景_执着`
     }
   }
 };

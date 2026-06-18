@@ -66,6 +66,20 @@ class WhichWayArknight {
     for (let key in arkData) {
       let info = arkData[key];
       if (!this.isCharacter(info)) continue;
+      const hasArkCharacters = characters.filter((i) => {
+        const char = get.character(i);
+        return typeof char.arkuid === "string";
+      });
+      if (hasArkCharacters.length) {
+        for (let name of hasArkCharacters) {
+          const char = get.character(name);
+          if (char.arkuid === key) {
+            extUID[name] = key;
+            arkUID[key] = name;
+            cn.set([key, name], get.translation(name));
+          }
+        }
+      }
       const trans = characters.map((i) => this.redirect.transfer(get.translation(i)));
       if (trans.includes(info.name)) {
         const whichWayUID = characters.find((i) => this.redirect.transfer(get.translation(i)) === info.name);
@@ -96,10 +110,26 @@ class WhichWayArknight {
       character: { whichWayUID: extUID, chineseName: cn, arknightUID: arkUID }
     } = this.shcema;
     const arkData = this.arknightData.character_table;
-    if (window.whichWaySave.allCharacters.includes(id)) {
+    const characters = window.whichWaySave.allCharacters;
+    if (characters.includes(id)) {
       for (let key in arkData) {
         const info = arkData[key];
         if (!this.isCharacter(info)) continue;
+        const hasArkCharacters = characters.filter((i) => {
+          const char = get.character(i);
+          return typeof char.arkuid === "string";
+        });
+        if (hasArkCharacters.length) {
+          for (let name of hasArkCharacters) {
+            const char = get.character(name);
+            if (char.arkuid === key) {
+              extUID[name] = key;
+              arkUID[key] = name;
+              cn.set([key, name], get.translation(name));
+              return;
+            }
+          }
+        }
         if (this.redirect.transfer(get.translation(id)) === info.name) {
           extUID[id] = key;
           arkUID[key] = id;
@@ -151,7 +181,11 @@ class WhichWayArknight {
    * @param {WhichWayCharacter} char 角色数据
    */
   initCharArknight(char) {
-    char.whichWay.arknight.charId = this.shcema.transfer(char.whichWay.charId, "character", "whichWayUID");
+    if (char.arkuid) {
+      char.whichWay.arknight.charId = char.arkuid;
+    } else {
+      char.whichWay.arknight.charId = this.shcema.transfer(char.whichWay.charId, "character", "whichWayUID");
+    }
     char.whichWay.arknight.camp = this.getCamp(char);
     char.whichWay.arknight.avaiableLangs = this.getAviableLangs(char.whichWay.charId) || [];
     char.whichWay.arknight.tags = this.getTags(char.whichWay.charId) || [];

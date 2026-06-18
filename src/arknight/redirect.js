@@ -13,6 +13,7 @@ class WhichWayArknightRedirect {
     云青萍: "录武官",
     玛露希尔: "玛露西尔",
     Christine: "Miss.Christine"
+    // 守望者凯尔希:"凯尔希·思衡托",
   };
   amiya = {
     char_1037_amiya3: "医疗阿米娅",
