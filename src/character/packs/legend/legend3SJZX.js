@@ -791,13 +791,14 @@ export default {
 						return !storage.acted.includes("education") && storage.target > storage.acted.length && get.type(event.card) === "equip";
 					},
 					async content(event, trigger, player) {
-						game.log(player, "发动了", "#y【兴学】");
-						let content = game.createEvent("rexingxue_fulingmrfz");
-						//@ts-ignore
-						content.player = player;
-						//@ts-ignore
-						content.setContent(lib.skill.rexingxue.content);
 						player.storage.fulingmrfz.acted.add("education");
+						game.log(player, "发动了", "#y【兴学】");
+						//@ts-ignore
+						await lib.skill.rexingxue.cost(event,trigger,player);
+						if(!event.result || !event.result.targets) return;
+						event.targets = event.result.targets;
+						//@ts-ignore
+						await lib.skill.rexingxue.content(event,trigger,player);
 					},
 				},
 				cohesion: {

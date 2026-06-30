@@ -6,6 +6,7 @@ character("liexiangmrfz", {
 	group: "wumrfz",
 	hp: 4,
 	skills: ["xuekuangmrfz","buxiumrfz"],
+	pack:"epicSJZX",
 });
 
 characterIntro("liexiangmrfz", "裂响，本名瑭雅，原乌萨斯泽尔格勒工人，曾在泽尔格勒以“整合运动”名号发起反抗运动，后经弑君者介绍来到罗德岛接受治疗，并以正式干员身份参与罗德岛外勤任务。");

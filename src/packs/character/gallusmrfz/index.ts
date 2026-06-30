@@ -133,7 +133,7 @@ async function orb(card:Card,player:Player,type: "jifa" | "beidong"){
     if(!["trick","basic","equip"].includes(get.type(card))) return;
     if(get.type(card) === "basic"){
         const result = await player.chooseTarget({
-            prompt:`【充能球】:你可以对一名角色造成${type === "jifa" ? 2 : 1}点伤害`,
+            prompt:`【充能球】:你可以对一名角色造成${type === "jifa" ? 1 : 1}点伤害`,
             ai(target) {
                 return get.attitude2(target)<0 ? 1 : -1;
             },

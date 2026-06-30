@@ -2537,7 +2537,7 @@ export default {
 					(target, cards) => {
 						target.storage.xinyunmrfz = true;
 						target.storage.xinyunmrfz_ban = true;
-						target.storage.xinyunmrfz_cards = cards;
+						target.storage.xinyunmrfz_cards = result.cards;
 					},
 					//@ts-ignore
 					target,
@@ -2553,7 +2553,7 @@ export default {
 						return player.hasHistory("sourceDamage", evt => {
 							if (evt.player && evt.player === player) return false;
 							//@ts-ignore
-							return evt.cards && evt.cards.some(card => result.includes(card));
+							return evt.cards && evt.cards.some(card => result.cards.includes(card));
 						});
 					})
 					.then(async (event, trigger, player) => {
@@ -2566,7 +2566,7 @@ export default {
 				while (true) {
 					let cards = target.getCards("h", card => {
 						//@ts-ignore
-						if (!result.includes(card)) return false;
+						if (!result.cards.includes(card)) return false;
 						return target.hasUseTarget(card);
 					});
 					if (cards.length < 1) break;
