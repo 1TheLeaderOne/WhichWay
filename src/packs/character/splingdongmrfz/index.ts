@@ -68,7 +68,7 @@ skill({
                     if(player.countCards("he")>=pow){
                         const result = await player.chooseCard({
                             position:"he",
-                            filterCard:true,
+                            filterCard:()=>true,
                             selectCard() {
                                 return [pow,pow]
                             },

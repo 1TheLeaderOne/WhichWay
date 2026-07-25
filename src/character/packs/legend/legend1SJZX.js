@@ -269,7 +269,7 @@ export default {
 			forced: true,
 			filter: function (event, player) {
 				if (event.player == player) return false;
-				if (event.card.name != "sha" || !player.isPhaseUsing()) return false;
+				if (!event.card || event.card.name != "sha" || !player.isPhaseUsing()) return false;
 				return event.player.isAlive();
 			},
 			async content(event, trigger, player) {
@@ -3555,6 +3555,7 @@ export default {
 				},
 			},
 		},
+		//小刻
 		shihuangmrfz: {
 			audio: 2,
 			usable: 2,
@@ -9970,6 +9971,7 @@ export default {
 				if (result.bool) {
 					if (history > 0) await player.gain(result.links, "gain2");
 					else await trigger.targets[0].gain(result.links, "gain2");
+					cards.removeArray(result.links);
 				}
 
 				player.loseToDiscardpile(cards);
@@ -15207,22 +15209,35 @@ export default {
 			},
 			async content(event, trigger, player) {
 				const { targets } = await player
-					.chooseTarget(true, [1, Infinity])
+					.chooseTarget({
+						forced:true,
+						selectTarget:[1,Infinity]
+					})
 					.set("filterTarget", (card, player, target) => {
 						return player.canCompare(target) && player != target && player.inRange(target);
 					})
 					.set("ai", target => get.attitude2(target) < 0)
 					.forResult();
 				if (targets && targets.length) {
-					player.chooseToCompare(targets).callback = function () {
-						if (event.winner != player) {
-							player.chooseToDiscard(true);
-						} else {
-							event.target.damage();
+					const result = await player.chooseToCompare(targets).forResult();
+					if(!result.targets){
+						return;
+					}
+					for(let i=0;i<result.targets.length;i++){
+						const target = targets[i];
+						const playerNum = result.num1[i];
+						const targetNum = result.num2[i];
+
+						if(![playerNum,targetNum].every(i=>typeof i === "number")) continue;
+
+						if(playerNum > targetNum){
+							await target.damage();
 							player.addMark("xinxiangmrfz_tmp", 1, false);
 							player.addTempSkill("xinxiangmrfz_tmp", { player: "phaseJieshuBegin" });
+						} else{
+							await player.chooseToDiscard().set("forced",true);
 						}
-					};
+					}
 				}
 			},
 		},

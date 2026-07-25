@@ -153,6 +153,10 @@ skill({
 					controls: ["选项一", "选项二", "选项三"],
 					//<br>1.额定摸牌数;<br>2.出牌阶段【杀】的使用次数;<br>3.手牌上限。",
 					choiceList: ["额定摸牌数", "出牌阶段【杀】的使用次数", "手牌上限"],
+					ai(event, player) {
+						//开摆！
+						return ["选项一", "选项二", "选项三"].randomGet();
+					},
 				})
 				.forResult();
 			if (typeof result.index !== "number") return;

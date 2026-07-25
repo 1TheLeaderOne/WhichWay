@@ -6,6 +6,7 @@ character("spkongbaomrfz", {
 	sex: "female",
 	skills: ["xuzhanmrfz", "chaojiemrfz"],
 	hp: 4,
+	pack:"epicSJZX"
 });
 
 characterTitle("spkongbaomrfz", "<font color = blue>兴之所至</font>");

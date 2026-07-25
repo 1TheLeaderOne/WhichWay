@@ -8,6 +8,7 @@ character(CHARNAME, {
 	sex: "female",
 	skills: ["jibaomrfz"],
 	hp: 4,
+    pack:"mediocreSJZX",
 });
 
 characterTitle(CHARNAME, "<font color = #2463d0>电流相生</font>");

@@ -484,7 +484,7 @@ export default {
 			trigger: { player: "phaseEnd" },
 			forced: true,
 			direct: true,
-			content: function () {
+			content: async function (event,trigger,player) {
 				for (var i = 0; i < game.dead.length && game.dead[i].name != "acemrfz"; i++);
 				var dead = game.dead[i];
 				dead.revive(dead.maxHp);
