@@ -4,7 +4,8 @@ character("spkongbaomrfz", {
   group: "othermrfz",
   sex: "female",
   skills: ["xuzhanmrfz", "chaojiemrfz"],
-  hp: 4
+  hp: 4,
+  pack: "epicSJZX"
 });
 characterTitle("spkongbaomrfz", "<font color = blue>兴之所至</font>");
 characterIntro("spkongbaomrfz", "空爆，行动预备组A6成员，在本人意愿下变更为近卫干员，并展现出极强的近身搏斗和使用重型近战武器的天赋。在A6小队的日常任务之外，她也常以个人名义参与各种需要前往险地的外勤任务。<br>大家都说那个过去总是喜欢偷懒耍滑头的空爆完全变了，对于这种评价，她不置可否。");

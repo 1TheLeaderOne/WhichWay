@@ -134,7 +134,10 @@ skill({
         prompt: "【星灭】:令其中一项的数值-1，然后其余项数值+1",
         controls: ["选项一", "选项二", "选项三"],
         //<br>1.额定摸牌数;<br>2.出牌阶段【杀】的使用次数;<br>3.手牌上限。",
-        choiceList: ["额定摸牌数", "出牌阶段【杀】的使用次数", "手牌上限"]
+        choiceList: ["额定摸牌数", "出牌阶段【杀】的使用次数", "手牌上限"],
+        ai(event2, player2) {
+          return ["选项一", "选项二", "选项三"].randomGet();
+        }
       }).forResult();
       if (typeof result.index !== "number") return;
       act(result.index);

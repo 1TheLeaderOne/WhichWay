@@ -2111,7 +2111,7 @@ const legend2SJZX = {
           (target2, cards) => {
             target2.storage.xinyunmrfz = true;
             target2.storage.xinyunmrfz_ban = true;
-            target2.storage.xinyunmrfz_cards = cards;
+            target2.storage.xinyunmrfz_cards = result.cards;
           },
           //@ts-ignore
           target,
@@ -2124,7 +2124,7 @@ const legend2SJZX = {
           if (event2.name !== "damage") return true;
           return player2.hasHistory("sourceDamage", (evt) => {
             if (evt.player && evt.player === player2) return false;
-            return evt.cards && evt.cards.some((card) => result.includes(card));
+            return evt.cards && evt.cards.some((card) => result.cards.includes(card));
           });
         }).then(async (event2, trigger2, player2) => {
           game.broadcastAll((player3) => {
@@ -2134,7 +2134,7 @@ const legend2SJZX = {
         });
         while (true) {
           let cards = target.getCards("h", (card) => {
-            if (!result.includes(card)) return false;
+            if (!result.cards.includes(card)) return false;
             return target.hasUseTarget(card);
           });
           if (cards.length < 1) break;

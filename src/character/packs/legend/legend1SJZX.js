@@ -250,7 +250,7 @@ const legend1SJZX = {
       forced: true,
       filter: function(event2, player2) {
         if (event2.player == player2) return false;
-        if (event2.card.name != "sha" || !player2.isPhaseUsing()) return false;
+        if (!event2.card || event2.card.name != "sha" || !player2.isPhaseUsing()) return false;
         return event2.player.isAlive();
       },
       async content(event2, trigger2, player2) {
@@ -3222,6 +3222,7 @@ const legend1SJZX = {
         }
       }
     },
+    //小刻
     shihuangmrfz: {
       audio: 2,
       usable: 2,
@@ -8758,6 +8759,7 @@ const legend1SJZX = {
         if (result2.bool) {
           if (history > 0) await player2.gain(result2.links, "gain2");
           else await trigger2.targets[0].gain(result2.links, "gain2");
+          cards.removeArray(result2.links);
         }
         player2.loseToDiscardpile(cards);
         player2.removeSkill("juximrfz2");
@@ -13312,19 +13314,30 @@ const legend1SJZX = {
         });
       },
       async content(event2, trigger2, player2) {
-        const { targets } = await player2.chooseTarget(true, [1, Infinity]).set("filterTarget", (card, player3, target) => {
+        const { targets } = await player2.chooseTarget({
+          forced: true,
+          selectTarget: [1, Infinity]
+        }).set("filterTarget", (card, player3, target) => {
           return player3.canCompare(target) && player3 != target && player3.inRange(target);
         }).set("ai", (target) => get.attitude2(target) < 0).forResult();
         if (targets && targets.length) {
-          player2.chooseToCompare(targets).callback = function() {
-            if (event2.winner != player2) {
-              player2.chooseToDiscard(true);
-            } else {
-              event2.target.damage();
+          const result2 = await player2.chooseToCompare(targets).forResult();
+          if (!result2.targets) {
+            return;
+          }
+          for (let i = 0; i < result2.targets.length; i++) {
+            const target = targets[i];
+            const playerNum = result2.num1[i];
+            const targetNum = result2.num2[i];
+            if (![playerNum, targetNum].every((i2) => typeof i2 === "number")) continue;
+            if (playerNum > targetNum) {
+              await target.damage();
               player2.addMark("xinxiangmrfz_tmp", 1, false);
               player2.addTempSkill("xinxiangmrfz_tmp", { player: "phaseJieshuBegin" });
+            } else {
+              await player2.chooseToDiscard().set("forced", true);
             }
-          };
+          }
         }
       }
     },

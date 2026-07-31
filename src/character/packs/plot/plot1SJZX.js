@@ -33,10 +33,10 @@ const plot1SJZX = {
       audio: 2,
       trigger: { global: "phaseBegin" },
       forced: true,
-      filter(event2, player2) {
+      filter(event, player2) {
         return player2.countCards("h", (card) => card.hasGaintag("shencimrfz")) < 1;
       },
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         let cards2 = [];
         for (let name2 of lib.inpile) {
           if (!["basic", "trick"].includes(get.type(name2))) continue;
@@ -56,10 +56,10 @@ const plot1SJZX = {
           audio: "shencimrfz",
           forced: true,
           trigger: { player: "dying" },
-          filter(event2, player2) {
+          filter(event, player2) {
             return player2.countCards("h", (card) => card.hasGaintag("shencimrfz")) > 0;
           },
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             await player2.discard(player2.getCards("h", (card) => card.hasGaintag("shencimrfz")));
             player2.recoverTo(1);
           }
@@ -69,14 +69,14 @@ const plot1SJZX = {
           silent: true,
           charlotte: true,
           trigger: { player: "loseAfter" },
-          filter(event2, player2) {
-            for (let id in event2.gaintag_map) {
-              let tags = event2.gaintag_map[id];
-              if (event2.cards.some((card) => card.cardid === id) && tags.includes("shencimrfz")) return true;
+          filter(event, player2) {
+            for (let id in event.gaintag_map) {
+              let tags = event.gaintag_map[id];
+              if (event.cards.some((card) => card.cardid === id) && tags.includes("shencimrfz")) return true;
             }
             return false;
           },
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             let destory = [];
             for (let id in trigger2.gaintag_map) {
               let tags = trigger2.gaintag_map[id];
@@ -94,16 +94,16 @@ const plot1SJZX = {
         player: "damageEnd",
         source: "damageEnd"
       },
-      filter(event2, player2) {
+      filter(event, player2) {
         return new Set(
           game.getAllGlobalHistory("everything", (evt) => evt.name === "gain" && evt.gaintag.includes("shencimrfz")).map((evt) => evt.cards.map((i) => get.suit(i))).flat()
         ).size > 0;
       },
-      async cost(event2, trigger2, player2) {
+      async cost(event, trigger2, player2) {
         let suits = new Set(
           game.getAllGlobalHistory("everything", (evt) => evt.name === "gain" && evt.gaintag.includes("shencimrfz")).map((evt) => evt.cards.map((i) => get.suit(i))).flat()
         );
-        event2.result = await player2.chooseCard().set("prompt", get.prompt("lanshengmrfz")).set("prompt2", `你可以重铸至多${suits.size}张牌，若包含了与获得过的“神赐”牌相同牌名的牌，你摸一张牌`).set("filterCard", (card) => {
+        event.result = await player2.chooseCard().set("prompt", get.prompt("lanshengmrfz")).set("prompt2", `你可以重铸至多${suits.size}张牌，若包含了与获得过的“神赐”牌相同牌名的牌，你摸一张牌`).set("filterCard", (card) => {
           if (get.event().shenciCard.has(get.name(card))) {
             let info = ui.create.div(".promptSJZX", card);
             info.classList.add("promptCardSJZX");
@@ -125,11 +125,11 @@ const plot1SJZX = {
           }
         });
       },
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         let names = new Set(
           game.getAllGlobalHistory("everything", (evt) => evt.name === "gain" && evt.gaintag.includes("shencimrfz")).map((evt) => evt.cards.map((i) => get.name(i))).flat()
         );
-        let { cards: cards2 } = event2;
+        let { cards: cards2 } = event;
         player2.recast(cards2, void 0, (player3, cards3) => {
           if (cards3.map((i) => get.name(i)).some((i) => names.has(i))) {
             player3.draw(cards3.length + 1);
@@ -146,11 +146,11 @@ const plot1SJZX = {
         player: ["dying", "enterGame"],
         global: "phaseBefore"
       },
-      filter(event2, player2) {
-        return event2.name !== "phase" || game.phaseNumber === 0;
+      filter(event, player2) {
+        return event.name !== "phase" || game.phaseNumber === 0;
       },
       firstDo: true,
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         if (player2.maxHp > 1) {
           let gains = ["xinjuejing", "weijing"].map((i) => `${i}_${get.randomNumberSJZX()}`);
           game.broadcastAll((skills) => {
@@ -171,13 +171,13 @@ const plot1SJZX = {
                 };
                 lib.skill[skill] = {
                   ...lib.skill[skill],
-                  filter(event3, player3) {
-                    if (event3.type === "wuxie" || player3.hasSkill(`${skill}_used`)) {
+                  filter(event2, player3) {
+                    if (event2.type === "wuxie" || player3.hasSkill(`${skill}_used`)) {
                       return false;
                     }
                     let names = player3.storage[skill] ? lib.inpile.filter((i) => get.type(i) === "basic") : ["sha", "shan"];
                     for (var name of names) {
-                      if (event3.filterCard({ name, isCard: true }, player3, event3)) {
+                      if (event2.filterCard({ name, isCard: true }, player3, event2)) {
                         return true;
                       }
                     }
@@ -204,17 +204,17 @@ const plot1SJZX = {
                           return 6 / Math.max(1, get.value(card));
                         },
                         // @ts-ignore
-                        async precontent(event3, trigger3, player4) {
+                        async precontent(event2, trigger3, player4) {
                           player4.addTempSkill(`${skill}_used`, "roundEnd");
                         }
                       };
                     },
-                    dialog(event3, player3) {
+                    dialog(event2, player3) {
                       let names = player3.storage[skill] ? lib.inpile.filter((i) => get.type(i) === "basic") : ["sha", "shan"];
                       var vcards = [];
                       for (var name of names) {
                         var card = { name, isCard: true };
-                        if (event3.filterCard(card, player3, event3)) {
+                        if (event2.filterCard(card, player3, event2)) {
                           vcards.push(["基本", "", name]);
                         }
                       }
@@ -244,7 +244,7 @@ const plot1SJZX = {
     // 可露希尔
     jingxiangmrfz: {
       audio: 2,
-      filter: function(event2, player2) {
+      filter: function(event, player2) {
         return false;
       },
       trigger: { player: "pointless" },
@@ -259,8 +259,8 @@ const plot1SJZX = {
       selectCard: -1,
       replaced: false,
       usedSJZX: false,
-      async precontent(event2, trigger2, player2) {
-        let name = event2.name.replace("pre_", "");
+      async precontent(event, trigger2, player2) {
+        let name = event.name.replace("pre_", "");
         player2.awakenSkill(name);
         lib.skill[name].usedSJZX = true;
       }
@@ -270,18 +270,18 @@ const plot1SJZX = {
       trigger: {
         target: "useCardToTargeted"
       },
-      filter(event2, player2) {
+      filter(event, player2) {
         let skills = player2.getSkills().filter((skill) => {
           if (!skill.startsWith("jingxiangmrfz")) return false;
           let info = get.info(skill);
           return !info.replaced;
         });
-        return skills.length > 0 && get.type(event2.card) !== "delay" && get.type(event2.card) !== "equip";
+        return skills.length > 0 && get.type(event.card) !== "delay" && get.type(event.card) !== "equip";
       },
-      prompt(event2) {
-        return `是否将一个“镜像”中的‘undefined’替换为‘${get.translation(event2.card.name)}’?`;
+      prompt(event) {
+        return `是否将一个“镜像”中的‘undefined’替换为‘${get.translation(event.card.name)}’?`;
       },
-      check(event2, player2) {
+      check(event, player2) {
         let skills = player2.getSkills().filter((skill) => {
           if (!skill.startsWith("jingxiangmrfz")) return false;
           let info = get.info(skill);
@@ -294,9 +294,9 @@ const plot1SJZX = {
           if (!calculate[viewName]) calculate[viewName] = 0;
           calculate[viewName]++;
         });
-        return calculate[event2.card.name] < (get.value(event2.card) >= 6 ? 4 : 3);
+        return calculate[event.card.name] < (get.value(event.card) >= 6 ? 4 : 3);
       },
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         let name = player2.getSkills().filter((skill) => {
           if (!skill.startsWith("jingxiangmrfz")) return false;
           let info2 = get.info(skill);
@@ -327,10 +327,10 @@ const plot1SJZX = {
         global: "phaseBefore",
         player: "enterGame"
       },
-      filter: function(event2, player2) {
-        return event2.name != "phase" || game.phaseNumber == 0;
+      filter: function(event, player2) {
+        return event.name != "phase" || game.phaseNumber == 0;
       },
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         for (let i = 0; i < 15; i++) {
           let name = "jingxiangmrfz" + i;
           let info = {
@@ -357,7 +357,7 @@ const plot1SJZX = {
           trigger: {
             player: "clanzhongliuAfter"
           },
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             let skills = player2.awakenedSkills.filter((skill) => {
               return skill.startsWith("jingxiangmrfz");
             });
@@ -396,10 +396,10 @@ const plot1SJZX = {
       init: function(player2) {
         player2.storage.sizhanmrfz = false;
       },
-      filter: function(event2, player2) {
+      filter: function(event, player2) {
         return !player2.storage.sizhanmrfz;
       },
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         const targets = game.filterPlayer(function(current) {
           return current != player2 && current.isZhu;
         });
@@ -416,12 +416,12 @@ const plot1SJZX = {
       trigger: { player: "phaseEnd" },
       forced: true,
       direct: true,
-      content: function() {
+      content: async function(event, trigger2, player2) {
         for (var i = 0; i < game.dead.length && game.dead[i].name != "acemrfz"; i++) ;
         var dead = game.dead[i];
         dead.revive(dead.maxHp);
         event.dead = dead;
-        player.removeSkill("sizhanmrfz2");
+        player2.removeSkill("sizhanmrfz2");
         dead.insertPhase();
         dead.addSkill("sizhanmrfz3");
         dead.chat("快走，我来断后！");
@@ -467,16 +467,16 @@ const plot1SJZX = {
       shaRelated: true,
       audio: 2,
       trigger: { player: "useCardToPlayered" },
-      filter: function(event2, player2) {
-        if (event2.getParent().name != "useCard" || player2 != _status.currentPhase) return false;
-        return event2.card.name == "sha" && event2.target.countDiscardableCards(player2, "he") > 0;
+      filter: function(event, player2) {
+        if (event.getParent().name != "useCard" || player2 != _status.currentPhase) return false;
+        return event.card.name == "sha" && event.target.countDiscardableCards(player2, "he") > 0;
       },
       preHidden: true,
-      check: function(event2, player2) {
-        return get.attitude(player2, event2.target) <= 0;
+      check: function(event, player2) {
+        return get.attitude(player2, event.target) <= 0;
       },
       logTarget: "target",
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         const result = await player2.discardPlayerCard(trigger2.target, get.prompt("guanyongmrfz", trigger2.target), true).set("att", get.attitude(player2, trigger2.target) <= 0).forResult();
         if (result.bool && result.links && result.links.length) {
           if (get.type(result.links[0], null, result.links[0].original == "h" ? player2 : false) == "basic") {
@@ -517,7 +517,7 @@ const plot1SJZX = {
       mark: true,
       intro: {
         // @ts-ignore
-        content: function(event2, player2) {
+        content: function(event, player2) {
           var show = {
             handlit: [],
             draw: [],
@@ -547,7 +547,7 @@ const plot1SJZX = {
       enable: "phaseUse",
       usable: 1,
       // @ts-ignore
-      filter: function(event2, player2) {
+      filter: function(event, player2) {
         return player2.countCards("he") > 0;
       },
       selectTarget: [0, 2],
@@ -558,9 +558,9 @@ const plot1SJZX = {
       multitarget: true,
       multiline: true,
       // @ts-ignore
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         var cardx;
-        const targets = event2.targets.add(player2);
+        const targets = event.targets.add(player2);
         const cards2 = [];
         for (var i of targets) {
           const result = await i.chooseCard("【星途】:你可以重铸一张牌", "he", lib.filter.cardRecastable).set("ai", function(card) {
@@ -658,31 +658,31 @@ const plot1SJZX = {
       },
       init: (player2, skill) => player2.storage[skill] = false,
       // @ts-ignore
-      filter: function(event2, player2) {
+      filter: function(event, player2) {
         return player2.storage.poqiongmrfz == false;
       },
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         let result;
-        event2.lose = 0;
-        event2.num = 0;
-        event2.showed = [];
-        event2.pd = [];
+        event.lose = 0;
+        event.num = 0;
+        event.showed = [];
+        event.pd = [];
         player2.storage.poqiongmrfz = true;
-        while (event2.num < 6) {
+        while (event.num < 6) {
           result = await player2.chooseCard("he", (card) => {
-            return !event2.showed.includes(card);
+            return !event.showed.includes(card);
           }).forResult();
           if (result.cards && result.cards.length) {
             const cards1 = game.cardsGotoOrdering(get.cards(1)).cards;
             const cards2 = result.cards[0];
             player2.showCards(cards2, get.translation(player2) + "展示的牌</br>点数为:" + cards2.number);
             player2.showCards(cards1, "牌堆顶的牌</br>点数为:" + cards1[0].number);
-            event2.showed.push(cards2);
-            event2.pd.push(cards1[0]);
+            event.showed.push(cards2);
+            event.pd.push(cards1[0]);
             if (cards1?.[0].number > cards2.number) {
               player2.loseMaxHp();
-              event2.lose++;
-              player2.popup("失败：" + event2.lose);
+              event.lose++;
+              player2.popup("失败：" + event.lose);
             }
             game.cardsDiscard(cards1);
           } else {
@@ -690,11 +690,11 @@ const plot1SJZX = {
             player2.showCards(cards1, "牌堆顶的牌</br>点数为:" + cards1[0].number);
             game.cardsDiscard(cards1);
             player2.loseMaxHp();
-            event2.lose++;
+            event.lose++;
           }
-          event2.num++;
+          event.num++;
         }
-        if (event2.lose < 3) {
+        if (event.lose < 3) {
           let num = Math.random();
           if (get.isLuckyStar(player2)) num = 0.1;
           if (num < 0.2 && lib.config.FTLmrfz !== true) {
@@ -705,7 +705,7 @@ const plot1SJZX = {
           player2.addSkill("jiexiangmrfz");
           player2.gainMaxHp(3);
           player2.recoverTo(player2.maxHp);
-          await player2.gain(event2.pd, "gain2");
+          await player2.gain(event.pd, "gain2");
         } else {
           player2.popup("失败");
         }
@@ -733,7 +733,7 @@ const plot1SJZX = {
       audio: 2,
       enable: "phaseUse",
       // @ts-ignore
-      filter: function(event2, player2) {
+      filter: function(event, player2) {
         return player2.countCards("he", function(card) {
           for (var i = 0; i < player2.storage.xingyoumrfz.length; i++) {
             var storage = player2.storage.xingyoumrfz[i];
@@ -767,7 +767,7 @@ const plot1SJZX = {
           silent: true,
           lastDo: true,
           trigger: { player: "phaseEnd" },
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             player2.storage.xingyoumrfz = [];
           }
         },
@@ -775,7 +775,7 @@ const plot1SJZX = {
           charlotte: true,
           forced: true,
           trigger: { global: "roundStart" },
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             player2.addMark("xingyoumrfz_dis", 1, false);
             if (game.countPlayer(function(current) {
               return current != player2 && player2.inRange(current);
@@ -804,19 +804,19 @@ const plot1SJZX = {
       forced: true,
       trigger: { player: "die" },
       forceDie: true,
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         let result;
         const targets = game.filterPlayer().remove(player2);
-        event2.targets = targets;
-        await player2.draw(Math.max(event2.targets.length + 1, player2.recastCount()));
-        while (event2.targets.length) {
-          const num = player2.countCards("he") - event2.targets.length;
-          result = await player2.chooseCard("【揭相】:请选择至少一张牌将其分配给" + get.translation(event2.targets[0]), [1, num + 1], "he").set("forced", true).forResult();
+        event.targets = targets;
+        await player2.draw(Math.max(event.targets.length + 1, player2.recastCount()));
+        while (event.targets.length) {
+          const num = player2.countCards("he") - event.targets.length;
+          result = await player2.chooseCard("【揭相】:请选择至少一张牌将其分配给" + get.translation(event.targets[0]), [1, num + 1], "he").set("forced", true).forResult();
           if (result.cards && result.cards.length) {
-            const target = event2.targets[0];
+            const target = event.targets[0];
             await target.gain(result.cards, "gain2");
           }
-          event2.targets.shift();
+          event.targets.shift();
         }
         for (const current of game.players) {
           if (current !== player2) {
@@ -842,10 +842,10 @@ const plot1SJZX = {
       forced: true,
       unique: true,
       // @ts-ignore
-      filter: function(event2, player2) {
-        return event2.name != "phase" || game.phaseNumber == 0;
+      filter: function(event, player2) {
+        return event.name != "phase" || game.phaseNumber == 0;
       },
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         const result = await player2.chooseTarget(true, "【守望】:请选择一名其他角色", function(card, player3, target) {
           return target != player3;
         }).set("ai", (target) => get.attitude(player2, target) > 0).forResult();
@@ -860,10 +860,10 @@ const plot1SJZX = {
           charlotte: true,
           trigger: { global: "dieBegin" },
           firstDo: true,
-          filter: function(event2, player2) {
-            return event2.player.hasSkill("shouwangmrfz2");
+          filter: function(event, player2) {
+            return event.player.hasSkill("shouwangmrfz2");
           },
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             player2.loseMaxHp(player2.maxHp);
             player2.logSkill("shouwangmrfz");
           }
@@ -872,7 +872,7 @@ const plot1SJZX = {
           direct: true,
           charlotte: true,
           trigger: { player: "dying" },
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             player2.recoverTo(1);
             player2.logSkill("shouwangmrfz");
           }
@@ -881,24 +881,24 @@ const plot1SJZX = {
           audio: 2,
           trigger: { player: "drawAfter" },
           // @ts-ignore
-          filter: function(event2, player2) {
-            return event2.getParent().name != "shouwangmrfz2";
+          filter: function(event, player2) {
+            return event.getParent().name != "shouwangmrfz2";
           },
           // @ts-ignore
-          check: function(event2, player2) {
+          check: function(event, player2) {
             var target = game.findPlayer(function(current) {
               return current.hasSkill("shouwangmrfz2");
             });
             return get.attitude(player2, target) > 0;
           },
           // @ts-ignore
-          prompt: function(event2, player2) {
+          prompt: function(event, player2) {
             var target = game.findPlayer(function(current) {
               return current.hasSkill("shouwangmrfz2");
             });
             return "是否令" + get.translation(target) + "摸一张牌？";
           },
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             player2.logSkill("shouwangmrfz");
             game.countPlayer(function(current) {
               if (current.hasSkill("shouwangmrfz2")) current.draw();
@@ -922,18 +922,18 @@ const plot1SJZX = {
       },
       trigger: { player: "drawAfter" },
       // @ts-ignore
-      filter: function(event2, player2) {
-        return event2.getParent().name != "shouwangmrfz_draw";
+      filter: function(event, player2) {
+        return event.getParent().name != "shouwangmrfz_draw";
       },
       // @ts-ignore
-      prompt: function(event2, player2) {
+      prompt: function(event, player2) {
         var target = game.findPlayer(function(current) {
           return current.hasSkill("shouwangmrfz");
         });
         return "是否令" + get.translation(target) + "摸一张牌？";
       },
       // @ts-ignore
-      check: function(event2, player2) {
+      check: function(event, player2) {
         var target = game.findPlayer(function(current) {
           return current.hasSkill("shouwangmrfz");
         });
@@ -949,11 +949,11 @@ const plot1SJZX = {
     xijimrfz: {
       audio: 2,
       trigger: { player: "dieBegin" },
-      filter: function(event2, player2) {
+      filter: function(event, player2) {
         return player2.countCards("hej") > 0;
       },
       direct: true,
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         const result = await player2.chooseTarget("【希冀】:你可以将你区域内所有的牌交给一名其他角色", function(card, player3, target2) {
           return target2 != player3;
         }).set("ai", (target2) => get.attitude(player2, target2) > 2 && target2.hp > 0).forResult();
@@ -970,10 +970,10 @@ const plot1SJZX = {
         die: {
           audio: "xijimrfz",
           enable: "phaseUse",
-          filter: function(event2, player2) {
+          filter: function(event, player2) {
             return player2.maxHp <= 5;
           },
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             const result = await player2.chooseBool("【希冀】:是否失去所有体力上限？").forResult();
             if (result.bool) {
               var num = Math.floor(player2.maxHp / 2);
@@ -1026,10 +1026,10 @@ const plot1SJZX = {
         global: "roundStart"
       },
       // @ts-ignore
-      filter: function(event2, player2) {
+      filter: function(event, player2) {
         return !player2.hasSkill("chanshimrfz_ban");
       },
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         player2.addTempSkill("chanshimrfz_ban", "phaseEnd");
         let list;
         if (_status.characterlist) {
@@ -1062,20 +1062,20 @@ const plot1SJZX = {
         }
         const switchToAuto = function() {
           _status.imchoosing = false;
-          event2._result = {
+          event._result = {
             bool: true,
             skills: skills.randomGets(1)
           };
-          if (event2.dialog) event2.dialog.close();
-          if (event2.control) event2.control.close();
+          if (event.dialog) event.dialog.close();
+          if (event.control) event.control.close();
         };
         const chooseButton = async function(list2, skills2, resolve) {
-          const event3 = _status.event;
-          if (!event3._result) event3._result = {};
-          event3._result.skills = [];
-          const rSkill = event3._result.skills;
+          const event2 = _status.event;
+          if (!event2._result) event2._result = {};
+          event2._result.skills = [];
+          const rSkill = event2._result.skills;
           const dialog = ui.create.dialog("请获得一个技能", [list2, "character"], "hidden");
-          event3.dialog = dialog;
+          event2.dialog = dialog;
           const table = document.createElement("div");
           table.classList.add("add-setting");
           table.style.margin = "0";
@@ -1107,37 +1107,37 @@ const plot1SJZX = {
           dialog.content.appendChild(table);
           dialog.add("  ");
           dialog.open();
-          event3.switchToAuto = function() {
-            event3.dialog.close();
-            event3.control.close();
+          event2.switchToAuto = function() {
+            event2.dialog.close();
+            event2.control.close();
             game.resume();
             _status.imchoosing = false;
           };
-          event3.control = ui.create.control("ok", function(link) {
-            event3.dialog.close();
-            event3.control.close();
+          event2.control = ui.create.control("ok", function(link) {
+            event2.dialog.close();
+            event2.control.close();
             game.resume();
             _status.imchoosing = false;
             if (resolve) resolve(true);
           });
-          for (let i = 0; i < event3.dialog.buttons.length; i++) {
-            event3.dialog.buttons[i].classList.add("selectable");
+          for (let i = 0; i < event2.dialog.buttons.length; i++) {
+            event2.dialog.buttons[i].classList.add("selectable");
           }
           game.pause();
           game.countChoose();
         };
-        if (event2.isMine()) {
+        if (event.isMine()) {
           await new Promise((resolve) => {
             chooseButton(list, skills, resolve);
           });
-        } else if (event2.isOnline()) {
-          event2.player.send(chooseButton, list, skills);
-          event2.player.wait();
+        } else if (event.isOnline()) {
+          event.player.send(chooseButton, list, skills);
+          event.player.wait();
           game.pause();
         } else {
           switchToAuto();
         }
-        const map = event2.result || event2._result;
+        const map = event.result || event._result;
         if (map && map.skills && map.skills.length) {
           for (const skill of map.skills) {
             player2.addSkillLog(skill);
@@ -1168,15 +1168,15 @@ const plot1SJZX = {
       trigger: {
         player: ["phaseChange", "drawAfter", "loseAfter"]
       },
-      filter: function(event2, player2) {
-        if (event2.name === "draw") return event2.num > 0;
-        else if (event2.name === "lose") return event2.type == "discard";
-        else if (event2.name === "phase")
+      filter: function(event, player2) {
+        if (event.name === "draw") return event.num > 0;
+        else if (event.name === "lose") return event.type == "discard";
+        else if (event.name === "phase")
           return !player2.storage.xinjunxingmrfz || !player2.storage.xinjunxingmrfz.isSubset(player2.getSkills(null, false, false));
         return false;
       },
       // @ts-ignore
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         if (!Array.isArray(player2.storage.xinjunxingmrfz)) player2.storage.xinjunxingmrfz = [];
         if (trigger2.name === "draw") {
           player2.storage.xinjunxingmrfz = ["sptunjiang", "reqiaobian"];
@@ -1199,19 +1199,19 @@ const plot1SJZX = {
       trigger: {
         player: "phaseBegin"
       },
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         if (player2.isUnderControl()) {
           game.swapPlayerAuto(player2);
         }
         const chooseButton = function(phases, resolve) {
-          const event3 = _status.event;
-          if (!event3._result) event3._result = {};
-          event3._result.phases = [];
-          event3._result.phases2 = [];
-          const endphases = event3._result.phases;
-          event3._result.phases2;
+          const event2 = _status.event;
+          if (!event2._result) event2._result = {};
+          event2._result.phases = [];
+          event2._result.phases2 = [];
+          const endphases = event2._result.phases;
+          event2._result.phases2;
           const dialog = ui.create.dialog("【游击】:你可以掉换执行阶段的顺序</br>执行顺序为由左到右依次执行", "hidden");
-          event3.dialog = dialog;
+          event2.dialog = dialog;
           const table = document.createElement("div");
           table.classList.add("add-setting");
           table.style.margin = "0";
@@ -1255,8 +1255,8 @@ const plot1SJZX = {
                 phases[index2] = tempNode2.link;
                 tempNode.classList.remove("bluebg");
                 tempNode2.classList.remove("bluebg");
-                event3._result.phases2 = phases;
-                event3._result.phases.length = 0;
+                event2._result.phases2 = phases;
+                event2._result.phases.length = 0;
               }
             }
           };
@@ -1271,45 +1271,45 @@ const plot1SJZX = {
           dialog.content.appendChild(table);
           dialog.add("  ");
           dialog.open();
-          event3.switchToAuto = function() {
-            event3.dialog.close();
-            event3.control.close();
+          event2.switchToAuto = function() {
+            event2.dialog.close();
+            event2.control.close();
             game.resume();
             _status.imchoosing = false;
           };
-          event3.control = ui.create.control("ok", function(link) {
-            event3.dialog.close();
-            event3.control.close();
+          event2.control = ui.create.control("ok", function(link) {
+            event2.dialog.close();
+            event2.control.close();
             game.resume();
             _status.imchoosing = false;
             if (resolve) resolve(true);
           });
-          for (let i = 0; i < event3.dialog.buttons.length; i++) {
-            event3.dialog.buttons[i].classList.add("selectable");
+          for (let i = 0; i < event2.dialog.buttons.length; i++) {
+            event2.dialog.buttons[i].classList.add("selectable");
           }
           game.pause();
         };
         const switchToAuto = function() {
           _status.imchoosing = false;
-          event2._result = {
+          event._result = {
             bool: true,
             phases2: ["phaseUse", "phaseDraw", "phaseDiscard", "phaseZhunbei", "phaseJieshu", "phaseJudge"]
           };
-          if (event2.dialog) event2.dialog.close();
-          if (event2.control) event2.control.close();
+          if (event.dialog) event.dialog.close();
+          if (event.control) event.control.close();
         };
-        if (event2.isMine()) {
+        if (event.isMine()) {
           await new Promise((resolve) => {
             chooseButton(trigger2.phaseList, resolve);
           });
-        } else if (event2.isOnline()) {
-          event2.player.send(chooseButton, trigger2.phaseList);
-          event2.player.wait();
+        } else if (event.isOnline()) {
+          event.player.send(chooseButton, trigger2.phaseList);
+          event.player.wait();
           game.pause();
         } else {
           switchToAuto();
         }
-        const map = event2.result || event2._result;
+        const map = event.result || event._result;
         trigger2.phaseList = map.phases2.length ? map.phases2 : trigger2.phaseList;
         game.log(player2, "阶段执行顺序为", `#y${get.translation(trigger2.phaseList)}`);
       }
@@ -1317,22 +1317,22 @@ const plot1SJZX = {
     //斗士塔露拉
     juhuomrfz: {
       trigger: { player: "useCardAfter" },
-      filter: function(event2, player2) {
+      filter: function(event, player2) {
         if (player2.hasSkill("juhuomrfz_ban")) return false;
-        return event2.card && get.tag(event2.card, "damage") > 0 && game.hasPlayer2((current) => {
+        return event.card && get.tag(event.card, "damage") > 0 && game.hasPlayer2((current) => {
           return current.hasHistory("damage", (evt) => {
-            return event2.card == evt.card;
+            return event.card == evt.card;
           });
         });
       },
-      prompt2: function(event2, player2) {
+      prompt2: function(event, player2) {
         var num = player2.getHistory("sourceDamage", function(evt) {
-          return evt.card == event2.card;
+          return evt.card == event.card;
         }).length;
-        var num2 = event2.card.number;
+        var num2 = event.card.number;
         return "【聚火】:是否增加" + num + "点体力上限（此牌点数<span class=firetext>" + (player2.hp < num2 ? "大于" : "不大于") + "</span>你的体力值）";
       },
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         var num = player2.getHistory("sourceDamage", function(evt) {
           return evt.card == trigger2.card;
         }).length;
@@ -1362,10 +1362,10 @@ const plot1SJZX = {
       derivation: ["shihunmrfz", "hantianmrfz"],
       trigger: { player: "phaseBegin" },
       // @ts-ignore
-      filter: function(event2, player2) {
+      filter: function(event, player2) {
         return player2.maxHp > game.countPlayer();
       },
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         player2.awakenSkill("xuehengmrfz");
         await player2.removeSkill("juhuomrfz");
         var hasfriendDeath = function(player3, identity) {
@@ -1428,7 +1428,7 @@ const plot1SJZX = {
           forced: true,
           trigger: { player: "phaseJieshuBegin" },
           // @ts-ignore
-          filter: function(event2, player2) {
+          filter: function(event, player2) {
             return game.dead.length > 0;
           },
           content: function() {
@@ -1444,8 +1444,8 @@ const plot1SJZX = {
           forced: true,
           trigger: { player: "damageBegin4" },
           // @ts-ignore
-          filter: function(event2, player2) {
-            return event2.num > 1;
+          filter: function(event, player2) {
+            return event.num > 1;
           },
           content: function() {
             trigger.num = 1;
@@ -1461,13 +1461,13 @@ const plot1SJZX = {
       },
       trigger: { player: "phaseZhunbeiBegin" },
       // @ts-ignore
-      filter: function(event2, player2) {
+      filter: function(event, player2) {
         return !game.hasPlayer((current) => {
           return current.hasMark("hantianmrfz");
         });
       },
       forced: true,
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         for (var i of game.players) {
           if (player2.identity == "nei" && i == player2) i.addMark("hantianmrfz");
           if (player2.identity == "zhu" && i.identity == "zhong" || player2.identity == "zhong" && i.identity == "zhu") {
@@ -1500,16 +1500,16 @@ const plot1SJZX = {
         },
         sha: {
           trigger: { global: "useCardAfter" },
-          filter: function(event2, player2) {
-            if (player2.hasSkill("hantianmrfz_ban") || event2.card.name != "sha" || !event2.targets.length) return false;
-            if (event2.getParent(2).name == "hantianmrfz_sha") return false;
-            if (!event2.player.hasMark("hantianmrfz")) return false;
+          filter: function(event, player2) {
+            if (player2.hasSkill("hantianmrfz_ban") || event.card.name != "sha" || !event.targets.length) return false;
+            if (event.getParent(2).name == "hantianmrfz_sha") return false;
+            if (!event.player.hasMark("hantianmrfz")) return false;
             var list = game.filterPlayer((current) => {
               return current.hasMark("hantianmrfz");
-            }), targets = event2.targets;
+            }), targets = event.targets;
             for (var i of list) {
               for (var j of targets) {
-                if (i == event2.player || !i.isIn()) continue;
+                if (i == event.player || !i.isIn()) continue;
                 if (!i.canUse("sha", j, false)) continue;
                 if (_status.connectMode && i.countCards("hs") > 0) return true;
                 if (i.hasSha()) return true;
@@ -1520,24 +1520,24 @@ const plot1SJZX = {
           forced: true,
           popup: false,
           charlotte: true,
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             let result;
-            event2.sources = game.filterPlayer((current) => {
+            event.sources = game.filterPlayer((current) => {
               return current.hasMark("hantianmrfz") && current !== trigger2.player;
             }).sortBySeat();
-            event2.targets = trigger2.targets;
-            while (event2.sources.length > 0) {
-              const current = event2.sources.shift();
+            event.targets = trigger2.targets;
+            while (event.sources.length > 0) {
+              const current = event.sources.shift();
               const targets = [];
-              event2.draw = current;
-              for (const target of event2.targets) {
+              event.draw = current;
+              for (const target of event.targets) {
                 if (!target.isIn()) continue;
                 if (!current.canUse("sha", target, false)) continue;
                 targets.push(target);
               }
               if (current.isIn() && (_status.connectMode || current.hasSha())) {
                 result = await current.chooseToUse(
-                  function(card, player3, event3) {
+                  function(card, player3, event2) {
                     if (get.name(card) !== "sha") return false;
                     return lib.filter.filterCard.apply(this, arguments);
                   },
@@ -1548,7 +1548,7 @@ const plot1SJZX = {
                 }).set("sourcex", targets).set("logSkill", "hantianmrfz").set("addCount", false).forResult();
               }
               if (result?.bool) {
-                await event2.draw.draw();
+                await event.draw.draw();
               }
             }
           }
@@ -1567,7 +1567,7 @@ const plot1SJZX = {
       enable: "phaseUse",
       usable: 1,
       // @ts-ignore
-      filter(event2, player2) {
+      filter(event, player2) {
         return player2.countCards("h") > 0;
       },
       // @ts-ignore
@@ -1578,8 +1578,8 @@ const plot1SJZX = {
       multitarget: true,
       multiline: true,
       // @ts-ignore
-      async content(event2, trigger2, player2) {
-        var targets = event2.targets.slice(), cardsx = [];
+      async content(event, trigger2, player2) {
+        var targets = event.targets.slice(), cardsx = [];
         while (targets.length > 0) {
           var prompt = `【博济】:请展示一张手牌
                         ${player2 == targets[0] && player2.storage.bojimrfz.color != null ? "" : "<br>" + get.translation(player2) + "展示的牌的颜色为：" + get.translation(player2.storage.bojimrfz.color)}`;
@@ -1606,7 +1606,7 @@ const plot1SJZX = {
           game.log(targets[0], "展示了", cards2);
           targets.shift();
         }
-        event2.videoId = lib.status.videoId++;
+        event.videoId = lib.status.videoId++;
         game.broadcastAll(
           // @ts-ignore
           function(targets2, cards2, id, player3) {
@@ -1640,10 +1640,10 @@ const plot1SJZX = {
             }
           },
           //@ts-ignore
-          event2.targets,
+          event.targets,
           cardsx,
           //@ts-ignore
-          event2.videoId,
+          event.videoId,
           player2
         );
         for (var i of player2.storage.bojimrfz["players"]) {
@@ -1653,7 +1653,7 @@ const plot1SJZX = {
         player2.addTempSkill("bojimrfz_eff2", { player: "phaseUseBegin" });
         let { promise, resolve } = Promise.withResolvers();
         setTimeout(() => {
-          game.broadcastAll("closeDialog", event2.videoId);
+          game.broadcastAll("closeDialog", event.videoId);
           resolve();
         }, 3e3);
         await promise;
@@ -1671,7 +1671,7 @@ const plot1SJZX = {
           mark: true,
           intro: {
             // @ts-ignore
-            content(event2, player2) {
+            content(event, player2) {
               var target = game.findPlayer((current) => {
                 return current == player2.storage.bojimrfz_mark;
               });
@@ -1689,7 +1689,7 @@ const plot1SJZX = {
           trigger: {
             player: "die"
           },
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             var target = game.findPlayer((current) => {
               return current == player2.storage.bojimrfz_mark;
             });
@@ -1704,10 +1704,10 @@ const plot1SJZX = {
           trigger: { player: ["phaseUseBegin", "die"] },
           forceDie: true,
           // @ts-ignore
-          filter(event2, player2) {
+          filter(event, player2) {
             return player2.storage.bojimrfz["players"].length > 0;
           },
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             for (var i of player2.storage.bojimrfz["players"]) {
               i.removeSkill("bojimrfz_eff1");
               i.removeSkill("bojimrfz_group");
@@ -1726,11 +1726,11 @@ const plot1SJZX = {
             global: ["loseEnd", "equipEnd", "addJudgeEnd", "gainEnd", "loseAsyncEnd", "addToExpansionEnd", "bojimrfzAfter"]
           },
           // @ts-ignore
-          filter(event2, player2) {
+          filter(event, player2) {
             return Boolean(player2.hasSkill("bojimrfz_mark") ^ player2.hasSkill("bojimrfz_group"));
           },
           // @ts-ignore
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             if (player2.hasSkill("bojimrfz_mark")) {
               var cards2 = [], target = game.findPlayer((current) => {
                 return current == player2.storage.bojimrfz_mark;
@@ -1760,9 +1760,9 @@ const plot1SJZX = {
           forced: true,
           silent: true,
           // @ts-ignore
-          filter: function(event2, player2) {
-            if (event2.name == "gain") return event2.cards && event2.cards.length;
-            var cards2 = event2.getd();
+          filter: function(event, player2) {
+            if (event.name == "gain") return event.cards && event.cards.length;
+            var cards2 = event.getd();
             return cards2.length;
           },
           onremove: function(player2) {
@@ -1813,9 +1813,9 @@ const plot1SJZX = {
           forced: true,
           popup: false,
           firstDo: true,
-          filter: function(event2, player2) {
+          filter: function(event, player2) {
             var cards2 = player2.getCards("s", (card) => card.hasGaintag("bojimrfz") && card._cardid);
-            return event2.cards && event2.cards.some((card) => {
+            return event.cards && event.cards.some((card) => {
               return cards2.includes(card);
             });
           },
@@ -1864,9 +1864,9 @@ const plot1SJZX = {
           forced: true,
           popup: false,
           firstDo: true,
-          filter: function(event2, player2) {
+          filter: function(event, player2) {
             var idList = player2.getCards("s", (card) => card.hasGaintag("bojimrfz")).map((i) => i._cardid);
-            return event2.cards && event2.cards.some((card) => {
+            return event.cards && event.cards.some((card) => {
               return idList.includes(card.cardid);
             });
           },
@@ -1909,8 +1909,8 @@ const plot1SJZX = {
           },
           charlotte: true,
           forced: true,
-          filter: function(event2, player2) {
-            if (event2.getl && !event2.getl(player2)) return false;
+          filter: function(event, player2) {
+            if (event.getl && !event.getl(player2)) return false;
             return player2.countCards("h") < player2.storage.bojimrfz.players.length;
           },
           content: function() {
@@ -1937,11 +1937,11 @@ const plot1SJZX = {
       forceDie: true,
       skillAnimation: true,
       animationColor: "gray",
-      filter: function(event2) {
-        return event2.source && event2.source.isIn();
+      filter: function(event) {
+        return event.source && event.source.isIn();
       },
       // @ts-ignore
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         var doc = trigger2.source;
         doc.clearSkills();
         doc.discard(doc.getCards("hej"));
@@ -1987,14 +1987,14 @@ const plot1SJZX = {
         player: "useCardToPlayered"
       },
       // @ts-ignore
-      filter: function(event2, player2) {
-        if (event2.getParent().triggeredTargets3.length > 1) return false;
-        if (get.name(event2.card) == "sha") return true;
+      filter: function(event, player2) {
+        if (event.getParent().triggeredTargets3.length > 1) return false;
+        if (get.name(event.card) == "sha") return true;
         return false;
       },
       direct: true,
       // @ts-ignore
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         const { targets } = await player2.chooseTarget(get.prompt("chongxiemrfz"), "你可以弃置其中一名角色的手牌", function(card, player3, target2) {
           return (_status.event.targets.includes(target2) || target2 == player3) && target2.countDiscardableCards(player3, "h");
         }).set("ai", function(target2) {
@@ -2023,12 +2023,12 @@ const plot1SJZX = {
     },
     qj_chongjimrfz: {
       enable: "chooseToUse",
-      filter: function(event2, player2) {
+      filter: function(event, player2) {
         if (player2.countMark("chongxiemrfz") < 1 || !player2.isPhaseUsing()) return false;
-        return event2.filterCard({ name: "sha" }, player2, event2);
+        return event.filterCard({ name: "sha" }, player2, event);
       },
       // @ts-ignore
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         await player2.chooseUseTarget({ name: "sha", nature: "thunder", isCard: true }, true, "nodistance");
         player2.removeMark("chongxiemrfz", 1, false);
       },
@@ -2052,16 +2052,16 @@ const plot1SJZX = {
         player: "phaseUseBegin"
       },
       // @ts-ignore
-      filter: function(event2, player2) {
+      filter: function(event, player2) {
         return player2.countMark("chongxiemrfz") > 5 && !player2.storage.leitingmrfz;
       },
       // @ts-ignore
-      check: function(event2, player2) {
+      check: function(event, player2) {
         if (player2.hasUnknown()) return false;
         return true;
       },
       // @ts-ignore
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         player2.removeMark("chongxiemrfz", 6, false);
         const { targets } = await player2.chooseTarget(true, "【雷霆】:请选择一个其他角色，对其使用6张雷【杀】").set("filterTarget", (card, player3, target) => {
           return player3.canUse({ name: "sha", nature: "thunder", isCard: true }, target, false) && player3 != target;
@@ -2082,10 +2082,10 @@ const plot1SJZX = {
         player2.when({
           player: "phaseEnd",
           global: "dieAfter"
-        }).filter((event3, player3) => {
+        }).filter((event2, player3) => {
           var target = _status.SJZX_tmpleitingmrfz;
-          if (event3.name == "phase") return true;
-          else return event3.player == target;
+          if (event2.name == "phase") return true;
+          else return event2.player == target;
         }).then(() => {
           var target = _status.SJZX_tmpleitingmrfz;
           if (trigger2.name == "die") {
@@ -2107,11 +2107,11 @@ const plot1SJZX = {
       },
       forced: true,
       // @ts-ignore
-      filter(event2, player2) {
+      filter(event, player2) {
         return player2.countCards("h") > 0;
       },
       // @ts-ignore
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         const { cards: cards2 } = await player2.chooseCard(true).set("prompt", "【怨府】:请展示一张手牌").set("ai", (card) => {
           var storage = player2.storage.yuanfumrfz;
           if (storage.length > 1) return Math.random();
@@ -2135,7 +2135,7 @@ const plot1SJZX = {
           charlotte: true,
           lastDo: true,
           trigger: { player: "phaseEnd" },
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             player2.logSkill("yuanfumrfz");
             player2.storage.yuanfumrfz = [];
             player2.loseHp();
@@ -2147,7 +2147,7 @@ const plot1SJZX = {
           mark: true,
           intro: {
             // @ts-ignore
-            content(event2, player2) {
+            content(event, player2) {
               return `无法使用或打出手牌中${get.translation(player2.storage.yuanfumrfz_eff)}的牌`;
             }
           },
@@ -2169,7 +2169,7 @@ const plot1SJZX = {
           charlotte: true,
           lastDo: true,
           trigger: { player: "phaseEnd" },
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             delete player2.storage.yuanfumrfz;
           },
           ai: {
@@ -2189,12 +2189,12 @@ const plot1SJZX = {
       enable: "phaseUse",
       usable: 1,
       // @ts-ignore
-      filter(event2, player2) {
+      filter(event, player2) {
         return player2.hasEnabledSlot(1) || player2.hasEnabledSlot(2) || player2.hasEnabledSlot(5) || player2.hasEnabledSlot("horse");
       },
       // @ts-ignore
-      async content(event2, trigger2, player2) {
-        var { control } = await player2.chooseToDisable(true).set("ai", function(event3, player3, list2) {
+      async content(event, trigger2, player2) {
+        var { control } = await player2.chooseToDisable(true).set("ai", function(event2, player3, list2) {
           if (list2.includes("equip5")) return "equip5";
           else if (list2.includes("equip2")) return "equip2";
           else if (list2.includes("horse")) return "horse";
@@ -2202,7 +2202,7 @@ const plot1SJZX = {
         }).forResult();
         if (!control) return;
         let targets = game.players.slice().remove(player2);
-        var getChooseList = function(event3, player3, target2) {
+        var getChooseList = function(event2, player3, target2) {
           let list2 = [];
           let chooseList2 = [
             `弃置一张牌，本回合你下次受到的伤害+1`,
@@ -2231,7 +2231,7 @@ const plot1SJZX = {
           if (!player2.isIn()) {
             break;
           }
-          var list = getChooseList(event2, player2, target).list, chooseList = getChooseList(event2, player2, target).chooseList;
+          var list = getChooseList(event, player2, target).list, chooseList = getChooseList(event, player2, target).chooseList;
           var { control } = await target.chooseControl(list).set("choiceList", chooseList).set("prompt", "请选择一项").set("ai", () => {
             var list2 = _status.event.list, player3 = _status.event.player, target2 = _status.event.target;
             if (get.attitude(player3, target2) > 0) {
@@ -2289,10 +2289,10 @@ const plot1SJZX = {
           forced: true,
           trigger: { player: "damageBegin2" },
           // @ts-ignore
-          filter(event2, player2) {
+          filter(event, player2) {
             return player2.countMark("fenzhoumrfz_eff1") > 0;
           },
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             trigger2.num += player2.countMark("fenzhoumrfz_eff1");
           }
         },
@@ -2319,10 +2319,10 @@ const plot1SJZX = {
           forced: true,
           trigger: { source: "damageBegin2" },
           // @ts-ignore
-          filter(event2, player2) {
+          filter(event, player2) {
             return player2.countMark("fenzhoumrfz_eff3") > 0;
           },
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             trigger2.num += player2.countMark("fenzhoumrfz_eff3");
           }
         }
@@ -2357,7 +2357,7 @@ const plot1SJZX = {
         return list;
       },
       // @ts-ignore
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         function getRandomKeys(obj, num2) {
           var keys = Object.keys(obj);
           var selectedKeys = [];
@@ -2487,7 +2487,7 @@ const plot1SJZX = {
           count += 10;
         }
         buttonList.push(`存在有${findWord.length}个技能`);
-        const { links } = event2.isMine() == false ? { links: autoChoose(list, findWord) } : await player2.chooseButton(buttonList).set("forced", true).set("selectButton", [2, Infinity]).set("filterButton", function(button) {
+        const { links } = event.isMine() == false ? { links: autoChoose(list, findWord) } : await player2.chooseButton(buttonList).set("forced", true).set("selectButton", [2, Infinity]).set("filterButton", function(button) {
           var list2 = _status.event.cannot;
           if (list2.length == 0) return true;
           if (list2.includes(button.link)) return true;
@@ -2535,10 +2535,10 @@ const plot1SJZX = {
       trigger: {
         source: "damageEnd"
       },
-      filter(event2, player2) {
-        return event2.player && event2.player.isIn() && !!event2.player.countGainableCards(player2, "hes");
+      filter(event, player2) {
+        return event.player && event.player.isIn() && !!event.player.countGainableCards(player2, "hes");
       },
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         var pos = [];
         for (var i of trigger2.player.getCards("hes")) {
           pos.add(get.position(i));
@@ -2553,16 +2553,16 @@ const plot1SJZX = {
           game.broadcastAll(function() {
             _status.noclearcountdown = true;
           });
-        event2.given_map = {};
+        event.given_map = {};
         while (cards2.length > 0) {
           var { links } = cards2.length == 1 ? { links: cards2 } : await player2.chooseCardButton("【拾薪】:请选择要分配的牌", true, cards2, [1, cards2.length]).set("ai", () => {
             if (ui.selected.buttons.length == 0) return 1;
             return 0;
           }).forResult();
           if (!links) continue;
-          event2.togive = links.slice();
+          event.togive = links.slice();
           cards2.removeArray(links);
-          const { targets } = await player2.chooseTarget("选择一名角色获得" + get.translation(event2.togive), true).set("ai", (target) => {
+          const { targets } = await player2.chooseTarget("选择一名角色获得" + get.translation(event.togive), true).set("ai", (target) => {
             const att = get.attitude(_status.event.player, target);
             if (_status.event.enemy) {
               return -att;
@@ -2571,11 +2571,11 @@ const plot1SJZX = {
             } else {
               return att / 100;
             }
-          }).set("enemy", get.value(event2.togive[0], player2, "raw") < 0).forResult();
+          }).set("enemy", get.value(event.togive[0], player2, "raw") < 0).forResult();
           if (targets) {
-            const id = targets[0].playerid, map = event2.given_map;
+            const id = targets[0].playerid, map = event.given_map;
             if (!map[id]) map[id] = [];
-            map[id].addArray(event2.togive);
+            map[id].addArray(event.togive);
           }
         }
         if (_status.connectMode) {
@@ -2585,11 +2585,11 @@ const plot1SJZX = {
           });
         }
         const list = [];
-        for (const i2 in event2.given_map) {
+        for (const i2 in event.given_map) {
           const source = (_status.connectMode ? lib.playerOL : game.playerMap)[i2];
           player2.line(source, "green");
           if (player2 !== source && (get.mode() !== "identity" || player2.identity !== "nei")) player2.addExpose(0.2);
-          list.push([source, event2.given_map[i2]]);
+          list.push([source, event.given_map[i2]]);
         }
         game.loseAsync({
           gain_list: list,
@@ -2606,14 +2606,14 @@ const plot1SJZX = {
       trigger: {
         player: "useCard"
       },
-      filter(event2, player2) {
-        if (!event2.card) return false;
-        return !player2.storage.zhuoximrfz.includes(get.type2(event2.card)) && game.hasPlayer((current) => {
+      filter(event, player2) {
+        if (!event.card) return false;
+        return !player2.storage.zhuoximrfz.includes(get.type2(event.card)) && game.hasPlayer((current) => {
           return get.distance(current, player2) == player2.hp && current != player2;
         });
       },
       // @ts-ignore
-      async cost(event2, trigger2, player2) {
+      async cost(event, trigger2, player2) {
         const { result } = await player2.chooseTarget(`【灼息】:你可以对一名与你距离为${player2.hp}的角色造成一点火焰伤害`).set("filterTarget", (card, player3, target) => {
           return get.distance(target, player3) == player3.hp && target != player3;
         }).set("ai", (target) => {
@@ -2621,10 +2621,10 @@ const plot1SJZX = {
           return get.damageEffect(target, player3, player3, "fire") > 0;
         });
         if (!result) return;
-        event2.result = result;
+        event.result = result;
       },
-      async content(event2, trigger2, player2) {
-        let target = event2.targets[0];
+      async content(event, trigger2, player2) {
+        let target = event.targets[0];
         target.damage("fire");
         player2.line(target);
         if (!player2.storage.zhuoximrfz) player2.storage.zhuoximrfz = [];
@@ -2636,7 +2636,7 @@ const plot1SJZX = {
           silent: true,
           charlotte: true,
           trigger: { player: "phaseEnd" },
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             player2.storage.zhuoximrfz = [];
           }
         }
@@ -2700,7 +2700,7 @@ const plot1SJZX = {
       firstDo: true,
       trigger: { global: "roundStart" },
       // @ts-ignore
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         let skill = lib.skill.chenkemrfz.getNegative(player2);
         await player2.addSkill(skill);
         player2.storage.chenkemrfz.add(skill);
@@ -2727,12 +2727,12 @@ const plot1SJZX = {
       derivation: ["bengjiemrfz"],
       trigger: { global: "roundStart" },
       // @ts-ignore
-      filter(event2, player2) {
+      filter(event, player2) {
         return game.roundNumber > 4;
       },
       forced: true,
       // @ts-ignore
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         let skills = player2.getOriginalSkills();
         skills.push(...["guguomrfz", "xingjunmrfz", "datongmrfz"]);
         for (let skill of skills) {
@@ -2752,13 +2752,13 @@ const plot1SJZX = {
           0: {
             intro: "弃置两种不同颜色的牌，获得“固国”",
             // @ts-ignore
-            filter(event2, player3) {
+            filter(event, player3) {
               return ["red", "black"].every(
                 (i) => player3.getCards("hes").map((j) => get.color(j)).includes(i)
               );
             },
             // @ts-ignore
-            async content(event2, trigger2, player3) {
+            async content(event, trigger2, player3) {
               const bool = await player3.chooseToDiscard(true, "弃置两种不同颜色的牌，获得“固国”", 2).set("ai", (card) => 8 - get.value(card)).set(
                 "filterCard",
                 (card, player4) => !ui.selected.cards.some((cardx) => get.color(cardx, player4) == get.color(card, player4))
@@ -2777,13 +2777,13 @@ const plot1SJZX = {
           1: {
             intro: "弃置三种不同类型的牌，获得“兴军”",
             // @ts-ignore
-            filter(event2, player3) {
+            filter(event, player3) {
               return ["trick", "basic", "equip"].every(
                 (i) => player3.getCards("hes").map((j) => get.type2(j)).includes(i)
               );
             },
             // @ts-ignore
-            async content(event2, trigger2, player3) {
+            async content(event, trigger2, player3) {
               const bool = await player3.chooseToDiscard(true, "弃置三种不同类型的牌，获得“兴军”", 3).set("ai", (card) => 8 - get.value(card)).set(
                 "filterCard",
                 (card, player4) => !ui.selected.cards.some((cardx) => get.type2(cardx, player4) == get.type2(card, player4))
@@ -2802,13 +2802,13 @@ const plot1SJZX = {
           2: {
             intro: "弃置四种不同花色的牌，获得“大同”",
             // @ts-ignore
-            filter(event2, player3) {
+            filter(event, player3) {
               return lib.suit.every(
                 (i) => player3.getCards("hes").map((j) => get.suit(j)).includes(i)
               );
             },
             // @ts-ignore
-            async content(event2, trigger2, player3) {
+            async content(event, trigger2, player3) {
               const bool = await player3.chooseToDiscard(true, "弃置四种不同花色的牌，获得“大同”", 4).set("ai", (card) => 8 - get.value(card)).set(
                 "filterCard",
                 (card, player4) => !ui.selected.cards.some((cardx) => get.suit(cardx, player4) == get.suit(card, player4))
@@ -2827,11 +2827,11 @@ const plot1SJZX = {
           3: {
             intro: "失去两点体力和体力上限、失去所有不因此技能而获得的技能。",
             // @ts-ignore
-            filter(event2, player3) {
+            filter(event, player3) {
               return true;
             },
             // @ts-ignore
-            async content(event2, trigger2, player3) {
+            async content(event, trigger2, player3) {
               await player3.loseHp(3);
               await player3.loseMaxHp(3);
               let gainSkills = ["guguomrfz", "xingjunmrfz", "datongmrfz"];
@@ -2851,17 +2851,17 @@ const plot1SJZX = {
       },
       forced: true,
       trigger: { player: "phaseUseBegin" },
-      filter(event2, player2) {
+      filter(event, player2) {
         let info = player2.storage.jiangqingmrfz;
         let keys = Object.keys(info);
-        return info[keys[0]].filter(event2, player2);
+        return info[keys[0]].filter(event, player2);
       },
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         let info = player2.storage.jiangqingmrfz;
         for (let i of [0, 1, 2, 3]) {
           if (!get.is.object(info[i])) continue;
-          if (!info[i].filter(event2, player2)) return;
-          const bool = await info[i].content(event2, trigger2, player2);
+          if (!info[i].filter(event, player2)) return;
+          const bool = await info[i].content(event, trigger2, player2);
           if (bool !== true) break;
           player2.logSkill("jiangqingmrfz");
         }
@@ -2871,7 +2871,7 @@ const plot1SJZX = {
       audio: 2,
       intro: {
         // @ts-ignore
-        content(event2, player2) {
+        content(event, player2) {
           let num = lib.skill.bengjiemrfz.getX(player2);
           return `当前X为:${num}`;
         }
@@ -2892,7 +2892,7 @@ const plot1SJZX = {
       },
       forced: true,
       // @ts-ignore
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         if (trigger2.name === "damage") {
           trigger2.num += game.roundNumber;
         } else {
@@ -2912,12 +2912,12 @@ const plot1SJZX = {
       audio: 1,
       trigger: { player: "phaseDrawBegin2" },
       // @ts-ignore
-      filter(event2, player2) {
-        return !event2.numFixed;
+      filter(event, player2) {
+        return !event.numFixed;
       },
       forced: true,
       // @ts-ignore
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         trigger2.num += lib.skill.bengjiemrfz.getX(player2);
       }
     },
@@ -2926,10 +2926,10 @@ const plot1SJZX = {
       trigger: { source: "damageEnd" },
       forced: true,
       // @ts-ignore
-      filter(event2, player2) {
-        return event2.card && event2.card.name === "sha";
+      filter(event, player2) {
+        return event.card && event.card.name === "sha";
       },
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         player2.draw();
       },
       mod: {
@@ -2949,11 +2949,11 @@ const plot1SJZX = {
         global: "phaseBefore"
       },
       forced: true,
-      filter(event2, player2) {
-        if (event2.name == "link") return player2.isLinked();
-        return (event2.name != "phase" || game.phaseNumber == 0) && !player2.isLinked();
+      filter(event, player2) {
+        if (event.name == "link") return player2.isLinked();
+        return (event.name != "phase" || game.phaseNumber == 0) && !player2.isLinked();
       },
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         if (trigger2.name != "link") player2.link(true);
         else trigger2.cancel();
       },
@@ -2964,11 +2964,11 @@ const plot1SJZX = {
           forced: true,
           trigger: { source: "dieAfter" },
           // @ts-ignore
-          filter(event2, player2) {
+          filter(event, player2) {
             return get.mode() == "identity";
           },
           // @ts-ignore
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             let target = trigger2.player;
             await target.revive();
             target.recoverTo(2);
@@ -3004,14 +3004,14 @@ const plot1SJZX = {
         player: "loseAfter",
         global: ["equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"]
       },
-      filter(event2, player2) {
+      filter(event, player2) {
         if (player2.countCards("h")) return false;
-        const evt = event2.getl(player2);
+        const evt = event.getl(player2);
         return evt && evt.player == player2 && evt.hs && evt.hs.length > 0;
       },
       forced: true,
       // @ts-ignore
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         const { index } = await player2.chooseControl("流失体力", "失去体力上限").set("prompt", "【死战】:流失一点体力或失去体力上限").set("ai", () => {
           let player3 = get.player();
           if (player3.hp >= 4) return 0;
@@ -3055,21 +3055,21 @@ const plot1SJZX = {
         player: "damageEnd",
         global: "damageEnd"
       },
-      filter(event2, player2) {
-        if (!event2.source || !event2.source.isIn()) return false;
-        return (event2.player === player2 || get.distance(player2, event2.player) <= 1) && player2.canUse("juedou", event2.source);
+      filter(event, player2) {
+        if (!event.source || !event.source.isIn()) return false;
+        return (event.player === player2 || get.distance(player2, event.player) <= 1) && player2.canUse("juedou", event.source);
       },
       // @ts-ignore
-      prompt(event2, player2) {
-        return `【扼后】:是否视为对${get.translation(event2.source)}使用一张【决斗】？`;
+      prompt(event, player2) {
+        return `【扼后】:是否视为对${get.translation(event.source)}使用一张【决斗】？`;
       },
-      check(event2, player2) {
-        let target = event2.source;
-        if (get.attitude2(event2.player) < 0) return false;
+      check(event, player2) {
+        let target = event.source;
+        if (get.attitude2(event.player) < 0) return false;
         return get.effect(target, { name: "juedou" }, player2, player2) > 0 && player2.countCards("h") * 2 > target.countCards("h");
       },
       // @ts-ignore
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         player2.storage.ehoumrfz = true;
         player2.useCard({ name: "juedou", isCard: true, storage: { jumpDying: true } }, trigger2.source, true);
       },
@@ -3080,11 +3080,11 @@ const plot1SJZX = {
           charlotte: true,
           trigger: { global: "dying" },
           // @ts-ignore
-          filter(event2, player2) {
-            return event2.card && event2.card.storage && event2.card.storage.jumpDying;
+          filter(event, player2) {
+            return event.card && event.card.storage && event.card.storage.jumpDying;
           },
           // @ts-ignore
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             player2.die();
           }
         },
@@ -3093,11 +3093,11 @@ const plot1SJZX = {
           charlotte: true,
           trigger: { player: "useCardEnd" },
           // @ts-ignore
-          filter(event2, player2) {
-            return event2.card && event2.card.storage && event2.card.storage.jumpDying;
+          filter(event, player2) {
+            return event.card && event.card.storage && event.card.storage.jumpDying;
           },
           // @ts-ignore
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             delete player2.storage.ehoumrfz;
           }
         }
@@ -3107,10 +3107,10 @@ const plot1SJZX = {
     qianmianmrfz: {
       audio: 2,
       trigger: { player: ["chooseToUseBegin", "chooseToRespondBegin"] },
-      getResAndUseCard(event2, player2) {
+      getResAndUseCard(event, player2) {
         let result = [];
         for (let name of lib.inpile) {
-          if (event2.filterCard && event2.filterCard({ name, suit: "none", number: null }, player2, event2)) result.add(name);
+          if (event.filterCard && event.filterCard({ name, suit: "none", number: null }, player2, event)) result.add(name);
         }
         return result;
       },
@@ -3118,12 +3118,12 @@ const plot1SJZX = {
       hiddenCard(player2, name) {
         return player2.countCards("h") > 0;
       },
-      filter(event2, player2) {
-        return (event2.respondTo && event2.respondTo[0] !== player2 || event2.type === "wuxie") && player2.countCards("h") > 0 && lib.skill.qianmianmrfz.getResAndUseCard(event2, player2).length > 0;
+      filter(event, player2) {
+        return (event.respondTo && event.respondTo[0] !== player2 || event.type === "wuxie") && player2.countCards("h") > 0 && lib.skill.qianmianmrfz.getResAndUseCard(event, player2).length > 0;
       },
       forced: true,
       // @ts-ignore
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         let names = lib.skill.qianmianmrfz.getResAndUseCard(trigger2, player2);
         let cardx = trigger2.card;
         if (names.length === 1) {
@@ -3147,9 +3147,9 @@ const plot1SJZX = {
         player2.storage.neihuamrfz = [];
         lib.translate["neihuamrfzx"] = "信息流";
       },
-      filter(event2, player2) {
+      filter(event, player2) {
         let nameList = player2.getExpansions("neihuamrfz").map((card) => card.name);
-        return !nameList.includes(event2.card.name) && !event2.cards.some((card) => card.neihuamrfz);
+        return !nameList.includes(event.card.name) && !event.cards.some((card) => card.neihuamrfz);
       },
       forced: true,
       mark: true,
@@ -3164,7 +3164,7 @@ const plot1SJZX = {
         if (cards2.length) player2.loseToDiscardpile(cards2);
       },
       // @ts-ignore
-      async content(event2, trigger2, player2) {
+      async content(event, trigger2, player2) {
         let card = trigger2.card;
         let cardcopy = ui.create.card();
         let info = ["none", null, get.name(card), get.nature(card), void 0];
@@ -3181,15 +3181,15 @@ const plot1SJZX = {
             global: ["loseEnd", "cardsDiscardEnd"]
           },
           // @ts-ignore
-          filter(event2, player2) {
-            if (event2.name == "lose" && event2.position != ui.discardPile) return false;
-            for (let card of event2.cards) {
+          filter(event, player2) {
+            if (event.name == "lose" && event.position != ui.discardPile) return false;
+            for (let card of event.cards) {
               if (card.neihuamrfz) return true;
             }
             return false;
           },
           // @ts-ignore
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             let cards2 = [];
             for (let card of trigger2.cards) {
               if (card.neihuamrfz) cards2.push(card);
@@ -3205,11 +3205,11 @@ const plot1SJZX = {
             player: ["addToExpansionAfter"]
           },
           // @ts-ignore
-          filter(event2, player2) {
-            return event2.cards.some((card) => card.neihuamrfz);
+          filter(event, player2) {
+            return event.cards.some((card) => card.neihuamrfz);
           },
           // @ts-ignore
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             let cards2 = trigger2.cards.filter((card) => card.neihuamrfz);
             let cardsx = cards2.map((card) => {
               let cardx = ui.create.card();
@@ -3228,11 +3228,11 @@ const plot1SJZX = {
             player: ["loseBegin"]
           },
           // @ts-ignore
-          filter(event2, player2) {
-            return event2.cards.filter((card) => card.neihuamrfz);
+          filter(event, player2) {
+            return event.cards.filter((card) => card.neihuamrfz);
           },
           // @ts-ignore
-          async content(event2, trigger2, player2) {
+          async content(event, trigger2, player2) {
             let cards2 = trigger2.cards;
             let loseCards = player2.getExpansions("neihuamrfz").filter((card) => {
               return cards2.some((cardt) => cardt._cardid === card.cardid);

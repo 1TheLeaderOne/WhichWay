@@ -5,7 +5,8 @@ character(CHARNAME, {
   group: "luomrfz",
   sex: "female",
   skills: ["jibaomrfz"],
-  hp: 4
+  hp: 4,
+  pack: "mediocreSJZX"
 });
 characterTitle(CHARNAME, "<font color = #2463d0>电流相生</font>");
 characterIntro(CHARNAME, "自称“GALLUS²”的特异存在，其主体为金属与玻璃构成的小屋，由爪状的金属足支撑，小屋背侧及足后侧缀有少量生物质羽毛。发现于泽尔格勒的石棺核心，经确认为石棺产出的特殊生命形态，携带着万余年前的完整记忆，其中大部分与凯尔希有关。从泽尔格勒撤离后跟随凯尔希回到罗德岛，作为历史顾问、生物学顾问，以及外勤干员协助工作。");
@@ -106,7 +107,7 @@ async function orb(card, player, type) {
   if (!["trick", "basic", "equip"].includes(get.type(card))) return;
   if (get.type(card) === "basic") {
     const result = await player.chooseTarget({
-      prompt: `【充能球】:你可以对一名角色造成${type === "jifa" ? 2 : 1}点伤害`,
+      prompt: `【充能球】:你可以对一名角色造成${type === "jifa" ? 1 : 1}点伤害`,
       ai(target) {
         return get.attitude2(target) < 0 ? 1 : -1;
       }

@@ -496,9 +496,12 @@ class WhichWayAudio {
    * @returns {string} 音频路径
    */
   compileVoicePath(uid, lang, voiceTitle) {
-    lang = this.transferLang(lang);
     uid = whichWayArknight.shcema.transfer(uid, "character", "whichWayUID") || uid;
+    if (lang === "CN_TOPOLECT") {
+      uid = `${uid}_cn_topolect`;
+    }
     voiceTitle = this.transferVoiceTitle(voiceTitle);
+    lang = this.transferLang(lang);
     return `${this.resourceUrl}assets/audio/${lang}/${uid}/${voiceTitle}.wav`;
   }
   /**
@@ -509,7 +512,9 @@ class WhichWayAudio {
   transferLang(lang) {
     if (whichWayArknight.getVoiceLangs().includes(lang)) {
       if (lang === "JP" || lang === "LINKAGE") return "voice";
-      else if (lang === "CN_MANDARIN") {
+      else if (lang === "CN_TOPOLECT") {
+        return "voice_custom";
+      } else if (lang === "CN_MANDARIN") {
         return "voice_cn";
       } else {
         return `voice_${lang.toLowerCase()}`;

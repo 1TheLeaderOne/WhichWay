@@ -686,11 +686,12 @@ const legend3SJZX = {
             return !storage.acted.includes("education") && storage.target > storage.acted.length && get.type(event.card) === "equip";
           },
           async content(event, trigger, player) {
-            game.log(player, "发动了", "#y【兴学】");
-            let content = game.createEvent("rexingxue_fulingmrfz");
-            content.player = player;
-            content.setContent(lib.skill.rexingxue.content);
             player.storage.fulingmrfz.acted.add("education");
+            game.log(player, "发动了", "#y【兴学】");
+            await lib.skill.rexingxue.cost(event, trigger, player);
+            if (!event.result || !event.result.targets) return;
+            event.targets = event.result.targets;
+            await lib.skill.rexingxue.content(event, trigger, player);
           }
         },
         cohesion: {
