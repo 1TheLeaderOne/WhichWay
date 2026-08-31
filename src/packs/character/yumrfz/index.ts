@@ -6,6 +6,7 @@ character("yumrfz", {
 			group: "suimrfz",
 			hp: 4,
 			skills: ["qizaomrfz","zhonglemrfz"],
+			pack:"legendSJZX",
 		});
 
 skill({

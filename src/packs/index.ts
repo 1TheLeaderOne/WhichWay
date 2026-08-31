@@ -9,16 +9,7 @@ import { groupData } from "../character/groups.js";
 import { whichWayArknight } from "../arknight/index.js";
 
 class WhichWayPackManager {
-	static readonly CHARACTER_PACKS = [
-		"epicSJZX",
-		"legendSJZX",
-		"especialSJZX",
-		"plotSJZX",
-		"specialSJZX",
-		"rareSJZX",
-		"mediocreSJZX",
-		"normalSJZX",
-	] as const;
+	static readonly CHARACTER_PACKS = ["epicSJZX", "legendSJZX", "especialSJZX", "plotSJZX", "specialSJZX", "rareSJZX", "mediocreSJZX", "normalSJZX"] as const;
 	/**
 	 * 初始化
 	 */
@@ -56,7 +47,15 @@ class WhichWayPackManager {
 		for (const file of files) {
 			const name = whichWayFile.removeExt(file.name);
 			if (!name.endsWith("mrfz")) continue;
-			await import(`./character/${name}.js`);
+			try {
+				await import(`./character/${name}.js`);
+			} catch (e) {
+				try {
+					await import(`./character/${name}.ts`);
+				} catch (e) {
+					console.warn(`${name} 加载失败 : ${e}`);
+				}
+			}
 		}
 
 		for (const folder of folders) {
@@ -65,7 +64,11 @@ class WhichWayPackManager {
 				try {
 					await import(`./character/${folder.name}/index.js`);
 				} catch (e) {
-					await import(`./character/${folder.name}/index.ts`);
+					try {
+						await import(`./character/${folder.name}/index.ts`);
+					} catch (e) {
+						console.warn(`${folder.name} 加载失败 : ${e}`);
+					}
 				}
 			}
 		}
@@ -76,12 +79,7 @@ class WhichWayPackManager {
 		for (const name of WhichWayPackManager.CHARACTER_PACKS) {
 			lib.characterPack[name] ??= {};
 			if (!lib.config.characters.includes(name)) lib.config.characters.push(name);
-			let translate =
-				lib.config.extension_WhichWay_compatibleMode === true
-					? `驶舰:${this.getPackTranslation(name)}`
-					: "<img style='width:90px;height:25px;' src=" +
-						lib.assetURL +
-						`extension/WhichWay/image/decoration/${this.getPackTranslation(name, 1)}.png>`;
+			let translate = lib.config.extension_WhichWay_compatibleMode === true ? `驶舰:${this.getPackTranslation(name)}` : "<img style='width:90px;height:25px;' src=" + lib.assetURL + `extension/WhichWay/image/decoration/${this.getPackTranslation(name, 1)}.png>`;
 			lib.translate[`${name}_character_config`] = translate;
 		}
 
@@ -216,24 +214,22 @@ class WhichWayPackManager {
 	/**
 	 * 为allCharacters和allSkills添加数据
 	 */
-	register():void{
+	register(): void {
 		const characters = this._hooks.getHooks("character");
 		const skills = this._hooks.getHooks("skill");
 		for (const char of characters) {
-			const name = char.key
+			const name = char.key;
 			if (!window.whichWaySave.allCharacters.includes(name)) {
 				window.whichWaySave.allCharacters.push(name);
 			}
 		}
 		for (const skill of skills) {
-			const name = skill.key
+			const name = skill.key;
 			if (!window.whichWaySave.allSkills.includes(name)) {
 				window.whichWaySave.allSkills.push(name);
 			}
 		}
 	}
-
-
 
 	pendingRun: Function[] = [];
 
