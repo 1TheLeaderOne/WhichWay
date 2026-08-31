@@ -245,10 +245,15 @@ class WhichWayFile {
 
 		try {
 			const [folders, files] = await game.promises.getFileList(path);
+			//路径拼接必须确保斜杠分隔：顶层 path 以 "/" 结尾（如 "audio/"），
+			//而递归传入的 folderPath 没有尾部斜杠，直接用 path + name 会把
+			//目录名和文件名粘连（如 audio/BGM + Sammis = audio/BGMSammis）。
+			const joinPath = (base, child) => (base.endsWith("/") ? base + child : base + "/" + child);
+
 			/** @type {FileItem[]} */
 			const fileObjs = files.map(name => ({
 				name,
-				path: path + name,
+				path: joinPath(path, name),
 			}));
 
 			/** @type {FolderItem[]} */
@@ -268,12 +273,12 @@ class WhichWayFile {
 						const idx = cursor++;
 						if (idx >= folders.length) return;
 						const folderName = folders[idx];
-						const folderPath = path + folderName;
+						const folderPath = joinPath(path, folderName);
 						const [subFolders, subFiles] = await game.promises.getFileList(folderPath);
 
 						const directFiles = subFiles.map(name => ({
 							name,
-							path: folderPath + "/" + name,
+							path: joinPath(folderPath, name),
 						}));
 
 						const subtree = step > 1 ? await this.getFileTree(folderPath, step - 1) : { folders: [] };
