@@ -1,9 +1,7 @@
-import __variableDynamicImportRuntimeHelper from "../../_virtual/dynamic-import-helper.js";
 import { lib, get, game } from "noname";
 import { groupData } from "./groups.js";
 import { whichWayUtil } from "../utill.js";
-import { whichWayTranslate } from "./translate/index.js";
-import { whichWayFile } from "../file.js";
+import dynamicTranslate from "./translate/dynamicTranslate.js";
 import { onSetDev, registerHookContextAt, onConfig, onAfterInit, whichWayHooksApi } from "../hooks/index.js";
 import { initCharConfig } from "./extCharConfig.js";
 import { charDes } from "./characterDesigner.js";
@@ -21,15 +19,12 @@ class WhichWayCharacterPack {
   designer = charDes;
   /**
    * 初始化武将包
+   * 旧式武将包已迁移至新式体系（src/packs/character/），此处不再加载旧式包，
+   * 仅保留翻译初始化、init 钩子上下文与统一势力配置。
    */
   async init() {
-    await this.initModuleList();
     this.initTranslate();
     const packs = [];
-    for (let module of this.moduleList) {
-      let m = await this.createImportModule(module[0], module[1], true);
-      packs.push(m);
-    }
     registerHookContextAt("init", 0, packs);
     onConfig({
       priority: 401,
@@ -57,33 +52,20 @@ class WhichWayCharacterPack {
   }
   /**
    * 初始化武将包模块
+   * 旧式武将包已迁移至新式体系（src/packs/character/），此方法不再使用。
+   * @deprecated
    */
   async initModuleList() {
-    const { folders } = await whichWayFile.getFileTree("pack:");
-    for (let folder of folders) {
-      if (folder.files.length < 0) continue;
-      let module = [`${folder.name}SJZX`, []];
-      for (let file of folder.files) {
-        if (file.name.endsWith(".js")) {
-          module[1].push(await __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./packs/epic/epic1.js": () => import("./packs/epic/epic1.js"), "./packs/epic/epic2.js": () => import("./packs/epic/epic2.js"), "./packs/especial/especial1SJZX.js": () => import("./packs/especial/especial1SJZX.js"), "./packs/legend/legend1SJZX.js": () => import("./packs/legend/legend1SJZX.js"), "./packs/legend/legend2SJZX.js": () => import("./packs/legend/legend2SJZX.js"), "./packs/legend/legend3SJZX.js": () => import("./packs/legend/legend3SJZX.js"), "./packs/legend/legend4SJZX.js": () => import("./packs/legend/legend4SJZX.js"), "./packs/mediocre/mediocre1SJZX.js": () => import("./packs/mediocre/mediocre1SJZX.js"), "./packs/normal/normal1SJZX.js": () => import("./packs/normal/normal1SJZX.js"), "./packs/plot/plot1SJZX.js": () => import("./packs/plot/plot1SJZX.js"), "./packs/rare/rare1SJZX.js": () => import("./packs/rare/rare1SJZX.js"), "./packs/special/special1SJZX.js": () => import("./packs/special/special1SJZX.js") }), `./packs/${folder.name}/${whichWayFile.removeExt(file.name)}.js`, 4).then((res) => res.default));
-        }
-      }
-      if (module[1].length > 0) {
-        this.moduleList.push(module);
-      }
-    }
   }
   /**
    * 初始化武将包翻译
+   * 角色/技能/称号/介绍翻译已迁移至新式体系（src/packs/character/*mrfz/index.ts），
+   * 此处仅保留新式体系未覆盖的内容：
+   *   - lib.dynamicTranslate：动态翻译函数（新式角色文件未注册 dynamicTranslate 钩子）
+   *   - 势力分组翻译（groupData）
    */
   initTranslate() {
-    const { translates, otherTranslates } = whichWayTranslate;
-    for (let key in translates) {
-      lib.translate[key] = translates[key];
-    }
-    for (let key in otherTranslates) {
-      lib[key] = otherTranslates[key];
-    }
+    lib.dynamicTranslate = dynamicTranslate;
     for (let key in groupData) {
       lib.translate[key + "_group"] = groupData[key].sort;
     }
