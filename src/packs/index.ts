@@ -43,11 +43,11 @@ class WhichWayPackManager {
 	}
 
 	async initCharacterPack() {
-		console.time("[WW] packs:getFileList");
 		//只扫一层：262 个干员目录都是单文件入口（index.ts），递归进子目录会再发 280+ 次
 		//空目录的 IPC，原 getFileTree 的 step=3 走过子目录纯粹是浪费时间。
+		const t0 = performance.now();
 		const folders = await whichWayFile.listDirNames("src:packs/character/");
-		console.timeEnd("[WW] packs:getFileList");
+		const tList = performance.now() - t0;
 
 		/**
 		 * 干员模块相互独立：模块顶层只把内容缓冲进 packHooks，统一在 onBeforeInit 落库，
@@ -76,7 +76,7 @@ class WhichWayPackManager {
 			);
 		}
 
-		console.time("[WW] packs:imports(限流 16)");
+		const t1 = performance.now();
 		const limit = 16;
 		let cursor = 0;
 		const workers = Array.from({ length: Math.min(limit, importTasks.length) }, async () => {
@@ -87,11 +87,21 @@ class WhichWayPackManager {
 			}
 		});
 		await Promise.all(workers);
-		console.timeEnd("[WW] packs:imports(限流 16)");
+		const tImports = performance.now() - t1;
 
-		console.time("[WW] packs:register");
+		const t2 = performance.now();
 		this.register();
-		console.timeEnd("[WW] packs:register");
+		const tRegister = performance.now() - t2;
+
+		//只在 packs(新) 总耗时 > 500ms 时打详细明细，正常 <300ms 直接静默
+		const total = tList + tImports + tRegister;
+		if (total > 500) {
+			console.groupCollapsed(`%c[WhichWay·packs] initCharacterPack ${total.toFixed(0)}ms`, "color:#e67e22;");
+			console.log(`  listDirNames:    ${tList.toFixed(0)}ms`);
+			console.log(`  imports (限16):  ${tImports.toFixed(0)}ms  (${importTasks.length} 模块)`);
+			console.log(`  register:        ${tRegister.toFixed(0)}ms`);
+			console.groupEnd();
+		}
 
 		//将包初始化
 		for (const name of WhichWayPackManager.CHARACTER_PACKS) {

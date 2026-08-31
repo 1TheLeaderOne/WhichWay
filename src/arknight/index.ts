@@ -13,12 +13,28 @@ class WhichWayArknight {
 	 */
 	async init() {
 		//更新明日方舟数据
+		const t0 = performance.now();
 		await this.autoUpdate();
+		const tUpd = performance.now() - t0;
 
 		//加载明日方舟数据
+		const t1 = performance.now();
 		await this.loadArknightData();
+		const tLoad = performance.now() - t1;
 
+		const t2 = performance.now();
 		await this.loadShcema();
+		const tShcema = performance.now() - t2;
+
+		//arknight 三段总耗时 > 500ms 时才展开折叠明细
+		const total = tUpd + tLoad + tShcema;
+		if (total > 500) {
+			console.groupCollapsed(`%c[WhichWay·arknight] init ${total.toFixed(0)}ms`, "color:#e67e22;");
+			console.log(`  autoUpdate:       ${tUpd.toFixed(0)}ms`);
+			console.log(`  loadArknightData: ${tLoad.toFixed(0)}ms`);
+			console.log(`  loadShcema:       ${tShcema.toFixed(0)}ms`);
+			console.groupEnd();
+		}
 
 		//为所有扩展角色添加对应的明日方舟角色数据
 		onInit({
