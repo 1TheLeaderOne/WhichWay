@@ -30,22 +30,26 @@ class WhichWayAudio {
 	async init(): Promise<void> {
 		await this.checkAudioFolder();
 
-		onArenaReady({
-			name: "whichWayAudio_init",
-			fn: async () => {
-				for (const name of window.whichWaySave.allCharacters) {
-					const char = get.character(name);
-					//@ts-ignore
-					await whichWayAudio.initDieAudio(char);
-					for (const skill of char.skills) {
-						await whichWayAudio.initAudio(skill, name);
-					}
-				}
+	onArenaReady({
+		name: "whichWayAudio_init",
+		fn: async () => {
+			//先一次性并行扫描 audio 目录建立存在性缓存，后续 initDieAudio/initAudio 里的
+			//exsitAudio 全部退化为 Set 查找，不再逐个发起 checkFile IPC
+			await this.ensureAudioCache();
 
-				//覆盖api
-				await whichWayAudio.override();
-			},
-		});
+			for (const name of window.whichWaySave.allCharacters) {
+				const char = get.character(name);
+				//@ts-ignore
+				await whichWayAudio.initDieAudio(char);
+				for (const skill of char.skills) {
+					await whichWayAudio.initAudio(skill, name);
+				}
+			}
+
+			//覆盖api
+			await whichWayAudio.override();
+		},
+	});
 
 		onConfig({
 			name: "whichWayAudioDefaultConfig_add",
@@ -129,11 +133,14 @@ class WhichWayAudio {
 	 */
 	async checkAudioFolder(): Promise<void> {
 		const audioLangs = whichWayArknight.getVoiceLangs();
-		for (const lang of audioLangs) {
-			if (await whichWayFile.exsitFile(`audio:${lang}`, "folder")) continue;
-			await whichWayFile.createFolder(`audio:${lang}`);
-			await whichWayFile.createFolder(`audio:${lang}/die`);
-		}
+		//各语言目录相互独立，并行检查/创建（原先串行）
+		await Promise.all(
+			audioLangs.map(async lang => {
+				if (await whichWayFile.exsitFile(`audio:${lang}`, "folder")) return;
+				await whichWayFile.createFolder(`audio:${lang}`);
+				await whichWayFile.createFolder(`audio:${lang}/die`);
+			})
+		);
 	}
 
 	async override(): Promise<void> {
@@ -203,6 +210,8 @@ class WhichWayAudio {
 			const audioIndex = i + 1;
 			const file = `${dieAudio ? char : `${skill}${audioIndex}`}.mp3`;
 			await whichWayFile.download(url, path, file);
+			//增量更新缓存，避免后续 initAudio/initDieAudio 误判为缺失
+			this._addAudioCacheEntry(`audio:${lang}${dieAudio ? "/die" : ""}/${file}`);
 			whichWayToast.showToast(`下载${file}成功`);
 			whichWayToast.removeToastById(`whichWayAudioDownLoad_${file}`);
 		}
@@ -267,8 +276,7 @@ class WhichWayAudio {
 
 			for (const lang of langsToCheck) {
 				if (lang === "CUSTOM") continue;
-				const dieFilePath = `audio:${lang}/die/${char}.mp3`;
-				const fileExists = await whichWayFile.exsitFile(dieFilePath);
+				const fileExists = await this.exsitAudio(null!, char, true);
 
 				if (!fileExists || allLangs) {
 					const urls = ["行动失败"].map(title => this.compileVoicePath(char, lang, title));
@@ -446,6 +454,36 @@ class WhichWayAudio {
 	}
 
 	/**
+	 * 音频文件存在性缓存。
+	 *
+	 * 原先每次 exsitAudio 都调一次 game.promises.checkFile（一趟 IPC），
+	 * 而 onArenaReady 会对 262 个干员 × 各自技能串行检查上千次，是开局耗时主因。
+	 * 这里首次需要时一次性并行扫描 audio 目录，把所有已存在文件的路径装入 Set，
+	 * 之后 exsitAudio 退化为 O(1) 的 Set 查找，不再发起任何 IPC。
+	 *
+	 * 下载新音频时会增量更新本缓存；若手动删除文件，需重启以重建。
+	 */
+	private _audioExistCache: Set<string> | null = null;
+
+	async ensureAudioCache(): Promise<void> {
+		if (this._audioExistCache) return;
+		const cache = new Set<string>();
+		// getFileTree 已并行扫描，约 5 个语言目录 + 各自 die/ 子目录，两轮 IPC 即可
+		const { folders } = await whichWayFile.getFileTree("audio:");
+		for (const langFolder of folders) {
+			for (const f of langFolder.files) cache.add(f.path);
+			for (const sub of langFolder.folders) {
+				for (const f of sub.files) cache.add(f.path);
+			}
+		}
+		this._audioExistCache = cache;
+	}
+
+	private _addAudioCacheEntry(relPath: string): void {
+		this._audioExistCache?.add(whichWayFile.compilePath(relPath));
+	}
+
+	/**
 	 * 技能的音频是否存在
 	 * @param {string} skill 技能名,如果是死亡配音此参数没有意义
 	 * @param {string} char 角色名
@@ -461,7 +499,9 @@ class WhichWayAudio {
 			}
 		}
 		const lang = dieAudio ? this.getCharacterLang(char) : this.getSkillLang(skill, char);
-		return await whichWayFile.exsitFile(dieAudio ? `audio:${lang}/die/${char}.mp3` : `audio:${lang}/${skill}1.mp3`);
+		const relPath = dieAudio ? `audio:${lang}/die/${char}.mp3` : `audio:${lang}/${skill}1.mp3`;
+		await this.ensureAudioCache();
+		return this._audioExistCache!.has(whichWayFile.compilePath(relPath));
 	}
 
 	async setCustomAudio(char: string, lang: string): Promise<void> {
