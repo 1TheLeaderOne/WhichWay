@@ -307,7 +307,8 @@ class WhichWayFile {
 	 */
 	async listDirNames(path) {
 		path = this.compilePath(path);
-		const { folders } = await game.promises.getFileList(path);
+		//注意：game.promises.getFileList 返回的是数组 [folders, files]，不是对象
+		const [folders] = await game.promises.getFileList(path);
 		return folders;
 	}
 
