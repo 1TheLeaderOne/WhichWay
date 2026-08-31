@@ -19,6 +19,20 @@ class WhichWayPackHooks {
 	static readonly _OBJECT_HOOKS = ["character", "skill"] as const;
 	static readonly _FUNCTION_HOOKS = ["dynamicTranslate"] as const;
 
+	/**
+	 * 卡牌专用钩子（不进 pendingRun，由 card 组装器统一收集后构造 mrfzcard 包
+	 * 再 game.import("card") 注册给引擎）。
+	 *
+	 * - card：卡牌定义（key=卡牌id, value=卡牌对象）
+	 * - cardSkill：卡牌相关技能（key=技能id, value=技能对象）
+	 * - cardTranslate：卡牌相关翻译（key=翻译键, value=字符串）
+	 *
+	 * 与 character/skill/translate 钩子分开，避免与干员的 skill/translate 混入同一
+	 * lib.skill/lib.translate 命名空间（loadCard 处理 card 包时会重复落库并刷
+	 * duplicated 警告）。
+	 */
+	static readonly _CARD_HOOKS = ["card", "cardSkill", "cardTranslate"] as const;
+
 
 	private _hooks: Record<string, Array<Record<string, any>>> = {};
 
@@ -95,6 +109,19 @@ class WhichWayPackHooks {
 				this._registerTypedHook(name, args, "function");
 			}) as any;
 			this.pendingRun.push(() => this._runHooks(name));
+		}
+
+		// ===== 第五组：卡牌专用钩子（不进 pendingRun，由 card 组装器收集） =====
+		// card / cardSkill 为 object 类型，cardTranslate 为 string 类型
+		for (const name of WhichWayPackHooks._CARD_HOOKS) {
+			this._hooks[name] = [];
+			this._execute[name] = [];
+			const valueType = name === "cardTranslate" ? "string" : "object";
+			this[name] = ((...args: any[]) => {
+				this._registerTypedHook(name, args, valueType as any);
+			}) as any;
+			// 不 push pendingRun —— card 钩子不直接落库 lib.card
+			// （会绕过 loadCard 的 cardPack 处理），由组装器收集后 game.import("card")
 		}
 	}
 
@@ -262,6 +289,22 @@ class WhichWayPackHooks {
 		key: string | Record<string, (player: Player) => string>,
 		content?: (player: Player) => string
 	) => void;
+
+	// ===== 卡牌专用钩子声明 =====
+	declare card: (
+		key: string | Record<string, any>,
+		content?: any
+	) => void;
+
+	declare cardSkill: (
+		key: string | Record<string, any>,
+		content?: any
+	) => void;
+
+	declare cardTranslate: (
+		key: string | Record<string, string>,
+		content?: string
+	) => void;
 }
 
 export const packHooks = new WhichWayPackHooks();
@@ -274,6 +317,9 @@ export const {
 	characterTitle,
 	characterReplace,
 	dynamicTranslate,
+	card,
+	cardSkill,
+	cardTranslate,
 	pendingRun,
 	registerExecute
 } = packHooks;

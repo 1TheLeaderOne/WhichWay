@@ -1,5 +1,5 @@
 import { whichWayUtil } from "../../../utill.js";
-import { character, skill, translate, characterTitle, characterIntro } from "../../hooks.ts";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../../hooks.ts";
 import { lib, game, ui, get, ai, _status } from "noname";
 character("jiaxintamrfz", {
 	hp: 3,
@@ -13,9 +13,13 @@ characterIntro("jiaxintamrfz", "嘉辛塔，雷姆必拓知名矿业大亨坎贝
 translate({
 	jiaxintamrfz: "嘉辛塔",
 	feilvmrfz: "飞旅",
-	feilvmrfz_info: "使命技，回合结束时，你可以将一张牌当做本回合第一张使用的牌使用，若你未因此使用过此牌，你摸一张牌。成功：本局游戏使用过18张牌：摸一张牌。",
+	feilvmrfz_info: "使命技，回合结束时，你可以将一张牌当做本回合第一张使用的牌使用，若你未因此使用过此牌，你摸两张牌。<br>成功：本局游戏使用过3X张牌：摸X张牌。(X=本技能的成功次数+1)",
 	zhixingmrfz: "咫行",
 	zhixingmrfz_info: "锁定技。①当你不因【咫行】而摸牌后，你令所有拥有【咫行】的角色制衡1；②当你使命技成功后，你重置该技能。",
+});
+dynamicTranslate("feilvmrfz", player => {
+	const num = (player?.storage?.feilvmrfz_achieved || 0) + 1;
+	return `使命技，回合结束时，你可以将一张牌当做本回合第一张使用的牌使用，若你未因此使用过此牌，你摸两张牌。<br>成功：本局游戏使用过3X(${whichWayUtil.colorize(`#r${3 * num}#`)})张牌：摸X(${whichWayUtil.colorize(`#r${num}#`)})张牌。(X=本技能的成功次数+1)`;
 });
 skill({
 	feilvmrfz: {
@@ -23,19 +27,27 @@ skill({
 		dutySkill: true,
 		trigger: { player: "phaseJieshuBegin" },
 		filter(event, player2) {
-			return player2.getHistory("useCard").length > 0 && player2.countCards("hs") > 0;
+			const histories = player2.getHistory("useCard");
+			if (histories.length < 1) return;
+			const history = histories[0];
+			//@ts-ignore
+			return history.card && player2.hasUseTarget(history.card, true, true) && player2.countCards("he") > 0;
 		},
 		mark: true,
+		init(player, skill) {
+			player.storage.feilvmrfz_achieved = 0;
+		},
 		intro: {
 			content(storage, player, skill) {
 				const used = player.storage.feilvmrfz_used;
-				return `·当前已使用${storage || 0}张牌<br>·已因此技能而使用的牌名：${Array.isArray(used) && used.length > 0 ? get.translation(used) : "无"}`;
+				return `·当前已使用${player.storage.feilvmrfz_count || 0}张牌<br>·已因此技能而使用的牌名：${Array.isArray(used) && used.length > 0 ? get.translation(used) : "无"}<br>成功的次数：${player.storage.feilvmrfz_achieved || 0}`;
 			},
 		},
 		onremove(player, type) {
 			delete player.storage.feilvmrfz_used;
 			delete player.storage.feilvmrfz_count;
 			delete player.storage.feilvmrfz_done;
+			delete player.storage.feilvmrfz_achieved;
 		},
 		async cost(event, trigger, player2) {
 			event.result = await player2
@@ -46,6 +58,7 @@ skill({
 					const history = player3.getHistory("useCard");
 					if (!history.length) return 0;
 					const card = { name: history[0].card.name, nature: history[0].card.nature };
+					//@ts-ignore
 					return player3.hasUseTarget(card, true, true) ? 1 : 0;
 				})
 				.forResult();
@@ -56,6 +69,7 @@ skill({
 			const firstCard = history[0].card;
 			if (!firstCard) return;
 			const card = { name: firstCard.name, nature: firstCard.nature };
+			//@ts-ignore
 			if (!player2.hasUseTarget(card, true, true)) return;
 			const name = "feilvmrfz_backup";
 			game.broadcastAll(
@@ -83,40 +97,44 @@ skill({
 				await player2.draw();
 			}
 		},
-		group: ["feilvmrfz_achieve", "feilvmrfz_usedClear"],
+		group: ["feilvmrfz_achieve", "feilvmrfz_count"],
 		subSkill: {
 			backup: {
 				filterCard(card) {
 					return get.itemtype(card) == "card";
 				},
 				selectCard: 1,
-				position: "hs",
+				position: "he",
 				popname: true,
 				log: false,
 			},
-			// 统计本局游戏累计使用牌数，达到18张触发使命成功
-			achieve: {
-				charlotte: true,
+			count: {
 				silent: true,
+				charlotte: true,
 				trigger: { player: "useCardAfter" },
 				async content(event, trigger, player2) {
 					player2.storage.feilvmrfz_count = (player2.storage.feilvmrfz_count || 0) + 1;
-					if (player2.storage.feilvmrfz_count < 18 || player2.storage.feilvmrfz_done) return;
+					if (player2.storage.feilvmrfz_count < 3 * ((player2.storage.feilvmrfz_achieved || 0) + 1) || player2.storage.feilvmrfz_done) return;
 					player2.storage.feilvmrfz_done = true;
-					game.log(player2, "成功完成使命");
-					player2.awakenSkill("feilvmrfz");
-					await player2.draw();
 					delete player2.storage.feilvmrfz_count;
-					// await event.trigger("dutySkill_reset");
 				},
 			},
-			// 每回合结束时清理【飞旅】本回合使用过的牌名记录
-			usedClear: {
-				charlotte: true,
-				silent: true,
-				trigger: { player: "phaseJieshuAfter" },
-				async content(event, trigger, player) {
-					delete player.storage.feilvmrfz_used;
+			// 统计本局游戏累计使用牌数，达到18张触发使命成功
+			achieve: {
+				audio: "feilvmrfz",
+				forced: true,
+				trigger: { player: "feilvmrfz_countAfter" },
+				filter(event, player, name, target) {
+					return player.storage.feilvmrfz_done === true;
+				},
+				async content(event, trigger, player2) {
+					game.log(player2, "成功完成使命");
+					player2.awakenSkill("feilvmrfz");
+					await player2.draw({ num: (player2.storage.feilvmrfz_achieved || 0) + 1 });
+					if (typeof player2.storage.feilvmrfz_achieved !== "number") {
+						player2.storage.feilvmrfz_achieved = 0;
+					}
+					player2.storage.feilvmrfz_achieved += 1;
 				},
 			},
 		},
@@ -140,7 +158,6 @@ skill({
 					for (const target of targets) {
 						const result = await target
 							.chooseToDiscard()
-							.set("forced", true)
 							.set("prompt", "【咫行】：制衡1（弃置一张牌，然后摸一张牌）")
 							.set("ai", card => 6 - get.value(card))
 							.forResult();
@@ -165,14 +182,21 @@ skill({
 					if (!info || info.charlotte || info.equipSkill) {
 						return false;
 					}
-					console.log(event);
-					return false;
+					return info.dutySkill === true && event.skill.includes("achieve");
 				},
 				async content(event, trigger, player2) {
-					if (player2.awakenedSkills.includes("feilvmrfz")) {
-						player2.restoreSkill("feilvmrfz");
-						game.log(player2, "重置了技能", "#g【飞旅】");
-					}
+					let skill = get.sourceSkillFor(trigger);
+					console.log(player2.awakenedSkills.includes(skill), skill, player2.awakenedSkills);
+					player2
+						.when({
+							global: `${trigger.skill}After`,
+						})
+						.step(async (event, trigger, player) => {
+							if (player.awakenedSkills.includes(skill)) {
+								player.restoreSkill(skill);
+								game.log(player, "重置了技能", `#g【${get.translation(skill)}】`);
+							}
+						});
 				},
 			},
 		},

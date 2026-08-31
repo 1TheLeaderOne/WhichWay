@@ -28,7 +28,6 @@ export default defineConfig(({ mode }) => ({
 				{ src: "./src/updateLog/updateContent.txt", dest: "./src/updateLog/" },
 				{ src: "README.md", dest: "" },
 				{ src: "vedio", dest: "" },
-				{ src: "src/card/index.js", dest: "src/card/" },
 				{ src: ".gitignore",dest:""}
 			],
 		}) as PluginOption,
@@ -46,7 +45,7 @@ export default defineConfig(({ mode }) => ({
 		emptyOutDir: true,
 		rollupOptions: {
 			preserveEntrySignatures: "strict",
-			external: [/^noname(\/.*)?$/, "vue", "pinyin-pro", /src\/card\/index\.js$/],
+			external: [/^noname(\/.*)?$/, "vue", "pinyin-pro"],
 			output: {
 				preserveModules: true,
 				preserveModulesRoot: "./",

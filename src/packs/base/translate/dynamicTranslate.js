@@ -1,5 +1,5 @@
 import { lib, game, ui, get, ai, _status } from "noname";
-import { whichWayUtil } from "../../utill.js";
+import { whichWayUtil } from "../../../utill.js";
 
 /**
  * @type {SMap<((player:Player)=>string)>}

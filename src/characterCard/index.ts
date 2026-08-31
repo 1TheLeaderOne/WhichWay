@@ -3,7 +3,7 @@ import { whichWayFile } from "../file.js";
 import { whichWayCharacterCardClick as click } from "./click.ts";
 import { whichWayUtil } from "../utill.js";
 import { whichWaySkin } from "../skin/index.ts";
-import { getDesigner, getCamp } from "./../character/index.js";
+import { getDesigner, getCamp } from "./../packs/base/index.js";
 import { whichWayAudio } from "../audio/index.ts";
 import { whichWayToast } from "../toast/index.ts";
 import Sortable from "./../../lib/Sortable/Sortable.js";

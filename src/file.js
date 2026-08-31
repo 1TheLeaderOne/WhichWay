@@ -17,7 +17,6 @@ class WhichWayFile {
 		"noname:": "",
 		"video:":`${this.extDir}vedio/`,
 		"src:": `${this.extDir}src/`,
-		"pack:": `${this.extDir}src/character/packs/`,
 		"bg:": `${this.extDir}image/background/`,
 		"dec:": `${this.extDir}image/decoration/`,
 		"json:": `${this.extDir}json/`,

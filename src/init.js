@@ -71,10 +71,9 @@ export const whichWayInit = async () => {
 	//————————————武将包————————————//
 
 	/**
-	 * 牢的添加将包的方法
+	 * 基础配置（势力/设计者/翻译）
 	 */
-	await _wwMark("character(旧)", () => import("./character/index.js"));
-	await _wwMark("card", () => import("./card/index.js"));
+	await _wwMark("base(配置)", () => import("./packs/base/index.js"));
 
 	/**
 	 * 新的添加将包的方法

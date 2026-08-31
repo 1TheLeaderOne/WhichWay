@@ -2,11 +2,12 @@ import { lib, game, ui, get, ai, _status } from "noname";
 import { whichWayFile } from "../file.js";
 import { onAfterInit, onSetDev, onInit, onAfterContent, onBeforeInit } from "../hooks/index.js";
 import { packHooks, pendingRun, registerExecute } from "./hooks.js";
-import { initCharConfig } from "../character/extCharConfig.js";
-import { designer, getDesigner } from "../character/index.js";
+import { initCharConfig } from "./base/extCharConfig.js";
+import { designer, getDesigner } from "./base/index.js";
 import { whichWayUtil } from "../utill.js";
-import { groupData } from "../character/groups.js";
+import { groupData } from "./base/groups.js";
 import { whichWayArknight } from "../arknight/index.js";
+import { initCardPack } from "./card/index.js";
 
 class WhichWayPackManager {
 	static readonly CHARACTER_PACKS = ["epicSJZX", "legendSJZX", "especialSJZX", "plotSJZX", "specialSJZX", "rareSJZX", "mediocreSJZX", "normalSJZX"] as const;
@@ -17,6 +18,9 @@ class WhichWayPackManager {
 		this.pendingRun = pendingRun;
 		//读取并初始化character的内容
 		await this.initCharacterPack();
+
+		//初始化卡牌（模块化卡牌包：每张卡一个目录，组装后 game.import("card")）
+		await initCardPack();
 
 		//初始化翻译
 		registerExecute("translate", (trans: string, name) => {
