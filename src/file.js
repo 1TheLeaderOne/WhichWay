@@ -255,12 +255,19 @@ class WhichWayFile {
 			let folderObjs = [];
 
 			if (folders.length > 0 && step > 0) {
-				//各子文件夹相互独立，这里并行扫描。
-				//原先的实现存在两处性能问题：
-				// 1. 递归调用了两次，其中一次的结果被同名变量遮蔽而丢弃，等于每个子文件夹都扫两遍；
-				// 2. 所有子文件夹串行 await，几百个干员目录时会产生大量排队等待的 IO。
-				folderObjs = await Promise.all(
-					folders.map(async folderName => {
+				//子文件夹并发扫描，并用固定窗口限流。
+				//原先用 Promise.all 把 250+ 个并发请求同时砸到 fs server / Node 单线程上，
+				//反而比串行慢得多（实测 290 个干员从 <1s 退到 1.5s）：
+				//fs server 处理 getFileList 是 readdir + N 次 stat，单次耗时主要在 IO 阻塞，
+				//适量并发（16）能铺满带宽，过多则相互抢占 fs 句柄与 CPU。
+				folderObjs = [];
+				const limit = 16;
+				let cursor = 0;
+				const workers = Array.from({ length: Math.min(limit, folders.length) }, async () => {
+					while (true) {
+						const idx = cursor++;
+						if (idx >= folders.length) return;
+						const folderName = folders[idx];
 						const folderPath = path + folderName;
 						const [subFolders, subFiles] = await game.promises.getFileList(folderPath);
 
@@ -272,14 +279,15 @@ class WhichWayFile {
 						const subtree = step > 1 ? await this.getFileTree(folderPath, step - 1) : { folders: [] };
 
 						/** @type {FolderItem} */
-						return {
+						folderObjs.push({
 							name: folderName,
 							path: folderPath,
 							files: directFiles,
 							folders: subtree.folders,
-						};
-					})
-				);
+						});
+					}
+				});
+				await Promise.all(workers);
 			}
 
 			return { files: fileObjs, folders: folderObjs };
@@ -288,6 +296,19 @@ class WhichWayFile {
 			console.warn(`[WhichWayFile] Failed to get file list of "${path}": ${e.message}`);
 			return { files: [], folders: [] };
 		}
+	}
+
+	/**
+	 * 单层目录扫描：仅返回直接子目录名，不递归。
+	 * 用于类似"src:packs/character/"这种只需要目录列表、不需要递归进入子目录的场景，
+	 * 比 getFileTree 省一半以上的 IPC。
+	 * @param {string} path
+	 * @returns {Promise<string[]>}
+	 */
+	async listDirNames(path) {
+		path = this.compilePath(path);
+		const { folders } = await game.promises.getFileList(path);
+		return folders;
 	}
 
 	/**

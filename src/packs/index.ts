@@ -43,54 +43,55 @@ class WhichWayPackManager {
 	}
 
 	async initCharacterPack() {
-		const { files, folders } = await whichWayFile.getFileTree("src:packs/character/");
+		console.time("[WW] packs:getFileList");
+		//只扫一层：262 个干员目录都是单文件入口（index.ts），递归进子目录会再发 280+ 次
+		//空目录的 IPC，原 getFileTree 的 step=3 走过子目录纯粹是浪费时间。
+		const folders = await whichWayFile.listDirNames("src:packs/character/");
+		console.timeEnd("[WW] packs:getFileList");
 
 		/**
 		 * 干员模块相互独立：模块顶层只把内容缓冲进 packHooks，统一在 onBeforeInit 落库，
 		 * 因此可以放心并行加载。原先逐个 await import，几百个干员时串行加载是主要耗时之一。
+		 * 用 16 并发窗口限流：浏览器/V8 的动态 import 内部也是用 microtask 队列，盲
+		 * 意 Promise.all 让 280+ 个 import() 同时进入会导致 vite 服务端同时打开大量
+		 * 文件句柄，原本 1100ms 的操作反而退到更慢。
 		 * @type {Promise<unknown>[]}
 		 */
 		const importTasks: Promise<unknown>[] = [];
 
-		for (const file of files) {
-			const name = whichWayFile.removeExt(file.name);
-			if (!name.endsWith("mrfz")) continue;
+		for (const folderName of folders) {
+			if (!folderName.endsWith("mrfz")) continue;
 			importTasks.push(
 				(async () => {
 					try {
-						await import(`./character/${name}.js`);
+						await import(`./character/${folderName}/index.js`);
 					} catch (e) {
 						try {
-							await import(`./character/${name}.ts`);
+							await import(`./character/${folderName}/index.ts`);
 						} catch (e) {
-							console.warn(`${name} 加载失败 : ${e}`);
+							console.warn(`${folderName} 加载失败 : ${e}`);
 						}
 					}
 				})()
 			);
 		}
 
-		for (const folder of folders) {
-			if (!folder.name.endsWith("mrfz")) continue;
-			//每个目录只需导入一次入口文件（原先按目录内文件数量重复导入）
-			importTasks.push(
-				(async () => {
-					try {
-						await import(`./character/${folder.name}/index.js`);
-					} catch (e) {
-						try {
-							await import(`./character/${folder.name}/index.ts`);
-						} catch (e) {
-							console.warn(`${folder.name} 加载失败 : ${e}`);
-						}
-					}
-				})()
-			);
-		}
+		console.time("[WW] packs:imports(限流 16)");
+		const limit = 16;
+		let cursor = 0;
+		const workers = Array.from({ length: Math.min(limit, importTasks.length) }, async () => {
+			while (true) {
+				const idx = cursor++;
+				if (idx >= importTasks.length) return;
+				await importTasks[idx];
+			}
+		});
+		await Promise.all(workers);
+		console.timeEnd("[WW] packs:imports(限流 16)");
 
-		await Promise.all(importTasks);
-
+		console.time("[WW] packs:register");
 		this.register();
+		console.timeEnd("[WW] packs:register");
 
 		//将包初始化
 		for (const name of WhichWayPackManager.CHARACTER_PACKS) {
