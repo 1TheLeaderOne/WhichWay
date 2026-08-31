@@ -1,8 +1,7 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { groupData } from "./groups.js";
 import { whichWayUtil } from "../utill.js";
-import { whichWayTranslate } from "./translate/index.js";
-import { whichWayFile } from "../file.js";
+import dynamicTranslate from "./translate/dynamicTranslate.js";
 import { onConfig, onSetDev, whichWayHooksApi, registerHookContextAt, onAfterInit } from "../hooks/index.js";
 import { initCharConfig } from "./extCharConfig.ts";
 import { charDes } from "./characterDesigner.js";
@@ -24,17 +23,13 @@ class WhichWayCharacterPack {
 
 	/**
 	 * 初始化武将包
+	 * 旧式武将包已迁移至新式体系（src/packs/character/），此处不再加载旧式包，
+	 * 仅保留翻译初始化、init 钩子上下文与统一势力配置。
 	 */
 	async init() {
-		await this.initModuleList();
-
 		this.initTranslate();
 
 		const packs = [];
-		for (let module of this.moduleList) {
-			let m = await this.createImportModule(module[0], module[1], true);
-			packs.push(m);
-		}
 
 		registerHookContextAt("init", 0, packs);
 
@@ -65,41 +60,25 @@ class WhichWayCharacterPack {
 
 	/**
 	 * 初始化武将包模块
+	 * 旧式武将包已迁移至新式体系（src/packs/character/），此方法不再使用。
+	 * @deprecated
 	 */
 	async initModuleList() {
-		const { folders } = await whichWayFile.getFileTree("pack:");
-		for (let folder of folders) {
-			if (folder.files.length < 0) continue;
-			let module = [`${folder.name}SJZX`, []];
-			for (let file of folder.files) {
-				if (file.name.endsWith(".js")) {
-					//@ts-ignore ${file.path}
-					module[1].push(await import(`./packs/${folder.name}/${whichWayFile.removeExt(file.name)}.js`).then(res => res.default));
-				}
-			}
-			if (module[1].length > 0) {
-				//@ts-ignore
-				this.moduleList.push(module);
-			}
-		}
+		// 旧式武将包已迁移至新式体系，此方法保留仅为兼容旧代码，不再加载任何包。
 	}
 
 	/**
 	 * 初始化武将包翻译
+	 * 角色/技能/称号/介绍翻译已迁移至新式体系（src/packs/character/*mrfz/index.ts），
+	 * 此处仅保留新式体系未覆盖的内容：
+	 *   - lib.dynamicTranslate：动态翻译函数（新式角色文件未注册 dynamicTranslate 钩子）
+	 *   - 势力分组翻译（groupData）
 	 */
 	initTranslate() {
-		//导入所有翻译
-		const { translates, otherTranslates } = whichWayTranslate;
+		//动态翻译（新式未覆盖，保留旧式集中文件）
+		lib.dynamicTranslate = dynamicTranslate;
 
-		for (let key in translates) {
-			lib.translate[key] = translates[key];
-		}
-
-		for (let key in otherTranslates) {
-			lib[key] = otherTranslates[key];
-		}
-
-		//分包翻译
+		//分包翻译（势力分组排序）
 		for (let key in groupData) {
 			lib.translate[key + "_group"] = groupData[key].sort;
 		}
