@@ -44,34 +44,51 @@ class WhichWayPackManager {
 
 	async initCharacterPack() {
 		const { files, folders } = await whichWayFile.getFileTree("src:packs/character/");
+
+		/**
+		 * 干员模块相互独立：模块顶层只把内容缓冲进 packHooks，统一在 onBeforeInit 落库，
+		 * 因此可以放心并行加载。原先逐个 await import，几百个干员时串行加载是主要耗时之一。
+		 * @type {Promise<unknown>[]}
+		 */
+		const importTasks: Promise<unknown>[] = [];
+
 		for (const file of files) {
 			const name = whichWayFile.removeExt(file.name);
 			if (!name.endsWith("mrfz")) continue;
-			try {
-				await import(`./character/${name}.js`);
-			} catch (e) {
-				try {
-					await import(`./character/${name}.ts`);
-				} catch (e) {
-					console.warn(`${name} 加载失败 : ${e}`);
-				}
-			}
+			importTasks.push(
+				(async () => {
+					try {
+						await import(`./character/${name}.js`);
+					} catch (e) {
+						try {
+							await import(`./character/${name}.ts`);
+						} catch (e) {
+							console.warn(`${name} 加载失败 : ${e}`);
+						}
+					}
+				})()
+			);
 		}
 
 		for (const folder of folders) {
 			if (!folder.name.endsWith("mrfz")) continue;
-			for (const file of folder.files) {
-				try {
-					await import(`./character/${folder.name}/index.js`);
-				} catch (e) {
+			//每个目录只需导入一次入口文件（原先按目录内文件数量重复导入）
+			importTasks.push(
+				(async () => {
 					try {
-						await import(`./character/${folder.name}/index.ts`);
+						await import(`./character/${folder.name}/index.js`);
 					} catch (e) {
-						console.warn(`${folder.name} 加载失败 : ${e}`);
+						try {
+							await import(`./character/${folder.name}/index.ts`);
+						} catch (e) {
+							console.warn(`${folder.name} 加载失败 : ${e}`);
+						}
 					}
-				}
-			}
+				})()
+			);
 		}
+
+		await Promise.all(importTasks);
 
 		this.register();
 
@@ -133,7 +150,7 @@ class WhichWayPackManager {
 			}
 
 			//————设置Arknight配置————//
-			whichWayArknight.addShcema(name);
+			whichWayArknight.addShcema(name, char);
 
 			whichWayArknight.initCharArknight(char);
 
@@ -217,15 +234,20 @@ class WhichWayPackManager {
 	register(): void {
 		const characters = this._hooks.getHooks("character");
 		const skills = this._hooks.getHooks("skill");
+		//用 Set 判重，避免对几百个干员做 O(n²) 的数组 includes
+		const knownChars = new Set<string>(window.whichWaySave.allCharacters);
 		for (const char of characters) {
 			const name = char.key;
-			if (!window.whichWaySave.allCharacters.includes(name)) {
+			if (!knownChars.has(name)) {
+				knownChars.add(name);
 				window.whichWaySave.allCharacters.push(name);
 			}
 		}
+		const knownSkills = new Set<string>(window.whichWaySave.allSkills);
 		for (const skill of skills) {
 			const name = skill.key;
-			if (!window.whichWaySave.allSkills.includes(name)) {
+			if (!knownSkills.has(name)) {
+				knownSkills.add(name);
 				window.whichWaySave.allSkills.push(name);
 			}
 		}

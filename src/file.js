@@ -252,31 +252,34 @@ class WhichWayFile {
 			}));
 
 			/** @type {FolderItem[]} */
-			const folderObjs = [];
+			let folderObjs = [];
 
-			for (const folderName of folders) {
-				const folderPath = path + folderName;
-				const [subFolders, subFiles] = await game.promises.getFileList(folderPath);
+			if (folders.length > 0 && step > 0) {
+				//各子文件夹相互独立，这里并行扫描。
+				//原先的实现存在两处性能问题：
+				// 1. 递归调用了两次，其中一次的结果被同名变量遮蔽而丢弃，等于每个子文件夹都扫两遍；
+				// 2. 所有子文件夹串行 await，几百个干员目录时会产生大量排队等待的 IO。
+				folderObjs = await Promise.all(
+					folders.map(async folderName => {
+						const folderPath = path + folderName;
+						const [subFolders, subFiles] = await game.promises.getFileList(folderPath);
 
-				const directFiles = subFiles.map(name => ({
-					name,
-					path: folderPath + "/" + name,
-				}));
+						const directFiles = subFiles.map(name => ({
+							name,
+							path: folderPath + "/" + name,
+						}));
 
-				/** @type {FolderItem} */
-				const folderObj = {
-					name: folderName,
-					path: folderPath,
-					files: directFiles,
-					folders: [],
-				};
-				const subtree = await this.getFileTree(folderPath, step - 1);
-				if (step > 1) {
-					const subtree = await this.getFileTree.call(this, folderPath, step - 1);
-					folderObj.folders = subtree.folders;
-				}
+						const subtree = step > 1 ? await this.getFileTree(folderPath, step - 1) : { folders: [] };
 
-				folderObjs.push(folderObj);
+						/** @type {FolderItem} */
+						return {
+							name: folderName,
+							path: folderPath,
+							files: directFiles,
+							folders: subtree.folders,
+						};
+					})
+				);
 			}
 
 			return { files: fileObjs, folders: folderObjs };
