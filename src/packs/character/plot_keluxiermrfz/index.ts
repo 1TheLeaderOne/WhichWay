@@ -1,7 +1,7 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { character, skill, translate, characterTitle, characterIntro } from "../../hooks.ts";
 
-character("plot_keluxiermrfz", {
+character("plot_keluxiermrfz", { pack: "plotSJZX",
 			sex: "female",
 			group: "bamrfz",
 			hp: 4,

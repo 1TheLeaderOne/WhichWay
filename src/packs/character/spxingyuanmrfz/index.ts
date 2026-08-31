@@ -2,7 +2,7 @@ import { lib, game, ui, get, ai, _status } from "noname";
 import { whichWayTips } from "../../../tips/index.ts";
 import { character, skill, translate, characterTitle, characterIntro } from "../../hooks.ts";
 
-character("spxingyuanmrfz", {
+character("spxingyuanmrfz", { pack: "legendSJZX",
 			sex: "female",
 			hp: 4,
 			skills: ["yulimrfz", "sulimrfz"],

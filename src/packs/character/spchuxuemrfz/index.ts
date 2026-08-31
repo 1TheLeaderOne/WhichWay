@@ -3,7 +3,7 @@ import { skillCustomFunc } from "../../../nonameEx/custom/skill.ts";
 import { whichWayUtil } from "../../../utill.js";
 import { character, skill, translate, characterTitle, characterIntro } from "../../hooks.ts";
 
-character("spchuxuemrfz", {
+character("spchuxuemrfz", { pack: "legendSJZX",
 			sex: "female",
 			hp: 3,
 			skills: ["fulingmrfz", "shengweimrfz"],

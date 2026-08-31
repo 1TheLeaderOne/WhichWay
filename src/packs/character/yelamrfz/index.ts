@@ -3,7 +3,7 @@ import { skillCustomFunc } from "../../../nonameEx/custom/skill.ts";
 import { whichWayTips } from "../../../tips/index.ts";
 import { character, skill, translate, characterTitle, characterIntro } from "../../hooks.ts";
 
-character("yelamrfz", {
+character("yelamrfz", { pack: "epicSJZX",
 			sex: "female",
 			group: "xiemrfz",
 			hp: 4,

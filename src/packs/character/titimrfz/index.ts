@@ -3,7 +3,7 @@ import { whichWayTips } from "../../../tips/index.ts";
 import { whichWayUtil } from "../../../utill.js";
 import { character, skill, translate, characterTitle, characterIntro } from "../../hooks.ts";
 
-character("titimrfz", {
+character("titimrfz", { pack: "legendSJZX",
 			sex: "female",
 			hp: 3,
 			skills: ["xiushimrfz", "canshimrfz", "titimrfz_mingshimrfz"],

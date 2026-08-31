@@ -2,7 +2,7 @@ import { lib, game, ui, get, ai, _status } from "noname";
 import { whichWayUtil } from "../../../utill.js";
 import { character, skill, translate, characterTitle, characterIntro } from "../../hooks.ts";
 
-character("shijunzhemrfz", {
+character("shijunzhemrfz", { pack: "legendSJZX",
 			sex: "female",
 			group: "xumrfz",
 			hp: 4,

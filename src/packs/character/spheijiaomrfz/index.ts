@@ -2,7 +2,7 @@ import { lib, game, ui, get, ai, _status } from "noname";
 import { whichWayToast } from "../../../toast/index.ts";
 import { character, skill, translate, characterTitle, characterIntro } from "../../hooks.ts";
 
-character("spheijiaomrfz", {
+character("spheijiaomrfz", { pack: "epicSJZX",
 			sex: "male",
 			group: "luomrfz",
 			hp: 3,

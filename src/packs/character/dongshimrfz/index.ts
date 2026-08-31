@@ -2,7 +2,7 @@ import { lib, game, ui, get, ai, _status } from "noname";
 import { whichWayMath } from "../../../math/index.ts";
 import { character, skill, translate, characterTitle, characterIntro } from "../../hooks.ts";
 
-character("dongshimrfz", {
+character("dongshimrfz", { pack: "rareSJZX",
 			sex: "female",
 			group: "wumrfz",
 			hp: 3,

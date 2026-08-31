@@ -2,7 +2,7 @@ import { lib, game, ui, get, ai, _status } from "noname";
 import { skillCustomFunc } from "../../../nonameEx/custom/skill.ts";
 import { character, skill, translate, characterTitle, characterIntro } from "../../hooks.ts";
 
-character("spxingxiongmrfz", {
+character("spxingxiongmrfz", { pack: "legendSJZX",
 			sex: "female",
 			group: "yanmrfz",
 			hp: 3,

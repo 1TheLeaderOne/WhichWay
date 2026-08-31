@@ -1,7 +1,7 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { character, skill, translate, characterTitle, characterIntro } from "../../hooks.ts";
 
-character("friston3mrfz", {
+character("friston3mrfz", { pack: "mediocreSJZX",
 			sex: "male",
 			group: "luomrfz",
 			hp: 4,
