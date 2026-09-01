@@ -13,7 +13,6 @@ import { whichWayTips } from "../../tips/index.ts";
 
 const NAME = "shiximrfz";
 const TOWER = "tower_shiximrfz";
-const TOWER_BIND = "towerBindShiximrfz"; // 副本 → 真牌的绑定标记（参考 muniu：directgain 的牌必须与真实牌建立关系）
 const save = window.whichWaySave.tmpSave;
 type CardSave = Record<string, Card[]>;
 
@@ -201,7 +200,7 @@ function scheduleTowerSync() {
 	}, 30);
 }
 
-/** 所有存储记录中的真牌 */
+/** 所有存储记录中的真牌（真牌物理上在 S 区 ui.special，带 TOWER gaintag） */
 function getStoredCards(): Card[] {
 	const list: Card[] = [];
 	if (!save[TOWER]) return list;
@@ -228,46 +227,30 @@ function isStoredCard(card: Card): boolean {
 	return getStoredCards().includes(card);
 }
 
-/**
- * 假牌替换成真牌（对应 muniu_skill7 的 storages.removeArray）：
- * 副本被"使用"（useCard）时，把 useCard 事件的 card/cards 指向真牌，让后续结算（含装备）处理真牌。
- * 注意：useCard 的 event.card 在 player.useCard 里已被转成 VCard（autoViewAs），实体牌在 event.cards 中。
- * - 真牌顶替副本进结算区（ordering）：equipCard 要求实体牌在 ordering 才执行装备；
- *   普通牌也随使用流程（orderingDiscard）进弃牌堆。
- * 返回 true 表示已消费真牌；返回 false 表示非使用（弃置等）——只作废副本、真牌保留。
- */
-function replaceFakeWithReal(fake: Card, real: Card, trigger?: GameEvent): boolean {
-	// 真牌脱离存储者手牌区前，先清掉通讯塔标记
-	real.removeGaintag(TOWER);
-	real.classList.remove("glows", "glow");
-	real.fix();
-	const useEvent = trigger?.getParent?.(e => e.name == "useCard");
-	// 判断用 VCard 的实体牌列表（useEvent.card.cards）：useEvent.cards 在 useCard step0 已被 removeArray 清空
-	if (useEvent && useEvent.card?.cards?.includes(fake)) {
-		// 正在"使用"这张副本 → 把 useCard 事件指向真牌
-		useEvent.card = get.autoViewAs(real, [real]);
-		useEvent.cards = [real];
-		// 真牌顶替副本进结算区
-		real.goto(ui.ordering);
-		// 副本（已失去到结算区）作废
-		fake.delete();
-		return true;
+/** 通过副本（_cardid 指向真牌 cardid）找到 S 区对应的真牌 */
+function findStoredCardByCopy(copy: Card): Card | undefined {
+	const cardid = (copy as any)._cardid;
+	if (!cardid || !save[TOWER]) return undefined;
+	for (const id in save[TOWER]) {
+		const arr = save[TOWER][id] as Card[];
+		const found = arr.find(c => c.cardid === cardid);
+		if (found) return found;
 	}
-	return false;
+	return undefined;
 }
 
-/** 同步核心：把存储的真牌同步到各拥有者手牌区（真牌留在存储者手中，其余拥有者发绑定副本） */
+/** 判断一张牌是否带通讯塔 tag（gaintag 在失去流程中会被剥离，需查失去前的 gaintag_map） */
+function cardHasTowerTag(card: Card, evt: any): boolean {
+	if (card.hasGaintag(TOWER)) return true;
+	return evt?.gaintag_map?.[card.cardid]?.includes(TOWER);
+}
+
+/** 同步核心：把 S 区的存储真牌同步给所有拥有者（每玩家一张副本，不带绑定关系） */
 function syncTowerCards() {
 	if (!game || !game.players) return;
-	// 清理所有角色手上的通讯塔【副本】（带 TOWER_BIND 绑定标记）；真牌保留在存储者手中
+	// 清理所有角色手上的通讯塔副本（带 TOWER gaintag）；真牌在 S 区不受影响
 	for (const p of game.players.concat(game.dead)) {
-		p.getCards("hs", c => c.hasGaintag(TOWER) && (c as any)[TOWER_BIND]).forEach(c => c.delete());
-	}
-	// 兜底：清理泄漏进弃牌堆的副本（死亡弃置等场景，gaintag 已剥离但绑定标记仍在）
-	for (const card of Array.from(ui.discardPile.childNodes)) {
-		if ((card as any)[TOWER_BIND]) {
-			(card as any).delete();
-		}
+		p.getCards("hs", c => c.hasGaintag(TOWER)).forEach(c => c.delete());
 	}
 	const CardsInfo: [Player, Card[]][] = [];
 	for (const id in save[TOWER]) {
@@ -275,30 +258,18 @@ function syncTowerCards() {
 		if (!target) continue;
 		CardsInfo.push([target, save[TOWER][id]]);
 	}
-	// 存储者自己的真牌也加上"属于XXX"提示
-	for (const [storer, links] of CardsInfo) {
-		for (const c of links) {
-			whichWayTips.addPrompt(c, `属于${get.translation(storer)}`, `${TOWER}_${storer.playerid}`);
-		}
-	}
 	for (const [owner] of CardsInfo) {
-		// 存储者本人持有真牌（position "s"），不发副本；其余拥有者发与真牌绑定的副本
+		// 给每个拥有者发副本（副本带 _cardid 关联真牌 + "属于XXX"提示）
 		const fakeCards = CardsInfo.flatMap(([storer, links]) =>
-			links
-				.filter(c => storer !== owner)
-				.map(c => {
-					const cardx = ui.create.card();
-					//@ts-ignore
-					cardx.init(get.cardInfo(c));
-					//@ts-ignore
-					cardx._cardid = c.cardid;
-					//@ts-ignore 绑定真牌：副本被使用/失去时据此换成真牌
-					cardx[TOWER_BIND] = c;
-					//@ts-ignore
-					cardx[TOWER] = storer;
-					whichWayTips.addPrompt(cardx, `属于${get.translation(storer)}`, `${TOWER}_${storer.playerid}`);
-					return cardx;
-				})
+			links.map(c => {
+				const cardx = ui.create.card();
+				//@ts-ignore
+				cardx.init(get.cardInfo(c));
+				//@ts-ignore 关联 S 区真牌（仅用于失去时定位真牌）
+				cardx._cardid = c.cardid;
+				whichWayTips.addPrompt(cardx, `属于${get.translation(storer)}`, `${TOWER}_${storer.playerid}`);
+				return cardx;
+			})
 		);
 		if (fakeCards.length) owner.directgains(fakeCards, null, TOWER);
 	}
@@ -335,26 +306,27 @@ cardSkill({
 			const cards2 = (trigger.getl(player).cards2 || []) as Card[];
 			const cards = cards2.filter(card => get.position(card, true) == "d" && !playerSave.includes(card));
 			if (!cards.length) return;
-			// 真牌：弃牌堆 → 特殊区（引擎处理无主牌的正规路径，对应 muniu loseToSpecial 前半段）
-			//      → 存储者手牌区（directgains，对应 muniu onEquip / loseToSpecial 后半段）
+			// 真牌丢到 S 区（特殊区）并打上通讯塔 tag；Proxy 监听 → 自动同步给所有拥有者
 			_status.discarded?.removeArray?.(cards);
 			await game.cardsGotoSpecial(cards, false);
-			player.directgains(cards, null, TOWER);
-			playerSave.push(...cards); // Proxy 监听 → 自动同步给其他拥有者
+			cards.forEach(c => c.addGaintag(TOWER));
+			playerSave.push(...cards);
 		},
 		onremove(player, skill) {
-			// 通讯塔离开装备区（被销毁/弃置/移动）：该角色存储的牌移入弃牌堆，并播放销毁音效
+			// 通讯塔离开装备区（被销毁/弃置/移动）：该角色 S 区的存储牌移入弃牌堆，并播放销毁音效
 			if (save[TOWER] && player.playerid !== undefined) {
 				const stored = save[TOWER][player.playerid] as Card[] | undefined;
 				if (stored?.length) {
 					const list = stored.slice();
-					stored.length = 0; // 先清存储 → Proxy 触发同步，移除其他拥有者的副本
-					player.lose(list, ui.discardPile);
+					stored.length = 0; // 先清存储 → Proxy 触发同步，移除所有拥有者的副本
+					game.cardsDiscard(list); // S 区真牌 → 弃牌堆
 					player.$throw(list, 1000);
 					player.popup(TOWER);
 					game.log(player, "的【通讯塔】被销毁，置于其上的牌被弃置", list);
 				}
 				delete save[TOWER][player.playerid];
+				// 销毁音效：baitiemrfzcardad4.mp3（支援装备音频）
+				game.trySkillAudio("baitiemrfzcardad", player, true);
 			}
 			if (save[TOWER] && Object.keys(save[TOWER]).length === 0) {
 				disposeTowerObserver();
@@ -363,42 +335,45 @@ cardSkill({
 	},
 });
 
-// ============ 技能二：使用/失去时把假牌（副本）替换成真牌 ============
+// ============ 技能二：失去监测——S 区 tag 牌失去后删除其他玩家手中相同的牌，并移除提示标记 ============
 cardSkill({
 	[`${TOWER}_skill7`]: {
 		audio: false,
 		charlotte: true,
-		trigger: { player: ["phaseUseBefore", "loseEnd"] },
+		trigger: { player: "loseEnd" },
 		firstDo: true,
 		forced: true,
 		silent: true,
 		delay: false,
 		filter(event, player) {
-			if (event.name === "phaseUse") return true;
 			if (!event.ss || !event.ss.length) return false;
 			const stored = getStoredCards();
 			if (!stored.length) return false;
-			// 玩家失去的特殊区牌里，有通讯塔副本（带绑定标记）或真牌（在存储区中）
-			return event.ss.some(card => (card as any)[TOWER_BIND] || stored.includes(card));
+			// 玩家失去的牌里，有通讯塔 tag 的（副本）或 S 区真牌
+			return event.ss.some(card => cardHasTowerTag(card, event) || stored.includes(card));
 		},
 		async content(event, trigger, player) {
-			if (trigger.name === "phaseUse") return;
-			const lost = (trigger.ss || []).filter(card => (card as any)[TOWER_BIND] || isStoredCard(card));
+			const evt = trigger.getl(player);
+			const lost = (trigger.ss || []).filter(card => cardHasTowerTag(card, evt) || isStoredCard(card));
 			for (const lostCard of lost) {
-				const real = (lostCard as any)[TOWER_BIND] || lostCard;
-				if (lostCard !== real) {
-					// 副本：被"使用"则假换真并消费真牌；被弃置（死亡清理等）只作废副本，真牌保留
-					if (replaceFakeWithReal(lostCard, real, trigger)) {
-						removeStoredCard(real);
-					} else {
-						lostCard.delete();
-					}
-				} else {
-					// 真牌被存储者自己失去：脱离存储区，随失去流程进入结算区/装备区
+				// 该牌从任意玩家手牌区失去 → 移除其上的"属于XXX"提示标记
+				whichWayTips.removePrompt(lostCard);
+				// 检索所有玩家 S 区（手牌区 position "s"）中与这张牌 id(_cardid) 相同的牌并删除
+				// （所有人手上的都是真牌副本，同 id 的份都要作废）
+				const targetId = (lostCard as any)._cardid || lostCard.cardid;
+				for (const p of game.players.concat(game.dead)) {
+					p.getCards("hs", c => c.hasGaintag(TOWER) && ((c as any)._cardid === targetId || c.cardid === targetId)).forEach(c => c.delete());
+				}
+				// 源真牌从存储移除并删除（S 区残留作废）
+				const real = isStoredCard(lostCard) ? lostCard : findStoredCardByCopy(lostCard);
+				if (real) {
 					removeStoredCard(real);
+					if (get.position(real, true) == "s") {
+						real.delete();
+					}
 				}
 			}
-			syncTowerCards();
+			syncTowerCards(); // 重新同步（已失去的牌不会再发放）
 		},
 	},
 });
