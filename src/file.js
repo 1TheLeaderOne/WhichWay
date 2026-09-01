@@ -15,7 +15,6 @@ class WhichWayFile {
     "noname:": "",
     "video:": `${this.extDir}vedio/`,
     "src:": `${this.extDir}src/`,
-    "pack:": `${this.extDir}src/character/packs/`,
     "bg:": `${this.extDir}image/background/`,
     "dec:": `${this.extDir}image/decoration/`,
     "json:": `${this.extDir}json/`,
@@ -215,36 +214,55 @@ class WhichWayFile {
     path = this.compilePath(path);
     try {
       const [folders, files] = await game.promises.getFileList(path);
+      const joinPath = (base, child) => base.endsWith("/") ? base + child : base + "/" + child;
       const fileObjs = files.map((name) => ({
         name,
-        path: path + name
+        path: joinPath(path, name)
       }));
-      const folderObjs = [];
-      for (const folderName of folders) {
-        const folderPath = path + folderName;
-        const [subFolders, subFiles] = await game.promises.getFileList(folderPath);
-        const directFiles = subFiles.map((name) => ({
-          name,
-          path: folderPath + "/" + name
-        }));
-        const folderObj = {
-          name: folderName,
-          path: folderPath,
-          files: directFiles,
-          folders: []
-        };
-        const subtree = await this.getFileTree(folderPath, step - 1);
-        if (step > 1) {
-          const subtree2 = await this.getFileTree.call(this, folderPath, step - 1);
-          folderObj.folders = subtree2.folders;
-        }
-        folderObjs.push(folderObj);
+      let folderObjs = [];
+      if (folders.length > 0 && step > 0) {
+        folderObjs = [];
+        const limit = 16;
+        let cursor = 0;
+        const workers = Array.from({ length: Math.min(limit, folders.length) }, async () => {
+          while (true) {
+            const idx = cursor++;
+            if (idx >= folders.length) return;
+            const folderName = folders[idx];
+            const folderPath = joinPath(path, folderName);
+            const [subFolders, subFiles] = await game.promises.getFileList(folderPath);
+            const directFiles = subFiles.map((name) => ({
+              name,
+              path: joinPath(folderPath, name)
+            }));
+            const subtree = step > 1 ? await this.getFileTree(folderPath, step - 1) : { folders: [] };
+            folderObjs.push({
+              name: folderName,
+              path: folderPath,
+              files: directFiles,
+              folders: subtree.folders
+            });
+          }
+        });
+        await Promise.all(workers);
       }
       return { files: fileObjs, folders: folderObjs };
     } catch (e) {
       console.warn(`[WhichWayFile] Failed to get file list of "${path}": ${e.message}`);
       return { files: [], folders: [] };
     }
+  }
+  /**
+   * 单层目录扫描：仅返回直接子目录名，不递归。
+   * 用于类似"src:packs/character/"这种只需要目录列表、不需要递归进入子目录的场景，
+   * 比 getFileTree 省一半以上的 IPC。
+   * @param {string} path
+   * @returns {Promise<string[]>}
+   */
+  async listDirNames(path) {
+    path = this.compilePath(path);
+    const [folders] = await game.promises.getFileList(path);
+    return folders;
   }
   /**
    * 读取文件内容,会自动解析json文件

@@ -1,6 +1,6 @@
 import { ui } from "noname";
 import { createApp } from "vue";
-import { onSetDev, onArenaReady, onContent } from "../hooks/index.js";
+import { onArenaReady, onContent, onSetDev } from "../hooks/index.js";
 import Main from "./main.vue.js";
 import { whichWayUtil } from "../utill.js";
 class WhichWayConfigUI {

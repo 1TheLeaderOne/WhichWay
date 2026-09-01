@@ -1,5 +1,5 @@
 import { get, ui } from "noname";
-import { onSetDev, onConfig } from "../hooks/index.js";
+import { onConfig, onSetDev } from "../hooks/index.js";
 import { whichWayToast } from "../toast/index.js";
 import { whichWayConfigData } from "./data.js";
 import ExtIntro from "./extIntro.vue.js";

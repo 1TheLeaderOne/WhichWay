@@ -1,4 +1,4 @@
-import { lib, get } from "noname";
+import { get, lib } from "noname";
 if (!lib.qhlypkg) {
   lib.qhlypkg = [];
 }

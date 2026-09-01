@@ -2,7 +2,7 @@ import "noname";
 let info = {
   intro: [
     // "调整技能/武将：",
-    "新增干员：桃金娘、米格鲁",
+    "新增干员：桃金娘、米格鲁、嘉欣塔",
     // "新增动态皮肤：无",
     "新增皮肤：桃金娘【繁闹祭典】、【淡金庆典】、【夏卉】，米格鲁【无畏】",
     // "新增背景：无",
@@ -19,7 +19,7 @@ let info = {
     "修复裂响、GALLUS²和雷狼龙S空爆未正确分包的bug",
     "优化守望者凯尔希【星灭】的ai，使其随机选取选项"
   ],
-  player: ["taojinniangmrfz", "migelumrfz"],
+  player: ["taojinniangmrfz", "migelumrfz", "jiaxintamrfz"],
   cards: []
 };
 const upDataContentCurrent = info;

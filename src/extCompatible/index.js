@@ -1,4 +1,4 @@
-import { onSetDev, onContent } from "../hooks/index.js";
+import { onContent, onSetDev } from "../hooks/index.js";
 import { decadeExtCompatible } from "./decade.js";
 import { qianhuanSetting } from "./qianhuan.js";
 import { skinSwitchtCompatible } from "./skinSwitch.js";
