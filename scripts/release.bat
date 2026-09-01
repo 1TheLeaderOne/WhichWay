@@ -5,12 +5,12 @@ chcp 65001 >nul
 REM ====================================================================
 REM  驶舰之向（WhichWay）一键发布三分支
 REM
-REM    dev-output  ← 本次构建产物的全量快照
-REM    output      ← 大版本合并自 dev-output，并打 tag
-REM    output-core ← 两次版本间的增量包（只含变动文件）
+REM    dev-output  = 本次构建产物的全量快照
+REM    output      = 大版本合并自 dev-output，并打 tag
+REM    output-core = 两次版本间的增量包（只含变动文件）
 REM
 REM  用法:
-REM      release.bat ^<版本号^> [output-core 基线]
+REM      release.bat 版本号 [output-core 基线]
 REM
 REM      版本号        新 tag 名，如 v1.4.3（必填）
 REM      基线          output-core 增量包对比的起点 tag/commit，如 v1.4
@@ -22,12 +22,12 @@ REM      release.bat v1.5.0 v1.4       REM output-core: v1.4   -> v1.5.0
 REM
 REM  说明：
 REM  - 全程用底层 git 命令构造提交，不切换分支、不动你的工作区
-REM    （构建产物在 apps/core/extension/WhichWay，会被覆盖，发布前请确保没在用）
+REM  - 本文件必须为 UTF-8 编码 + CRLF 行尾（cmd 批处理要求）
 REM  - 推送前会暂停等你确认
 REM ====================================================================
 
-set "REPO=F:\无名杀\packages\extension\WhichWay"
-set "ROOT=F:\无名杀"
+set "REPO=F:/无名杀/packages/extension/WhichWay"
+set "ROOT=F:/无名杀"
 set "BUILD=%ROOT%\apps\core\extension\WhichWay"
 set "SCRIPTS=%REPO%\scripts"
 
@@ -84,7 +84,14 @@ REM ====================================================================
 REM [1/6] 构建扩展
 REM ====================================================================
 echo [1/6] 构建扩展...
-if exist "%BUILD%" rd /s /q "%BUILD%" 2>nul
+REM 先尝试清理旧产物；失败不中断（vite 的 emptyOutDir 会再处理）
+if exist "%BUILD%" (
+	rd /s /q "%BUILD%" 2>nul
+	if exist "%BUILD%" (
+		echo [警告] 旧产物目录删除失败（可能被占用），尝试重命名规避...
+		ren "%BUILD%" "WhichWay-stale-%RANDOM%" 2>nul
+	)
+)
 cd /d "%ROOT%"
 call pnpm --filter ./packages/extension/WhichWay build
 if errorlevel 1 (
@@ -122,6 +129,10 @@ if "!TREE!"=="" (
 >>"%MSGDEV%" echo 产物目录 apps/core/extension/WhichWay，由 release.bat 生成。
 set "DOCOMMIT="
 for /f "delims=" %%c in ('git commit-tree !TREE! -p dev-output -F "%MSGDEV%"') do set DOCOMMIT=%%c
+if "!DOCOMMIT!"=="" (
+	echo [错误] commit-tree 失败，dev-output 未生成。
+	exit /b 1
+)
 git update-ref refs/heads/dev-output !DOCOMMIT!
 echo       dev-output = !DOCOMMIT!
 
@@ -130,9 +141,13 @@ REM [3/6] output：构造 --no-ff 合并提交并打 tag
 REM ====================================================================
 echo [3/6] 生成 output 合并提交并打 tag %VERSION%...
 > "%MSGOUT%" echo output: %VERSION% 大版本合并自 dev-output
->>"%MSGOUT%" echo 增量对比见 output-core（基线 %BASELINE% -> %VERSION%）。
+>>"%MSGOUT%" echo 增量对比见 output-core（基线 %BASELINE% -^> %VERSION%）。
 set "MERGE="
 for /f "delims=" %%c in ('git commit-tree !TREE! -p output -p dev-output -F "%MSGOUT%"') do set MERGE=%%c
+if "!MERGE!"=="" (
+	echo [错误] commit-tree 失败，output 未生成。
+	exit /b 1
+)
 git update-ref refs/heads/output !MERGE!
 git tag %VERSION% !MERGE!
 echo       output = !MERGE!  ^(tag %VERSION%^)
@@ -155,12 +170,20 @@ set "CORETREE="
 for /f "delims=" %%t in ('git write-tree') do set CORETREE=%%t
 set "GIT_INDEX_FILE="
 del "%TMPIDX%" 2>nul
+if "!CORETREE!"=="" (
+	echo [错误] output-core 树构造失败。
+	exit /b 1
+)
 
 > "%MSGCORE%" echo output-core: %VERSION% 增量包
->>"%MSGCORE%" echo 基线 %BASELINE% -> %VERSION%（output）
+>>"%MSGCORE%" echo 基线 %BASELINE% -^> %VERSION%（output）
 >>"%MSGCORE%" echo 覆盖安装到 %BASELINE% 即可升级；删除项不含在内。
 set "CORE="
 for /f "delims=" %%c in ('git commit-tree !CORETREE! -p output-core -F "%MSGCORE%"') do set CORE=%%c
+if "!CORE!"=="" (
+	echo [错误] commit-tree 失败，output-core 未生成。
+	exit /b 1
+)
 git update-ref refs/heads/output-core !CORE!
 echo       output-core = !CORE!
 
