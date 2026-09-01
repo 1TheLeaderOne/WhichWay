@@ -288,6 +288,17 @@ class WhichWayPackManager {
 		for (const h of skillHooks) skill[h.key] = h.obj;
 		for (const h of transHooks) translate[h.key] = h.obj;
 
+		// 兜底：引擎 loadCard 要求每张卡必须有 `${id}_info` 翻译才进 lib.cardPack。
+		// card/ 目录的卡牌文件都自带 _info；但干员文件里通过 card() 钩子注册的
+		// 卡牌容易漏写，会导致卡牌被引擎静默丢弃（不进卡牌包、游戏里选不到）。
+		// 这里统一兜底：缺 _info 时用卡牌名翻译（或卡牌 id）补上，保证进包。
+		for (const cardKey of Object.keys(card)) {
+			const infoKey = `${cardKey}_info`;
+			if (translate[infoKey] === undefined) {
+				translate[infoKey] = translate[cardKey] ?? cardKey;
+			}
+		}
+
 		const mrfzcard = { name: "mrfzcard", connect: true, card, skill, translate, list: [] };
 		lib.translate["mrfzcard_card_config"] = "驶舰之向";
 		if (!lib.config.cards.includes("mrfzcard")) lib.config.cards.push("mrfzcard");
