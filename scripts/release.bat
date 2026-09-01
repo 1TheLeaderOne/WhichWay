@@ -78,6 +78,14 @@ echo.
 REM ---- remember current branch ----
 for /f "delims=" %%b in ('git rev-parse --abbrev-ref HEAD') do set ORIGBRANCH=%%b
 
+REM ---- precheck: build toolchain (vite) ----
+set "VITEBIN=%REPO%\node_modules\.bin\vite.CMD"
+if not exist "%VITEBIN%" set "VITEBIN=%ROOT%\node_modules\.bin\vite.CMD"
+if not exist "%VITEBIN%" (
+	echo [ERROR] vite not found. Run "pnpm install" in the workspace root first.
+	exit /b 1
+)
+
 REM ============================================================
 REM [1/6] build
 REM ============================================================
