@@ -107,7 +107,8 @@ card(TOWER, {
 	image: `ext:WhichWay/image/card/tower_shiximrfz.jpg`,
 	type: "equip",
 	subtype: "equip5",
-	skills: [`${TOWER}_skill`],
+	// skill：存储弃置牌 + 同步到各拥有者手牌区；skill7：使用/失去时把假牌替换成真牌（参考 muniu_skill / muniu_skill7）
+	skills: [`${TOWER}_skill`, `${TOWER}_skill7`],
 	// 离开装备区即销毁（防止进入弃牌堆/牌堆污染，参照 tiejili 铁蒺藜骨朵）
 	destroy: true,
 	ai: {
@@ -200,7 +201,58 @@ function scheduleTowerSync() {
 	}, 30);
 }
 
-/** 同步核心：把存储的真牌重建为绑定副本，同步给所有拥有者（真牌留在存储者手中，仅发副本） */
+/** 所有存储记录中的真牌 */
+function getStoredCards(): Card[] {
+	const list: Card[] = [];
+	if (!save[TOWER]) return list;
+	for (const id in save[TOWER]) {
+		list.addArray(save[TOWER][id] as Card[]);
+	}
+	return list;
+}
+
+/** 从存储记录中移除一张真牌 */
+function removeStoredCard(real: Card) {
+	if (!save[TOWER]) return;
+	for (const id in save[TOWER]) {
+		const arr = save[TOWER][id] as Card[];
+		if (arr.includes(real)) {
+			arr.remove(real);
+			return;
+		}
+	}
+}
+
+/** 真牌当前是否还在通讯塔存储中 */
+function isStoredCard(card: Card): boolean {
+	return getStoredCards().includes(card);
+}
+
+/**
+ * 假牌替换成真牌（对应 muniu_skill7 的 storages.removeArray）：
+ * 真牌移到副本被失去后所处的位置（结算区/弃牌堆），副本删除。
+ * 这样后续流程处理的就是真牌，避免同一张牌出现两份。
+ */
+function replaceFakeWithReal(fake: Card, real: Card) {
+	// 真牌脱离存储者手牌区前，先清掉通讯塔标记
+	real.removeGaintag(TOWER);
+	real.classList.remove("glows", "glow");
+	real.fix();
+	const pos = get.position(fake, true);
+	if (pos == "o") {
+		real.goto(ui.ordering);
+	} else if (pos == "d") {
+		real.goto(ui.discardPile);
+	} else if (pos == "s") {
+		real.goto(ui.discardPile);
+	} else {
+		real.goto(ui.discardPile);
+	}
+	// 副本（假牌）作废
+	fake.delete();
+}
+
+/** 同步核心：把存储的真牌同步到各拥有者手牌区（真牌留在存储者手中，其余拥有者发绑定副本） */
 function syncTowerCards() {
 	if (!game || !game.players) return;
 	// 清理所有角色手上的通讯塔【副本】（带 TOWER_BIND 绑定标记）；真牌保留在存储者手中
@@ -230,7 +282,7 @@ function syncTowerCards() {
 					cardx.init(get.cardInfo(c));
 					//@ts-ignore
 					cardx._cardid = c.cardid;
-					//@ts-ignore 绑定真牌：副本被使用时据此消费真牌
+					//@ts-ignore 绑定真牌：副本被使用/失去时据此换成真牌
 					cardx[TOWER_BIND] = c;
 					//@ts-ignore
 					cardx[TOWER] = storer;
@@ -242,6 +294,7 @@ function syncTowerCards() {
 	}
 }
 
+// ============ 技能一：存储弃置牌 + 同步到各拥有者手牌区（参考 muniu 的 loseToSpecial / onEquip） ============
 cardSkill({
 	[`${TOWER}_skill`]: {
 		audio: false,
@@ -250,25 +303,14 @@ cardSkill({
 			global: "loseAsyncAfter",
 		},
 		filter(event, player) {
-			if (event.type == "discard") {
-				// 存储模式：弃置的牌进入弃牌堆
-				let evt = event.getl(player);
-				if (!evt || !evt.cards2) {
-					return false;
-				}
-				for (let i = 0; i < evt.cards2.length; i++) {
-					if (get.position(evt.cards2[i]) == "d") {
-						return true;
-					}
-				}
-				return false;
-			}
-			// 消费模式：通讯塔真牌或副本被失去（使用/弃置等）
+			// 只负责捕获"弃置后进入弃牌堆"的牌
+			if (event.type != "discard") return false;
 			let evt = event.getl(player);
-			if (!evt || !evt.ss || !evt.ss.length) {
-				return false;
+			if (!evt || !evt.cards2) return false;
+			for (let i = 0; i < evt.cards2.length; i++) {
+				if (get.position(evt.cards2[i]) == "d") return true;
 			}
-			return evt.ss.some(card => (card as any)[TOWER_BIND] || evt.gaintag_map?.[card.cardid]?.includes(TOWER));
+			return false;
 		},
 		init(player, skill) {
 			save[TOWER] ??= {};
@@ -278,23 +320,17 @@ cardSkill({
 		},
 		forced: true,
 		async content(event, trigger, player) {
-			if (trigger.type == "discard") {
-				// 存储：真牌从弃牌堆移到存储者手牌区（position "s"，muniu 式存储），登记进存储区
-				save[TOWER] ??= {};
-				const playerSave = (save[TOWER][player.playerid as string] ||= []) as Card[];
-				const cards2 = trigger.getl(player).cards2 as Card[];
-				const cards = (cards2 || []).filter(card => get.position(card, true) == "d" && !playerSave.includes(card));
-				if (!cards.length) return;
-				// 从弃牌堆计数中移除，再 directgains 挂到存储者手上
-				_status.discarded?.removeArray?.(cards);
-				player.directgains(cards, null, TOWER);
-				playerSave.push(...cards);
-			} else {
-				// 消费：真牌/副本被使用或失去 → 消费对应的真牌
-				const evt = trigger.getl(player);
-				const lost = (evt.ss || []).filter(card => (card as any)[TOWER_BIND] || evt.gaintag_map?.[card.cardid]?.includes(TOWER));
-				for (const card of lost) consumeTowerCard(card, trigger);
-			}
+			save[TOWER] ??= {};
+			const playerSave = (save[TOWER][player.playerid as string] ||= []) as Card[];
+			const cards2 = (trigger.getl(player).cards2 || []) as Card[];
+			const cards = cards2.filter(card => get.position(card, true) == "d" && !playerSave.includes(card));
+			if (!cards.length) return;
+			// 真牌：弃牌堆 → 特殊区（引擎处理无主牌的正规路径，对应 muniu loseToSpecial 前半段）
+			//      → 存储者手牌区（directgains，对应 muniu onEquip / loseToSpecial 后半段）
+			_status.discarded?.removeArray?.(cards);
+			await game.cardsGotoSpecial(cards, false);
+			player.directgains(cards, null, TOWER);
+			playerSave.push(...cards); // Proxy 监听 → 自动同步给其他拥有者
 		},
 		onremove(player, skill) {
 			// 通讯塔离开装备区（被销毁/弃置/移动）：该角色存储的牌移入弃牌堆，并播放销毁音效
@@ -319,50 +355,49 @@ cardSkill({
 	},
 });
 
-/** 消费一张被失去的通讯塔牌：真牌移出存储区；副本被使用时真牌移入弃牌堆并删除副本 */
-function consumeTowerCard(lostCard: Card, trigger: GameEvent) {
-	const real = (lostCard as any)[TOWER_BIND] || lostCard;
-	// 从所有存储记录中移除真牌
-	let storer: Player | null = null;
-	for (const id in save[TOWER]) {
-		const arr = save[TOWER][id] as Card[];
-		if (arr.includes(real)) {
-			arr.remove(real);
-			storer = game.findPlayer(c => c.playerid === id) || null;
-			break;
-		}
-	}
-	// 真牌被存储者自己失去：随失去流程进入弃牌堆，无需额外处理
-	if (lostCard === real) return;
-	if (trigger.type == "use") {
-		// 副本被"使用"：真牌（在存储者手中）移入弃牌堆；副本延迟删除，避免使用结算中途被引用
-		if (storer && get.position(real, true) == "s") {
-			storer.lose([real], ui.discardPile);
-		}
-		scheduleTowerCopyCleanup(lostCard);
-	} else {
-		// 副本被弃置（如死亡清理）：删除副本，真牌保留在存储区
-		lostCard.delete();
-	}
-}
-
-/** 延迟删除被使用的副本（等使用结算完、副本进入弃牌堆后再删） */
-function scheduleTowerCopyCleanup(card: Card) {
-	if ((card as any)._towerCleaned) return;
-	(card as any)._towerCleaned = true;
-	window.setTimeout(() => {
-		const pos = get.position(card);
-		if (pos == "d" || pos == "o") {
-			card.delete();
-		}
-	}, 1200);
-}
+// ============ 技能二：使用/失去时把假牌（副本）替换成真牌（参考 muniu_skill7） ============
+cardSkill({
+	[`${TOWER}_skill7`]: {
+		audio: false,
+		charlotte: true,
+		trigger: { player: ["phaseUseBefore", "loseEnd"] },
+		firstDo: true,
+		forced: true,
+		silent: true,
+		delay: false,
+		filter(event, player) {
+			if (event.name === "phaseUse") return true;
+			if (!event.ss || !event.ss.length) return false;
+			const stored = getStoredCards();
+			if (!stored.length) return false;
+			// 玩家失去的特殊区牌里，有通讯塔副本（带绑定标记）或真牌（在存储区中）
+			return event.ss.some(card => (card as any)[TOWER_BIND] || stored.includes(card));
+		},
+		async content(event, trigger, player) {
+			if (trigger.name === "phaseUse") return;
+			const lost = (trigger.ss || []).filter(card => (card as any)[TOWER_BIND] || isStoredCard(card));
+			for (const lostCard of lost) {
+				const real = (lostCard as any)[TOWER_BIND] || lostCard;
+				// 真牌脱离存储区（对应 muniu_skill7 的 storages.removeArray(trigger.ss)）
+				removeStoredCard(real);
+				if (lostCard !== real) {
+					// 被失去的是副本 → 假牌替换成真牌，后续流程处理的是真牌
+					replaceFakeWithReal(lostCard, real);
+				}
+				// 被失去的是真牌本身 → 已随失去流程进入结算区/弃牌堆，无需额外处理
+			}
+			syncTowerCards();
+		},
+	},
+});
 
 cardTranslate({
 	[TOWER]: "通讯塔",
 	[`${TOWER}_info`]: "锁定技，当你不在弃牌阶段因弃置的牌进入弃牌堆后，你将弃置的牌置于此牌之上，所有装备区有【通讯塔】的角色可将此牌当做手牌使用；当此牌离开你的装备区时，弃置置于此牌上的所有牌并销毁此牌。",
 	[`${TOWER}_skill`]: "通讯塔",
 	[`${TOWER}_skill_info`]: "锁定技，当你不在弃牌阶段因弃置的牌进入弃牌堆后，你将弃置的牌置于此牌之上，所有装备区有【通讯塔】的角色可将此牌当做手牌使用；当此牌离开你的装备区时，弃置置于此牌上的所有牌并销毁此牌。",
+	[`${TOWER}_skill7`]: "通讯塔",
+	[`${TOWER}_skill7_info`]: "锁定技，当你不在弃牌阶段因弃置的牌进入弃牌堆后，你将弃置的牌置于此牌之上，所有装备区有【通讯塔】的角色可将此牌当做手牌使用；当此牌离开你的装备区时，弃置置于此牌上的所有牌并销毁此牌。",
 });
 
 function getUsableTower(player: Player): Player[] {
