@@ -119,7 +119,6 @@ skill({
 					delete player2.storage.feilvmrfz_count;
 				},
 			},
-			// 统计本局游戏累计使用牌数，达到18张触发使命成功
 			achieve: {
 				audio: "feilvmrfz",
 				forced: true,

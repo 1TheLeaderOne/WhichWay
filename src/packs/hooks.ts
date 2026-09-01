@@ -292,13 +292,13 @@ class WhichWayPackHooks {
 
 	// ===== 卡牌专用钩子声明 =====
 	declare card: (
-		key: string | Record<string, any>,
-		content?: any
+		key: string | Record<string, CardInfo>,
+		content?: CardInfo
 	) => void;
 
 	declare cardSkill: (
-		key: string | Record<string, any>,
-		content?: any
+		key: string | Record<string, ExtendedSkill>,
+		content?: ExtendedSkill
 	) => void;
 
 	declare cardTranslate: (

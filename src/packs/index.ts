@@ -66,6 +66,8 @@ class WhichWayPackManager {
 
 		// 扁平文件形态：character/xxx.ts
 		for (const file of files) {
+			// 只处理源码文件，跳过 sourcemap 等（产物模式下 .js.map 的 removeExt 会得到 "xxx.js"）
+			if (!/\.(ts|js)$/.test(file.name)) continue;
 			const name = whichWayFile.removeExt(file.name);
 			if (!name.endsWith("mrfz")) continue;
 			loadedFlats.add(name);
@@ -232,10 +234,14 @@ class WhichWayPackManager {
 	 * 无需修改任何文件。共享技能（多卡共用的）请放入 shared.ts。
 	 */
 	async initCardPack() {
+		const t0 = performance.now();
 		const { files } = await whichWayFile.getFileTree("src:packs/card/", 1);
+		const tList = performance.now() - t0;
 
 		const importTasks: Promise<unknown>[] = [];
 		for (const file of files) {
+			// 只处理源码文件，跳过 sourcemap 等（产物模式下 .js.map 的 removeExt 会得到 "xxx.js"）
+			if (!/\.(ts|js)$/.test(file.name)) continue;
 			const name = whichWayFile.removeExt(file.name);
 			// 跳过旧组装器入口（index.ts）；shared.ts 是共享技能模块，正常加载
 			if (name === "index") continue;
@@ -254,6 +260,7 @@ class WhichWayPackManager {
 			);
 		}
 
+		const t1 = performance.now();
 		// 16 并发限流（与干员加载一致）
 		const limit = 16;
 		let cursor = 0;
@@ -265,7 +272,9 @@ class WhichWayPackManager {
 			}
 		});
 		await Promise.all(workers);
+		const tImports = performance.now() - t1;
 
+		const t2 = performance.now();
 		// 从 packHooks 收集卡牌钩子（card/cardSkill/cardTranslate 不进 pendingRun，
 		// 不会自动落库 lib，由本方法统一收集后构造 mrfzcard 包给引擎 loadCard 处理）
 		const cardHooks = packHooks.getHooks("card");
@@ -283,6 +292,17 @@ class WhichWayPackManager {
 		lib.translate["mrfzcard_card_config"] = "驶舰之向";
 		if (!lib.config.cards.includes("mrfzcard")) lib.config.cards.push("mrfzcard");
 		await game.import("card", () => mrfzcard);
+		const tAssemble = performance.now() - t2;
+
+		// 只在总耗时 > 500ms 时打详细明细（与 initCharacterPack 一致的折叠风格）
+		const total = tList + tImports + tAssemble;
+		if (total > 500) {
+			console.groupCollapsed(`%c[WhichWay·packs] initCardPack ${total.toFixed(0)}ms`, "color:#e67e22;");
+			console.log(`  listFiles:      ${tList.toFixed(0)}ms`);
+			console.log(`  imports (限16): ${tImports.toFixed(0)}ms  (${importTasks.length} 模块)`);
+			console.log(`  assemble:       ${tAssemble.toFixed(0)}ms`);
+			console.groupEnd();
+		}
 	}
 
 	getPackTranslation(str: string, index?: number) {

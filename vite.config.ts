@@ -33,7 +33,11 @@ export default defineConfig(({ mode }) => ({
 		}) as PluginOption,
 	],
 	build: {
-		sourcemap: true,
+		// 关闭 sourcemap：产物不再生成 .js.map，否则 getFileTree 扫目录时会把
+		// .map 文件也列进来，removeExt("xxx.js.map") 得到 "xxx.js"，导致
+		// 动态 import 拼出 "xxx.js.ts" 报 Unknown variable dynamic import。
+		// 产物本身 minify:false，堆栈仍可读，调试影响很小。
+		sourcemap: false,
 		minify: false,
 		lib: {
 			entry: {
