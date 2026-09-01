@@ -230,26 +230,31 @@ function isStoredCard(card: Card): boolean {
 
 /**
  * 假牌替换成真牌（对应 muniu_skill7 的 storages.removeArray）：
- * 真牌移到副本被失去后所处的位置（结算区/弃牌堆），副本删除。
- * 这样后续流程处理的就是真牌，避免同一张牌出现两份。
+ * 副本被"使用"（useCard，含装备牌：装备牌 content=equipCard 会 target.equip(event.card)）时，
+ * 把 useCard 事件的 card/cards 替换成真牌，让后续结算（含装备）处理真牌。
+ * - 装备牌：由 equipCard → equip 流程处理真牌位置（存储者 lose 真牌到特殊区 → 装备区）。
+ * - 普通牌：真牌顶替副本进结算区，随使用流程进弃牌堆。
+ * 返回 true 表示已消费真牌；返回 false 表示非使用（弃置等）——只作废副本、真牌保留。
  */
-function replaceFakeWithReal(fake: Card, real: Card) {
+function replaceFakeWithReal(fake: Card, real: Card, trigger?: GameEvent): boolean {
 	// 真牌脱离存储者手牌区前，先清掉通讯塔标记
 	real.removeGaintag(TOWER);
 	real.classList.remove("glows", "glow");
 	real.fix();
-	const pos = get.position(fake, true);
-	if (pos == "o") {
-		real.goto(ui.ordering);
-	} else if (pos == "d") {
-		real.goto(ui.discardPile);
-	} else if (pos == "s") {
-		real.goto(ui.discardPile);
-	} else {
-		real.goto(ui.discardPile);
+	const useEvent = trigger?.getParent?.(e => e.name == "useCard");
+	if (useEvent && useEvent.card === fake) {
+		// 正在"使用"这张副本
+		useEvent.card = real;
+		useEvent.cards = [real];
+		if (get.type(real) != "equip") {
+			// 普通牌：真牌顶替副本进结算区，随使用流程进弃牌堆
+			real.goto(ui.ordering);
+		}
+		// 副本（已失去到结算区）作废
+		fake.delete();
+		return true;
 	}
-	// 副本（假牌）作废
-	fake.delete();
+	return false;
 }
 
 /** 同步核心：把存储的真牌同步到各拥有者手牌区（真牌留在存储者手中，其余拥有者发绑定副本） */
@@ -345,8 +350,6 @@ cardSkill({
 					game.log(player, "的【通讯塔】被销毁，置于其上的牌被弃置", list);
 				}
 				delete save[TOWER][player.playerid];
-				// 销毁音效：baitiemrfzcardad4.mp3（支援装备音频）
-				game.trySkillAudio("baitiemrfzcardad", player, true);
 			}
 			if (save[TOWER] && Object.keys(save[TOWER]).length === 0) {
 				disposeTowerObserver();
@@ -355,7 +358,7 @@ cardSkill({
 	},
 });
 
-// ============ 技能二：使用/失去时把假牌（副本）替换成真牌（参考 muniu_skill7） ============
+// ============ 技能二：使用/失去时把假牌（副本）替换成真牌 ============
 cardSkill({
 	[`${TOWER}_skill7`]: {
 		audio: false,
@@ -378,13 +381,17 @@ cardSkill({
 			const lost = (trigger.ss || []).filter(card => (card as any)[TOWER_BIND] || isStoredCard(card));
 			for (const lostCard of lost) {
 				const real = (lostCard as any)[TOWER_BIND] || lostCard;
-				// 真牌脱离存储区（对应 muniu_skill7 的 storages.removeArray(trigger.ss)）
-				removeStoredCard(real);
 				if (lostCard !== real) {
-					// 被失去的是副本 → 假牌替换成真牌，后续流程处理的是真牌
-					replaceFakeWithReal(lostCard, real);
+					// 副本：被"使用"则假换真并消费真牌；被弃置（死亡清理等）只作废副本，真牌保留
+					if (replaceFakeWithReal(lostCard, real, trigger)) {
+						removeStoredCard(real);
+					} else {
+						lostCard.delete();
+					}
+				} else {
+					// 真牌被存储者自己失去：脱离存储区，随失去流程进入结算区/装备区
+					removeStoredCard(real);
 				}
-				// 被失去的是真牌本身 → 已随失去流程进入结算区/弃牌堆，无需额外处理
 			}
 			syncTowerCards();
 		},
