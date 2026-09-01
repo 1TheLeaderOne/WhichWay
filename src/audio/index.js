@@ -1,7 +1,7 @@
 import { whichWayArknight } from "../arknight/index.js";
 import { whichWayFile } from "../file.js";
 import { get, lib, game } from "noname";
-import { onSetDev, onArenaReady, onConfig } from "../hooks/index.js";
+import { onArenaReady, onConfig, onSetDev } from "../hooks/index.js";
 import { whichWayUtil } from "../utill.js";
 import { whichWayWebPlay } from "./webPlay.js";
 import { whichWayWebPlayDie } from "./webPlayDie.js";
@@ -28,6 +28,7 @@ class WhichWayAudio {
     onArenaReady({
       name: "whichWayAudio_init",
       fn: async () => {
+        await this.ensureAudioCache();
         for (const name of window.whichWaySave.allCharacters) {
           const char = get.character(name);
           await whichWayAudio.initDieAudio(char);
@@ -115,11 +116,13 @@ class WhichWayAudio {
    */
   async checkAudioFolder() {
     const audioLangs = whichWayArknight.getVoiceLangs();
-    for (const lang of audioLangs) {
-      if (await whichWayFile.exsitFile(`audio:${lang}`, "folder")) continue;
-      await whichWayFile.createFolder(`audio:${lang}`);
-      await whichWayFile.createFolder(`audio:${lang}/die`);
-    }
+    await Promise.all(
+      audioLangs.map(async (lang) => {
+        if (await whichWayFile.exsitFile(`audio:${lang}`, "folder")) return;
+        await whichWayFile.createFolder(`audio:${lang}`);
+        await whichWayFile.createFolder(`audio:${lang}/die`);
+      })
+    );
   }
   async override() {
     await whichWayAPIOverride.appendHook("game.trySkillAudio", {
@@ -179,6 +182,7 @@ class WhichWayAudio {
       const audioIndex = i + 1;
       const file = `${dieAudio ? char : `${skill}${audioIndex}`}.mp3`;
       await whichWayFile.download(url, path, file);
+      this._addAudioCacheEntry(`audio:${lang}${dieAudio ? "/die" : ""}/${file}`);
       whichWayToast.showToast(`下载${file}成功`);
       whichWayToast.removeToastById(`whichWayAudioDownLoad_${file}`);
     }
@@ -229,8 +233,7 @@ class WhichWayAudio {
       }
       for (const lang of langsToCheck) {
         if (lang === "CUSTOM") continue;
-        const dieFilePath = `audio:${lang}/die/${char}.mp3`;
-        const fileExists = await whichWayFile.exsitFile(dieFilePath);
+        const fileExists = await this.exsitAudio(null, char, true);
         if (!fileExists || allLangs) {
           const urls = ["行动失败"].map((title) => this.compileVoicePath(char, lang, title));
           if (urls.length > 0) {
@@ -380,6 +383,32 @@ class WhichWayAudio {
     return get.character(char)?.whichWay?.arknight?.avaiableLangs || [];
   }
   /**
+   * 音频文件存在性缓存。
+   *
+   * 原先每次 exsitAudio 都调一次 game.promises.checkFile（一趟 IPC），
+   * 而 onArenaReady 会对 262 个干员 × 各自技能串行检查上千次，是开局耗时主因。
+   * 这里首次需要时一次性并行扫描 audio 目录，把所有已存在文件的路径装入 Set，
+   * 之后 exsitAudio 退化为 O(1) 的 Set 查找，不再发起任何 IPC。
+   *
+   * 下载新音频时会增量更新本缓存；若手动删除文件，需重启以重建。
+   */
+  _audioExistCache = null;
+  async ensureAudioCache() {
+    if (this._audioExistCache) return;
+    const cache = /* @__PURE__ */ new Set();
+    const { folders } = await whichWayFile.getFileTree("audio:");
+    for (const langFolder of folders) {
+      for (const f of langFolder.files) cache.add(f.path);
+      for (const sub of langFolder.folders) {
+        for (const f of sub.files) cache.add(f.path);
+      }
+    }
+    this._audioExistCache = cache;
+  }
+  _addAudioCacheEntry(relPath) {
+    this._audioExistCache?.add(whichWayFile.compilePath(relPath));
+  }
+  /**
    * 技能的音频是否存在
    * @param {string} skill 技能名,如果是死亡配音此参数没有意义
    * @param {string} char 角色名
@@ -395,7 +424,9 @@ class WhichWayAudio {
       }
     }
     const lang = dieAudio ? this.getCharacterLang(char) : this.getSkillLang(skill, char);
-    return await whichWayFile.exsitFile(dieAudio ? `audio:${lang}/die/${char}.mp3` : `audio:${lang}/${skill}1.mp3`);
+    const relPath = dieAudio ? `audio:${lang}/die/${char}.mp3` : `audio:${lang}/${skill}1.mp3`;
+    await this.ensureAudioCache();
+    return this._audioExistCache.has(whichWayFile.compilePath(relPath));
   }
   async setCustomAudio(char, lang) {
     const skills = get.character(char)?.skills || [];

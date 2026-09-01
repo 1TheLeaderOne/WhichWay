@@ -1,6 +1,6 @@
 import { createApp } from "vue";
 import { whichWayFile } from "../file.js";
-import { onSetDev, onContent } from "../hooks/index.js";
+import { onContent, onSetDev } from "../hooks/index.js";
 import { upDataContentCurrent } from "./updateContentCurrent.js";
 import UpdateNotice from "./updateNotice.vue.js";
 import { whichWayVersion } from "../version.js";

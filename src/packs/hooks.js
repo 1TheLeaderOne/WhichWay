@@ -10,6 +10,19 @@ class WhichWayPackHooks {
   static _ARRAY_HOOKS = ["characterReplace"];
   static _OBJECT_HOOKS = ["character", "skill"];
   static _FUNCTION_HOOKS = ["dynamicTranslate"];
+  /**
+   * 卡牌专用钩子（不进 pendingRun，由 card 组装器统一收集后构造 mrfzcard 包
+   * 再 game.import("card") 注册给引擎）。
+   *
+   * - card：卡牌定义（key=卡牌id, value=卡牌对象）
+   * - cardSkill：卡牌相关技能（key=技能id, value=技能对象）
+   * - cardTranslate：卡牌相关翻译（key=翻译键, value=字符串）
+   *
+   * 与 character/skill/translate 钩子分开，避免与干员的 skill/translate 混入同一
+   * lib.skill/lib.translate 命名空间（loadCard 处理 card 包时会重复落库并刷
+   * duplicated 警告）。
+   */
+  static _CARD_HOOKS = ["card", "cardSkill", "cardTranslate"];
   _hooks = {};
   getHooks(hookName) {
     return this._hooks[hookName] || [];
@@ -68,6 +81,14 @@ class WhichWayPackHooks {
         this._registerTypedHook(name, args, "function");
       });
       this.pendingRun.push(() => this._runHooks(name));
+    }
+    for (const name of WhichWayPackHooks._CARD_HOOKS) {
+      this._hooks[name] = [];
+      this._execute[name] = [];
+      const valueType = name === "cardTranslate" ? "string" : "object";
+      this[name] = ((...args) => {
+        this._registerTypedHook(name, args, valueType);
+      });
     }
   }
   // ========== 统一类型注册入口 ==========
@@ -173,10 +194,16 @@ const {
   characterTitle,
   characterReplace,
   dynamicTranslate,
+  card,
+  cardSkill,
+  cardTranslate,
   pendingRun,
   registerExecute
 } = packHooks;
 export {
+  card,
+  cardSkill,
+  cardTranslate,
   character,
   characterIntro,
   characterReplace,

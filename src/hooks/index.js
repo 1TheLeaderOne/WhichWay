@@ -156,7 +156,7 @@ for (const key of Object.keys(whichWayHooks)) {
     exportsMethods[key] = whichWayHooks[key].bind(whichWayHooks);
   }
 }
-const { onSetDev, onExtension, onArenaReady, onContent, onBeforeContent, onConfig, onInit, onAfterInit, onBeforeInit, whichWayHooksApi, registerHookContextAt } = exportsMethods;
+const { onSetDev, onExtension, onArenaReady, onContent, onBeforeContent, onConfig, onInit, onBeforeInit, whichWayHooksApi, registerHookContextAt } = exportsMethods;
 onSetDev({
   name: "whichWayHooks_dev",
   fn: () => {
@@ -171,7 +171,6 @@ onExtension({
   }
 });
 export {
-  onAfterInit,
   onArenaReady,
   onBeforeContent,
   onBeforeInit,

@@ -1,6 +1,6 @@
 import { get, _status, game, lib } from "noname";
 import { whichWayFile } from "../file.js";
-import { onSetDev, onContent } from "../hooks/index.js";
+import { onContent, onSetDev } from "../hooks/index.js";
 import { whichWayUtil } from "../utill.js";
 import { modules, modulesList } from "./data.js";
 const modulesSet = window.whichWaySave.modulesSet;

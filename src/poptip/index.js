@@ -1,5 +1,5 @@
 import { lib, get } from "noname";
-import { onSetDev, onArenaReady } from "../hooks/index.js";
+import { onArenaReady, onSetDev } from "../hooks/index.js";
 import { WhichWayPopTipsConfig } from "./poptip.js";
 class WhichWayPoptip {
   constructor() {

@@ -1,7 +1,7 @@
 import { createApp } from "vue";
 import { lib, get, ui, game } from "noname";
 import { whichWayFile } from "../file.js";
-import { onSetDev, onInit, onContent, onArenaReady, onConfig } from "../hooks/index.js";
+import { onInit, onContent, onArenaReady, onConfig, onSetDev } from "../hooks/index.js";
 import { whichWayAPIOverride } from "../override/index.js";
 import { whichWayToast } from "../toast/index.js";
 import { whichWayUtil } from "../utill.js";

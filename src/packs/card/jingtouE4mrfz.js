@@ -1,0 +1,47 @@
+import { get, game, _status } from "noname";
+import { card, cardTranslate } from "../hooks.js";
+card("jingtouE4mrfz", {
+  image: `ext:WhichWay/image/card/jingtouE4mrfz.jpg`,
+  type: "equip",
+  subtype: "equip4",
+  distance: {
+    globalFrom: -1
+  },
+  onLose: function() {
+    if ((!event.getParent(2) || event.getParent(2).name != "swapEquip") && (event.getParent().type != "equip" || event.getParent().swapEquip)) {
+      cards.forEach((card2) => {
+        card2.fix();
+        card2.remove();
+        card2.destroyed = true;
+        game.log(card2, "被销毁了");
+      });
+    }
+    var player = _status.event.player, hs = player.getCards("h", (card2) => get.is.shownCard(card2));
+    if (hs.length > 0) player.hideShownCards(hs);
+  },
+  equipDelay: false,
+  loseDelay: false,
+  skills: ["jingtoumrfz_skill"],
+  ai: {
+    basic: {
+      equipValue: -1
+    },
+    result: {
+      target: (player, target2, card2) => get.equipResult(player, target2, card2.name)
+    }
+  },
+  enable: true,
+  selectTarget: -1,
+  filterTarget: (card2, player, target2) => player == target2 && target2.canEquip(card2, true),
+  modTarget: true,
+  allowMultiple: false,
+  content: function() {
+    if (cards.length && get.position(cards[0], true) == "o") target.equip(cards[0]);
+  },
+  toself: true
+});
+cardTranslate({
+  jingtouE4mrfz: "镜头",
+  "jingtouE4mrfz_info": "锁定技，你的手牌始终明置；你始终视为在其他角色的攻击范围内；此牌离开你的装备区时，销毁之。"
+});
+//# sourceMappingURL=jingtouE4mrfz.js.map

@@ -1,5 +1,5 @@
 import { whichWayFile } from "../file.js";
-import { onSetDev, onInit, onConfig } from "../hooks/index.js";
+import { onInit, onConfig, onSetDev } from "../hooks/index.js";
 import { whichWayArknightShcema } from "./shcema.js";
 import { whichWayUtil } from "../utill.js";
 import { whichWayArknightRedirect } from "./redirect.js";
@@ -11,9 +11,23 @@ class WhichWayArknight {
    * 初始化
    */
   async init() {
+    const t0 = performance.now();
     await this.autoUpdate();
+    const tUpd = performance.now() - t0;
+    const t1 = performance.now();
     await this.loadArknightData();
+    const tLoad = performance.now() - t1;
+    const t2 = performance.now();
     await this.loadShcema();
+    const tShcema = performance.now() - t2;
+    const total = tUpd + tLoad + tShcema;
+    if (total > 500) {
+      console.groupCollapsed(`%c[WhichWay·arknight] init ${total.toFixed(0)}ms`, "color:#e67e22;");
+      console.log(`  autoUpdate:       ${tUpd.toFixed(0)}ms`);
+      console.log(`  loadArknightData: ${tLoad.toFixed(0)}ms`);
+      console.log(`  loadShcema:       ${tShcema.toFixed(0)}ms`);
+      console.groupEnd();
+    }
     onInit({
       name: "arknight_init",
       fn: (packs) => {
@@ -46,13 +60,11 @@ class WhichWayArknight {
   async loadArknightData(path = "json:arknight/") {
     if (!this.arknightData) this.arknightData = {};
     const { files } = await whichWayFile.getFileTree(path);
-    const jsonNames = files.filter((file) => file.name.endsWith(".json")).map((file) => file.name);
-    const jsonPaths = files.filter((file) => file.path.endsWith(".json")).map((file) => file.path);
-    for (let i = 0; i < jsonNames.length; i++) {
-      const jsonName = jsonNames[i], jsonPath = jsonPaths[i];
-      const jsonData = await whichWayFile.readFile(jsonPath);
-      this.arknightData[jsonName.replace(".json", "")] = jsonData;
-    }
+    const jsonFiles = files.filter((file) => file.name.endsWith(".json"));
+    const jsonDatas = await Promise.all(jsonFiles.map((file) => whichWayFile.readFile(file.path)));
+    jsonFiles.forEach((file, i) => {
+      this.arknightData[file.name.replace(".json", "")] = jsonDatas[i];
+    });
   }
   /**
    * 构建映射表
@@ -63,13 +75,19 @@ class WhichWayArknight {
     } = this.shcema;
     const characters = window.whichWaySave.allCharacters;
     const arkData = this.arknightData.character_table;
+    const hasArkCharacters = characters.filter((i) => {
+      const char = get.character(i);
+      return !!char && typeof char.arkuid === "string";
+    });
+    const translations = characters.map((i) => get.translation(i));
+    const transToId = /* @__PURE__ */ new Map();
+    characters.forEach((i, idx) => {
+      const t = this.redirect.transfer(translations[idx]);
+      if (t !== void 0 && !transToId.has(t)) transToId.set(t, i);
+    });
     for (let key in arkData) {
       let info = arkData[key];
       if (!this.isCharacter(info)) continue;
-      const hasArkCharacters = characters.filter((i) => {
-        const char = get.character(i);
-        return typeof char.arkuid === "string";
-      });
       if (hasArkCharacters.length) {
         for (let name of hasArkCharacters) {
           const char = get.character(name);
@@ -80,9 +98,8 @@ class WhichWayArknight {
           }
         }
       }
-      const trans = characters.map((i) => this.redirect.transfer(get.translation(i)));
-      if (trans.includes(info.name)) {
-        const whichWayUID = characters.find((i) => this.redirect.transfer(get.translation(i)) === info.name);
+      const whichWayUID = transToId.get(info.name);
+      if (whichWayUID !== void 0) {
         extUID[whichWayUID] = key;
         arkUID[key] = whichWayUID;
         cn.set([key, whichWayUID], info.name);
@@ -94,8 +111,8 @@ class WhichWayArknight {
       if (!this.isCharacter(info)) continue;
       arkData[key] = info;
       const amiyaName = this.redirect.transfer(key, "amiya");
-      if (characters.map((i) => get.translation(i)).includes(amiyaName)) {
-        const whichWayUID = characters.find((i) => this.redirect.transfer(get.translation(i)) === amiyaName);
+      if (translations.includes(amiyaName)) {
+        const whichWayUID = characters[translations.indexOf(amiyaName)];
         extUID[whichWayUID] = key;
         arkUID[key] = whichWayUID;
         cn.set([key, whichWayUID], amiyaName);
@@ -103,39 +120,49 @@ class WhichWayArknight {
     }
   }
   /**
-   * 添加到映射表
+   * 明日方舟干员名 → 明日方舟uid 的反查索引（懒构建，仅构建一次）
+   *
+   * 原先 addShcema 对每个干员都遍历整张 character_table，且循环体内还对全部干员
+   * 反复做 filter/map，规模为 干员数 × 全表大小 × 干员数，是扩展加载的最大热点。
    */
-  async addShcema(id) {
+  _arkNameIndex = null;
+  _getArkNameIndex() {
+    if (!this._arkNameIndex) {
+      const index = /* @__PURE__ */ new Map();
+      const arkData = this.arknightData.character_table;
+      for (const key in arkData) {
+        if (!this.isCharacter(arkData[key])) continue;
+        index.set(arkData[key].name, key);
+      }
+      this._arkNameIndex = index;
+    }
+    return this._arkNameIndex;
+  }
+  /**
+   * 添加到映射表
+   * @param { string } id 驶舰之向干员id（或明日方舟uid）
+   * @param { WhichWayCharacter } [char] 干员数据对象；传入后可识别干员显式声明的 arkuid
+   */
+  async addShcema(id, char) {
     const {
       character: { whichWayUID: extUID, chineseName: cn, arknightUID: arkUID }
     } = this.shcema;
     const arkData = this.arknightData.character_table;
     const characters = window.whichWaySave.allCharacters;
     if (characters.includes(id)) {
-      for (let key in arkData) {
-        const info = arkData[key];
-        if (!this.isCharacter(info)) continue;
-        const hasArkCharacters = characters.filter((i) => {
-          const char = get.character(i);
-          return typeof char.arkuid === "string";
-        });
-        if (hasArkCharacters.length) {
-          for (let name of hasArkCharacters) {
-            const char = get.character(name);
-            if (char.arkuid === key) {
-              extUID[name] = key;
-              arkUID[key] = name;
-              cn.set([key, name], get.translation(name));
-              return;
-            }
-          }
-        }
-        if (this.redirect.transfer(get.translation(id)) === info.name) {
-          extUID[id] = key;
-          arkUID[key] = id;
-          cn.set([key, id], info.name);
-          return;
-        }
+      const declaredArkuid = char?.arkuid;
+      if (typeof declaredArkuid === "string" && declaredArkuid in arkData) {
+        extUID[id] = declaredArkuid;
+        arkUID[declaredArkuid] = id;
+        cn.set([declaredArkuid, id], get.translation(id));
+        return;
+      }
+      const key = this._getArkNameIndex().get(this.redirect.transfer(get.translation(id)));
+      if (key !== void 0) {
+        extUID[id] = key;
+        arkUID[key] = id;
+        cn.set([key, id], arkData[key].name);
+        return;
       }
       console.warn(`角色${id}不存在`);
     } else if (id in arkData) {
