@@ -6,6 +6,7 @@ character("spamiyamrfz", { pack: "epicSJZX",
 			group: "luomrfz",
 			hp: 4,
 			skills: ["chenxianmrfz","benyemrfz","newjueyingmrfz"],
+			arkuid:"char_1001_amiya2",
 		});
 
 skill({
@@ -144,7 +145,7 @@ skill({
 
 translate({
 	"spamiyamrfz": "近卫阿米娅",
-	"spamiyamrfz_prefix": "{\r\n\t\tname:'近卫'",
+	"spamiyamrfz_prefix": "近卫",
 	"chenxianmrfz": "沉弦",
 	"chenxianmrfz_info": "摸牌阶段，你可以额外摸X张牌，其中每包含一张【万箭齐发】、【杀】或【酒】，你便须弃置一张牌。（X=场上受伤角色数）",
 	"benyemrfz": "奔夜",

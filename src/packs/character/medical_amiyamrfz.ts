@@ -6,6 +6,7 @@ character("medical_amiyamrfz", { pack: "epicSJZX",
 			group: "luomrfz",
 			hp: 3,
 			skills: ["tongqingmrfz","cibeimrfz"],
+			arkuid:"char_1001_amiya3"
 		});
 
 skill({
@@ -14,11 +15,11 @@ skill({
 				player.storage[skill] = [];
 			},
 			onremove: function (player, skill) {
-				var cards = player.getCards("s", function (card) {
+				let cards = player.getCards("s", function (card) {
 					return card.hasGaintag("tongqingmrfzx");
 				});
 				if (cards.length) {
-					player.lose(cards, ui.discardPile);
+					player.lose({cards:cards,position:ui.discardPile});
 					player.$throw(cards, 1000);
 					game.log(cards, "进入了弃牌堆");
 				}
@@ -27,7 +28,7 @@ skill({
 			intro: {
 				name: "情绪",
 				mark(dialog, content, player) {
-					var cards = player.getCards("s", function (card) {
+					let cards = player.getCards("s", function (card) {
 						return card.hasGaintag("tongqingmrfzx");
 					});
 					if (!cards || cards.length < 1) {
@@ -41,15 +42,15 @@ skill({
 			audio: 2,
 			trigger: { global: "phaseJieshuBegin" },
 			getDiscard: function (event, player) {
-				let cards = [];
-				for (var character of game.players) {
-					var history = character.getHistory("lose", function (evt) {
+				let cards = [] as Card[];
+				for (let character of game.players) {
+					let history = character.getHistory("lose", function (evt) {
 						return evt && evt.type == "discard";
 					});
 					if (history.length == 0) continue;
-					for (var i = 0; i < history.length; i++) {
-						var cardsList = history[i].cards;
-						for (var j = 0; j < cardsList.length; j++) {
+					for (let i = 0; i < history.length; i++) {
+						let cardsList = history[i].cards;
+						for (let j = 0; j < cardsList.length; j++) {
 							if (get.position(cardsList[j], true) != "d") continue;
 							cards.push(cardsList[j]);
 						}
@@ -77,11 +78,11 @@ skill({
 				return get.value(cardsList) - get.value(cards) > 0;
 			},
 			async content(event, trigger, player) {
-				var cards = player.getCards("s", function (card) {
+				let cards = player.getCards("s", function (card) {
 					return card.hasGaintag("tongqingmrfzx");
 				});
 				if (cards && cards.length > 0) {
-					await player.loseToDiscardpile(cards);
+					await player.loseToDiscardpile({cards});
 				}
 				let cardsList = lib.skill.tongqingmrfz.getDiscard(trigger, player);
 				game.log(player, "将", cardsList.length, "张牌置于在武将牌上");
@@ -93,7 +94,7 @@ skill({
 			audio: 2,
 			trigger: { player: "loseAfter" },
 			filter(event, player) {
-				var position = event.cards.map(i => i.original);
+				let position = event.cards.map(i => i.original);
 				return position.every(item => item != "h");
 			},
 			direct: true,
@@ -129,7 +130,7 @@ skill({
 
 translate({
 	"medical_amiyamrfz": "医疗阿米娅",
-	"medical_amiyamrfz_prefix": "{\r\n\t\tname:'医疗'",
+	"medical_amiyamrfz_prefix": "医疗",
 	"tongqingmrfz": "恸情",
 	"tongqingmrfz_info": "一名角色的结束阶段，若本回合有牌因弃置而进入弃牌堆，你可以将所有的‘情绪’置入弃牌堆，然后将本回合因弃置而进入弃牌堆的牌置于你的武将牌上，称之为‘情绪’，你可以如手牌般使用‘情绪’。",
 	"cibeimrfz": "慈悲",

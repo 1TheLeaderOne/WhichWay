@@ -73,7 +73,7 @@ skill({
 		async content(event, trigger, player) {
 			const { cards, targets } = event.cost_data as Result;
 			const target = targets[0];
-			const card = new lib.element.VCard({ name: TOWER, cards: cards , suit:"spade"});
+			const card = new lib.element.VCard({ name: TOWER, cards: cards, suit: "spade" });
 			await target.equip(card);
 		},
 		group: ["feishengmrfz_achieve"],
@@ -124,8 +124,6 @@ card(TOWER, {
 				game.log(player, "的【通讯塔】被销毁，置于其上的牌被弃置", list);
 			}
 			delete save[TOWER][player.playerid];
-			// 销毁音效：baitiemrfzcardad4.mp3（支援装备音频）
-			game.trySkillAudio("baitiemrfzcardad", player, true);
 		}
 		if (save[TOWER] && Object.keys(save[TOWER]).length === 0) {
 			disposeTowerObserver();
@@ -264,7 +262,7 @@ function findStoredCardByCopy(copy: Card): Card | undefined {
 /** 判断一张牌是否带通讯塔 tag（gaintag 在失去流程中会被剥离，需查失去前的 gaintag_map） */
 function cardHasTowerTag(card: Card, evt: any): boolean {
 	if (card.hasGaintag(TOWER)) return true;
-	return evt?.gaintag_map?.[card.cardid]?.includes(TOWER);
+	return evt?.gaintag_map?.[card.cardid || ""]?.includes(TOWER);
 }
 
 /** 同步核心：把 S 区的存储真牌同步给所有拥有者（每玩家一张副本，不带绑定关系） */
@@ -305,8 +303,20 @@ cardSkill({
 			player: "loseAfter",
 			global: "loseAsyncAfter",
 		},
+		mark:true,
+		intro:{
+			content(storage, player, skill) {
+				let num = ((save?.[TOWER]?.[(player.playerid || "")] as Card[])?.length || 0);
+				return `·${get.translation(player)}的【通讯塔】中有${num}张牌<br><p><i>几根替换用的天线。虽然很纤细，虽然很易折，但你知道这种小小的东西能够连接人与人，连接整片大地。</i></p>`
+			},
+		},
 		filter(event, player) {
-			// 只负责捕获"弃置后进入弃牌堆"的牌
+			const evt3 = event.getParent(3);
+			const discardEvt = event.getParent("phaseDiscard");
+			if (evt3 == null || discardEvt == null) {
+				return false;
+			}
+			if(discardEvt.player === player) return true;
 			if (event.type != "discard") return false;
 			let evt = event.getl(player);
 			if (!evt || !evt.cards2) return false;
