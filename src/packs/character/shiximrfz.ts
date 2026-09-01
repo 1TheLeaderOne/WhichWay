@@ -230,10 +230,10 @@ function isStoredCard(card: Card): boolean {
 
 /**
  * 假牌替换成真牌（对应 muniu_skill7 的 storages.removeArray）：
- * 副本被"使用"（useCard，含装备牌：装备牌 content=equipCard 会 target.equip(event.card)）时，
- * 把 useCard 事件的 card/cards 替换成真牌，让后续结算（含装备）处理真牌。
- * - 装备牌：由 equipCard → equip 流程处理真牌位置（存储者 lose 真牌到特殊区 → 装备区）。
- * - 普通牌：真牌顶替副本进结算区，随使用流程进弃牌堆。
+ * 副本被"使用"（useCard）时，把 useCard 事件的 card/cards 指向真牌，让后续结算（含装备）处理真牌。
+ * 注意：useCard 的 event.card 在 player.useCard 里已被转成 VCard（autoViewAs），实体牌在 event.cards 中。
+ * - 真牌顶替副本进结算区（ordering）：equipCard 要求实体牌在 ordering 才执行装备；
+ *   普通牌也随使用流程（orderingDiscard）进弃牌堆。
  * 返回 true 表示已消费真牌；返回 false 表示非使用（弃置等）——只作废副本、真牌保留。
  */
 function replaceFakeWithReal(fake: Card, real: Card, trigger?: GameEvent): boolean {
@@ -242,14 +242,13 @@ function replaceFakeWithReal(fake: Card, real: Card, trigger?: GameEvent): boole
 	real.classList.remove("glows", "glow");
 	real.fix();
 	const useEvent = trigger?.getParent?.(e => e.name == "useCard");
-	if (useEvent && useEvent.card === fake) {
-		// 正在"使用"这张副本
-		useEvent.card = real;
+	// 判断用 VCard 的实体牌列表（useEvent.card.cards）：useEvent.cards 在 useCard step0 已被 removeArray 清空
+	if (useEvent && useEvent.card?.cards?.includes(fake)) {
+		// 正在"使用"这张副本 → 把 useCard 事件指向真牌
+		useEvent.card = get.autoViewAs(real, [real]);
 		useEvent.cards = [real];
-		if (get.type(real) != "equip") {
-			// 普通牌：真牌顶替副本进结算区，随使用流程进弃牌堆
-			real.goto(ui.ordering);
-		}
+		// 真牌顶替副本进结算区
+		real.goto(ui.ordering);
 		// 副本（已失去到结算区）作废
 		fake.delete();
 		return true;
@@ -275,6 +274,12 @@ function syncTowerCards() {
 		const target = game.findPlayer(c => c.playerid === id);
 		if (!target) continue;
 		CardsInfo.push([target, save[TOWER][id]]);
+	}
+	// 存储者自己的真牌也加上"属于XXX"提示
+	for (const [storer, links] of CardsInfo) {
+		for (const c of links) {
+			whichWayTips.addPrompt(c, `属于${get.translation(storer)}`, `${TOWER}_${storer.playerid}`);
+		}
 	}
 	for (const [owner] of CardsInfo) {
 		// 存储者本人持有真牌（position "s"），不发副本；其余拥有者发与真牌绑定的副本
