@@ -6,7 +6,7 @@ character("medical_amiyamrfz", { pack: "epicSJZX",
 			group: "luomrfz",
 			hp: 3,
 			skills: ["tongqingmrfz","cibeimrfz"],
-			arkuid:"char_1001_amiya3"
+			arkuid:"char_1037_amiya3"
 		});
 
 skill({
@@ -115,7 +115,9 @@ skill({
 					return;
 				}
 				const { control } = await player
-					.chooseControl("回复体力", "摸一张牌")
+					.chooseControl({
+						controls:["回复体力", "摸一张牌"]
+					})
 					.set("prompt", `【慈悲】:请选择一项`)
 					.set("ai", () => 0)
 					.forResult();
