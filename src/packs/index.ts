@@ -7,7 +7,6 @@ import { designer, getDesigner } from "./base/index.js";
 import { whichWayUtil } from "../utill.js";
 import { groupData } from "./base/groups.js";
 import { whichWayArknight } from "../arknight/index.js";
-import { initCardPack } from "./card/index.js";
 
 class WhichWayPackManager {
 	static readonly CHARACTER_PACKS = ["epicSJZX", "legendSJZX", "especialSJZX", "plotSJZX", "specialSJZX", "rareSJZX", "mediocreSJZX", "normalSJZX"] as const;
@@ -19,8 +18,8 @@ class WhichWayPackManager {
 		//读取并初始化character的内容
 		await this.initCharacterPack();
 
-		//初始化卡牌（模块化卡牌包：每张卡一个目录，组装后 game.import("card")）
-		await initCardPack();
+		//初始化卡牌（模块化卡牌包：每张卡一个文件，自动扫描加载后 game.import("card")）
+		await this.initCardPack();
 
 		//初始化翻译
 		registerExecute("translate", (trans: string, name) => {
@@ -47,10 +46,10 @@ class WhichWayPackManager {
 	}
 
 	async initCharacterPack() {
-		//只扫一层：262 个干员目录都是单文件入口（index.ts），递归进子目录会再发 280+ 次
-		//空目录的 IPC，原 getFileTree 的 step=3 走过子目录纯粹是浪费时间。
+		//只扫一层：干员入口支持两种形态——扁平文件（{名}mrfz.ts）与目录（{名}mrfz/index.ts），
+		//两者并存时以目录优先（getFileTree 同时返回 files 与 folders，各取所需）。
 		const t0 = performance.now();
-		const folders = await whichWayFile.listDirNames("src:packs/character/");
+		const { files, folders } = await whichWayFile.getFileTree("src:packs/character/", 1);
 		const tList = performance.now() - t0;
 
 		/**
@@ -62,18 +61,44 @@ class WhichWayPackManager {
 		 * @type {Promise<unknown>[]}
 		 */
 		const importTasks: Promise<unknown>[] = [];
+		// 记录已按扁平形态加载的干员名，目录形态遇到同名则跳过（避免重复注册）
+		const loadedFlats = new Set<string>();
 
-		for (const folderName of folders) {
-			if (!folderName.endsWith("mrfz")) continue;
+		// 扁平文件形态：character/xxx.ts
+		for (const file of files) {
+			const name = whichWayFile.removeExt(file.name);
+			if (!name.endsWith("mrfz")) continue;
+			loadedFlats.add(name);
 			importTasks.push(
 				(async () => {
 					try {
-						await import(`./character/${folderName}/index.js`);
+						await import(`./character/${name}.js`);
 					} catch (e) {
 						try {
-							await import(`./character/${folderName}/index.ts`);
+							await import(`./character/${name}.ts`);
 						} catch (e) {
-							console.warn(`${folderName} 加载失败 : ${e}`);
+							console.warn(`${name} 加载失败 : ${e}`);
+						}
+					}
+				})()
+			);
+		}
+
+		// 目录形态：character/xxx/index.ts
+		for (const folder of folders) {
+			const name = folder.name;
+			if (!name.endsWith("mrfz")) continue;
+			// 若同名的扁平文件已加载过，跳过目录形态避免重复注册
+			if (loadedFlats.has(name)) continue;
+			importTasks.push(
+				(async () => {
+					try {
+						await import(`./character/${name}/index.js`);
+					} catch (e) {
+						try {
+							await import(`./character/${name}/index.ts`);
+						} catch (e) {
+							console.warn(`${name} 加载失败 : ${e}`);
 						}
 					}
 				})()
@@ -191,6 +216,73 @@ class WhichWayPackManager {
 		// registerExecute("skill", (info, name) => {
 		// 	return info;
 		// });
+	}
+
+	/**
+	 * 初始化卡牌包
+	 *
+	 * 与干员加载同一模式（性能红线，勿改）：
+	 * - getFileTree 单层扫描 src:packs/card/ 下的扁平文件（{卡牌}.ts）
+	 * - 16 并发窗口限流并行 import，避免过度并行打爆 vite 文件句柄
+	 * - 卡牌模块顶层只调用 card()/cardSkill()/cardTranslate() 钩子缓冲进 packHooks
+	 *   （这三个钩子不进 pendingRun，不会自动落库），统一在本方法内收集后组装
+	 *   mrfzcard 包，game.import("card") 注册给引擎
+	 *
+	 * 新增卡牌：在 src/packs/card/ 下新建 {新卡}.ts 即可自动加载，
+	 * 无需修改任何文件。共享技能（多卡共用的）请放入 shared.ts。
+	 */
+	async initCardPack() {
+		const { files } = await whichWayFile.getFileTree("src:packs/card/", 1);
+
+		const importTasks: Promise<unknown>[] = [];
+		for (const file of files) {
+			const name = whichWayFile.removeExt(file.name);
+			// 跳过旧组装器入口（index.ts）；shared.ts 是共享技能模块，正常加载
+			if (name === "index") continue;
+			importTasks.push(
+				(async () => {
+					try {
+						await import(`./card/${name}.js`);
+					} catch (e) {
+						try {
+							await import(`./card/${name}.ts`);
+						} catch (e) {
+							console.warn(`${name} 卡牌加载失败 : ${e}`);
+						}
+					}
+				})()
+			);
+		}
+
+		// 16 并发限流（与干员加载一致）
+		const limit = 16;
+		let cursor = 0;
+		const workers = Array.from({ length: Math.min(limit, importTasks.length) }, async () => {
+			while (true) {
+				const idx = cursor++;
+				if (idx >= importTasks.length) return;
+				await importTasks[idx];
+			}
+		});
+		await Promise.all(workers);
+
+		// 从 packHooks 收集卡牌钩子（card/cardSkill/cardTranslate 不进 pendingRun，
+		// 不会自动落库 lib，由本方法统一收集后构造 mrfzcard 包给引擎 loadCard 处理）
+		const cardHooks = packHooks.getHooks("card");
+		const skillHooks = packHooks.getHooks("cardSkill");
+		const transHooks = packHooks.getHooks("cardTranslate");
+
+		const card: Record<string, any> = {};
+		const skill: Record<string, any> = {};
+		const translate: Record<string, any> = {};
+		for (const h of cardHooks) card[h.key] = h.obj;
+		for (const h of skillHooks) skill[h.key] = h.obj;
+		for (const h of transHooks) translate[h.key] = h.obj;
+
+		const mrfzcard = { name: "mrfzcard", connect: true, card, skill, translate, list: [] };
+		lib.translate["mrfzcard_card_config"] = "驶舰之向";
+		if (!lib.config.cards.includes("mrfzcard")) lib.config.cards.push("mrfzcard");
+		await game.import("card", () => mrfzcard);
 	}
 
 	getPackTranslation(str: string, index?: number) {
