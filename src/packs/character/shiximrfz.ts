@@ -106,9 +106,31 @@ card(TOWER, {
 	image: `ext:WhichWay/image/card/tower_shiximrfz.jpg`,
 	type: "equip",
 	subtype: "equip5",
-	// skill：存储弃置牌 + 同步到各拥有者手牌区；skill7：使用/失去时把假牌替换成真牌（参考 muniu_skill / muniu_skill7）
 	skills: [`${TOWER}_skill`, `${TOWER}_skill7`],
-	// 离开装备区即销毁（防止进入弃牌堆/牌堆污染，参照 tiejili 铁蒺藜骨朵）
+	// 离开装备区时执行 onLose（丢弃置于其上的牌 + 销毁音效）
+	clearLose: true,
+	async onLose(event, trigger, player) {
+		// 通讯塔离开装备区：该角色存储的牌从存储中移出并置入弃牌堆，播放销毁音效
+		if (player.playerid !== undefined && save[TOWER] && Array.isArray(save[TOWER][player.playerid])) {
+			const arr = save[TOWER][player.playerid] as Card[];
+			if (arr.length) {
+				const list = arr.slice();
+				arr.length = 0; // 从存储移出 → Proxy 触发同步，移除所有拥有者的真牌副本
+				// 真牌离开塔：剥离通讯塔 tag，再置入弃牌堆（player.discard 对非 hejsx 的牌无效，须用 cardsDiscard）
+				list.forEach(c => c.removeGaintag(TOWER));
+				await game.cardsDiscard(list);
+				player.$throw(list, 1000);
+				player.popup(TOWER);
+				game.log(player, "的【通讯塔】被销毁，置于其上的牌被弃置", list);
+			}
+			delete save[TOWER][player.playerid];
+			// 销毁音效：baitiemrfzcardad4.mp3（支援装备音频）
+			game.trySkillAudio("baitiemrfzcardad", player, true);
+		}
+		if (save[TOWER] && Object.keys(save[TOWER]).length === 0) {
+			disposeTowerObserver();
+		}
+	},
 	destroy: true,
 	ai: {
 		basic: {
@@ -313,20 +335,13 @@ cardSkill({
 			playerSave.push(...cards);
 		},
 		onremove(player, skill) {
-			// 通讯塔离开装备区（被销毁/弃置/移动）：该角色 S 区的存储牌移入弃牌堆，并播放销毁音效
+			// 通讯塔失去时，存储牌的移出与弃置由 card.onLose 负责（lose 事件 step3，晚于此钩子）；
+			// 此处仅兜底清理空记录与监听回收（防止 onLose 异常未执行时记录泄漏）
 			if (save[TOWER] && player.playerid !== undefined) {
 				const stored = save[TOWER][player.playerid] as Card[] | undefined;
-				if (stored?.length) {
-					const list = stored.slice();
-					stored.length = 0; // 先清存储 → Proxy 触发同步，移除所有拥有者的副本
-					game.cardsDiscard(list); // S 区真牌 → 弃牌堆
-					player.$throw(list, 1000);
-					player.popup(TOWER);
-					game.log(player, "的【通讯塔】被销毁，置于其上的牌被弃置", list);
+				if (!stored?.length) {
+					delete save[TOWER][player.playerid];
 				}
-				delete save[TOWER][player.playerid];
-				// 销毁音效：baitiemrfzcardad4.mp3（支援装备音频）
-				game.trySkillAudio("baitiemrfzcardad", player, true);
 			}
 			if (save[TOWER] && Object.keys(save[TOWER]).length === 0) {
 				disposeTowerObserver();
