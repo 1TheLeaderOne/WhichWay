@@ -155,4 +155,3 @@ translate({
   "chanshimrfz_info": "每回合限一次，每轮开始时或你造成伤害后，你可以从两张武将牌中选择并获得其中一个技能。"
 });
 characterIntro("yizumikemrfz", "临近进化奇点的完美生物，大群的建言者与引领者，“后生的初生”，海嗣。");
-//# sourceMappingURL=yizumikemrfz.js.map

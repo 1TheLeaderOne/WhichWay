@@ -119,4 +119,3 @@ translate({
 });
 characterTitle("tifengmrfz", "<font color=2942BA>永恒狩猎</font>");
 characterIntro("tifengmrfz", "提丰，活跃于萨米的萨卡兹，以猎人自居，对萨米的自然环境和潜在威胁有着充足的知识储备和应对技巧。现应干员麦哲伦邀请与罗德岛进行合作，协助罗德岛在萨米及无尽冰原地区的事务。");
-//# sourceMappingURL=tifengmrfz.js.map

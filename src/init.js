@@ -51,4 +51,3 @@ const whichWayInit = async () => {
 export {
   whichWayInit
 };
-//# sourceMappingURL=init.js.map

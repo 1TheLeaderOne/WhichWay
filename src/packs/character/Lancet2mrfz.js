@@ -65,4 +65,3 @@ translate({
 });
 characterTitle("Lancet2mrfz", "<font color = #b7229c66>一喷起效</font>");
 characterIntro("Lancet2mrfz", "Lancet-2是可露希尔客制化后的雷神存在者™S Typer 62六轮作业平台，圆形的外观让人觉得很可爱所以成为了某种意义上的吉祥物。虽然她说话有时候很消极，但是大家都很喜欢她。<br>Lancet-2在经过可露希尔的改造后，得以满足更多罗德岛内的医疗需求，其器械设备也更注重于消毒和应对源石污染");
-//# sourceMappingURL=Lancet2mrfz.js.map

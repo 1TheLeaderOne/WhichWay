@@ -259,4 +259,3 @@ translate({
   "yingfenmrfz_info": "每轮限一次，当你使用【桃】时，你可以令一名其他角色恢复一点体力。"
 });
 characterIntro("palasimrfz", "帕拉斯，曾在米诺斯担任祭司职务。在离开雅赛努斯城邦去往阿克罗蒂村任职期间，带领当地民众进行了对萨尔贡周边部落长年侵扰的反抗，并在当地推行旅游及文化产业的发展。后因矿石病病况恶化，来到罗德岛进行秘密治疗。");
-//# sourceMappingURL=palasimrfz.js.map

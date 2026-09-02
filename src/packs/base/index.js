@@ -100,4 +100,3 @@ export {
   getCamp,
   getDesigner
 };
-//# sourceMappingURL=index.js.map

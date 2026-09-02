@@ -377,4 +377,3 @@ translate({
 });
 characterTitle("mowangmrfz", "<font color=#00868B>文明的存续</font>");
 characterIntro("mowangmrfz", "特蕾西娅，卡兹戴尔移动城市的建立者，卡兹戴尔军事委员会创始人之一，巴别塔组织的创立者，曾是卡兹戴尔的最高领袖。执政期间，她致力于推进医疗、教育、城市基础建设等事业，多次带领萨卡兹击退了外敌的入侵，并且在外交工作中颇有建树。后于卡兹戴尔与维多利亚的战争中身亡。<br>该人事档案留存在罗德岛人事部封存的资料库中。");
-//# sourceMappingURL=mowangmrfz.js.map

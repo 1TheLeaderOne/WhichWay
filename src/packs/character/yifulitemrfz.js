@@ -219,4 +219,3 @@ translate({
   "huishenmrfz_info": "出牌阶段限一次，当你使用的牌指定其他角色为目标时，你可以令成为此牌目标的角色选择令你摸一张牌或弃置一张手牌。"
 });
 characterIntro("yifulitemrfz", "伊芙利特，前莱茵生命医疗对象，重度感染者。拥有极高的源石适应性，伴随有多发性点火现象。进入莱茵生命前的履历缺失。</br>现于罗德岛接受治疗，由医疗干员赫默担任监护与担保人。");
-//# sourceMappingURL=yifulitemrfz.js.map

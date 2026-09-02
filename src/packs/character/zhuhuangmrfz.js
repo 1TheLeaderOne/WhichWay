@@ -227,4 +227,3 @@ translate({
 });
 characterTitle("zhuhuangmrfz", "<font color='red'>燎原之愿</font>");
 characterIntro("zhuhuangmrfz", "本名顾烛煌，代号煌，罗德岛精英干员，其施放的法术在破坏力与攻击范围上均达较高标准。兼任近卫干员与术师干员，在攻坚、防守、突袭等多种类型的作战任务中，作为战术核心之一发挥作用。");
-//# sourceMappingURL=zhuhuangmrfz.js.map

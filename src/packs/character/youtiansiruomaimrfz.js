@@ -122,4 +122,3 @@ translate({
 });
 characterTitle("youtiansiruomaimrfz", "<font color = #db7093>毋畏爱意</font>");
 characterIntro("youtiansiruomaimrfz", "Ave Mujica的鼓手祐天寺若麦。一直积极辅助舰内各种沟通任务，是个率直的人。平时喜欢与澄闪一起为干员们化妆，深受大家喜爱。");
-//# sourceMappingURL=youtiansiruomaimrfz.js.map

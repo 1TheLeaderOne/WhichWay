@@ -134,4 +134,3 @@ translate({
 });
 characterTitle("spjingzhemrfz", "<font color = #6495ed>行道修远</font>");
 characterIntro("spjingzhemrfz", "麟青砚，曾官居炎国大理寺少卿，现已辞去官职，回到天师府研修雷法。游历途中暂居罗德岛，参与部分外勤任务。");
-//# sourceMappingURL=spjingzhemrfz.js.map

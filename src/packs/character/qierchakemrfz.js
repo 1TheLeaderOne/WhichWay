@@ -263,4 +263,3 @@ translate({
 });
 characterTitle("qierchakemrfz", "<font color='#b8860b'>资深陷阱专家</font>");
 characterIntro("qierchakemrfz", "齐尔查克在莱欧斯小队中负责以敏锐的五感探寻各类陷阱，保障小队的生命安全。现来罗德岛寻找返回原本所在地的方法，并在罗德岛作战任务中提供地形探查、陷阱感知等帮助。");
-//# sourceMappingURL=qierchakemrfz.js.map

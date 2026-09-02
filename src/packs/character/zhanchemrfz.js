@@ -107,4 +107,3 @@ translate({
   "qingxiemrfz_info": "摸牌阶段结束后，若你的出牌阶段将不会被跳过，你可以选择攻击范围内的一名其他角色，然后你进行三次判定，你对其使用等同于判定结果为红色的次数张【杀】（不计入次数限制），若你因此使用了至少两张【杀】，你跳过出牌阶段。"
 });
 characterIntro("zhanchemrfz", "战车，彩虹小队成员之一，强韧、爽朗且冷静，极为擅长阵地战。</br>主要武器为DP-28轻机枪以及SHUMIKHALAUNCHER“喧闹”发射器，他是整个小队的火力中心，毋庸置疑的战场主宰。");
-//# sourceMappingURL=zhanchemrfz.js.map

@@ -98,4 +98,3 @@ translate({
 });
 characterTitle("feilaimrfz", "<font color='#b8860b'>灵河守卫</font>");
 characterIntro("feilaimrfz", "菲莱，来自萨尔贡的神庙守卫，信仰“生命之河”。如今以虔修者的身份在各地游历。<br>在修习之旅中结识了驻萨尔贡办事处的干员，并与办事处建立长期合作关系，为罗德岛的安保、救灾工作提供援助，兼任外勤重装干员。");
-//# sourceMappingURL=feilaimrfz.js.map

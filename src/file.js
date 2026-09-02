@@ -356,4 +356,3 @@ window.whichWay.register("file", whichWayFile);
 export {
   whichWayFile
 };
-//# sourceMappingURL=file.js.map

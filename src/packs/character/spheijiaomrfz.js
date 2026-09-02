@@ -306,4 +306,3 @@ translate({
 });
 characterTitle("spheijiaomrfz", "<font color = #a52a2a>太刀天尊</font>");
 characterIntro("spheijiaomrfz", "从东国完成任务归来的黑角，换上了由艾露猫打造的全新装备。尽管放下盾牌，挥舞起威风凛凛的太刀，黑角仍是那个最值得大家信赖的依靠，冲在最前线为队友扫清障碍。");
-//# sourceMappingURL=spheijiaomrfz.js.map

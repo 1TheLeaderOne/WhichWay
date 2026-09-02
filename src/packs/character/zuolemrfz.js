@@ -156,4 +156,3 @@ translate({
 });
 characterTitle("zuolemrfz", "<font color=#DC143C>心系苍生</font>");
 characterIntro("zuolemrfz", "设计：今天整点什么/林登万<br>左乐，隶属炎国处理巨兽问题的秘密组织“司岁台”，任秉烛人之职。现因监督代理人之故于罗德岛暂驻，并定期返回炎国述职。兼职罗德岛外勤干员，参与部分外勤任务。");
-//# sourceMappingURL=zuolemrfz.js.map

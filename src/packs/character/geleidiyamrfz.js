@@ -190,4 +190,3 @@ translate({
 });
 characterTitle("geleidiyamrfz", "<font color=rgb(1,255,22)>执政官</font>");
 characterIntro("geleidiyamrfz", "歌蕾蒂娅，阿戈尔人，阿戈尔技术执政官、荣誉军团长，阿戈尔军事团体“深海猎人”总战争设计师之一。登陆时间地点俱不明。于对抗大型生物，破坏硬目标，攻坚战，歼灭战，机动战与谍报战等多类行动中展现出非凡实力。现以合作姿态协助罗德岛、辅助罗德岛部分工作，在保留阿戈尔国家职能身份的同时，兼任罗德岛的阿戈尔事务负责人。");
-//# sourceMappingURL=geleidiyamrfz.js.map

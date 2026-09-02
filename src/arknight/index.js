@@ -364,4 +364,3 @@ window.whichWay.register("arknight", whichWayArknight);
 export {
   whichWayArknight
 };
-//# sourceMappingURL=index.js.map

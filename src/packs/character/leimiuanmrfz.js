@@ -288,4 +288,3 @@ translate({
 });
 characterTitle("leimiuanmrfz", "<font color='#6495ed'>第七枢机</font>");
 characterIntro("leimiuanmrfz", "蕾缪安，拉特兰公民，适用于拉特兰一至十三项公民权益，现任拉特兰教皇厅第七厅枢机。<br>蕾缪安本人称自己来到罗德岛可以被视作干员家属来舰探亲，但她的到访在程序上仍需被认定为拉特兰代表对罗德岛的正式访问。访问期间，蕾缪安将依照协议为罗德岛提供各种形式的协助。");
-//# sourceMappingURL=leimiuanmrfz.js.map

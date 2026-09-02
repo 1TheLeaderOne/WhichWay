@@ -198,4 +198,3 @@ translate({
 });
 characterTitle("maluxiermrfz", "<font color=#00868B>建校以来第一才女</font>");
 characterIntro("maluxiermrfz", "玛露西尔，莱欧斯小队的魔法师。<br>自称在迷宫中尝试救回朋友法琳时意外来到泰拉，现于罗德岛寻找返回原本所在地的方法，并为罗德岛提供医疗、法术方面的协助。");
-//# sourceMappingURL=maluxiermrfz.js.map

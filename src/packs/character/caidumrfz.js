@@ -99,4 +99,3 @@ translate({
 });
 characterTitle("caidumrfz", "<font color='#00008b'>量体裁衣</font>");
 characterIntro("caidumrfz", "裁度，本名卢奇诺·德蒙塔诺，叙拉古裁缝名店德蒙塔诺现任主理人，经由叙拉古办事处推介至罗德岛交流访问，留舰期间暂时分配至后勤部，为罗德岛提供各项支持。");
-//# sourceMappingURL=caidumrfz.js.map

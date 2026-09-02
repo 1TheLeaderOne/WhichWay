@@ -18,9 +18,9 @@ card("DP27mrfz", {
 });
 cardSkill("DP27mrfz_skill", {
   mod: {
-    cardnature: function(card2, player2) {
-      var history = player2.getHistory("useCard"), tmp_bool = false;
-      for (var i = 0; i < history.length; i++) {
+    cardnature: function(card2, player) {
+      let history = player.getHistory("useCard"), tmp_bool = false;
+      for (let i = 0; i < history.length; i++) {
         if (history[i].card.name == "sha") {
           tmp_bool = true;
           break;
@@ -32,14 +32,13 @@ cardSkill("DP27mrfz_skill", {
   trigger: { player: "useCard" },
   forced: true,
   firstDo: true,
-  filter: function(event2, player2) {
-    if (!event2.card) return false;
-    return event2.card.name == "sha";
+  filter: function(event, player) {
+    if (!event.card) return false;
+    return event.card.name == "sha";
   },
-  content: function() {
-    "step 0";
-    var history = player.getHistory("useCard"), tmp_bool = false;
-    for (var i = 0; i < history.length; i++) {
+  content: async function(event, trigger, player) {
+    let history = player.getHistory("useCard"), tmp_bool = false;
+    for (let i = 0; i < history.length; i++) {
       if (!history[i - 1]) continue;
       if (history[i - 1].card.name == "sha") {
         tmp_bool = true;
@@ -61,19 +60,19 @@ cardSkill("DP27mrfz_skill", {
       trigger: {
         player: "useCardToPlayered"
       },
-      filter: function(event2) {
-        return event2.card && event2.card.name == "sha" && event2.card.nature;
+      filter: function(event) {
+        return event.card && event.card.name == "sha" && event.card.nature;
       },
       forced: true,
       logTarget: "target",
-      content: function() {
+      content: async function(event, trigger, player) {
         trigger.target.addTempSkill("qinggang2");
         trigger.target.storage.qinggang2.add(trigger.card);
         trigger.target.markSkill("qinggang2");
       },
       ai: {
-        "unequip_ai": true,
-        skillTagFilter: function(player2, tag, arg) {
+        unequip_ai: true,
+        skillTagFilter: function(player, tag, arg) {
           if (arg && arg.name == "sha" && game.hasNature(arg)) return true;
           return false;
         }
@@ -84,6 +83,5 @@ cardSkill("DP27mrfz_skill", {
 cardTranslate({
   DP27mrfz: "DP27",
   DP27mrfz_skill: "DP27",
-  "DP27mrfz_info": "①锁定技，若你于本回合使用过【杀】，则你的非属性【杀】均视为火【杀】。②锁定技，你的属性杀无视防具且伤害基数+1。"
+  DP27mrfz_info: "①锁定技，若你于本回合使用过【杀】，则你的非属性【杀】均视为火【杀】。②锁定技，你的属性杀无视防具且伤害基数+1。"
 });
-//# sourceMappingURL=DP27mrfz.js.map

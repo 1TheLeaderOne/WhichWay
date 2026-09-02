@@ -79,4 +79,3 @@ translate({
 });
 characterTitle("tiankonghemrfz", "<font color = #2263b766>管理局突击中</font>");
 characterIntro("tiankonghemrfz", "高登·谭农，哥伦比亚人，在“螺旋桨天堂”事件后，升任哥伦比亚烟酒施术单元以及源石制品管理局探员总管，并恢复“螺旋桨天堂”总长官身份。现与罗德岛达成合作，既以管理局的名义帮助罗德岛打通矿石病药物进入哥伦比亚市场的合法渠道，也以“螺旋桨天堂”的名义与罗德岛共同进行天空相关的科研。");
-//# sourceMappingURL=tiankonghemrfz.js.map

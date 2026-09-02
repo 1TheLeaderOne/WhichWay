@@ -236,4 +236,3 @@ translate({
 });
 characterTitle("xigymrfz", "<font color=#f6b3fa>工笔入画</font>");
 characterIntro("xigymrfz", "夕，炎国画家，待业。在留舰人员年的积极行动下，被以访客身份挟持至罗德岛。擅长绘画，尤其是炎国传统绘画。现寓居罗德岛某偏僻走道的墙内。");
-//# sourceMappingURL=xigymrfz.js.map

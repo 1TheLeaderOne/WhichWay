@@ -4,8 +4,11 @@ card("shadishoumrfz", {
   image: `ext:WhichWay/image/card/shadishoumrfz.jpg`,
   type: "equip",
   subtype: "equip2",
-  onLose: function() {
-    if ((!event.getParent(2) || event.getParent(2).name != "swapEquip") && (event.getParent().type != "equip" || event.getParent().swapEquip)) {
+  onLose: async function(event, trigger, player) {
+    const { cards } = event;
+    const par2 = event.getParent(2);
+    const par = event.getParent();
+    if ((!par2 || par2.name != "swapEquip") && par && (par.type != "equip" || par.swapEquip)) {
       cards.forEach((card2) => {
         card2.fix();
         card2.remove();
@@ -22,15 +25,16 @@ card("shadishoumrfz", {
       equipValue: -1
     },
     result: {
-      target: (player, target2, card2) => get.equipResult(player, target2, card2.name)
+      target: (player, target, card2) => get.equipResult(player, target, card2.name)
     }
   },
   enable: true,
   selectTarget: -1,
-  filterTarget: (card2, player, target2) => player == target2 && target2.canEquip(card2, true),
+  filterTarget: (card2, player, target) => player == target && target.canEquip(card2, true),
   modTarget: true,
   allowMultiple: false,
-  content: function() {
+  content: async function(event, trigger, player) {
+    const { cards, target } = event;
     if (cards.length && get.position(cards[0], true) == "o") target.equip(cards[0]);
   },
   toself: true
@@ -38,7 +42,7 @@ card("shadishoumrfz", {
 cardSkill("shadishoumrfz_skill", {
   enable: "phaseUse",
   usable: 1,
-  filter: function(event2, player) {
+  filter: function(event, player) {
     return player.countCards("h") > 0;
   },
   filterCard: true,
@@ -48,11 +52,11 @@ cardSkill("shadishoumrfz_skill", {
   check(card2) {
     return 8 - get.value(card2);
   },
-  async content(event2, trigger, player) {
-    var equip = player.getCards("e", function(card2) {
+  async content(event, trigger, player) {
+    let equips = player.getCards("e", function(card2) {
       return card2.name == "shadishoumrfz";
     });
-    player.discard(equip);
+    player.discard({ cards: equips });
   },
   ai: {
     order: 1,
@@ -64,6 +68,5 @@ cardSkill("shadishoumrfz_skill", {
 cardTranslate({
   shadishoumrfz: "沙地兽",
   shadishoumrfz_skill: "沙地兽",
-  "shadishoumrfz_info": "①锁定技，当此牌不因交换装备或移动离开你的装备区时，销毁之。②出牌阶段限一次，你可以弃置一张手牌并弃置此牌。"
+  shadishoumrfz_info: "①锁定技，当此牌不因交换装备或移动离开你的装备区时，销毁之。②出牌阶段限一次，你可以弃置一张手牌并弃置此牌。"
 });
-//# sourceMappingURL=shadishoumrfz.js.map

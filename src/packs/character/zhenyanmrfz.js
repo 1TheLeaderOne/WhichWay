@@ -206,4 +206,3 @@ translate({
 });
 characterTitle("zhenyanmrfz", "<font color = #128985ff>噤声限域</font>");
 characterIntro("zhenyanmrfz", "真言，罗德岛精英干员。受凯尔希邀请加入巴别塔，曾参与卡兹戴尔内战，后成为罗德岛首批精英干员之一。<br>真言长期担任特殊行动第三小队领队，能与通讯员配合，在难以建立稳定通讯或需要秘密行动的情况下，使用源石技艺维持沟通和协调各方，是任务中不可或缺的存在。");
-//# sourceMappingURL=zhenyanmrfz.js.map

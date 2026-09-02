@@ -173,4 +173,3 @@ window.whichWay.register("characterModules", whichWayCharacterModules);
 export {
   whichWayCharacterModules
 };
-//# sourceMappingURL=index.js.map

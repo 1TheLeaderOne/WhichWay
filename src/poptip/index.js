@@ -98,4 +98,3 @@ window.whichWay.register("poptip", whichWayPoptip);
 export {
   whichWayPoptip
 };
-//# sourceMappingURL=index.js.map

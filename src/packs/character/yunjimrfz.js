@@ -112,4 +112,3 @@ translate({
 });
 characterTitle("yunjimrfz", "<font color='#6495ed'>鼯击长空</font>");
 characterIntro("yunjimrfz", "云迹，出生于哥伦比亚的飞行冒险家，为进行飞行实验而旅居各地，对于飞行动力装备的开发与改良颇有心得，如今为治疗矿石病来到罗德岛，并为罗德岛工程部的机动装置研发项目提供技术支持。");
-//# sourceMappingURL=yunjimrfz.js.map

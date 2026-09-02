@@ -185,4 +185,3 @@ translate({
 });
 characterTitle("splinguangmrfz", "<font color=#00868B>长夜临光</font>");
 characterIntro("splinguangmrfz", "耀骑士临光，卡西米尔耀骑士。在掩护己方队员、机动作战、歼灭战与开阔地带作战中体现出极高的战斗技巧和个人军事素养。</br>在重返卡西米尔并夺得第二十四届骑士特别锦标赛决斗赛冠军之后，留在卡西米尔处理后续事务。作为合作干员为罗德岛驻卡瓦莱利亚基办事处提供战术支援，必要时也会去往其他地区协助本舰展开各项行动。");
-//# sourceMappingURL=splinguangmrfz.js.map

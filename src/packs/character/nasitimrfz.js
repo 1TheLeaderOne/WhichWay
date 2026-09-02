@@ -79,4 +79,3 @@ translate({
 });
 characterTitle("nasitimrfz", "<font color = #2263b766>悬于天际</font>");
 characterIntro("nasitimrfz", "娜斯提·鲁诺瑞伊，莱茵生命工程科主任，哥伦比亚工程科学领域的专家，在应用语言学方面也有一定造诣。经塞雷娅介绍，现与罗德岛签订长期合作条款，作为工程部特聘顾问，为罗德岛多个项目提供支持。");
-//# sourceMappingURL=nasitimrfz.js.map

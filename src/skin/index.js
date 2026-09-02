@@ -469,4 +469,3 @@ window.whichWay.register("skin", whichWaySkin);
 export {
   whichWaySkin
 };
-//# sourceMappingURL=index.js.map

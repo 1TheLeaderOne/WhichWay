@@ -61,4 +61,3 @@ dynamicTranslate({
     return "<font color=`#FF1111`>" + ["浪人", "帝王", "强力", "离子", "军团", "烈焰", "先锋"].randomGet() + "</font>森蚺";
   }
 });
-//# sourceMappingURL=extratranslatemrfz.js.map

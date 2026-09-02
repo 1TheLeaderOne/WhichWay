@@ -235,4 +235,3 @@ translate({
 });
 characterTitle("shumrfz", "<font color=#42b983>百谷长青</font>");
 characterIntro("shumrfz", "黍，炎国农业天师，天师府授业天师。曾于炎国北部农业基地大荒城从事农业研究多年且已有丰富的科研成果。现因访问亲属，以访客身份暂驻罗德岛。");
-//# sourceMappingURL=shumrfz.js.map

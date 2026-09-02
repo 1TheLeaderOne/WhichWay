@@ -156,4 +156,3 @@ translate({
   "niximrfz_info": "一名其他角色的结束阶段，你可以对其使用一张【杀】，若此【杀】没有造成伤害，你可以将你的座次移动至其下家。"
 });
 characterIntro("asikalunmrfz", "阿斯卡纶，巴别塔时期担任情报官，后作为S.W.E.E.P.负责人，为罗德岛负责反渗透工作。");
-//# sourceMappingURL=asikalunmrfz.js.map

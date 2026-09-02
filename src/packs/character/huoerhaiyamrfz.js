@@ -430,4 +430,3 @@ translate({
 });
 characterTitle("huoerhaiyamrfz", "<font color=#00868B>但为求索</font>");
 characterIntro("huoerhaiyamrfz", "投稿来源：涵涵<br>霍尔海雅，前梅兰德基金会所属特工，在凯尔希医生与博士的引荐下加入罗德岛。</br>擅长单兵作战，并且能够应对各种极端环境，在各类隐秘行动中发挥了重大价值。");
-//# sourceMappingURL=huoerhaiyamrfz.js.map

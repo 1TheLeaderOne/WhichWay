@@ -313,4 +313,3 @@ translate({
 });
 characterTitle("shuangwangmrfz", "<font color='#00008b'>千年之愿</font>");
 characterIntro("shuangwangmrfz", "或许我们能走向不同的结局...");
-//# sourceMappingURL=shuangwangmrfz.js.map

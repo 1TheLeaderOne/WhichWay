@@ -181,4 +181,3 @@ translate({
   "shahuanmrfz_info": "出牌阶段，你可以令一名没有‘噬’标记的其他角色获得一个‘噬’。"
 });
 characterIntro("kanielianmrfz", "卡涅利安，出身萨尔贡深处不受王酋管辖的某个古老部族，目前外出游学中。因接受莱塔尼亚霍恩洛厄伯爵的雇佣，作为其侍从长期停留于莱塔尼亚地区。现与罗德岛达成合作关系，作为干员为罗德岛执行莱塔尼亚境内的相关任务。");
-//# sourceMappingURL=kanielianmrfz.js.map

@@ -164,4 +164,3 @@ translate({
 });
 characterTitle("sphemomrfz", "<font color=#4EEE94>伦理坚守者</font>");
 characterIntro("sphemomrfz", "赫默，《特里蒙科学伦理联合宣言》发起人，莱茵生命总辖构件科执行顾问，在医疗事务方面与罗德岛展开了深度合作。</br>本人拥有丰富的医学临床经验，在罗德岛接受矿石病相关治疗的同时，为罗德岛提供医学支持。");
-//# sourceMappingURL=sphemomrfz.js.map

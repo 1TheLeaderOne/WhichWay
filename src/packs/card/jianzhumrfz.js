@@ -1,6 +1,6 @@
 import { get, game } from "noname";
-import { card as card$1, cardSkill, cardTranslate } from "../hooks.js";
-card$1("jianzhumrfz", {
+import { card, cardSkill, cardTranslate } from "../hooks.js";
+card("jianzhumrfz", {
   image: `ext:WhichWay/image/card/jianzhumrfz.jpg`,
   type: "equip",
   subtype: "equip1",
@@ -13,14 +13,14 @@ card$1("jianzhumrfz", {
   ai: {
     basic: {
       equipValue: 8,
-      value: (card2, player2, index, method) => {
-        if (!player2.getCards("e").includes(card2) && !player2.canEquip(card2, true)) return 0.01;
-        const info = get.info(card2), current = player2.getEquip(info.subtype), value = current && card2 != current && get.value(current, player2);
+      value: (card2, player, index, method) => {
+        if (!player.getCards("e").includes(card2) && !player.canEquip(card2, true)) return 0.01;
+        const info = get.info(card2), current = player.getEquip(info.subtype), value = current && card2 != current && get.value(current, player);
         let equipValue = info.ai.equipValue || info.ai.basic.equipValue;
         if (typeof equipValue == "function") {
-          if (method == "raw") return equipValue(card2, player2);
-          if (method == "raw2") return equipValue(card2, player2) - value;
-          return Math.max(0.1, equipValue(card2, player2) - value);
+          if (method == "raw") return equipValue(card2, player);
+          if (method == "raw2") return equipValue(card2, player) - value;
+          return Math.max(0.1, equipValue(card2, player) - value);
         }
         if (typeof equipValue != "number") equipValue = 0;
         if (method == "raw") return equipValue;
@@ -31,20 +31,28 @@ card$1("jianzhumrfz", {
   },
   enable: true,
   selectTarget: -1,
-  filterTarget: (card2, player2, target2) => player2 == target2 && target2.canEquip(card2, true),
+  filterTarget: (card2, player, target) => player == target && target.canEquip(card2, true),
   modTarget: true,
   allowMultiple: false,
-  onLose: function() {
-    if ((!event.getParent(2) || event.getParent(2).name != "swapEquip") && (event.getParent().type != "equip" || event.getParent().swapEquip)) {
-      card.destroyed = true;
-      game.log(card, "被销毁了");
+  onLose: async function(event, trigger, player) {
+    const { cards } = event;
+    const par2 = event.getParent(2);
+    const par = event.getParent();
+    if ((!par2 || par2.name != "swapEquip") && par && (par.type != "equip" || par.swapEquip)) {
+      cards.forEach((card2) => {
+        card2.fix();
+        card2.remove();
+        card2.destroyed = true;
+        game.log(card2, "被销毁了");
+      });
     }
   },
-  content: function() {
-    if (!card?.cards.some((card2) => {
-      return get.position(card2, true) !== "o";
+  content: async function(event, trigger, player) {
+    const { card: card2, target } = event;
+    if (!card2?.cards.some((card22) => {
+      return get.position(card22, true) !== "o";
     })) {
-      target.equip(card);
+      target.equip(card2);
     }
   },
   toself: true
@@ -56,18 +64,18 @@ cardSkill("jianzhumrfz_skill", {
   equipSkill: true,
   forced: true,
   firstDo: true,
-  filter(event2, player2) {
-    if (event2.name == "damage") return true;
-    return player2.hasHistory("lose", (evt) => {
-      return evt.getParent() == event2 && Object.values(evt.gaintag_map).some((value) => value.join(" ").includes("shimomrfz_"));
-    }) || get.is.yingbianConditional(event2.card);
+  filter(event, player) {
+    if (event.name == "damage") return true;
+    return player.hasHistory("lose", (evt) => {
+      return evt.getParent() == event && Object.values(evt.gaintag_map).some((value) => value.join(" ").includes("shimomrfz_"));
+    }) || get.is.yingbianConditional(event.card);
   },
-  content: () => {
+  content: async function(event, trigger, player) {
     if (trigger.name == "damage") {
       const equip = player.getCards("e", function(card2) {
         return card2.name == "jianzhumrfz";
       });
-      player.discard(equip);
+      player.discard({ cards: equip });
       return;
     }
     trigger.forceYingbian = true;
@@ -76,6 +84,5 @@ cardSkill("jianzhumrfz_skill", {
 cardTranslate({
   jianzhumrfz: "剑助",
   jianzhumrfz_skill: "剑助",
-  "jianzhumrfz_info": "锁定技，使用带有应变效果的牌可无视条件直接生效；当你受到伤害后或此牌离开了你的装备区时，你将【剑助】销毁之。"
+  jianzhumrfz_info: "锁定技，使用带有应变效果的牌可无视条件直接生效；当你受到伤害后或此牌离开了你的装备区时，你将【剑助】销毁之。"
 });
-//# sourceMappingURL=jianzhumrfz.js.map

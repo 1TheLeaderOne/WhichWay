@@ -156,4 +156,3 @@ translate({
 });
 characterTitle("puruisaisimrfz", "<font color=#77be6a>女祭司</font>");
 characterIntro("puruisaisimrfz", "博士面对石棺的回忆中的神秘女性人物，是源石的起点，曾与博士亲密无间。");
-//# sourceMappingURL=puruisaisimrfz.js.map

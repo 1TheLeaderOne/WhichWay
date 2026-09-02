@@ -224,4 +224,3 @@ translate({
 });
 characterTitle("wuerbianmrfz", "<font color=#00868B>阴影中的求路人</font>");
 characterIntro("wuerbianmrfz", "乌尔比安，阿戈尔人，阿戈尔前技术院执政官，科研项目深海猎人计划负责人，阿戈尔军事团体“深海猎人”作战指挥官之一。登陆时间地点俱不明。在罗德岛处理海洋相关事务时提供支持。<br>经本人与相关人员确认，乌尔比安的所有档案移入高权限资料库。");
-//# sourceMappingURL=wuerbianmrfz.js.map

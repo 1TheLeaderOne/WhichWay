@@ -153,4 +153,3 @@ translate({
 });
 characterTitle("suxinmrfz", "<font color=#DC143C>感性与自由</font>");
 characterIntro("suxinmrfz", "塑心，本名阿尔图罗·吉亚洛，出身于拉特兰、活跃于泰拉大地的著名音乐家。受莱塔尼亚帝国宫廷、拉特兰教皇厅委托，罗德岛与两方签署协议确认，在受相应人员的严格监管下，允许其以干员“塑心”身份暂留罗德岛。");
-//# sourceMappingURL=suxinmrfz.js.map

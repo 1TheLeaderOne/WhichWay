@@ -153,4 +153,3 @@ translate({
   "shehunmrfz_info": "锁定技，你使用【杀】的次数+X。（X=你本局游戏造成伤害的数量，X至多为5）"
 });
 characterIntro("bohuimrfz", "柏喙，雷神工业装备设计师之女，遭遇工厂工人暴动而不幸感染矿石病。</br>现作为医疗救助对象加入罗德岛，依照本人的意愿，允许调入作战部门，她的剑术如同她纺线一般优雅而有韵律。");
-//# sourceMappingURL=bohuimrfz.js.map

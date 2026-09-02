@@ -199,4 +199,3 @@ translate({
   "yubimrfz_info": "锁定技，场上所有角色的手牌上限+X。（X为其的护盾值，X至多为5）"
 });
 characterIntro("shanlingmrfz", "闪灵，萨卡兹医师，前萨卡兹医疗组织“赦罪师”成员，感染者援助团体“使徒”的一员。于源石技艺、战场急救、医学理论、临床医学等领域拥有渊博知识。</br>现作为医疗干员为罗德岛医疗部门提供源石技艺理论，并为多项行动提供战场医疗救护服务。");
-//# sourceMappingURL=shanlingmrfz.js.map

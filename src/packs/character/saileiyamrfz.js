@@ -196,4 +196,3 @@ translate({
 });
 characterTitle("saileiyamrfz", "<font color=#FFF68F>守望者</font>");
 characterIntro("saileiyamrfz", "塞雷娅，前莱茵生命防卫科主任。于生命科学、微生物学、源石技艺等领域皆有建树，同时于歼灭战、要员保全、异常事态处理等任务中表现出强大实力。</br>目前与罗德岛在科研等多个领域皆有合作，同时，正与罗德岛针对深入合作计划进行磋商。");
-//# sourceMappingURL=saileiyamrfz.js.map

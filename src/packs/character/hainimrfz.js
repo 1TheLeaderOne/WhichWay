@@ -135,4 +135,3 @@ translate({
 });
 characterTitle("hainimrfz", "<font color=#00868B>山静水流开画景</font>");
 characterIntro("hainimrfz", "海霓，本名卢契拉，阿戈尔人，隶属技术院设施管理所，于穹顶系统担任穹顶管理员与洋流测绘员。阿戈尔与陆地建立联系后，卢契拉出于个人兴趣，以个人名义与罗德岛达成合作，不定期前来进行文化交流。<br>现以“海霓”为代号，登记为罗德岛合作干员。");
-//# sourceMappingURL=hainimrfz.js.map

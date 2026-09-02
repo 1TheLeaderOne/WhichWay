@@ -58,4 +58,3 @@ translate({
 });
 characterTitle("THRMEXmrfz", "<font color = #b7229c66>炙热冲击！</font>");
 characterIntro("THRMEXmrfz", "Thermal-EX（型号亦作THRM-EX）是梅尔与可露希尔共同客制化后的雷神挑衅者™熔岩猫魔鬼高性能版作业平台，其中梅尔主要负责他的武器与储能装置的制作和改进。有着非常特别的存在感，对人非常热情，这点很讨周围部分人的喜欢，也有很多人对此不能适应。不过，Thermal-EX仍然无所畏惧，今天也在这个冰冷的世界用光明的自己去温暖他人。<br><br>由于是新型号，独特的具有侵略性的外形让人感觉到有些畏惧，但是Thermal-EX却对此并不介意。无论是谁，在还没看清楚他模样的距离，就会听到Thermal-EX对他的热情问候。不过好像言语中有关“热”的字眼用得实在太多了......");
-//# sourceMappingURL=THRMEXmrfz.js.map

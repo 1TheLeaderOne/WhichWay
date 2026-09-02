@@ -167,4 +167,3 @@ translate({
 });
 characterTitle("chongyuemrfz", "<font color=#FFF68F>玉门戍卫</font>");
 characterIntro("chongyuemrfz", "重岳，留舰人员年、夕、令的兄长，与炎国兵部、司岁台等政府部门往来密切，此前担任移动城市玉门的武术教官，已卸任。因探视亲属来到罗德岛，经过审核，暂时凭访客身份驻留本舰。重岳具有丰富的战场经验，为罗德岛提供过独特的作战建议，但应凯尔希医生要求，重岳本人较少直接参加任务。");
-//# sourceMappingURL=chongyuemrfz.js.map

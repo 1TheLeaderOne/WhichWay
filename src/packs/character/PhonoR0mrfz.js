@@ -46,4 +46,3 @@ translate({
 });
 characterTitle("PhonoR0mrfz", "<font color = #b7229c66>悠远河谷的齐唱</font>");
 characterIntro("PhonoR0mrfz", "R&V型巫术作业平台PhonoR-0，罗德岛首款且唯一一款搭载女妖咒言法器的智能作业平台。与其他客制化的雷神工业作业平台不同，她的诞生离不开罗德岛干员的顶尖技术与女妖们之间的默契。从其运行机构、传动系统及核心的巫术元件的设计来看，比起轮式作业平台，PhonoR-0更像一座移动的巫术祭坛。作为尖端工业技术与萨卡兹巫术结合的产物，PhonoR-0的基本性能并不出众，但她易于部署，能随时对行动干员进行支援，现作为辅助干员参与相关作战任务。");
-//# sourceMappingURL=PhonoR0mrfz.js.map

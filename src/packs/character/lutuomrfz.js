@@ -113,4 +113,3 @@ translate({
 });
 characterTitle("lutuomrfz", "<font color=#00868B>止戈胜悼</font>");
 characterIntro("lutuomrfz", "露托，曾在玻利瓦尔各交战地区活动，不从属于任何当地组织，以战场打扫工作为生。现今在本舰接受治疗，并与后勤部签订合作协议，偶尔以战场环境顾问的身份支援外勤任务。");
-//# sourceMappingURL=lutuomrfz.js.map

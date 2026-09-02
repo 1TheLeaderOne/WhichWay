@@ -199,4 +199,3 @@ translate({
 });
 characterTitle("zheyamrfz", "<font color = #103b58ff>苔原吹哨人</font>");
 characterIntro("zheyamrfz", "折桠，常用名别乔克，曾为乌萨斯远北中心矿区工人，现于罗德岛接受治疗，同时根据本人意愿，接受标准强度的战斗训练，作为罗德岛的外勤干员参与感染者救助工作。");
-//# sourceMappingURL=zheyamrfz.js.map

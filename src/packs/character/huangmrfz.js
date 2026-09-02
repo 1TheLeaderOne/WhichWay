@@ -126,4 +126,3 @@ translate({
   "newfeixuemrfz_info": "当你于回合内使用伤害类牌选择目标后，你可以跳过本回合下个没有被跳过的阶段，然后你摸一张牌且此牌的目标角色需要打出一张【闪】，否则其无法响应此牌。"
 });
 characterIntro("huangmrfz", "煌，罗德岛精英干员，在机动作战、歼灭战与突袭作战中体现出了专业的战斗技巧与战术素养。现由阿米娅带领，作为攻坚战的战术核心之一发挥作用。");
-//# sourceMappingURL=huangmrfz.js.map

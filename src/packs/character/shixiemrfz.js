@@ -157,4 +157,3 @@ translate({
   "lijimrfz_info": "锁定技，你使用的【杀】需要X张【闪】才可抵消。（X=本回合你使用的牌的花色数）"
 });
 characterIntro("shixiemrfz", "狮蝎，履历大部分缺失，已知其入职前曾从事指定对象清除工作，推测身份：杀手。在潜伏、侵扰、突袭敌军阵线等行动中均表现出过硬的战斗技巧。<br>现作为特种干员，为罗德岛提供特别行动服务。");
-//# sourceMappingURL=shixiemrfz.js.map

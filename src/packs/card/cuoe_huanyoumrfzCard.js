@@ -30,6 +30,5 @@ card("cuoe_huanyoumrfzCard", {
 });
 cardTranslate({
   cuoe_huanyoumrfzCard: "幻有",
-  "cuoe_huanyoumrfzCard_info": "如真似幻，扑朔迷离。"
+  cuoe_huanyoumrfzCard_info: "如真似幻，扑朔迷离。"
 });
-//# sourceMappingURL=cuoe_huanyoumrfzCard.js.map

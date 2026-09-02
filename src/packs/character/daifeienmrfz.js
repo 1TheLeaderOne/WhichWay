@@ -156,4 +156,3 @@ translate({
 });
 characterTitle("daifeienmrfz", "<font color=#FFF68F>濯洗剑锋</font>");
 characterIntro("daifeienmrfz", "戴菲恩，曾作为情报人员在诺伯特区活动多年，后以典范军成员的身份参与了伦蒂尼姆周边的一系列战役。在维多利亚事件结束后，同罗德岛达成了一系列战略合作条款，为罗德岛驻维多利亚办事处提供协助。");
-//# sourceMappingURL=daifeienmrfz.js.map

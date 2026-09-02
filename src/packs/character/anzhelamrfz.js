@@ -99,4 +99,3 @@ translate({
 });
 characterTitle("anzhelamrfz", "<font color='#6495ed'>缄默的杀手</font>");
 characterIntro("anzhelamrfz", "安哲拉，伊比利亚出身，干员白炽的保镖，与白炽一同接受罗德岛的雇佣。拥有良好的狙击素养，接受专业培训后，作为狙击干员活跃在各类任务中。");
-//# sourceMappingURL=anzhelamrfz.js.map

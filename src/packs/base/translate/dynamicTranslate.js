@@ -233,4 +233,3 @@ const dynamicTranslate = {
 export {
   dynamicTranslate as default
 };
-//# sourceMappingURL=dynamicTranslate.js.map

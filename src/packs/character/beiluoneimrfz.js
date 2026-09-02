@@ -163,4 +163,3 @@ function setCards(player, cards) {
     whichWayTips.addPrompt(card, "失去后摸牌", "huozhimrfz_effect");
   });
 }
-//# sourceMappingURL=beiluoneimrfz.js.map

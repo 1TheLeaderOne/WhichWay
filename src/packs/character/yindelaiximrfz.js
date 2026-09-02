@@ -387,4 +387,3 @@ translate({
 });
 characterTitle("yindelaiximrfz", "<font color='#db7093'>玫瑰河畔的引渡人</font>");
 characterIntro("yindelaiximrfz", "隐德来希，作为卡兹戴尔情报组织玫瑰河畔的成员，曾为巴别塔提供过情报。伦蒂尼姆战争期间，隐德来希主动与罗德岛取得联系，现以访客身份留舰。<br>需注意，隐德来希与罗德岛并非正式的合约关系，她与罗德岛的一切合作，均视作私人委托。");
-//# sourceMappingURL=yindelaiximrfz.js.map

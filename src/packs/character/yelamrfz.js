@@ -203,4 +203,3 @@ translate({
 });
 characterTitle("yelamrfz", "<font color = blue>谢拉格的守护神</font>");
 characterIntro("yelamrfz", "谢拉格圣女，恩雅·希瓦艾什，也就是干员初雪的侍女长，作为圣女的代表加入罗德岛。<br>负责初雪秘密访问罗德岛的诸多对接事宜，除此之外，本人也十分享受干员生活，现作为术师干员活跃于各种任务中。");
-//# sourceMappingURL=yelamrfz.js.map

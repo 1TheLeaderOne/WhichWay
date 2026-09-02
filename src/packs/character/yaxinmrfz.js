@@ -57,4 +57,3 @@ translate({
   "yabengmrfz_info": "锁定技，当你进入濒死状态时，你重置【凌顶】并摸X张牌。（X=【凌顶】记录的牌的数量，X至多为2）"
 });
 characterIntro("yaxinmrfz", "崖心，谢拉格出身，现罗德岛干员。攀岩与登山方面的专家，能熟练使用各种攀爬工具。现于罗德岛接受矿石病治疗。");
-//# sourceMappingURL=yaxinmrfz.js.map

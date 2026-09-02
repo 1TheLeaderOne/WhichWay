@@ -102,4 +102,3 @@ translate({
   "baigeimrfz_info": "锁定技，出牌阶段结束时，若你已执行了五个出牌阶段，你须将手牌弃置至手牌上限。"
 });
 characterIntro("ashmrfz", "<span class=firetext>联动：彩虹六号:围攻</span></br>灰烬，彩虹小队成员之一，暂时担当小队队长职务，严于律己，恪尽职守，为整个小队谋划行动方针。</br>灰烬使用一把M120CREM爆破弹发射器，可以对重装目标造成伤害，也可破开障碍物，为小队行动增加战术选择。");
-//# sourceMappingURL=ashmrfz.js.map

@@ -59,4 +59,3 @@ translate({
 });
 characterTitle("xiaomanmrfz", "<font color=#42b983>竹笛飞声</font>");
 characterIntro("xiaomanmrfz", "小满，来自炎国北部农业重镇大荒城的普通女孩，在管理牧兽方面颇有心得。跟随黍以访客身份暂居罗德岛。");
-//# sourceMappingURL=xiaomanmrfz.js.map

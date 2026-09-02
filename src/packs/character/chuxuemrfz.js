@@ -164,4 +164,3 @@ translate({
 });
 characterTitle("chuxuemrfz", "<font color=#C0C0C0>谢拉格的圣女</font>");
 characterIntro("chuxuemrfz", "初雪，谢拉格出身，喀兰圣女，全谢拉格的宗教领袖。运用神赐的圣铃，呼唤风雪的力量。现通过保密途径来到罗德岛，具体担任事务与驻留时间不便公开。");
-//# sourceMappingURL=chuxuemrfz.js.map

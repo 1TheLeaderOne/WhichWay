@@ -70,4 +70,3 @@ translate({
 });
 characterTitle("muqianmrfz", "<font color='#8a2be2'>矿石收藏家</font>");
 characterIntro("muqianmrfz", "钼铅，探险家，矿石收藏家，同时也是哥伦比亚城际网络中颇为知名的社交媒体视频创作者。在地质考察过程中，不慎感染矿石病，来到罗德岛接受治疗。其后，经过交涉，作为特种干员加入罗德岛，以丰富的地质学知识和荒野求生经验，为罗德岛诸多队伍的野外探索任务提供支持。");
-//# sourceMappingURL=muqianmrfz.js.map

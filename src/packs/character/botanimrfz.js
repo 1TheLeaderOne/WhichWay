@@ -184,4 +184,3 @@ function canUseTao(player, target) {
   }
   return target.isDamaged();
 }
-//# sourceMappingURL=botanimrfz.js.map

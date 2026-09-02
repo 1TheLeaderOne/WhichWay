@@ -118,4 +118,3 @@ translate({
 });
 characterTitle("mingjiaomrfz", "<font color=#DC143C>蹒跚求索</font>");
 characterIntro("mingjiaomrfz", "明椒，萨卡兹雇佣兵中的一员，自哥伦比亚被曼弗雷德召集至伦蒂尼姆，后因理念不合而带小队脱离原本阵营，受袭途中被搭救。<br>现接受罗德岛雇佣，为作战小队提供战场医疗支援。");
-//# sourceMappingURL=mingjiaomrfz.js.map

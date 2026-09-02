@@ -162,4 +162,3 @@ translate({
 });
 characterTitle("ailisimrfz", "<font color=#77be6a>梦境守护者</font>");
 characterIntro("ailisimrfz", "爱丽丝，罗德岛临时干员，为了归还某位干员的寄存物而来到罗德岛的维多利亚术师，在处理完相关事项前，她会暂留罗德岛。</br>使用着特殊的源石技艺，能够引人沉眠并适当操控梦的内容。");
-//# sourceMappingURL=ailisimrfz.js.map

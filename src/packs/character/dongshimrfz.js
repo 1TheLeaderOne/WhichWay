@@ -59,4 +59,3 @@ translate({
 });
 characterTitle("dongshimrfz", "<font color = red>循理归因</font>");
 characterIntro("dongshimrfz", "冬时，本名科谢尼娅·马尔科芙娜·涅留朵娃，原乌萨斯远北中心矿区研究所研究员，现入职罗德岛，继续其在乌萨斯从事的部分研究。");
-//# sourceMappingURL=dongshimrfz.js.map

@@ -89,4 +89,3 @@ translate({
   "yubianmrfz_info": "结束阶段，你可以使用牌堆底的牌（必须合法），若你因此的使用颜色均相同，你重复这个流程。"
 });
 characterIntro("shanmrfz", "山，哥伦比亚某建筑业龙头公司CEO之子，举家被竞争对手陷害而入狱，离开监狱后，加入罗德岛。</br>拥有几乎天生为战斗而生的体魄，现作为近卫干员活跃于各种任务的第一线。");
-//# sourceMappingURL=shanmrfz.js.map

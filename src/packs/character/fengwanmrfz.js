@@ -333,4 +333,3 @@ translate({
   "huayingmrfz_info": "当你进入濒死状态时，你可以切换一个“纸偶”和你当前的武将牌。"
 });
 characterTitle("fengwanmrfz", "<font color = #8b008b>折纸生花</font>");
-//# sourceMappingURL=fengwanmrfz.js.map

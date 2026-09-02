@@ -158,4 +158,3 @@ function getAdjacentCard(card) {
     return new lib.element.VCard("none", void 0, str);
   }
 }
-//# sourceMappingURL=sbchenmrfz.js.map
