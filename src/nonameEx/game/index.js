@@ -159,4 +159,3 @@ class GameExt extends Game {
 export {
   GameExt
 };
-//# sourceMappingURL=index.js.map

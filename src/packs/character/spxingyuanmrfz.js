@@ -164,4 +164,3 @@ translate({
 });
 characterTitle("spxingyuanmrfz", "<font color = green>溯光求源</font>");
 characterIntro("spxingyuanmrfz", "莱茵生命能量科研究员，埃琳娜·乌比卡博士，如今作为谢拉格观测站的能量组组长活跃在研究一线。谢拉格天灾事件的主要调查者之一。");
-//# sourceMappingURL=spxingyuanmrfz.js.map

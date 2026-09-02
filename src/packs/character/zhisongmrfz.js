@@ -128,4 +128,3 @@ translate({
   "lirenmrfz_info": "准备阶段，你可以弃置你判定区的所有牌，然后流失一点体力。"
 });
 characterIntro("zhisongmrfz", "止颂，本名莱辛·梅耶尔，莱塔尼亚路德维格大学旁听生，随干员黑键一同来到罗德岛。经过充分沟通，莱辛与罗德岛签订了合作协议，为罗德岛在莱塔尼亚境内的行动提供协助。");
-//# sourceMappingURL=zhisongmrfz.js.map

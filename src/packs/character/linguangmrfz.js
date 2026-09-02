@@ -282,4 +282,3 @@ translate({
   "chongyaomrfz_info": "觉醒技，当你发动过至少五次【互持】后，你减少一点体力上限并获得【逐光】。"
 });
 characterIntro("linguangmrfz", "临光，前卡西米尔耀骑士，感染者援助团体“使徒”的一员。在掩护己方队员、机动作战、歼灭战与开阔地带作战中体现出极高的战斗技巧和个人军事素养。</br>现于罗德岛作为重装干员行动，并于现场提供战术指挥支援。");
-//# sourceMappingURL=linguangmrfz.js.map

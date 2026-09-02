@@ -194,4 +194,3 @@ translate({
 });
 characterTitle("ruoyemumrfz", "<font color = #db7093>毋畏死亡</font>");
 characterIntro("ruoyemumrfz", "Ave Mujica的吉他手若叶睦。沉默寡言的她在罗德岛上大多时候负责一些简单的工作。除此以外，她还在疗养庭院承包了一小块区域，用作果蔬的栽培。");
-//# sourceMappingURL=ruoyemumrfz.js.map

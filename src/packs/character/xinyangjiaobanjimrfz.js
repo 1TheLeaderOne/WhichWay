@@ -228,4 +228,3 @@ translate({
 });
 characterTitle("xinyangjiaobanjimrfz", "<font color='#6495ed'>律法守卫</font>");
 characterIntro("xinyangjiaobanjimrfz", "帕特里奇昂，拉特兰公民，拉特兰目前任职时间最长的铳骑，适用于拉特兰一至十三项公民权益，熟练掌握所有种类铳械的使用方式。现因拉特兰教皇厅与罗德岛友好协议，以“信仰搅拌机”为代号，作为合作干员为罗德岛提供协助。");
-//# sourceMappingURL=xinyangjiaobanjimrfz.js.map

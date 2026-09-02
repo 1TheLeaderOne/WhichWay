@@ -194,4 +194,3 @@ window.whichWay.register("config", whichWayConfig);
 export {
   whichWayConfig
 };
-//# sourceMappingURL=index.js.map

@@ -212,4 +212,3 @@ translate({
 });
 characterTitle("spjicimrfz", "<font color='#00008b'>帆扬海疆</font>");
 characterIntro("spjicimrfz", "棘刺，前罗德岛前线作战干员，如今以独立探险船兼科考船兼捕鳞船兼货运船兼海盗船——宝宝摇篮号船长的身份，与罗德岛保持合作关系。罗德岛定期为宝宝摇篮号提供医疗与物资支持，棘刺则为罗德岛提供诸多与海洋相关的便利，以及接触伊比利亚土地上许多不受审判庭管辖的偏远聚落的渠道。");
-//# sourceMappingURL=spjicimrfz.js.map

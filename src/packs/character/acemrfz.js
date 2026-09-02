@@ -806,4 +806,3 @@ translate({
 });
 characterTitle("acemrfz", "<font color='red'>巴别塔之盾</font>");
 characterIntro("acemrfz", "罗德岛精英干员Ace，参与切尔诺伯格行动，因掩护博士救援小队撤退而阵亡。</br></br><span class=firetext>罗德岛会铭记您的贡献。</span>");
-//# sourceMappingURL=acemrfz.js.map

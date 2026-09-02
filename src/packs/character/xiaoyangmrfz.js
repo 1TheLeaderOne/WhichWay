@@ -167,4 +167,3 @@ translate({
   "qingyanmrfz_info": "每轮限一次，出牌阶段结束时，若你于本阶段使用过三种类型的牌，你可以在本回合结束后额外执行一个回合。"
 });
 characterIntro("xiaoyangmrfz", "艾雅法拉，火山学家，天灾信使。于高等源石技艺、高能量法术释放等领域展现出了卓越的天赋。现于罗德岛接受治疗，同时为罗德岛提供天灾研究、环境观察与评估、危险地形航行保障等相关服务。");
-//# sourceMappingURL=xiaoyangmrfz.js.map

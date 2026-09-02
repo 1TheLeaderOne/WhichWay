@@ -149,4 +149,3 @@ translate({
 });
 characterTitle("laiousimrfz", '<font color="#8b008b">迷宫魔物专家</font>');
 characterIntro("laiousimrfz", "莱欧斯，莱欧斯小队的队长，拥有丰富的“迷宫”（注：我们也不知道所谓“迷宫”到底是什么）探索经验。虽然充满谜团，但是莱欧斯的贡献毋庸置疑。在执行野外任务时，他总能为罗德岛提供不少作战帮助。");
-//# sourceMappingURL=laiousimrfz.js.map

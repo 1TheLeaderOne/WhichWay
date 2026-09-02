@@ -141,4 +141,3 @@ translate({
 });
 characterTitle("alannamrfz", "<font color='#00008b'>能工巧匠</font>");
 characterIntro("alannamrfz", "阿兰娜，原雷姆必拓比格皮勒自治州运载车驾驶员，熟练掌握多种机械操控与维修技巧，现就职于罗德岛工程部第三维修工坊，参与由可露希尔主持的各类新型设备的研发与调试工作。");
-//# sourceMappingURL=alannamrfz.js.map

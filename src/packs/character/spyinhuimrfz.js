@@ -232,4 +232,3 @@ translate({
 });
 characterTitle("spyinhuimrfz", "<font color = blue>变革已致</font>");
 characterIntro("spyinhuimrfz", "恩希欧迪斯，喀兰贸易公司前董事长，希瓦艾什家族现任族长。在经济贸易、国际政治、外交手腕与战术策划上有独到见解。<br>鉴于其身份的极端特殊性以及谢拉格如今复杂的局势，建议谨慎选择与其合作的姿态以杜绝额外风险。");
-//# sourceMappingURL=spyinhuimrfz.js.map

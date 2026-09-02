@@ -228,4 +228,3 @@ translate({
 });
 characterTitle("ziyeyaomrfz", "<font color = red>浮生若梦</font>");
 characterIntro("ziyeyaomrfz", "紫野遥，在东国南院有相当名气的艺人。艺名羽生萌萌香。受干员星熊推荐，与罗德岛签订合约，负责罗德岛与东国的交流工作。鉴于本人的要求，也会参与一部分外勤任务。");
-//# sourceMappingURL=ziyeyaomrfz.js.map

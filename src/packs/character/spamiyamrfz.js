@@ -5,7 +5,8 @@ character("spamiyamrfz", {
   sex: "female",
   group: "luomrfz",
   hp: 4,
-  skills: ["chenxianmrfz", "benyemrfz", "newjueyingmrfz"]
+  skills: ["chenxianmrfz", "benyemrfz", "newjueyingmrfz"],
+  arkuid: "char_1001_amiya2"
 });
 skill({
   "chenxianmrfz": {
@@ -130,7 +131,7 @@ skill({
 });
 translate({
   "spamiyamrfz": "近卫阿米娅",
-  "spamiyamrfz_prefix": "{\r\n		name:'近卫'",
+  "spamiyamrfz_prefix": "近卫",
   "chenxianmrfz": "沉弦",
   "chenxianmrfz_info": "摸牌阶段，你可以额外摸X张牌，其中每包含一张【万箭齐发】、【杀】或【酒】，你便须弃置一张牌。（X=场上受伤角色数）",
   "benyemrfz": "奔夜",
@@ -140,4 +141,3 @@ translate({
 });
 characterTitle("spamiyamrfz", "<font color=#00868B>争斗在此止歇</font>");
 characterIntro("spamiyamrfz", "阿米娅，罗德岛的公开领袖，在内部拥有最高执行权。虽然，从外表上看起来仅仅是个不成熟的少女，实际上，她却是深受大家信任的合格的领袖。</br>现在，阿米娅正带领着罗德岛，为了感染者的未来，为了让这片大地挣脱矿石病的阴霾而不懈努力。</br>史载，萨卡兹君王奎隆的佩剑，长度约在0.9到1.2米之间，宽约5厘米，材质不明，通体呈黑色，剑身铭刻萨卡兹传统文字，释作“争斗在此止歇”。");
-//# sourceMappingURL=spamiyamrfz.js.map

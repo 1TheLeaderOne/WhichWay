@@ -97,27 +97,27 @@ let data = {
   kamimrfz: {
     今昔须臾之梦: {
       name: "dyn_illust_char_472_pasngr_epoque17",
-      x: [0, 0.2],
-      y: [0, -1.91],
-      scale: 0.38,
+      x: [0, 0.287],
+      y: [0, -1.255],
+      scale: 0.3,
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
-      background: `废墟`
+      background: `场景_花圃`
     }
   },
   //凯尔希
   kaierximrfz: {
     残余: {
       name: "dyn_illust_char_003_kalts_boc6",
-      x: [0, 0.52],
-      y: [0, -1.33],
+      x: [0, 0.551],
+      y: [0, -1.262],
       scale: 0.4,
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `废墟`
+      background: `场景_彼端`
     },
     时遗: {
       name: "dyn_illust_char_003_kalts_sale14",
@@ -128,7 +128,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `废墟`
+      background: `场景_始发`
     },
     时遗2: {
       name: "sp_dyn_illust_char_003_kalts_sale14_2",
@@ -139,33 +139,45 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `废墟`
+      background: `场景_始发`
     }
   },
-  // 纯烬艾雅法拉 纯爱
+  // 纯烬艾雅法拉 
   spxiaoyangmrfz: {
     经典形象: {
       name: "dyn_illust_char_1016_agoat2",
-      x: [0, 0.35],
-      y: [0, -1.41],
-      scale: 0.41,
+      x: [0, 0.426],
+      y: [0, -1.36],
+      scale: 0.4,
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `火山旅梦`
+      background: `场景_假日`
     },
     远行前的野餐: {
       name: "dyn_illust_char_1016_agoat2_epoque34",
-      x: [0, 0.6],
-      y: [0, -1.66],
-      scale: 0.41,
+      x: [0, 0.61],
+      y: [0, -1.55],
+      scale: 0.4,
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
       json: true,
-      background: `火山旅梦`
+      background: `场景_假日`
+    },
+    后来的故事: {
+      name: "dyn_illust_char_1016_agoat2_epoque57",
+      x: [0, 0.39],
+      y: [0, -1.771],
+      scale: 0.4,
+      version: "3.8",
+      action: ["Idle", "Special", "Interact"],
+      speed: 1,
+      unpackPremultipliedAlpha: true,
+      alpha: true,
+      background: `场景_再启`
     }
   },
   // 缪尔赛思
@@ -179,28 +191,28 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `孤星`
+      background: `场景_林野`
     },
     新枝: {
       name: "dyn_illust_char_249_mlyss_boc",
-      x: [0, 0.56],
-      y: [0, -1.26],
-      scale: 0.27,
+      x: [0, 0.636],
+      y: [0, -1.527],
+      scale: 0.3,
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `孤星`
+      background: `场景_林野`
     },
     漫步于黄金之梦: {
       name: "dyn_illust_char_249_mlyss_ambienceSynesthesia6",
-      x: [0, 0.56],
-      y: [0, -1.26],
-      scale: 0.27,
+      x: [0, 0.626],
+      y: [0, -1.422],
+      scale: 0.3,
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
-      background: `孤星`
+      background: `场景_林野`
     }
   },
   //老鲤
@@ -213,7 +225,7 @@ let data = {
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
-      background: `default`
+      background: `场景_游园`
     }
   },
   //空弦
@@ -226,7 +238,7 @@ let data = {
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
-      background: `拉特兰`
+      background: `场景_澄空`
     }
   },
   //傀影
@@ -239,7 +251,7 @@ let data = {
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
-      background: `揭幕者们`
+      background: `场景_聚光`
     }
   },
   //水月
@@ -252,7 +264,7 @@ let data = {
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
-      background: `海滩`
+      background: `场景_彼端`
     }
   },
   // 迷迭香
@@ -266,7 +278,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       alpha: false,
       speed: 1,
-      background: `花圃`
+      background: `场景_花圃`
     },
     拥抱新生: {
       name: "dyn_illust_char_391_rosmon_epoque17",
@@ -276,7 +288,7 @@ let data = {
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
-      background: `废墟`
+      background: `场景_澄空`
     },
     轻盈一梦: {
       name: "dyn_illust_char_391_rosmon_sale16",
@@ -301,7 +313,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `黍`
+      background: `场景_青穰`
     },
     春日宴: {
       name: "dyn_illust_char_2025_shu_nian11",
@@ -312,7 +324,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `黍`
+      background: `场景_青穰`
     }
   },
   // W w
@@ -326,7 +338,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `生于黑夜`
+      background: `场景_意塑`
     },
     恍惚: {
       name: "dyn_illust_char_113_cqbw_epoque7",
@@ -337,7 +349,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `生于黑夜`
+      background: `场景_意塑`
     }
   },
   // 塑心
@@ -351,7 +363,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `崔林特尔梅之金`
+      background: `场景_聚光`
     },
     无我唯识: {
       name: "dyn_illust_char_245_cello_sale12",
@@ -361,7 +373,7 @@ let data = {
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
-      background: `崔林特尔梅之金`
+      background: `场景_聚光`
     }
   },
   // 浊心斯卡蒂
@@ -375,7 +387,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `生路`
+      background: `场景_彼端`
     },
     升华: {
       name: "dyn_illust_char_1012_skadi2_boc4",
@@ -385,7 +397,7 @@ let data = {
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
-      background: `生路`
+      background: `场景_彼端`
     },
     红女爵: {
       name: "dyn_illust_char_1012_skadi2_iteration2",
@@ -395,7 +407,7 @@ let data = {
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
-      background: `生路`
+      background: `场景_彼端`
     }
   },
   //焰影苇草
@@ -408,7 +420,7 @@ let data = {
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
-      background: `default`
+      background: `场景_庆典`
     },
     夏卉: {
       name: "dyn_illust_char_1020_reed2_summer17",
@@ -419,7 +431,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       json: true,
-      background: `海滩`
+      background: `场景_假日`
     }
   },
   // 耀骑士临光
@@ -433,7 +445,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `长夜临光`
+      background: `场景_商业`
     },
     复现荣光: {
       name: "dyn_illust_char_1014_nearl2_epoque17",
@@ -443,7 +455,7 @@ let data = {
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
-      background: `长夜临光`
+      background: `场景_商业`
     }
   },
   // 归溟幽灵鲨
@@ -457,7 +469,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `生路`
+      background: `场景_彼端`
     },
     生而为一: {
       name: "dyn_illust_char_1023_ghost2_boc6",
@@ -467,7 +479,7 @@ let data = {
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
-      background: `长夜临光`
+      background: `场景_彼端`
     }
   },
   // 百炼嘉维尔
@@ -481,7 +493,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `理想城`
+      background: `场景_假日`
     },
     悠然假日: {
       name: "dyn_illust_char_1026_gvial2_summer12",
@@ -491,7 +503,7 @@ let data = {
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
-      background: `理想城`
+      background: `场景_假日`
     }
   },
   //银灰
@@ -505,7 +517,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `喀兰`
+      background: `场景_始发`
     }
   },
   //夜莺
@@ -519,7 +531,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `长夜临光`
+      background: `场景_庆典`
     }
   },
   // 缄默德克萨斯 德狗
@@ -533,7 +545,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `生路`
+      background: `场景_庆典`
     },
     幽兰秘辛: {
       name: "dyn_illust_char_1028_texas2_epoque36",
@@ -543,7 +555,7 @@ let data = {
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
-      background: `叙拉古人`
+      background: `场景_庆典`
     },
     破翼者: {
       name: "dyn_illust_char_1028_texas2_iteration1",
@@ -553,7 +565,7 @@ let data = {
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
-      background: `叙拉古人`
+      background: `场景_庆典`
     }
   },
   // 维什戴尔
@@ -567,7 +579,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `花圃`
+      background: `场景_意塑`
     },
     超新星: {
       name: "dyn_illust_char_1035_wisdel_sale14",
@@ -578,7 +590,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `废墟`
+      background: `场景_意塑`
     }
   },
   // 年
@@ -592,7 +604,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `岁兽`
+      background: `场景_青穰`
     },
     霹雳导演: {
       name: "dyn_illust_char_2014_nian_cfa1",
@@ -603,7 +615,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `岁兽`
+      background: `场景_青穰`
     },
     乐逍遥: {
       name: "dyn_illust_char_2014_nian_nian4",
@@ -614,7 +626,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `岁兽`
+      background: `场景_青穰`
     }
   },
   // 夕
@@ -628,7 +640,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `岁兽`
+      background: `场景_青穰`
     },
     染尘烟: {
       name: "rcy",
@@ -639,7 +651,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `岁兽`
+      background: `场景_青穰`
     },
     青玉砚: {
       name: "dyn_illust_char_2015_dusk_nian12",
@@ -650,7 +662,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `场景_游园`
+      background: `场景_青穰`
     }
   },
   // 令
@@ -664,7 +676,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `岁兽`
+      background: `场景_青穰`
     },
     崖高梦远: {
       name: "ling2",
@@ -675,7 +687,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `岁兽`
+      background: `场景_青穰`
     },
     濯缨: {
       name: "ling3",
@@ -686,7 +698,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `岁兽`
+      background: `场景_青穰`
     },
     方遒卷: {
       name: "dyn_illust_char_2023_ling_nian12",
@@ -697,7 +709,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `场景_游园`
+      background: `场景_青穰`
     }
   },
   // 重岳
@@ -711,7 +723,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `岁兽`
+      background: `场景_青穰`
     },
     全能演员: {
       name: "chongyue2",
@@ -722,7 +734,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `岁兽`
+      background: `场景_青穰`
     },
     何处栖: {
       name: "chongyue3",
@@ -733,7 +745,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `岁兽`
+      background: `场景_青穰`
     }
   },
   // 荒芜拉普兰德
@@ -747,7 +759,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `揭幕者们`
+      background: `场景_庆典`
     },
     无序的谦卑: {
       name: "dyn_illust_char_1038_whitw2_sale15",
@@ -758,7 +770,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `揭幕者们`
+      background: `场景_庆典`
     }
   },
   //维多利亚 维纳
@@ -772,7 +784,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `叙拉古人`
+      background: `场景_庆典`
     }
   },
   //凛御银灰
@@ -786,7 +798,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `喀兰`
+      background: `场景_始发`
     }
   },
   //魔王
@@ -800,7 +812,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `花圃`
+      background: `场景_花圃`
     }
   },
   // 新约能天使
@@ -814,7 +826,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `拉特兰`
+      background: `场景_澄空`
     },
     寻翼之歌: {
       name: "dyn_illust_char_1041_angel2_iteration6",
@@ -825,7 +837,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `场景_庆典`
+      background: `场景_澄空`
     }
   },
   // 佩佩
@@ -840,7 +852,7 @@ let data = {
       speed: 1,
       alpha: true,
       json: true,
-      background: `花圃`
+      background: `场景_地城`
     },
     星移: {
       name: "peipei_xingyi",
@@ -852,7 +864,7 @@ let data = {
       speed: 1,
       alpha: true,
       json: true,
-      background: `花圃`
+      background: `场景_地城`
     }
   },
   //死芒 爱布拉娜
@@ -866,7 +878,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `海滩`
+      background: `场景_假日`
     }
   },
   //引星棘刺 异格棘刺
@@ -880,21 +892,32 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `海滩`
+      background: `场景_假日`
     }
   },
   //斩业星熊
   spxingxiongmrfz: {
     经典形象: {
       name: "spxingxiong_default",
-      x: [0, 0.53],
-      y: [0, -0.76],
-      scale: 0.24,
+      x: [0, 0.618],
+      y: [0, -1.692],
+      scale: 0.4,
       version: "3.8",
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `海滩`
+      background: `场景_庆典`
+    },
+    一闪极意: {
+      name: "dyn_illust_char_1044_hsgma2_whirlwind11",
+      x: [0, 0.52],
+      y: [0, -1.76],
+      scale: 0.4,
+      version: "3.8",
+      action: ["Idle", "Special", "Interact"],
+      speed: 1,
+      alpha: false,
+      background: `场景_庆典`
     }
   },
   //林
@@ -908,7 +931,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `海滩`
+      background: `场景_假日`
     },
     列瑶台: {
       name: "dyn_illust_char_4080_lin_nian10",
@@ -919,7 +942,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `山顶`
+      background: `场景_山岳`
     }
   },
   //锏
@@ -933,7 +956,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `山顶`
+      background: `场景_聚光`
     }
   },
   //伊内丝
@@ -947,7 +970,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `花圃`
+      background: `场景_意塑`
     },
     燃烧天穹下: {
       name: "dyn_illust_char_4087_ines_boc8",
@@ -958,7 +981,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `废墟`
+      background: `场景_意塑`
     }
   },
   // 余
@@ -972,7 +995,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `岁兽`
+      background: `场景_青穰`
     },
     愿清晓: {
       name: "dyn_illust_char_2026_yu_nian12",
@@ -997,7 +1020,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `海滩`
+      background: `场景_假日`
     },
     超然序曲: {
       name: "dyn_illust_char_350_surtr_ambienceSynesthesia6",
@@ -1022,7 +1045,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `海滩`
+      background: `场景_假日`
     }
   },
   // 水陈 假日威龙陈
@@ -1036,7 +1059,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `海滩`
+      background: `场景_青穰`
     },
     悠然假日: {
       name: "shuichen_youyoujiari",
@@ -1047,7 +1070,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `海滩`
+      background: `场景_假日`
     },
     重装芯片: {
       name: "dyn_illust_char_1013_chen2",
@@ -1058,7 +1081,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `海滩`
+      background: `场景_假日`
     }
   },
   // 医疗阿米娅
@@ -1072,7 +1095,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `夜空`
+      background: `场景_庆典`
     }
   },
   // 左乐
@@ -1086,7 +1109,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `山顶`
+      background: `场景_山岳`
     }
   },
   //阿斯卡纶
@@ -1100,7 +1123,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `生于黑夜`
+      background: `场景_庆典`
     }
   },
   //逻格斯 logos
@@ -1114,7 +1137,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `花圃`
+      background: `场景_庆典`
     }
   },
   // 玛恩纳 叔叔
@@ -1128,7 +1151,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: false,
-      background: `花圃`
+      background: `场景_商业`
     }
   },
   // 圣约送葬人
@@ -1142,7 +1165,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `拉特兰`
+      background: `场景_澄空`
     }
   },
   // 鸿雪
@@ -1156,7 +1179,7 @@ let data = {
       action: ["Idle", "Special", "Interact"],
       speed: 1,
       alpha: true,
-      background: `喀兰`
+      background: `场景_始发`
     }
   },
   //隐德来希
@@ -1242,8 +1265,36 @@ let data = {
       alpha: false,
       background: `场景_执着`
     }
+  },
+  // 圣聆初雪
+  spchuxuemrfz: {
+    曙光祝颂: {
+      name: "dyn_illust_char_1046_sbell2_ambienceSynesthesia8",
+      x: [0, 0.862],
+      y: [0, -2.168],
+      scale: 0.4,
+      version: "3.8",
+      action: ["Idle", "Special", "Interact"],
+      speed: 1,
+      alpha: false,
+      background: `场景_庆典`
+    }
+  },
+  // 予愿安洁丽娜
+  spanjielinamrfz: {
+    经典形象: {
+      name: "dyn_illust_char_1015_aglna2",
+      x: [0, 0.469],
+      y: [0, -2.008],
+      scale: 0.35,
+      version: "3.8",
+      action: ["Idle", "Special", "Interact"],
+      speed: 1,
+      unpackPremultipliedAlpha: true,
+      alpha: true,
+      background: `场景_再启`
+    }
   }
 };
 data = sjzxDycInit(data);
 window.whichWaySave.dycSave.assets = data;
-//# sourceMappingURL=dynamicConfig.js.map

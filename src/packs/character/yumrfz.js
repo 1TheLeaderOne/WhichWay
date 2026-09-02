@@ -231,4 +231,3 @@ translate({
 });
 characterTitle("yumrfz", "<font color='#b8860b'>灶里乾坤</font>");
 characterIntro("yumrfz", "余，炎国厨师，拥有丰富的烹饪经验。现通过审核，以访客身份驻留罗德岛以便探亲访友，同时也为罗德岛提供烹饪支持。");
-//# sourceMappingURL=yumrfz.js.map

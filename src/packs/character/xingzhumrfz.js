@@ -310,4 +310,3 @@ translate({
 });
 characterTitle("xingzhumrfz", "<font color='#b8860b'>行止于坊</font>");
 characterIntro("xingzhumrfz", "行箸，就任于炎国太史阁的历史研究者，畅销美食类散记《百灶食珍录》作者。经干员煌介绍，以访客身份来到罗德岛。");
-//# sourceMappingURL=xingzhumrfz.js.map

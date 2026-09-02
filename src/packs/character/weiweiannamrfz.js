@@ -235,4 +235,3 @@ translate({
 });
 characterTitle("weiweiannamrfz", "<font color=#efd02a>金盏花</font>");
 characterIntro("weiweiannamrfz", "薇薇安娜·德罗斯特，莱塔尼亚施彤领选帝侯霍赫贝格家族后裔，前卡西米尔人气竞技骑士。经耀骑士临光举荐，在罗德岛登记为合作干员。</br>擅长使用光影类源石技艺，配以华丽的剑术技巧，能在战场上灵活御敌。驻留本舰期间将为罗德岛提供战术与外勤任务支援。");
-//# sourceMappingURL=weiweiannamrfz.js.map

@@ -126,4 +126,3 @@ async function orb(card, player, type) {
     player.changeHujia(type === "jifa" ? 2 : 1, "gain", 5);
   }
 }
-//# sourceMappingURL=gallusmrfz.js.map

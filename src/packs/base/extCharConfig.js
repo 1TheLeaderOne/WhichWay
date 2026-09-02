@@ -39,4 +39,3 @@ const initCharConfig = (char) => {
 export {
   initCharConfig
 };
-//# sourceMappingURL=extCharConfig.js.map

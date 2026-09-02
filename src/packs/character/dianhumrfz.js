@@ -206,4 +206,3 @@ translate({
 });
 characterTitle("dianhumrfz", "<font color = #6495ed>无言的慈爱</font>");
 characterIntro("dianhumrfz", "电弧，罗德岛精英干员。曾为巴别塔提供通讯支援，主导罗德岛早期的通讯系统建设，为相关通讯工作提供了必要的框架支持。");
-//# sourceMappingURL=dianhumrfz.js.map

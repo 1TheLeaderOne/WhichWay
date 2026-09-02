@@ -52,4 +52,3 @@ window.whichWay.register("VideoPlayer", VideoPlayer);
 export {
   VideoPlayer
 };
-//# sourceMappingURL=index.js.map

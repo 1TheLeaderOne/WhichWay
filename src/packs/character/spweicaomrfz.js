@@ -190,4 +190,3 @@ translate({
   "newminghuomrfz_info": "锁定技，每回合限一次，当有角色因你而脱离濒死状态后，或有角色因你回复体力值后体力值与体力上限相等，你于此回合结束后执行一个额外的回合。"
 });
 characterIntro("spweicaomrfz", "苇草，驻留罗德岛的维多利亚南部办事处期间，曾提出撤离申请，近期再次成功与罗德岛建立联络。目前正以深池名义带领小股部队在维多利亚境内活动，以救助被暴力胁迫的塔拉人为主要行动目标。");
-//# sourceMappingURL=spweicaomrfz.js.map

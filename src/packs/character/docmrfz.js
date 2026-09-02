@@ -157,4 +157,3 @@ translate({
 });
 characterTitle("docmrfz", "<font color=#DC143C>利他主义</font>");
 characterIntro("docmrfz", "医生是彩虹小队成员之一，为人亲和体贴，乐于助人，极受队友们的信任。<br>医生随身携带一把MPD-0激素手枪。该武器可以从远距离向目标注射具有急救功能的药剂，为受伤的队友提供可靠的救助。");
-//# sourceMappingURL=docmrfz.js.map

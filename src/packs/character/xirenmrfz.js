@@ -161,4 +161,3 @@ translate({
 });
 characterTitle("xirenmrfz", "<font color=#00868B>凋敝魂灵</font>");
 characterIntro("xirenmrfz", "锡人，哥伦比亚侦探，梅兰德基金会高级特工，曾在特里蒙与罗德岛有过数次接触。<br>罗德岛与梅兰德基金会已经正式展开合作，不过锡人先生并不负责专门的对接工作。尽管他偶尔也会在梅兰德一侧的接洽人员不方便时临时顶替，但这只是特殊情况，并非常规，请多加注意。");
-//# sourceMappingURL=xirenmrfz.js.map

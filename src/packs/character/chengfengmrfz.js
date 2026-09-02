@@ -238,4 +238,3 @@ translate({
 });
 characterTitle("chengfengmrfz", "<font color='#db7093'>抢亦有道</font>");
 characterIntro("chengfengmrfz", "镖客骋风，常年在炎国尚蜀及周边地区走镖。因矿石病来罗德岛就医，为拓展镖局业务，主动与罗德岛签订了合作协议，为罗德岛提供药物运输服务及引荐人才。");
-//# sourceMappingURL=chengfengmrfz.js.map

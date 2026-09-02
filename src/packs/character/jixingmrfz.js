@@ -142,4 +142,3 @@ translate({
 });
 characterTitle("jixingmrfz", "<font color = #a52a2a>命由天定</font>");
 characterIntro("jixingmrfz", "吉星，活跃在锻冶町的珠宝鉴定师，杂货铺“吉星”的所有者，在金石会事件后失去了店铺与家，经介绍来到罗德岛接受矿石病治疗，现作为狙击干员为罗德岛提供服务。");
-//# sourceMappingURL=jixingmrfz.js.map

@@ -71,4 +71,3 @@ translate({
 });
 characterTitle("paxinghaomrfz", "<font color=#00868B>战争巨兽</font>");
 characterIntro("paxinghaomrfz", "由白铁制作的钢铁巨兽‘爬行者’");
-//# sourceMappingURL=paxinghaomrfz.js.map

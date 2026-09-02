@@ -26,4 +26,3 @@ class GameEventExt extends lib.element.GameEvent {
 export {
   GameEventExt
 };
-//# sourceMappingURL=gameEvent.js.map

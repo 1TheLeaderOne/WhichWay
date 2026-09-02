@@ -200,4 +200,3 @@ translate({
 });
 characterTitle("senximrfz", "<font color='#d2691e'>资深魔物料理人</font>");
 characterIntro("senximrfz", "森西是莱欧斯小队的成员之一，具有丰富的野外生存经验，对饮食有固执的坚持，在小队中担任厨师。<br>森西以为小队提供健康伙食为己任，随身携带的锅具和菜刀是用珍贵材料精制的厨具。");
-//# sourceMappingURL=senximrfz.js.map

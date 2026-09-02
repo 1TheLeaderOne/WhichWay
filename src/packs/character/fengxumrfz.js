@@ -136,4 +136,3 @@ function getNumber(player) {
   const evt = player.getHistory("useCard", (evt2) => typeof evt2.card.number === "number")[player.getHistory("useCard", (evt2) => typeof evt2.card.number === "number").length - 1];
   return evt.card.number;
 }
-//# sourceMappingURL=fengxumrfz.js.map

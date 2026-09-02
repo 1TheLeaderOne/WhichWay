@@ -225,4 +225,3 @@ translate({
 });
 characterTitle("chizuimrfz", "<font color=#8F3ED7>斩棘卫法</font>");
 characterIntro("chizuimrfz", "斥罪，原为叙拉古城邦法官，通过干员德克萨斯与罗德岛建立联系。于后勤部工作，担任罗德岛法律顾问一职。");
-//# sourceMappingURL=chizuimrfz.js.map

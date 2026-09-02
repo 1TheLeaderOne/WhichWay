@@ -174,4 +174,3 @@ translate({
 });
 characterTitle("spyoulingshamrfz", "<font color=#00868B>未尽之美</font>");
 characterIntro("spyoulingshamrfz", "幽灵鲨，本名劳伦缇娜，阿戈尔军事团体“深海猎人”成员，在对抗大型生物与破坏硬目标等行动中展现出极强的技巧。</br>“愚人号”事件后，其精神状态趋于稳定，记忆恢复，情绪趋于稳定。");
-//# sourceMappingURL=spyoulingshamrfz.js.map

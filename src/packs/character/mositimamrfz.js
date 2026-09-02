@@ -128,4 +128,3 @@ translate({
   "shishimrfz_info": "当你于你的出牌阶段或摸牌阶段摸牌时，你可以令此次摸牌数+X，然后你于弃牌阶段开始时弃X-1张牌。（X=本回合你发动此技能的次数+1）"
 });
 characterIntro("mositimamrfz", "莫斯提马，企鹅物流员工，总是单独行动，此前履历不详。");
-//# sourceMappingURL=mositimamrfz.js.map

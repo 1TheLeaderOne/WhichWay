@@ -1,6 +1,6 @@
 import { whichWayArknight } from "../arknight/index.js";
 import { whichWayFile } from "../file.js";
-import { get, lib, game } from "noname";
+import { lib, get, game } from "noname";
 import { onArenaReady, onConfig, onSetDev } from "../hooks/index.js";
 import { whichWayUtil } from "../utill.js";
 import { whichWayWebPlay } from "./webPlay.js";
@@ -10,6 +10,25 @@ import { whichWayToast } from "../toast/index.js";
 import { createApp } from "vue";
 import AudioDownloadDialog from "./AudioDownloadDialog.vue.js";
 const audioSave = window.whichWaySave.audioConfig;
+const DEFAULT_VOICE_TITLES = ["选中干员1", "选中干员2", "部署1", "部署2", "作战中1", "作战中2", "作战中3", "作战中4"];
+function resolvePlayerNames(player) {
+  if (typeof player === "string") return [player];
+  if (!player) return [];
+  const list = [];
+  for (const name of [player.name, player.name1, player.name2]) {
+    if (typeof name === "string" && name && !list.includes(name)) list.push(name);
+  }
+  const shown = get.name(player);
+  if (typeof shown === "string" && shown && !list.includes(shown)) list.push(shown);
+  return list;
+}
+async function listDirSafe(dir) {
+  try {
+    return await game.promises.getFileList(dir);
+  } catch (e) {
+    return [[], []];
+  }
+}
 class WhichWayAudio {
   /**
    * PRTS路径
@@ -24,18 +43,11 @@ class WhichWayAudio {
    * 配音组件初始化
    */
   async init() {
-    await this.checkAudioFolder();
     onArenaReady({
       name: "whichWayAudio_init",
       fn: async () => {
         await this.ensureAudioCache();
-        for (const name of window.whichWaySave.allCharacters) {
-          const char = get.character(name);
-          await whichWayAudio.initDieAudio(char);
-          for (const skill of char.skills) {
-            await whichWayAudio.initAudio(skill, name);
-          }
-        }
+        this.initAllAudio();
         await whichWayAudio.override();
       }
     });
@@ -52,6 +64,7 @@ class WhichWayAudio {
           onclick(item) {
             audioSave.default = item;
             whichWayUtil.saveConfig("audioDefaultLang", item);
+            whichWayAudio.refreshAudioIndex();
           }
         }
       }
@@ -111,64 +124,367 @@ class WhichWayAudio {
       priority: 860
     });
   }
+  // ============ 缓存 / 索引 ============
   /**
-   * 检查音频文件夹是否存在，不存在则创建
+   * 已存在的音频文件路径集合。
+   *
+   * 原先每次 exsitAudio 都发一趟 checkFile IPC，开局 262 个干员 × 各自技能会串行检查上千次；
+   * 现在改为首次访问时一次性扁平扫描（3 轮并发），之后退化为 O(1) 的 Set 查找。
    */
-  async checkAudioFolder() {
-    const audioLangs = whichWayArknight.getVoiceLangs();
-    await Promise.all(
-      audioLangs.map(async (lang) => {
-        if (await whichWayFile.exsitFile(`audio:${lang}`, "folder")) return;
-        await whichWayFile.createFolder(`audio:${lang}`);
-        await whichWayFile.createFolder(`audio:${lang}/die`);
-      })
-    );
+  _audioExistCache = null;
+  _audioExistPromise = null;
+  /** 干员 → 是否属于明日方舟干员（inArknightChars 内部是数组 includes，需缓存） */
+  _inArkCache = /* @__PURE__ */ new Map();
+  /** 干员 → 配音语言 */
+  _charLangCache = /* @__PURE__ */ new Map();
+  /** `技能|干员` → 配音语言 */
+  _skillLangCache = /* @__PURE__ */ new Map();
+  /** 技能 → 引用链终点技能 */
+  _referCache = /* @__PURE__ */ new Map();
+  /** `技能_干员` → 在线配音标题 */
+  _voiceCache = /* @__PURE__ */ new Map();
+  /** 启用了 audioname 后缀命名的共享技能 */
+  _suffixSkills = /* @__PURE__ */ new Set();
+  /** 技能 → (干员 → 在线配音实例) */
+  _webPlayMap = /* @__PURE__ */ new Map();
+  /** 技能 → 被音频系统改写前的原始 audio 配置（用于切换语言后还原） */
+  _originalAudio = /* @__PURE__ */ new Map();
+  /**
+   * 确保音频目录存在并建立存在性缓存（幂等，并发出一次）
+   */
+  async ensureAudioCache() {
+    if (this._audioExistCache) return;
+    if (!this._audioExistPromise) {
+      this._audioExistPromise = this._buildAudioCache();
+    }
+    return this._audioExistPromise;
   }
+  /**
+   * 建立缓存：建目录 + 扁平扫描。
+   *
+   * 这里刻意不用 whichWayFile.getFileTree —— 它对每一层目录都会「列一次 + 再递归列一次」，
+   * 同一目录被扫描两遍；音频目录的固定结构是 audio/{语言}/{文件} 与 audio/{语言}/die/{文件}，
+   * 只有两层，直接分 3 轮并发列出即可（1 + 语言数 + 子目录数 次 IPC）。
+   */
+  async _buildAudioCache() {
+    const root = whichWayFile.compilePath("audio:");
+    const allLangs = whichWayArknight.getVoiceLangs();
+    const cache = /* @__PURE__ */ new Set();
+    const [existingLangs] = await listDirSafe(root);
+    const missingLangs = allLangs.filter((lang) => !existingLangs.includes(lang));
+    if (missingLangs.length) {
+      await Promise.all(
+        missingLangs.map(async (lang) => {
+          await whichWayFile.createFolder(`audio:${lang}`);
+          await whichWayFile.createFolder(`audio:${lang}/die`);
+        })
+      );
+    }
+    const langNames = existingLangs.concat(missingLangs);
+    const langPaths = langNames.map((lang) => root.endsWith("/") ? root + lang : `${root}/${lang}`);
+    const langLists = await Promise.all(langPaths.map(listDirSafe));
+    const subPaths = [];
+    for (let i = 0; i < langPaths.length; i++) {
+      const [subFolders, files] = langLists[i];
+      for (const file of files) cache.add(`${langPaths[i]}/${file}`);
+      for (const sub of subFolders) subPaths.push(`${langPaths[i]}/${sub}`);
+    }
+    const subLists = await Promise.all(subPaths.map(listDirSafe));
+    for (let i = 0; i < subPaths.length; i++) {
+      for (const file of subLists[i][1]) cache.add(`${subPaths[i]}/${file}`);
+    }
+    this._audioExistCache = cache;
+    console.debug(`[whichWayAudio] 音频缓存就绪：${cache.size} 个文件，${langPaths.length} 个语言目录`);
+  }
+  _addAudioCacheEntry(fullPath) {
+    this._audioExistCache?.add(fullPath);
+  }
+  /** 清空所有派生缓存（语言/引用/索引），下次访问时重建 */
+  clearCaches() {
+    this._charLangCache.clear();
+    this._skillLangCache.clear();
+    this._referCache.clear();
+    this._suffixSkills.clear();
+    this._webPlayMap.clear();
+  }
+  /** 配置变更后重建整套音频索引 */
+  async refreshAudioIndex() {
+    for (const [skill, audio] of this._originalAudio) {
+      const info = lib.skill[skill];
+      if (info) info.audio = audio;
+    }
+    this._originalAudio.clear();
+    this.clearCaches();
+    await this.ensureAudioCache();
+    this.initAllAudio();
+  }
+  // ============ 索引构建 ============
+  /**
+   * 一次性为所有干员建立音频索引（全程同步，无 IPC）。
+   *
+   * 原先的写法有两类问题：
+   * 1. 对 262 个干员 × 各自技能逐次 `await exsitAudio`，即使命中缓存也有上千次微任务调度；
+   * 2. `lib.skill[skill].audio` 被每个干员反复覆盖（共享技能最终只保留最后一个干员的路径），
+   *    在线配音也只挂在技能上的单例 whichWayWebPlay，导致不同干员共用同一份配音。
+   *
+   * 现在改为：
+   * 1. 先汇总「技能 → 拥有该技能的干员」，为共享技能自动登记 audioname（引擎会据此解析
+   *    `{技能}_{干员}{n}.mp3`）；
+   * 2. 再按 (技能, 干员) 把结果写到 lib.skill[目标技能].audioname2 —— 这是引擎原生的
+   *    「按角色覆盖 audio」机制（见 docs/audio-guide.md），各干员互不干扰；
+   * 3. 本地缺失的登记到「技能 → 干员」二级在线配音表，每个干员播自己的 PRTS 配音。
+   */
+  initAllAudio() {
+    if (!this._audioExistCache) return;
+    const characters = [];
+    const owners = /* @__PURE__ */ new Map();
+    for (const name of window.whichWaySave.allCharacters) {
+      const skills = get.character(name)?.skills;
+      if (!skills?.length) continue;
+      characters.push([name, skills]);
+      for (const skill of skills) {
+        let list = owners.get(skill);
+        if (!list) owners.set(skill, list = []);
+        list.push(name);
+      }
+    }
+    for (const [skill, list] of owners) {
+      if (list.length < 2) continue;
+      if (!this.shouldUseAudioNameSuffix(skill, list)) continue;
+      const info = lib.skill[this.getReferSkill(skill)];
+      if (!info) continue;
+      if (!Array.isArray(info.audioname)) info.audioname = [];
+      for (const char of list) {
+        if (!info.audioname.includes(char)) info.audioname.push(char);
+      }
+      this._suffixSkills.add(skill);
+    }
+    for (const [name, skills] of characters) {
+      this.initDieAudio(get.character(name));
+      for (const skill of skills) this.applySkillAudio(skill, name);
+    }
+  }
+  /**
+   * 共享技能是否改用 `{技能}_{干员}{n}.mp3` 命名。
+   *
+   * 多个干员共用一份 `{技能}{n}.mp3` 会互相覆盖，所以新下载一律用带干员名的后缀命名；
+   * 但若已存在旧命名文件（老版本下载产物），则沿用旧命名以免已下载的配音失效。
+   */
+  shouldUseAudioNameSuffix(skill, owners) {
+    const target = this.getReferSkill(skill);
+    for (const char of owners) {
+      if (this._audioExistCache.has(whichWayFile.compilePath(`audio:${this.getSkillLang(skill, char)}/${target}_${char}1.mp3`))) {
+        return true;
+      }
+    }
+    for (const char of owners) {
+      if (this._audioExistCache.has(whichWayFile.compilePath(`audio:${this.getSkillLang(skill, char)}/${target}1.mp3`))) {
+        return false;
+      }
+    }
+    return true;
+  }
+  /**
+   * 为「技能 × 干员」这一组合确定音频来源并写入引擎可识别的位置。
+   *
+   * - 本地文件存在 → `lib.skill[目标技能].audioname2[干员] = "ext:WhichWay/audio/{语言}:{数量}"`
+   * - 本地文件缺失 → 登记在线配音实例（每个干员一份）
+   */
+  applySkillAudio(skill, char) {
+    if (!window.whichWaySave.allSkills.includes(skill)) return;
+    const info = lib.skill[skill];
+    if (!info) return;
+    if (!info.logAudio) info.logAudio = () => info.audio;
+    const target = this.getReferSkill(skill);
+    const targetInfo = lib.skill[target];
+    if (!targetInfo || !window.whichWaySave.allSkills.includes(target)) return;
+    const parsed = this.parseAudioCount(targetInfo.audio);
+    if (!parsed) {
+      this.clearWebPlay(skill, char);
+      return;
+    }
+    if (parsed.voices.length) this.cacheSkillVoices(skill, char, parsed.voices);
+    const lang = this.getSkillLang(skill, char);
+    const base = this.getAudioBaseName(skill, char);
+    const exists = this._audioExistCache.has(whichWayFile.compilePath(`audio:${lang}/${base}1.mp3`));
+    if (exists) {
+      if (!targetInfo.audioname2) targetInfo.audioname2 = {};
+      targetInfo.audioname2[char] = `ext:WhichWay/audio/${lang}:${parsed.count}`;
+      this.clearWebPlay(skill, char);
+    } else if (lang !== "CUSTOM") {
+      this.setWebPlay(skill, char, new whichWayWebPlay(skill, char, parsed.voices, base));
+      if (targetInfo.audioname2) delete targetInfo.audioname2[char];
+    } else {
+      this.clearWebPlay(skill, char);
+      if (targetInfo.audioname2) delete targetInfo.audioname2[char];
+      console.warn(`[whichWayAudio] 角色 ${char} 的技能 ${skill} 的语言设置为 ${lang}，但音频文件不存在！`);
+    }
+    if (typeof info.audio !== "string") {
+      this._originalAudio.set(skill, info.audio);
+      info.audio = `ext:WhichWay/audio/${lang}:${parsed.count}`;
+    }
+  }
+  /**
+   * 解析 audio 配置得到音频数量与（可选的）配音标题列表
+   */
+  parseAudioCount(audio) {
+    if (audio === false || audio === void 0 || audio === null) return void 0;
+    if (audio === true) return { count: 1, voices: [] };
+    if (typeof audio === "number") return { count: audio, voices: [] };
+    if (Array.isArray(audio)) return { count: audio.length, voices: audio.slice() };
+    if (typeof audio === "string") {
+      const matched = audio.match(/:(\d+)$/);
+      if (matched) return { count: parseInt(matched[1]), voices: [] };
+    }
+    return void 0;
+  }
+  /**
+   * 该技能在该干员名下的本地文件名前缀。
+   *
+   * 引擎在解析路径时用的是**引用链终点技能名**，并在 audioname 命中该干员时追加 `_干员`，
+   * 这里必须与之完全一致，否则存在性判断与下载文件名都会错位。
+   */
+  getAudioBaseName(skill, char) {
+    const target = this.getReferSkill(skill);
+    if (this._suffixSkills.has(skill)) return `${target}_${char}`;
+    const info = lib.skill[target];
+    if (info && Array.isArray(info.audioname) && info.audioname.includes(char)) return `${target}_${char}`;
+    return target;
+  }
+  /**
+   * 取 (技能, 干员) 的在线配音标题；数字型 audio 从中随机抽取并持久化，保证每次选中一致
+   */
+  getSkillVoices(skill, char) {
+    const key = `${skill}_${char}`;
+    const cached = this._voiceCache.get(key);
+    if (cached) return cached;
+    const stored = audioSave.onlineVoicesTitle[key];
+    if (Array.isArray(stored) && stored.length) {
+      this._voiceCache.set(key, stored);
+      return stored;
+    }
+    const parsed = this.parseAudioCount(lib.skill[this.getReferSkill(skill)]?.audio);
+    let titles;
+    if (parsed?.voices.length) {
+      titles = parsed.voices.slice();
+    } else {
+      const count = Math.max(1, Math.min(parsed?.count ?? 2, DEFAULT_VOICE_TITLES.length));
+      titles = DEFAULT_VOICE_TITLES.randomGets(count);
+    }
+    return this.cacheSkillVoices(skill, char, titles);
+  }
+  /** 固化 (技能, 干员) 的在线配音标题 */
+  cacheSkillVoices(skill, char, titles) {
+    const key = `${skill}_${char}`;
+    this._voiceCache.set(key, titles);
+    audioSave.onlineVoicesTitle[key] = titles;
+    return titles;
+  }
+  // ============ 在线配音表 ============
+  getWebPlay(skill, char) {
+    return this._webPlayMap.get(skill)?.get(char);
+  }
+  setWebPlay(skill, char, instance) {
+    let map = this._webPlayMap.get(skill);
+    if (!map) this._webPlayMap.set(skill, map = /* @__PURE__ */ new Map());
+    map.set(char, instance);
+  }
+  clearWebPlay(skill, char) {
+    this._webPlayMap.get(skill)?.delete(char);
+  }
+  /**
+   * 按玩家查找在线配音实例：依次尝试 name/name1/name2/显示名，再回退到引用技能
+   */
+  findWebPlay(skill, player) {
+    const names = resolvePlayerNames(player);
+    const target = this.getReferSkill(skill);
+    for (const skillName of skill === target ? [skill] : [skill, target]) {
+      for (const name of names) {
+        const found = this.getWebPlay(skillName, name);
+        if (found) return found;
+      }
+    }
+    return void 0;
+  }
+  /**
+   * 取 audioname2 中命中该玩家的配置值。
+   *
+   * 引擎原生支持 audioname2（按角色覆盖 audio，见 docs/audio-guide.md），命中后有以下几种值：
+   * - 音频系统写入的本地路径（`ext:WhichWay/audio/{语言}:{数量}`）→ 交回引擎解析即可；
+   * - 干员代码写的「借用别的技能配音」（`info.audioname2[player.name] = "bianyimrfz"`）→
+   *   需要转交那个技能处理，否则在线配音会播错人；
+   * - 其它（如引用核心技能）→ 交回引擎。
+   */
+  getAudioname2Value(info, player) {
+    const map = info?.audioname2;
+    if (!map) return void 0;
+    for (const name of resolvePlayerNames(player)) {
+      const value = map[name];
+      if (typeof value === "string") return value;
+    }
+    return void 0;
+  }
+  // ============ 引擎 API 覆盖 ============
   async override() {
     await whichWayAPIOverride.appendHook("game.trySkillAudio", {
       before: async function(skill, player, directaudio, nobroadcast, skillInfo, args) {
         if (!lib.config.background_speak) {
-          return;
+          return false;
         }
-        let trueSkill = whichWayAudio.getReferSkill(skill);
-        let info = skillInfo || lib.skill[trueSkill];
-        let infox = skillInfo || lib.skill[skill];
-        if (!info) {
-          return;
+        const trueSkill = whichWayAudio.getReferSkill(skill);
+        const info = skillInfo || lib.skill[trueSkill];
+        const infox = skillInfo || lib.skill[skill];
+        if (!info || !infox) {
+          return false;
         }
         if (infox.direct && !directaudio) {
-          return;
+          return false;
         }
         if (lib.skill.global.includes(skill) && !infox.forceaudio) {
+          return false;
+        }
+        const audioname2 = whichWayAudio.getAudioname2Value(infox, player);
+        if (audioname2 !== void 0) {
+          if (audioname2 !== skill && !audioname2.startsWith("ext:") && window.whichWaySave.allSkills.includes(audioname2)) {
+            await game.trySkillAudio(audioname2, player, directaudio, true, void 0, args);
+            return false;
+          }
           return;
         }
-        if (infox.audioname2) {
-          let playername = typeof player === "string" ? player : get.name(player);
-          for (let name in infox.audioname2) {
-            if (name.endsWith("mrfz") && playername === name) {
-              return game.trySkillAudio(infox.audioname2[name], player, directaudio, nobroadcast, skillInfo, args);
-            }
-          }
-        }
-        if (info.whichWayWebPlay && info.whichWayWebPlay.useLocalAudio === false) {
-          return info.whichWayWebPlay.play(trueSkill, typeof player === "string" ? player : get.name(player));
-        }
+        const web = whichWayAudio.findWebPlay(skill, player);
+        if (!web) return;
+        if (web.useLocalAudio) return;
+        web.play();
+        return false;
       }
     });
     await whichWayAPIOverride.appendHook("game.tryDieAudio", {
-      before: async function(player) {
-        let name = typeof player === "string" ? player : get.name(player);
-        let info = get.character(name);
-        if (info && info.whichWay && info.whichWay.dieAudio && await whichWayAudio.exsitAudio(null, name, true)) {
-          return info.whichWay.dieAudio.play();
-        }
+      before: function(player) {
+        const name = typeof player === "string" ? player : player ? get.name(player) : void 0;
+        if (!name) return;
+        const info = get.character(name);
+        if (!info?.whichWay?.dieAudio) return;
+        if (whichWayUtil.config("useLocalAudio")) return;
+        info.whichWay.dieAudio.play();
+        return false;
       }
     });
+  }
+  // ============ 对外 API ============
+  /**
+   * 检查音频文件夹是否存在，不存在则创建
+   *
+   * 已并入 ensureAudioCache：建目录与扫描在同一次扁平遍历中完成，不再各自发起 IPC。
+   */
+  async checkAudioFolder() {
+    await this.ensureAudioCache();
   }
   /**
    * 下载音频
    * @param {string} skill 技能名
    * @param {string} char 角色名
+   * @param {string[]} urls 音频地址
+   * @param {string} [lang] 配音语言
    * @param {boolean} [dieAudio=false] 是否是死亡音频
    */
   async downloadAudio(skill, char, urls, lang, dieAudio = false) {
@@ -177,17 +493,16 @@ class WhichWayAudio {
       lang = this.getCharacterLang(char);
     }
     const path = whichWayFile.compilePath(`audio:${lang}${dieAudio ? "/die" : ""}/`);
+    const base = dieAudio ? char : this.getAudioBaseName(skill, char);
     for (let i = 0; i < urls.length; i++) {
-      const url = urls[i];
-      const audioIndex = i + 1;
-      const file = `${dieAudio ? char : `${skill}${audioIndex}`}.mp3`;
-      await whichWayFile.download(url, path, file);
-      this._addAudioCacheEntry(`audio:${lang}${dieAudio ? "/die" : ""}/${file}`);
+      const file = `${dieAudio ? base : `${base}${i + 1}`}.mp3`;
+      await whichWayFile.download(urls[i], path, file);
+      this._addAudioCacheEntry(`${path}${file}`);
       whichWayToast.showToast(`下载${file}成功`);
       whichWayToast.removeToastById(`whichWayAudioDownLoad_${file}`);
     }
     if (!dieAudio) await this.initAudio(skill, char);
-    else await this.initDieAudio(get.character(char));
+    else this.initDieAudio(get.character(char));
   }
   /**
    * 获取所有缺失配音的信息列表
@@ -195,56 +510,43 @@ class WhichWayAudio {
    * @returns {Promise<Array<{type: 'skill'|'die', skill?: string, char: string, urls: string[], lang: string}>>}
    */
   async getMissingAudioList(allLangs = false) {
+    await this.ensureAudioCache();
     const tasks = [];
-    const allChars = window.whichWaySave.allCharacters;
-    for (const char of allChars) {
+    for (const char of window.whichWaySave.allCharacters) {
       const charData = get.character(char);
       if (!charData?.skills) continue;
       const avaiableLangs = whichWayArknight.getAviableLangs(char) || [];
       const defaultLang = this.getCharacterLang(char);
       const langsToCheck = allLangs ? avaiableLangs.filter((l) => l !== "CUSTOM") : [defaultLang];
+      if (!langsToCheck.length) continue;
       for (const skill of charData.skills) {
         if (!window.whichWaySave.allSkills.includes(skill)) continue;
+        const base = this.getAudioBaseName(skill, char);
         for (const lang of langsToCheck) {
           if (lang === "CUSTOM") continue;
-          if (!await this.exsitAudio(skill, char) || allLangs) {
-            const info = lib.skill[skill];
-            let voiceTitles = [];
-            if (Array.isArray(info.audio)) {
-              voiceTitles = info.audio;
-            } else if (typeof info.audio === "number") {
-              const audioConfig = window.whichWaySave.audioConfig;
-              const cacheKey = `${skill}_${lang}`;
-              voiceTitles = audioConfig.onlineVoicesTitle[cacheKey] || ["选中干员1", "选中干员2", "部署1", "部署2", "作战中1", "作战中2", "作战中3", "作战中4"].randomGets(2);
-              audioConfig.onlineVoicesTitle[cacheKey] = voiceTitles;
-            }
-            const urls = voiceTitles.map((title) => this.compileVoicePath(char, lang, title));
-            if (urls.length > 0) {
-              tasks.push({
-                type: "skill",
-                skill,
-                char,
-                urls,
-                lang
-              });
-            }
+          if (!allLangs && this._audioExistCache.has(whichWayFile.compilePath(`audio:${lang}/${base}1.mp3`))) {
+            continue;
           }
+          const voiceTitles = this.getSkillVoices(skill, char);
+          if (!voiceTitles.length) continue;
+          tasks.push({
+            type: "skill",
+            skill,
+            char,
+            urls: voiceTitles.map((title) => this.compileVoicePath(char, lang, title)),
+            lang
+          });
         }
       }
       for (const lang of langsToCheck) {
         if (lang === "CUSTOM") continue;
-        const fileExists = await this.exsitAudio(null, char, true);
-        if (!fileExists || allLangs) {
-          const urls = ["行动失败"].map((title) => this.compileVoicePath(char, lang, title));
-          if (urls.length > 0) {
-            tasks.push({
-              type: "die",
-              char,
-              urls,
-              lang
-            });
-          }
-        }
+        if (!allLangs && this.exsitAudioSync(null, char, true)) continue;
+        tasks.push({
+          type: "die",
+          char,
+          urls: [this.compileVoicePath(char, lang, "行动失败")],
+          lang
+        });
       }
     }
     return tasks;
@@ -287,20 +589,28 @@ class WhichWayAudio {
     whichWayToast.showToast(`发现 ${tasks.length} 个缺失配音（${langLabel}），开始下载...`, 5e3, "topRight", "whichWayAudioDownloadAll");
     let successCount = 0;
     let failCount = 0;
-    for (let i = 0; i < tasks.length; i++) {
-      const task = tasks[i];
-      const current = i + 1;
-      if (onProgress) {
-        onProgress(current, tasks.length, `正在下载 ${task.char}${task.skill ? ` - ${task.skill}` : " 死亡配音"} [${task.lang}]`);
+    let finished = 0;
+    const concurrency = 4;
+    let cursor = 0;
+    const workers = Array.from({ length: Math.min(concurrency, tasks.length) }, async () => {
+      while (true) {
+        const index = cursor++;
+        if (index >= tasks.length) return;
+        const task = tasks[index];
+        const current = ++finished;
+        if (onProgress) {
+          onProgress(current, tasks.length, `正在下载 ${task.char}${task.skill ? ` - ${task.skill}` : " 死亡配音"} [${task.lang}]`);
+        }
+        try {
+          await this.downloadAudio(task.skill || "", task.char, task.urls, task.lang, task.type === "die");
+          successCount++;
+        } catch (e) {
+          failCount++;
+          console.warn(`下载失败: ${task.char}${task.skill ? ` - ${task.skill}` : " 死亡配音"}`, e);
+        }
       }
-      try {
-        await this.downloadAudio(task.skill || "", task.char, task.urls, task.lang, task.type === "die");
-        successCount++;
-      } catch (e) {
-        failCount++;
-        console.warn(`下载失败: ${task.char}${task.skill ? ` - ${task.skill}` : " 死亡配音"}`, e);
-      }
-    }
+    });
+    await Promise.all(workers);
     const message = `下载完成！成功 ${successCount} 个${failCount > 0 ? `，失败 ${failCount} 个` : ""}`;
     whichWayToast.showToast(message, 5e3, "topRight", "whichWayAudioDownloadAll");
   }
@@ -311,24 +621,37 @@ class WhichWayAudio {
    * @returns {string} 技能的配音语言
    */
   getSkillLang(skill, char) {
-    const defaultLang = this.getCharacterLang(char) || audioSave.default;
     if (char === void 0 || skill === void 0) throw new Error("char or skill is undefined");
-    if (!whichWayArknight.inArknightChars(char)) return "CUSTOM";
-    let custom = audioSave.custom;
-    if (!custom[char]) return defaultLang;
-    const info = custom[char], skills = this.expandSkills(info.skills);
-    if (skills.includes(skill)) return info.lang;
-    return defaultLang;
+    const key = `${skill}|${char}`;
+    const cached = this._skillLangCache.get(key);
+    if (cached !== void 0) return cached;
+    let result;
+    if (!this.inArknightChars(char)) {
+      result = "CUSTOM";
+    } else {
+      const defaultLang = this.getCharacterLang(char) || audioSave.default;
+      const custom = audioSave.custom[char];
+      if (!custom) result = defaultLang;
+      else result = this.expandSkills(custom.skills).includes(skill) ? custom.lang : defaultLang;
+    }
+    this._skillLangCache.set(key, result);
+    return result;
+  }
+  /** inArknightChars 的记忆化包装（内部是数组 includes，逐个调用是 O(n²)） */
+  inArknightChars(char) {
+    let cached = this._inArkCache.get(char);
+    if (cached === void 0) {
+      cached = whichWayArknight.inArknightChars(char);
+      this._inArkCache.set(char, cached);
+    }
+    return cached;
   }
   /**
    * 播放技能音频(无视trySkillAudio的限制)
    */
   playSkillAudio(skill, name) {
-    const info = lib.skill[this.getReferSkill(skill)];
-    if (!info) return;
-    if (info.whichWayWebPlay && info.whichWayWebPlay.useLocalAudio === false) {
-      return info.whichWayWebPlay.play(skill, name);
-    }
+    const web = this.findWebPlay(skill, name);
+    if (web) return web.play();
     const audioList = get.Audio.skill({ skill, player: name }).fileList;
     return game.tryAudio({ audioList });
   }
@@ -338,8 +661,9 @@ class WhichWayAudio {
   expandSkills(skills) {
     const result = [...skills];
     for (const skill of skills) {
-      let info = lib.skill[skill];
-      let audio = info.audio;
+      const info = lib.skill[skill];
+      if (!info) continue;
+      const audio = info.audio;
       if (window.whichWaySave.allSkills.includes(audio)) {
         result.push(this.getReferSkill(audio));
       }
@@ -362,17 +686,20 @@ class WhichWayAudio {
    */
   getCharacterLang(char, translate = false) {
     if (char === void 0) throw new Error("char is undefined");
-    let custom = audioSave.custom;
-    if (!custom[char]) {
-      let langs = this.getCharacterAvailableLang(char);
-      if (langs.length === 0) return autoTranslate("CUSTOM");
-      if (langs.includes(audioSave.default)) return autoTranslate(audioSave.default);
-      return autoTranslate(langs[0]);
+    let lang = this._charLangCache.get(char);
+    if (lang === void 0) {
+      const custom = audioSave.custom[char];
+      if (custom) {
+        lang = custom.lang;
+      } else {
+        const langs = this.getCharacterAvailableLang(char);
+        if (!langs.length) lang = "CUSTOM";
+        else if (langs.includes(audioSave.default)) lang = audioSave.default;
+        else lang = langs[0];
+      }
+      this._charLangCache.set(char, lang);
     }
-    return autoTranslate(custom[char].lang);
-    function autoTranslate(str) {
-      return translate ? whichWayArknight.getVoiceLangTranslation(str) : str;
-    }
+    return translate ? whichWayArknight.getVoiceLangTranslation(lang) : lang;
   }
   /**
    * 获取角色可用的配音语言
@@ -383,30 +710,20 @@ class WhichWayAudio {
     return get.character(char)?.whichWay?.arknight?.avaiableLangs || [];
   }
   /**
-   * 音频文件存在性缓存。
-   *
-   * 原先每次 exsitAudio 都调一次 game.promises.checkFile（一趟 IPC），
-   * 而 onArenaReady 会对 262 个干员 × 各自技能串行检查上千次，是开局耗时主因。
-   * 这里首次需要时一次性并行扫描 audio 目录，把所有已存在文件的路径装入 Set，
-   * 之后 exsitAudio 退化为 O(1) 的 Set 查找，不再发起任何 IPC。
-   *
-   * 下载新音频时会增量更新本缓存；若手动删除文件，需重启以重建。
+   * 技能的音频是否存在（同步版本，需先 ensureAudioCache）
+   * @param {string} skill 技能名,如果是死亡配音此参数没有意义
+   * @param {string} char 角色名
+   * @param {boolean} [dieAudio=false] 是否是死亡音频
    */
-  _audioExistCache = null;
-  async ensureAudioCache() {
-    if (this._audioExistCache) return;
-    const cache = /* @__PURE__ */ new Set();
-    const { folders } = await whichWayFile.getFileTree("audio:");
-    for (const langFolder of folders) {
-      for (const f of langFolder.files) cache.add(f.path);
-      for (const sub of langFolder.folders) {
-        for (const f of sub.files) cache.add(f.path);
-      }
+  exsitAudioSync(skill, char, dieAudio = false) {
+    if (!this._audioExistCache) return false;
+    if (dieAudio) {
+      const lang2 = this.getCharacterLang(char);
+      return this._audioExistCache.has(whichWayFile.compilePath(`audio:${lang2}/die/${char}.mp3`));
     }
-    this._audioExistCache = cache;
-  }
-  _addAudioCacheEntry(relPath) {
-    this._audioExistCache?.add(whichWayFile.compilePath(relPath));
+    const lang = this.getSkillLang(skill, char);
+    const base = this.getAudioBaseName(skill, char);
+    return this._audioExistCache.has(whichWayFile.compilePath(`audio:${lang}/${base}1.mp3`));
   }
   /**
    * 技能的音频是否存在
@@ -416,17 +733,8 @@ class WhichWayAudio {
    * @returns {Promise<boolean>} 音频是否存在
    */
   async exsitAudio(skill, char, dieAudio = false) {
-    if (dieAudio === false) {
-      const info = lib.skill[skill];
-      if (Array.isArray(info.audioname)) {
-        const find = info.audioname.find((i) => i === char);
-        if (find) skill = `${skill}_${find}1`;
-      }
-    }
-    const lang = dieAudio ? this.getCharacterLang(char) : this.getSkillLang(skill, char);
-    const relPath = dieAudio ? `audio:${lang}/die/${char}.mp3` : `audio:${lang}/${skill}1.mp3`;
     await this.ensureAudioCache();
-    return this._audioExistCache.has(whichWayFile.compilePath(relPath));
+    return this.exsitAudioSync(skill, char, dieAudio);
   }
   async setCustomAudio(char, lang) {
     const skills = get.character(char)?.skills || [];
@@ -436,60 +744,35 @@ class WhichWayAudio {
       audioSave.custom[char].skills = skills;
     }
     whichWayUtil.saveConfig("audioConfig", audioSave);
-    for (const skill of skills) {
-      await this.initAudio(skill, char);
+    this._charLangCache.delete(char);
+    for (const key of [...this._skillLangCache.keys()]) {
+      if (key.endsWith(`|${char}`)) this._skillLangCache.delete(key);
     }
-    await this.initDieAudio(get.character(char));
+    await this.ensureAudioCache();
+    for (const skill of skills) {
+      this.applySkillAudio(skill, char);
+    }
+    this.initDieAudio(get.character(char));
   }
   /**
-   * 初始化技能的音频
+   * 初始化单个技能的音频（下载完成 / 切换配音语言后调用）
    */
-  async initAudio(skill, char, range = lib.skill) {
-    if (!window.whichWaySave.allSkills.includes(skill)) return;
-    const info = range[skill];
-    if (!info.logAudio) {
-      info.logAudio = () => info.audio;
-    }
-    const lang = this.getSkillLang(skill, char);
-    const audio = info.audio;
-    if (typeof audio === "number") {
-      if (await this.exsitAudio(skill, char)) {
-        info.audio = `ext:WhichWay/audio/${lang}:${audio}`;
-        delete info.whichWayWebPlay;
-      } else if (lang !== "CUSTOM") {
-        info.whichWayWebPlay = new whichWayWebPlay(skill, char);
-      } else {
-        console.warn(`[whichWayAudio] 角色 ${char} 的技能 ${skill} 的语言设置为 ${lang}，但音频文件不存在！`);
-      }
-    } else if (typeof audio === "string") {
-      if (audio.startsWith("ext:")) {
-        const num = info.audio.split(":")[2];
-        info.audio = `ext:WhichWay/audio/${lang}:${num}`;
-        if (!await this.exsitAudio(skill, char)) {
-          if (lang !== "CUSTOM") info.whichWayWebPlay = new whichWayWebPlay(skill, char);
-        } else delete info.whichWayWebPlay;
-        return;
-      }
-      let realSkill = this.getReferSkill(skill);
-      if (realSkill) await this.initAudio(realSkill, char, range);
-    } else if (Array.isArray(audio)) {
-      info.audio = `ext:WhichWay/audio/${lang}:${audio.length}`;
-      if (!await this.exsitAudio(skill, char)) {
-        if (lang !== "CUSTOM") info.whichWayWebPlay = new whichWayWebPlay(skill, char, audio);
-      } else delete info.whichWayWebPlay;
-    }
+  async initAudio(skill, char) {
+    await this.ensureAudioCache();
+    this.applySkillAudio(skill, char);
   }
   /**
    * 初始化角色死亡音频
    * @param {WhichWayCharacter} char 角色
    */
-  async initDieAudio(char) {
+  initDieAudio(char) {
+    if (!char?.whichWay?.charId) return;
     const name = char.whichWay.charId;
-    char.dieAudios = [true, whichWayFile.compilePath(`audio:${this.getCharacterLang(name)}/die/${name}.mp3`)];
-    if (!await this.exsitAudio(null, name, true)) {
+    char.dieAudios = [whichWayFile.compilePath(`audio:${this.getCharacterLang(name)}/die/${name}.mp3`)];
+    if (!this.exsitAudioSync(null, name, true)) {
       if (whichWayArknight.inArknightChars(name)) char.whichWay.dieAudio = new whichWayWebPlayDie(char);
-    } else {
-      if (char.whichWay.dieAudio) char.whichWay.dieAudio = void 0;
+    } else if (char.whichWay.dieAudio) {
+      char.whichWay.dieAudio = void 0;
     }
   }
   /**
@@ -499,13 +782,19 @@ class WhichWayAudio {
    * 会继续查找被引用技能的 audio 属性，直到找到不为字符串类型或为纯数字字符串的技能为止。
    *
    * 该方法会检测并处理循环引用情况，如果发现循环引用会输出警告并返回原始技能名。
+   * 结果会被记忆化，避免 262 个干员 × 各自技能重复走同一条引用链。
    *
    * @param {string} name - 起始技能名称
-   * @param {Set<string>} [visited=new Set()] - 已访问的技能集合，用于检测循环引用
-   * @param {string} [lastName] - 上一个技能名称，用于返回默认值
-   * @returns {string} 最终目标技能名称或上一个技能名称或起始技能名称
+   * @returns {string} 最终目标技能名称
    */
-  getReferSkill(name, visited = /* @__PURE__ */ new Set(), lastName) {
+  getReferSkill(name) {
+    const cached = this._referCache.get(name);
+    if (cached !== void 0) return cached;
+    const result = this._resolveReferSkill(name, /* @__PURE__ */ new Set());
+    this._referCache.set(name, result);
+    return result;
+  }
+  _resolveReferSkill(name, visited, lastName) {
     if (visited.has(name)) {
       console.warn(`Circular reference detected at skill: ${name}`);
       return name;
@@ -515,7 +804,7 @@ class WhichWayAudio {
     if (!info || !info.audio) return lastName || name;
     const audio = info.audio;
     if (typeof audio === "string" && !/^\d+$/.test(audio)) {
-      return this.getReferSkill(audio, visited, name);
+      return this._resolveReferSkill(audio, visited, name);
     }
     return name;
   }
@@ -577,4 +866,3 @@ window.whichWay.register("audio", whichWayAudio);
 export {
   whichWayAudio
 };
-//# sourceMappingURL=index.js.map

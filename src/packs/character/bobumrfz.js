@@ -128,4 +128,3 @@ translate({
 });
 characterTitle("bobumrfz", "<font color=#b8860b>倾听者</font>");
 characterIntro("bobumrfz", "波卜,赤心医疗员工埃利西奥，作为组织代表前来罗德岛交流学习。<br>现以“波卜”为代号，以罗德岛合作干员身份参与外勤任务，主要参与沟通、谈判、事故救援与情感安抚等事务。");
-//# sourceMappingURL=bobumrfz.js.map

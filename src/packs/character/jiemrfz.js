@@ -169,4 +169,3 @@ function getLastHistory(player) {
   if (!Array.isArray(history)) return null;
   return history.filter((evt) => evt?.card?.cards.length > 0);
 }
-//# sourceMappingURL=jiemrfz.js.map

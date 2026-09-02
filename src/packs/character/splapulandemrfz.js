@@ -184,4 +184,3 @@ translate({
 });
 characterTitle("splapulandemrfz", "<font color='#8b008b'>恣意英杰</font>");
 characterIntro("splapulandemrfz", "拉普兰德，无业，叙拉古萨卢佐家族现任家主阿尔贝托的独女，目前已从家族脱离。拉普兰德擅长单兵作战，经常在战术攻坚与肃清作战中为罗德岛提供协助。");
-//# sourceMappingURL=splapulandemrfz.js.map

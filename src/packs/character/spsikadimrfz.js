@@ -82,4 +82,3 @@ translate({
 });
 characterTitle("spsikadimrfz", "<font color='#6495ed'>大群</font>");
 characterIntro("spsikadimrfz", "照这个方向发展下去，就不会有人关心她究竟是什么了。不是斯卡蒂的问题，一个人也不能改变什么。我说的是，这种生理状态，以及该类生物性物质表现出的最终状态，可能会摧毁我们社会、历史与科学的所有度量衡。希望我们简陋的医疗科研条件现在还够使上点劲......");
-//# sourceMappingURL=spsikadimrfz.js.map

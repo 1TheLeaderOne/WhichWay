@@ -46,4 +46,3 @@ translate({
   "shunanmrfz_info": "①锁定技，你的手牌数不小于你的体力值时，你造成的伤害+<span class=thundertext>1</span>且摸牌阶段额外摸<span class=thundertext>1</span>张牌，若你已损失的体力值不大于你体力上限的一半，有颜色的数字翻倍。②结束阶段，若你的体力值大于1，你失去一点体力。"
 });
 characterIntro("feiyameitamrfz", "菲亚梅塔，拉特兰公证所高级特派员，职务名经本人强烈要求，不予记录。现依据罗德岛与拉特兰教廷的合作协议，从罗德岛获得补给，并提供相关服务。</br>天启惩罚者？每个月还会更新？让我把这些玩意输进终端归档不如直接杀了我。");
-//# sourceMappingURL=feiyameitamrfz.js.map

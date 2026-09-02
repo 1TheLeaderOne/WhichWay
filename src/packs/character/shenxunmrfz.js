@@ -90,4 +90,3 @@ translate({
 });
 characterTitle("shenxunmrfz", "<font color=#DC143C>执者失之</font>");
 characterIntro("shenxunmrfz", "深巡，原名西昆妲，前深海猎人计划研究员，现服役于阿戈尔军团系统，担任海巡队指挥官。在阿戈尔向陆上诸国发出合作邀请后，西昆妲以阿戈尔对陆接洽代表的身份与罗德岛达成合作协议，以罗德岛为媒介与陆上诸国建立交流关系。<br>现以“深巡”为代号，登记为罗德岛合作干员。");
-//# sourceMappingURL=shenxunmrfz.js.map

@@ -114,4 +114,3 @@ onExtension({
 export {
   whichWayVersion
 };
-//# sourceMappingURL=version.js.map

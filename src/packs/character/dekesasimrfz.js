@@ -160,4 +160,3 @@ translate({
   "sudimrfz_info": "每轮开始时，你可以摸两张牌并将这两张牌分配给任意角色。"
 });
 characterIntro("dekesasimrfz", "德克萨斯，企鹅物流员工，单兵作战能力出类拔萃。</br>于合约期内任企鹅物流驻罗德岛联络人员，同时为罗德岛的多项行动提供协助。");
-//# sourceMappingURL=dekesasimrfz.js.map

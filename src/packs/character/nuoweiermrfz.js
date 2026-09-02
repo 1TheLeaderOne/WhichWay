@@ -58,4 +58,3 @@ translate({
 });
 characterTitle("nuoweiermrfz", "<font color='#8b008b'>无证的配镜师</font>");
 characterIntro("nuoweiermrfz", "诺威尔，维多利亚配镜师。在与九及其领导的新整合运动短暂同行前，曾于泰拉多地游历寻人，同时以为当地人配镜维持生计。伦蒂尼姆事件结束后，诺威尔与往日的一位顾客重遇，经其引荐，开始与罗德岛接触。");
-//# sourceMappingURL=nuoweiermrfz.js.map

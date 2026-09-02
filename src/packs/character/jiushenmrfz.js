@@ -288,4 +288,3 @@ translate({
 });
 characterTitle("jiushenmrfz", "<font color='#124FFF'>戏中人</font>");
 characterIntro("jiushenmrfz", "酒神，曾以独立刺客的身份受雇于罗德岛，担任特种干员。结束蓝卡坞的拍摄归来时，干员傀影已经实现自己最早来罗德岛的目的。在同博士协商后，他决定继续保留与罗德岛的合作关系，在游历泰拉的旅程中，以辅助干员的身份为落脚地附近的办事处提供相应支持。");
-//# sourceMappingURL=jiushenmrfz.js.map

@@ -120,4 +120,3 @@ translate({
   "picaimrfz_info": "每回合限一次，当你受到伤害时，你可以展示一张与伤害牌花色相同的牌并令此伤害-1，然后你展示伤害来源一张手牌并标记为“毒”。"
 });
 characterTitle("landumrfz", "<font color = #a52a2a>美丽毒物</font>");
-//# sourceMappingURL=landumrfz.js.map

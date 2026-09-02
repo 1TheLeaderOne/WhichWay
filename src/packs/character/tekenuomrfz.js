@@ -134,4 +134,3 @@ translate({
 });
 characterTitle("tekenuomrfz", "<font color='#b8860b'>制偶艺术家</font>");
 characterIntro("tekenuomrfz", "特克诺，多索雷斯街头艺术社区成员，曾卷入克里斯达尔艺术馆的恐怖袭击事件，因暴露于大量源石粉尘之中，感染加重。经干员龙舌兰介绍，特克诺来到罗德岛寻求医疗援助。病情稳定后，她主动提出加入罗德岛。现已通过相关培训和测试，作为外勤干员常驻于多索雷斯。");
-//# sourceMappingURL=tekenuomrfz.js.map

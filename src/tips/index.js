@@ -132,4 +132,3 @@ window.whichWay.register("tips", whichWayTips);
 export {
   whichWayTips
 };
-//# sourceMappingURL=index.js.map

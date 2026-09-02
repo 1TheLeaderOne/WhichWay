@@ -89,4 +89,3 @@ translate({
 });
 characterTitle("wanqingmrfz", "<font color=#C0C0C0>牵风者</font>");
 characterIntro("wanqingmrfz", "万顷，本名禾生，炎国天师府学徒，担任农业天师一职。在大荒城多项育种实验中取得了重要的成果。经黍介绍，来到罗德岛访学交流，兼任后勤干员。");
-//# sourceMappingURL=wanqingmrfz.js.map

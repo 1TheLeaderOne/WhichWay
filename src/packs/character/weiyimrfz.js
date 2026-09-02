@@ -135,4 +135,3 @@ skill({
     }
   }
 });
-//# sourceMappingURL=weiyimrfz.js.map

@@ -34,4 +34,3 @@ const whichWayArknightRedirect = new WhichWayArknightRedirect();
 export {
   whichWayArknightRedirect
 };
-//# sourceMappingURL=redirect.js.map

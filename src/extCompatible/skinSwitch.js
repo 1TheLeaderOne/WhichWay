@@ -19,4 +19,3 @@ const skinSwitchtCompatible = function() {
 export {
   skinSwitchtCompatible
 };
-//# sourceMappingURL=skinSwitch.js.map

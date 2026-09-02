@@ -240,4 +240,3 @@ translate({
   "weihumrfz_info": "①锁定技，每轮开始时，若你没有护甲，你获得一点护甲；当你有护甲时，手牌上限+1。②出牌阶段结束时，你可以失去至少一点护甲，然后令等量+1名没有护甲的其他角色获得一点护甲。"
 });
 characterIntro("spjiexikamrfz", "杰西卡·布林雷，因私人原因离开黑钢基地后，选择去往拓荒地，成为了一名治安官。现作为当地办事处的合作干员为罗德岛提供帮助与支持。");
-//# sourceMappingURL=spjiexikamrfz.js.map

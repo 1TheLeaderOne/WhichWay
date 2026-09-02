@@ -120,4 +120,3 @@ translate({
 });
 characterTitle("xueliemrfz", "<font color = #1a3cac66>虔信猎人</font>");
 characterIntro("xueliemrfz", "雪猎，出身于谢拉格佩尔罗契家迁入雪山生活的一支，祖辈以在山中捕猎为生，雕刻耶拉冈德像的手艺代代相传。<br>雪猎擅长在雪山中狩猎，身体素质极佳，不幸在一次捕猎中感染了矿石病，现于罗德岛接受治疗，并根据个人意愿成为一名外勤干员。");
-//# sourceMappingURL=xueliemrfz.js.map

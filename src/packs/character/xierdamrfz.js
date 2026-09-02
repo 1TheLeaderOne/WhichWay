@@ -126,4 +126,3 @@ translate({
 });
 characterTitle("xierdamrfz", "<font color = red>神祇代理人</font>");
 characterIntro("xierdamrfz", "一路在伦蒂尼姆救助难民，最后死于矿石病的感染者少女。被前文明语言学家普瑞赛斯以源石信息重构为宇宙投影。她在“罗德岛”内化宇宙中窥见文明墓碑与毁灭真理，仍选择回归泰拉。被普瑞赛斯赋予“消除源石痛苦”的权柄，治愈了几名矿工。");
-//# sourceMappingURL=xierdamrfz.js.map

@@ -335,4 +335,3 @@ translate({
 });
 characterTitle("dibimrfz", "<font color='#6495ed'>场景喷绘师</font>");
 characterIntro("dibimrfz", "蒂比，蓝卡坞场景喷绘师。由本人主动联系，希望推动罗德岛与蓝卡坞双方，就为蓝卡坞感染者员工和演员提供医疗服务的问题，建立相关合作关系，同时根据本人意愿，作为特种干员为罗德岛提供服务。");
-//# sourceMappingURL=dibimrfz.js.map

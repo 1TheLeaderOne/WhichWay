@@ -42,4 +42,3 @@ class HTMLDivElementExt extends HTMLDivElement {
 export {
   HTMLDivElementExt
 };
-//# sourceMappingURL=HTMLDivElementExt.js.map

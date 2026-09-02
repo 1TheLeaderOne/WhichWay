@@ -65,4 +65,3 @@ translate({
 });
 characterTitle("hadiyamrfz", "<font color = #be9b1c66>再造剑角</font>");
 characterIntro("hadiyamrfz", "哈蒂娅，萨尔贡裔哥伦比亚人，沙漠传奇战士部族剑角的后代。为学习战斗技巧于萨尔贡主动加入罗德岛，现作为罗德岛驻萨尔贡办事处干员，接受战斗训练的同时参与各类外勤任务。");
-//# sourceMappingURL=hadiyamrfz.js.map

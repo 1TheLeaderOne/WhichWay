@@ -182,4 +182,3 @@ translate({
 });
 characterTitle("titimrfz", "<font color = #a52a2a>拂扫除垢</font>");
 characterIntro("titimrfz", "法尔贾万达巴德博物馆现任馆长梅捷缇克缇，只有朋友才可以称她“缇缇”。现以外勤干员的身份与罗德岛展开合作。她也希望能尽自己的全力，修复萨尔贡与米诺斯的关系。");
-//# sourceMappingURL=titimrfz.js.map

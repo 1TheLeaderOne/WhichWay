@@ -205,4 +205,3 @@ translate({
 });
 characterTitle("haidimrfz", "<font color=#DC143C>风暴中的信使</font>");
 characterIntro("haidimrfz", "海蒂，以小说家的名义在维多利亚活动，同时已担任凯尔希的私人信使多年。因参与市民自救军的行动而遭萨卡兹军抓捕，在罗德岛进入伦蒂尼姆时被救出，随后正式以干员身份加入罗德岛。");
-//# sourceMappingURL=haidimrfz.js.map

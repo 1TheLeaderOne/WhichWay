@@ -12,4 +12,3 @@ class WhichWayManager {
   }
 }
 window.whichWay = new WhichWayManager();
-//# sourceMappingURL=whichWay.js.map

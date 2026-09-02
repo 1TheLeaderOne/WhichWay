@@ -179,4 +179,3 @@ translate({
 });
 characterTitle("qiubaimrfz", "<font color=#1885f2>春江逢雪</font>");
 characterIntro("qiubaimrfz", "仇白，剑客，出生于炎国姜齐城附近的水寨，后因家庭变故离开故乡，常年行走于炎国各地，并无固定居所与工作。</br>经调查，仇白曾在不同事件中与多位干员有过接触，后接受罗德岛的合作邀请，为罗德岛在炎国境内的各项事务提供支持。");
-//# sourceMappingURL=qiubaimrfz.js.map

@@ -335,4 +335,3 @@ const weinaData = {
 export {
   weinaData
 };
-//# sourceMappingURL=weina.js.map

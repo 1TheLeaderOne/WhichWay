@@ -12,11 +12,11 @@ card("baitiemrfzcard1", {
 });
 cardSkill("baitiemrfzcard1_skill", {
   trigger: { source: "damageBegin3" },
-  filter: function(event, player2) {
-    return event.num > 1 && event.player != player2;
+  filter: function(event, player) {
+    return event.num > 1 && event.player != player;
   },
   prompt: "是否令此伤害+1？",
-  content: function() {
+  content: async function(event, trigger, player) {
     trigger.num++;
     player.logSkill("baitiemrfzcardad", trigger.player);
   }
@@ -24,6 +24,5 @@ cardSkill("baitiemrfzcard1_skill", {
 cardTranslate({
   baitiemrfzcard1: "攻击型平台",
   baitiemrfzcard1_skill: "援备",
-  "baitiemrfzcard1_info": "当你造成至少两点伤害时，你可以令此伤害+1。"
+  baitiemrfzcard1_info: "当你造成至少两点伤害时，你可以令此伤害+1。"
 });
-//# sourceMappingURL=baitiemrfzcard1.js.map

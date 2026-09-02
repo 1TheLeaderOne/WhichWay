@@ -161,4 +161,3 @@ onContent({
 export {
   whichWayToast
 };
-//# sourceMappingURL=index.js.map

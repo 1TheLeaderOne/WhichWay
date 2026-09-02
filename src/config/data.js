@@ -38,4 +38,3 @@ const whichWayConfigData = {
 export {
   whichWayConfigData
 };
-//# sourceMappingURL=data.js.map

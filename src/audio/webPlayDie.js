@@ -28,4 +28,3 @@ class whichWayWebPlayDie {
 export {
   whichWayWebPlayDie
 };
-//# sourceMappingURL=webPlayDie.js.map

@@ -95,4 +95,3 @@ const skillCustomFunc = new SkillCustomFunc();
 export {
   skillCustomFunc
 };
-//# sourceMappingURL=skill.js.map

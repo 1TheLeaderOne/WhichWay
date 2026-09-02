@@ -95,4 +95,3 @@ translate({
 });
 characterTitle("songtongmrfz", "<font color = gray>见微知著</font>");
 characterIntro("songtongmrfz", "松桐，本名森内彻，酒保、关东煮摊摊主，同时也是锻冶町周边情报交易的核心人物，从事多种职业，广泛涉足各类人际网络，尤其擅长处理东国方面的信息流通事务。由本人主动联系，希望就情报交流及业务扩展等方面与罗德岛建立合作关系，同时根据本人意愿，作为先锋干员为罗德岛提供服务。");
-//# sourceMappingURL=songtongmrfz.js.map

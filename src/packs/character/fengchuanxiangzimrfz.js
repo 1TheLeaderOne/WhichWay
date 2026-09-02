@@ -196,4 +196,3 @@ translate({
 });
 characterTitle("fengchuanxiangzimrfz", "<font color = #db7093>毋畏遗忘</font>");
 characterIntro("fengchuanxiangzimrfz", "Ave Mujica的键盘手丰川祥子。与其他成员一起暂居罗德岛，在此期间，积极参与舰上的各项工作。不管是音乐上的造诣，还是行为礼仪，都彰显了她不折不扣的名门大小姐身份。");
-//# sourceMappingURL=fengchuanxiangzimrfz.js.map

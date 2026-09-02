@@ -9,7 +9,9 @@ card("ksl_lulitongxinmrfz", {
   async content(event, trigger, player) {
     let list = [`横置角色`];
     if (game.hasPlayer((c) => c.isLinked())) list.push(`解除横置`);
-    const control = list.length === 1 ? list[0] : await player.chooseControl(list).set("prompt", "请选择一项").set("ai", () => {
+    const control = list.length === 1 ? list[0] : await player.chooseControl({
+      controls: list
+    }).set("prompt", "请选择一项").set("ai", () => {
       get.event().player;
       let Links = game.filterPlayer((p) => p.isLinked());
       let canDraws = 0;
@@ -29,9 +31,14 @@ card("ksl_lulitongxinmrfz", {
     }).forResultControl();
     if (!control) return;
     if (control === "横置角色") {
-      const targets = await player.chooseTarget([1, game.countGroup()], true, `请横置至多${game.countGroup()}名角色`).set("filterTarget", (card2, target, player2) => {
+      const result = await player.chooseTarget({
+        selectTarget: [1, game.countGroup()],
+        forced: true,
+        prompt: `请横置至多${game.countGroup()}名角色`
+      }).set("filterTarget", (card2, target, player2) => {
         return !target.isLinked();
-      }).set("ai", (target) => get.attitude2(target) > 0 && target.countCards("h") < 4).forResult("targets");
+      }).set("ai", (target) => get.attitude2(target) > 0 && target.countCards("h") < 4).forResult();
+      const targets = result.targets;
       if (!targets) return;
       for (let target of game.players) {
         if (targets.includes(target)) {
@@ -40,21 +47,24 @@ card("ksl_lulitongxinmrfz", {
         }
         if (!target.isLinked()) continue;
         let hs = target.getCards("h", (card2) => !get.is.shownCard(card2));
-        if (hs.length) target.addShownCards(hs, "visible_ksl_luli");
+        if (hs.length)
+          target.addShownCards({
+            cards: hs,
+            gaintag: ["visible_ksl_luli"]
+          });
       }
     } else {
       for (let target of game.filterPlayer((c) => c.isLinked())) {
         await target.link(false);
         let hs = target.getCards("h", (card2) => get.is.shownCard(card2));
-        if (hs.length) target.hideShownCards(hs);
-        if (target.hasCard()) target.chooseToDiscard(true, `请弃置一张手牌`);
+        if (hs.length) target.hideShownCards({ cards: hs });
+        if (target.countCards("h") > 0) target.chooseToDiscard({ forced: true, prompt: "请弃置一张手牌" });
       }
     }
   },
   ai: {
     wuxie: (target, card2, player, viewer, status) => {
-      if (status * get.attitude(viewer, player._trueMe || player) > 0 || get.attitude(viewer, player) > 0)
-        return 0;
+      if (status * get.attitude(viewer, player._trueMe || player) > 0 || get.attitude(viewer, player) > 0) return 0;
     },
     basic: {
       order: 7.4,
@@ -76,6 +86,5 @@ card("ksl_lulitongxinmrfz", {
 });
 cardTranslate({
   ksl_lulitongxinmrfz: "勠力同心",
-  "ksl_lulitongxinmrfz_info": "出牌阶段：<br>①你可以令X名没有被横置的角色横置，然后所有被横置的角色将手牌补至4张并明置所有手牌。（X=场上势力数）<br>②你可以令所有被横置的角色解除横置状态、弃置一张手牌，并暗置所有手牌。"
+  ksl_lulitongxinmrfz_info: "出牌阶段：<br>①你可以令X名没有被横置的角色横置，然后所有被横置的角色将手牌补至4张并明置所有手牌。（X=场上势力数）<br>②你可以令所有被横置的角色解除横置状态、弃置一张手牌，并暗置所有手牌。"
 });
-//# sourceMappingURL=ksl_lulitongxinmrfz.js.map

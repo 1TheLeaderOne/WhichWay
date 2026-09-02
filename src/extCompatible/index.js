@@ -34,4 +34,3 @@ window.whichWay.register("extCompatible", whichWayExtCompatible);
 export {
   whichWayExtCompatible
 };
-//# sourceMappingURL=index.js.map

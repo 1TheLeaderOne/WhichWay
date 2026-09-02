@@ -96,4 +96,3 @@ class GetExt extends Get {
 export {
   GetExt
 };
-//# sourceMappingURL=index.js.map

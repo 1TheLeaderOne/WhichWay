@@ -196,4 +196,3 @@ translate({
   "nuanxiangmrfz_info": "每回合限一次，当你使用或打出的一张转化牌结算完毕后，你可以令至多X名角色摸一张牌。（X=该牌对应的实体牌数）"
 });
 characterIntro("wenmimrfz", "温米，出生于雷姆必拓的一座矿业小镇，虽年纪尚小，却在烹饪、机械修理等技术领域展露出了出色的天分。经干员暴行推荐，在监护人阿兰娜的陪同下来到罗德岛接受治疗，同时在舰上学习源石技艺基础课程。");
-//# sourceMappingURL=wenmimrfz.js.map

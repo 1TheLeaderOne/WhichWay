@@ -195,4 +195,3 @@ translate({
 });
 characterTitle("yunqingpingmrfz", "<font color = #a52a2a>何须剑</font>");
 characterIntro("yunqingpingmrfz", "云青萍，曾就任炎国录武官一职，为军队将士记录武功、编撰书籍。现经干员左乐介绍，作为司岁台编外文职暂驻罗德岛，负责辅助对岁兽代理人的观察与记录，并兼任罗德岛后勤干员。");
-//# sourceMappingURL=yunqingpingmrfz.js.map

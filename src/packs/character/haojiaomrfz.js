@@ -196,4 +196,3 @@ translate({
 });
 characterTitle("haojiaomrfz", "<font color=#ed7e78>维多利亚的白狼</font>");
 characterIntro("haojiaomrfz", "号角，毕业于维多利亚皇家近卫学校，现为维多利亚风暴突击队第二分队指挥官。于伦蒂尼姆事件中与罗德岛协同作战，经精英干员Misery介绍，与罗德岛签订战略合作条款。");
-//# sourceMappingURL=haojiaomrfz.js.map

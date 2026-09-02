@@ -100,4 +100,3 @@ translate({
 });
 characterTitle("haimomrfz", "<font color=#8ccfcc>归于海潮</font>");
 characterIntro("haimomrfz", "海沫，在某次针对伊比利亚地区的行动中受到波及，作为伤员被带回本舰施行救治。经考察并结合测试结果，批准其成为外勤干员，于伊比利亚地区周边支援各项任务。");
-//# sourceMappingURL=haimomrfz.js.map

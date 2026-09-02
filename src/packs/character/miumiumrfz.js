@@ -133,4 +133,3 @@ translate({
 });
 characterTitle("miumiumrfz", "<font color=#6575f1>孑然水灵</font>");
 characterIntro("miumiumrfz", "缪尔赛思，莱茵生命生态科主任，哥伦比亚生命科学与环境科学领域专家，在特里蒙事件中与罗德岛取得联系，后与罗德岛签订长期合作条款，与生物工程研究室开展多项联合科研项目，并作为先锋干员参与相关作战任务。");
-//# sourceMappingURL=miumiumrfz.js.map
