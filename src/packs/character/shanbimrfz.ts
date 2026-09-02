@@ -17,6 +17,7 @@ character(NAME, {
 	sex: "female",
 	pack: "legendSJZX",
 	skills: ["feiyuanmrfz", "zhixingmrfz"],
+    designer:["Flandre"],
 });
 
 characterIntro(NAME, "珊比，来自雷姆必拓大涌泉镇，前来罗德岛接受矿石病治疗，并经由干员安洁莉娜的推荐，以及根据本人意愿，加入外勤部作为重装干员为罗德岛提供帮助。");
@@ -99,9 +100,7 @@ skill({
 			await game.asyncDraw([player, target], 1);
 			const result = await player.chooseToCompare(target).forResult();
 			const winner = (result.winner as Player) || undefined;
-			if (winner === player) {
-				player.addTempSkill("xinfu_guanchao",{player:"phaseUseEnd"});
-			} else {
+			if(winner !== player) {
 				player.storage.feiyuanmrfz_extra ??= 0;
 				player.storage.feiyuanmrfz_extra += 2;
 				player.markSkill("feiyuanmrfz");
@@ -141,6 +140,7 @@ skill({
 				async content(event, trigger, player) {
 					game.log(player, "成功完成使命");
 					player.awakenSkill("feiyuanmrfz");
+                    player.addTempSkill("xinfu_guanchao",{player:"phaseUseEnd"});
 				},
 			},
 			extra: {
