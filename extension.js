@@ -38,4 +38,3 @@ export {
   extension as default,
   type
 };
-//# sourceMappingURL=extension.js.map

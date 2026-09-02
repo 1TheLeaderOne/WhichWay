@@ -243,4 +243,3 @@ translate({
 });
 characterTitle("kaierximrfz", "<font color=rgb(255,45,62)>旧日残影</font>");
 characterIntro("kaierximrfz", "凯尔希，罗德岛高层管理人员之一，罗德岛医疗项目领头人。在冶金工业、社会学、源石技艺、考古学、历史系谱学、经济学、植物学、地质学等领域皆拥有渊博学识。于罗德岛部分行动中作为医务人员提供医学理论协助与应急医疗器械，同时也作为罗德岛战略指挥系统的重要组成人员活跃在各项目中。");
-//# sourceMappingURL=kaierximrfz.js.map

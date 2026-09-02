@@ -189,4 +189,3 @@ translate({
   "huanxiangmrfz_info": "当你使用或打出一张【闪】或【无懈可击】结算完成后，你可以摸一张牌。"
 });
 characterIntro("kuiyingmrfz", "独自行动于维多利亚及周边地区的刺客傀影，过去行踪难以查定，背景履历尚未完全实证。</br>现作为特种干员加入罗德岛，作战能力优秀，但仍需谨慎对待。");
-//# sourceMappingURL=kuiyingmrfz.js.map

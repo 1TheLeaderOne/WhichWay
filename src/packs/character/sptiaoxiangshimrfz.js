@@ -166,4 +166,3 @@ translate({
 });
 characterTitle("sptiaoxiangshimrfz", "<font color = green>百里香</font>");
 characterIntro("sptiaoxiangshimrfz", "调香师莱娜，在与博士和罗德岛医疗部沟通后，将疗养庭院暂时交予干员波登可负责，并主动申请外派至米诺斯地区，担任新建立的雅赛努斯办事处的负责人，为当地建立感染者医疗体系。");
-//# sourceMappingURL=sptiaoxiangshimrfz.js.map

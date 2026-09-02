@@ -45,4 +45,3 @@ onSetDev({
 export {
   dataManager
 };
-//# sourceMappingURL=index.js.map

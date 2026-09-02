@@ -170,4 +170,3 @@ translate({
 });
 characterTitle("yemomrfz", "<font color=#efd02a>双生花</font>");
 characterIntro("yemomrfz", "夜魔，维多利亚公民，登记姓名为瑞贝尔·帕斯贝莱蒂·葛罗莉亚，于罗德岛正式任职前为高校学生，进修课程：进阶医疗法术与心理学干预。在医疗法术和破坏性法术领域均展现出较强的控制力。现于罗德岛某调理机构中担任职员。<br>备注：该干员适用于特殊监护管理办法，协议已由监护者莱娜签字确认，现已生效。");
-//# sourceMappingURL=yemomrfz.js.map

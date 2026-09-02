@@ -175,4 +175,3 @@ translate({
   "re_chaoshengmrfz_info": "结束阶段，若你本回合没有造成过伤害，你可以摸两张牌并恢复一点体力。"
 });
 characterIntro("jicimrfz", "精通剑术与药剂制作的罗德岛前线作战干员，棘刺。出身于伊比利亚腹地，于当地宗教局势动荡中离开家乡，在脱离伊比利亚地区后，受邀来到罗德岛。</br>以上关于伊比利亚境内局势的部分为棘刺自述，尚未完全经过考证。");
-//# sourceMappingURL=jicimrfz.js.map

@@ -71,4 +71,3 @@ const WhichWayPopTipsConfig = {
 export {
   WhichWayPopTipsConfig
 };
-//# sourceMappingURL=poptip.js.map

@@ -177,4 +177,3 @@ translate({
 });
 characterTitle("weishidaiermrfz", "<font color=#00868B>卡兹戴尔的黎明</font>");
 characterIntro("weishidaiermrfz", '<span style="text-decoration:line-through">丁真戴尔</span>维什戴尔，萨卡兹雇佣兵领袖W，现正式更名为维什戴尔。于伦蒂尼姆战争期间，与罗德岛伦蒂尼姆特别行动队紧密合作，数度阻遏军事委员会的行动。<br>【权限记录】<br>我们紧急更新了与维什戴尔的战略合作条款，具体条目您可以考虑是否亲自一一核对。您一定已经很清楚，我们未来与她的合作只会越来越紧密。这绝不仅仅关乎她自己。');
-//# sourceMappingURL=weishidaiermrfz.js.map

@@ -389,4 +389,3 @@ translate({
 });
 characterTitle("spxingxiongmrfz", "<font color = #a52a2a>斩金执义</font>");
 characterIntro("spxingxiongmrfz", "星熊，现任龙门近卫局特别督察组组长。仍作为重装干员协助罗德岛行动，主要职能维持不变。<br>顺带一提，在星熊向博士讲述了她早年在东国度过的时光，并默许博士将其中一部分转述给我们之后，我们调整了她基础档案中战斗经验的时间。");
-//# sourceMappingURL=spxingxiongmrfz.js.map

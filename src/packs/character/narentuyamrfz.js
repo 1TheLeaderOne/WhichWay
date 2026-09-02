@@ -60,4 +60,3 @@ translate({
 });
 characterTitle("narentuyamrfz", "<font color=#00868B>征踏天途</font>");
 characterIntro("narentuyamrfz", "娜仁图亚，曾是足迹遍布萨尔贡大半地区的沙盗，现作为外勤干员长期驻留罗德岛，凭借自己丰富的自然知识与生存技巧，活跃于各种野外行动。");
-//# sourceMappingURL=narentuyamrfz.js.map

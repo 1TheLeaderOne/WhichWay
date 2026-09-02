@@ -57,4 +57,3 @@ function patchPrototypeWhitherHelm(ExtensionClass, NativePrototype, BasePrototyp
     timestamp: Date.now()
   };
 }
-//# sourceMappingURL=index.js.map

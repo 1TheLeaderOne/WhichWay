@@ -164,4 +164,3 @@ const UpdateNotice = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data
 export {
   UpdateNotice as default
 };
-//# sourceMappingURL=updateNotice.vue.js.map

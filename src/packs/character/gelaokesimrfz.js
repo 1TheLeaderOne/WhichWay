@@ -150,4 +150,3 @@ translate({
   "ganraomrfz_info": "每名角色每回合限一次，当你对一名其他角色造成伤害时，你可以声明一张牌，然后其本回合不能使用与你声明的牌相同牌名的牌。"
 });
 characterIntro("gelaokesimrfz", "格劳克斯出生于阿戈尔地区，却早早离开家园四处流浪。机缘巧合下加入罗德岛，现为雷神工业先端武器测评师。除了对尖端武器进行研究调整之外，格劳克斯也会在需求对空特化的任务中亲自出击。");
-//# sourceMappingURL=gelaokesimrfz.js.map

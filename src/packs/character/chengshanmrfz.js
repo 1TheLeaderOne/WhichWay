@@ -98,4 +98,3 @@ translate({
   "shidemrfz_info": "锁定技，当你使用或打出，或因弃置失去一张牌时，若你的武将牌没有被横置，则横置之，反之重置之；当你武将牌被重置时，你摸一张牌。"
 });
 characterIntro("chengshanmrfz", "澄闪，罗德岛后勤干员，主要工作地点为罗德岛理发室，一般情况下不作为外勤干员派遣。使用特殊形制的法杖，操控“浮标”对敌人进行打击。");
-//# sourceMappingURL=chengshanmrfz.js.map

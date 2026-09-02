@@ -164,4 +164,3 @@ translate({
   "bingmingmrfz_info": "锁定技，第二轮开始时，若场上有星源，你将手牌和手牌上限调整至与其一致。"
 });
 characterIntro("xingjimrfz", "星极，哥伦比亚某神秘学组织的会员，经由合作协议被派驻至莱茵生命，职位为文献学顾问。由于共发性矿石病与妹妹一起来到罗德岛，在进行矿石病治疗期间通过测试成为干员。可使用独特的剑技，对近战目标造成类似法术的攻击效果。");
-//# sourceMappingURL=xingjimrfz.js.map

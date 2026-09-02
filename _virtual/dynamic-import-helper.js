@@ -8,4 +8,3 @@ const __variableDynamicImportRuntimeHelper = (glob$1, path$13, segs) => {
 export {
   __variableDynamicImportRuntimeHelper as default
 };
-//# sourceMappingURL=dynamic-import-helper.js.map

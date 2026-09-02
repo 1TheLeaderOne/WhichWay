@@ -591,4 +591,3 @@ window.whichWay.register("spineWorker", spineWorker);
 export {
   spineWorker
 };
-//# sourceMappingURL=spineWork.js.map

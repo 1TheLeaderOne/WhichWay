@@ -145,4 +145,3 @@ translate({
   "xinjimrfz_info": "准备阶段，你可以用任意数量的手牌交换‘踏垫’。"
 });
 characterIntro("shuanghuamrfz", "霜华，彩虹小队成员之一，坚定、专注、充满活力，擅长在野外环境作战。</br>除了自身携带的枪械外，霜华携带了SterlingMK2机械夹板“迎宾踏垫”，通过精妙布设，对敌方造成阻碍，为整个小队提供战术支持。");
-//# sourceMappingURL=shuanghuamrfz.js.map

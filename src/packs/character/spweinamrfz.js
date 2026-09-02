@@ -187,4 +187,3 @@ translate({
 });
 characterTitle("spweinamrfz", "<font color=#C0C0C0>再缔荣光</font>");
 characterIntro("spweinamrfz", "维娜·维多利亚,最初以格拉斯哥帮头领身份登记为罗德岛干员的推进之王，于伦蒂尼姆战争期间又以典范军领袖身份与罗德岛协同行动，现在则以伦蒂尼姆议会议长身份，和罗德岛保持合作关系。罗德岛为伦蒂尼姆的医疗建设提供了支持，维娜·维多利亚也承诺未来将在更多领域与罗德岛展开合作。");
-//# sourceMappingURL=spweinamrfz.js.map

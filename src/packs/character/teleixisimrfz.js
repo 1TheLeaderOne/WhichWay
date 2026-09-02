@@ -255,4 +255,3 @@ translate({
 });
 characterTitle("teleixisimrfz", "<font color=#00868B>执剑斩棘</font>");
 characterIntro("teleixisimrfz", "特雷西斯，特蕾西娅的兄长，卡兹戴尔的摄政王，萨卡兹的利刃，一位坚韧的英雄，一个孤独的梦想。道路被他的利刃劈开，代价是他的未来。");
-//# sourceMappingURL=teleixisimrfz.js.map

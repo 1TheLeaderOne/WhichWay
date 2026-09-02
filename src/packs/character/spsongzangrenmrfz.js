@@ -237,4 +237,3 @@ translate({
 });
 characterTitle("spsongzangrenmrfz", "<font color=#f1ca13>圣徒</font>");
 characterIntro("spsongzangrenmrfz", "送葬人，拉特兰公证所法定专业执行者，适用于拉特兰一至十三项公民权益，由现任拉特兰教宗伊万杰利斯塔十一世亲自授予“圣徒”封号。</br>拉特兰并未限制这位特殊的“圣徒”与我们的接触，公证所与罗德岛的合作关系正日趋紧密。干员送葬人现仍旧依合约为罗德岛提供服务，执行拉特兰公民权益相关任务。");
-//# sourceMappingURL=spsongzangrenmrfz.js.map

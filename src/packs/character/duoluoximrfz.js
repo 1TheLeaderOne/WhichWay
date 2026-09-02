@@ -86,4 +86,3 @@ translate({
 });
 characterTitle("duoluoximrfz", "<font color=#13a022>绿野幻梦</font>");
 characterIntro("duoluoximrfz", "多萝西，莱茵生命源石技艺应用科主任，在罗德岛选择使用自己的本名作为代号。</br>多萝西·弗兰克斯小姐以“莱茵生命与罗德岛的合作项目负责人”这一身份加入我们，将会在许多研究项目上为罗德岛提供帮助。身为源石技艺应用科的主任，她对源石技艺本身的理解毋庸置疑，而在源石技艺的应用上更是炉火纯青。");
-//# sourceMappingURL=duoluoximrfz.js.map

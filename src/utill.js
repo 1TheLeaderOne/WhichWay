@@ -2,6 +2,113 @@ import { lib, ui, get, game } from "noname";
 import { onSetDev, onExtension, whichWayHooksApi } from "./hooks/index.js";
 class WhichWayUtil {
   /**
+   * 工具函数组，提供常见的数值比较和动态最值判断。
+   * @typedef {Object} Tools
+   * @property {function(*, number): boolean} gt - 判断元素是否大于指定值。
+   * @property {function(*, number): boolean} lt - 判断元素是否小于指定值。
+   * @property {function(*, *): boolean} eq - 判断元素是否严格等于指定值。
+   * @property {function(*, number): boolean} gte - 判断元素是否大于或等于指定值。
+   * @property {function(*, number): boolean} lte - 判断元素是否小于或等于指定值。
+   * @property {function(*, number, number): boolean} between - 判断元素是否在闭区间 [a, b] 内。
+   * @property {function(*, Function=): boolean} isMax - 判断元素（或按 selector 提取的值）是否等于数组中的最大值。
+   * @property {function(*, Function=): boolean} isMin - 判断元素（或按 selector 提取的值）是否等于数组中的最小值。
+   */
+  /**
+   * 对数组进行筛选，回调中可直接使用工具函数进行条件判断。
+   *
+   * @param {Array} arr - 待筛选的数组。
+   * @param {function(*, Tools): boolean} fn - 回调函数，参数为当前元素 `item` 和工具对象 `tools`。
+   * @returns {Array} 筛选后组成的新数组。
+   *
+   * @example
+   * const numbers = [3, 1, 4, 1, 5, 9, 2, 6];
+   *
+   * // 基础比较
+   * const gt4 = filterArray(numbers, (item, tools) => tools.gt(item, 4));
+   * console.log(gt4); // [5, 9, 6]
+   *
+   * // 筛选最大值（数字直接比较）
+   * const maxItems = filterArray(numbers, (item, tools) => tools.isMax(item));
+   * console.log(maxItems); // [9]
+   *
+   * // 对象数组按属性筛选最大值
+   * const people = [{ name: 'Alice', age: 30 }, { name: 'Bob', age: 25 }, { name: 'Charlie', age: 30 }];
+   * const oldest = filterArray(people, (item, tools) => tools.isMax(item, p => p.age));
+   * console.log(oldest); // [{ name: 'Alice', age: 30 }, { name: 'Charlie', age: 30 }]（两个都是30）
+   *
+   * // 组合条件
+   * const between3and6 = filterArray(numbers, (item, tools) =>
+   *   tools.gte(item, 3) && tools.lte(item, 6)
+   * );
+   * console.log(between3and6); // [3, 4, 5, 6]
+   */
+  filterArray(arr, fn) {
+    if (!Array.isArray(arr)) {
+      throw new TypeError("第一个参数必须是数组");
+    }
+    if (typeof fn !== "function") {
+      throw new TypeError("第二个参数必须是函数");
+    }
+    const maxCache = /* @__PURE__ */ new Map();
+    const minCache = /* @__PURE__ */ new Map();
+    const tools = {
+      // 基础比较（直接比较元素本身）
+      gt: (item, x) => item > x,
+      lt: (item, x) => item < x,
+      eq: (item, x) => item === x,
+      gte: (item, x) => item >= x,
+      lte: (item, x) => item <= x,
+      between: (item, a, b) => item >= a && item <= b,
+      /**
+       * 判断当前元素（或通过 selector 提取的值）是否等于数组中的最大值。
+       * @param {*} item - 当前元素。
+       * @param {Function} [selector] - 可选的取值函数，用于提取比较值，默认为恒等函数。
+       * @returns {boolean}
+       */
+      isMax: (item, selector) => {
+        const getVal = typeof selector === "function" ? selector : (x) => x;
+        const key = selector || "default";
+        if (!maxCache.has(key)) {
+          if (arr.length === 0) {
+            maxCache.set(key, void 0);
+          } else {
+            const maxVal = arr.reduce((max, cur) => {
+              const v = getVal(cur);
+              return v > max ? v : max;
+            }, getVal(arr[0]));
+            maxCache.set(key, maxVal);
+          }
+        }
+        const maxValue = maxCache.get(key);
+        return getVal(item) === maxValue;
+      },
+      /**
+       * 判断当前元素（或通过 selector 提取的值）是否等于数组中的最小值。
+       * @param {*} item - 当前元素。
+       * @param {Function} [selector] - 可选的取值函数，用于提取比较值，默认为恒等函数。
+       * @returns {boolean}
+       */
+      isMin: (item, selector) => {
+        const getVal = typeof selector === "function" ? selector : (x) => x;
+        const key = selector || "default";
+        if (!minCache.has(key)) {
+          if (arr.length === 0) {
+            minCache.set(key, void 0);
+          } else {
+            const minVal = arr.reduce((min, cur) => {
+              const v = getVal(cur);
+              return v < min ? v : min;
+            }, getVal(arr[0]));
+            minCache.set(key, minVal);
+          }
+        }
+        const minValue = minCache.get(key);
+        return getVal(item) === minValue;
+      }
+    };
+    return arr.filter((item) => fn(item, tools));
+  }
+  /**
    * 获取随机数
    * @param {number} [length = 16] 随机数长度
    * @returns {string} 随机数字符串
@@ -378,4 +485,3 @@ onExtension({
 export {
   whichWayUtil
 };
-//# sourceMappingURL=utill.js.map

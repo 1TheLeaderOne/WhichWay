@@ -166,4 +166,3 @@ translate({
 });
 characterTitle("xiangshimrfz", "<font color = #a52a2a>特殊渠道顾问</font>");
 characterIntro("xiangshimrfz", "费尔南·伯恩，哥伦比亚人，经营着一家以“哪儿都能去”闻名的独立旅行社。除了已故的荣誉社员马丁·伯恩，费尔南便是该社的唯一成员。<br>接受治疗的同时，费尔南也与罗德岛达成了合作，以“响石”为代号，在各类外勤任务中行使向导职责。");
-//# sourceMappingURL=xiangshimrfz.js.map

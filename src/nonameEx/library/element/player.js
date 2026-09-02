@@ -389,4 +389,3 @@ class PlayerExt extends lib.element.Player {
 export {
   PlayerExt
 };
-//# sourceMappingURL=player.js.map

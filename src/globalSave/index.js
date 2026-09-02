@@ -99,4 +99,3 @@ export {
   WhichWaySave,
   whichWaySave
 };
-//# sourceMappingURL=index.js.map

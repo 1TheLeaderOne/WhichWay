@@ -170,4 +170,3 @@ translate({
 });
 characterTitle("shijunzhemrfz", "<font color='#d2691e'>尘烟蔽目</font>");
 characterIntro("shijunzhemrfz", "弑君者，柳德米拉·伊里尼奇娜，原整合运动干部，从事潜伏活动与突袭暗杀行动，擅长近身攻击及突破防御阵线进行奇袭，于切尔诺伯格-龙门事件之后脱离整合运动，1100年末主动与罗德岛接洽，现正在监督下接受矿石病治疗。");
-//# sourceMappingURL=shijunzhemrfz.js.map

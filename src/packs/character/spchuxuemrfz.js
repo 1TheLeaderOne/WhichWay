@@ -301,4 +301,3 @@ translate({
 });
 characterTitle("spchuxuemrfz", "<font color = blue>雪镜归心</font>");
 characterIntro("spchuxuemrfz", "初雪，谢拉格出身，喀兰圣女，全谢拉格的宗教领袖。在谢拉格的发展与变革历程中扮演着重要的角色，如今正着手建设谢拉格境内的基础教育系统。据部分信息报告，其在谢拉格境内曾成功驱散过一场即将降临的天灾。");
-//# sourceMappingURL=spchuxuemrfz.js.map

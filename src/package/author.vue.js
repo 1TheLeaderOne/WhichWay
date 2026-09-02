@@ -5,4 +5,3 @@ const Author = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-abf
 export {
   Author as default
 };
-//# sourceMappingURL=author.vue.js.map

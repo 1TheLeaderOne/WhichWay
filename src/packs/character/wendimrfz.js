@@ -129,4 +129,3 @@ translate({
   "jiangpaomrfz_info": "摸牌阶段，你可以额外摸等同于你有牌的区域数张牌。"
 });
 characterIntro("wendimrfz", "温蒂，生物工程学专家，伊比利亚科研世家出身，罗德岛成立之初就加入的研究者。</br>经过本人长期调整与测试，最终完成了为自己量身定做的武器。并根据自身意愿成为干员，在战场上为同僚提供远程支援。");
-//# sourceMappingURL=wendimrfz.js.map

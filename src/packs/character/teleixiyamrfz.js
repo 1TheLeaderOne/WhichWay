@@ -438,4 +438,3 @@ translate({
 });
 characterTitle("teleixiyamrfz", "<font color=#00868B>瑰丽理想</font>");
 characterIntro("teleixiyamrfz", "特蕾西娅，特雷西斯的妹妹，巴别塔的领袖，萨卡兹的魔王，一位谦卑的英雄，一个瑰丽的梦想。未来在她眼中凝聚，道路在她脚下消散。");
-//# sourceMappingURL=teleixiyamrfz.js.map

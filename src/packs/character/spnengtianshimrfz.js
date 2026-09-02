@@ -104,4 +104,3 @@ translate({
 });
 characterTitle("spnengtianshimrfz", "<font color='#6495ed'>圣城趣事通</font>");
 characterIntro("spnengtianshimrfz", "能天使，拉特兰公民，适用拉特兰一至十三项公民权益。在合约期间，于秘密联络、武装押运等多项行动中为罗德岛提供帮助。现应本人要求，将其登记的合作身份更新为：企鹅物流资深员工，拉特兰新创物流公司“苹果派物流”老板。");
-//# sourceMappingURL=spnengtianshimrfz.js.map

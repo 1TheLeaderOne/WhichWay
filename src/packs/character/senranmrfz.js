@@ -320,4 +320,3 @@ translate({
   "tieyimrfz_append": '<span style="font-family: yuanli">快看，是我方的一名铁驭，我们有救了！</span>'
 });
 characterIntro("senranmrfz", "森蚺，嘉维尔的故乡——阿卡胡拉中某部族的族长，经过干员测试后加入罗德岛，同时接受治疗。</br>拥有不输于嘉维尔的身体素质，目前和她的伙伴“暴躁铁皮”共同活跃在战场上。");
-//# sourceMappingURL=senranmrfz.js.map

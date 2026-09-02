@@ -75,4 +75,3 @@ window.whichWay.register("configUI", whichWayConfigUI);
 export {
   whichWayConfigUI
 };
-//# sourceMappingURL=index.js.map

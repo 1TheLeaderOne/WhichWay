@@ -118,4 +118,3 @@ translate({
 });
 characterTitle("amiyamrfz", "<font color=#00868B>魔王</font>");
 characterIntro("amiyamrfz", "阿米娅，罗德岛的公开领袖，在内部拥有最高执行权。虽然，从外表上看起来仅仅是个不成熟的少女，实际上，她却是深受大家信任的合格的领袖。现在，阿米娅正带领着罗德岛，为了感染者的未来，为了让这片大地挣脱矿石病的阴霾而不懈努力。");
-//# sourceMappingURL=amiyamrfz.js.map

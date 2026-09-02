@@ -406,4 +406,3 @@ translate({
 });
 characterTitle("lingmrfz", "<font color=#BFEFFF>千年一梦</font>");
 characterIntro("lingmrfz", "令，寓居尚蜀的诗人，与炎国司岁台等政府部门均有联系，在尚蜀事件中接触罗德岛，现通过审核，以访客身份驻留本舰。");
-//# sourceMappingURL=lingmrfz.js.map

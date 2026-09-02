@@ -308,4 +308,3 @@ translate({
 });
 characterTitle("spxiaoyangmrfz", "<font color=#DC143C>登山者</font>");
 characterIntro("spxiaoyangmrfz", "艾雅法拉，火山学家，天灾信使。近年参与拍摄多部火山纪录片，并参与撰写出版火山相关书籍。现于罗德岛继续接受治疗，并视需求参与包括天灾研究在内的多项活动。");
-//# sourceMappingURL=spxiaoyangmrfz.js.map

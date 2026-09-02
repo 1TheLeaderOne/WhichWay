@@ -53,4 +53,3 @@ window.whichWay.register("math", whichWayMath);
 export {
   whichWayMath
 };
-//# sourceMappingURL=index.js.map

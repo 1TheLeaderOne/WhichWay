@@ -245,4 +245,3 @@ translate({
   "jixiongmrfz2": "吉凶"
 });
 characterIntro("laolimrfz", "老鲤，私家侦探，龙门鲤氏侦探事务所的创办者。在罗德岛于龙门发展业务的过程中与罗德岛相识，随后建立合作关系。为罗德岛提供关于龙门本地信息的咨询服务，也向罗德岛引荐过一些人才。");
-//# sourceMappingURL=laolimrfz.js.map

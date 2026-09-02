@@ -24,4 +24,3 @@ const charDes = {
 export {
   charDes
 };
-//# sourceMappingURL=characterDesigner.js.map

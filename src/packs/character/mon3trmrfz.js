@@ -101,4 +101,3 @@ translate({
 });
 characterTitle("mon3trmrfz", "<font color='#8b008b'>旧日重拾</font>");
 characterIntro("mon3trmrfz", "Mon3tr，在生命科学、矿石病诊疗、历史系谱学等诸多领域具备渊博学识，拥有丰富的移动作战经验，为罗德岛重建工作提供了至关重要的帮助，现为罗德岛医疗部、工程部、外勤部特别顾问。");
-//# sourceMappingURL=mon3trmrfz.js.map

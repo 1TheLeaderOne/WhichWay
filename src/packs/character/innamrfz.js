@@ -103,4 +103,3 @@ translate({
 });
 characterTitle("innamrfz", "<font color = #db7093>情报专家</font>");
 characterIntro("innamrfz", "双月是彩虹小队成员之一，自信、坚决，极富探索精神。<br>除了随身携带的武器之外，双月擅长使用被称为“双子分身复制器”的装置。该装置能制造与双月<br>外形上完全一致的全息投影，既能搜集情报，也能欺骗敌人。");
-//# sourceMappingURL=innamrfz.js.map

@@ -182,4 +182,3 @@ export {
   registerHookContextAt,
   whichWayHooksApi
 };
-//# sourceMappingURL=index.js.map

@@ -227,4 +227,3 @@ const UpdateLog = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-
 export {
   UpdateLog as default
 };
-//# sourceMappingURL=updateLog.vue.js.map

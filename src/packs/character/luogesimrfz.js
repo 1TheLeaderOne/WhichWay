@@ -180,4 +180,3 @@ translate({
 });
 characterTitle("luogesimrfz", "<font color=#00868B>女妖之主</font>");
 characterIntro("luogesimrfz", "逻各斯，罗德岛精英术师干员，咒术大师，女妖河谷年轻的“女主人”。曾作为巴别塔核心成员参与卡兹戴尔内战，并于罗德岛建立之初成为首批精英干员之一。逻各斯着手制定了干员源石技艺适应性测试的标准及流程。这套评估系统展现了巨大的价值，令罗德岛得以准确地评估每一位干员的施术潜能。<br>现根据罗德岛决议，逻各斯继续担任外勤小队指挥，参与术师干员的测试与选拔，负责敏感情报的破译及加密工作。");
-//# sourceMappingURL=luogesimrfz.js.map

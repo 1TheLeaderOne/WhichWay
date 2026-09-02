@@ -122,4 +122,3 @@ translate({
   "chuandunmrfz_append": "THX,Ubi"
 });
 characterIntro("shanjimrfz", "闪击，彩虹小队的成员之一，为人幽默和蔼，擅长在室内与街巷环境作战。</br>以手枪为主要武器，同时携带经G52型闪光战术护盾，一旦在近战中开启，将能致盲几米内的作战目标，为整个小队提供战术优势。");
-//# sourceMappingURL=shanjimrfz.js.map

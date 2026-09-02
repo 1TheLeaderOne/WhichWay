@@ -108,4 +108,3 @@ skill({
     }
   }
 });
-//# sourceMappingURL=migelumrfz.js.map

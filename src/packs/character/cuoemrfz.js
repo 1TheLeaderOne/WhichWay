@@ -220,4 +220,3 @@ translate({
 });
 characterTitle("cuoemrfz", "<font color = #a52a2a>空即有</font>");
 characterIntro("cuoemrfz", "嵯峨，东国出身的云游僧人。部分经历不明。原本只是因迷路而误入罗德岛办事处，经询问本人也有求职意向，于是随后通过测试加入罗德岛。在此之前似乎已与罗德岛干员炎熔建立关系。</br>十分善用随身的薙刀，身手矫健，作为先锋干员活跃在前线。");
-//# sourceMappingURL=cuoemrfz.js.map

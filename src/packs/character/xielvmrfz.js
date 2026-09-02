@@ -149,4 +149,3 @@ translate({
 });
 characterTitle("xielvmrfz", "<font color = #8b9dda66>绝对音准</font>");
 characterIntro("xielvmrfz", "协律，本名托妮娅·克朗，来自莱塔尼亚偏远小镇的调谐师。于一场暴风雪导致的声场核心过载事故中不慎感染上矿石病，后来经介绍来到罗德岛，接受治疗的同时，致力于为罗德岛的音乐环境提供力所能及的支持与辅助，并作为术师干员协助战斗。");
-//# sourceMappingURL=xielvmrfz.js.map

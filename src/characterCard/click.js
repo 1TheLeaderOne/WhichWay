@@ -273,4 +273,3 @@ const whichWayCharacterCardClick = new WhichWayCharacterCardClick();
 export {
   whichWayCharacterCardClick
 };
-//# sourceMappingURL=click.js.map

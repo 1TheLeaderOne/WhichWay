@@ -138,4 +138,3 @@ translate({
 });
 characterTitle("nifumrfz", "<font color=#00868B>耀阳映友</font>");
 characterIntro("nifumrfz", "妮芙，卡兹戴尔市民，通过罗德岛驻卡兹戴尔办事处加入罗德岛外勤部门。<br>擅长使用心灵相关的源石技艺，配合其笞心魔的天赋，可在诸多领域发挥特长。");
-//# sourceMappingURL=nifumrfz.js.map

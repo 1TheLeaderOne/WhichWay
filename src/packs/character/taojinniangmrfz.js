@@ -342,4 +342,3 @@ function accumulateCardVal(arr) {
   }
   return num;
 }
-//# sourceMappingURL=taojinniangmrfz.js.map

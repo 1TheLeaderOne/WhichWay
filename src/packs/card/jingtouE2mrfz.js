@@ -1,11 +1,14 @@
-import { get, game, _status } from "noname";
+import { get, game } from "noname";
 import { card, cardTranslate } from "../hooks.js";
 card("jingtouE2mrfz", {
   image: `ext:WhichWay/image/card/jingtouE2mrfz.jpg`,
   type: "equip",
   subtype: "equip2",
-  onLose: function() {
-    if ((!event.getParent(2) || event.getParent(2).name != "swapEquip") && (event.getParent().type != "equip" || event.getParent().swapEquip)) {
+  onLose: async function(event, trigger, player) {
+    const { cards } = event;
+    const par2 = event.getParent(2);
+    const par = event.getParent();
+    if ((!par2 || par2.name != "swapEquip") && par && (par.type != "equip" || par.swapEquip)) {
       cards.forEach((card2) => {
         card2.fix();
         card2.remove();
@@ -13,8 +16,8 @@ card("jingtouE2mrfz", {
         game.log(card2, "被销毁了");
       });
     }
-    var player = _status.event.player, hs = player.getCards("h", (card2) => get.is.shownCard(card2));
-    if (hs.length > 0) player.hideShownCards(hs);
+    let hs = player.getCards("h", (card2) => get.is.shownCard(card2));
+    if (hs.length > 0) player.hideShownCards({ cards: hs });
   },
   equipDelay: false,
   loseDelay: false,
@@ -24,21 +27,21 @@ card("jingtouE2mrfz", {
       equipValue: -1
     },
     result: {
-      target: (player, target2, card2) => get.equipResult(player, target2, card2.name)
+      target: (player, target, card2) => get.equipResult(player, target, card2.name)
     }
   },
   enable: true,
   selectTarget: -1,
-  filterTarget: (card2, player, target2) => player == target2 && target2.canEquip(card2, true),
+  filterTarget: (card2, player, target) => player == target && target.canEquip(card2, true),
   modTarget: true,
   allowMultiple: false,
-  content: function() {
+  content: async function(event, trigger, player) {
+    const { cards, target } = event;
     if (cards.length && get.position(cards[0], true) == "o") target.equip(cards[0]);
   },
   toself: true
 });
 cardTranslate({
   jingtouE2mrfz: "镜头",
-  "jingtouE2mrfz_info": "锁定技，你的手牌始终明置；你始终视为在其他角色的攻击范围内；此牌离开你的装备区时，销毁之。"
+  jingtouE2mrfz_info: "锁定技，你的手牌始终明置；你始终视为在其他角色的攻击范围内；此牌离开你的装备区时，销毁之。"
 });
-//# sourceMappingURL=jingtouE2mrfz.js.map

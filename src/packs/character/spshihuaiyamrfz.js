@@ -278,4 +278,3 @@ translate({
 });
 characterTitle("spshihuaiyamrfz", "<font color=#e44997>万民安生</font>");
 characterIntro("spshihuaiyamrfz", "诗怀雅，龙门近卫局局长。</br>于汐斯塔度假归来，目前仅以私人身份视情况为罗德岛工作提供协助。</br>龙门近卫局委任状</br>经会议决定，兹任命碧翠克斯·施怀雅为近卫局局长。</br>望日后长定龙门，护一方平安，万民安生。</br>此状</br>龙门总督魏彦吾</br></br>诗怀雅捏着这张薄薄的委任状，郑重地收进抽屉里。纸张之轻、之薄，字之简约，在她手中却仿佛重若千钧。");
-//# sourceMappingURL=spshihuaiyamrfz.js.map

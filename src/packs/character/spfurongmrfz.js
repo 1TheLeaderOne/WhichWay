@@ -140,4 +140,3 @@ translate({
 });
 characterTitle("spfurongmrfz", "<font color='#db7093'>无名之花</font>");
 characterIntro("spfurongmrfz", "芙蓉，经过系统的医疗理论培训以及长时间的临床实践训练后，已经由实习医生转为正式医疗干员，并且成为了医疗部的主治医师之一。芙蓉不仅在医疗外勤任务上有相当丰富的经验，在健康管理以及病后护理的理论研究方面也颇有建树。");
-//# sourceMappingURL=spfurongmrfz.js.map

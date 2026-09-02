@@ -20,4 +20,3 @@ const qianhuanSetting = config;
 export {
   qianhuanSetting
 };
-//# sourceMappingURL=qianhuan.js.map

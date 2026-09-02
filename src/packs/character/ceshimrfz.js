@@ -22,4 +22,3 @@ translate({
   "ceshiSkillmrfz": "测试",
   "ceshiSkillmrfz_info": "测试喵"
 });
-//# sourceMappingURL=ceshimrfz.js.map

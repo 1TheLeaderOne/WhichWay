@@ -212,4 +212,3 @@ translate({
 });
 characterTitle("guiyanmrfz", "<font color='#b8860b'>狡黠医生</font>");
 characterIntro("guiyanmrfz", "瑰盐，伊比利亚地区的流浪草药医生，人脉资源丰富，涵盖当地各阶层人士，现为罗德岛提供伊比利亚相关情报及工作开展前期的调研支持。");
-//# sourceMappingURL=guiyanmrfz.js.map

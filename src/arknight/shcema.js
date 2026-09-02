@@ -80,4 +80,3 @@ const whichWayArknightShcema = new ArknightShcema();
 export {
   whichWayArknightShcema
 };
-//# sourceMappingURL=shcema.js.map

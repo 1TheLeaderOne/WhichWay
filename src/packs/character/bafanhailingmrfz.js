@@ -108,4 +108,3 @@ translate({
 });
 characterTitle("bafanhailingmrfz", "<font color = #db7093>毋畏恐惧</font>");
 characterIntro("bafanhailingmrfz", "Ave Mujica的贝斯手八幡海铃。不管是演奏中还是作战中，她总是能展现出极高的专业度。");
-//# sourceMappingURL=bafanhailingmrfz.js.map

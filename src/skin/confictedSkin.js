@@ -31,4 +31,3 @@ const confictedSkin = Object.create(ConfictedSkinPrototype);
 export {
   confictedSkin
 };
-//# sourceMappingURL=confictedSkin.js.map

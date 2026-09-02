@@ -129,4 +129,3 @@ await decadeExtCompatible.init();
 export {
   decadeExtCompatible
 };
-//# sourceMappingURL=decade.js.map

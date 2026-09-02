@@ -283,4 +283,3 @@ translate({
 });
 characterTitle("midiexiangmrfz", "<font color=#f91c01>勿忘我</font>");
 characterIntro("midiexiangmrfz", "迷迭香，罗德岛精英干员，熟练掌握极稀有的源石技艺，于对抗大型生物，破坏硬目标，设施紧急制动与中断小规模冲突等任务中表现出色，并于攻坚战、阵地战与歼灭战中体现出极强的战场掌控力与显著的战术价值。现由凯尔希指派，作为歼灭战的核心发起人之一发挥作用。</br><span class=firetext>迷迭香的所有其他档案皆移入高权限资料库。</span>");
-//# sourceMappingURL=midiexiangmrfz.js.map

@@ -193,4 +193,3 @@ translate({
   "xingyimrfz_info": "其他角色的回合结束阶段，你可以受到一点伤害，并令一名本回合受到过伤害的其他角色回复一点体力。"
 });
 characterIntro("maennamrfz", "设计：落尘星河/林登万<br>玛恩纳·临光，临光家前家主，干员临光与瑕光的叔叔，迄今并未获得过任何形式的骑士封号。于特锦赛后约两个月，接受罗德岛的合作邀请，协助罗德岛处理卡西米尔地区的各项事务。");
-//# sourceMappingURL=maennamrfz.js.map

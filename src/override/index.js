@@ -224,4 +224,3 @@ window.whichWay.register("override", whichWayAPIOverride);
 export {
   whichWayAPIOverride
 };
-//# sourceMappingURL=index.js.map

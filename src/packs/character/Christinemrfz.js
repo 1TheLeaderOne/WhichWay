@@ -225,4 +225,3 @@ translate({
 });
 characterTitle("Christinemrfz", "<font color = #a52a2a>黑猫传说</font>");
 characterIntro("Christinemrfz", "Miss.Christine，时常出现在干员傀影身边的美丽生物，经推测可能为“兽主”之一。现出于自我意愿加入罗德岛，目前并未分配任何相关职务。");
-//# sourceMappingURL=Christinemrfz.js.map

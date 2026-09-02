@@ -143,4 +143,3 @@ const groupData = {
 export {
   groupData
 };
-//# sourceMappingURL=groups.js.map

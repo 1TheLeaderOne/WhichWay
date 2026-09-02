@@ -79,4 +79,3 @@ translate({
 });
 characterTitle("Castle3mrfz", "<font color = #b7229c66>冲刺！冲刺！</font>");
 characterIntro("Castle3mrfz", "Castle-3是可露希尔客制化后的雷神存在者™Plus六轮作业平台。受人喜爱，也是吉祥物一般的存在不过因为性格比较正常所以没有获得那么多关注。<br>Castle-3方方正正的形象给人以坚定可靠的感觉。<br>身上的标记可能代表着杀敌数，但是他自己没有手，所以是谁刻上去的呢？");
-//# sourceMappingURL=Castle3mrfz.js.map

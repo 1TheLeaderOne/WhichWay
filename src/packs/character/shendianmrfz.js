@@ -250,4 +250,3 @@ translate({
 });
 characterTitle("shendianmrfz", "<font color=#00E68A>灯塔守卫者</font>");
 characterIntro("shendianmrfz", "深靛，来自伊比利亚的流浪术师。曾经是一座海滨灯塔的见习看守人。在游历期间，与正执行外勤任务的蓝毒和格劳克斯相识。后经蓝毒介绍，入职罗德岛。");
-//# sourceMappingURL=shendianmrfz.js.map

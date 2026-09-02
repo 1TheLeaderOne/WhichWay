@@ -130,4 +130,3 @@ translate({
 });
 characterTitle("shuidengxinmrfz", "<font color='#8b008b'>火与生命</font>");
 characterIntro("shuidengxinmrfz", "水灯心，本名布莉吉，游牧民。据称来自塔拉某支古老的游牧部族，其成员长久以来在平原、丘陵地区从事游牧活动，兼领天灾预警、传信相关职责。现经干员苇草推荐与罗德岛合作，在接受矿石病治疗的同时，作为狙击干员协助战斗。");
-//# sourceMappingURL=shuidengxinmrfz.js.map

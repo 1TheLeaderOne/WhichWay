@@ -70,4 +70,3 @@ class CardExt extends lib.element.Card {
 export {
   CardExt
 };
-//# sourceMappingURL=card.js.map

@@ -128,4 +128,3 @@ translate({
 });
 characterTitle("rendongmrfz", "<font color='#d2691e'>完美主义杀手</font>");
 characterIntro("rendongmrfz", "忍冬，本名英格丽，铃兰干员的母亲，曾为叙拉古灰厅十二家族之一——威尼斯家族的核心成员，多执行暗杀任务，擅长歼灭战与突袭战，后因故从家族脱离。现以罗德岛驻舰干员身份活动。");
-//# sourceMappingURL=rendongmrfz.js.map

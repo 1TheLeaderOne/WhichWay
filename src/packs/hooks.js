@@ -215,4 +215,3 @@ export {
   skill,
   translate
 };
-//# sourceMappingURL=hooks.js.map

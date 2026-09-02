@@ -81,4 +81,3 @@ function watch(className, callback, targetNode = document.body) {
 export {
   mainPackage
 };
-//# sourceMappingURL=index.js.map

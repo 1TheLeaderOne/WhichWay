@@ -91,4 +91,3 @@ translate({
 });
 characterTitle("baidurenmrfz", "<font color = #a52a2a>血色旧往</font>");
 characterIntro("baidurenmrfz", "赞索斯，移动城市雅赛努斯中特尔斐运河的前任渡口管理者，河流的摆渡人。在第一神殿的文物交换仪式之后辞去了这一职务，经干员调香师介绍来到罗德岛接受矿石病的治疗，以近卫干员的身份为罗德岛提供服务。");
-//# sourceMappingURL=baidurenmrfz.js.map

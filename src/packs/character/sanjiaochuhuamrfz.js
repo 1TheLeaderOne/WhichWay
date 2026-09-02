@@ -57,4 +57,3 @@ translate({
 });
 characterTitle("sanjiaochuhuamrfz", "<font color = #db7093>毋畏悲伤</font>");
 characterIntro("sanjiaochuhuamrfz", "Ave Mujica的主唱兼吉他手三角初华。既是Mujica的成员，也是著名偶像组合sumimi的一员。拥有出众的个人魅力，爱好观星，总是把祥子挂在嘴边。");
-//# sourceMappingURL=sanjiaochuhuamrfz.js.map

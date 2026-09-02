@@ -166,4 +166,3 @@ function getLastUsed(player, event) {
   }
   return false;
 }
-//# sourceMappingURL=spzilanmrfz.js.map

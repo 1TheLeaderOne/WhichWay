@@ -137,4 +137,3 @@ translate({
 });
 characterTitle("kaiselinmrfz", "<font color=#00868B>群工之首</font>");
 characterIntro("kaiselinmrfz", "凯瑟琳，维多利亚工人代表。于伦蒂尼姆事件期间参与市民自救军的抵抗运动，与罗德岛协同行动。<br>在凯瑟琳的协调下，伦蒂尼姆的多家工厂及工人团体先后与罗德岛达成合作，在源石污染善后、矿石病预防与医疗救治等领域共同展开行动。");
-//# sourceMappingURL=kaiselinmrfz.js.map

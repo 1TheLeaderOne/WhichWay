@@ -12,4 +12,3 @@ translate({
   "fengwan_zhioumrfz": "纸偶"
 });
 characterTitle("fengwan_zhioumrfz", "<font color='yellow'>栩栩如生</font>");
-//# sourceMappingURL=fengwan_zhioumrfz.js.map

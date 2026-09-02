@@ -240,4 +240,3 @@ translate({
   "jiandunmrfz_info": "你可以将锦囊牌当任意基本牌使用或打出。"
 });
 characterIntro("xiaguangmrfz", "瑕光，本名玛莉娅·临光，来自卡西米尔的年轻骑士，干员临光的妹妹，曾有骑士竞技经验，在各项测试中均展露出优秀的作战素质。应本人期望，与干员临光共同作为重装干员行动。");
-//# sourceMappingURL=xiaguangmrfz.js.map

@@ -132,4 +132,3 @@ translate({
 });
 characterTitle("xunlanmrfz", "<font color='#00008b'>幽灵探险者</font>");
 characterIntro("xunlanmrfz", "黑钢先遣小组队员蒂拉，代号寻澜。工作能力极强，现由本人申请，以合作干员的身份于罗德岛就职，拓展黑钢与罗德岛合作的前期情报搜集工作。");
-//# sourceMappingURL=xunlanmrfz.js.map

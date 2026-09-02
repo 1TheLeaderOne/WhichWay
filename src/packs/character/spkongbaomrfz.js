@@ -146,4 +146,3 @@ skill({
 function getShaCount(player) {
   return player.getAllHistory("useCard", (evt) => evt.card && get.name(evt.card) === "sha").length;
 }
-//# sourceMappingURL=spkongbaomrfz.js.map

@@ -128,4 +128,3 @@ function getSingleDigit(num) {
   }
   return Number(numStr.charAt(numStr.length - 1));
 }
-//# sourceMappingURL=jumrfz.js.map

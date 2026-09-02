@@ -156,4 +156,3 @@ translate({
 });
 characterTitle("nianmrfz", "<font color=#FFA500>地生五金</font>");
 characterIntro("nianmrfz", "年，无业游民，熟习各类金属工艺，拥有与身份不符的渊博冶金知识。现凭访客身份逗留于罗德岛，偶尔为罗德岛的金属加工项目提供建议。声称自己擅长音像娱乐工作，经常提供一些罗德岛干员普遍不太喜爱的音像产品。");
-//# sourceMappingURL=nianmrfz.js.map

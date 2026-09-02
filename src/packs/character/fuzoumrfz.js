@@ -103,4 +103,3 @@ skill({
     }
   }
 });
-//# sourceMappingURL=fuzoumrfz.js.map

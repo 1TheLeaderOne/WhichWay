@@ -366,4 +366,3 @@ window.whichWay.register("characterCard", whichWayCharacterCard);
 export {
   whichWayCharacterCard
 };
-//# sourceMappingURL=index.js.map

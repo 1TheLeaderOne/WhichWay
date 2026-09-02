@@ -102,4 +102,3 @@ window.whichWay.register("updateLog", whichWayUpdateLog);
 export {
   whichWayUpdateLog
 };
-//# sourceMappingURL=index.js.map

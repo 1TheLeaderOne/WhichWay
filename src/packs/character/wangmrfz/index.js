@@ -364,4 +364,3 @@ function getUsedTricks(player) {
   const history = player.getAllHistory("useCard", (evt) => evt.card && get.type(evt.card) === "trick");
   return Array.from(new Set(history.map((evt) => evt.card.name)));
 }
-//# sourceMappingURL=index.js.map

@@ -177,4 +177,3 @@ translate({
 });
 characterTitle("peipeimrfz", "<font color=#00868B>往昔传承</font>");
 characterIntro("peipeimrfz", "佩佩，萨尔贡知名的历史学者，身世显赫，是萨尔贡一位尊贵帕夏的长女。现作为外勤干员协助罗德岛在萨尔贡当地进行一系列考古勘察。");
-//# sourceMappingURL=peipeimrfz.js.map

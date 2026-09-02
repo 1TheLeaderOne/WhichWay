@@ -207,4 +207,3 @@ translate({
 });
 characterTitle("suocaomrfz", "<font color=#DC143C>读万卷致千里</font>");
 characterIntro("suocaomrfz", "莎草，本名阿娜特，曾任萨尔贡法尔贾万达巴德博物馆的代理馆长，怀揣着游历大地这一理想的她，在经历了博物馆的变故后踏上巡游大地的旅程。现以“莎草”为代号，作为外勤干员与罗德岛驻萨尔贡办事处展开合作，为罗德岛在当地的历史研究活动提供理论支持和指导。");
-//# sourceMappingURL=suocaomrfz.js.map

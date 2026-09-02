@@ -144,4 +144,3 @@ translate({
 });
 characterTitle("lingyinmrfz", "<font color='#6495ed'>至虔修女</font>");
 characterIntro("lingyinmrfz", "聆音，来自玻利瓦尔的修女，经干员信仰搅拌机推荐加入罗德岛，目前已经返回家乡玻利瓦尔，于当地办事处担任近卫干员。");
-//# sourceMappingURL=lingyinmrfz.js.map

@@ -108,4 +108,3 @@ const UpdateCurrent = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "dat
 export {
   UpdateCurrent as default
 };
-//# sourceMappingURL=updateCurrent.vue.js.map

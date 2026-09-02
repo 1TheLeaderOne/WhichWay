@@ -62,4 +62,3 @@ export {
   modules,
   modulesList
 };
-//# sourceMappingURL=data.js.map
