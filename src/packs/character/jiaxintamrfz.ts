@@ -15,7 +15,7 @@ translate({
 	feilvmrfz: "飞旅",
 	feilvmrfz_info: "使命技，回合结束时，你可以将一张牌当做本回合第一张使用的牌使用，若你未因此使用过此牌，你摸两张牌。<br>成功：本局游戏使用过3X张牌：摸X张牌。(X=本技能的成功次数+1)",
 	zhixingmrfz: "咫行",
-	zhixingmrfz_info: "锁定技。①当你不因【咫行】而摸牌后，你令所有拥有【咫行】的角色制衡1；②当你使命技成功后，你重置该技能。",
+	zhixingmrfz_info: `锁定技。①当你不因【咫行】而摸牌后，你令所有拥有【咫行】的角色${get.poptip("sjzx_zhiheng")}1；②当你使命技成功后，你重置该技能。`,
 });
 dynamicTranslate("feilvmrfz", player => {
 	const num = (player?.storage?.feilvmrfz_achieved || 0) + 1;
@@ -143,15 +143,17 @@ skill({
 	// ② 当你使命技成功后，你重置该技能（恢复【飞旅】为可用状态）
 	zhixingmrfz: {
 		audio: ["部署1", "完成高难行动"],
+		audioname:["shiximrfz"],
 		locked: true,
 		group: ["zhixingmrfz_draw", "zhixingmrfz_reset"],
 		subSkill: {
 			draw: {
-				forced: true,
+				audio:"zhixingmrfz",
 				trigger: { player: "drawAfter" },
 				filter(event, player2) {
 					return !event._zhixingmrfz;
 				},
+				forced:true,
 				async content(event, trigger, player2) {
 					const targets = game.filterPlayer(p => p.hasSkill("zhixingmrfz") && p.countCards("he") > 0);
 					for (const target of targets) {
@@ -167,6 +169,7 @@ skill({
 				},
 			},
 			reset: {
+				audio:"zhixingmrfz",
 				forced: true,
 				trigger: { global: ["useSkill", "logSkillBegin"] },
 				filter(event, player, name, target) {

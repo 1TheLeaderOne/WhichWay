@@ -27,15 +27,18 @@ character(NAME, {
 characterTitle(NAME, whichWayUtil.colorize("#b不一样的梦想#"));
 characterIntro(NAME, "时隙,通讯技术工程师，其研究成果已应用于雷姆必拓远程通讯系统。现加入罗德岛工程部，为罗德岛基地远程通讯提供技术支持。");
 
+const TOWER_POPTIP = get.poptip(`${TOWER}_skill`);
+
 translate({
 	[NAME]: "时隙",
 
 	feishengmrfz: "飞声",
-	feishengmrfz_info: "使命技，出牌阶段开始时，你可以将一张手牌作为【通讯塔】置入你或与装备【通讯塔】的角色距离为1的角色的装备区。<br>成功：回合结束时，场上存在【通讯塔】：摸X张牌。（X=场上拥有【通讯塔】角色的数量，X至多为你的体力上限）",
+	feishengmrfz_info: `使命技，出牌阶段开始时，你可以将一张手牌作为${TOWER_POPTIP}置入你或与装备${TOWER_POPTIP}的角色距离为1的角色的装备区。<br>成功：回合结束时，场上存在${TOWER_POPTIP}：摸X张牌。（X=场上拥有${TOWER_POPTIP}角色的数量，X至多为你的体力上限）`,
 });
 
 skill({
 	feishengmrfz: {
+		derivation:[`${TOWER}_skill`],
 		audio: ["部署1", "部署2"],
 		dutySkill: true,
 		trigger: {
@@ -48,7 +51,7 @@ skill({
 			const result = await player
 				.chooseCardTarget({
 					prompt: get.prompt("feishengmrfz"),
-					prompt2: "你可以将一张手牌作为【通讯塔】置入你或与装备【通讯塔】的角色距离为1的角色的装备区",
+					prompt2: `你可以将一张手牌作为${TOWER_POPTIP}置入你或与装备${TOWER_POPTIP}的角色距离为1的角色的装备区`,
 					position: "h",
 					filterCard: () => true,
 					filterTarget(card, player, target) {
@@ -115,8 +118,7 @@ card(TOWER, {
 			const arr = save[TOWER][player.playerid] as Card[];
 			if (arr.length) {
 				const list = arr.slice();
-				arr.length = 0; // 从存储移出 → Proxy 触发同步，移除所有拥有者的真牌副本
-				// 真牌离开塔：剥离通讯塔 tag，再置入弃牌堆（player.discard 对非 hejsx 的牌无效，须用 cardsDiscard）
+				arr.length = 0;
 				list.forEach(c => c.removeGaintag(TOWER));
 				await game.cardsDiscard(list);
 				player.$throw(list, 1000);
@@ -124,6 +126,8 @@ card(TOWER, {
 				game.log(player, "的【通讯塔】被销毁，置于其上的牌被弃置", list);
 			}
 			delete save[TOWER][player.playerid];
+			player.unmarkSkill(`${TOWER}_skill`);
+			syncTowerCards();
 		}
 		if (save[TOWER] && Object.keys(save[TOWER]).length === 0) {
 			disposeTowerObserver();
@@ -269,7 +273,7 @@ function cardHasTowerTag(card: Card, evt: any): boolean {
 function syncTowerCards() {
 	if (!game || !game.players) return;
 	// 清理所有角色手上的通讯塔副本（带 TOWER gaintag）；真牌在 S 区不受影响
-	for (const p of game.players.concat(game.dead)) {
+	for (const p of game.players.slice().concat(game.dead)) {
 		p.getCards("hs", c => c.hasGaintag(TOWER)).forEach(c => c.delete());
 	}
 	const CardsInfo: [Player, Card[]][] = [];
@@ -313,10 +317,11 @@ cardSkill({
 		filter(event, player) {
 			const evt3 = event.getParent(3);
 			const discardEvt = event.getParent("phaseDiscard");
+			console.log(event,discardEvt);
 			if (evt3 == null || discardEvt == null) {
 				return false;
 			}
-			if(discardEvt.player === player) return true;
+			if(discardEvt.player === player) return false;
 			if (event.type != "discard") return false;
 			let evt = event.getl(player);
 			if (!evt || !evt.cards2) return false;
@@ -328,6 +333,7 @@ cardSkill({
 		init(player, skill) {
 			save[TOWER] ??= {};
 			save[TOWER][player.playerid as string] ??= [];
+			player.markSkill(`${TOWER}_skill`);
 			ensureTowerObserver();
 			syncTowerCards();
 		},
