@@ -57,6 +57,8 @@ class WhichWayAudio {
 	 */
 	vaildDefaultLang: Array<ArkAllLangs> = ["CN_MANDARIN", "JP"];
 
+	customVoiceGroup:string[] = ["CN_TOPOLECT","ITA","GER","RUS","FRE","SPA"]
+
 	/**
 	 * 配音组件初始化
 	 */
@@ -564,6 +566,47 @@ class WhichWayAudio {
 				return false;
 			},
 		});
+
+		// ============ 在线配音的「本地请求」补漏 ============
+		// 引擎除 trySkillAudio / tryDieAudio（上面已短路）外，还有其它入口会直接对技能/阵亡
+		// 台词解析**本地文件列表**并发起请求——典型如武将详情弹窗里点击技能页签时的语音预览
+		// （ui/click 直接 get.Audio.skill(...).fileList + game.tryAudio，不走 trySkillAudio）。
+		// 在线配音组合的本地文件必然缺失，这类请求会刷 404。
+		// 因此在解析层拦截：在线组合返回空文件列表（音频仍由 trySkillAudio/tryDieAudio
+		// 钩子走在线播放），本地组合原样放行。
+		//@ts-ignore 返回结构与引擎 Audio 实例读取的字段一致（audioList/fileList/textList）
+		const onlineAudioStub = Object.freeze({ audioList: [], fileList: [], textList: [] });
+
+		await whichWayAPIOverride.appendHook("get.Audio.skill", {
+			after(result: any, options: any) {
+				if (!result || typeof options?.skill !== "string" || !options?.player) return result;
+				try {
+					const web = whichWayAudio.findWebPlay(options.skill, options.player);
+					//有在线实例 = 本地必然缺文件；useLocalAudio 时不干预（用户强制走本地）
+					if (!web || web.useLocalAudio) return result;
+				} catch (e) {
+					return result;
+				}
+				return onlineAudioStub;
+			},
+		});
+
+		await whichWayAPIOverride.appendHook("get.Audio.die", {
+			after(result: any, options: any) {
+				if (!result || !options?.player) return result;
+				try {
+					const name = typeof options.player === "string" ? options.player : get.name(options.player);
+					if (!name) return result;
+					const char = get.character(name);
+					//initDieAudio 只在本地缺失时才挂 dieAudio 实例
+					if (!char?.whichWay?.dieAudio) return result;
+					if (whichWayUtil.config("useLocalAudio")) return result;
+				} catch (e) {
+					return result;
+				}
+				return onlineAudioStub;
+			},
+		});
 	}
 
 	// ============ 对外 API ============
@@ -992,7 +1035,7 @@ class WhichWayAudio {
 		//torappu.prts.wiki/assets/audio/voice_custom/char_2024_chyue_cn_topolect/cn_005.wav
 		if (whichWayArknight.getVoiceLangs().includes(lang)) {
 			if (lang === "JP" || lang === "LINKAGE") return "voice";
-			else if (lang === "CN_TOPOLECT") {
+			else if (this.customVoiceGroup.includes(lang)) {
 				return "voice_custom";
 			} else if (lang === "CN_MANDARIN") {
 				return "voice_cn";

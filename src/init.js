@@ -65,6 +65,17 @@ export const whichWayInit = async () => {
 	//导入配置
 	await _wwMark("config", () => import("./config/index.js"));
 
+	//————————————模式：特蕾西娅与瑰丽理想————————————//
+	// 还处于测试阶段,暂时不进行添加
+	// try {
+	// 	await _wwMark("gloriousIdeal(新模式)", async () => {
+	// 		const { registerGloriousIdealMode } = await import("./GloriousIdeal/index.js");
+	// 		registerGloriousIdealMode();
+	// 	});
+	// } catch (e) {
+	// 	console.error("[GloriousIdeal] 新模式注册失败（可忽略，不影响扩展本体）", e);
+	// }
+
 	//导入视频播放组件
 	await _wwMark("videoPlayer", () => import("./videoPlayer/index.js"));
 

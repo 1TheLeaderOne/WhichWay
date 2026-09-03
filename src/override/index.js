@@ -68,9 +68,10 @@ class WhichWayAPIOverride {
 			throw new Error(`Invalid API name: ${parts[0]} , must be one of ${Object.keys(this.apis)}`);
 		}
 
+		const isContainer = obj => obj != null && (typeof obj === "object" || typeof obj === "function");
 		try {
 			for (const part of parts) {
-				if (obj == null || typeof obj !== "object") {
+				if (!isContainer(obj)) {
 					throw new Error(`Invalid path: ${apiName}`);
 				}
 				obj = obj[part];
@@ -79,7 +80,7 @@ class WhichWayAPIOverride {
 			throw new Error(`Cannot access property ${apiName}, current Object is ${obj}`);
 		}
 
-		if (obj == null || typeof obj !== "object") {
+		if (!isContainer(obj)) {
 			throw new Error(`Parent of '${prop}' is not an object in path: ${apiName}`);
 		}
 
