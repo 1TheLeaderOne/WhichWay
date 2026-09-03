@@ -3,6 +3,8 @@ import { skillCustomFunc } from "../../nonameEx/custom/skill.ts";
 import { whichWayTips } from "../../tips/index.ts";
 import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
 
+const tmpSave = window.whichWaySave;
+
 character("yelamrfz", { pack: "epicSJZX",
 			sex: "female",
 			group: "xiemrfz",

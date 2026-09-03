@@ -110,6 +110,7 @@ skill({
 			if (!result || !winner) return;
             const compareCards = [result.player, result.target];
 			await winner.gain({ cards: compareCards, animate: "gain2" });
+			//@ts-ignore
             const cards = compareCards.filter(card => !!card && winner.hasUseTarget(card, true) && get.owner(card) === winner);
 			if (cards.length > 0) {
 				winner.chooseToUse({
