@@ -9,7 +9,7 @@ character(NAME, {
 	hp: 3,
     maxHp:4,
 	skills: ["miuyuanmrfz", "zhengguomrfz", "qianshimrfz"],
-	group: "laimrfz",
+	group: "gemrfz",
 	pack: "legendSJZX",
 });
 

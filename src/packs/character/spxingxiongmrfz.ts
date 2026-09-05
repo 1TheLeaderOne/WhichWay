@@ -2,6 +2,8 @@ import { lib, game, ui, get, ai, _status } from "noname";
 import { skillCustomFunc } from "../../nonameEx/custom/skill.ts";
 import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
 
+const tmpSave = window.whichWaySave.tmpSave;
+
 character("spxingxiongmrfz", { pack: "legendSJZX",
 			sex: "female",
 			group: "yanmrfz",
@@ -59,7 +61,7 @@ skill({
 			},
 			intro: {
 				content(storage, player) {
-					let str = [];
+					let str:any[] = [];
 					if (player.storage.zhanyemrfz) str.push("我执已修改");
 					if (typeof storage !== "number" || storage === 0) str.push("体力值目前十分健康！");
 					else str.push(`额外体力：${player.maxHp - storage}/${player.maxHp}`);

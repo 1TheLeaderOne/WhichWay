@@ -168,7 +168,8 @@ skill({
 						return 3;
 					},
 				},
-				order(item, player) {
+				order(item, playerx) {
+					const player = playerx || get.player();
 					//@ts-ignore
 					if (_status.event.dying) return 9;
 					let sha = get.order({ name: "sha" });
@@ -300,7 +301,7 @@ skill({
 							return;
 						player
 							.when({ global: "phaseEnd" })
-							.then(() => {
+							.then(async (event,trigger,player) => {
 								player.unmarkSkill("zhanwangmrfz");
 								player.removeMark("zhanwangmrfz", player.countMark("zhanwangmrfz"), false);
 							})
