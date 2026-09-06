@@ -3,9 +3,9 @@ import { lib, game, ui, get, ai, _status } from "noname";
 let info = {
 	intro: [
 		// "调整技能/武将：",
-		"新增干员：桃金娘、米格鲁、嘉欣塔、时隙、珊比、予愿安洁莉娜、佩德洛，谬因",
+		"新增干员：桃金娘、米格鲁、嘉欣塔、时隙、珊比、予愿安洁莉娜、佩德洛、谬因、机械师",
 		// "新增动态皮肤：无",
-		"新增皮肤：桃金娘【繁闹祭典】、【淡金庆典】、【夏卉】，米格鲁【无畏】",
+		// "新增皮肤：桃金娘【繁闹祭典】、【淡金庆典】、【夏卉】，米格鲁【无畏】",
 		// "新增背景：无",
 		// "新增模组：无",
 		"整合了来自Flandre的皮肤包",
@@ -24,7 +24,7 @@ let info = {
 		"优化守望者凯尔希【星灭】的ai，使其随机选取选项",
 		"修复凯瑟琳【勠力同心】的bug"
 	],
-	player: ["taojinniangmrfz","migelumrfz","jiaxintamrfz","shiximrfz","shanbimrfz","spanjielinamrfz","peideluomrfz","miuyinmrfz"],
+	player: ["taojinniangmrfz","migelumrfz","jiaxintamrfz","shiximrfz","shanbimrfz","spanjielinamrfz","peideluomrfz","miuyinmrfz","jixieshimrfz"],
 	cards: [],
 };
 
