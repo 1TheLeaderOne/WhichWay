@@ -2,6 +2,7 @@ import { get, lib, game, ui } from "noname";
 import { skillCustomFunc } from "../../nonameEx/custom/skill.js";
 import { whichWayTips } from "../../tips/index.js";
 import { character, skill, translate, characterTitle, characterIntro } from "../hooks.js";
+const tmpSave = window.whichWaySave;
 character("yelamrfz", {
   pack: "epicSJZX",
   sex: "female",

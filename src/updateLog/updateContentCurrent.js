@@ -2,11 +2,12 @@ import "noname";
 let info = {
   intro: [
     // "调整技能/武将：",
-    "新增干员：桃金娘、米格鲁、嘉欣塔、时隙、珊比、予愿安洁莉娜",
+    "新增干员：桃金娘、米格鲁、嘉欣塔、时隙、珊比、予愿安洁莉娜、佩德洛、谬因、机械师",
     // "新增动态皮肤：无",
-    "新增皮肤：桃金娘【繁闹祭典】、【淡金庆典】、【夏卉】，米格鲁【无畏】",
+    // "新增皮肤：桃金娘【繁闹祭典】、【淡金庆典】、【夏卉】，米格鲁【无畏】",
     // "新增背景：无",
     // "新增模组：无",
+    "整合了来自Flandre的皮肤包",
     "优化了扩展武将、卡牌和配音的加载流程",
     "彻底废弃了旧有的武将和卡牌的加载逻辑",
     "为阿兰娜添加缺失的干员简介",
@@ -22,7 +23,7 @@ let info = {
     "优化守望者凯尔希【星灭】的ai，使其随机选取选项",
     "修复凯瑟琳【勠力同心】的bug"
   ],
-  player: ["taojinniangmrfz", "migelumrfz", "jiaxintamrfz", "shiximrfz", "shanbimrfz", "spanjielinamrfz"],
+  player: ["taojinniangmrfz", "migelumrfz", "jiaxintamrfz", "shiximrfz", "shanbimrfz", "spanjielinamrfz", "peideluomrfz", "miuyinmrfz", "jixieshimrfz"],
   cards: []
 };
 const upDataContentCurrent = info;
