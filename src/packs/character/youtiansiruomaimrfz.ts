@@ -31,7 +31,9 @@ skill({
 				// @ts-ignore
 				if (trigger.leigumrfz[player.playerid][1] === true) {
 					const { cards } = await player
-						.chooseCard("he")
+						.chooseCard({
+							position:"he"
+						})
 						.set("prompt", `你可以重铸一张牌`)
 						.set("filterCard", card => player.canRecast(card))
 						.set("ai", card => 7 - get.value(card))
@@ -128,7 +130,7 @@ skill({
 			},
 			// @ts-ignore
 			async content(event, trigger, player) {
-				player.discard(event.cards);
+				player.discard({cards:event.cards});
 				player.draw(event.cards.length);
 			},
 		},
@@ -139,7 +141,7 @@ translate({
 	"leigumrfz": "擂鼓",
 	"leigumrfz_info": "锁定技。<br>①你使用手牌最[左侧/右侧]的牌后，你[摸一张牌/重铸一张牌]，然后你本回合所有牌的使用次数+X（同类效果取最高值）;<br>②你不能整理手牌。",
 	"jiaoyingmrfz": "校音",
-	"jiaoyingmrfz_info": "出牌阶段开始或结束时，你可以${get.poptip(\"sjzx_zhiheng\")}X。",
+	"jiaoyingmrfz_info": `出牌阶段开始或结束时，你可以${get.poptip("sjzx_zhiheng")}X。`,
 });
 
 characterTitle("youtiansiruomaimrfz", "<font color = #db7093>毋畏爱意</font>");

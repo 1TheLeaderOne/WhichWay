@@ -65,7 +65,7 @@ skill({
 					return info && !info.charlotte && !info.equipSkill;
 				});
 				const { control } = await player
-					.chooseControl(skills)
+					.chooseControl({controls:skills})
 					.set("prompt", `请选择失去一个技能直到本轮结束`)
 					.set("ai", () => {
 						// @ts-ignore
@@ -122,8 +122,8 @@ skill({
 						},
 						ai1(card) {
 							let player = get.player();
-							if (player.isPhaseUsing() && player.countCards("h", card => player.hasUseTarget(card) && ["equip", "delay"].includes(get.type(card))) > 0) return false;
-							if (!player.isPhaseUsing() && !game.hasPlayer(char => get.attitude2(char) > 0 && char.getDamagedHp() > 0)) return false;
+							if (player.isPhaseUsing() && player.countCards("h", card => player.hasUseTarget(card) && ["equip", "delay"].includes(get.type(card))) > 0) return -1;
+							if (!player.isPhaseUsing() && !game.hasPlayer(char => get.attitude2(char) > 0 && char.getDamagedHp() > 0)) return -1;
 							return 8 - get.value(card);
 						},
 						ai2(target) {
@@ -155,9 +155,7 @@ skill({
 						if (num < 1) return;
 						//@ts-ignore
 						game.getRoundHistory("changeHp", evt => {
-							/** @type { GameEvent } */
-							//@ts-ignore
-							let evtx = evt.getParent();
+							let evtx = evt.getParent()!;
 							if (evtx.name === "recover" && targets.includes(evtx.player) && evtx.card && evtx.card?.storage?.pojianmrfz_id === randomId) {
 								evtx.player.draw(num);
 								targets.remove(evtx.player);
@@ -191,20 +189,26 @@ skill({
 					});
 
 				player.recast(cards);
-				await player
-					.chooseUseTarget(
-						{
+				const vcard = get.autoViewAs({
 							name: "taoyuan",
 							isCard: true,
 							storage: {
 								pojianmrfz: true,
 								pojianmrfz_id: randomId,
 							},
-						},
-						cards,
-						targets
-					)
-					.set("forced", true);
+						})
+
+				await player.chooseUseTarget({
+					card:vcard,
+					cards,
+					filterTarget(card, player, target) {
+						return targets.includes(target);
+					},
+					selectTarget() {
+						return targets.length;
+					},
+					forced:true
+				})
 			},
 			ai: {
 				threaten: 0.5,
@@ -227,9 +231,9 @@ skill({
 translate({
 	"ruoyemumrfz": "若叶睦",
 	"lingwomrfz": "另我",
-	"lingwomrfz_info": "锁定技，当你进入濒死状态后，你${get.poptip(\"sjzx_byRecast\")}将一张牌赠予一名其他角色，并将体力至调整至X（X至少为1），然后你选择失去一个技能直到本轮结束。",
+	"lingwomrfz_info": `锁定技，当你进入濒死状态后，你${get.poptip("sjzx_byRecast")}将一张牌赠予一名其他角色，并将体力至调整至X（X至少为1），然后你选择失去一个技能直到本轮结束。`,
 	"pojianmrfz": "破茧",
-	"pojianmrfz_info": "每回合限三次，当你受到伤害后，你可以将一张牌${get.poptip(\"sjzx_byRecast\")}当目标数至多为X（至少为1）的【桃园结义】使用，然后因此回复体力值的角色摸X张牌，反之其本回合使用的下一张牌额外结算X次。",
+	"pojianmrfz_info": `每回合限三次，当你受到伤害后，你可以将一张牌${get.poptip("sjzx_byRecast")}当目标数至多为X（至少为1）的【桃园结义】使用，然后因此回复体力值的角色摸X张牌，反之其本回合使用的下一张牌额外结算X次。`,
 });
 
 characterTitle("ruoyemumrfz", "<font color = #db7093>毋畏死亡</font>");

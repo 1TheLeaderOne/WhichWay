@@ -1020,6 +1020,9 @@ class WhichWayAudio {
 		uid = whichWayArknight.shcema.transfer(uid, "character", "whichWayUID") || uid;
 		if (lang === "CN_TOPOLECT") {
 			uid = `${uid}_cn_topolect`;
+		} else if(lang === "ITA"){
+			//整个custom组就意大利语搞特殊是何意味
+			uid = `${uid}_ita`;
 		}
 		voiceTitle = this.transferVoiceTitle(voiceTitle);
 		lang = this.transferLang(lang);

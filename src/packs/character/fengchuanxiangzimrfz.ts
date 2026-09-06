@@ -19,7 +19,10 @@ skill({
 					const { color } = await player.judge().forResult();
 					if (player.countCards("h") < 1) continue;
 					const { cards } = await player
-						.chooseCard("h", true)
+						.chooseCard({
+							position:"h",
+							forced:true
+						})
 						.set(
 							"prompt",
 							`你可以重铸一张手牌，若重铸的牌与判定牌颜色(${get.translation(color)})一致，你摸${lib.skill.wuweimrfz.getNum(player, event.name)}张牌。`
@@ -54,6 +57,7 @@ skill({
 								let evtx = evt.getParent();
 								//@ts-ignore
 								if (evtx.name === "damage" && evtx.num > 0) return evtx.cards?.includes(card);
+								return false;
 							}).length > 0
 						);
 					}).length > 0
@@ -66,6 +70,7 @@ skill({
 							let evtx = evt.getParent();
 							//@ts-ignore
 							if (evtx.name === "damage" && evtx.num > 0) return evtx.cards?.includes(card);
+							return false;
 						}).length > 0
 					);
 				});
@@ -199,7 +204,7 @@ skill({
 					return;
 				}
 				const result = await player
-					.chooseControl(skills.concat("cancel2"))
+					.chooseControl({controls:skills.concat("cancel2")})
 					.set("prompt", `为一个技能添加下列描述直到本轮结束：“（X=你本轮触发过的${get.poptip("sjzx_cardUseType")}数）”`)
 					.set("ai", () => {
 						//@ts-ignore
@@ -220,7 +225,7 @@ skill({
 						skill: skill,
 						receiver: player,
 					};
-					player.when({ global: "roundStart" }).then(() => {
+					player.when({ global: "roundStart" }).then(async (event,trigger,player) => {
 						if (player.playerid) delete player.storage.wuweimrfz[player.playerid];
 					});
 				}
@@ -233,9 +238,9 @@ translate({
 	"songyuemrfz": "颂乐",
 	"songyuemrfz_info": "准备阶段，你可以进行三次判定，每次判定后你重铸一张手牌，若重铸的牌与判定牌颜色一致，你摸X张牌。",
 	"yuxiangmrfz": "余响",
-	"yuxiangmrfz_info": "任意角色的结束阶段，你可以${get.poptip(\"sjzx_byRecast\")}使用${get.poptip(\"sjzx_centralArea\")}中本回合造成过伤害的一张牌，若此牌造成伤害，你可以弃置至多X名角色的一张手牌。",
+	"yuxiangmrfz_info": `任意角色的结束阶段，你可以${get.poptip("sjzx_byRecast")}使用${get.poptip("sjzx_centralArea")}中本回合造成过伤害的一张牌，若此牌造成伤害，你可以弃置至多X名角色的一张手牌。`,
 	"wuweimrfz": "毋畏",
-	"wuweimrfz_info": "宗族技（${get.poptip(\"sjzx_AveMujica\")}），当你重铸牌后，你可以将本技能句号之后的描述移至同族武将的武将牌上任意一个技能直到本轮结束。（X=你本轮触发过的${get.poptip(\"sjzx_cardUseType\")}数）",
+	"wuweimrfz_info": `宗族技（${get.poptip("sjzx_AveMujica")}），当你重铸牌后，你可以将本技能句号之后的描述移至同族武将的武将牌上任意一个技能直到本轮结束。（X=你本轮触发过的${get.poptip("sjzx_cardUseType")}数）`,
 });
 
 characterTitle("fengchuanxiangzimrfz", "<font color = #db7093>毋畏遗忘</font>");

@@ -114,7 +114,7 @@ skill({
 translate({
 	"bafanhailingmrfz": "八幡海铃",
 	"chendiemrfz": "沉叠",
-	"chendiemrfz_info": "锁定技，出牌阶段，你使用的前X+2张牌改为以${get.poptip(\"sjzx_byRecast\")}来使用，且你的手牌继承此牌的应变效果。",
+	"chendiemrfz_info": `锁定技，出牌阶段，你使用的前X+2张牌改为以${get.poptip("sjzx_byRecast")}来使用，且你的手牌继承此牌的应变效果。`,
 	"umiri_chenxianmrfz": "陈弦",
 	"umiri_chenxianmrfz_info": "锁定技，你于回合内获得的牌的应变效果可无视条件直接生效，若这些牌没有应变效果，你令这些牌随机获得X+1个应变效果。",
 });
