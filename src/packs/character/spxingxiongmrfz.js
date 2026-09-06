@@ -1,6 +1,7 @@
 import { game, lib, get, _status, ui } from "noname";
 import { skillCustomFunc } from "../../nonameEx/custom/skill.js";
 import { character, skill, translate, characterTitle, characterIntro } from "../hooks.js";
+const tmpSave = window.whichWaySave.tmpSave;
 character("spxingxiongmrfz", {
   pack: "legendSJZX",
   sex: "female",
