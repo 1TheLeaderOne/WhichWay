@@ -153,7 +153,8 @@ skill({
           return 3;
         }
       },
-      order(item, player) {
+      order(item, playerx) {
+        const player = playerx || get.player();
         if (_status.event.dying) return 9;
         let sha = get.order({ name: "sha" });
         if (sha <= 0) return 0;
@@ -261,9 +262,9 @@ skill({
             return info.zhanwangmrfz;
           }))
             return;
-          player.when({ global: "phaseEnd" }).then(() => {
-            player.unmarkSkill("zhanwangmrfz");
-            player.removeMark("zhanwangmrfz", player.countMark("zhanwangmrfz"), false);
+          player.when({ global: "phaseEnd" }).then(async (event2, trigger2, player2) => {
+            player2.unmarkSkill("zhanwangmrfz");
+            player2.removeMark("zhanwangmrfz", player2.countMark("zhanwangmrfz"), false);
           }).assign({
             zhanwangmrfz: true,
             mod: {

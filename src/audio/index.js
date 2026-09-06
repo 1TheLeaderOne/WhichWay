@@ -39,6 +39,7 @@ class WhichWayAudio {
    * 只开放中、日，因为其他的某些角色不一定有
    */
   vaildDefaultLang = ["CN_MANDARIN", "JP"];
+  customVoiceGroup = ["CN_TOPOLECT", "ITA", "GER", "RUS", "FRE", "SPA"];
   /**
    * 配音组件初始化
    */
@@ -469,6 +470,34 @@ class WhichWayAudio {
         return false;
       }
     });
+    const onlineAudioStub = Object.freeze({ audioList: [], fileList: [], textList: [] });
+    await whichWayAPIOverride.appendHook("get.Audio.skill", {
+      after(result, options) {
+        if (!result || typeof options?.skill !== "string" || !options?.player) return result;
+        try {
+          const web = whichWayAudio.findWebPlay(options.skill, options.player);
+          if (!web || web.useLocalAudio) return result;
+        } catch (e) {
+          return result;
+        }
+        return onlineAudioStub;
+      }
+    });
+    await whichWayAPIOverride.appendHook("get.Audio.die", {
+      after(result, options) {
+        if (!result || !options?.player) return result;
+        try {
+          const name = typeof options.player === "string" ? options.player : get.name(options.player);
+          if (!name) return result;
+          const char = get.character(name);
+          if (!char?.whichWay?.dieAudio) return result;
+          if (whichWayUtil.config("useLocalAudio")) return result;
+        } catch (e) {
+          return result;
+        }
+        return onlineAudioStub;
+      }
+    });
   }
   // ============ 对外 API ============
   /**
@@ -832,7 +861,7 @@ class WhichWayAudio {
   transferLang(lang) {
     if (whichWayArknight.getVoiceLangs().includes(lang)) {
       if (lang === "JP" || lang === "LINKAGE") return "voice";
-      else if (lang === "CN_TOPOLECT") {
+      else if (this.customVoiceGroup.includes(lang)) {
         return "voice_custom";
       } else if (lang === "CN_MANDARIN") {
         return "voice_cn";
