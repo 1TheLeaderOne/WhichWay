@@ -108,7 +108,7 @@ skill({
 					return info && !info.charlotte;
 				});
 				let num = lib.skill.wuweimrfz.getNum(player, "pojianmrfz");
-				const { result } = await player
+				event.result = await player
 					.chooseCardTarget({
 						prompt: `你可以将一张牌${get.poptip("sjzx_byRecast")}当目标数至多为${Math.max(1, num)}的【桃园结义】使用，然后因此回复体力值的角色摸${num}张牌，反之其本回合使用的下一张牌额外结算${num}次`,
 						filterCard: true,
@@ -137,7 +137,6 @@ skill({
 						},
 					})
 					.set("num", num);
-				event.result = result;
 			},
 			async content(event, trigger, player) {
 				const { cards, targets } = event;

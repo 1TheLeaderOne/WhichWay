@@ -137,9 +137,31 @@ class WhichWayPackManager {
 		//将包初始化
 		for (const name of WhichWayPackManager.CHARACTER_PACKS) {
 			lib.characterPack[name] ??= {};
-			if (!lib.config.characters.includes(name)) lib.config.characters.push(name);
 			let translate = lib.config.extension_WhichWay_compatibleMode === true ? `驶舰:${this.getPackTranslation(name)}` : "<img style='width:90px;height:25px;' src=" + lib.assetURL + `extension/WhichWay/image/decoration/${this.getPackTranslation(name, 1)}.png>`;
 			lib.translate[`${name}_character_config`] = translate;
+		}
+
+		// —— 武将包子包开关初始化 ——
+		// 旧版本在每次启动都无条件 lib.config.characters.push(子包)，导致玩家在
+		// 「武将包」菜单关闭某子包后，重启又被强行加回来（开关无法关闭）。
+		// 现在改为：仅在「首次运行」时把子包默认加入 characters 并持久化一次，
+		// 之后完全尊重 players 在菜单里的开关（characters 随 toggle 持久化），重启不再干预。
+		if (!lib.config.extension_WhichWay_characterPackDefaulted) {
+			let changed = false;
+			for (const name of WhichWayPackManager.CHARACTER_PACKS) {
+				if (!lib.config.characters.includes(name)) {
+					lib.config.characters.push(name);
+					changed = true;
+				}
+			}
+			if (changed) {
+				try {
+					game.saveConfig("characters", lib.config.characters);
+				} catch (e) {
+					console.warn("[WhichWay] 初始化默认武将包子包失败", e);
+				}
+			}
+			game.saveConfig("extension_WhichWay_characterPackDefaulted", true);
 		}
 
 		//初始化武将
@@ -162,6 +184,31 @@ class WhichWayPackManager {
 			//————设置将包————//
 			if (!char.pack) {
 				char.pack = "specialSJZX";
+			}
+
+			//————引擎可用性注册————//
+			// WhichWay 的干员不走引擎普通武将包导入流程（game.import/addCharacterPack），
+			// 角色仅挂在 lib.characterPack 下，引擎开局会把 characterPack 全量并入 lib.character，
+			// 因此“包开关/仅点将”在这里无法被引擎原逻辑过滤。这里对齐引擎普通包语义：
+			// - 扩展整体关闭（extension_WhichWay_characters_enable=false）→ 全部角色 isUnseen（不可选）
+			// - 子包在“武将包”菜单被关闭（不在 lib.config.characters）→ isUnseen（不可选，等同引擎关闭包）
+			// - 子包勾选“仅点将可用”（forbidai_user_<子包>）→ 加入 lib.config.forbidai（常规/AI 将池禁用，
+			//   玩家点将仍可选用；与引擎普通包的 forbidai 语义一致）
+			// isUnseen 角色仍保留在 lib.characterPack 中，WhichWay 图鉴/立绘等内部逻辑不受影响。
+			const packEnabled =
+				lib.config.extension_WhichWay_characters_enable !== false && lib.config.characters.includes(char.pack);
+			if (!packEnabled) {
+				//@ts-ignore isUnseen 为引擎角色标记字段（类型未在 WhichWayCharacter 上声明）
+				(char as any).isUnseen = true;
+			} else if (
+				// 整体“仅点将可用”（引擎扩展包 tab：forbidai_user_mode_extension_WhichWay）
+				lib.config.forbidai_user_mode_extension_WhichWay === true ||
+				// 子包“仅点将可用”（forbidai_user_<子包>）
+				lib.config[`forbidai_user_${char.pack}`] === true
+			) {
+				if (!lib.config.forbidai.includes(name)) {
+					lib.config.forbidai.add(name);
+				}
 			}
 
 			lib.characterPack[char.pack][name] ??= char;

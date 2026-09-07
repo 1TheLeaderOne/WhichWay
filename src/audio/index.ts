@@ -370,23 +370,24 @@ class WhichWayAudio {
 		const exists = this._audioExistCache!.has(whichWayFile.compilePath(`audio:${lang}/${base}1.mp3`));
 
 		if (exists) {
-			//本地配音 → 用 audioname2 按干员登记路径，引擎会按角色解析
-			if (!targetInfo.audioname2) targetInfo.audioname2 = {};
-			targetInfo.audioname2[char] = `ext:WhichWay/audio/${lang}:${parsed.count}`;
+			//本地配音：路径写在 info.audio（'ext:...' 格式），引擎解析时按
+			//`info.audioname` 数组匹配自动追加 `_干员` 后缀得到 `{技能}_{干员}{n}.mp3`。
+			//注意：这里**不要**把路径写进 `lib.skill[].audioname2[干员]`——
+			//该字段是引擎原生的"借用另一技能配音"机制（值应为另一技能名），
+			//把路径字符串塞进去会让千幻聆音等扩展按错误语义执行（`lib.skill[路径]` 取不到
+			//目标，触发 TypeError）。所有按角色解析的需求已由 `info.audioname` + `info.audio`
+			//覆盖共同完成。
 			this.clearWebPlay(skill, char);
 		} else if (lang !== "CUSTOM") {
 			//本地缺失 → 在线配音（按干员独立）
 			this.setWebPlay(skill, char, new whichWayWebPlay(skill, char, parsed.voices, base));
-			if (targetInfo.audioname2) delete targetInfo.audioname2[char];
 		} else {
 			//CUSTOM 语言又没有本地文件 → 确实无音可播
 			this.clearWebPlay(skill, char);
-			if (targetInfo.audioname2) delete targetInfo.audioname2[char];
 			console.warn(`[whichWayAudio] 角色 ${char} 的技能 ${skill} 的语言设置为 ${lang}，但音频文件不存在！`);
 		}
 
 		//info.audio 保留一个稳定的默认路径字符串，供 logAudio / getSkillAudioPath 等按原样使用。
-		//各干员的实际路径已由上面的 audioname2 覆盖，这里只是兜底。
 		if (typeof info.audio !== "string") {
 			this._originalAudio.set(skill, info.audio);
 			(info as any).audio = `ext:WhichWay/audio/${lang}:${parsed.count}`;
@@ -490,11 +491,14 @@ class WhichWayAudio {
 	/**
 	 * 取 audioname2 中命中该玩家的配置值。
 	 *
-	 * 引擎原生支持 audioname2（按角色覆盖 audio，见 docs/audio-guide.md），命中后有以下几种值：
-	 * - 音频系统写入的本地路径（`ext:WhichWay/audio/{语言}:{数量}`）→ 交回引擎解析即可；
+	 * 引擎原生 audioname2 用于"按角色覆盖 audio"，命中后通常为以下几种：
 	 * - 干员代码写的「借用别的技能配音」（`info.audioname2[player.name] = "bianyimrfz"`）→
 	 *   需要转交那个技能处理，否则在线配音会播错人；
 	 * - 其它（如引用核心技能）→ 交回引擎。
+	 *
+	 * 注意：**本地配音的路径不再走 audioname2**（会与"技能别名"语义冲突，
+	 * 并会让千幻聆音等扩展崩溃）——本地路径由 `info.audio` 覆写 + `info.audioname`
+	 * 数组按角色追加后缀共同完成。
 	 */
 	getAudioname2Value(info: Skill, player: Player | string): string | undefined {
 		const map = (info as any)?.audioname2 as Record<string, unknown> | undefined;
@@ -529,26 +533,21 @@ class WhichWayAudio {
 					return false;
 				}
 
-				//audioname2 命中（引擎原生的「按角色覆盖 audio」）
 				const audioname2 = whichWayAudio.getAudioname2Value(infox, player);
 				if (audioname2 !== undefined) {
-					//干员代码写的「借用别的技能配音」→ 转交给那个技能，由它决定走本地还是在线
 					if (audioname2 !== skill && !audioname2.startsWith("ext:") && window.whichWaySave.allSkills.includes(audioname2)) {
 						await game.trySkillAudio(audioname2, player, directaudio, true, void 0, args);
 						return false;
 					}
-					//其余（本地路径 / 引用核心技能）由引擎自己解析
 					return;
 				}
 
 				const web = whichWayAudio.findWebPlay(skill, player);
-				//本地已有该干员的配音 → 交回引擎按 audioname / audioname2 解析本地路径
 				if (!web) return;
-				//强制使用本地音频 → 交回引擎
 				if (web.useLocalAudio) return;
 
 				web.play();
-				return false; //已播在线配音，阻断引擎的本地播放
+				return false;
 			},
 		});
 
