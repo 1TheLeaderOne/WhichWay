@@ -21,38 +21,38 @@ skill({
 				if (player == _status.currentPhase) return false;
 				return event.type == "discard" && event.getl(player).cards2.length > 0 && !player.hasSkill("qinghemrfz_ban");
 			},
-			direct: true,
-			async content(event, trigger, player) {
-				var target = _status.currentPhase;
-				if (!target) return;
-				const { bool } = await target
-					.chooseBool("【亲和】：是否让" + get.translation(player) + "其弃置的牌中的一张牌？")
+			async cost(event, trigger, player) {
+				let target = _status.currentPhase;
+				event.result = await target
+					.chooseBool({prompt:"【亲和】：是否让" + get.translation(player) + "其弃置的牌中的一张牌？"})
 					.set("ai", () => {
 						return get.attitude(_status.currentPhase, _status.event.targetx) > 0;
 					})
 					.set("targetx", player)
 					.forResult();
-
-				if (bool) {
-					let target = _status.currentPhase;
+			},
+			direct: true,
+			async content(event, trigger, player) {
+				let target = _status.currentPhase;
 					if (!target) return;
 					player.addTempSkill("qinghemrfz_ban", "phaseEnd");
 					if (trigger.cards.length == 1) {
-						player.gain(trigger.cards, "gain2");
-						event.finish();
+						player.gain({cards:trigger.cards,animate:"gain2"});
+						return;
 					}
 					if (trigger.cards.length > 1) {
 						const result = await target
-							.chooseButton(["选择获得令其获得其中的一张牌", trigger.cards.slice(0)], true)
+							.chooseButton({
+								forced:true,
+								createDialog:["选择获得令其获得其中的一张牌", trigger.cards.slice(0)]
+							})
 							.set("ai", button => get.value(button.link))
 							.forResult();
 						if (result.links) {
-							//@ts-ignore
 							player.logSkill("qinghemrfz");
-							player.gain(result.links, "gain2");
+							player.gain({cards:result.links, animate:"gain2"});
 						}
 					}
-				}
 			},
 			subSkill: {
 				ban: {
@@ -66,16 +66,18 @@ skill({
 				global: "phaseEnd",
 			},
 			findGainAndDiscardHistory() {
-				let result = {
+				let result:Record<string,any> = {
 					gain: [],
 					discard: [],
 				};
 				game.players.forEach(char => {
 					char.getHistory("gain", evt => {
 						if (evt.name === "gain") result.gain.add(char);
+						return false;
 					});
 					char.getHistory("lose", evt => {
 						if (evt.type === "discard") result.discard.add(char);
+						return false;
 					});
 				});
 				return result;
@@ -104,12 +106,12 @@ skill({
 			forced: true,
 			filter(event, player) {
 				return event.name === "gain"
-					? player.countCards("h") >= 10 && event.getParent().name === "draw"
+					? player.countCards("h") >= 10 && (event.getParent()!).name === "draw"
 					: player.countCards("h") <= 5 && event.type === "discard";
 			},
 			async content(event, trigger, player) {
 				if (event.name === "gain") {
-					let cards = trigger.getParent().result;
+					let cards = (trigger.getParent()!).result;
 					game.cardsDiscard(cards);
 					game.log(player, "取消了此次摸牌");
 				} else {

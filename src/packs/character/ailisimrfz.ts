@@ -23,12 +23,12 @@ skill({
 				let result;
 
 				event.list = [];
-				for (var name of lib.inpile) {
+				for (let name of lib.inpile) {
 					if (get.type(name) == "delay" || get.type(name) == "equip") continue;
 					if (get.tag({ name: name }, "damage")) continue;
 					event.list.push([get.type(name), "", name]);
 				}
-				var dialog = ["为" + get.translation(trigger.player) + "选择至多三个牌名"];
+				let dialog = ["为" + get.translation(trigger.player) + "选择至多三个牌名"];
 				if (event.list.length) {
 					//@ts-ignore
 					dialog.push([event.list, "vcard"]);
@@ -36,7 +36,13 @@ skill({
 				if (!event.list.length) event.finish();
 				else {
 					result = await player
-						.chooseButton(dialog, [1, 3])
+						.chooseButton(
+							//dialog, [1, 3]
+							{
+								createDialog:dialog,
+								selectButton:[1,3]
+							}
+						)
 						.set("ai", function (button) {
 							let name = button.link[2],
 								list = _status.event.list.map(i => i[2]),
@@ -74,7 +80,7 @@ skill({
 				}
 
 				if (result?.links) {
-					var names = result.links.map(i => i[2]),
+					let names = result.links.map(i => i[2]),
 						target = trigger.player;
 					if (!target.storage.alsmengxiangmrfz_eff) target.storage.alsmengxiangmrfz_eff = [];
 					target.storage.alsmengxiangmrfz_eff = target.storage.alsmengxiangmrfz_eff.concat(names);
@@ -101,17 +107,17 @@ skill({
 					mod: {
 						//@ts-ignore
 						hiddenCard: function (player, name) {
-							var storage = player.getStorage("alsmengxiangmrfz_eff");
+							let storage = player.getStorage("alsmengxiangmrfz_eff");
 							if (storage.length) return name == storage[0];
 						},
 						cardname: function (card, player) {
 							if (_status.event.name != "chooseToUse" || _status.event.skill) return;
-							var storage = player.getStorage("alsmengxiangmrfz_eff");
+							let storage = player.getStorage("alsmengxiangmrfz_eff");
 							if (storage.length) return storage[0];
 						},
 						cardnature: function (card, player) {
 							if (_status.event.name != "chooseToUse" || _status.event.skill) return;
-							var storage = player.getStorage("alsmengxiangmrfz_eff");
+							let storage = player.getStorage("alsmengxiangmrfz_eff");
 							if (storage.length) return false;
 						},
 					},
@@ -143,7 +149,10 @@ skill({
 			},
 			async content(event, trigger, player) {
 				const result = await player
-					.chooseTarget(true, "【入眠】:请选择一名角色，令其于下个结束阶段开始时额外执行一个出牌阶段")
+					.chooseTarget({
+						forced:true,
+						prompt:"【入眠】:请选择一名角色，令其于下个结束阶段开始时额外执行一个出牌阶段"
+					})
 					.set("ai", target => {
 						let player = get.player();
 						if (get.attitude(player, target) > 4) {
@@ -154,10 +163,10 @@ skill({
 					.forResult();
 
 				if (result.targets) {
-					var target = result.targets[0];
+					let target = result.targets[0];
 					target.addMark("rumianmrfz", 1, false);
 					target.when({ player: "phaseJieshuBegin" }).then(async (event, trigger, player) => {
-						var next = trigger.player.phaseUse();
+						let next = trigger.player.phaseUse();
 						event.next.remove(next);
 						//@ts-ignore
 						trigger.getParent("phase").next.push(next);

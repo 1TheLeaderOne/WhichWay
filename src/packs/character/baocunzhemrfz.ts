@@ -23,9 +23,16 @@ skill({
 			},
 			async content(event, trigger, player) {
 				const result = await player
-					.chooseTarget(true, "【守望】:请选择一名其他角色", function (card, player, target) {
-						return target != player;
-					})
+					.chooseTarget(
+					// 	true, "【守望】:请选择一名其他角色", function (card, player, target) {
+					// 	return target != player;
+					// }
+					{
+						forced:true,
+						prompt:`【守望】:请选择一名其他角色`,
+						filterTarget:lib.filter.notMe
+					}
+				)
 					.set("ai", target => get.attitude(player, target) > 0)
 					.forResult();
 
@@ -69,14 +76,14 @@ skill({
 					},
 					// @ts-ignore
 					check: function (event, player) {
-						var target = game.findPlayer(function (current) {
+						let target = game.findPlayer(function (current) {
 							return current.hasSkill("shouwangmrfz2");
 						});
 						return get.attitude(player, target) > 0;
 					},
 					// @ts-ignore
 					prompt: function (event, player) {
-						var target = game.findPlayer(function (current) {
+						let target = game.findPlayer(function (current) {
 							return current.hasSkill("shouwangmrfz2");
 						});
 						return "是否令" + get.translation(target) + "摸一张牌？";
@@ -109,13 +116,16 @@ skill({
 			direct: true,
 			async content(event, trigger, player) {
 				const result = await player
-					.chooseTarget("【希冀】:你可以将你区域内所有的牌交给一名其他角色", function (card, player, target) {
-						return target != player;
+					.chooseTarget({
+						prompt:"【希冀】:你可以将你区域内所有的牌交给一名其他角色",
+						filterTarget(card, player, target) {
+							return target !==player
+						},
 					})
 					.set("ai", target => get.attitude(player, target) > 2 && target.hp > 0)
 					.forResult();
 				if (result.targets) {
-					var hej = player.getCards("hej"),
+					let hej = player.getCards("hej"),
 						target = result.targets[0];
 					player.give(hej, target);
 					// @ts-ignore
@@ -133,10 +143,10 @@ skill({
 						return player.maxHp <= 5;
 					},
 					async content(event, trigger, player) {
-						const result = await player.chooseBool("【希冀】:是否失去所有体力上限？").forResult();
+						const result = await player.chooseBool({prompt:"【希冀】:是否失去所有体力上限？"}).forResult();
 
 						if (result.bool) {
-							var num = Math.floor(player.maxHp / 2);
+							let num = Math.floor(player.maxHp / 2);
 							player.draw(Math.min(3, num > 1 ? num : 1));
 							player.loseMaxHp(player.maxHp);
 						}

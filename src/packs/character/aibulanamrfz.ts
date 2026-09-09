@@ -54,11 +54,12 @@ skill({
 						}
 					}
 				}
-				let cardMaps = [];
+				let cardMaps:any[] = [];
 				for (let target of [...targets, player]) {
 					let cardsCompare;
 					const result = await target
-						.chooseCard(true)
+						.chooseCard()
+						.set("forced",true)
 						.set("prompt", "【刈诈】：请选择一张手牌进行拼点")
 						.set("type", "compare")
 						.set("ai", card => {
@@ -75,7 +76,8 @@ skill({
 						cardsCompare = lib.skill[result.skill].onCompare(target)[0];
 					} else cardsCompare = result.cards[0];
 					const { cards } = await target
-						.chooseCard(true)
+						.chooseCard()
+						.set("forced",true)
 						.set("type", "debate")
 						.set("source", player)
 						.set("prompt", "【刈诈】：请选择一张手牌进行议事")
@@ -100,7 +102,7 @@ skill({
 					cardMaps.push([target, [cardsCompare, cardsDebate]]);
 				}
 				let compareMaps = {};
-				let debateMaps = [];
+				let debateMaps:any[] = [];
 				for (let arr of cardMaps) {
 					//@ts-ignore
 					compareMaps[arr[0].playerid] = arr[1][0];
@@ -111,7 +113,8 @@ skill({
 				let targetDebate = targets.filter(target => debateMaps.map(arr => arr[0]).includes(target));
 				let result1 = await player.chooseToCompare(targetCompare).set("fixedResult", compareMaps).forResult();
 				let result2 = await player
-					.chooseToDebate([...targetDebate, player])
+					.chooseToDebate()
+					.set("list",[...targetDebate, player])
 					.set("fixedResult", debateMaps)
 					.forResult();
 				[...targetDebate, player].forEach(target => target.removeGaintag("yizhamrfz_tip2"));
@@ -155,7 +158,7 @@ skill({
 						.forResult();
 					if (targetsx) {
 						for (let char of targetsx) {
-							char.damage(player);
+							char.damage({source:player});
 							player.line(char);
 						}
 					}
@@ -175,7 +178,7 @@ skill({
 			trigger: { player: "phaseJieshuEnd" },
 			getNum(player) {
 				let num = 0;
-				let cards = [];
+				let cards:Card[] = [];
 				num += player.getStat("damage") || 0;
 				for (let char of game.players) {
 					//@ts-ignore
