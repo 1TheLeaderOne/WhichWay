@@ -13,9 +13,10 @@ let info = {
 		"修复自定义配音中意大利语url拼接错误的bug",
 		"修复部分技能描述中插值表达式未正确设置的bug",
 		"修复大D老师优化配音流程中误用Skill.audioname2导致的bug",
-		"修复武将包无法正常关闭/仅点将不可用的bug"
+		"修复武将包无法正常关闭/仅点将不可用的bug",
+		"为动皮适配unpackPremultipliedAlpha",
+		"添加“驶舰之向”启动页面"
 		/**
-		 * TODO: 给动皮适配unpackPremultipliedAlpha
 		 * TODO: 嘉欣塔飞旅bug
 		 */
 	],

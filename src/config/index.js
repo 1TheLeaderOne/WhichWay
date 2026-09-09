@@ -95,6 +95,9 @@ const whichWayOriginConfig = {
         },
 	},
 
+	// 注：「驶舰之向启动页」开关不在这里声明，而是由 src/launchPad/config.ts 通过
+	// onConfig 钩子注册（保持启动页模块自包含，避免与主配置表耦合）。
+
 	designerThanksTitle:{
 		name: "<font color=#ed7e78><———干员设计———></font></a>",
 		clear: true,

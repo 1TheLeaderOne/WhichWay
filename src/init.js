@@ -65,6 +65,18 @@ export const whichWayInit = async () => {
 	//导入配置
 	await _wwMark("config", () => import("./config/index.js"));
 
+	//————————————启动页美化（WhichWay 视差轮播）————————————//
+	// 注册自定义启动页样式：玩家可在「选项 → 外观 → 启动页样式」中选择。
+	// 在引擎构建 splash 选项前注册即可（WhichWay 扩展加载早于引擎 splash 初始化）。
+	try {
+		await _wwMark("launchPad(启动页美化)", async () => {
+			const { registerLaunchPadSplash } = await import("./launchPad/index.js");
+			registerLaunchPadSplash();
+		});
+	} catch (e) {
+		console.error("[launchPad] 启动页美化注册失败（可忽略，不影响扩展本体）", e);
+	}
+
 	//————————————模式：特蕾西娅与瑰丽理想————————————//
 	// 还处于测试阶段,暂时不进行添加
 	// try {

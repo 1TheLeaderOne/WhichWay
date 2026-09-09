@@ -5,6 +5,62 @@ import { whichWayToast } from "../toast/index.ts";
 import { onSetDev } from "../hooks/index.js";
 import { whichWayFile } from "../file.js";
 
+// ============ unpackPremultipliedAlpha 支持 ============
+// 与千幻聆音同方案：为需要「预乘 alpha 上传」的动皮纹理，在 texImage2D 上传前临时打开
+// gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL（上传后复位）。适合美术导出为 straight-alpha 但按
+// premultiplied 混合（premultipliedAlpha=true）渲染的 Spine 素材，可消除半透明黑边/发暗。
+const WW_UNPACK_MARK = "__whichWayUnpackPremultiply";
+
+/** 幂等 patch spine.webgl.GLTexture.update：按 image 标记决定是否预乘上传 */
+function patchSpineGLTextureUnpackOnce() {
+	const glt = spine?.webgl?.GLTexture;
+	if (!glt || !glt.prototype || glt.prototype.update.__whichWayUnpackPatched) return;
+	const orig = glt.prototype.update;
+	glt.prototype.update = function (useMipMaps) {
+		const gl = this.context && this.context.gl;
+		let opened = false;
+		const img = this._image;
+		if (gl && gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL != null && img && img[WW_UNPACK_MARK]) {
+			gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+			opened = true;
+		}
+		try {
+			return orig.call(this, useMipMaps);
+		} finally {
+			if (opened && gl && gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL != null) {
+				gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+			}
+		}
+	};
+	glt.prototype.update.__whichWayUnpackPatched = true;
+}
+patchSpineGLTextureUnpackOnce();
+
+/**
+ * 为该 SpinePlayer 的 AssetManager 包一层 textureLoader：资源图片加载前打上「预乘上传」标记。
+ * SpinePlayer 构造（render()）已发起异步加载，图片 onload 一定晚于本函数的同步执行，故安全。
+ */
+function wrapSpinePlayerUnpack(player) {
+	if (!player || !player.assetManager) return;
+	const unpack = !!player.config?.unpackPremultipliedAlpha;
+	const am = player.assetManager;
+	const orig = am.textureLoader;
+	if (typeof orig !== "function") return;
+	if (orig.__whichWayUnpackWrapped) return;
+	am.textureLoader = function (image) {
+		try {
+			if (image) {
+				if (unpack) image[WW_UNPACK_MARK] = true;
+				else delete image[WW_UNPACK_MARK];
+			}
+		} catch (e) {
+			/* ImageBitmap / 不可扩展对象等 */
+		}
+		return orig(image);
+	};
+	am.textureLoader.__whichWayUnpackWrapped = true;
+}
+
 const dycSave = window.whichWaySave.dycSave;
 
 class SpineWorker {
@@ -210,9 +266,10 @@ class SpineWorker {
 						attachments: false,
 						hulls: false,
 					},
-					showLoading: false,
-					premultipliedAlpha: options.alpha || false,
-					preserveDrawingBuffer: true,
+				showLoading: false,
+				premultipliedAlpha: options.alpha || false,
+				unpackPremultipliedAlpha: !!options.unpackPremultipliedAlpha,
+				preserveDrawingBuffer: true,
 					viewport: {
 						x: 0,
 						y: 0,
@@ -238,6 +295,7 @@ class SpineWorker {
 
 			//@ts-ignore
 			const player = new spine.SpinePlayer(container, config);
+			wrapSpinePlayerUnpack(player);
 
 			let cache = spineWorker.spineCache;
 			if (!cache.get(dynamicName)) cache.set(dynamicName, {});
@@ -412,7 +470,7 @@ class SpineWorker {
 			const rect = container.getBoundingClientRect();
 			container.style.display = "none";
 			//@ts-ignore
-			dycSkin[playerid][action] = new spine.SpinePlayer(container, {
+			const actionPlayer = new spine.SpinePlayer(container, {
 				skelUrl: data.skelUrl,
 				jsonUrl: data.jsonUrl,
 				atlasUrl: data.atlasUrl,
@@ -432,6 +490,7 @@ class SpineWorker {
 				},
 				showLoading: false,
 				premultipliedAlpha: actionConfig.alpha || false,
+				unpackPremultipliedAlpha: !!(data.originalOptions && data.originalOptions.unpackPremultipliedAlpha),
 				preserveDrawingBuffer: true,
 				viewport: {
 					x: 0,
@@ -466,6 +525,8 @@ class SpineWorker {
 					player.dom.parentNode.style.display = "";
 				},
 			});
+			wrapSpinePlayerUnpack(actionPlayer);
+			dycSkin[playerid][action] = actionPlayer;
 		} else {
 			dycSkin[playerid][action].parent.style.display = "";
 		}
