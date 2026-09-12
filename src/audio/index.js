@@ -309,15 +309,11 @@ class WhichWayAudio {
     const base = this.getAudioBaseName(skill, char);
     const exists = this._audioExistCache.has(whichWayFile.compilePath(`audio:${lang}/${base}1.mp3`));
     if (exists) {
-      if (!targetInfo.audioname2) targetInfo.audioname2 = {};
-      targetInfo.audioname2[char] = `ext:WhichWay/audio/${lang}:${parsed.count}`;
       this.clearWebPlay(skill, char);
     } else if (lang !== "CUSTOM") {
       this.setWebPlay(skill, char, new whichWayWebPlay(skill, char, parsed.voices, base));
-      if (targetInfo.audioname2) delete targetInfo.audioname2[char];
     } else {
       this.clearWebPlay(skill, char);
-      if (targetInfo.audioname2) delete targetInfo.audioname2[char];
       console.warn(`[whichWayAudio] 角色 ${char} 的技能 ${skill} 的语言设置为 ${lang}，但音频文件不存在！`);
     }
     if (typeof info.audio !== "string") {
@@ -410,11 +406,14 @@ class WhichWayAudio {
   /**
    * 取 audioname2 中命中该玩家的配置值。
    *
-   * 引擎原生支持 audioname2（按角色覆盖 audio，见 docs/audio-guide.md），命中后有以下几种值：
-   * - 音频系统写入的本地路径（`ext:WhichWay/audio/{语言}:{数量}`）→ 交回引擎解析即可；
+   * 引擎原生 audioname2 用于"按角色覆盖 audio"，命中后通常为以下几种：
    * - 干员代码写的「借用别的技能配音」（`info.audioname2[player.name] = "bianyimrfz"`）→
    *   需要转交那个技能处理，否则在线配音会播错人；
    * - 其它（如引用核心技能）→ 交回引擎。
+   *
+   * 注意：**本地配音的路径不再走 audioname2**（会与"技能别名"语义冲突，
+   * 并会让千幻聆音等扩展崩溃）——本地路径由 `info.audio` 覆写 + `info.audioname`
+   * 数组按角色追加后缀共同完成。
    */
   getAudioname2Value(info, player) {
     const map = info?.audioname2;
@@ -848,6 +847,8 @@ class WhichWayAudio {
     uid = whichWayArknight.shcema.transfer(uid, "character", "whichWayUID") || uid;
     if (lang === "CN_TOPOLECT") {
       uid = `${uid}_cn_topolect`;
+    } else if (lang === "ITA") {
+      uid = `${uid}_ita`;
     }
     voiceTitle = this.transferVoiceTitle(voiceTitle);
     lang = this.transferLang(lang);

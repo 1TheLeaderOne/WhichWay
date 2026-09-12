@@ -1,5 +1,5 @@
 import __variableDynamicImportRuntimeHelper from "../../_virtual/dynamic-import-helper.js";
-import { lib, get, game } from "noname";
+import { lib, game, get } from "noname";
 import { whichWayFile } from "../file.js";
 import { onBeforeInit, onSetDev } from "../hooks/index.js";
 import { pendingRun, registerExecute, packHooks } from "./hooks.js";
@@ -102,9 +102,25 @@ class WhichWayPackManager {
     }
     for (const name of WhichWayPackManager.CHARACTER_PACKS) {
       lib.characterPack[name] ??= {};
-      if (!lib.config.characters.includes(name)) lib.config.characters.push(name);
       let translate = lib.config.extension_WhichWay_compatibleMode === true ? `驶舰:${this.getPackTranslation(name)}` : "<img style='width:90px;height:25px;' src=" + lib.assetURL + `extension/WhichWay/image/decoration/${this.getPackTranslation(name, 1)}.png>`;
       lib.translate[`${name}_character_config`] = translate;
+    }
+    if (!lib.config.extension_WhichWay_characterPackDefaulted) {
+      let changed = false;
+      for (const name of WhichWayPackManager.CHARACTER_PACKS) {
+        if (!lib.config.characters.includes(name)) {
+          lib.config.characters.push(name);
+          changed = true;
+        }
+      }
+      if (changed) {
+        try {
+          game.saveConfig("characters", lib.config.characters);
+        } catch (e) {
+          console.warn("[WhichWay] 初始化默认武将包子包失败", e);
+        }
+      }
+      game.saveConfig("extension_WhichWay_characterPackDefaulted", true);
     }
     registerExecute("character", (char, name) => {
       if (Array.isArray(char)) char = get.convertedCharacter(char);
@@ -114,6 +130,18 @@ class WhichWayPackManager {
       char.whichWay.charId = name;
       if (!char.pack) {
         char.pack = "specialSJZX";
+      }
+      const packEnabled = lib.config.extension_WhichWay_characters_enable !== false && lib.config.characters.includes(char.pack);
+      if (!packEnabled) {
+        char.isUnseen = true;
+      } else if (
+        // 整体“仅点将可用”（引擎扩展包 tab：forbidai_user_mode_extension_WhichWay）
+        lib.config.forbidai_user_mode_extension_WhichWay === true || // 子包“仅点将可用”（forbidai_user_<子包>）
+        lib.config[`forbidai_user_${char.pack}`] === true
+      ) {
+        if (!lib.config.forbidai.includes(name)) {
+          lib.config.forbidai.add(name);
+        }
       }
       lib.characterPack[char.pack][name] ??= char;
       if (char.designer) {

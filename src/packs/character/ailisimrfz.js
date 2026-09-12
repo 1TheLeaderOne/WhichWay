@@ -21,46 +21,52 @@ skill({
     async content(event, trigger, player) {
       let result;
       event.list = [];
-      for (var name of lib.inpile) {
+      for (let name of lib.inpile) {
         if (get.type(name) == "delay" || get.type(name) == "equip") continue;
         if (get.tag({ name }, "damage")) continue;
         event.list.push([get.type(name), "", name]);
       }
-      var dialog = ["为" + get.translation(trigger.player) + "选择至多三个牌名"];
+      let dialog = ["为" + get.translation(trigger.player) + "选择至多三个牌名"];
       if (event.list.length) {
         dialog.push([event.list, "vcard"]);
       }
       if (!event.list.length) event.finish();
       else {
-        result = await player.chooseButton(dialog, [1, 3]).set("ai", function(button) {
-          let name2 = button.link[2], list = _status.event.list.map((i) => i[2]), player2 = _status.event.player, trigger2 = _status.event.getTrigger(), target2 = trigger2.player, getv = (name3, player3) => {
-            let v = trigger2.getTempCache("alsmengxiangmrfz", player3.id + name3);
+        result = await player.chooseButton(
+          //dialog, [1, 3]
+          {
+            createDialog: dialog,
+            selectButton: [1, 3]
+          }
+        ).set("ai", function(button) {
+          let name = button.link[2], list = _status.event.list.map((i) => i[2]), player2 = _status.event.player, trigger2 = _status.event.getTrigger(), target = trigger2.player, getv = (name2, player3) => {
+            let v = trigger2.getTempCache("alsmengxiangmrfz", player3.id + name2);
             if (typeof v === "number") return v;
-            v = player3.getUseValue({ name: name3 });
-            trigger2.putTempCache("alsmengxiangmrfz", player3.id + name3, v);
+            v = player3.getUseValue({ name: name2 });
+            trigger2.putTempCache("alsmengxiangmrfz", player3.id + name2, v);
             return v;
           };
-          if (get.attitude(player2, target2) < 0) {
-            if (!list.includes(name2)) return 0;
+          if (get.attitude(player2, target) < 0) {
+            if (!list.includes(name)) return 0;
             let val = 0;
-            if (target2.getDamagedHp() == 0 && name2 == "tao") val += 25;
-            else if (name2 === "wuxie") val += 20;
-            else if (name2 === "shan") val += 15;
-            else if (name2 === "jiu") val += 6;
-            return -getv(name2, target2) + val;
+            if (target.getDamagedHp() == 0 && name == "tao") val += 25;
+            else if (name === "wuxie") val += 20;
+            else if (name === "shan") val += 15;
+            else if (name === "jiu") val += 6;
+            return -getv(name, target) + val;
           } else {
-            if (!list.includes(name2)) return 0;
-            let val = getv(name2, target2), base = 5;
+            if (!list.includes(name)) return 0;
+            let val = getv(name, target), base = 5;
             val = Math.min(15, val - base);
-            if (name2 === "wuzhong" || name2 === "dongzhuxianji") val += 20;
-            else if (name2 === "tao" && player2.getDamagedHp() > 0) val += 15;
-            else if (name2 === "shunshou") val += 6;
+            if (name === "wuzhong" || name === "dongzhuxianji") val += 20;
+            else if (name === "tao" && player2.getDamagedHp() > 0) val += 15;
+            else if (name === "shunshou") val += 6;
             return val;
           }
         }).set("list", event.list).forResult();
       }
       if (result?.links) {
-        var names = result.links.map((i) => i[2]), target = trigger.player;
+        let names = result.links.map((i) => i[2]), target = trigger.player;
         if (!target.storage.alsmengxiangmrfz_eff) target.storage.alsmengxiangmrfz_eff = [];
         target.storage.alsmengxiangmrfz_eff = target.storage.alsmengxiangmrfz_eff.concat(names);
         game.log(player, "为", target, "选择了", "#y" + get.translation(names));
@@ -84,17 +90,17 @@ skill({
         mod: {
           //@ts-ignore
           hiddenCard: function(player, name) {
-            var storage = player.getStorage("alsmengxiangmrfz_eff");
+            let storage = player.getStorage("alsmengxiangmrfz_eff");
             if (storage.length) return name == storage[0];
           },
           cardname: function(card, player) {
             if (_status.event.name != "chooseToUse" || _status.event.skill) return;
-            var storage = player.getStorage("alsmengxiangmrfz_eff");
+            let storage = player.getStorage("alsmengxiangmrfz_eff");
             if (storage.length) return storage[0];
           },
           cardnature: function(card, player) {
             if (_status.event.name != "chooseToUse" || _status.event.skill) return;
-            var storage = player.getStorage("alsmengxiangmrfz_eff");
+            let storage = player.getStorage("alsmengxiangmrfz_eff");
             if (storage.length) return false;
           }
         },
@@ -125,18 +131,21 @@ skill({
       player: ["phaseDiscardAfter", "damageEnd"]
     },
     async content(event, trigger, player) {
-      const result = await player.chooseTarget(true, "【入眠】:请选择一名角色，令其于下个结束阶段开始时额外执行一个出牌阶段").set("ai", (target2) => {
+      const result = await player.chooseTarget({
+        forced: true,
+        prompt: "【入眠】:请选择一名角色，令其于下个结束阶段开始时额外执行一个出牌阶段"
+      }).set("ai", (target) => {
         let player2 = get.player();
-        if (get.attitude(player2, target2) > 4) {
-          return get.threaten(target2) / Math.sqrt(target2.hp + 1) / Math.sqrt(target2.countCards("h") + 1);
+        if (get.attitude(player2, target) > 4) {
+          return get.threaten(target) / Math.sqrt(target.hp + 1) / Math.sqrt(target.countCards("h") + 1);
         }
-        return get.attitude(player2, target2) > 0;
+        return get.attitude(player2, target) > 0;
       }).forResult();
       if (result.targets) {
-        var target = result.targets[0];
+        let target = result.targets[0];
         target.addMark("rumianmrfz", 1, false);
         target.when({ player: "phaseJieshuBegin" }).then(async (event2, trigger2, player2) => {
-          var next = trigger2.player.phaseUse();
+          let next = trigger2.player.phaseUse();
           event2.next.remove(next);
           trigger2.getParent("phase").next.push(next);
           player2.removeMark("rumianmrfz", 1, false);

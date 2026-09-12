@@ -18,12 +18,12 @@ skill({
     },
     async content(event, trigger, player) {
       let num = trigger.cards.length, dialog = ["【暗信】:请选择一张牌"], list = [];
-      for (var i = 0; i < lib.inpile.length; i++) {
-        var name = lib.inpile[i];
+      for (let i = 0; i < lib.inpile.length; i++) {
+        let name = lib.inpile[i];
         if (get.type(name) == "delay" || get.type(name) == "equip") continue;
         if (name == "sha") {
           list.push(["基本", "", "sha"]);
-          for (var j of lib.inpile_nature) {
+          for (let j of lib.inpile_nature) {
             list.push(["基本", "", "sha", j]);
           }
         } else if (get.type2(name) == "trick") list.push(["锦囊", "", name]);
@@ -31,41 +31,49 @@ skill({
       }
       dialog.push([list, "vcard"]);
       while (num--) {
-        var { links } = await player.chooseButton(1, true).set("createDialog", dialog).set("ai", (button) => {
-          var card = {
+        let result = await player.chooseButton().set("forced", true).set("createDialog", dialog).set("ai", (button) => {
+          let card = {
             name: button.link[2],
             nature: button.link[3]
           };
           _status.event.player;
-          var target = _status.event.target, att = _status.event.att, num2 = target.getUseValue(card, void 0, true);
+          let target = _status.event.target, att = _status.event.att, num2 = target.getUseValue(card, void 0, true);
           if (card.name == "jiedao" && att < 0) num2 -= 10;
           if ((card.name == "tao" || card.name == "shan") && att < 0) num2 -= 5;
           return num2 * att;
         }).set("target", trigger.player).set("att", get.attitude(trigger.player, player) > 0 ? 1 : -1).forResult();
+        let links = result.links;
         if (!links) continue;
         let viewCards = {
           name: links[0][2],
           nature: links[0][3]
         };
-        var gaincards = trigger.cards.filter((card) => {
+        let gaincards = trigger.cards.filter((card) => {
           return !card.hasGaintag("anxinmrfz") && get.position(card) == "h";
         }), tmpnum = gaincards.length;
         if (gaincards.length == 0) return;
-        var { links } = gaincards.length == 1 ? { links: gaincards } : await player.chooseCardButton(
-          `【暗信】:请你选择视为${viewCards["nature"] === void 0 ? "" : get.translation(viewCards["nature"])}${get.translation(viewCards["name"])}的牌`,
-          true,
-          gaincards,
-          [1, tmpnum]
+        result = gaincards.length == 1 ? { links: gaincards } : await player.chooseCardButton(
+          // `【暗信】:请你选择视为${viewCards["nature"] === undefined ? "" : get.translation(viewCards["nature"])}${get.translation(viewCards["name"])}的牌`,
+          // true,
+          // gaincards,
+          // [1, tmpnum]
+          {
+            prompt: `暗信】:请你选择视为${viewCards["nature"] === void 0 ? "" : get.translation(viewCards["nature"])}${get.translation(viewCards["name"])}的牌`,
+            cards: gaincards,
+            forced: true,
+            select: [1, tmpnum]
+          }
         ).set("ai", () => {
           if (ui.selected.buttons.length == 0) return 1;
           return 0;
         }).forResult();
+        links = result.links;
         if (!links) continue;
-        for (var i = 0; i < links.length; i++) {
+        for (let i = 0; i < links.length; i++) {
           links[i].gaintag.add("anxinmrfz");
           links[i].storage.anxinmrfz = viewCards;
         }
-        var gaincards = trigger.cards.filter((card) => {
+        gaincards = trigger.cards.filter((card) => {
           return !card.hasGaintag("anxinmrfz") && get.position(card) == "h";
         });
         if (gaincards.length == 0) return;
@@ -81,7 +89,7 @@ skill({
         filter: function(event, player) {
           return event.player.hasHistory("lose", function(evt) {
             if (evt.getParent() != event) return false;
-            for (var i in evt.gaintag_map) {
+            for (let i in evt.gaintag_map) {
               if (evt.gaintag_map[i].includes("anxinmrfz")) return true;
             }
             return false;
@@ -99,11 +107,11 @@ skill({
             if (get.itemtype(card) == "card" && card.hasGaintag("anxinmrfz")) return num + 1;
           },
           cardname: function(card, player) {
-            var viewsCard = card.storage.anxinmrfz;
+            let viewsCard = card.storage.anxinmrfz;
             if (get.itemtype(card) == "card" && card.hasGaintag("anxinmrfz")) return viewsCard.name;
           },
           cardnature(card, player) {
-            var viewsCard = card.storage.anxinmrfz;
+            let viewsCard = card.storage.anxinmrfz;
             if (get.itemtype(card) == "card" && card.hasGaintag("anxinmrfz")) return viewsCard.nature;
           }
         }
@@ -132,9 +140,10 @@ skill({
           targets.shift();
           continue;
         }
-        var { cards } = await targets[0].chooseCard(true).set("prompt", `【觥筹】:请选择一张牌交给${get.translation(player)}`).set("ai", function(card) {
+        let result = await targets[0].chooseCard().set("forced", true).set("prompt", `【觥筹】:请选择一张牌交给${get.translation(player)}`).set("ai", function(card) {
           return get.value(card) < 6;
         }).forResult();
+        const cards = result.cards;
         if (!cards) {
           targets.shift();
           continue;
@@ -147,14 +156,15 @@ skill({
       if (list.length == 0) return;
       while (true) {
         if (player.countCards("he") == 0) return;
-        var { cards } = await player.chooseCard(true, "he").set("prompt", `【觥筹】:请选择一张牌交给${get.translation(list[0])}`).set("ai", function(card) {
+        let result = await player.chooseCard({ position: "he" }).set("forced", true).set("prompt", `【觥筹】:请选择一张牌交给${get.translation(list[0])}`).set("ai", function(card) {
           return get.value(card) < 6;
         }).forResult();
-        if (!cards) {
+        const cardsx = result.cards;
+        if (!cardsx) {
           list.shift();
           continue;
         }
-        player.give(cards, list[0]);
+        player.give(cardsx, list[0]);
         list.shift();
         if (list.length == 0) break;
       }
@@ -169,8 +179,8 @@ skill({
   "yinshimrfz": {
     mod: {
       targetEnabled: function(card, player, target) {
-        var num = 0, list = ["h", "j", "e"];
-        for (var i = 0; i < list.length; i++) {
+        let num = 0, list = ["h", "j", "e"];
+        for (let i = 0; i < list.length; i++) {
           if (target.countCards(list[i]) == 0) continue;
           num++;
         }
@@ -183,8 +193,8 @@ skill({
     },
     forced: true,
     filter: (event, player) => {
-      var num = 0, list = ["h", "j", "e"];
-      for (var i = 0; i < list.length; i++) {
+      let num = 0, list = ["h", "j", "e"];
+      for (let i = 0; i < list.length; i++) {
         if (player.countCards(list[i]) == 0) continue;
         num++;
       }

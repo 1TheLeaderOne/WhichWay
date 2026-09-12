@@ -22,7 +22,7 @@ skill({
       global: "damageEnd"
     },
     filter: function(event, player) {
-      var list = [], storage = player.storage.zhengrongmrfz;
+      let list = [], storage = player.storage.zhengrongmrfz;
       if (player.countCards("h") > 0 && storage["discard"] == false) list.push("弃牌");
       if (storage["losedraw"] == false) list.push("摸牌阶段摸牌数-1");
       if (storage["maxhp"] == false) list.push("失去体力上限");
@@ -44,14 +44,18 @@ skill({
       if (player.countCards("h") > 0 && storage["discard"] == false) list.push("弃牌");
       if (storage["losedraw"] == false) list.push("摸牌阶段摸牌数-1");
       if (storage["maxhp"] == false) list.push("失去体力上限");
-      const result = await player.chooseControl(list).set("ai", function() {
+      const result = await player.chooseControl({ controls: list }).set("ai", function() {
         return 0;
       }).set("prompt", "【征戎】:请选择一项").forResult();
       if (result.control) {
         const control = result.control;
         game.log(control);
         if (control == "弃牌") {
-          player.chooseToDiscard("he", true, "【征戎】:请弃置一张牌");
+          player.chooseToDiscard({
+            position: "he",
+            forced: true,
+            prompt: "【征戎】:请弃置一张牌"
+          });
           player.storage.zhengrongmrfz["discard"] = true;
         }
         if (control == "摸牌阶段摸牌数-1") {
@@ -75,7 +79,7 @@ skill({
         firstDo: true,
         trigger: { player: "phaseBegin" },
         filter: function(event, player) {
-          var allGone = Object.values(player.storage.zhengrongmrfz).every(function(value) {
+          let allGone = Object.values(player.storage.zhengrongmrfz).every(function(value) {
             return value === true;
           });
           if (player.storage.zhengrongmrfz === void 0) return false;
@@ -127,12 +131,12 @@ skill({
       if (event.targets.length > 1) return false;
       if (event.targets[0] == player) return false;
       if (!event.card || event.card.name != "sha") return false;
-      var history = event.targets[0].getHistory("damage");
-      for (var i = 0; i < history.length; i++) {
+      let history = event.targets[0].getHistory("damage");
+      for (let i = 0; i < history.length; i++) {
         if (!history[i].source) continue;
         if (history[i].source == player) return true;
       }
-      var seatNum = event.targets[0].getSeatNum();
+      let seatNum = event.targets[0].getSeatNum();
       if (seatNum in player.storage.siyanmrfz_tol && player.storage.siyanmrfz_tol[seatNum] === true) return true;
     },
     check: function(event, player) {
@@ -181,7 +185,10 @@ skill({
         const target2 = trigger.targets[0];
         if (result.index === 1) {
           game.log(get.translation(target2), "选择了弃置两张手牌");
-          await target2.chooseToDiscard("h", true, 2);
+          await target2.chooseToDiscard({
+            forced: true,
+            selectCard: [2, 2]
+          });
         } else {
           trigger.directHit.addArray(
             game.filterPlayer((current) => {
@@ -202,7 +209,7 @@ skill({
           source: "damageEnd"
         },
         filter: function(event, player) {
-          var info = player.storage.siyanmrfz_rec;
+          let info = player.storage.siyanmrfz_rec;
           return event.card && event.card == info.card;
         },
         silent: true,
@@ -230,7 +237,7 @@ skill({
       tol: {
         init: function(player) {
           player.storage.siyanmrfz_tol = {};
-          for (var i = 0; i < game.players.length; i++) {
+          for (let i = 0; i < game.players.length; i++) {
             if (game.players[i] == player) continue;
             player.storage.siyanmrfz_tol[i + 1] = false;
           }
@@ -263,7 +270,7 @@ skill({
 translate({
   "hedeleimrfz": "赫德雷",
   "zhengrongmrfz": "征戎",
-  "zhengrongmrfz_info": '①每${get.poptip("sjzx_huihelun")}每项限一次，当你或与你距离不大于1的其他角色受到伤害后，你可以选择并在本回合轮删除一项，然后其回复一点体力：1.体力上限-1；2.弃置一张牌；3.下个摸牌阶段摸牌数-1。</br>②你的回合开始时，若【征戎①】所有选项均被删除，你可以将手牌补至体力上限。',
+  "zhengrongmrfz_info": `①每${get.poptip("sjzx_huihelun")}每项限一次，当你或与你距离不大于1的其他角色受到伤害后，你可以选择并在本回合轮删除一项，然后其回复一点体力：1.体力上限-1；2.弃置一张牌；3.下个摸牌阶段摸牌数-1。</br>②你的回合开始时，若【征戎①】所有选项均被删除，你可以将手牌补至体力上限。`,
   "siyanmrfz": "死烟",
   "siyanmrfz_info": "出牌阶段，当你使用【杀】选择唯一目标后，若该角色上回合轮对你造成过伤害或你本回合对其造成过伤害，你可以流失一点体力，令其流失一点体力并选择一项：1.无法响应此【杀】；2.弃置两张手牌，然后若此牌造成了伤害且此牌花色为♦，你回复一点体力。"
 });

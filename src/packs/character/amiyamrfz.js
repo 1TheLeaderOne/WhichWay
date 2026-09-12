@@ -20,27 +20,29 @@ skill({
       if (player == _status.currentPhase) return false;
       return event.type == "discard" && event.getl(player).cards2.length > 0 && !player.hasSkill("qinghemrfz_ban");
     },
-    direct: true,
-    async content(event, trigger, player) {
-      var target = _status.currentPhase;
-      if (!target) return;
-      const { bool } = await target.chooseBool("【亲和】：是否让" + get.translation(player) + "其弃置的牌中的一张牌？").set("ai", () => {
+    async cost(event, trigger, player) {
+      let target = _status.currentPhase;
+      event.result = await target.chooseBool({ prompt: "【亲和】：是否让" + get.translation(player) + "其弃置的牌中的一张牌？" }).set("ai", () => {
         return get.attitude(_status.currentPhase, _status.event.targetx) > 0;
       }).set("targetx", player).forResult();
-      if (bool) {
-        let target2 = _status.currentPhase;
-        if (!target2) return;
-        player.addTempSkill("qinghemrfz_ban", "phaseEnd");
-        if (trigger.cards.length == 1) {
-          player.gain(trigger.cards, "gain2");
-          event.finish();
-        }
-        if (trigger.cards.length > 1) {
-          const result = await target2.chooseButton(["选择获得令其获得其中的一张牌", trigger.cards.slice(0)], true).set("ai", (button) => get.value(button.link)).forResult();
-          if (result.links) {
-            player.logSkill("qinghemrfz");
-            player.gain(result.links, "gain2");
-          }
+    },
+    direct: true,
+    async content(event, trigger, player) {
+      let target = _status.currentPhase;
+      if (!target) return;
+      player.addTempSkill("qinghemrfz_ban", "phaseEnd");
+      if (trigger.cards.length == 1) {
+        player.gain({ cards: trigger.cards, animate: "gain2" });
+        return;
+      }
+      if (trigger.cards.length > 1) {
+        const result = await target.chooseButton({
+          forced: true,
+          createDialog: ["选择获得令其获得其中的一张牌", trigger.cards.slice(0)]
+        }).set("ai", (button) => get.value(button.link)).forResult();
+        if (result.links) {
+          player.logSkill("qinghemrfz");
+          player.gain({ cards: result.links, animate: "gain2" });
         }
       }
     },
@@ -63,9 +65,11 @@ skill({
       game.players.forEach((char) => {
         char.getHistory("gain", (evt) => {
           if (evt.name === "gain") result.gain.add(char);
+          return false;
         });
         char.getHistory("lose", (evt) => {
           if (evt.type === "discard") result.discard.add(char);
+          return false;
         });
       });
       return result;

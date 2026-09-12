@@ -17,7 +17,10 @@ skill({
       for (let t of [1, 2, 3]) {
         const { color } = await player.judge().forResult();
         if (player.countCards("h") < 1) continue;
-        const { cards } = await player.chooseCard("h", true).set(
+        const { cards } = await player.chooseCard({
+          position: "h",
+          forced: true
+        }).set(
           "prompt",
           `你可以重铸一张手牌，若重铸的牌与判定牌颜色(${get.translation(color)})一致，你摸${lib.skill.wuweimrfz.getNum(player, event.name)}张牌。`
         ).set("ai", (card2) => {
@@ -43,6 +46,7 @@ skill({
         return game.getGlobalHistory("changeHp", (evt) => {
           let evtx = evt.getParent();
           if (evtx.name === "damage" && evtx.num > 0) return evtx.cards?.includes(card);
+          return false;
         }).length > 0;
       }).length > 0;
     },
@@ -51,6 +55,7 @@ skill({
         return game.getGlobalHistory("changeHp", (evt) => {
           let evtx = evt.getParent();
           if (evtx.name === "damage" && evtx.num > 0) return evtx.cards?.includes(card);
+          return false;
         }).length > 0;
       });
       const result = await player.chooseButton().set("createDialog", [get.prompt(event.skill) + `选择你要${get.poptip("sjzx_byRecast")}使用的牌`, centralArea]).set("ai", (button) => {
@@ -162,7 +167,7 @@ skill({
         };
         return;
       }
-      const result = await player.chooseControl(skills.concat("cancel2")).set("prompt", `为一个技能添加下列描述直到本轮结束：“（X=你本轮触发过的${get.poptip("sjzx_cardUseType")}数）”`).set("ai", () => {
+      const result = await player.chooseControl({ controls: skills.concat("cancel2") }).set("prompt", `为一个技能添加下列描述直到本轮结束：“（X=你本轮触发过的${get.poptip("sjzx_cardUseType")}数）”`).set("ai", () => {
         return get.event().skills.randomGet();
       }).set("skills", skills).forResult();
       event.result = {
@@ -178,8 +183,8 @@ skill({
           skill: skill2,
           receiver: player
         };
-        player.when({ global: "roundStart" }).then(() => {
-          if (player.playerid) delete player.storage.wuweimrfz[player.playerid];
+        player.when({ global: "roundStart" }).then(async (event2, trigger2, player2) => {
+          if (player2.playerid) delete player2.storage.wuweimrfz[player2.playerid];
         });
       }
     }
@@ -190,9 +195,9 @@ translate({
   "songyuemrfz": "颂乐",
   "songyuemrfz_info": "准备阶段，你可以进行三次判定，每次判定后你重铸一张手牌，若重铸的牌与判定牌颜色一致，你摸X张牌。",
   "yuxiangmrfz": "余响",
-  "yuxiangmrfz_info": '任意角色的结束阶段，你可以${get.poptip("sjzx_byRecast")}使用${get.poptip("sjzx_centralArea")}中本回合造成过伤害的一张牌，若此牌造成伤害，你可以弃置至多X名角色的一张手牌。',
+  "yuxiangmrfz_info": `任意角色的结束阶段，你可以${get.poptip("sjzx_byRecast")}使用${get.poptip("sjzx_centralArea")}中本回合造成过伤害的一张牌，若此牌造成伤害，你可以弃置至多X名角色的一张手牌。`,
   "wuweimrfz": "毋畏",
-  "wuweimrfz_info": '宗族技（${get.poptip("sjzx_AveMujica")}），当你重铸牌后，你可以将本技能句号之后的描述移至同族武将的武将牌上任意一个技能直到本轮结束。（X=你本轮触发过的${get.poptip("sjzx_cardUseType")}数）'
+  "wuweimrfz_info": `宗族技（${get.poptip("sjzx_AveMujica")}），当你重铸牌后，你可以将本技能句号之后的描述移至同族武将的武将牌上任意一个技能直到本轮结束。（X=你本轮触发过的${get.poptip("sjzx_cardUseType")}数）`
 });
 characterTitle("fengchuanxiangzimrfz", "<font color = #db7093>毋畏遗忘</font>");
 characterIntro("fengchuanxiangzimrfz", "Ave Mujica的键盘手丰川祥子。与其他成员一起暂居罗德岛，在此期间，积极参与舰上的各项工作。不管是音乐上的造诣，还是行为礼仪，都彰显了她不折不扣的名门大小姐身份。");
