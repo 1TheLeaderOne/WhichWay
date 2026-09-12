@@ -1,0 +1,126 @@
+name: release
+
+# 一个 tag = 一个 Release = 三份附件：
+#   WhichWay-<tag>.zip        完整包   （取自标签自身的树，即 output 分支）
+#   WhichWay-<tag>-core.zip   增量包   （取自 output-core 分支，覆盖安装用）
+#   WhichWay-<tag>-dev.zip    源码包   （取自 scripts/release.bat 记录在该标签提交信息里的 dev-commit）
+#
+# 触发方式：
+#   1) push tag（v*）——scripts/release.bat 用一次 --atomic push 把
+#      dev-output / output / output-core / dev / tag 一起推送，因此触发时
+#      三个分支必定都是该次发布的对应提交；
+#   2) 手动 workflow_dispatch：填一个已存在的标签，可为历史标签补发/重发附件。
+#      此时 -dev 用标签里记录的 dev-commit；若该标签没记录（例如旧版本发布），
+#      则退回使用当前 origin/dev 并在日志里给出警告。
+#
+# 注意：GitHub 只在「被标记的提交里存在该工作流文件」时才会为 tag push 运行工作流，
+# 因此 scripts/release.bat 会把本文件注入到 tags 指向的那棵树（构建目录本身保持干净），
+# 而两个附件都会排除 .github，避免把 CI 配置发给用户。
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "已存在的标签（如 v1.5.2）；留空则使用触发本次运行的标签"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch the three release branches
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin \
+            +refs/heads/output:refs/remotes/origin/output \
+            +refs/heads/output-core:refs/remotes/origin/output-core \
+            +refs/heads/dev:refs/remotes/origin/dev
+          git rev-parse --short origin/output origin/output-core origin/dev
+
+      - name: Resolve version and source commit
+        run: |
+          set -euo pipefail
+          VERSION="${{ github.event.inputs.tag }}"
+          if [ -z "${VERSION}" ]; then VERSION="${GITHUB_REF_NAME}"; fi
+          git fetch --force --tags origin
+          git rev-parse --verify --quiet "refs/tags/${VERSION}" >/dev/null \
+            || { echo "::error::tag ${VERSION} not found"; exit 1; }
+          DEV_REF="$(git log -1 --format=%B "refs/tags/${VERSION}" \
+            | sed -n 's/^dev-commit:[[:space:]]*\([0-9a-f]\{7,40\}\)$/\1/p' | head -n 1)"
+          if [ -n "${DEV_REF}" ] && ! git cat-file -e "${DEV_REF}^{commit}" 2>/dev/null; then DEV_REF=""; fi
+          if [ -z "${DEV_REF}" ]; then
+            DEV_REF="refs/remotes/origin/dev"
+            echo "::warning::no dev-commit recorded on ${VERSION}; the -dev asset falls back to the current origin/dev head"
+          fi
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+          echo "DEV_REF=${DEV_REF}" >> "$GITHUB_ENV"
+          echo "resolved VERSION=${VERSION} DEV_REF=${DEV_REF}"
+
+      - name: Build the three archives
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          # 完整包：标签自身的树（= output 分支合并提交），排除仅供 CI 使用的 .github
+          git archive --format=zip -o "dist/WhichWay-${VERSION}.zip" \
+            --prefix=WhichWay/ "refs/tags/${VERSION}" -- . ":(exclude).github"
+          # 增量包：output-core 分支头部（release.bat 生成时已忽略 .github）
+          git archive --format=zip -o "dist/WhichWay-${VERSION}-core.zip" --prefix=WhichWay/ origin/output-core
+          # 源码包：该次发布所使用的 dev 提交
+          git archive --format=zip -o "dist/WhichWay-${VERSION}-dev.zip" --prefix=WhichWay/ "${DEV_REF}"
+          ls -lh dist
+          # 三个包的顶层都必须是 WhichWay/
+          for f in dist/*.zip; do
+            echo "$f -> $(unzip -Z1 "$f" | head -n 1)"
+            if ! unzip -Z1 "$f" | head -n 1 | grep -q '^WhichWay/$'; then
+              echo "::error::$f: top level is not WhichWay/"; exit 1
+            fi
+          done
+          # 两个安装包不得包含 CI 配置（源码包是源码树，含 .github 属正常）
+          for f in "dist/WhichWay-${VERSION}.zip" "dist/WhichWay-${VERSION}-core.zip"; do
+            if unzip -Z1 "$f" | grep -q '^WhichWay/\.github/'; then
+              echo "::error::$f: contains .github"; exit 1
+            fi
+          done
+
+      - name: Create or update the GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          cat > notes.md <<'EOF'
+          ## 驶舰之向 VERSION
+
+          本次 Release 同时附带三个压缩包，解压后顶层目录都是 `WhichWay/`：
+
+          | 附件 | 来源 | 说明 |
+          | --- | --- | --- |
+          | `WhichWay-VERSION.zip` | output | **完整包**，解压后直接导入无名杀（推荐） |
+          | `WhichWay-VERSION-core.zip` | output-core | **增量包**，覆盖到已有 `WhichWay` 目录即可升级 |
+          | `WhichWay-VERSION-dev.zip` | dev | **源码包**，需自行 `pnpm install && pnpm build` |
+
+          本次发布所用源码提交：`DEVREF`
+          EOF
+          sed -i "s/VERSION/${VERSION}/g; s/DEVREF/${DEV_REF}/g" notes.md
+          if gh release view "${VERSION}" >/dev/null 2>&1; then
+            gh release edit "${VERSION}" --title "${VERSION}" --notes-file notes.md
+            gh release upload "${VERSION}" dist/*.zip --clobber
+          else
+            gh release create "${VERSION}" --title "${VERSION}" --notes-file notes.md dist/*.zip
+          fi
+          gh release view "${VERSION}" --json tagName,name,assets
