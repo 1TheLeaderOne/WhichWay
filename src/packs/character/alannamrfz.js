@@ -51,7 +51,7 @@ skill({
       }
       let subtypes = ["equip1", "equip2", "equip3", "equip4", "equip5"];
       subtypes = subtypes.filter((i) => player.hasEnabledSlot(i));
-      const { control } = await player.chooseControl(subtypes).set("prompt", "请选择一个装备栏").set("ai", () => {
+      const { control } = await player.chooseControl({ controls: subtypes }).set("prompt", "请选择一个装备栏").set("ai", () => {
         let subtypes2 = get.event().subtypes;
         let player2 = get.player();
         let list = subtypes2.filter((i) => !player2.getEquip(i));
@@ -61,10 +61,16 @@ skill({
       await lib.skill.qixiemrfz.createEquip(name, control);
       let cardx = {
         name: "qixiemrfz_" + name,
-        suit: "none",
-        number: "none"
+        suit: "none"
       };
-      target.useCard(cardx, [card], target);
+      target.chooseUseTarget({
+        forced: true,
+        card: get.autoViewAs(cardx),
+        cards: [card],
+        filterTarget(card2, player2, target2) {
+          return target2 === get.event().targetx;
+        }
+      }).set("targetx", target);
     },
     async createEquip(skill2, subtype) {
       if (!lib.card["qixiemrfz_" + skill2]) {
@@ -72,7 +78,7 @@ skill({
         else lib.translate["qixiemrfz_" + skill2] = lib.translate[skill2] + "-" + get.translation(subtype)[subtype === "equip2" ? 1 : 0];
         lib.translate["qixiemrfz_" + skill2 + "_info"] = `锁定技，你视为拥有【${get.translation(skill2)}】；当此牌离开你的装备区后，销毁之`;
         lib.translate["qixiemrfz_" + skill2 + "_append"] = '<div class="skill">【' + get.translation(skill2) + '】</div><div><span style="font-family: yuanli">' + get.skillInfoTranslation(skill2) + "</span></div><br><br>";
-        var card = {
+        let card = {
           fullimage: true,
           image: "ext:WhichWay/image/skill/alannamrfz_equip.png",
           type: "equip",

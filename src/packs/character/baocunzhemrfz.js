@@ -1,4 +1,4 @@
-import { get, game } from "noname";
+import { get, game, lib } from "noname";
 import { character, skill, translate, characterIntro } from "../hooks.js";
 character("baocunzhemrfz", {
   pack: "plotSJZX",
@@ -21,9 +21,16 @@ skill({
       return event.name != "phase" || game.phaseNumber == 0;
     },
     async content(event, trigger, player2) {
-      const result = await player2.chooseTarget(true, "【守望】:请选择一名其他角色", function(card, player3, target) {
-        return target != player3;
-      }).set("ai", (target) => get.attitude(player2, target) > 0).forResult();
+      const result = await player2.chooseTarget(
+        // 	true, "【守望】:请选择一名其他角色", function (card, player, target) {
+        // 	return target != player;
+        // }
+        {
+          forced: true,
+          prompt: `【守望】:请选择一名其他角色`,
+          filterTarget: lib.filter.notMe
+        }
+      ).set("ai", (target) => get.attitude(player2, target) > 0).forResult();
       if (result.targets) {
         result.targets[0].addSkill("shouwangmrfz2");
       }
@@ -61,14 +68,14 @@ skill({
         },
         // @ts-ignore
         check: function(event, player2) {
-          var target = game.findPlayer(function(current) {
+          let target = game.findPlayer(function(current) {
             return current.hasSkill("shouwangmrfz2");
           });
           return get.attitude(player2, target) > 0;
         },
         // @ts-ignore
         prompt: function(event, player2) {
-          var target = game.findPlayer(function(current) {
+          let target = game.findPlayer(function(current) {
             return current.hasSkill("shouwangmrfz2");
           });
           return "是否令" + get.translation(target) + "摸一张牌？";
@@ -98,11 +105,14 @@ skill({
     },
     direct: true,
     async content(event, trigger, player2) {
-      const result = await player2.chooseTarget("【希冀】:你可以将你区域内所有的牌交给一名其他角色", function(card, player3, target2) {
-        return target2 != player3;
-      }).set("ai", (target2) => get.attitude(player2, target2) > 2 && target2.hp > 0).forResult();
+      const result = await player2.chooseTarget({
+        prompt: "【希冀】:你可以将你区域内所有的牌交给一名其他角色",
+        filterTarget(card, player3, target) {
+          return target !== player3;
+        }
+      }).set("ai", (target) => get.attitude(player2, target) > 2 && target.hp > 0).forResult();
       if (result.targets) {
-        var hej = player2.getCards("hej"), target = result.targets[0];
+        let hej = player2.getCards("hej"), target = result.targets[0];
         player2.give(hej, target);
         player2.logSkill("xijimrfz", target);
         target.addSkill("xijimrfz_eff");
@@ -118,9 +128,9 @@ skill({
           return player2.maxHp <= 5;
         },
         async content(event, trigger, player2) {
-          const result = await player2.chooseBool("【希冀】:是否失去所有体力上限？").forResult();
+          const result = await player2.chooseBool({ prompt: "【希冀】:是否失去所有体力上限？" }).forResult();
           if (result.bool) {
-            var num = Math.floor(player2.maxHp / 2);
+            let num = Math.floor(player2.maxHp / 2);
             player2.draw(Math.min(3, num > 1 ? num : 1));
             player2.loseMaxHp(player2.maxHp);
           }

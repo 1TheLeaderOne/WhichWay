@@ -13,12 +13,12 @@ characterIntro("jiaxintamrfz", "嘉辛塔，雷姆必拓知名矿业大亨坎贝
 translate({
   jiaxintamrfz: "嘉辛塔",
   feilvmrfz: "飞旅",
-  feilvmrfz_info: "使命技，回合结束时，你可以将一张牌当做本回合第一张使用的牌使用，若你未因此使用过此牌，你摸两张牌。<br>成功：本局游戏使用过3X张牌：摸X张牌。(X=本技能的成功次数+1)",
+  feilvmrfz_info: "使命技，回合结束时，你可以将一张牌当做本回合第一张使用的牌使用，若你未因此使用过此牌，你摸两张牌。<br>成功：本局游戏使用过3X张牌：摸2张牌。(X=本技能的成功次数+1)",
   zhixingmrfz: "咫行",
   zhixingmrfz_info: `锁定技。①当你不因【咫行】而摸牌后，你令所有拥有【咫行】的角色${get.poptip("sjzx_zhiheng")}1；②当你使命技成功后，你重置该技能。`
 });
 dynamicTranslate("feilvmrfz", (player) => {
-  const num = (player?.storage?.feilvmrfz_achieved || 0) + 1;
+  const num = (getSkillCount(player) || 0) + 1;
   return `使命技，回合结束时，你可以将一张牌当做本回合第一张使用的牌使用，若你未因此使用过此牌，你摸两张牌。<br>成功：本局游戏使用过3X(${whichWayUtil.colorize(`#r${3 * num}#`)})张牌：摸X(${whichWayUtil.colorize(`#r${num}#`)})张牌。(X=本技能的成功次数+1)`;
 });
 skill({
@@ -33,20 +33,15 @@ skill({
       return history.card && player2.hasUseTarget(history.card, true, true) && player2.countCards("he") > 0;
     },
     mark: true,
-    init(player, skill2) {
-      player.storage.feilvmrfz_achieved = 0;
-    },
     intro: {
       content(storage, player, skill2) {
         const used = player.storage.feilvmrfz_used;
-        return `·当前已使用${player.storage.feilvmrfz_count || 0}张牌<br>·已因此技能而使用的牌名：${Array.isArray(used) && used.length > 0 ? get.translation(used) : "无"}<br>成功的次数：${player.storage.feilvmrfz_achieved || 0}`;
+        return `·当前已使用${player.getAllHistory("useCard").length}张牌<br>·已因此技能而使用的牌名：${Array.isArray(used) && used.length > 0 ? get.translation(used) : "无"}<br>成功的次数：${getSkillCount(player) || 0}`;
       }
     },
     onremove(player, type) {
       delete player.storage.feilvmrfz_used;
-      delete player.storage.feilvmrfz_count;
       delete player.storage.feilvmrfz_done;
-      delete player.storage.feilvmrfz_achieved;
     },
     async cost(event, trigger, player2) {
       event.result = await player2.chooseBool().set("prompt", `是否发动${get.prompt("feilvmrfz")}?<br>将一张牌当做本回合第一张使用的牌使用`).set("ai", () => {
@@ -91,7 +86,7 @@ skill({
         await player2.draw();
       }
     },
-    group: ["feilvmrfz_achieve", "feilvmrfz_count"],
+    group: ["feilvmrfz_achieve"],
     subSkill: {
       backup: {
         filterCard(card) {
@@ -102,32 +97,17 @@ skill({
         popname: true,
         log: false
       },
-      count: {
-        silent: true,
-        charlotte: true,
-        trigger: { player: "useCardAfter" },
-        async content(event, trigger, player2) {
-          player2.storage.feilvmrfz_count = (player2.storage.feilvmrfz_count || 0) + 1;
-          if (player2.storage.feilvmrfz_count < 3 * ((player2.storage.feilvmrfz_achieved || 0) + 1) || player2.storage.feilvmrfz_done) return;
-          player2.storage.feilvmrfz_done = true;
-          delete player2.storage.feilvmrfz_count;
-        }
-      },
       achieve: {
         audio: "feilvmrfz",
         forced: true,
-        trigger: { player: "feilvmrfz_countAfter" },
+        trigger: { player: "useCardAfter" },
         filter(event, player, name, target) {
-          return player.storage.feilvmrfz_done === true;
+          return ((getSkillCount(player) || 0) + 1) * 3 <= player.getAllHistory("useCard").length;
         },
         async content(event, trigger, player2) {
           game.log(player2, "成功完成使命");
           player2.awakenSkill("feilvmrfz");
-          await player2.draw({ num: (player2.storage.feilvmrfz_achieved || 0) + 1 });
-          if (typeof player2.storage.feilvmrfz_achieved !== "number") {
-            player2.storage.feilvmrfz_achieved = 0;
-          }
-          player2.storage.feilvmrfz_achieved += 1;
+          await player2.draw({ num: 2 });
         }
       }
     }
@@ -192,3 +172,6 @@ skill({
     }
   }
 });
+function getSkillCount(player) {
+  return player.getAllHistory("useSkill", (evt) => evt.skill === "feilvmrfz_achieve").length;
+}

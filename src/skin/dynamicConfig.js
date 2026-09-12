@@ -67,7 +67,7 @@ function sjzxDycInit(dyc) {
   return dyc;
 }
 let data = {
-  //近卫阿米娅 
+  //近卫阿米娅
   spamiyamrfz: {
     于万千宇宙之中: {
       name: "dyn_illust_char_1001_amiya2_sale16",
@@ -142,7 +142,7 @@ let data = {
       background: `场景_始发`
     }
   },
-  // 纯烬艾雅法拉 
+  // 纯烬艾雅法拉
   spxiaoyangmrfz: {
     经典形象: {
       name: "dyn_illust_char_1016_agoat2",

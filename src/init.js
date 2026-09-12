@@ -30,6 +30,14 @@ const whichWayInit = async () => {
   await _wwMark("override", () => import("./override/index.js"));
   await _wwMark("nonameEx", () => import("./nonameEx/index.js"));
   await _wwMark("config", () => import("./config/index.js"));
+  try {
+    await _wwMark("launchPad(启动页美化)", async () => {
+      const { registerLaunchPadSplash } = await import("./launchPad/index.js");
+      registerLaunchPadSplash();
+    });
+  } catch (e) {
+    console.error("[launchPad] 启动页美化注册失败（可忽略，不影响扩展本体）", e);
+  }
   await _wwMark("videoPlayer", () => import("./videoPlayer/index.js"));
   await _wwMark("base(配置)", () => import("./packs/base/index.js"));
   await _wwMark("packs(新)", () => import("./packs/index.js"));
