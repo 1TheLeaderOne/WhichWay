@@ -4,6 +4,49 @@ import { whichWayUtil } from "../utill.js";
 import { whichWayToast } from "../toast/index.js";
 import { onSetDev } from "../hooks/index.js";
 import { whichWayFile } from "../file.js";
+const WW_UNPACK_MARK = "__whichWayUnpackPremultiply";
+function patchSpineGLTextureUnpackOnce() {
+  const glt = spineWhitherHelm?.webgl?.GLTexture;
+  if (!glt || !glt.prototype || glt.prototype.update.__whichWayUnpackPatched) return;
+  const orig = glt.prototype.update;
+  glt.prototype.update = function(useMipMaps) {
+    const gl = this.context && this.context.gl;
+    let opened = false;
+    const img = this._image;
+    if (gl && gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL != null && img && img[WW_UNPACK_MARK]) {
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+      opened = true;
+    }
+    try {
+      return orig.call(this, useMipMaps);
+    } finally {
+      if (opened && gl && gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL != null) {
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+      }
+    }
+  };
+  glt.prototype.update.__whichWayUnpackPatched = true;
+}
+patchSpineGLTextureUnpackOnce();
+function wrapSpinePlayerUnpack(player) {
+  if (!player || !player.assetManager) return;
+  const unpack = !!player.config?.unpackPremultipliedAlpha;
+  const am = player.assetManager;
+  const orig = am.textureLoader;
+  if (typeof orig !== "function") return;
+  if (orig.__whichWayUnpackWrapped) return;
+  am.textureLoader = function(image) {
+    try {
+      if (image) {
+        if (unpack) image[WW_UNPACK_MARK] = true;
+        else delete image[WW_UNPACK_MARK];
+      }
+    } catch (e) {
+    }
+    return orig(image);
+  };
+  am.textureLoader.__whichWayUnpackWrapped = true;
+}
 const dycSave = window.whichWaySave.dycSave;
 class SpineWorker {
   backgroundPath = `${lib.assetURL}extension/WhichWay/dynamicSkin/background/`;
@@ -173,6 +216,7 @@ class SpineWorker {
           },
           showLoading: false,
           premultipliedAlpha: options.alpha || false,
+          unpackPremultipliedAlpha: !!options.unpackPremultipliedAlpha,
           preserveDrawingBuffer: true,
           viewport: {
             x: 0,
@@ -197,6 +241,7 @@ class SpineWorker {
           }
         };
       const player = new spineWhitherHelm.SpinePlayer(container, config);
+      wrapSpinePlayerUnpack(player);
       let cache = spineWorker.spineCache;
       if (!cache.get(dynamicName)) cache.set(dynamicName, {});
       let dycSkin = cache.get(dynamicName);
@@ -332,7 +377,7 @@ class SpineWorker {
       container.classList.add(`${action}`);
       const rect = container.getBoundingClientRect();
       container.style.display = "none";
-      dycSkin[playerid][action] = new spineWhitherHelm.SpinePlayer(container, {
+      const actionPlayer = new spineWhitherHelm.SpinePlayer(container, {
         skelUrl: data.skelUrl,
         jsonUrl: data.jsonUrl,
         atlasUrl: data.atlasUrl,
@@ -352,6 +397,7 @@ class SpineWorker {
         },
         showLoading: false,
         premultipliedAlpha: actionConfig.alpha || false,
+        unpackPremultipliedAlpha: !!(data.originalOptions && data.originalOptions.unpackPremultipliedAlpha),
         preserveDrawingBuffer: true,
         viewport: {
           x: 0,
@@ -381,6 +427,8 @@ class SpineWorker {
           player2.dom.parentNode.style.display = "";
         }
       });
+      wrapSpinePlayerUnpack(actionPlayer);
+      dycSkin[playerid][action] = actionPlayer;
     } else {
       dycSkin[playerid][action].parent.style.display = "";
     }

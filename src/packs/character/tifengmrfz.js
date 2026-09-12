@@ -94,7 +94,10 @@ skill({
     },
     async content(event, trigger, player) {
       const { cards, targets } = event;
-      await player.chooseUseTarget({ name: "sha", nature: "stab" }, cards).set("forced", true).set("filterTarget", (card, player2, target2) => target2 === get.event().targetx).set("targetx", event.target).set("nodistance", true).set("addCount", false).forResult();
+      await player.chooseUseTarget({
+        card: get.autoViewAs({ name: "sha", nature: "stab" }),
+        cards
+      }).set("forced", true).set("filterTarget", (card, player2, target2) => target2 === get.event().targetx).set("targetx", event.target).set("nodistance", true).set("addCount", false).forResult();
       if (!cards || !targets) return;
       let target = targets[0];
       if (get.distance(player, target) > 0) player.draw(get.distance(player, target));
@@ -115,7 +118,7 @@ translate({
   "tifengmrfz_lieshimrfz": "裂矢",
   "tifengmrfz_lieshimrfz_info": "出牌阶段限一次，你可以将一半的手牌（向下取整，至少为1）当一张无距离和次数限制的刺【杀】对一名其他角色使用，然后你摸X张牌。（X=目标角色与你的距离）",
   "lieqiongmrfz": "裂穹",
-  "lieqiongmrfz_info": '锁定技，当你使用【杀】时，若此杀对应的实体牌的颜色有:<br>红色：此杀${get.poptip("sjzx_enchanting")}“挽弓”<br>黑色：此杀${get.poptip("sjzx_enchanting")}“烈弓”。'
+  "lieqiongmrfz_info": `锁定技，当你使用【杀】时，若此杀对应的实体牌的颜色有:<br>红色：此杀${get.poptip("sjzx_enchanting")}“挽弓”<br>黑色：此杀${get.poptip("sjzx_enchanting")}“烈弓”。`
 });
 characterTitle("tifengmrfz", "<font color=2942BA>永恒狩猎</font>");
 characterIntro("tifengmrfz", "提丰，活跃于萨米的萨卡兹，以猎人自居，对萨米的自然环境和潜在威胁有着充足的知识储备和应对技巧。现应干员麦哲伦邀请与罗德岛进行合作，协助罗德岛在萨米及无尽冰原地区的事务。");

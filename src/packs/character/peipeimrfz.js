@@ -1,14 +1,8 @@
 import { get, lib, game, _status, ui } from "noname";
 import { character, skill, translate, characterTitle, characterIntro } from "../hooks.js";
-character("peipeimrfz", {
-  pack: "legendSJZX",
-  sex: "female",
-  group: "samrfz",
-  hp: 3,
-  skills: ["boqingmrfz", "kuisuimrfz", "lianwenmrfz"]
-});
+character("peipeimrfz", { pack: "legendSJZX", sex: "female", group: "samrfz", hp: 3, skills: ["boqingmrfz", "kuisuimrfz", "lianwenmrfz"] });
 skill({
-  "boqingmrfz": {
+  boqingmrfz: {
     audio: 2,
     trigger: {
       player: "drawBegin",
@@ -17,7 +11,10 @@ skill({
     async content(event, trigger, player) {
       let cards = get.cards(4);
       let originalHandCards = player.getCards("h");
-      const { moved } = await player.chooseToMove("【博青】:你可以交换牌堆顶和你的手牌并任意顺序放回牌堆顶或牌堆底").set("list", [["牌堆顶", cards], ["牌堆底"], ["你的手牌", player.getCards("h")]]).set("processAI", (list) => {
+      const { moved } = await player.chooseToMove({
+        prompt: "【博青】:你可以交换牌堆顶和你的手牌并任意顺序放回牌堆顶或牌堆底",
+        list: [["牌堆顶", cards], ["牌堆底"], ["你的手牌", player.getCards("h")]]
+      }).set("processAI", (list) => {
         let moved2 = [[], [], []];
         let top2 = list[0][1];
         let originalHandCards2 = get.event().originalHandCards.slice();
@@ -28,7 +25,7 @@ skill({
         all.sort(function(a, b) {
           return get.value(b, player2) - get.value(a, player2);
         });
-        for (let i2 = 0; i2 < originalHandCards2.length; i2++) {
+        for (let i = 0; i < originalHandCards2.length; i++) {
           moved2[2].push(all.shift());
         }
         while (all) {
@@ -42,19 +39,19 @@ skill({
         return moved2[2].length == originalHandCards2.length;
       }).set("evt", event).set("originalHandCards", originalHandCards).forResult();
       if (!moved) return;
-      const puts = player.getCards("h", (i2) => moved[0].includes(i2) || moved[1].includes(i2));
-      const gains = cards.filter((i2) => moved[2].includes(i2));
+      const puts = player.getCards("h", (i) => moved[0].includes(i) || moved[1].includes(i));
+      const gains = cards.filter((i) => moved[2].includes(i));
       if (puts.length && gains.length) {
         player.$throw(puts.length, 1e3);
-        await player.gain(gains, "giveAuto");
+        await player.gain({ cards: gains, animate: "giveAuto" });
       }
       const top = moved[0];
       const bottom = moved[1];
       top.reverse();
-      for (var i = 0; i < top.length; i++) {
+      for (let i = 0; i < top.length; i++) {
         ui.cardPile.insertBefore(top[i], ui.cardPile.firstChild);
       }
-      for (i = 0; i < bottom.length; i++) {
+      for (let i = 0; i < bottom.length; i++) {
         ui.cardPile.appendChild(bottom[i]);
       }
       game.addCardKnower(top, [player]);
@@ -64,7 +61,7 @@ skill({
       game.updateRoundNumber();
     }
   },
-  "kuisuimrfz": {
+  kuisuimrfz: {
     audio: 2,
     usable: 1,
     enable: "phaseUse",
@@ -95,21 +92,24 @@ skill({
     lose: false,
     async content(event, trigger, player) {
       event.cards[0];
-      let names = [...new Set(lib.skill.kuisuimrfz.getLastAction(player).map((i2) => i2.name))];
+      let names = [...new Set(lib.skill.kuisuimrfz.getLastAction(player).map((i) => i.name))];
       let list = [];
-      for (var i = 0; i < names.length; i++) {
-        var name = names[i];
+      for (let i = 0; i < names.length; i++) {
+        let name = names[i];
         if (get.type(name) == "basic") list.push(["基本", "", name]);
         else if (get.type(name) == "trick") list.push(["锦囊", "", name]);
       }
-      const { links } = await player.chooseButton(["窥岁", [list, "vcard"]]).set("ai", (button) => {
+      const { links } = await player.chooseButton({ createDialog: ["窥岁", [list, "vcard"]] }).set("ai", (button) => {
         let player2 = get.player(), card2 = {
           name: button.link[2]
         };
         return player2.getUseValue(card2, void 0, true);
       }).forResult();
       if (!links) return;
-      player.chooseUseTarget({ name: links[0][2], isCard: true }, event.cards);
+      player.chooseUseTarget({
+        card: get.autoViewAs({ name: links[0][2], isCard: true }),
+        cards: event.cards
+      });
     },
     ai: {
       order: 5,
@@ -118,12 +118,12 @@ skill({
       }
     }
   },
-  "lianwenmrfz": {
+  lianwenmrfz: {
     audio: 2,
     trigger: { player: "damageBegin4" },
     usable: 1,
     filter(event, player) {
-      return event.num > 0;
+      return event.num > 0 && event.source && event.source.isIn();
     },
     check(event, player) {
       if (!event.source) return true;
@@ -133,10 +133,12 @@ skill({
       return `你可以进行一次判定，若为红，此伤害-1${event.source ? `且${get.translation(event.source)}手牌上限-1直到其回合结束` : ""}`;
     },
     async content(event, trigger, player) {
-      const next = player.judge(function(card) {
-        const color2 = get.color(card);
-        if (color2 == "red") return 4;
-        return 0;
+      const next = player.judge({
+        judge(card) {
+          const color2 = get.color(card);
+          if (color2 == "red") return 4;
+          return 0;
+        }
       });
       next.judge2 = function(result) {
         return result.bool == false;
@@ -167,13 +169,13 @@ skill({
   }
 });
 translate({
-  "peipeimrfz": "佩佩",
-  "boqingmrfz": "博青",
-  "boqingmrfz_info": "当你摸牌时，或一名角色进行判定时，你可以观看牌堆顶4张牌，并与你的手牌交换，然后你以任意顺序放回牌堆顶或牌堆底。",
-  "kuisuimrfz": "窥岁",
-  "kuisuimrfz_info": "出牌阶段限一次，你可以将一张牌当本局游戏中上一回合进入弃牌堆的一张非装备牌使用。",
-  "lianwenmrfz": "莲纹",
-  "lianwenmrfz_info": "每回合限一次，当你受到伤害时，你可以进行判定，若为红色，此伤害-1且伤害来源手牌上限-1直到其回合结束。"
+  peipeimrfz: "佩佩",
+  boqingmrfz: "博青",
+  boqingmrfz_info: "当你摸牌时，或一名角色进行判定时，你可以观看牌堆顶4张牌，并与你的手牌交换，然后你以任意顺序放回牌堆顶或牌堆底。",
+  kuisuimrfz: "窥岁",
+  kuisuimrfz_info: "出牌阶段限一次，你可以将一张牌当本局游戏中上一回合进入弃牌堆的一张非装备牌使用。",
+  lianwenmrfz: "莲纹",
+  lianwenmrfz_info: "每回合限一次，当你受到伤害时，你可以进行判定，若为红色，此伤害-1且伤害来源手牌上限-1直到其回合结束。"
 });
 characterTitle("peipeimrfz", "<font color=#00868B>往昔传承</font>");
 characterIntro("peipeimrfz", "佩佩，萨尔贡知名的历史学者，身世显赫，是萨尔贡一位尊贵帕夏的长女。现作为外勤干员协助罗德岛在萨尔贡当地进行一系列考古勘察。");

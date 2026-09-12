@@ -56,7 +56,7 @@ skill({
         let info = get.info(skill2);
         return info && !info.charlotte && !info.equipSkill;
       });
-      const { control } = await player.chooseControl(skills).set("prompt", `请选择失去一个技能直到本轮结束`).set("ai", () => {
+      const { control } = await player.chooseControl({ controls: skills }).set("prompt", `请选择失去一个技能直到本轮结束`).set("ai", () => {
         let { skills: skills2, player: player2 } = get.event();
         if (skills2.includes("wuweimrfz")) return "wuweimrfz";
         if (skills2.length > 1 && skills2.includes("pojianmrfz")) skills2.remove("pojianmrfz");
@@ -90,7 +90,7 @@ skill({
         return info && !info.charlotte;
       });
       let num = lib.skill.wuweimrfz.getNum(player, "pojianmrfz");
-      const { result } = await player.chooseCardTarget({
+      event.result = await player.chooseCardTarget({
         prompt: `你可以将一张牌${get.poptip("sjzx_byRecast")}当目标数至多为${Math.max(1, num)}的【桃园结义】使用，然后因此回复体力值的角色摸${num}张牌，反之其本回合使用的下一张牌额外结算${num}次`,
         filterCard: true,
         // @ts-ignore
@@ -103,8 +103,8 @@ skill({
         },
         ai1(card) {
           let player2 = get.player();
-          if (player2.isPhaseUsing() && player2.countCards("h", (card2) => player2.hasUseTarget(card2) && ["equip", "delay"].includes(get.type(card2))) > 0) return false;
-          if (!player2.isPhaseUsing() && !game.hasPlayer((char) => get.attitude2(char) > 0 && char.getDamagedHp() > 0)) return false;
+          if (player2.isPhaseUsing() && player2.countCards("h", (card2) => player2.hasUseTarget(card2) && ["equip", "delay"].includes(get.type(card2))) > 0) return -1;
+          if (!player2.isPhaseUsing() && !game.hasPlayer((char) => get.attitude2(char) > 0 && char.getDamagedHp() > 0)) return -1;
           return 8 - get.value(card);
         },
         ai2(target) {
@@ -116,7 +116,6 @@ skill({
           return num2;
         }
       }).set("num", num);
-      event.result = result;
     },
     async content(event, trigger, player) {
       const { cards, targets } = event;
@@ -155,18 +154,25 @@ skill({
         });
       });
       player.recast(cards);
-      await player.chooseUseTarget(
-        {
-          name: "taoyuan",
-          isCard: true,
-          storage: {
-            pojianmrfz: true,
-            pojianmrfz_id: randomId
-          }
-        },
+      const vcard = get.autoViewAs({
+        name: "taoyuan",
+        isCard: true,
+        storage: {
+          pojianmrfz: true,
+          pojianmrfz_id: randomId
+        }
+      });
+      await player.chooseUseTarget({
+        card: vcard,
         cards,
-        targets
-      ).set("forced", true);
+        filterTarget(card, player2, target) {
+          return targets.includes(target);
+        },
+        selectTarget() {
+          return targets.length;
+        },
+        forced: true
+      });
     },
     ai: {
       threaten: 0.5,
@@ -188,9 +194,9 @@ skill({
 translate({
   "ruoyemumrfz": "若叶睦",
   "lingwomrfz": "另我",
-  "lingwomrfz_info": '锁定技，当你进入濒死状态后，你${get.poptip("sjzx_byRecast")}将一张牌赠予一名其他角色，并将体力至调整至X（X至少为1），然后你选择失去一个技能直到本轮结束。',
+  "lingwomrfz_info": `锁定技，当你进入濒死状态后，你${get.poptip("sjzx_byRecast")}将一张牌赠予一名其他角色，并将体力至调整至X（X至少为1），然后你选择失去一个技能直到本轮结束。`,
   "pojianmrfz": "破茧",
-  "pojianmrfz_info": '每回合限三次，当你受到伤害后，你可以将一张牌${get.poptip("sjzx_byRecast")}当目标数至多为X（至少为1）的【桃园结义】使用，然后因此回复体力值的角色摸X张牌，反之其本回合使用的下一张牌额外结算X次。'
+  "pojianmrfz_info": `每回合限三次，当你受到伤害后，你可以将一张牌${get.poptip("sjzx_byRecast")}当目标数至多为X（至少为1）的【桃园结义】使用，然后因此回复体力值的角色摸X张牌，反之其本回合使用的下一张牌额外结算X次。`
 });
 characterTitle("ruoyemumrfz", "<font color = #db7093>毋畏死亡</font>");
 characterIntro("ruoyemumrfz", "Ave Mujica的吉他手若叶睦。沉默寡言的她在罗德岛上大多时候负责一些简单的工作。除此以外，她还在疗养庭院承包了一小块区域，用作果蔬的栽培。");

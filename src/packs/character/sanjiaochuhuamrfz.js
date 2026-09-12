@@ -23,7 +23,10 @@ skill({
       let num = lib.skill.wuweimrfz.getNum(player, "weimianmrfz");
       let centralArea = get.discarded().slice();
       let max = centralArea.length > 0 ? Math.max(...centralArea.map((card2) => get.number(card2))) : 0;
-      const { cards } = await player.chooseCard("he", true).set("prompt", `【伪面】:请重铸一张牌,然后若重铸的牌的点数为${get.poptip("sjzx_centralArea")}的牌中点数最大的，你摸${2 * num}张牌。`).set("prompt2", `${get.poptip("sjzx_centralArea")}点数最大的牌：${max}`).set("filterCard", (card2) => player.canRecast(card2)).set("ai", (card2) => -get.value(card2)).forResult();
+      const { cards } = await player.chooseCard({
+        forced: true,
+        position: "he"
+      }).set("prompt", `【伪面】:请重铸一张牌,然后若重铸的牌的点数为${get.poptip("sjzx_centralArea")}的牌中点数最大的，你摸${2 * num}张牌。`).set("prompt2", `${get.poptip("sjzx_centralArea")}点数最大的牌：${max}`).set("filterCard", (card2) => player.canRecast(card2)).set("ai", (card2) => -get.value(card2)).forResult();
       if (!cards) return;
       let card = cards[0];
       if (card) await player.recast(card);
@@ -51,7 +54,7 @@ skill({
 translate({
   "sanjiaochuhuamrfz": "三角初华",
   "weimianmrfz": "伪面",
-  "weimianmrfz_info": '锁定技，当你使用一张${get.poptip("sjzx_jishipai")}后，你重铸一张牌，然后若重铸的牌的点数为${get.poptip("sjzx_centralArea")}的牌中点数最大的，你摸2X张牌。',
+  "weimianmrfz_info": `锁定技，当你使用一张${get.poptip("sjzx_jishipai")}后，你重铸一张牌，然后若重铸的牌的点数为${get.poptip("sjzx_centralArea")}的牌中点数最大的，你摸2X张牌。`,
   "weiquanmrfz": "伪全",
   "weiquanmrfz_info": "锁定技，当你受到实体牌的伤害时，若此牌的点数大于3X，此伤害+1，反之此伤害-1。"
 });

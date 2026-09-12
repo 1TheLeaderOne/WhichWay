@@ -55,7 +55,7 @@ skill({
       let cardMaps = [];
       for (let target of [...targets, player]) {
         let cardsCompare;
-        const result = await target.chooseCard(true).set("prompt", "【刈诈】：请选择一张手牌进行拼点").set("type", "compare").set("ai", (card) => {
+        const result = await target.chooseCard().set("forced", true).set("prompt", "【刈诈】：请选择一张手牌进行拼点").set("type", "compare").set("ai", (card) => {
           get.player();
           let result3 = get.event().aiChooseResult;
           return result3[0] === card;
@@ -64,7 +64,7 @@ skill({
         if (result.skill) {
           cardsCompare = lib.skill[result.skill].onCompare(target)[0];
         } else cardsCompare = result.cards[0];
-        const { cards } = await target.chooseCard(true).set("type", "debate").set("source", player).set("prompt", "【刈诈】：请选择一张手牌进行议事").set("filterCard", (card, player2, event2) => {
+        const { cards } = await target.chooseCard().set("forced", true).set("type", "debate").set("source", player).set("prompt", "【刈诈】：请选择一张手牌进行议事").set("filterCard", (card, player2, event2) => {
           let banCard = get.event().banCard;
           return card !== banCard;
         }).set("complexCard", true).set("ai", (card) => {
@@ -85,7 +85,7 @@ skill({
       let targetCompare = targets.filter((target) => Object.keys(compareMaps).includes(target.playerid));
       let targetDebate = targets.filter((target) => debateMaps.map((arr) => arr[0]).includes(target));
       let result1 = await player.chooseToCompare(targetCompare).set("fixedResult", compareMaps).forResult();
-      let result2 = await player.chooseToDebate([...targetDebate, player]).set("fixedResult", debateMaps).forResult();
+      let result2 = await player.chooseToDebate().set("list", [...targetDebate, player]).set("fixedResult", debateMaps).forResult();
       [...targetDebate, player].forEach((target) => target.removeGaintag("yizhamrfz_tip2"));
       let compareResult = {
         win: [],
@@ -116,7 +116,7 @@ skill({
         }).forResult();
         if (targetsx) {
           for (let char of targetsx) {
-            char.damage(player);
+            char.damage({ source: player });
             player.line(char);
           }
         }
