@@ -26,7 +26,7 @@ function git(args) {
 // 忽略清单：增量包永不包含的路径（依赖目录等）
 // 即使某个基线/目标树里残留了 node_modules（如 .gitignore 失效或误提交），
 // 也会在 diff 与 tree 两层被过滤掉，不会进入增量包。
-const IGNORED_PREFIXES = ['node_modules/'];
+const IGNORED_PREFIXES = ['node_modules/', '.github/'];
 const isIgnored = (p) => IGNORED_PREFIXES.some((pre) => p === pre.slice(0, -1) || p.startsWith(pre));
 
 // 1. 基线→目标的新增/变动文件（ACMRT：Added/Copied/Modified/Renamed/Type-changed），不含删除
