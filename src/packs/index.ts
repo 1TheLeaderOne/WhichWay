@@ -10,6 +10,45 @@ import { whichWayArknight } from "../arknight/index.js";
 
 class WhichWayPackManager {
 	static readonly CHARACTER_PACKS = ["epicSJZX", "legendSJZX", "especialSJZX", "plotSJZX", "specialSJZX", "rareSJZX", "mediocreSJZX", "normalSJZX"] as const;
+
+	/**
+	 * 干员模块清单（构建期由 import.meta.glob 静态确定，eager 求值）。
+	 *
+	 * 取代原先的「启动期 getFileTree 扫目录 + import(`./character/${name}.js`) + .js/.ts 双次 try/catch」：
+	 * - 启动期不再发起任何目录扫描 IPC；
+	 * - 不再依赖产物文件名为 .js 的假设，也无需失败重试兜底；
+	 * - 清单在构建期确定，rollup 据此把这 267 个模块合并进同一个 chunk
+	 *   （本模块自身只被 init.js 动态 import），启动期请求数从 267 降到 1。
+	 *
+	 * 为什么用 eager：干员模块必须在「packs 阶段」才求值——它们的顶层只把内容
+	 * 缓冲进 packHooks，而 packHooks 的 pendingRun 统一由 onBeforeInit 落库。
+	 * 若改用 lazy glob + manualChunks 把干员单独分组，rollup 会因为该组与入口
+	 * 共享核心模块而把它提升为入口的静态依赖，导致干员模块在 start() 之前就被
+	 * 求值（语义变化）。eager 静态依赖则严格保证「本模块被 import 时才求值」。
+	 *
+	 * 新增干员依旧是「丢文件即可」：在 src/packs/character/ 下新建
+	 * {名}mrfz.ts（或 {名}mrfz/index.ts）后重新构建即生效，无需改动任何代码。
+	 *
+	 * 注意合并顺序即优先级（同名时先出现者胜出）：扁平 .ts > 扁平 .js >
+	 * 目录 index.ts > 目录 index.js。
+	 */
+	private readonly characterModules: Record<string, unknown> = {
+		...import.meta.glob("./character/*mrfz.ts", { eager: true }),
+		...import.meta.glob("./character/*mrfz.js", { eager: true }),
+		...import.meta.glob("./character/*mrfz/index.ts", { eager: true }),
+		...import.meta.glob("./character/*mrfz/index.js", { eager: true }),
+	};
+
+	/**
+	 * 卡牌模块清单（构建期确定，与干员同理）。
+	 * 新增卡牌：在 src/packs/card/ 下新建 {新卡}.ts 即可自动加载，无需修改任何文件；
+	 * 共享技能放入 shared.ts。index.ts 为旧组装器入口，会被跳过。
+	 */
+	private readonly cardModules: Record<string, unknown> = {
+		...import.meta.glob("./card/*.ts", { eager: true }),
+		...import.meta.glob("./card/*.js", { eager: true }),
+	};
+
 	/**
 	 * 初始化
 	 */
@@ -46,91 +85,23 @@ class WhichWayPackManager {
 	}
 
 	async initCharacterPack() {
-		//只扫一层：干员入口支持两种形态——扁平文件（{名}mrfz.ts）与目录（{名}mrfz/index.ts），
-		//两者并存时以目录优先（getFileTree 同时返回 files 与 folders，各取所需）。
+		//干员模块是 characterModules 的 eager 静态依赖：本模块被 init.js 动态 import
+		//的那一刻，它们已经全部求值完毕（顶层只把内容缓冲进 packHooks，不落库 lib），
+		//因此这里不需要再逐个 import —— 只统计清单，真正的落库在 onBeforeInit。
 		const t0 = performance.now();
-		const { files, folders } = await whichWayFile.getFileTree("src:packs/character/", 1);
-		const tList = performance.now() - t0;
-
-		/**
-		 * 干员模块相互独立：模块顶层只把内容缓冲进 packHooks，统一在 onBeforeInit 落库，
-		 * 因此可以放心并行加载。原先逐个 await import，几百个干员时串行加载是主要耗时之一。
-		 * 用 16 并发窗口限流：浏览器/V8 的动态 import 内部也是用 microtask 队列，盲
-		 * 意 Promise.all 让 280+ 个 import() 同时进入会导致 vite 服务端同时打开大量
-		 * 文件句柄，原本 1100ms 的操作反而退到更慢。
-		 * @type {Promise<unknown>[]}
-		 */
-		const importTasks: Promise<unknown>[] = [];
-		// 记录已按扁平形态加载的干员名，目录形态遇到同名则跳过（避免重复注册）
-		const loadedFlats = new Set<string>();
-
-		// 扁平文件形态：character/xxx.ts
-		for (const file of files) {
-			// 只处理源码文件，跳过 sourcemap 等（产物模式下 .js.map 的 removeExt 会得到 "xxx.js"）
-			if (!/\.(ts|js)$/.test(file.name)) continue;
-			const name = whichWayFile.removeExt(file.name);
-			if (!name.endsWith("mrfz")) continue;
-			loadedFlats.add(name);
-			importTasks.push(
-				(async () => {
-					try {
-						await import(`./character/${name}.js`);
-					} catch (e) {
-						try {
-							await import(`./character/${name}.ts`);
-						} catch (e) {
-							console.warn(`${name} 加载失败 : ${e}`);
-						}
-					}
-				})()
-			);
-		}
-
-		// 目录形态：character/xxx/index.ts
-		for (const folder of folders) {
-			const name = folder.name;
-			if (!name.endsWith("mrfz")) continue;
-			// 若同名的扁平文件已加载过，跳过目录形态避免重复注册
-			if (loadedFlats.has(name)) continue;
-			importTasks.push(
-				(async () => {
-					try {
-						await import(`./character/${name}/index.js`);
-					} catch (e) {
-						try {
-							await import(`./character/${name}/index.ts`);
-						} catch (e) {
-							console.warn(`${name} 加载失败 : ${e}`);
-						}
-					}
-				})()
-			);
-		}
+		const characterNames = this.collectCharacterModuleNames();
+		const tModules = performance.now() - t0;
 
 		const t1 = performance.now();
-		const limit = 16;
-		let cursor = 0;
-		const workers = Array.from({ length: Math.min(limit, importTasks.length) }, async () => {
-			while (true) {
-				const idx = cursor++;
-				if (idx >= importTasks.length) return;
-				await importTasks[idx];
-			}
-		});
-		await Promise.all(workers);
-		const tImports = performance.now() - t1;
-
-		const t2 = performance.now();
 		this.register();
-		const tRegister = performance.now() - t2;
+		const tRegister = performance.now() - t1;
 
-		//只在 packs(新) 总耗时 > 500ms 时打详细明细，正常 <300ms 直接静默
-		const total = tList + tImports + tRegister;
-		if (total > 500) {
+		//只在 packs(新) 总耗时 > 300ms 时打详细明细，正常直接静默
+		const total = tModules + tRegister;
+		if (total > 300) {
 			console.groupCollapsed(`%c[WhichWay·packs] initCharacterPack ${total.toFixed(0)}ms`, "color:#e67e22;");
-			console.log(`  listDirNames:    ${tList.toFixed(0)}ms`);
-			console.log(`  imports (限16):  ${tImports.toFixed(0)}ms  (${importTasks.length} 模块)`);
-			console.log(`  register:        ${tRegister.toFixed(0)}ms`);
+			console.log(`  清单收集:  ${tModules.toFixed(0)}ms  (${characterNames.length} 模块 / 单 chunk)`);
+			console.log(`  register:  ${tRegister.toFixed(0)}ms`);
 			console.groupEnd();
 		}
 
@@ -270,9 +241,8 @@ class WhichWayPackManager {
 	/**
 	 * 初始化卡牌包
 	 *
-	 * 与干员加载同一模式（性能红线，勿改）：
-	 * - getFileTree 单层扫描 src:packs/card/ 下的扁平文件（{卡牌}.ts）
-	 * - 16 并发窗口限流并行 import，避免过度并行打爆 vite 文件句柄
+	 * 与干员加载同一模式：
+	 * - 模块清单由 import.meta.glob(eager) 在构建期确定，随本模块一起求值
 	 * - 卡牌模块顶层只调用 card()/cardSkill()/cardTranslate() 钩子缓冲进 packHooks
 	 *   （这三个钩子不进 pendingRun，不会自动落库），统一在本方法内收集后组装
 	 *   mrfzcard 包，game.import("card") 注册给引擎
@@ -282,46 +252,10 @@ class WhichWayPackManager {
 	 */
 	async initCardPack() {
 		const t0 = performance.now();
-		const { files } = await whichWayFile.getFileTree("src:packs/card/", 1);
-		const tList = performance.now() - t0;
-
-		const importTasks: Promise<unknown>[] = [];
-		for (const file of files) {
-			// 只处理源码文件，跳过 sourcemap 等（产物模式下 .js.map 的 removeExt 会得到 "xxx.js"）
-			if (!/\.(ts|js)$/.test(file.name)) continue;
-			const name = whichWayFile.removeExt(file.name);
-			// 跳过旧组装器入口（index.ts）；shared.ts 是共享技能模块，正常加载
-			if (name === "index") continue;
-			importTasks.push(
-				(async () => {
-					try {
-						await import(`./card/${name}.js`);
-					} catch (e) {
-						try {
-							await import(`./card/${name}.ts`);
-						} catch (e) {
-							console.warn(`${name} 卡牌加载失败 : ${e}`);
-						}
-					}
-				})()
-			);
-		}
+		const cardNames = this.collectCardModuleNames();
+		const tModules = performance.now() - t0;
 
 		const t1 = performance.now();
-		// 16 并发限流（与干员加载一致）
-		const limit = 16;
-		let cursor = 0;
-		const workers = Array.from({ length: Math.min(limit, importTasks.length) }, async () => {
-			while (true) {
-				const idx = cursor++;
-				if (idx >= importTasks.length) return;
-				await importTasks[idx];
-			}
-		});
-		await Promise.all(workers);
-		const tImports = performance.now() - t1;
-
-		const t2 = performance.now();
 		// 从 packHooks 收集卡牌钩子（card/cardSkill/cardTranslate 不进 pendingRun，
 		// 不会自动落库 lib，由本方法统一收集后构造 mrfzcard 包给引擎 loadCard 处理）
 		const cardHooks = packHooks.getHooks("card");
@@ -350,17 +284,62 @@ class WhichWayPackManager {
 		lib.translate["mrfzcard_card_config"] = "驶舰之向";
 		if (!lib.config.cards.includes("mrfzcard")) lib.config.cards.push("mrfzcard");
 		await game.import("card", () => mrfzcard);
-		const tAssemble = performance.now() - t2;
+		const tAssemble = performance.now() - t1;
 
-		// 只在总耗时 > 500ms 时打详细明细（与 initCharacterPack 一致的折叠风格）
-		const total = tList + tImports + tAssemble;
-		if (total > 500) {
+		// 只在总耗时 > 300ms 时打详细明细（与 initCharacterPack 一致的折叠风格）
+		const total = tModules + tAssemble;
+		if (total > 300) {
 			console.groupCollapsed(`%c[WhichWay·packs] initCardPack ${total.toFixed(0)}ms`, "color:#e67e22;");
-			console.log(`  listFiles:      ${tList.toFixed(0)}ms`);
-			console.log(`  imports (限16): ${tImports.toFixed(0)}ms  (${importTasks.length} 模块)`);
-			console.log(`  assemble:       ${tAssemble.toFixed(0)}ms`);
+			console.log(`  清单收集:  ${tModules.toFixed(0)}ms  (${cardNames.length} 模块 / 单 chunk)`);
+			console.log(`  assemble:  ${tAssemble.toFixed(0)}ms`);
 			console.groupEnd();
 		}
+	}
+
+	/**
+	 * 干员模块名清单，按名称去重（同名时先出现者胜出：
+	 * 扁平 .ts > 扁平 .js > 目录 index.ts > 目录 index.js）。
+	 *
+	 * 这些模块在 eager glob 下是本模块的静态依赖，被 import 时已全部求值，
+	 * 因此这里只返回名字（用于埋点与自检），不需要再 import 一次。
+	 */
+	collectCharacterModuleNames(): string[] {
+		return this.pickModuleNames(this.characterModules, path => this.getCharacterModuleName(path));
+	}
+
+	/**
+	 * 卡牌模块名清单，跳过旧组装器入口 index；
+	 * shared.ts 是共享技能模块，正常加载。
+	 */
+	collectCardModuleNames(): string[] {
+		return this.pickModuleNames(this.cardModules, path => whichWayFile.removeExt(path.slice(path.lastIndexOf("/") + 1)), name => name !== "index");
+	}
+
+	/**
+	 * 按名称去重（保留首次出现者）后返回模块名清单。
+	 * @param modules import.meta.glob 得到的「路径 → 模块」映射
+	 * @param getName 从路径推导模块名
+	 * @param accept 可选的过滤条件
+	 */
+	private pickModuleNames(modules: Record<string, unknown>, getName: (path: string) => string, accept?: (name: string, path: string) => boolean): string[] {
+		const picked = new Set<string>();
+		for (const path in modules) {
+			const name = getName(path);
+			if (accept && !accept(name, path)) continue;
+			picked.add(name);
+		}
+		return [...picked];
+	}
+
+	/**
+	 * 从模块路径推导干员名：
+	 * - 扁平形态 "./character/beiluoneimrfz.ts" → "beiluoneimrfz"
+	 * - 目录形态 "./character/wangmrfz/index.ts" → "wangmrfz"
+	 */
+	getCharacterModuleName(path: string): string {
+		const segments = path.split("/");
+		if (/\/index\.(ts|js)$/.test(path)) return segments[segments.length - 2];
+		return whichWayFile.removeExt(segments[segments.length - 1]);
 	}
 
 	getPackTranslation(str: string, index?: number) {

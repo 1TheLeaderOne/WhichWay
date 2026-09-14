@@ -14,10 +14,10 @@ skill({
 			trigger: { player: "phaseDrawEnd" },
 			forced: true,
 			filter(event, player) {
-				let cards = [];
+				let cards:Card[] = [];
 				let histories = player.getHistory("gain", evt => {
-					let evtx = evt.getParent(2);
-					return evtx.name === "phaseDraw" || (evtx.triggername && evtx.triggername.includes("phaseDraw"));
+					let evtx = evt.getParent(2)!;
+					return evtx.name === "phaseDraw" || !!(evtx.triggername && evtx.triggername.includes("phaseDraw"));
 				});
 				for (let history of histories) {
 					if (history.cards) cards.push(...history.cards);
@@ -25,16 +25,15 @@ skill({
 				return cards.length > 0;
 			},
 			async content(event, trigger, player) {
-				let cards = [];
+				let cards:Card[] = [];
 				let histories = player.getHistory("gain", evt => {
-					let evtx = evt.getParent(2);
-					//@ts-ignore
-					return evtx.name === "phaseDraw" || (evtx.triggername && evtx.triggername.includes("phaseDraw"));
+					let evtx = evt.getParent(2)!;
+					return evtx.name === "phaseDraw" || !!(evtx.triggername && evtx.triggername.includes("phaseDraw"));
 				});
 				for (let history of histories) {
 					if (history.cards) cards.push(...history.cards);
 				}
-				await player.discard(cards);
+				await player.discard({cards});
 				player.draw(cards.length * 2);
 				player.storage.daoweimrfz_ban = Array.from(new Set(cards.map(card => card.name)));
 				player.addTempSkill("daoweimrfz_ban", { player: "phaseEnd" });
@@ -67,27 +66,24 @@ skill({
 			},
 			filter(event, player) {
 				if (event.type == "wuxie") return false;
-				for (var name of ["sha", "shan"]) {
+				for (let name of ["sha", "shan"]) {
 					if (event.filterCard({ name: name, isCard: true }, player, event)) return true;
 				}
 				return false;
 			},
 			chooseButton: {
 				dialog(event, player) {
-					var vcards = [];
-					for (var name of ["sha", "shan"]) {
-						var card = { name: name, isCard: true };
+					let vcards:any[] = [];
+					for (let name of ["sha", "shan"]) {
+						let card = { name: name, isCard: true };
 						if (event.filterCard(card, player, event)) {
 							if (name === "sha") {
-								for (var j of lib.inpile_nature) vcards.push(["基本", "", "sha", j]);
+								for (let j of lib.inpile_nature) vcards.push(["基本", "", "sha", j]);
 							}
 							vcards.push(["基本", "", name]);
 						}
 					}
-					/**@type {Dialog}*/
-					//@ts-ignore
-					var dialog = ui.create.dialog("铳胄", [vcards, "vcard"], "hidden");
-					//@ts-ignore
+					let dialog = ui.create.dialog("铳胄", [vcards, "vcard"], "hidden");
 					dialog.direct = true;
 					return dialog;
 				},
@@ -103,7 +99,6 @@ skill({
 						},
 						popname: true,
 						async precontent(event, trigger, player) {
-							//@ts-ignore
 							let target = _status.currentPhase;
 							if (
 								target.getSkills().filter(skill => {
@@ -114,7 +109,7 @@ skill({
 								target.markSkill("chongzhoumrfz");
 								target
 									.when({ player: "phaseEnd" })
-									.then(() => {
+									.then(async (event,trigger,player) => {
 										player.unmarkSkill("chongzhoumrfz");
 									})
 									.assign({
@@ -134,12 +129,11 @@ skill({
 			},
 			ai: {
 				order(item, player) {
-					var player = _status.event.player;
-					var event = _status.event;
+					player = player || get.player();
+					let event = _status.event;
 					if (event.filterCard({ name: "sha" }, player, event)) {
 						if (
 							!player.hasShan() &&
-							//@ts-ignore
 							!game.hasPlayer(function (current) {
 								return player.canUse("sha", current) && current.hp == 1 && get.effect(current, { name: "sha" }, player, player) > 0;
 							})
@@ -148,7 +142,6 @@ skill({
 						}
 						return 2.95;
 					} else {
-						var player = _status.event.player;
 						if (player.hasSkill("qingzhong_give")) return 2.95;
 						return 3.15;
 					}

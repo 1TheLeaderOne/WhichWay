@@ -339,8 +339,8 @@ html body .mcb-root {
 	inset: 0 !important;
 	margin: 0 !important;
 	padding: 0 !important;
-	width: 100vw !important;
-	height: 100vh !important;
+	width: 100% !important;
+	height: 100% !important;
 	overflow: hidden !important;
 	background: #000 !important;
 	font-family: "PingFang SC", "Microsoft YaHei", sans-serif !important;

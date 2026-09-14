@@ -346,7 +346,7 @@ class WhichWayAudio {
 	 * - 本地文件缺失 → 登记在线配音实例（每个干员一份）
 	 */
 	applySkillAudio(skill: string, char: string): void {
-		if (!window.whichWaySave.allSkills.includes(skill)) return;
+		if (!window.whichWaySave.hasSkill(skill)) return;
 		const info = lib.skill[skill];
 		if (!info) return;
 		if (!info.logAudio) info.logAudio = () => info.audio;
@@ -354,7 +354,7 @@ class WhichWayAudio {
 		const target = this.getReferSkill(skill);
 		const targetInfo = lib.skill[target];
 		//引用到核心技能（如 audio: "eagle"）时不干预，交给引擎默认处理
-		if (!targetInfo || !window.whichWaySave.allSkills.includes(target)) return;
+		if (!targetInfo || !window.whichWaySave.hasSkill(target)) return;
 
 		const parsed = this.parseAudioCount(targetInfo.audio);
 		if (!parsed) {
@@ -535,7 +535,7 @@ class WhichWayAudio {
 
 				const audioname2 = whichWayAudio.getAudioname2Value(infox, player);
 				if (audioname2 !== undefined) {
-					if (audioname2 !== skill && !audioname2.startsWith("ext:") && window.whichWaySave.allSkills.includes(audioname2)) {
+					if (audioname2 !== skill && !audioname2.startsWith("ext:") && window.whichWaySave.hasSkill(audioname2)) {
 						await game.trySkillAudio(audioname2, player, directaudio, true, void 0, args);
 						return false;
 					}
@@ -671,7 +671,7 @@ class WhichWayAudio {
 			if (!langsToCheck.length) continue;
 
 			for (const skill of charData.skills) {
-				if (!window.whichWaySave.allSkills.includes(skill)) continue;
+				if (!window.whichWaySave.hasSkill(skill)) continue;
 				const base = this.getAudioBaseName(skill, char);
 				for (const lang of langsToCheck) {
 					if (lang === "CUSTOM") continue;
@@ -840,13 +840,13 @@ class WhichWayAudio {
 			if (!info) continue;
 			//@ts-ignore
 			const audio: string = info.audio;
-			if (window.whichWaySave.allSkills.includes(audio)) {
+			if (window.whichWaySave.hasSkill(audio)) {
 				result.push(this.getReferSkill(audio));
 			}
 			if (info.derivation) {
 				const extraSkills = Array.isArray(info.derivation) ? info.derivation : [info.derivation];
 				for (const extraSkill of extraSkills) {
-					if (window.whichWaySave.allSkills.includes(extraSkill)) {
+					if (window.whichWaySave.hasSkill(extraSkill)) {
 						result.push(this.getReferSkill(extraSkill));
 					}
 				}

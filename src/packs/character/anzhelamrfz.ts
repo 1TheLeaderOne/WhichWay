@@ -25,12 +25,16 @@ skill({
 				const { targets, cards } = event;
 				let target = targets[0];
 				const { cards: card2 } = await player
-					.discardPlayerCard("h", target, true)
-					.set("target", target)
+					.discardPlayerCard(
+						{
+							target,
+							forced:true
+						}
+					)
 					.set("complexSelect", false)
 					.set("ai", lib.card.guohe.ai.button)
 					.forResult();
-				if (card2) player.draw(new Set([].concat(cards, card2).map(i => get.type2(i, player))).size);
+				if (card2) player.draw(new Set([...cards,card2].map(i => get.type2(i, player))).size);
 				else player.draw();
 				if (target.countCards("h") === 0 && card2) player.getStat("skill").zhishemrfz = 0;
 			},
@@ -47,7 +51,7 @@ skill({
 			filter(event, player) {
 				if (event.player == player) return false;
 				if (get.color(event.card) != "black" || get.type(event.card) != "trick") return false;
-				var info = lib.card[event.card.name];
+				let info = lib.card[event.card.name];
 				return info && info.selectTarget && info.selectTarget == -1 && !info.toself;
 			},
 			async content(event, trigger, player) {},
@@ -69,7 +73,12 @@ skill({
 			async cost(event, trigger, player) {
 				if (trigger.name === "lose") {
 					event.result = await player
-						.chooseCard("he", [1, player.countCards("he")])
+						.chooseCard(
+							{
+								position:"he",
+								selectCard:[1, player.countCards("he")]
+							}
+						)
 						.set("prompt", `【锐觉】:你可以重铸任意张牌`)
 						.set("ai", card => get.value(card, player) < 7)
 						.set("filterCard", (card, player) => player.canRecast(card))

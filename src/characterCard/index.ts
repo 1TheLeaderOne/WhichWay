@@ -236,7 +236,7 @@ class WhichWayCharacterCard {
 		// @ts-ignore
 		audioCollapseWrapper.addEventListener("click", async e => {
 			//不是本扩展的武将无法更改配音
-			if (!window.whichWaySave.allCharacters.includes(name)) {
+			if (!window.whichWaySave.hasChar(name)) {
 				whichWayToast.showToast("[驶舰之向] 请勿修改非驶舰之向的武将配音！");
 				return;
 			}

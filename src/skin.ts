@@ -170,7 +170,7 @@ class WhichWaySkin {
 	getCurrentSkinPath(name: string): string {
 		let skin = this._skinStore?.[name]?.[1];
 		if (!skin) {
-			if (window.whichWaySave.allCharacters.includes(name)) skin = whichWayFile.compilePath(`img:character/${name}.jpg`);
+			if (window.whichWaySave.hasChar(name)) skin = whichWayFile.compilePath(`img:character/${name}.jpg`);
 			else {
 				const player = game.players.find((p) => p.name1 === name || p.name2 === name);
 				const avatar = player?.node[player.name1 === name? "avatar" : "avatar2"];

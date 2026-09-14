@@ -66,20 +66,122 @@ class WhichWayArknight {
 
 	/**
 	 * 加载明日方舟相关数据
+	 *
+	 * 两级加载（`json/arknight/` 下的全量数据 character_table ≈7.5MB + charword_table ≈8.1MB，
+	 * 读盘 + JSON.parse 会长时间占住主线程，是启动耗时的主要来源之一）：
+	 *
+	 * 1. **快路径**：`json/cache/arknight.json` 存在、结构版本与扩展版本都匹配、
+	 *    且本次启动没有重新下载过数据时，直接使用精简缓存（实测约 153KB），
+	 *    **完全不触碰 json/arknight/ 下的全量文件**。
+	 * 2. **慢路径**（首次启动 / 扩展版本变化 / 精简缓存结构版本变化 / 本次下载过数据）：
+	 *    读全量 JSON → 按白名单裁剪（slimArknightData）→ 写回缓存 → 使用裁剪结果。
+	 *
 	 * @param {string} [path="json:arknight"] json文件的路径
 	 */
 	async loadArknightData(path: string = "json:arknight/") {
 		//@ts-ignore
 		if (!this.arknightData) this.arknightData = {};
-		//获取文件列表
-		const { files } = await whichWayFile.getFileTree(path);
 
-		const jsonFiles = files.filter(file => file.name.endsWith(".json"));
+		if (!this.arknightDataUpdated) {
+			const cached = await this.readSlimCache();
+			if (cached) {
+				Object.assign(this.arknightData, cached);
+				return;
+			}
+		}
+
+		//只需要本层的 .json，step 传 0 让扫描只列一次目录（不必递归子目录）
+		const { files } = await whichWayFile.getFileTree(path, 0);
+
+		const jsonFiles = files.filter(file => file.name.endsWith(".json") && !this.loadSkipFiles.includes(file.name.replace(".json", "")));
 		//各 JSON 相互独立，并行读取（character_table 体积较大，串行读取会明显拖慢启动）
 		const jsonDatas = await Promise.all(jsonFiles.map(file => whichWayFile.readFile(file.path)));
+		const raw: Record<string, any> = {};
 		jsonFiles.forEach((file, i) => {
-			this.arknightData[file.name.replace(".json", "")] = jsonDatas[i];
+			raw[file.name.replace(".json", "")] = jsonDatas[i];
 		});
+
+		const slim = this.slimArknightData(raw);
+		Object.assign(this.arknightData, slim);
+
+		//写回精简缓存供下次启动使用；写失败只影响下次启动速度，不影响本次运行
+		try {
+			await whichWayFile.writeFileAsJson({ schema: this.slimCacheSchema, version: whichWayVersion.ext, data: slim }, "json:cache/", "arknight.json");
+		} catch (e) {
+			console.warn("[WhichWay] 写入明日方舟精简缓存失败（不影响本次运行）", e);
+		}
+	}
+
+	/**
+	 * 读取精简缓存。
+	 *
+	 * 不存在 / 解析失败 / 结构版本或扩展版本不匹配时返回 undefined（不抛错，由调用方走慢路径重建）。
+	 */
+	private async readSlimCache(): Promise<ArknightSlimData | undefined> {
+		try {
+			const cache: { schema?: number; version?: string; data?: ArknightSlimData } = await whichWayFile.readFile(`json:${this.slimCacheFile}`);
+			if (!cache || cache.schema !== this.slimCacheSchema || cache.version !== whichWayVersion.ext || !cache.data) return;
+			return cache.data;
+		} catch (e) {
+			//首次启动没有缓存文件是正常情况
+			return;
+		}
+	}
+
+	/**
+	 * 把 `json/arknight/` 的全量数据裁剪成启动期真正用到的字段。
+	 *
+	 * ⚠️ 白名单必须与「本文件的实际读取点」严格一致：
+	 * 若新增了读取 character_table / charword_table / char_patch_table 其它字段的代码，
+	 * 必须同时（1）在此保留该字段、（2）同步 typings/arknight.d.ts 的 *Slim 类型、
+	 * （3）把 slimCacheSchema +1 让老缓存失效——否则精简缓存会静默缺字段。
+	 *
+	 * 白名单依据（全仓核实：除本文件外没有任何位置读取这三张表）：
+	 * - character_table[uid]：name（译名匹配）、subProfessionId（isCharacter）、tagList（getTags）、键存在性
+	 * - char_patch_table.patchChars[uid]：name、subProfessionId、tagList
+	 * - charword_table.charDefaultTypeDict：仅 Object.keys().length
+	 * - charword_table.voiceLangTypeDict：Object.keys() 与 [lang].name
+	 * - charword_table.voiceLangDict[uid].dict：仅真值判断与 Object.keys()
+	 */
+	slimArknightData(raw: Record<string, any>): ArknightSlimData {
+		const rawCharacters: Record<string, ArknightCharacter> = raw.character_table ?? {};
+		const character_table: Record<string, ArknightCharacterSlim> = {};
+		for (const uid in rawCharacters) {
+			const info = rawCharacters[uid];
+			character_table[uid] = { name: info.name, subProfessionId: info.subProfessionId, tagList: info.tagList };
+		}
+
+		const rawPatchChars: Record<string, ArknightCharacter> | undefined = raw.char_patch_table?.patchChars;
+		const patchChars: Record<string, ArknightCharacterSlim> = {};
+		for (const uid in rawPatchChars ?? {}) {
+			const info = rawPatchChars![uid];
+			patchChars[uid] = { name: info.name, subProfessionId: info.subProfessionId, tagList: info.tagList };
+		}
+
+		const rawVoice: Partial<ArknightVoice> = raw.charword_table ?? {};
+
+		//只需键存在性
+		const charDefaultTypeDict: Record<string, boolean> = {};
+		for (const key in rawVoice.charDefaultTypeDict ?? {}) charDefaultTypeDict[key] = true;
+
+		//只需键 + 显示名
+		const voiceLangTypeDict: Record<string, { name: string }> = {};
+		const rawLangTypes = rawVoice.voiceLangTypeDict ?? {};
+		for (const lang in rawLangTypes) voiceLangTypeDict[lang] = { name: rawLangTypes[lang].name };
+
+		//只需「某干员在某语言下是否有台词」这一事实，因此把每个语言的对象压成键
+		const voiceLangDict: Record<string, { dict: Record<string, boolean> }> = {};
+		for (const uid in rawVoice.voiceLangDict ?? {}) {
+			const dict: Record<string, boolean> = {};
+			for (const lang in rawVoice.voiceLangDict![uid]?.dict ?? {}) dict[lang] = true;
+			voiceLangDict[uid] = { dict };
+		}
+
+		return {
+			character_table,
+			char_patch_table: { patchChars },
+			charword_table: { charDefaultTypeDict, voiceLangTypeDict, voiceLangDict },
+		};
 	}
 
 	/**
@@ -90,14 +192,24 @@ class WhichWayArknight {
 			character: { whichWayUID: extUID, chineseName: cn, arknightUID: arkUID },
 		} = this.shcema;
 		const characters = window.whichWaySave.allCharacters;
-		const arkData: Record<string, ArknightCharacter> = this.arknightData.character_table;
+		const arkData: Record<string, ArknightCharacterSlim> = this.arknightData.character_table;
 
-		//以下两份中间量与具体 key 无关，提前算好。
+		//以下中间量与具体 key 无关，提前算好。
 		//原先它们在循环体内构建，每个 key 都对全部干员重算一遍 filter/map
 		const hasArkCharacters = characters.filter(i => {
 			const char = get.character(i) as WhichWayCharacterPending;
 			return !!char && typeof char.arkuid === "string";
 		});
+		//显式声明了 arkuid 的干员按 arkuid 建索引：原实现是
+		//「每个明日方舟 key 都遍历一遍全部干员」的二重循环
+		//（表大小 × 干员数），建索引后整段降为线性。
+		const arkUidToNames = new Map<string, string[]>();
+		for (const name of hasArkCharacters) {
+			const arkuid = (get.character(name) as WhichWayCharacterPending).arkuid!;
+			let names = arkUidToNames.get(arkuid);
+			if (!names) arkUidToNames.set(arkuid, (names = []));
+			names.push(name);
+		}
 		const translations: (string | undefined)[] = characters.map(i => get.translation(i));
 		const transToId = new Map<string, string>();
 		characters.forEach((i, idx) => {
@@ -106,18 +218,16 @@ class WhichWayArknight {
 		});
 
 		for (let key in arkData) {
-			let info = arkData[key];
+			const info = arkData[key];
 			if (!this.isCharacter(info)) continue;
 
-			//先判断对应的Character是否有arkuid
-			if (hasArkCharacters.length) {
-				for (let name of hasArkCharacters) {
-					const char = get.character(name) as WhichWayCharacterPending;
-					if (char.arkuid === key) {
-						extUID[name] = key;
-						arkUID[key] = name;
-						cn.set([key, name], get.translation(name));
-					}
+			//先判断对应的Character是否有arkuid（索引命中顺序与原内层循环一致）
+			const declaredNames = arkUidToNames.get(key);
+			if (declaredNames) {
+				for (const name of declaredNames) {
+					extUID[name] = key;
+					arkUID[key] = name;
+					cn.set([key, name], get.translation(name));
 				}
 			}
 
@@ -160,7 +270,7 @@ class WhichWayArknight {
 	private _getArkNameIndex(): Map<string, string> {
 		if (!this._arkNameIndex) {
 			const index = new Map<string, string>();
-			const arkData: Record<string, ArknightCharacter> = this.arknightData.character_table;
+			const arkData: Record<string, ArknightCharacterSlim> = this.arknightData.character_table;
 			for (const key in arkData) {
 				if (!this.isCharacter(arkData[key])) continue;
 				index.set(arkData[key].name, key);
@@ -179,10 +289,10 @@ class WhichWayArknight {
 		const {
 			character: { whichWayUID: extUID, chineseName: cn, arknightUID: arkUID },
 		} = this.shcema;
-		const arkData: Record<string, ArknightCharacter> = this.arknightData.character_table;
+		const arkData: Record<string, ArknightCharacterSlim> = this.arknightData.character_table;
 		const characters = window.whichWaySave.allCharacters;
 
-		if (characters.includes(id)) {
+		if (window.whichWaySave.hasChar(id)) {
 			//显式声明了 arkuid 的干员直接按声明映射
 			//（原先该分支扫的是"已写入 characterPack 的其他干员"，当前干员自身要等后续调用才被间接映射，
 			//  且一旦命中就提前 return，会吞掉后续干员的按名映射）
@@ -222,10 +332,12 @@ class WhichWayArknight {
 	 * @param { ArknightCharacter | string } info 明日方舟角色信息或明日方舟角色uid
 	 * @returns { boolean }
 	 */
-	isCharacter(info: ArknightCharacter | string): boolean {
+	isCharacter(info: ArknightCharacterSlim | string): boolean {
 		if (typeof info === "string") info = this.arknightData.character_table[info];
-		if (info === undefined) return false;
-		return !(/** @type {ArknightCharacter} */ info.subProfessionId.startsWith("notchar"));
+		//缺字段一律视为非干员：精简缓存若因白名单变动少了 subProfessionId，
+		//这里返回 false 而不是抛错，避免一个缓存问题直接崩掉启动
+		if (!info?.subProfessionId) return false;
+		return !info.subProfessionId.startsWith("notchar");
 	}
 
 	/**
@@ -239,7 +351,7 @@ class WhichWayArknight {
 			console.warn("allCharacters is not initialized!");
 			return false;
 		}
-		if (!chars.includes(name)) return false;
+		if (!window.whichWaySave.hasChar(name)) return false;
 		return !!this.shcema.transfer(name, "character", "whichWayUID");
 	}
 
@@ -341,7 +453,7 @@ class WhichWayArknight {
 			//@ts-ignore
 			return this.shcema.transfer(char.whichWay?.reallyGroup, "group", "arknight");
 		} else if (typeof uid === "string") {
-			if (window.whichWaySave.allCharacters.includes(uid)) {
+			if (window.whichWaySave.hasChar(uid)) {
 				const group = whichWayUtil.getCharExtConfig(uid)?.reallyGroup || "";
 				//@ts-ignore
 				return this.shcema.transfer(group, "group", "arknight");
@@ -362,7 +474,8 @@ class WhichWayArknight {
 	 * 自动检测更新明日方舟数据
 	 */
 	async autoUpdate() {
-		const { files } = await whichWayFile.getFileTree("json:arknight/");
+		//只需要本层的 .json 文件名，step 传 0 让扫描只列一次目录（不必递归子目录）
+		const { files } = await whichWayFile.getFileTree("json:arknight/", 0);
 		const fileNames = files.map(file => file.name);
 
 		if (fileNames.length < 1 || !this.updateFile.every(file => fileNames.includes(file + ".json"))) {
@@ -378,6 +491,9 @@ class WhichWayArknight {
 	 */
 	async updateArknigtData() {
 		const { updateFile, updateUrl } = this;
+		//下载会覆盖 json/arknight/ 下的全量文件，因此本次启动的精简缓存必须作废重建
+		//（即使扩展版本没变，也可能是「文件缺失被补下载」的情况）
+		this.arknightDataUpdated = true;
 		whichWayToast.showToast(`[驶舰之向] 正在更新明日方舟数据...`, 3000, "topRight", "whichWayArknightUpdateTitle");
 		for (const file of updateFile) {
 			const url = `${updateUrl}${file}.json`;
@@ -400,15 +516,37 @@ class WhichWayArknight {
 	}
 
 	/**
-	 * TODO添加新的JSON后需要自行补充TS声明
-	 * 加载的JSON的原始数据
+	 * 明日方舟数据（**精简后的**，见 slimArknightData 的白名单与 typings 的 *Slim 类型；
+	 * 不是 json/arknight/ 下的全量原始 JSON）
 	 */
-	arknightData: {
-		character_table: Record<string, ArknightCharacter>;
-		charword_table: ArknightVoice;
-		handbook_team_table: ArknightTeams;
-		char_patch_table: ArknightCharacterPatch;
-	};
+	arknightData: ArknightSlimData;
+
+	/**
+	 * 精简缓存文件（相对 json: 的路径），与 json/cache/skin.json 同目录、同读写方式
+	 */
+	private readonly slimCacheFile = "cache/arknight.json";
+
+	/**
+	 * 精简缓存的结构版本：白名单字段发生变化时必须 +1，否则老缓存不会被重建
+	 * （只靠扩展版本号覆盖不了「改了白名单但没升版本」的情况）
+	 */
+	private readonly slimCacheSchema = 1;
+
+	/**
+	 * 本次启动是否重新下载过明日方舟数据。
+	 *
+	 * 置位后 loadArknightData 会强制走慢路径重建精简缓存——否则会出现
+	 * 「json/arknight/ 下文件缺失被重新下载、但扩展版本未变 → 读到旧缓存」的错误场景。
+	 */
+	private arknightDataUpdated = false;
+
+	/**
+	 * 启动期不读入内存的数据文件名（仍保留在 updateFile 清单里，自动更新/下载不受影响）。
+	 *
+	 * handbook_team_table 全扩展零运行时读取（只出现在本文件的 updateFile 清单中），
+	 * 也不在精简缓存的裁剪范围内——裁剪只保留 ArknightSlimData 声明的三张表。
+	 */
+	private readonly loadSkipFiles: Array<string> = ["handbook_team_table"];
 
 	/**
 	 * 需要更新的JSON文件名

@@ -28,10 +28,9 @@ skill({
 			},
 			async content(event, trigger, player) {
 				trigger.cancel();
-				var next = trigger.player.phaseUse();
+				let next = trigger.player.phaseUse();
 				event.next.remove(next);
-				//@ts-ignore
-				trigger.getParent("phase").next.push(next);
+				trigger.getParent("phase")!.next.push(next);
 				player.addMark("wusumrfz");
 			},
 			group: "wusumrfz_draw",
@@ -73,8 +72,8 @@ skill({
 			},
 			async content(event, trigger, player) {
 				if (player.countMark("wusumrfz") >= 5) {
-					var num = player.countCards("h") - player.getHandcardLimit();
-					var chattext = [
+					let num = player.countCards("h") - player.getHandcardLimit();
+					let chattext = [
 						"窗下怎么会有个夹子？",
 						"为什么会有人放站位edd！",
 						"（Ash听到的敌方干员的声音）call a pizza！",
@@ -87,7 +86,11 @@ skill({
 					if (num > 0) {
 						//@ts-ignore
 						player.logSkill("baigeimrfz");
-						player.chooseToDiscard("h", num, true, "弃置" + get.cnNumber(num) + "张手牌");
+						player.chooseToDiscard({
+							selectCard:num,
+							forced:true,
+							prompt:"弃置" + get.cnNumber(num) + "张手牌"
+						});
 					}
 					player.removeMark("wusumrfz", 5);
 					player.chat(chattext);

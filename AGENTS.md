@@ -24,20 +24,46 @@ pnpm -F ./packages/extension/WhichWay build
 # 监听模式构建（开发）
 pnpm -F ./packages/extension/WhichWay build:watch
 
+# 快速构建：跳过静态资源复制（仅用于验证打包结果，产物不含 audio/image/json 等）
+# PowerShell: $env:WW_SKIP_STATIC_COPY="1"; npx vite build
+WW_SKIP_STATIC_COPY=1 pnpm -F ./packages/extension/WhichWay build
+
 # 或在扩展目录内
 cd packages/extension/WhichWay && pnpm build
 ```
 
 - 构建使用 `vite build`（lib 模式），入口为 `extension.js`，输出目录为 `../../../apps/core/extension/WhichWay`（即 `apps/core/extension/WhichWay`），构建时清空输出目录。
-- 静态资源（`audio`、`image`、`info.json`、`LICENSE`、`json`、`font`、`dynamicSkin`、`css`、`README.md`、`vedio`、`src/card/index.js`、`.gitignore`）通过 `vite-plugin-static-copy` 原样复制到输出目录，无需手动处理。
+- **不要开启 `preserveModules`**：产物形态应为「入口 `extension.js` + `chunks/*.js`（约 25 个，其中 `packs-*.js` 是全部干员/卡牌聚合成的单个 chunk）」，而不是「一个模块一个文件」。全量复制静态资源时构建约 3~4 分钟，加 `WW_SKIP_STATIC_COPY=1` 时约 4 秒。
+- 静态资源（`audio`、`image`、`info.json`、`LICENSE`、`json`、`font`、`dynamicSkin`、`css`、`README.md`、`vedio`、`src/updateLog/updateContent.txt`、`.gitignore`）通过 `vite-plugin-static-copy` 原样复制到输出目录，无需手动处理。
+- `assetFileNames` 必须保持 `css/viteAutoCreateStyle[extname]`：`whichWayFile.autoLoadCSS()` 会扫描整个 `css/` 目录并按文件名注入 `<link>`，改名会导致样式重复或丢失。
 - 开发时可使用无名杀本体 `pnpm dev` 启动 vite 服务器；扩展在 vite dev server 环境下会自动进入开发者模式（`whichWayUtil.isViteDevServer()` 检测）。
+- **压缩策略**：`minify` 按构建模式判定——`pnpm build`（mode=production）用 esbuild 压缩，`build:watch --mode development` 不压缩以保留可读堆栈。**`esbuild.charset` 必须保持 `"utf8"`**：esbuild 默认 `ascii` 会把扩展的海量中文文本转义成 `\uXXXX`（每字 3 字节 → 6 字节），体积反而变大。
 - 本扩展没有独立 lint / test 脚本，代码质量检查依赖仓库根目录的 `pnpm lint`。
+
+### ⛔ 入口红线：`extension.js` 不得静态 import 内部模块
+
+`extension.js` 必须用**顶层 await** 阻塞到初始化结束（宿主 `await import("/extension/WhichWay/extension.js")` 返回后会立刻同步读取扩展的 `config` / `package`，不能改成惰性启动），因此它**只允许静态 `import "noname"`**，所有 `./src/**` 一律用动态 `import()`（现状：`whichWay.js` → `globalSave/index.js` → `init.js` / `hooks/index.js` / `utill.js` / `package/index.js` → `whichWayInit()` → `developerSet()` → `whichWayHooksApi.extension()`）。
+
+**一旦入口静态 import 了内部模块**，rollup 会把入口代码与它静态依赖中的共享模块合并进同一个 chunk；只要该 chunk 被动态 chunk 反向静态依赖，就会形成 ESM 顶层 await 死锁：
+
+```
+入口(TLA: await whichWayInit()) ──动态 import──▶ packs chunk
+        ▲                                            │
+        └────────────── 静态 import ─────────────────┘
+```
+
+带顶层 await 的模块 `[[AsyncEvaluation]]` 为 true，任何静态依赖它的模块都必须等它「完成」；于是入口等 `packs` 求值完、`packs` 又等入口完成 —— **双方互等，扩展加载永久挂起**（现象：控制台停在 `[WhichWayFile] Auto loaded CSS files: ...` 之后，既没有 `[WhichWay] 阶段 "x" 加载失败`，也没有 `[WhichWay] 加载完成 · 总计 xxxms`）。
+
+> 历史实例：入口曾与 `src/version.js`（`whichWayVersion`）和 Vue 的 `_export_sfc` 被合进同一个 chunk，而 `packs` / `arknight` / `audio` / `skin-confOverride-shared` / `configUI` / `updateLog` / `launchPad` / `config-data-shared` 共 8 个动态 chunk 都静态 import 了它。
+
+**构建后自检**（应无输出）：`chunks/` 下不应有任何 `from "./extension.js"` 反向引用。
+
 
 ## 目录结构
 
 ```text
 WhichWay/
-├── extension.js          # 扩展入口（非 TS 入口，构建真正入口）
+├── extension.js          # 扩展入口（非 TS 入口，构建真正入口；只允许静态 import "noname"，见「入口红线」）
 ├── info.json             # 扩展导入信息（name/intro/author/version）
 ├── package.json          # @noname-extension/WhichWay 包定义
 ├── vite.config.ts        # 构建配置（vite lib 模式 + 静态资源复制）
@@ -45,15 +71,16 @@ WhichWay/
 ├── LICENSE               # GPL-3.0-only
 ├── src/                  # 源代码
 │   ├── index.ts          # 一个"空壳"TS 入口（仅供参考，实际不走这里）
-│   ├── init.js           # whichWayInit：按顺序加载全部模块
+│   ├── init.js           # whichWayInit：声明式阶段清单（deps/optional/load）
+│   ├── stageLoader.js    # 阶段加载器：按 deps 拓扑波次并发执行各阶段
 │   ├── whichWay.js       # 全局组件管理器 window.whichWay
 │   ├── hooks/index.js    # 生命周期钩子系统（onXxx / onBeforeXxx / onAfterXxx）
 │   ├── file.js           # 文件系统工具 + 路径 scheme 编译（src:/img:/audio: 等）
 │   ├── utill.js          # 工具函数（配置读写、开发者模式、颜色、音频播放等）
 │   ├── version.js        # 版本管理与兼容性检查
-│   ├── globalSave/index.js  # 全局存储 window.whichWaySave
+│   ├── globalSave/index.js  # 全局存储 window.whichWaySave（含干员/技能 Set 索引）
 │   ├── packs/            # ★新式武将包系统（推荐新干员写这里）
-│   │   ├── index.ts      # WhichWayPackManager：扫描/注册角色包
+│   │   ├── index.ts      # WhichWayPackManager：import.meta.glob 收集并注册角色/卡牌包
 │   │   ├── hooks.ts      # packHooks：character/skill/translate 等注册钩子
 │   │   └── character/*mrfz/  # 新式单干员目录（index.ts / index.js + 可选 Vue 组件）
 │   ├── character/        # 旧式武将包系统（历史遗留，仍在使用）
@@ -100,7 +127,8 @@ WhichWay/
 
 - `window.whichWay`（`src/whichWay.js`）：全局组件管理器，`window.whichWay.register(name, component)` 注册各子系统；注册了 `file`、`util`、`hooks`、`version`、`packManager`、`characterPack`、`arknight`、`skin`、`audio`、`modules`、`extCompatible`、`dataManager` 等组件。
 - `window.whichWaySave`（`src/globalSave/index.js`）：全局存储，关键字段：
-  - `allCharacters` / `allSkills`：所有干员 / 技能 id 列表
+  - `allCharacters` / `allSkills`：所有干员 / 技能 id 列表（**顺序有意义**，明日方舟译名反查按注册顺序取首个命中者，不要重排/重建这两个数组）
+  - `hasChar(name)` / `hasSkill(name)`：成员判断统一走这两个方法（内部是 Set 索引，O(1)）。**不要再用 `allCharacters.includes(...)` / `allSkills.includes(...)`**——那是 O(n) 线性扫描，且常出现在「每个干员 × 每个技能」的循环里。
   - `skinConfig` / `audioConfig`：皮肤与语音配置
   - `dycSave`：动态皮肤存储
   - `customFucSave`：自定义函数全局存储（如吉占相关）
@@ -128,9 +156,17 @@ onConfig({
 
 可用钩子阶段：`extension`、`arenaReady`、`prepare`、`precontent`、`content(config, pack)`、`config`（合并配置，特殊）、`init(packs)`、`character(pack)`、`setDev`。
 
-### 初始化流程（src/init.js）
+### 初始化流程（src/init.js + src/stageLoader.js）
 
-`whichWayInit()` 依序动态 import：toast → file（加载 css）→ override → nonameEx → config → videoPlayer → character/card（旧式）→ packs（新式）→ arknight → audio → skin → poptip → tips → characterCard → extCompatible → updateLog → configUI → modules，最后触发 `init` 钩子。
+`whichWayInit()` 把各阶段写成声明式数组（`{ name, deps?, optional?, load }`）交给 `runStages()`，由它按 `deps` 做拓扑波次并发执行，无依赖的阶段同时发起模块请求；所有阶段完成后才触发 `init` 钩子（`whichWayHooksApi.init()`），因为各模块是在**顶层**注册 onBeforeInit/onInit 钩子、把内容缓冲进 packHooks 的，提前跑 init 会漏掉注册。
+
+阶段清单（`deps` 为运行时注册类依赖；模块间静态 import 的顺序由打包器保证，无需在此声明）：
+`toast / file / override / nonameEx / config / videoPlayer / base(配置) / arknight / audio / skin / poptip / tips / characterCard / extCompatible / updateLog / configUI / modules / packs(新) / launchPad(启动页美化，optional)`，其中 `css` 声明 `deps: ["file"]`（要读 `file` 阶段注册到 `window.whichWay.file` 上的实例）。
+
+修改该清单时的要点：
+- 新增阶段若依赖「另一个阶段在运行时注册的对象」（如 `window.whichWay.xxx`），必须写进 `deps`；仅靠模块 import 关系是不够的。
+- `optional: true` 表示该阶段失败只打日志、不阻断整体（如启动页美化）。默认失败会向上抛出，由宿主提示是否关闭扩展。
+- 加载耗时会以折叠表输出到控制台（`[WhichWay] 加载完成 · 总计 xxx ms`），可据此定位阶段瓶颈。
 
 ## 武将包（角色注册）
 
@@ -162,7 +198,11 @@ skill({ huozhimrfz: { /* lib.skill 标准技能对象 */ } });
 
 3. 其余可用的注册函数：`characterReplace`（角色替换）、`dynamicTranslate`（动态翻译）。
 
-`WhichWayPackManager`（`src/packs/index.ts`）会在初始化时扫描 `src:packs/character/` 下所有 `*mrfz` 目录/文件并动态导入；`character()` 注册的角色会自动：补全立绘路径（`img:character/{name}.jpg`）、初始化 `char.whichWay` 配置、按 `pack` 字段放入对应星级包、登记进 `allCharacters`、绑定明日方舟数据（阵营/语音/tag）、处理势力与设计者。
+`WhichWayPackManager`（`src/packs/index.ts`）用 `import.meta.glob("./character/*mrfz.{ts,js}")` 与 `import.meta.glob("./character/*mrfz/index.{ts,js}")`（`card/` 同构）在**构建期**确定模块清单：新增干员/卡牌仍然是「丢文件即可」，无需改任何代码，但必须重新 `build`。这些模块在 `packs/index.ts` 被 import 时（即 `packs(新)` 阶段）全部求值，并被 rollup 合并进**单个 chunk**（`chunks/packs-*.js`），因此启动期不再有 267 次模块请求。
+
+> ⚠️ 性能红线：干员/卡牌模块的**顶层只允许调用 packHooks 的注册函数（`character()` / `skill()` / `translate()` / `characterTitle()` / `characterIntro()` / `card()` 等）做缓冲**，不得调用其它有副作用的 API、也不要读 `window.whichWaySave` 里由武将包填充的内容（如 `allCharacters`）——它们在 `register()` 之前就可能被执行。落库统一由 `onBeforeInit`（`pendingRun` 刷新）完成。
+
+`character()` 注册的角色会自动：补全立绘路径（`img:character/{name}.jpg`）、初始化 `char.whichWay` 配置、按 `pack` 字段放入对应星级包、登记进 `allCharacters`、绑定明日方舟数据（阵营/语音/tag）、处理势力与设计者。
 
 ### 旧式（src/character/packs/）
 
@@ -205,7 +245,12 @@ skill({ huozhimrfz: { /* lib.skill 标准技能对象 */ } });
 
 ## 明日方舟数据（src/arknight/）
 
-- 原始数据存放于 `json/arknight/`（`character_table.json`、`charword_table.json`、`handbook_team_table.json`、`char_patch_table.json`），启动时若缺失或扩展版本变化会从 PRTS（`https://torappu.prts.wiki/gamedata/latest/excel/`）自动下载更新。
+- 原始数据存放于 `json/arknight/`（`character_table.json` ≈7.5MB、`charword_table.json` ≈8.1MB、`handbook_team_table.json`、`char_patch_table.json`），启动时若缺失或扩展版本变化会从 PRTS（`https://torappu.prts.wiki/gamedata/latest/excel/`）自动下载更新。
+- **精简缓存（性能红线）**：全量数据共约 16MB，启动期读盘 + `JSON.parse` 会长时间占住主线程（实测约 650ms 的同步块）。因此 `loadArknightData()` 改为两级：
+  - **快路径**：读 `json/cache/arknight.json`（实测约 **153KB**），完全不触碰 `json/arknight/` 全量文件；
+  - **慢路径**（首次启动 / 扩展版本变化 / `slimCacheSchema` 变化 / 本次下载过数据）：读全量 → 按 `slimArknightData()` 白名单裁剪 → 写回缓存。
+  - ⚠️ **新增对这三张表的字段读取时，必须三处同步**：`slimArknightData()` 白名单、`typings/arknight.d.ts` 的 `*Slim` 类型、`WhichWayArknight.slimCacheSchema`（+1 让老缓存失效）。只改读取代码会导致精简缓存静默缺字段。
+  - `handbook_team_table` 零运行时引用，既在 `loadSkipFiles` 里跳过读取，也不进精简缓存。
 - `whichWayArknight` 提供：干员 id 映射（驶舰之向 ↔ 明日方舟）、阵营查询、语音语言查询、干员 tag 查询等。
 - 每个干员注册后自动绑定 `char.whichWay.arknight`（`charId` / `camp` / `avaiableLangs` / `tags`）。
 

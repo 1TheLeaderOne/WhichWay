@@ -341,7 +341,7 @@ class WhichWaySkin {
 	getCurrentSkinPath(name: string): string {
 		let skin = this._skinStore?.[name]?.[1];
 		if (!skin) {
-			if (window.whichWaySave.allCharacters.includes(name)) skin = whichWayFile.compilePath(`img:character/${name}.jpg`);
+			if (window.whichWaySave.hasChar(name)) skin = whichWayFile.compilePath(`img:character/${name}.jpg`);
 			else {
 				const char = get.character(name);
 				if (char.img !== undefined) return char.img;
@@ -492,7 +492,7 @@ class WhichWaySkin {
 		for (const key in skinConfig) {
 			if (selected[key] && [skinConfig[key], skin[key], qhly_skinset[key]].includes(selected[key])) continue;
 			//暂时只处理本扩展武将
-			if (!window.whichWaySave.allCharacters.includes(key)) continue;
+			if (!window.whichWaySave.hasChar(key)) continue;
 
 			if (skin[key]) {
 				if (Array.isArray(skin[key]) && skin[key][0] !== skinConfig[key]) {

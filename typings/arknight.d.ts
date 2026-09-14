@@ -333,3 +333,45 @@ declare interface ArknightCharacterPatch {
 		>
 	>;
 }
+
+/* ==================== 精简缓存类型 ====================
+ * json/arknight/ 下的全量数据（character_table ≈7.5MB、charword_table ≈8.1MB）在启动期
+ * 会被裁剪成约 0.5MB 的 json/cache/arknight.json 精简缓存，之后每次启动只读缓存。
+ *
+ * 以下类型与 src/arknight/index.ts 的 slimArknightData 白名单一一对应。
+ * ⚠️ 若新增了读取这三张表其它字段的代码，必须同时：
+ *   (1) 在 slimArknightData 里保留该字段；
+ *   (2) 同步扩展这里的 *Slim 类型；
+ *   (3) 把 WhichWayArknight.slimCacheSchema 加 1 让老缓存失效。
+ */
+
+/** character_table 每项只保留：name（译名匹配）、subProfessionId（isCharacter）、tagList（getTags） */
+declare interface ArknightCharacterSlim {
+	name: string;
+	subProfessionId: string;
+	tagList?: string[];
+}
+
+/** char_patch_table 只保留 patchChars（字段同 character_table 的瘦身子集） */
+declare interface ArknightCharacterPatchSlim {
+	patchChars: Record<string, ArknightCharacterSlim>;
+}
+
+/**
+ * charword_table 只需「键」级信息：
+ * - charDefaultTypeDict：仅用 Object.keys().length
+ * - voiceLangTypeDict：用 Object.keys() 与 [lang].name
+ * - voiceLangDict[uid].dict：仅用真值判断与 Object.keys()
+ */
+declare interface ArknightVoiceSlim {
+	charDefaultTypeDict: Record<string, boolean>;
+	voiceLangTypeDict: Record<string, { name: string }>;
+	voiceLangDict: Record<string, { dict: Record<string, boolean> }>;
+}
+
+/** 精简后的明日方舟数据（json/cache/arknight.json 的 data 字段，也是 arknightData 的实际结构） */
+declare interface ArknightSlimData {
+	character_table: Record<string, ArknightCharacterSlim>;
+	char_patch_table: ArknightCharacterPatchSlim;
+	charword_table: ArknightVoiceSlim;
+}

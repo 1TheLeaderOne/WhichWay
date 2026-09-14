@@ -19,10 +19,9 @@ skill({
 				player: "phaseJieshuBegin",
 			},
 			filter: function (event, player) {
-				var num = 0;
-				var history = player.getHistory("useCard");
-				for (var i = 0; i < history.length; i++) {
-					//@ts-ignore
+				let num = 0;
+				let history = player.getHistory("useCard");
+				for (let i = 0; i < history.length; i++) {
 					if (history[i].card.name == "sha" && history[i].isPhaseUsing()) {
 						num++;
 					}
@@ -31,10 +30,9 @@ skill({
 				return player.getCardUsable("sha") - num > 0;
 			},
 			async content(event, trigger, player) {
-				var num = 0;
-				var history = player.getHistory("useCard");
-				for (var i = 0; i < history.length; i++) {
-					//@ts-ignore
+				let num = 0;
+				let history = player.getHistory("useCard");
+				for (let i = 0; i < history.length; i++) {
 					if (history[i].card.name == "sha" && history[i].isPhaseUsing()) {
 						num++;
 					}
@@ -84,7 +82,10 @@ skill({
 					prompt: "【异刃】：请弃置两张手牌并选择至多两名角色",
 					async content(event, trigger, player) {
 						for (let i of event.targets) {
-							if (player.canUse("sha", i)) player.useCard({ name: "sha", isCard: true }, i, false);
+							if (player.canUse("sha", i)) player.useCard({
+								card:get.autoViewAs({ name: "sha", isCard: true }),
+								targets:[i],
+							});
 							i.addTempSkill("yirenmrfz_lim", { player: "phaseEnd" });
 							i.addMark("yirenmrfz_lim", 1, false);
 						}
@@ -93,6 +94,7 @@ skill({
 					},
 					ai: {
 						order: function (item, player) {
+							player = player || get.player();
 							if (player.hasSkillTag("presha", true, null, true)) return 10;
 							if (game.hasNature(item, "linked")) {
 								if (
@@ -117,7 +119,7 @@ skill({
 						},
 						result: {
 							target: function (player, target) {
-								var enemyIR = game.filterPlayer(function (current) {
+								let enemyIR = game.filterPlayer(function (current) {
 									return current != player && get.attitude(player, current) < 0 && !!player.canUse("sha", current);
 								});
 								if (enemyIR.length < 1) return 0;
@@ -145,10 +147,11 @@ skill({
 				return player.countMark("shehunmrfz") < 5;
 			},
 			async content(event, trigger, player) {
-				var mark = player.countMark("shehunmrfz");
-				var num = trigger.num;
-				if (mark + num > 5) var add = 5 - mark;
-				else var add = num;
+				let mark = player.countMark("shehunmrfz");
+				let num = trigger.num;
+				let add;
+				if (mark + num > 5) add = 5 - mark;
+				else add = num;
 				player.addMark("shehunmrfz", add, false);
 			},
 			mod: {

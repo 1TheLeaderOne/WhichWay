@@ -73,7 +73,7 @@ skill({
 				if (event.name != "lose") return true;
 				if (event.type != "discard") return false;
 				if (event.cards2) {
-					for (var i = 0; i < event.cards2.length; i++) {
+					for (let i = 0; i < event.cards2.length; i++) {
 						return true;
 					}
 				}

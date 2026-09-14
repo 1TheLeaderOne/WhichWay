@@ -11,7 +11,7 @@ if(!lib.qhlypkg){
 const config = {
 	isExt:true,
 	filterCharacter:function(name){
-		return window.whichWaySave.allCharacters.includes(name);
+		return window.whichWaySave.hasChar(name);
 	},
 	characterNameTranslate:function(name){
 		return get.translation(name);

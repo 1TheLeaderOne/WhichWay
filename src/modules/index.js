@@ -58,13 +58,13 @@ class WhichWayCharacterModules {
 			},
 		};
         //@ts-ignore
-		if (window.whichWaySave.allCharacters.includes(name) && this.modulesList.includes(name)) {
+		if (window.whichWaySave.hasChar(name) && this.modulesList.includes(name)) {
 			throw new Error(`${name} 即是角色名也是模组名，请重新命名模组！`);
 		}
 
 		if (name === "default") return defaultModule.default;
         //@ts-ignore
-		if (window.whichWaySave.allCharacters.includes(name)) {
+		if (window.whichWaySave.hasChar(name)) {
 			if (current) {
                 //@ts-ignore
 				if (!modulesSet[name]) return defaultModule.default;

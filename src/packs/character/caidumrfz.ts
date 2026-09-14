@@ -14,12 +14,13 @@ skill({
 			trigger: { player: "equipBefore" },
 			forced: true,
 			filter(event, player) {
-				return event.card && get.type(event.card) === "equip" && event.getParent().name != "caiyimrfz";
+				const evt = event.getParent();
+				return event.card && get.type(event.card) === "equip" && evt && evt.name != "caiyimrfz";
 			},
 			async content(event, trigger, player) {
 				const subtype = ["equip1", "equip2", "equip3", "equip4", "equip5"];
-				const { control } = await player
-					.chooseControl(subtype)
+				const result = await player
+					.chooseControl({controls:subtype})
 					.set("prompt", `请选择将${get.translation(trigger.card)}置入一个装备栏`)
 					.set("ai", () => {
 						let player = get.player();
@@ -38,8 +39,8 @@ skill({
 					.set("subtype", subtype)
 					.set("card", trigger.card)
 					.forResult();
-				if (!control) return;
-				trigger.card.subtypes = [control];
+				if (!result.control) return;
+				trigger.card.subtypes = [result.control];
 			},
 		},
 	"mingjiangmrfz": {
@@ -66,7 +67,10 @@ skill({
 				await player.draw();
 				if (player.countCards("h") < 1) return;
 				const { links } = await player
-					.chooseButton(["名匠", [list, "vcard"]], true)
+					.chooseButton({
+						createDialog:["名匠", [list, "vcard"]],
+						forced:true
+					})
 					.set("ai", button => {
 						let card = {
 							name: button.link[2],

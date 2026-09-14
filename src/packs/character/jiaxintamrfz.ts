@@ -19,7 +19,7 @@ translate({
 });
 dynamicTranslate("feilvmrfz", player => {
 	const num = (getSkillCount(player) || 0) + 1;
-	return `使命技，回合结束时，你可以将一张牌当做本回合第一张使用的牌使用，若你未因此使用过此牌，你摸两张牌。<br>成功：本局游戏使用过3X(${whichWayUtil.colorize(`#r${3 * num}#`)})张牌：摸X(${whichWayUtil.colorize(`#r${num}#`)})张牌。(X=本技能的成功次数+1)`;
+	return `使命技，回合结束时，你可以将一张牌当做本回合第一张使用的牌使用，若你未因此使用过此牌，你摸两张牌。<br>成功：本局游戏使用过3X(${whichWayUtil.colorize(`#r${3 * num}#`)})张牌：摸2张牌。(X=本技能的成功次数+1)`;
 });
 skill({
 	feilvmrfz: {

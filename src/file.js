@@ -243,63 +243,73 @@ class WhichWayFile {
 		path = this.compilePath(path);
 
 		try {
-			const [folders, files] = await game.promises.getFileList(path);
-			//路径拼接必须确保斜杠分隔：顶层 path 以 "/" 结尾（如 "audio/"），
-			//而递归传入的 folderPath 没有尾部斜杠，直接用 path + name 会把
-			//目录名和文件名粘连（如 audio/BGM + Sammis = audio/BGMSammis）。
-			const joinPath = (base, child) => (base.endsWith("/") ? base + child : base + "/" + child);
-
-			/** @type {FileItem[]} */
-			const fileObjs = files.map(name => ({
-				name,
-				path: joinPath(path, name),
-			}));
-
-			/** @type {FolderItem[]} */
-			let folderObjs = [];
-
-			if (folders.length > 0 && step > 0) {
-				//子文件夹并发扫描，并用固定窗口限流。
-				//原先用 Promise.all 把 250+ 个并发请求同时砸到 fs server / Node 单线程上，
-				//反而比串行慢得多（实测 290 个干员从 <1s 退到 1.5s）：
-				//fs server 处理 getFileList 是 readdir + N 次 stat，单次耗时主要在 IO 阻塞，
-				//适量并发（16）能铺满带宽，过多则相互抢占 fs 句柄与 CPU。
-				folderObjs = [];
-				const limit = 16;
-				let cursor = 0;
-				const workers = Array.from({ length: Math.min(limit, folders.length) }, async () => {
-					while (true) {
-						const idx = cursor++;
-						if (idx >= folders.length) return;
-						const folderName = folders[idx];
-						const folderPath = joinPath(path, folderName);
-						const [subFolders, subFiles] = await game.promises.getFileList(folderPath);
-
-						const directFiles = subFiles.map(name => ({
-							name,
-							path: joinPath(folderPath, name),
-						}));
-
-						const subtree = step > 1 ? await this.getFileTree(folderPath, step - 1) : { folders: [] };
-
-						/** @type {FolderItem} */
-						folderObjs.push({
-							name: folderName,
-							path: folderPath,
-							files: directFiles,
-							folders: subtree.folders,
-						});
-					}
-				});
-				await Promise.all(workers);
-			}
-
-			return { files: fileObjs, folders: folderObjs };
+			return await this.scanDir(path, step);
 		} catch (e) {
 			//@ts-ignore
 			console.warn(`[WhichWayFile] Failed to get file list of "${path}": ${e.message}`);
 			return { files: [], folders: [] };
 		}
+	}
+
+	/**
+	 * 递归扫描目录的 worker：**每个目录只会被 getFileList 列一次**。
+	 *
+	 * 原实现对每个子目录都要列两次（先取该子目录的直接文件，再在递归时把同一目录
+	 * 又列一遍），IPC 与 readdir/stat 开销翻倍。这里改为一次列举后同时产出
+	 * 「直接文件」与「子目录树」，扫描开销减半。
+	 *
+	 * @param {string} path 起始目录
+	 * @param {number} step 剩余递归深度，0 表示只取本层文件、不再进入子目录
+	 * @returns {Promise<{ files: FileItem[], folders: FolderItem[] }>}
+	 */
+	async scanDir(path, step) {
+		//路径拼接必须确保斜杠分隔：顶层 path 以 "/" 结尾（如 "audio/"），
+		//而递归传入的 folderPath 没有尾部斜杠，直接用 path + name 会把
+		//目录名和文件名粘连（如 audio/BGM + Sammis = audio/BGMSammis）。
+		const joinPath = (base, child) => (base.endsWith("/") ? base + child : base + "/" + child);
+
+		//注意：game.promises.getFileList 返回的是数组 [folders, files]，不是对象
+		const [folderNames, fileNames] = await game.promises.getFileList(path);
+
+		/** @type {FileItem[]} */
+		const files = fileNames.map(name => ({
+			name,
+			path: joinPath(path, name),
+		}));
+
+		/** @type {FolderItem[]} */
+		const folders = [];
+		if (folderNames.length === 0 || step <= 0) return { files, folders };
+
+		//子文件夹并发扫描，并用固定窗口限流。
+		//原先用 Promise.all 把 250+ 个并发请求同时砸到 fs server / Node 单线程上，
+		//反而比串行慢得多（实测 290 个干员从 <1s 退到 1.5s）：
+		//fs server 处理 getFileList 是 readdir + N 次 stat，单次耗时主要在 IO 阻塞，
+		//适量并发（16）能铺满带宽，过多则相互抢占 fs 句柄与 CPU。
+		const limit = 16;
+		let cursor = 0;
+		/** @type {Array<{ files: FileItem[], folders: FolderItem[] }>} */
+		const subtrees = new Array(folderNames.length);
+		const workers = Array.from({ length: Math.min(limit, folderNames.length) }, async () => {
+			while (true) {
+				const idx = cursor++;
+				if (idx >= folderNames.length) return;
+				subtrees[idx] = await this.scanDir(joinPath(path, folderNames[idx]), step - 1);
+			}
+		});
+		await Promise.all(workers);
+
+		//按列举顺序落位，保证 folders 顺序稳定（并发完成顺序不确定）
+		for (let i = 0; i < folderNames.length; i++) {
+			folders.push({
+				name: folderNames[i],
+				path: joinPath(path, folderNames[i]),
+				files: subtrees[i].files,
+				folders: subtrees[i].folders,
+			});
+		}
+
+		return { files, folders };
 	}
 
 	/**
@@ -392,7 +402,8 @@ class WhichWayFile {
 	 * 自动加载扩展内的css文件
 	 */
 	async autoLoadCSS() {
-		const { files } = await this.getFileTree("css:");
+		//只需要本层的 .css 文件，step 传 0 让扫描只列一次目录（不必递归子目录）
+		const { files } = await this.getFileTree("css:", 0);
 		const loaded = [];
 		files.forEach(file => {
 			if (file.name.endsWith(".css")) {

@@ -76,7 +76,7 @@ class WhichWayCharacterPack {
 	 */
 	getDesigner(char, igDefault = false, fromStorage = false) {
 		//@ts-ignore 不是本扩展的角色直接返回佚名
-		if ((get.is.object(char) && !char?.whichWay) || (typeof char === "string" && !window.whichWaySave.allCharacters.includes(char))) {
+		if ((get.is.object(char) && !char?.whichWay) || (typeof char === "string" && !window.whichWaySave.hasChar(char))) {
 			return ["佚名"];
 		}
 
