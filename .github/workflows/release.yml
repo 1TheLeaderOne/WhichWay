@@ -51,7 +51,11 @@ jobs:
             +refs/heads/output:refs/remotes/origin/output \
             +refs/heads/output-core:refs/remotes/origin/output-core \
             +refs/heads/dev:refs/remotes/origin/dev
-          git rev-parse --short origin/output origin/output-core origin/dev
+          # 注意：git rev-parse --short 只接受一个 revision，给多个会直接
+          # fatal: Needed a single revision（退出码 128），必须逐个打印。
+          for r in origin/output origin/output-core origin/dev; do
+            printf '%-20s %s\n' "$r" "$(git rev-parse --short "$r")"
+          done
 
       - name: Resolve version and source commit
         run: |
@@ -84,17 +88,24 @@ jobs:
           # 源码包：该次发布所使用的 dev 提交
           git archive --format=zip -o "dist/WhichWay-${VERSION}-dev.zip" --prefix=WhichWay/ "${DEV_REF}"
           ls -lh dist
-          # 三个包的顶层都必须是 WhichWay/
+          # 检查三个包：顶层必须是 WhichWay/，安装包不得带 CI 配置。
+          # 注意：这里一律不用 `... | head -n 1` / `... | grep -q`。仓库有几千个
+          # 条目，下游提前退出会让上游（unzip 或 printf）收到 SIGPIPE（退出码
+          # 141），在 set -o pipefail 下整条管道被判为失败——包其实是对的却报错。
+          # 所以：清单只取一次，之后全部用 shell 内建字符串操作判断。
           for f in dist/*.zip; do
-            echo "$f -> $(unzip -Z1 "$f" | head -n 1)"
-            if ! unzip -Z1 "$f" | head -n 1 | grep -q '^WhichWay/$'; then
+            entries="$(unzip -Z1 "$f")"
+            top="${entries%%$'\n'*}"
+            echo "$f -> ${top}"
+            if [ "${top}" != "WhichWay/" ]; then
               echo "::error::$f: top level is not WhichWay/"; exit 1
             fi
-          done
-          # 两个安装包不得包含 CI 配置（源码包是源码树，含 .github 属正常）
-          for f in "dist/WhichWay-${VERSION}.zip" "dist/WhichWay-${VERSION}-core.zip"; do
-            if unzip -Z1 "$f" | grep -q '^WhichWay/\.github/'; then
-              echo "::error::$f: contains .github"; exit 1
+            if [[ "${entries}" == "WhichWay/.github/"* || "${entries}" == *$'\n'"WhichWay/.github/"* ]]; then
+              case "$f" in
+                # 源码包取自 dev 源码树，含 .github 属正常
+                *-dev.zip) echo "note: $f keeps .github (it is the source tree)" ;;
+                *) echo "::error::$f: contains .github"; exit 1 ;;
+              esac
             fi
           done
 
@@ -116,7 +127,9 @@ jobs:
 
           本次发布所用源码提交：`DEVREF`
           EOF
-          sed -i "s/VERSION/${VERSION}/g; s/DEVREF/${DEV_REF}/g" notes.md
+          # DEV_REF 可能是 refs/remotes/origin/dev（含 /），分隔符不能用 /，否则
+          # sed 会报 "unknown option to `s'"
+          sed -i "s|VERSION|${VERSION}|g; s|DEVREF|${DEV_REF}|g" notes.md
           if gh release view "${VERSION}" >/dev/null 2>&1; then
             gh release edit "${VERSION}" --title "${VERSION}" --notes-file notes.md
             gh release upload "${VERSION}" dist/*.zip --clobber
