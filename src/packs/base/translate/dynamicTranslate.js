@@ -49,10 +49,6 @@ const dynamicTranslate = {
 		if (player.hasSkill('junumrfz_effect')) return '锁定技，你的【杀】无视防具；你对有防具的角色造成的伤害+1，对与你距离小于等于3的角色造成的伤害+1。';
 		return '锁定技，你的使用的【杀】仅能指定与你距离不大于2的角色为目标，你的【杀】无视防具；你对有防具的角色造成的伤害+1，对与你距离为1的角色造成的伤害+1。';
 	},
-	wowumrfz: function (player) {
-		if (player.countMark('wowumrfz_time') < 5) return '<span class=firetext>【劲发江潮落】</span></br>你的回合内，你每使用三张牌可视为使用一张不计入次数的【杀】，若此【杀】造成了伤害，你摸一张牌；锁定技，当你本局游戏累计发动5次【我无】时，修改此技能。';
-		return '<span class=firetext>【气收秋毫平】</span></br>每当你累计使用或打出三张牌时，你可以视为使用一张无距离限制且不计入次数的【杀】，然后你摸一张牌。';
-	},
 	xuezhanmrfz: function (player) {
 		if (!player.storage.xuezhanmrfz) return '锁定技，当你首次即将死亡时，取消之，然后你将体力值和体力上限调整至2，并摸4张牌。';
 		return '<font color=#696969>锁定技，当你首次即将死亡时，取消之，然后你将体力值和体力上限调整至2，并摸4张牌。</font>';

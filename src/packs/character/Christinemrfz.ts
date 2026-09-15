@@ -16,26 +16,23 @@ skill({
 			},
 			onremove(player, skill) {
 				const cards = player.getExpansions(skill);
-				if (cards.length) player.loseToDiscardpile(cards);
+				if (cards.length) player.loseToDiscardpile({cards});
 			},
 			filter(event, player) {
 				const cards = player.getExpansions("mixumrfz");
 				if (cards.length >= player.maxHp * 2) return false;
 				if (event.type !== "discard") return false;
 				return game.hasPlayer(current => {
-					// @ts-ignore
 					let evt = event.getl(current);
 					return !(!evt || !evt.cards2 || evt.cards2.filterInD("d").length < 1);
 				});
 			},
 			async cost(event, trigger, player) {
 				let cardsList = [];
-				// @ts-ignore
 				let players = game.filterPlayer().sortBySeat(_status.currentPhase);
-				for (var current of players) {
-					var cards = [];
-					// @ts-ignore
-					var evt = trigger.getl(current);
+				for (let current of players) {
+					let cards = [];
+					let evt = trigger.getl(current);
 					if (!evt || !evt.cards2) continue;
 					let cardsx = evt.cards2.filterInD("d");
 					cards.addArray(cardsx);
@@ -44,9 +41,10 @@ skill({
 					}
 				}
 				const result = await player
-					.chooseButton(["选择置于武将牌上的牌", cardsList])
+					.chooseButton({
+						createDialog:["选择置于武将牌上的牌", cardsList]
+					})
 					.set("selectButton", () => {
-						// @ts-ignore
 						return [1, get.event().numx];
 					})
 					.set("numx", player.maxHp * 2 - player.getExpansions("mixumrfz").length)
@@ -175,15 +173,11 @@ skill({
 					return ui.create.dialog("雅食", cards, "hidden");
 				},
 				check(button) {
-					let event = get.event().parent;
-					// @ts-ignore
+					let event = get.event().parent!;
 					let check = event.yashimrfz_aiCheck;
-					// @ts-ignore
 					return check.includes(button.link);
 				},
-				select() {
-					return [1, Infinity];
-				},
+				select:[1, Infinity],
 				// @ts-ignore
 				filterOk() {
 					// @ts-ignore
@@ -223,7 +217,7 @@ skill({
 								let i = Math.min(3, cardsx.length);
 								player.say(lines[i - 1]);
 								player.recover();
-								player.loseToDiscardpile(cardsx);
+								player.loseToDiscardpile({cards:cardsx});
 								player.draw();
 							}
 						},

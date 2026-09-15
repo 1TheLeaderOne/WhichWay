@@ -25,7 +25,7 @@ skill({
 			},
 			logTarget: "player",
 			async content(event, trigger, player) {
-				var cards = trigger.cards.filterInD("o").filterInD("d");
+				let cards = trigger.cards.filterInD("o").filterInD("d");
 				player.gain(cards, "log", "gain2");
 				player.addMark("danweimrfz");
 			},
