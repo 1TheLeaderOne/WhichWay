@@ -29,9 +29,9 @@ skill({
 			},
 			complexCard: true,
 			filterCard: function (card, player) {
-				var selected = ui.selected.cards;
+				let selected = ui.selected.cards;
 				if (!selected.length) return true;
-				for (var i = 0; i < selected.length; i++) {
+				for (let i = 0; i < selected.length; i++) {
 					if (get.type2(card) == get.type2(selected[i])) return false;
 				}
 				return true;
@@ -94,7 +94,13 @@ skill({
 					result;
 				let differ = player.countCards("h") - num;
 				if (differ > 0) {
-					result = await player.chooseToDiscard(true, `请弃置${get.cnNumber(player.countCards("h") - num)}张牌`, differ).forResult();
+					result = await player.chooseToDiscard({
+						forced:true,
+						prompt:`请弃置${get.cnNumber(player.countCards("h") - num)}张牌`,
+						selectCard() {
+							return differ;
+						},
+					}).forResult();
 				} else if (differ < 0) {
 					player.draw(Math.abs(differ));
 				}

@@ -20,19 +20,22 @@ skill({
 				return 3 - player.getDamagedHp() + player.getCards("he", card => get.value(card) < 7).length;
 			},
 			async cost(event, trigger, player) {
-				const { result } = await player
-					.chooseToDiscard(2, "he")
+				const result= await player
+					.chooseToDiscard({
+						selectCard:2,
+						position:"he"
+					})
 					.set("prompt2", `你可以弃置两张牌并回复${trigger.num}点体力，若你弃置的牌类别不同，你将手牌补至5张`)
 					.set("ai", card => {
-						var player = get.event().player,
+						let player = get.event().player,
 							selected = ui.selected.cards,
 							num = get.value(card);
-						for (var i of selected) {
+						for (let i of selected) {
 							if (get.type2(i) == get.type2(card)) num - 3;
 							else num + 2;
 						}
 						return 7 - num + player.getDamagedHp();
-					});
+					}).forResult();
 				event.result = result;
 			},
 			async content(event, trigger, player) {
@@ -64,15 +67,15 @@ skill({
 				global: "phaseJieshuBegin",
 			},
 			getDiscardCards(event) {
-				let cards = [];
-				for (var i of game.players.slice().concat(game.dead)) {
-					var history = i.getHistory("lose", function (evt) {
+				let cards:Card[] = [];
+				for (let i of game.players.slice().concat(game.dead)) {
+					let history = i.getHistory("lose", function (evt) {
 						return evt && evt.type == "discard";
 					});
 					if (history.length == 0) continue;
-					for (var k of history) {
+					for (let k of history) {
 						if (k.cards.length == 0) continue;
-						for (var j of k.cards) {
+						for (let j of k.cards) {
 							if (get.position(j) != "d") continue;
 							cards.push(j);
 						}
@@ -81,12 +84,12 @@ skill({
 				return cards;
 			},
 			filter(event, player) {
-				var cards = lib.skill.cehuimrfz.getDiscardCards(event);
+				let cards = lib.skill.cehuimrfz.getDiscardCards(event);
 				if (!game.hasPlayer(current => current != player && player.canCompare(current, true, false))) return false;
 				return player.countCards("h") != player.storage.cehuimrfz && cards.length > 0;
 			},
 			async cost(event, trigger, player) {
-				var cards = lib.skill.cehuimrfz.getDiscardCards(trigger);
+				let cards = lib.skill.cehuimrfz.getDiscardCards(trigger);
 				const result = await player
 					.chooseCardButton(cards)
 					.set("prompt2", `你可以选择一张牌并与一名其他角色进行拼点，若你赢，你使用牌堆顶3张牌`)
@@ -99,24 +102,25 @@ skill({
 			async content(event, trigger, player) {
 				let card = event.cost_data[0];
 				const { targets } = await player
-					.chooseTarget(true)
+					.chooseTarget()
+					.set("forced",true)
 					.set("prompt", `【测绘】:请选择一名其他角色进行拼点`)
 					.set("filterTarget", (card, player, target) => target != player && player.canCompare(target, true, false))
 					.set("ai", target => {
-						var player = get.event().player;
+						let player = get.event().player;
 						return get.attitude(player, target) < 0;
 					})
 					.forResult();
 				if (!targets) return;
-				var tmpfuc = async function () {
+				let tmpfuc = async function () {
 					let next = player.chooseToCompare(targets[0]);
 					if (!next.fixedResult) next.fixedResult = {};
-					next.fixedResult[player.playerid] = card;
+					next.fixedResult[player.playerid!] = card;
 					return await next.forResult();
 				};
-				var next = await tmpfuc();
+				let next = await tmpfuc();
 				if (next.bool) {
-					var cards = game.cardsGotoOrdering(get.cards(3)).cards;
+					let cards = game.cardsGotoOrdering(get.cards(3)).cards;
 					player.showCards(cards, `${get.translation(player)}展示了牌堆顶三张牌`);
 					let canUse = cards.filter(i => player.hasUseTarget(i, false));
 					if (canUse.length == 0) return;
@@ -125,7 +129,10 @@ skill({
 							canUse.length == 1
 								? { links: canUse }
 								: await player
-										.chooseCardButton(canUse, true)
+										.chooseCardButton({
+											cards:canUse,
+											forced:true
+										})
 										.set("prompt", `【测绘】:请选择你要使用的牌`)
 										.set("ai", link => get.number(link))
 										.forResult();

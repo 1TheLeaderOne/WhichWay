@@ -17,7 +17,7 @@ skill({
 				player: "gainAfter",
 			},
 			filter(event, player) {
-				return !player.isPhaseUsing() && event.cards.length > 0 && event.getParent().name !== "huanyoumrfz";
+				return !player.isPhaseUsing() && event.cards.length > 0 && (event.getParent()!).name !== "huanyoumrfz";
 			},
 			async content(event, trigger, player) {
 				player.gain(lib.card.ying.getYing(trigger.cards.length), "gain2");
@@ -33,7 +33,7 @@ skill({
 						player.node.washTip = ui.create.div(handcard, ".washTip");
 						player.node.washTip.innerHTML = "洗牌中...";
 
-						let hs = [];
+						let hs:Card[] = [];
 						let origin = player.getCards("h");
 						for (let i = 0; i < player.getCards("h").length; i++) {
 							let r = origin.randomGet();
@@ -75,7 +75,7 @@ skill({
 							//@ts-ignore
 							player.node.handcards2.cardMod = {};
 						}
-						var cardMod = function (card) {
+						let cardMod = function (card) {
 							return ["幻有", "手牌对你不可见"];
 						};
 						//@ts-ignore
@@ -118,7 +118,7 @@ skill({
 							event.card.storage?.huanyoumrfz &&
 							event.cards.length === 1 &&
 							!event.card.failToUse &&
-							!event.getParent().noTriggerHuanyoumrfz
+							!(event.getParent()!).noTriggerHuanyoumrfz
 						);
 					},
 					async content(event, trigger, player) {
@@ -191,12 +191,12 @@ skill({
 							player.countCards("h", card => card.storage.huanyoumrfz) > 0 &&
 							event.card.storage?.huanyoumrfz &&
 							event.cards.length === 1 &&
-							!event.getParent().noTriggerHuanyoumrfz
+							!(event.getParent()!).noTriggerHuanyoumrfz
 						);
 					},
 					async cost(event, trigger, player) {
 						event.result = await player
-							.chooseCard("h")
+							.chooseCard()
 							.set("prompt", get.prompt("wenxinmrfz"))
 							.set("prompt2", `你可以令一张背面朝上的手牌正面朝上`)
 							.set("filterCard", card => card.storage.huanyoumrfz)
@@ -229,7 +229,7 @@ skill({
 						//@ts-ignore
 						return (
 							(useList.length === 0 || (useList[0] === "ying" && new Set(useList).size === 1)) &&
-							!player.getHistory("skipped").includes("phaseUse")
+							!player.getHistory("skipped").map(evt=>evt.name).includes("phaseUse")
 						);
 					},
 					async content(event, trigger, player) {

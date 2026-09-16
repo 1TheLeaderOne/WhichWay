@@ -1,6 +1,22 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
 
+//纸偶
+character("fengwan_zhioumrfz", { pack: "specialSJZX",
+			sex:"female",
+			group:"dongmrfz",
+			hp:1,
+			maxHp:2,
+			skills:[],
+			isAiForbidden:true
+		});
+
+translate({
+	"fengwan_zhioumrfz": "纸偶",
+});
+
+characterTitle("fengwan_zhioumrfz", "<font color='yellow'>栩栩如生</font>");
+
 character("fengwanmrfz", { pack: "epicSJZX",
 			sex: "female",
 			group: "dongmrfz",
@@ -19,7 +35,7 @@ skill({
 				return player.countCards("h") > 0 && player.countEnabledSlot() > 0;
 			},
 			async content(event, trigger, player) {
-				const { cards } = await player.chooseCard("h", true).set("prompt", `你展示一张手牌，然后令“纸偶”随机获得技能描述中包含此牌牌名的技能`).forResult();
+				const { cards } = await player.chooseCard({forced:true}).set("prompt", `你展示一张手牌，然后令“纸偶”随机获得技能描述中包含此牌牌名的技能`).forResult();
 				if (!cards) return;
 				const card = cards[0];
 				//@ts-ignore
@@ -151,11 +167,11 @@ skill({
 					hpNode.innerHTML = Array.isArray(hp) ? hp.join("/") : "1/2";
 					lib.translate[`${name}_info`] = `锁定技，你视为拥有技能${skills.map(s => "〖" + get.translation(s) + "〗").join("、")}，此牌不因【化影】而离开你的装备区后，销毁之。<br>` + node.outerHTML + "<br>";
 					let append = "";
-					for (var skill of skills) {
+					for (let skill of skills) {
 						if (lib.skill[skill].nobracket) {
 							append += '<div class="skilln">' + get.translation(skill) + '</div><div><span style="font-family: yuanli">' + get.plainText(get.skillInfoTranslation(skill)) + "</span></div><br><br>";
 						} else {
-							var translation = lib.translate[skill + "_ab"] || get.translation(skill).slice(0, 2);
+							let translation = lib.translate[skill + "_ab"] || get.translation(skill).slice(0, 2);
 							append += '<div class="skill">【' + translation + '】</div><div><span style="font-family: yuanli">' + get.plainText(get.skillInfoTranslation(skill)) + "</span></div><br><br>";
 						}
 					}
@@ -187,7 +203,7 @@ skill({
 					if (cache[name]) {
 						return cache[name].filter(i => !player.getSkills().includes(i) && !lib.skill[i].charlotte).randomGet();
 					}
-					let list = [];
+					let list:string[] = [];
 					for (let skill in lib.skill) {
 						let info = lib.skill[skill];
 						if (info.charlotte || info.equipSkill || info.zhuSkill) continue;
@@ -295,7 +311,9 @@ skill({
 			// @ts-ignore
 			async cost(event, trigger, player) {
 				event.result = await player
-					.chooseCard("e")
+					.chooseCard({
+						position:'e'
+					})
 					.set("prompt", get.prompt("huayingmrfz"))
 					.set("prompt2", `你可以切换一个“纸偶”和你当前的武将牌`)
 					.set("filterCard", card => card.name.indexOf("zhiyimrfz_card_") === 0)

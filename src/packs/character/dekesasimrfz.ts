@@ -15,21 +15,27 @@ skill({
 			enable: "phaseUse",
 			async content(event, trigger, player) {
 				let result;
-				/** @type {Array<Card>} */
-				//@ts-ignore
 				const cards = get.cards(4);
 				game.cardsGotoOrdering(cards);
 				player.showCards(cards, "剑雨");
-				var suit = [];
-				for (var i = 0; i < cards.length; i++) {
-					var suitcard = get.suit(cards[i]);
+				let suit:string[] = [];
+				for (let i = 0; i < cards.length; i++) {
+					let suitcard = get.suit(cards[i])!;
 					if (suit.includes(suitcard)) continue;
 					suit.add(suitcard);
 				}
-				var num = suit.length;
+				let num = suit.length;
 				if (player.countCards("he") >= suit.length)
 					result = await player
-						.chooseCard("he", true, "【剑雨】:将至少" + num + "张牌当作【万箭齐发】对你选择牌的等量名其他角色使用", [num, Infinity])
+						.chooseCard(
+							//"he", true, "【剑雨】:将至少" + num + "张牌当作【万箭齐发】对你选择牌的等量名其他角色使用", [num, Infinity]
+							{
+								position:"he",
+								forced:true,
+								prompt:"【剑雨】:将至少" + num + "张牌当作【万箭齐发】对你选择牌的等量名其他角色使用",
+								selectCard:[num, Infinity]
+							}
+						)
 						.set("ai", function (card) {
 							return get.value(card) <= 6;
 						})
@@ -38,10 +44,15 @@ skill({
 
 				if (result?.cards) {
 					player.addTempSkill("jianyumrfz_dam", "jianyumrfzAfter");
-					player.chooseUseTarget({ name: "wanjian" }, result.cards, true, false).set("selectTarget", function (card, player, target) {
-						var num = result.cards?.length || 1;
-						return [1, num];
-					}).viewAs = true;
+					player.chooseUseTarget(
+						{
+							card:get.autoViewAs({name:"wanjian"}),
+							cards:result.cards,
+							selectTarget() {
+								return [1, (result.cards?.length || 1)];
+							},
+						}
+					).viewAs = true;
 				}
 			},
 			subSkill: {
@@ -101,7 +112,14 @@ skill({
 						// step 2
 						if (event.cards.length > 1) {
 							result = await player
-								.chooseCardButton("【速递】:请选择要分配的牌", true, event.cards, [1, event.cards.length])
+								.chooseCardButton({
+									prompt:"【速递】:请选择要分配的牌",
+									forced:true,
+									cards:event.cards,
+									select() {
+										return [1, event.cards.length];
+									},
+								})
 								.set("ai", button => {
 									if (ui.selected.buttons.length === 0) return 1;
 									return 0;
@@ -118,7 +136,10 @@ skill({
 							event.cards = event.cards.filter(c => !result.links.includes(c));
 							event.togive = result.links.slice(0);
 							result = await player
-								.chooseTarget("选择一名角色获得" + get.translation(result.links), true)
+								.chooseTarget({
+									prompt:"选择一名角色获得" + get.translation(result.links),
+									forced:true
+								})
 								.set("ai", target => {
 									const aiPlayer = _status.event.player;
 									const att = get.attitude(aiPlayer, target);
@@ -156,7 +177,7 @@ skill({
 							game.stopCountChoose();
 						});
 					}
-					const list = [];
+					const list:any[] = [];
 					for (const i in event.given_map) {
 						const source = (_status.connectMode ? lib.playerOL : game.playerMap)[i];
 						player.line(source, "green");
@@ -175,7 +196,7 @@ skill({
 						break;
 					}
 
-					result = await player.chooseBool(get.prompt2(event.name)).set("frequentSkill", event.name).forResult();
+					result = await player.chooseBool({prompt:get.prompt2(event.name)}).set("frequentSkill", event.name).forResult();
 
 					// step 7: if player cancels, break the loop
 					if (!result.bool) {

@@ -9,6 +9,84 @@ character("yunxingmrfz", { pack: "epicSJZX",
 		});
 
 skill({
+	zhimingmrfz: {
+		mark: true,
+		intro: {
+			content: function (event, player) {
+				let storage = player.storage.yxliumingmrfz_count;
+				if (player.awakenedSkills && player.awakenedSkills.includes("dingyuanmrfz")) {
+					return "置于过武将牌上的牌（装备牌和延时锦囊除外）:" + get.translation(storage["card"]);
+				}
+				return "已置于过武将牌上" + storage["count"] + "张牌</br>置于过武将牌上的牌（装备牌和延时锦囊除外）:" + get.translation(storage["card"]);
+			},
+		},
+		audio: 2,
+		enable: ["chooseToUse", "chooseToRespond"],
+		hiddenCard: function (player, name) {
+			let cards = player.storage.yxliumingmrfz_count["card"];
+			if (player.countCards("he") < 1 || !cards || player.hasSkill("zhimingmrfz_ban")) return false;
+			for (let i of cards) {
+				if (name == i) return true;
+			}
+			return false;
+		},
+		filter: function (event, player) {
+			let cards = player.storage.yxliumingmrfz_count["card"];
+			if (player.countCards("he") < 1 || !cards || player.hasSkill("zhimingmrfz_ban")) return false;
+			for (let i of cards) {
+				if (event.filterCard({ name: i, isCard: true }, player, event)) return true;
+			}
+			return false;
+		},
+		chooseButton: {
+			dialog: function (event, player) {
+				let vcards:any[] = [];
+				let list = player.storage.yxliumingmrfz_count["card"];
+				for (let name of list) {
+					let card = { name: name, isCard: true };
+					let type = get.type(name);
+					if (event.filterCard(card, player, event)) vcards.push([type, "", name]);
+				}
+				/**
+				 * @type { Dialog }
+				 */
+				//@ts-ignore
+				let dialog = ui.create.dialog("祗铭", [vcards, "vcard"], "hidden");
+				//@ts-ignore
+				dialog.direct = true;
+				return dialog;
+			},
+			backup: function (links, player) {
+				return {
+					filterCard: () => true,
+					selectCard: 1,
+					viewAs: {
+						name: links[0][2],
+					},
+					position: "he",
+					async precontent(event, trigger, player) {
+						//@ts-ignore
+						player.logSkill("zhimingmrfz");
+						player.addTempSkill("zhimingmrfz_ban", { global: "phaseEnd" });
+					},
+				};
+			},
+			prompt: function (links, player) {
+				return "【祗铭】：将一张牌当作【" + get.translation(links[0][2]) + "】使用或打出";
+			},
+		},
+		ai: {
+			order: 1,
+			result: {
+				player: 1,
+			},
+		},
+		subSkill: {
+			ban: {
+				charlotte: true,
+			},
+		},
+	},
 	"dingyuanmrfz": {
 			derivation: "zhimingmrfz",
 			mark: true,
@@ -241,6 +319,8 @@ translate({
 	"dingyuanmrfz_info": "觉醒技，准备阶段，若你于本局游戏中置于武将牌上过至少三张‘铭’，你失去一点体力上限并获得技能【祗铭】。",
 	"yxliumingmrfz": "流铭",
 	"yxliumingmrfz_info": "①锁定技，一名角色的回合开始时，若你武将牌上没有‘铭’，你将牌堆顶的一张牌置于你的武将牌上，称之为‘铭’。②锁定技，当你成为其他角色使用的牌的目标后，若此牌[花色/点数]与‘铭’[相同/不同]，则[你获得武将牌上的‘铭’/其须弃置一张与‘铭’类型一致的牌，否则此牌对你无效且你失去此技能直到本回合结束]。③你可以使用‘铭’。",
+	zhimingmrfz: "祗铭",
+	zhimingmrfz_info: "每回合限一次，你可以将一张牌当作与本局游戏中你获得过的‘铭’的同名牌（装备牌和延时锦囊牌除外）使用或打出。",
 });
 
 characterIntro("yunxingmrfz", "陨星，前“守林人”组织成员，现自由佣兵，此外履历不详。</br>现作为狙击干员为罗德岛服务，使用手中的弩炮发挥出卓越的范围杀伤力。");

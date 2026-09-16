@@ -11,7 +11,7 @@ character("guiyanmrfz", { pack: "epicSJZX",
 skill({
 	"qiyimrfz": {
 			audio: 2,
-			enable: ["phaseUse", "chooseToUse"],
+			enable: ["chooseToUse"],
 			usable: 1,
 			hiddenCard: function (player, name) {
 				let event = get.event();
@@ -109,11 +109,20 @@ skill({
 			async content(event, trigger, player) {
 				if (!player.isUnderControl(true) || _status.auto) {
 					let result = lib.skill.qiyimrfz.getResult(player);
-					player.useCard({ name: "tao" }, result.targets, result.cards);
+					player.useCard({
+						card:get.autoViewAs({name:"tao"}),
+						targets:result.targets,
+						cards:result.cards
+					});
 				} else {
 					let targets = event.targets;
 					let cards = event.cards;
-					player.useCard({ name: "tao" }, targets, cards);
+					player.useCard({
+						//{ name: "tao" }, result.targets, result.cards
+						card:get.autoViewAs({name:"tao"}),
+						targets,
+						cards
+					});
 				}
 			},
 			ai: {
@@ -199,7 +208,7 @@ skill({
 			firstDo: true,
 			async content(event, trigger, player) {
 				let cards = player.getCards("h", card => card.hasGaintag("xiadumrfz"));
-				if (cards) await player.discard(cards);
+				if (cards) await player.discard({cards});
 				await player.changeHujia(-1);
 				const result = await player.draw(2).forResult();
 				if (!result.cards) return;

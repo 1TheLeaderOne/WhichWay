@@ -36,7 +36,7 @@ skill({
 						if (player.hasSkill("shantanmrfz_used")) return false;
 						return game.hasPlayer(current => {
 							if (current == player) return false;
-							var evt = event.getl(current);
+							let evt = event.getl(current);
 							if (!evt || !evt.cards2 || evt.cards2.filterInD("d").length < 1) return false;
 							return true;
 						});
@@ -49,25 +49,30 @@ skill({
 					},
 					async content(event, trigger, player) {
 						if (player.countCards("he") <= 0) return;
-						const result = await player.chooseToDiscard(true, 1, "he", "【善谈】:请弃置一张牌").set("card",card=>get.value(card) < 8).forResult();
+						const result = await player.chooseToDiscard(
+							{forced:true,position:"he",prompt:"【善谈】:请弃置一张牌"}
+						).set("card",card=>get.value(card) < 8).forResult();
 
 						if (result.cards) {
-							var targets = [],
-								cardsList = [];
-							var players = game.filterPlayer().sortBySeat(_status.currentPhase);
-							for (var current of players) {
+							let targets:Player[] = [],
+								cardsList:Card[][] = [];
+							let players = game.filterPlayer().sortBySeat(_status.currentPhase);
+							for (let current of players) {
 								if (current == player) continue;
-								var cards = [];
-								var evt = trigger.getl(current);
+								let cards = [];
+								let evt = trigger.getl(current);
 								if (!evt || !evt.cards2) continue;
-								var cardsx = evt.cards2.filterInD("d");
+								let cardsx = evt.cards2.filterInD("d");
 								cards.addArray(cardsx);
 								if (cards.length) {
 									targets.push(current);
 									cardsList.push(cards);
 								}
 							}
-							targets[0].gain(cardsList[0], "gain2");
+							targets[0].gain({
+								cards:cardsList[0],
+								animate:"gain2"
+							});
 							player.addTempSkill("shantanmrfz_used", { global: "phaseEnd" });
 						}
 					},

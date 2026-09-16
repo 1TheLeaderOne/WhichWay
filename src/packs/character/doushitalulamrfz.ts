@@ -18,12 +18,17 @@ skill({
 				return event.player && event.player.isIn() && !!event.player.countGainableCards(player, "hes");
 			},
 			async content(event, trigger, player) {
-				var pos = [];
-				for (var i of trigger.player.getCards("hes")) {
+				let pos:string[] = [];
+				for (let i of trigger.player.getCards("hes")) {
 					pos.add(get.position(i));
 				}
-				var { cards } = await player
-					.choosePlayerCard("hes", trigger.player, true)
+				let { cards } = await player
+					.choosePlayerCard({
+						//"hes", trigger.player, true
+						position:"hes",
+						target:trigger.player,
+						forced:true
+					})
 					.set("prompt", `【拾薪】:请选择其各区域内的一张牌`)
 					.set("selectButton", pos.length)
 					.set("filterButton", button => {
@@ -36,34 +41,38 @@ skill({
 					.forResult();
 				if (!cards) return;
 				if (_status.connectMode)
-					// @ts-ignore
 					game.broadcastAll(function () {
-						// @ts-ignore
 						_status.noclearcountdown = true;
 					});
-				// @ts-ignore
 				event.given_map = {};
 				while (cards.length > 0) {
-					var { links } =
+					let { links } =
 						cards.length == 1
 							? { links: cards }
 							: await player
-									.chooseCardButton("【拾薪】:请选择要分配的牌", true, cards, [1, cards.length])
+									.chooseCardButton({
+										prompt:"【拾薪】:请选择要分配的牌",
+										forced:true,
+										cards,
+										select() {
+											return [1, cards.length];
+										},
+									})
 									.set("ai", () => {
 										if (ui.selected.buttons.length == 0) return 1;
 										return 0;
 									})
 									.forResult();
 					if (!links) continue;
-					// @ts-ignore
 					event.togive = links.slice();
 					cards.removeArray(links);
 					const { targets } = await player
-						// @ts-ignore
-						.chooseTarget("选择一名角色获得" + get.translation(event.togive), true)
+						.chooseTarget({
+							prompt:"选择一名角色获得" + get.translation(event.togive),
+							forced:true
+						})
 						.set("ai", target => {
 							const att = get.attitude(_status.event.player, target);
-							// @ts-ignore
 							if (_status.event.enemy) {
 								return -att;
 							} else if (att > 0) {
@@ -72,33 +81,27 @@ skill({
 								return att / 100;
 							}
 						})
-						// @ts-ignore
 						.set("enemy", get.value(event.togive[0], player, "raw") < 0)
 						.forResult();
 					if (targets) {
-						const id = targets[0].playerid,
-							// @ts-ignore
+						const id = targets[0].playerid!,
 							map = event.given_map;
 						if (!map[id]) map[id] = [];
-						// @ts-ignore
 						map[id].addArray(event.togive);
 					}
 				}
 				if (_status.connectMode) {
-					// @ts-ignore
 					game.broadcastAll(function () {
-						// @ts-ignore
 						delete _status.noclearcountdown;
 						game.stopCountChoose();
 					});
 				}
-				const list = [];
-				// @ts-ignore
+				const list:any[] = [];
+
 				for (const i in event.given_map) {
 					const source = (_status.connectMode ? lib.playerOL : game.playerMap)[i];
 					player.line(source, "green");
 					if (player !== source && (get.mode() !== "identity" || player.identity !== "nei")) player.addExpose(0.2);
-					// @ts-ignore
 					list.push([source, event.given_map[i]]);
 				}
 				game.loseAsync({
@@ -125,16 +128,16 @@ skill({
 					})
 				);
 			},
-			// @ts-ignore
 			async cost(event, trigger, player) {
 				const { result } = await player
-					.chooseTarget(`【灼息】:你可以对一名与你距离为${player.hp}的角色造成一点火焰伤害`)
-					// @ts-ignore
+					.chooseTarget({
+						prompt:`【灼息】:你可以对一名与你距离为${player.hp}的角色造成一点火焰伤害`
+					})
 					.set("filterTarget", (card, player, target) => {
 						return get.distance(target, player) == player.hp && target != player;
 					})
 					.set("ai", target => {
-						var player = get.event().player;
+						let player = get.event().player;
 						return get.damageEffect(target, player, player, "fire") > 0;
 					});
 				if (!result) return;
@@ -142,7 +145,7 @@ skill({
 			},
 			async content(event, trigger, player) {
 				let target = event.targets[0];
-				target.damage("fire");
+				target.damage({nature:"fire"});
 				player.line(target);
 				if (!player.storage.zhuoximrfz) player.storage.zhuoximrfz = [];
 				player.storage.zhuoximrfz.add(get.type2(trigger.card));
@@ -154,7 +157,6 @@ skill({
 					charlotte: true,
 					trigger: { player: "phaseEnd" },
 					async content(event,trigger,player) {
-						// @ts-ignore
 						player.storage.zhuoximrfz = [];
 					},
 				},
@@ -164,7 +166,7 @@ skill({
 
 translate({
 	"doushitalulamrfz": "斗士塔露拉",
-	"doushitalulamrfz_prefix": "{\r\n\t\tname:\"斗士\"",
+	"doushitalulamrfz_prefix": "斗士",
 	"talula_shixinmrfz": "拾薪",
 	"talula_shixinmrfz_info": "当你造成伤害后，你可以选择其各区域内的一张牌，然后将这些牌任意分配给任意角色。",
 	"zhuoximrfz": "灼息",

@@ -21,11 +21,11 @@ skill({
 			},
 			enable: "phaseUse",
 			filter: function (event, player) {
-				var hs = player.countCards("he", function (card) {
+				let hs = player.countCards("he", function (card) {
 						return !player.storage.cichongmrfz.includes(get.type2(card));
 					}),
 					bool = false;
-				for (var i of game.players) {
+				for (let i of game.players) {
 					if (player.canUse("sha", i) || i != player) continue;
 					bool = true;
 					break;
@@ -33,7 +33,7 @@ skill({
 				return hs > 0 && bool;
 			},
 			filterCard: function (card) {
-				var storage = _status.event.player.storage.cichongmrfz;
+				let storage = _status.event.player.storage.cichongmrfz;
 				return !storage.includes(get.type2(card));
 			},
 			filterTarget: lib.filter.notMe,
@@ -93,7 +93,7 @@ skill({
 			},
 			trigger: { source: "damageBegin3" },
 			filter: function (event, player) {
-				var storage = player.storage.ganraomrfz;
+				let storage = player.storage.ganraomrfz;
 				return !storage.includes(event.player) && event.player.isIn();
 			},
 			check: function (event, player) {
@@ -101,9 +101,9 @@ skill({
 			},
 			async content(event, trigger, player) {
 				let dialog = ["【干扰】:请选择一张牌"],
-					list = [];
-				for (var i = 0; i < lib.inpile.length; i++) {
-					var name = lib.inpile[i];
+					list:any[] = [];
+				for (let i = 0; i < lib.inpile.length; i++) {
+					let name = lib.inpile[i];
 					if (get.type(name) == "equip") list.push(["装备", "", name]);
 					else if (get.type2(name) == "trick") list.push(["锦囊", "", name]);
 					else if (get.type(name) == "basic") list.push(["基本", "", name]);
@@ -111,10 +111,11 @@ skill({
 				//@ts-ignore
 				dialog.push([list, "vcard"]);
 				const { links } = await player
-					.chooseButton(1, true)
+					.chooseButton()
+					.set("forced",true)
 					.set("createDialog", dialog)
 					.set("ai", button => {
-						var target = _status.event.target;
+						let target = _status.event.target;
 						if (target.hp < 2) return ["tao", "jiu"].randomGet();
 						return ["shan", "wuxie", "tao"].randomGet();
 					})

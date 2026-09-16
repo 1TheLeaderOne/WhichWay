@@ -93,7 +93,7 @@ skill({
         delay:0,
         async content(event,trigger,player){
             const cards = event.cards;
-            await player.addShownCards(cards,"visible_mutuanmrfz");
+            await player.addShownCards({cards,gaintag:["visible_mutuanmrfz"]});
             await player.draw();
             
             const skill:Required<Skill> = lib.skill.mutuanmrfz;

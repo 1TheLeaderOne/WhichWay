@@ -13,9 +13,9 @@ skill({
 			mod: {
 				aiOrder: function (player, card, num) {
 					if (typeof card == "object" && player.isPhaseUsing()) {
-						var history = player.getAllHistory("useCard");
+						let history = player.getAllHistory("useCard");
 						if (history.length < 1) return num;
-						var cardx = history[history.length - 1].card;
+						let cardx = history[history.length - 1].card;
 						if (cardx && get.type2(cardx) == get.type2(card)) {
 							return num + 10;
 						}
@@ -26,27 +26,33 @@ skill({
 			trigger: { player: ["useCardEnd", "respondEnd"] },
 			forced: true,
 			filter(event, player) {
-				//@ts-ignore
 				return player.getAllHistory(event.name).length > 1;
 			},
 			async content(event, trigger, player) {
-				//@ts-ignore
-				var history = player.getAllHistory(trigger.name);
-				var cardx = history[history.length - 2].card;
+				let history = player.getAllHistory(trigger.name);
+				let cardx = history[history.length - 2].card;
 				if (!cardx) return;
 				if (get.type2(cardx) == get.type2(trigger.card)) {
-					var cards = get.cards(2);
+					let cards = get.cards(2);
 					game.cardsGotoOrdering(cards);
 					const { links } = await player
-						.chooseCardButton(`【共振】:请选择获得一张牌`, true, cards)
+						.chooseCardButton({
+							prompt:"【共振】:请选择获得一张牌",
+							forced:true,
+							cards
+						})
 						.set("ai", button => {
 							return get.value(button);
 						})
 						.forResult();
 					if (!links) return;
-					player.gain(links, "gain2");
+					player.gain({cards:links,animate:"gain2"});
 				} else
-					player.chooseToDiscard(true, `【共振】:请弃置区域内的一张牌`, "hej").set("ai", card => {
+					player.chooseToDiscard({
+						forced:true,
+						position:"hej",
+						prompt:"【共振】:请弃置区域内的一张牌"
+					}).set("ai", card => {
 						if (get.position(card) == "j") return 10;
 						return -get.value(card);
 					});
@@ -54,19 +60,19 @@ skill({
 		},
 	"newmengxiangmrfz": {
 			getLastDiscard(event, player) {
-				var history = player.getAllHistory("lose", evt => evt.type && evt.type == "discard");
+				let history = player.getAllHistory("lose", evt => evt.type && evt.type == "discard");
 				if (history.length < 1) return false;
-				var cards = history[history.length - 1].cards;
+				let cards = history[history.length - 1].cards;
 				if (!cards) return false;
 				return cards[cards.length - 1];
 			},
 			mod: {
 				cardUsable: function (card, player) {
-					var cardx = lib.skill.newmengxiangmrfz.getLastDiscard(_status.event, player);
+					let cardx = lib.skill.newmengxiangmrfz.getLastDiscard(_status.event, player);
 					if (cardx && get.type2(cardx) == get.type2(card)) return Infinity;
 				},
 				targetInRange: function (card, player) {
-					var cardx = lib.skill.newmengxiangmrfz.getLastDiscard(_status.event, player);
+					let cardx = lib.skill.newmengxiangmrfz.getLastDiscard(_status.event, player);
 					if (cardx && get.type2(cardx) == get.type2(card)) return true;
 				},
 			},
@@ -74,7 +80,7 @@ skill({
 			forced: true,
 			trigger: { player: "useCardBefore" },
 			filter(event, player) {
-				var cardx = lib.skill.newmengxiangmrfz.getLastDiscard(_status.event, player);
+				let cardx = lib.skill.newmengxiangmrfz.getLastDiscard(_status.event, player);
 				if (!cardx) return false;
 				return !event.audioed && get.type2(cardx) == get.type2(event.card);
 			},

@@ -18,18 +18,23 @@ skill({
 				return player.countCards("h") > 0;
 			},
 			async cost(event, trigger, player) {
-				const { result } = await player.chooseCard([1, 2], "【荒响】:你可以选择两张手牌将其标记为‘残影’").set("ai", card => {
-					var num = get.value(card);
+				const result = await player.chooseCard({
+					selectCard() {
+						return [1,2]
+					},
+					prompt:"【荒响】:你可以选择两张手牌将其标记为‘残影’"
+				}).set("ai", card => {
+					let num = get.value(card);
 					if (get.name(card) == "shan" || get.name(card) == "wuxie") num += 10;
 					if (get.type2(card) == "equip") num -= 2;
 					return num;
-				});
+				}).forResult();
 				event.result = result;
 			},
 			async content(event, trigger, player) {
-				var cards = event.cards;
-				await player.removeGaintag("newhuangxiangmrfzx");
-				for (var i of cards) i.addGaintag("newhuangxiangmrfzx");
+				let cards = event.cards;
+				player.removeGaintag("newhuangxiangmrfzx");
+				for (let i of cards) i.addGaintag("newhuangxiangmrfzx");
 			},
 			group: "newhuangxiangmrfz_lose",
 			subSkill: {
@@ -41,41 +46,41 @@ skill({
 					},
 					filter(event, player) {
 						if (_status.currentPhase == player) return false;
-						var evt = event.getl(player);
+						let evt = event.getl(player);
 						if (!evt || !evt.hs || !evt.hs.length) return false;
 						if (event.name == "lose") {
-							for (var i in event.gaintag_map) {
+							for (let i in event.gaintag_map) {
 								if (event.gaintag_map[i].includes("newhuangxiangmrfzx")) return true;
 							}
 							return false;
 						}
 						return player.hasHistory("lose", function (evt) {
 							if (event != evt.getParent()) return false;
-							for (var i in evt.gaintag_map) {
+							for (let i in evt.gaintag_map) {
 								if (evt.gaintag_map[i].includes("newhuangxiangmrfzx")) return true;
 							}
 							return false;
 						});
 					},
 					async cost(event, trigger, player) {
-						var list = ["选项一", "选项二", "cancel2"],
+						let list = ["选项一", "选项二", "cancel2"],
 							choicelist = ["令一名你攻击范围内的角色选择弃置一张黑桃牌或受到一点伤害", "你摸一张牌且将此牌标记为‘残影’"];
 						if (!game.hasPlayer(current => current != player && player.inRange(current))) {
 							list.remove("选项一");
 							choicelist[0] = '<span style="opacity:0.5; ">' + choicelist[0] + "(没有满足条件的角色)</span>";
 						}
 						const { control } = await player
-							.chooseControl(list)
+							.chooseControl({controls:list})
 							.set("choiceList", choicelist)
 							.set("prompt", "【荒响】:你可以选择一项")
 							.set("ai", () => {
-								var player = _status.event.player;
+								let player = _status.event.player;
 								if (!game.hasPlayer(current => current != player && player.inRange(current) && get.attitude(player, current) < 0))
 									return 1;
 								return [0, 1];
 							})
 							.forResult();
-						var result = {};
+						let result:Record<string,any> = {};
 						result.bool = true;
 						result.cost_data = control;
 						if (control == "cancel2") result.bool = false;
@@ -83,7 +88,7 @@ skill({
 						event.result = result;
 					},
 					async content(event, trigger, player) {
-						var control = event.cost_data;
+						let control = event.cost_data;
 						//@ts-ignore
 						if (control == "选项一") {
 							const { targets } = await player
@@ -96,9 +101,13 @@ skill({
 								.forResult();
 							if (!targets) return;
 							const { bool } = await targets[0]
-								.chooseToDiscard("【荒响】:请弃置一张黑桃牌，否则受到一点伤害", "he")
+								.chooseToDiscard({
+									//"【荒响】:请弃置一张黑桃牌，否则受到一点伤害", "he"
+									prompt:"【荒响】:请弃置一张黑桃牌，否则受到一点伤害",
+									position:"he"
+								})
 								.set("ai", card => {
-									var player = _status.event.player;
+									let player = _status.event.player;
 									if (
 										player.hp < 2 &&
 										player.countCards("hes", card => {
@@ -113,8 +122,9 @@ skill({
 							if (bool) return;
 							targets[0].damage();
 						} else {
-							const result = await player.draw().forResult();
-							result.cards[0].addGaintag("newhuangxiangmrfzx");
+							await player.draw({
+								gaintag:["newhuangxiangmrfzx"]
+							});
 						}
 					},
 				},
@@ -135,7 +145,7 @@ skill({
 			},
 			filter(event, player) {
 				if (event.card.name != "sha") return false;
-				for (var target of event.targets) {
+				for (let target of event.targets) {
 					let num = lib.skill.newjiyinmrfz.getMeetCondition(event, player, target);
 					if (typeof num === "number") return true;
 				}
@@ -143,7 +153,7 @@ skill({
 			},
 			async content(event, trigger, player) {
 				let targets = trigger.targets;
-				for (var target of targets) {
+				for (let target of targets) {
 					let num = lib.skill.newjiyinmrfz.getMeetCondition(event, player, target);
 					if (typeof num !== "number") continue;
 					player.line(target);
@@ -186,8 +196,8 @@ skill({
 					},
 					logTarget: "target",
 					async content(event, trigger, player) {
-						var id = trigger.target.playerid;
-						var map = trigger.getParent()?.customArgs;
+						let id = trigger.target.playerid;
+						let map = trigger.getParent()?.customArgs;
 						if (!map || !id) return;
 						if (!map[id]) map[id] = {};
 						if (typeof map[id].shanRequired == "number") {
@@ -215,5 +225,7 @@ translate({
 	"newjiyinmrfz": "寂音",
 	"newjiyinmrfz_info": "锁定技，当你使用【杀】指定目标后，其每满足下列一项，其抵消此【杀】所需要的【闪】的数量+1，此【杀】对其造成的伤害+1：<br>①手牌数为全场最多；<br>②体力值为全场最多；<br>③装备区为全场最多。",
 });
+
+characterTitle("heijianmrfz","乐理阐释者")
 
 characterIntro("heijianmrfz", "黑键，莱塔尼亚平民，于维谢海姆事件中感染矿石病，经干员芙蓉介绍来罗德岛治疗，在源石技艺方面展现出不凡天赋。经考核后，作为外勤干员加入罗德岛。");
