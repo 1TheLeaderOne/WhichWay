@@ -31,47 +31,66 @@ export class PlayerExt extends lib.element.Player {
 		}
 	}
 
-	//@ts-ignore
-	chooseCardHand(choose) {
-		var next = game.createEvent("chooseCardHand");
-		//@ts-ignore
+	/**
+	 * 从传入的牌中选牌（假牌版）。
+	 *
+	 * 把 `params.cards` 里的每张牌复制成一张**假牌**直接置入自己的手牌（`directgains`，不触发获得事件），
+	 * 玩家从这些假牌中挑选；选择期间自己的真实手牌会被折叠成只露左边缘的重叠条
+	 * （鼠标悬停 / 触屏点选被折叠的牌可以展开查看），假牌则按正常间距平铺。
+	 * 选择结束后假牌被全部删除、手牌布局完全复原。
+	 *
+	 * **参数是一个对象，字段与本体 `chooseCard` 一致**（`EventChooseCardParams`），另外多一个必填的 `cards`：
+	 * - `cards`（必填）供玩家选择的牌，由 `Card` / `VCard` 原对象组成的数组；
+	 * - `selectCard` 选择数量或范围（`number` 或 `[begin, end]`，`-1` 表示全选），默认 `[1, 1]`；
+	 * - `filterCard` 可选牌过滤（函数 / `get.filter` 用的对象 / `true`），默认 `lib.filter.all`；
+	 * - `ai` AI 选牌评分函数，默认 `get.unuseful3`；
+	 * - `forced` 是否强制选择，默认 false；
+	 * - `prompt` / `prompt2` / `promptx` 提示内容；
+	 * - `complexCard` / `complexSelect` / `allowChooseAll` / `filterOk` / `hsskill` / `type` 与 `chooseCard` 同义；
+	 * - `glow_result` 选完后高亮结果，注意高亮的是**原牌**（`result.links`），而不是选完即被删除的假牌；
+	 * - `tagName` 假牌 gaintag 的显示名：临时写进 `lib.translate`（引擎会把 gaintag 的翻译渲染在牌面上），
+	 *   选完还原；默认取事件名，常传技能名，这样牌面上显示技能的中文名；
+	 * - `position` 会被忽略：内部固定用 `"s"`（假牌所在的特殊区），以免误选真手牌。
+	 *
+	 * 与旧做法的区别：
+	 * - 临时牌走 `directgains` 带 gaintag，归入「特殊区」，因此**不污染真实手牌数据**
+	 *   （`countCards("h")` / 手牌上限 / 弃牌结算都只看到真牌）。
+	 * - `result.cards` 是玩家选中的假牌，它们对应的原牌（Card 或 VCard）放在 `result.links` 里。
+	 *
+	 * @param { import("@/library/element/Player/type.d").EventChooseCardParams & { cards: Array<Card|VCard> } } params 参数对象，见上方说明
+	 * @returns { GameEvent } 可链式 `.set(...)`、可 `.forResult()` 的事件；
+	 * result 形态与 `chooseCard` 一致（cards / targets / buttons / links / confirm / bool）。
+	 * 其中 `result.cards` 是玩家选中的**假牌**（与本体语义相同），而这些假牌选完即被删除，
+	 * 它们对应的真实值（调用方传入的 Card / VCard）放在 `result.links` 里；
+	 * 玩家未做出选择时 `result.bool` 为 false、`result.cards` 与 `result.links` 都是空数组。
+	 *
+	 * @example
+	 * ```js
+	 * const cards = player.getCards("h");
+	 * const result = await player
+	 * 	.chooseFakeCard({ cards, selectCard: 1, prompt: "请选择一张手牌" })
+	 * 	.forResult();
+	 * // result.cards[0] 是玩家选中的假牌，result.links[0] 才是 cards 里的那一张原牌
+	 * ```
+	 */
+	chooseFakeCard(params) {
+		const next = game.createEvent("chooseFakeCard");
 		next.player = this;
-		if (arguments.length == 1 && get.is.object(choose)) {
-			for (var i in choose) {
-				next[i] = choose[i];
-			}
-		} else {
-			//@ts-ignore
-			for (var i = 0; i < arguments.length; i++) {
-				if(Array.isArray(arguments[i])){
-					next.cards = arguments[i];
-				}
-				else if (typeof arguments[i] == "number") {
-					next.selectCard = [arguments[i], arguments[i]];
-				} else if (get.itemtype(arguments[i]) == "select") {
-					next.selectCard = arguments[i];
-				} else if (typeof arguments[i] == "boolean") {
-					next.forced = arguments[i];
-				} else if (get.itemtype(arguments[i]) == "position") {
-					next.position = arguments[i];
-				} else if (typeof arguments[i] == "function") {
-					if (next.filterCard) {
-						next.ai = arguments[i];
-					} else {
-						next.filterCard = arguments[i];
-					}
-				} else if (typeof arguments[i] == "object" && arguments[i]) {
-					next.filterCard = get.filter(arguments[i]);
-				} else if (arguments[i] == "glow_result") {
-					//@ts-ignore
-					next.glow_result = true;
-				} else if (arguments[i] == "allowChooseAll") {
-					next.allowChooseAll = true;
-				} else if (typeof arguments[i] == "string") {
-					get.evtprompt(next, arguments[i]);
-				}
-			}
+
+		//参数处理与本体 chooseCard 一致
+		Object.assign(next, params);
+		if (next.filterCard != null && typeof next.filterCard === "object") {
+			next.filterCard = get.filter(next.filterCard);
 		}
+		if (typeof next.selectCard === "number") {
+			next.selectCard = [next.selectCard, next.selectCard];
+		}
+		if (params != null && params.prompt != null) {
+			delete next.prompt;
+			get.evtprompt(next, params.prompt);
+		}
+		//cards 必须是一组牌；顺手复制一份，避免调用方之后改动原数组
+		next.cards = Array.isArray(next.cards) ? next.cards.slice(0) : [];
 		if (next.filterCard == undefined) {
 			next.filterCard = lib.filter.all;
 		}
@@ -81,29 +100,8 @@ export class PlayerExt extends lib.element.Player {
 		if (next.ai == undefined) {
 			next.ai = get.unuseful3;
 		}
-		//@ts-ignore
-		next.autochoose = function () {
-			if (!this.forced) {
-				return false;
-			}
-			if (typeof this.selectCard == "function") {
-				return false;
-			}
-			if (this.complexCard || this.complexSelect || this.filterOk) {
-				return false;
-			}
-			if (this.type === "compare") {
-				return false;
-			}
-			var cards = this.player.getCards(this.position);
-			if (cards.some(card => !this.filterCard(card, this.player, this))) {
-				return false;
-			}
-			return get.select(this.selectCard)[0] >= this.player.countCards(this.position);
-		};
-		//@ts-ignore
-		next.setContent("chooseCardHand");
-		next._args = Array.from(arguments);
+		next.setContent("chooseFakeCard");
+		next._args = [params];
 		return next;
 	}
 

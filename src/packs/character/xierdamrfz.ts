@@ -14,31 +14,44 @@ skill({
 			trigger: { global: "phaseBegin" },
 			forced: true,
 			filter(event, player) {
-				return player.countCards("h", card => card.hasGaintag("shencimrfz")) < 1;
+				//正在选择/结算期间不再重复触发：content 需要等玩家选牌，不拦会叠出多次触发与多次配音
+				if (player.storage.shencimrfz_doing) return false;
+				//查 "hs"：神赐牌有可能落在特殊区（带 glows），只查 "h" 会漏检，从而每个回合都重复触发
+				return player.countCards("hs", card => card.hasGaintag("shencimrfz")) < 1;
 			},
 			async content(event, trigger, player) {
-				let cards = [];
-				for (let name of lib.inpile) {
-					if (!["basic", "trick"].includes(get.type(name))) continue;
-					let list = lib.card.list.filter(arr => arr[2] === name).randomGet();
+				player.storage.shencimrfz_doing = true;
+				try {
+					let cards = [];
+					for (let name of lib.inpile) {
+						if (!["basic", "trick"].includes(get.type(name))) continue;
+						let list = lib.card.list.filter(arr => arr[2] === name).randomGet();
+						//@ts-ignore
+						cards.push(game.createCard(name, list[0], list[1], list[3]));
+					}
+					const result = await player
+						.chooseFakeCard({
+							cards,
+							tagName: "shencimrfz",
+							ai: card => get.player().getUseValue(card),
+							forced: true,
+							complexSelect: true,
+							prompt: `【神赐】:请选择你要获得的牌`,
+						})
+						.forResult();
+					//result.cards 是玩家选中的假牌（选完即被删除），对应的原牌在 result.links 里
+					if (!result?.links?.length) return;
+					const { name, suit, number, nature } = result.links[0];
+					let card = game.createCard(name, suit, number, nature);
 					//@ts-ignore
-					cards.push(game.createCard(name, list[0], list[1], list[3]));
+					card._destroy = true;
+					player.gain({
+						cards:[card],
+						animate:"gain2"
+					}).set("gaintag", ["shencimrfz"]);
+				} finally {
+					delete player.storage.shencimrfz_doing;
 				}
-				const result = await player
-					//@ts-ignore
-					.chooseCardHand()
-					.set("ai", card => get.player().getUseValue(card))
-					.set("cards", cards)
-					.set("forced", true)
-					.set("complexSelect", true)
-					.set("prompt", `【神赐】:请选择你要获得的牌`)
-					.forResult();
-				if (!result?.cards) return;
-				const { name, suit, number, nature } = result.cards[0];
-				let card = game.createCard(name, suit, number, nature);
-				//@ts-ignore
-				card._destroy = true;
-				player.gain(card, "gain2").set("gaintag", ["shencimrfz"]);
 			},
 			group: ["shencimrfz_onlose", "shencimrfz_dying"],
 			subSkill: {
@@ -47,10 +60,10 @@ skill({
 					forced: true,
 					trigger: { player: "dying" },
 					filter(event, player) {
-						return player.countCards("h", card => card.hasGaintag("shencimrfz")) > 0;
+						return player.countCards("hs", card => card.hasGaintag("shencimrfz")) > 0;
 					},
 					async content(event, trigger, player) {
-						await player.discard(player.getCards("h", card => card.hasGaintag("shencimrfz")));
+						await player.discard({cards:player.getCards("hs", card => card.hasGaintag("shencimrfz"))});
 						player.recoverTo(1);
 					},
 				},
@@ -70,7 +83,7 @@ skill({
 					},
 					async content(event, trigger, player) {
 						//补一个销毁的log
-						let destory = [];
+						let destory:Card[] = [];
 						//@ts-ignore
 						for (let id in trigger.gaintag_map) {
 							//@ts-ignore

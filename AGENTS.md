@@ -257,6 +257,9 @@ skill({ huozhimrfz: { /* lib.skill 标准技能对象 */ } });
 ## 语音 / 皮肤 / 模组
 
 - 语音（`src/audio/`）：优先使用本地 `audio/` 资源；也可在线从 PRTS 播放（`whichWayWebPlay`），支持多语言（默认 CN_MANDARIN、JP 可选），可"一键下载缺失配音"。
+- ⛔ **不要移除 `game.playAudio` 的 onError 熔断钩子**（`src/audio/index.ts` 的 `override()` 末尾）：引擎 `game.tryAudio` 里 `refresh` 只由 `onCanPlay` 置真且**永不复位**，一旦某条音频成功加载过，之后**任何一次** `onError` 都会让它把候选列表重新填满再随机播一条 ⇒ 「一句配音播完又随机播另一句、永不停止」，且**候选只剩一条也会循环**（单条反复失败同样成立）。唯一出口就是 `game.playAudio` 的 `onError`，所以扩展在那里把错误回调换成 `wrapSkillAudioError`（默认 0 次重试：失败即静默并打印一次详情）。`skillAudioErrorRetry` 保留为可调常量，改 1 即"失败后允许重试一次"。
+- 该熔断只作用于**扩展自己的语音**：`isOwnAudioPath()` 会归一化 `ext:WhichWay/…`、`extension/WhichWay/…`、`../extension/WhichWay/…` 与带资源前缀的形态后再判定；背景乐、本体音效、其它扩展的音频一律透传。**该钩子必须是同步函数**（`appendHook` 的同步包装层用 `beforeResult === false` / 数组替换参数，async 会让两种语义同时失效）。
+- 交回引擎的本地候选由 `filterExistingAudio()` 收成**一条**（优先挑磁盘存在项），阵亡语音的 `char.dieAudios` 必须写成 `ext:WhichWay/audio/{语言}/die/{干员}.mp3` 形态——`game.playAudio` 只认 `blob:/data:/ext:/db:`，其它写法会被前置 `audio/` 导致必然 404。
 - 皮肤（`src/skin/`）：静态皮肤存 `image/skin/`，动态皮肤走 `dynamicSkin/` + spine（`lib/spine-player.js`）；有皮肤冲突检测与皮肤数据自动更新。
 - 干员模组（`src/modules/`）：数据在 `src/modules/data.js`，对应 `image/modules/` 下的证章图片。
 
@@ -270,9 +273,33 @@ skill({ huozhimrfz: { /* lib.skill 标准技能对象 */ } });
 - 常用全局对象从 `"noname"` 导入：`import { lib, game, ui, get, ai, _status } from "noname";`。
 - 本扩展特有工具：`whichWayUtil`（配置/颜色/音频等）、`whichWayTips`（卡牌提示）、`whichWayToast`（提示框）、`whichWayFile`（文件与路径）。
 
+### 假牌选牌（`player.chooseFakeCard`）
+
+需要「让玩家从一组给定的牌里挑选，而这些牌并不真的属于玩家」时用它（例：神赐、从牌堆顶的若干牌中选一张）。它把传入的每张牌复制成**假牌**直接置入玩家手牌，不触发任何获得事件：
+
+```js
+const cards = player.getCards("h"); // 也可以是 VCard 数组、牌堆顶的牌等
+const result = await player
+	.chooseFakeCard({ cards, selectCard: 1, prompt: "请选择一张手牌" })
+	.forResult();
+// result.cards 是玩家选中的**假牌**（与本体 result 语义一致，选完即被删除）
+// result.links 才是它们对应的原牌（Card / VCard）；未选择时 result.bool 为 false
+```
+
+- 实现位置：`src/nonameEx/library/element/player.js`（`PlayerExt.chooseFakeCard` 事件工厂）+ `src/nonameEx/library/element/content.js`（`ContentExt.chooseFakeCard` 单段 content + 私有折叠助手 `foldRealHand`），类型声明见 `typings/noname/Player.d.ts`（`ChooseFakeCardParams` / `ChooseFakeCardResult` 两个全局类型别名同在该文件）。
+- **只收一个参数对象，字段与本体 `chooseCard` 的 `EventChooseCardParams` 一致，另外多一个必填的 `cards`**：`selectCard` / `filterCard` / `ai` / `forced` / `prompt` / `prompt2` / `promptx` / `complexCard` / `complexSelect` / `allowChooseAll` / `filterOk` / `hsskill` / `glow_result` / `tagName` 等。`position` 会被忽略（内部固定 `"s"`，即假牌所在的特殊区）；`tagName` 是假牌 gaintag 的显示名（临时写进 `lib.translate`，选完还原，默认取事件名，常传技能名，这样牌面上显示技能的中文名）。参数对象会被 `Object.assign` 到事件上，因此仍可链式 `.set(...)` 覆盖或追加。
+- 选择期间真实手牌被折叠成只露左边缘的重叠条，假牌按正常间距平铺；「悬停 / 点选展开被折叠的牌」由引擎原生的 `ui.getSpreadOffset` 提供，**不要自己实现展开**，也不要改 `lib.config.spread_card`。
+- ⛔ **临时牌必须用 `directgains`（带 gaintag）而不是 `directgain`**：前者给牌加 `glows`、归入「特殊区」（配合 `position: "s"`），因此 `countCards("h")` / 手牌上限 / 弃牌结算都看不到假牌；`directgain` 会把临时牌算成真手牌，污染手牌数与弃牌逻辑。
+- ⛔ **不要把真牌挪出 `node.handcards1/2`**：`getCards("h"/"s")` 直接读这两个容器的子节点，挪出去会让游戏逻辑看不到手牌。折叠只允许「在两个容器之间移动真牌 + 调整 `#handcards1` 的宽度」，两个容器同属 `node.handcards1/2`，因此移动不影响逻辑。
+- 折叠是**借引擎自己的折叠能力**：把真牌集中到 `handcards1` 并收窄该容器，`ui.updatehl` 会按 `offset = min(112, (容器宽度 - 128) / (张数 - 1))` 自动压出重叠条（`offset < 32` 会被夹到 32 并加 `scrollh`，所以目标取略大于 32）。期间只临时置位 `lib.config.fold_card`（运行期值，**绝不 `game.saveConfig` 写回配置**），并在 `finally` 中复原容器宽度、配置与每张真牌的原容器。
+- 已知降级：`single-handcard` 布局（`mobile` / `long` / `long2` / `nova`）下 `#handcards2` 被隐藏，且 `directgains` 也会把假牌放进 `handcards1`，无法做到「只折真牌」，此时降级为整行折叠。
+- `createFakeCards` 用源牌的 `cardid` 作为 `_cardid`，而 `deleteFakeCards` 只清理 `_cardid` 为真的假牌；VCard 可能没有 `cardid`，因此 content 里会对缺失者补一个合成 id，否则假牌会残留在手牌里。
+
 ## 类型系统（typings/）
 
-- `typings/` 下提供全局类型声明：`WhichWayCharacter` / `WhichWayCharacterPending` / `ExtendedSkill` / `WhichWayCharConfig` / `WhichWay`（window）/ `whichWayConfig` / 钩子注册类型等，编写 TS 时可直接使用。
+- `typings/` 下提供全局类型声明：`WhichWayCharacter` / `WhichWayCharacterPending` / `ExtendedSkill` / `WhichWayCharConfig` / `WhichWay`（window）/ `whichWayConfig` / 钩子注册类型 / `ChooseFakeCardResult`（`player.chooseFakeCard()` 的结果，`links` 为传入的原牌）等，编写 TS 时可直接使用。
+- `typings/noname/` 下是对 noname 本体接口的模块增强，与 `src/nonameEx/` 的目录一一对应：`Game.d.ts`（对应 `nonameEx/game/`）、`Get.d.ts`（对应 `nonameEx/get/`）、`Card.d.ts` / `Player.d.ts` / `GameEvent.d.ts`（对应 `nonameEx/library/element/`）。`nonameEx/library/element/content.js` 里的 content 函数**不需要**声明：本体的 `lib.element.content` 本身就是 `Record<string, ContentFuncByAll | ContentFuncsByAll>`，任何键都能通过。
+- ⚠️ 给 `nonameEx/` 下的类新增方法后，记得在对应的 `typings/noname/*.d.ts` 里补声明，否则调用处只能拿到 `any`（`content.js` 除外，见上一条）。`typings/extNonameClass/` 是早期的同类模块增强目录（如 `Character.whichWay`），新声明请统一放 `typings/noname/`。
 - 代码中存在较多 `@ts-ignore` / `@ts-nocheck` 与 `any`，与根项目一致允许宽松类型。
 
 ## 代码风格

@@ -57,6 +57,80 @@ class WhichWayAudio {
 	 */
 	vaildDefaultLang: Array<ArkAllLangs> = ["CN_MANDARIN", "JP"];
 
+	/** 技能配音最近一次播放时间：`技能|干员` → 时间戳。用于识别同一次技能触发的重复请求 */
+	private _voicePlayedAt: Map<string, number> = new Map();
+
+	/**
+	 * 判定本次 `trySkillAudio` 是否为「同一次技能触发的重复请求」。
+	 *
+	 * 引擎对**一次**技能触发会调用两次 `game.trySkillAudio`：
+	 * ① `player.logSkill` 方法里（同步，技能发动瞬间，`directaudio === true`）；
+	 * ② `logSkill` 事件 content 里（异步，可能隔数秒，`directaudio == null`）。
+	 * 两次都会真的播出声音：引擎的 `_status.skillaudio` 只在 1 秒内按**文件路径**去重
+	 * （`game/index.js:2500`），而两次间隔常常超过 1 秒，且扩展语音包每个技能有多条变体
+	 * （`tryAudio` 每次都随机取一条，路径还不同），于是就成了
+	 * 「一句播完立刻又随机播另一句」—— 有扩展语音包的干员（如希尔达）才明显。
+	 *
+	 * 判定用两次调用的特征差异：**只有 ②（`directaudio == null`）且同一 (技能, 干员)
+	 * 在最近 30 秒内已经播过**，才判为重复；① 永不拦截 —— 技能真的再次触发时
+	 * 一定会经 ① 播出声音，因此不会误伤正常触发。
+	 *
+	 * @param directaudio 引擎传入的第三个参数（`true` = ①，`null`/`undefined` = ②）
+	 * @returns 返回 true 表示应跳过本次播放
+	 */
+	isRepeatedSkillAudio(skill: string, player: Player | string, directaudio?: boolean | null): boolean {
+		if (directaudio) return false;
+		const key = `${skill}|${typeof player === "string" ? player : get.name(player) || ""}`;
+		const last = this._voicePlayedAt.get(key);
+		return last != null && Date.now() - last < 30000;
+	}
+
+	/** 记录一次技能配音的播放时间（判定通过、确定会播放后调用） */
+	markSkillAudioPlayed(skill: string, player: Player | string): void {
+		this._voicePlayedAt.set(`${skill}|${typeof player === "string" ? player : get.name(player) || ""}`, Date.now());
+	}
+
+	/**
+	 * 交给引擎播放时**只保留一条**候选（优先挑确实存在的那条）。
+	 *
+	 * 为什么必须是"一条"：引擎 `game.tryAudio`（`game/index.js:2569-2613`）的机制是
+	 * ```js
+	 * const check = () => { if (list.length) return true; if (refresh) { list = audioList.slice(); return true; } return false; };
+	 * const play  = () => { ...; return game.playAudio({ path: audio, onCanPlay: () => (refresh = true), onError: play }); };
+	 * ```
+	 * `refresh` 一旦被 `onCanPlay` 置真就**不会复位**，此后任何一条加载失败的候选都会让
+	 * `onError → play → check()` 把整表重填并再随机取一条 ⇒ **无限重试**（debug 时能看到
+	 * `list` 在 `[]` 与单条之间反复横跳、`refresh` 名义上为 false 却仍在重填）。
+	 * 候选**全部存在**也没用：只要运行期有一条拉不下来（文件正在被构建覆盖、404、解码失败…）就会中招。
+	 *
+	 * 只留一条时结果必然是二者之一：
+	 * - 能播 ⇒ 播完即止（`onended` 只做 remove，不会再产生 error）；
+	 * - 不能播 ⇒ `onError` 一次后 `list` 已空且 `refresh` 仍为 false ⇒ `check()` 返回 false ⇒ **立即终止**。
+	 * 因此"一条"是唯一能做到「循环不可能发生」的形态；随机取一条也保持了原本的随机播放体验。
+	 */
+	filterExistingAudio(result: any): any {
+		const list = result?.audioList;
+		if (!Array.isArray(list) || list.length <= 1) return result;
+		//@ts-ignore 引擎给 Array 扩展了 randomGet
+		let candidates: any[] = list;
+		if (this._audioExistCache) {
+			const exist = list.filter(item => {
+				const file = item?.file;
+				if (typeof file !== "string") return false;
+				//file 形如 ext:WhichWay/audio/CUSTOM/xxx1.mp3 → 扩展缓存使用的键是 audio:CUSTOM/xxx1.mp3
+				return this._audioExistCache!.has(whichWayFile.compilePath("audio:" + file.replace(/^ext:WhichWay\/audio\//, "")));
+			});
+			//有确认存在的就只在这些里挑；一条都没有时退回原列表随机取一条（同样只留一条）
+			if (exist.length) candidates = exist;
+		}
+		const picked = candidates.randomGet();
+		return {
+			audioList: [picked],
+			fileList: [picked?.file],
+			textList: [picked?.text].filter((text: any) => text != void 0),
+		};
+	}
+
 	customVoiceGroup:string[] = ["CN_TOPOLECT","ITA","GER","RUS","FRE","SPA"]
 
 	/**
@@ -66,9 +140,7 @@ class WhichWayAudio {
 		onArenaReady({
 			name: "whichWayAudio_init",
 			fn: async () => {
-				//唯一一次 IO：建目录 + 一次性扫描出所有已存在的音频文件路径
 				await this.ensureAudioCache();
-				//此后全程同步：262 个干员 × 各自技能一次性建索引，不再有任何 IPC / await
 				this.initAllAudio();
 
 				//覆盖api
@@ -165,6 +237,30 @@ class WhichWayAudio {
 	 */
 	private _audioExistCache: Set<string> | null = null;
 	private _audioExistPromise: Promise<void> | null = null;
+
+	/** 已报警过的「技能|干员」候选对账，避免每次技能触发都刷同样的日志 */
+	private _auditedKeys = new Set<string>();
+
+	/**
+	 * 扩展语音加载失败时允许的重试次数。
+	 *
+	 * 默认为 0：失败即熔断（按需求「静默、只熔断不重试」）。`game.tryAudio` 的重试链是由
+	 * `game.playAudio` 的 `onError` 驱动的（`onError: play`），把它掐断就不会再有下一次播放尝试。
+	 * 若日后希望"失败后换一条候选再试一次"，把这个数字改成 1 即可。
+	 */
+	skillAudioErrorRetry: number = 0;
+
+	/**
+	 * 语音失败计数：键为**被包装的原始 onError 闭包**。
+	 *
+	 * `game.tryAudio` 每次调用都会新建一个 `play` 闭包并把它同时用作 `onError`，因此以闭包为键
+	 * 恰好等于"以一次重试链为计数"：一次技能触发产生的重试链之间互不干扰，之后正常的再次触发
+	 * 是全新的闭包、计数从零开始，不会被误熔断。
+	 */
+	private _audioErrorCount = new WeakMap<Function, number>();
+
+	/** 已打印过失败详情的路径，避免同一路径反复刷屏 */
+	private _reportedAudioError = new Set<string>();
 
 	/** 干员 → 是否属于明日方舟干员（inArknightChars 内部是数组 includes，需缓存） */
 	private _inArkCache = new Map<string, boolean>();
@@ -388,10 +484,12 @@ class WhichWayAudio {
 		}
 
 		//info.audio 保留一个稳定的默认路径字符串，供 logAudio / getSkillAudioPath 等按原样使用。
-		if (typeof info.audio !== "string") {
-			this._originalAudio.set(skill, info.audio);
-			(info as any).audio = `ext:WhichWay/audio/${lang}:${parsed.count}`;
-		}
+		//数量取「本地实际存在」与「技能配置数量」的较小值：引擎按这个数量生成候选路径
+		//（`{前缀}1.mp3 ... {前缀}N.mp3`），只要候选里混入缺失文件，game.tryAudio 就会无限重试
+		//（见 filterExistingAudio / wrapSkillAudioError 的说明）——配置写 2 条而只下到 1 条时就会中招。
+		const existCount = this.getExistingAudioCount(base, lang);
+		if (typeof info.audio !== "string") this._originalAudio.set(skill, info.audio);
+		(info as any).audio = `ext:WhichWay/audio/${lang}:${existCount ? Math.max(1, Math.min(existCount, parsed.count)) : parsed.count}`;
 	}
 
 	/**
@@ -514,10 +612,22 @@ class WhichWayAudio {
 
 	async override(): Promise<void> {
 		await whichWayAPIOverride.appendHook("game.trySkillAudio", {
-			before: async function (skill, player, directaudio, nobroadcast, skillInfo, args) {
+			//⚠ 这里**必须是同步函数**：appendHook 的同步包装层用 `beforeResult === false` 判断是否短路
+			//（override/index.js:116），而 async 函数返回的是 Promise，`return false` 永远拦不住引擎。
+			//一旦拦不住，引擎就会继续执行 trySkillAudio → get.Audio.skill → game.tryAudio，
+			//而 tryAudio 在「列表里既有能播的文件、又有缺失的文件」时会无限重试
+			//（能播的那条触发 onCanPlay 置 refresh，之后每条缺失文件的 onError 都会把列表重新填满
+			//再随机取一条，见 game/index.js:2577-2602），听感就是「一句播完又随机播另一句、永不停歇」。
+			before: function (skill, player, directaudio, nobroadcast, skillInfo, args) {
 				if (!lib.config.background_speak) {
 					return false;
 				}
+
+				if (whichWayAudio.isRepeatedSkillAudio(skill, player, directaudio)) {
+					console.log(`[驶舰之向] 已拦截重复的技能配音：${skill} / ${typeof player === "string" ? player : get.name(player)}`);
+					return false;
+				}
+				whichWayAudio.markSkillAudioPlayed(skill, player);
 
 				const trueSkill = whichWayAudio.getReferSkill(skill);
 				const info: Skill = skillInfo || lib.skill[trueSkill];
@@ -536,18 +646,23 @@ class WhichWayAudio {
 				const audioname2 = whichWayAudio.getAudioname2Value(infox, player);
 				if (audioname2 !== undefined) {
 					if (audioname2 !== skill && !audioname2.startsWith("ext:") && window.whichWaySave.hasSkill(audioname2)) {
-						await game.trySkillAudio(audioname2, player, directaudio, true, void 0, args);
+						game.trySkillAudio(audioname2, player, directaudio, true, void 0, args);
 						return false;
 					}
 					return;
 				}
 
 				const web = whichWayAudio.findWebPlay(skill, player);
-				if (!web) return;
-				if (web.useLocalAudio) return;
+				if (web && !web.useLocalAudio) {
+					//在线配音：本地文件必然缺失，交回引擎只会刷 404，因此由扩展播放并短路
+					web.play();
+					return false;
+				}
 
-				web.play();
-				return false;
+				//本地配音：**仍然交给引擎按原生方式播放**（兼容性优先，例如录像回放、其它扩展的
+				//音频钩子都依赖引擎流程）。安全性由 get.Audio.skill 钩子保证：它只把确实存在的
+				//文件交给引擎，因此不会出现「能播 + 缺失」的混合列表去触发 tryAudio 的重试循环。
+				return;
 			},
 		});
 
@@ -582,7 +697,14 @@ class WhichWayAudio {
 				try {
 					const web = whichWayAudio.findWebPlay(options.skill, options.player);
 					//有在线实例 = 本地必然缺文件；useLocalAudio 时不干预（用户强制走本地）
-					if (!web || web.useLocalAudio) return result;
+					if (!web || web.useLocalAudio) {
+						//体检：把引擎解析出的候选与本地文件对账，部分缺失时在控制台报警（见 auditEngineAudioList 注释）
+						whichWayAudio.auditEngineAudioList(options.skill, options.player, result);
+						//本地播放仍然交给引擎（兼容性优先），但只把**确实存在**的文件交过去：
+						//game.tryAudio 只要遇到「能播 + 缺失」混合列表，就会在 onError 下无限重试
+						//（听感是「一句播完又随机播另一句」），过滤后全部存在即无 error 可触发（见 filterExistingAudio）。
+						return whichWayAudio.filterExistingAudio(result);
+					}
 				} catch (e) {
 					return result;
 				}
@@ -598,12 +720,30 @@ class WhichWayAudio {
 					if (!name) return result;
 					const char = get.character(name);
 					//initDieAudio 只在本地缺失时才挂 dieAudio 实例
-					if (!char?.whichWay?.dieAudio) return result;
-					if (whichWayUtil.config("useLocalAudio")) return result;
+					if (!char?.whichWay?.dieAudio) return whichWayAudio.filterExistingAudio(result);
+					if (whichWayUtil.config("useLocalAudio")) return whichWayAudio.filterExistingAudio(result);
 				} catch (e) {
 					return result;
 				}
 				return onlineAudioStub;
+			},
+		});
+
+		// ============ 扩展语音的 onError 熔断 ============
+		// 引擎 game.tryAudio 的 `refresh` 只由 onCanPlay 置真且**永不复位**：一旦成功加载过一次，
+		// 之后任何一次 onError 都会让 play() 把候选列表重新填满再随机播一条 ⇒
+		// 「一句配音播完又随机播另一句、永不停止」。候选只剩一条也没用（单条反复失败同样循环）。
+		// 唯一出口就是 game.playAudio 的 onError（game/index.js:2540），这里把它换成熔断版本：
+		// 失败即静默结束（默认不重试），并打印一次失败详情（实际请求地址 / MediaError.code / 状态）。
+		await whichWayAPIOverride.appendHook("game.playAudio", {
+			//必须是同步函数：appendHook 的同步包装层用 `beforeResult === false` 判短路、用数组替换参数
+			before: function (...args: any[]) {
+				//只接管「单对象 options」形态；位置参数形态（playAudio("a","b")）一律透传
+				const options = args.length === 1 ? args[0] : void 0;
+				if (!options || typeof options !== "object" || Array.isArray(options)) return;
+				if (!whichWayAudio.isOwnAudioPath(options.path)) return;
+				//浅拷贝后替换 onError，避免污染调用方（tryAudio 闭包）持有的对象
+				return [{ ...options, onError: whichWayAudio.wrapSkillAudioError(options.path, options.onError) }];
 			},
 		});
 	}
@@ -908,6 +1048,171 @@ class WhichWayAudio {
 	}
 
 	/**
+	 * 对账「引擎解析出的候选音频」与「本地实际存在的文件」，**部分缺失**时在控制台报警。
+	 *
+	 * ⛔ **只对本扩展语音生效**：本体技能（如 `skill/wfyuyan1.mp3`）与其它扩展的音频不在扩展的
+	 * 存在性缓存（`_audioExistCache`）里，让它们参与对账只会被误报成"全部缺失"。
+	 * 因此这里先用 `toAudioCacheKey()`（与 `game.playAudio` 熔断钩子共用同一套归一化）
+	 * 筛出属于本扩展的候选；一条都筛不出来就直接返回，不做任何对账与打印。
+	 *
+	 * 排查价值：引擎的 `game.tryAudio` 只在候选列表里**既有能加载的、又有加载失败的**时才会无限重试
+	 * （能加载的那条触发 `onCanPlay` 把 `refresh` 置真，之后每一次 `onError` 都会把列表重新填满再随机取一条，
+	 * 见 `game/index.js:2577-2602`）；全部缺失只会静默失败、全部存在只会播一条，都不会循环。
+	 * 因此"是否部分缺失"就是判断某位干员会不会中招的唯一条件，而这里会把**具体哪一条缺失**打出来。
+	 *
+	 * @param result 引擎 `get.Audio.skill` 解析出的 Audio 实例（含 audioList/fileList/textList）
+	 */
+	auditEngineAudioList(skill: string, player: Player | string, result: any): void {
+		if (!this._audioExistCache) return;
+		const list = result?.fileList as string[] | undefined;
+		if (!Array.isArray(list) || !list.length) return;
+		//只取能映射到扩展缓存的条目；本体技能的 `skill/xxx.mp3` 等一律映射失败 ⇒ 不参与对账
+		const own: Array<{ file: string; key: string }> = [];
+		for (const file of list) {
+			const key = this.toAudioCacheKey(file);
+			if (key) own.push({ file: file as string, key });
+		}
+		if (!own.length) return;
+		const missing = own.filter(item => !this._audioExistCache!.has(whichWayFile.compilePath(item.key))).map(item => item.file);
+		//全部存在是正常情况，不需要提醒
+		if (!missing.length) return;
+		const char = typeof player === "string" ? player : get.name(player) || "";
+		//同一个 (技能, 干员) 只报警一次，避免每次触发都刷屏
+		const auditKey = `${skill}|${char}`;
+		if (this._auditedKeys.has(auditKey)) return;
+		this._auditedKeys.add(auditKey);
+		//部分缺失 = 引擎 tryAudio 无限重试的充要条件（能播的触发 onCanPlay 置 refresh，
+		//缺失的 onError 再把列表填满再随机取一条）；全部缺失只会静默失败一次。
+		const partial = missing.length < own.length;
+		console.warn(
+			`[whichWayAudio] ${char} 的技能 ${skill}：本扩展的 ${own.length} 条候选语音里有 ${missing.length} 条在本地找不到，` +
+				`${partial ? "属于「部分缺失」⇒ 会让引擎 tryAudio 无限重试（配音一句播完又播一句），已由 game.playAudio 的 onError 熔断拦截" : "属于「全部缺失」⇒ 只会静默失败一次，不会循环"}` +
+				`。候选与缺失项如下：`,
+			{ 候选: own.map(item => item.file), 缺失: missing }
+		);
+	}
+
+	/**
+	 * 该 (技能, 干员) 本地**连续存在**的音频文件数（从 1 开始数到第一个缺失为止）。
+	 *
+	 * 用于写入 `info.audio` 的数量：引擎按这个数量生成候选路径 `{前缀}1.mp3 ... {前缀}N.mp3`，
+	 * 只要其中混入缺失文件就会触发 `game.tryAudio` 的无限重试，所以数量必须与磁盘实际文件数一致。
+	 */
+	getExistingAudioCount(base: string, lang: string): number {
+		if (!this._audioExistCache) return 0;
+		let count = 0;
+		//上限只是防御：正常情况下一个技能的配音不会超过 32 条
+		while (count < 32) {
+			const name = `${base}${count + 1}.mp3`;
+			if (!this._audioExistCache.has(whichWayFile.compilePath(`audio:${lang}/${name}`))) break;
+			count++;
+		}
+		return count;
+	}
+
+	/**
+	 * 剥离各种前缀，把音频路径归一化成扩展内的相对路径（`WhichWay/...`）。
+	 *
+	 * 扩展语音在不同入口的写法不同，必须都能归一化到同一形态：
+	 * - 技能语音：`ext:WhichWay/audio/{语言}/{技能}{序号}.mp3`（引擎会把 `ext:` 换成 `extension/`）
+	 * - 阵亡语音：`whichWayFile.compilePath("audio:...")` 产物，形如 `${lib.assetURL}extension/WhichWay/audio/...`
+	 * - 其它扩展改写后可能出现 `../extension/WhichWay/audio/...`
+	 *
+	 * @returns 归一化后的路径；入参不是字符串或为空时返回 undefined
+	 */
+	private normalizeOwnPath(file: unknown): string | undefined {
+		if (typeof file !== "string" || !file) return undefined;
+		let normalized = file;
+		//`../extension/WhichWay/...` → `extension/WhichWay/...`
+		if (normalized.startsWith("../")) normalized = normalized.slice(3);
+		//带资源前缀的形态 → 去掉前缀（lib.assetURL 为空串时跳过，避免"以空前缀开头"恒真）
+		const assetURL = lib.assetURL || "";
+		if (assetURL && normalized.startsWith(assetURL)) normalized = normalized.slice(assetURL.length);
+		//`ext:WhichWay/...` → `WhichWay/...`
+		if (normalized.startsWith("ext:")) normalized = normalized.slice(4);
+		//`extension/WhichWay/...` → `WhichWay/...`
+		if (normalized.startsWith("extension/")) normalized = normalized.slice("extension/".length);
+		return normalized;
+	}
+
+	/**
+	 * 把引擎解析出的音频路径映射成扩展存在性缓存（`_audioExistCache`）使用的键 `audio:{语言}/{文件名}`。
+	 *
+	 * 对账（`auditEngineAudioList`）靠它判断"这条候选是不是扩展语音"，
+	 * 与 `isOwnAudioPath` 共用同一段归一化，避免两处判定漂移造成误报/漏判。
+	 *
+	 * @returns 扩展缓存键；不是扩展语音（例如本体技能的 `skill/xxx1.mp3`）时返回 undefined
+	 */
+	toAudioCacheKey(file: unknown): string | undefined {
+		const normalized = this.normalizeOwnPath(file);
+		if (!normalized || !normalized.startsWith("WhichWay/audio/")) return undefined;
+		return "audio:" + normalized.slice("WhichWay/audio/".length);
+	}
+
+	/**
+	 * 归一化判断：这条播放请求是否属于「扩展自己的音频」。
+	 *
+	 * 熔断钩子（`game.playAudio` 的 before）用它决定是否接管，因此判定要比 `toAudioCacheKey`
+	 * 更宽一点：归一化后只要落在 `WhichWay/` 下即算扩展路径（不限于 `audio/` 子目录）。
+	 */
+	isOwnAudioPath(path: unknown): boolean {
+		return this.normalizeOwnPath(path)?.startsWith("WhichWay/") ?? false;
+	}
+
+	/**
+	 * 给 `game.playAudio` 的 `onError` 套一层熔断，切断 `game.tryAudio` 的无限重试。
+	 *
+	 * 背景：`game.tryAudio`（`game/index.js:2569-2613`）里
+	 * ```js
+	 * const check = () => { if (list.length) return true; if (refresh) { list = audioList.slice(); return true; } return false; };
+	 * const play  = () => { ...; return game.playAudio({ path: audio, onCanPlay: () => (refresh = true), onError: play }); };
+	 * ```
+	 * `refresh` 只由 `onCanPlay` 置真且**永不复位**：一旦成功加载过一次，之后任何一次 `onError`
+	 * 都会让 `play()` 把候选列表重新填满再随机播一条 ⇒ **无限循环**（表现为"一句播完又随机播另一句"）。
+	 * 候选是否只有一条都无所谓——单条反复失败同样会循环。**唯一出口就是这里**。
+	 *
+	 * @param path 本次播放的路径（用于诊断）
+	 * @param onError 引擎传入的错误回调（`tryAudio` 里就是重试函数 `play`）
+	 */
+	wrapSkillAudioError(path: string, onError: unknown): (...args: any[]) => void {
+		const original = typeof onError === "function" ? (onError as (...args: any[]) => void) : void 0;
+		return (...args: any[]) => {
+			this.reportSkillAudioError(path, args[0]);
+			if (!original) return;
+			const used = (this._audioErrorCount.get(original) || 0) + 1;
+			this._audioErrorCount.set(original, used);
+			//达到上限即熔断：不再调用原始 onError ⇒ 引擎不会发起下一次 play ⇒ 循环终止
+			if (used > this.skillAudioErrorRetry) return;
+			original(...args);
+		};
+	}
+
+	/**
+	 * 打印扩展语音加载失败的详情（每个路径只打印一次），用于定位"为什么加载失败"。
+	 *
+	 * `game.playAudio` 的 `audio.onerror` 会先 `audio.remove()` 再回调，但事件对象仍在内存中，
+	 * 因此 `evt.target` 上的 `error/currentSrc/readyState/networkState` 都可以读取。
+	 */
+	reportSkillAudioError(path: string, evt: any): void {
+		if (this._reportedAudioError.has(path)) return;
+		this._reportedAudioError.add(path);
+		const audio = evt?.target as HTMLAudioElement | undefined;
+		const code = audio?.error?.code;
+		const codeText: Record<number, string> = {
+			1: "请求被中断(ABORTED)",
+			2: "网络/请求失败(NETWORK)",
+			3: "解码失败(DECODE)",
+			4: "源不支持(SRC_NOT_SUPPORTED)",
+		};
+		console.warn(
+			`[whichWayAudio] 扩展语音加载失败，本次触发将静默且不再重试：${path}\n` +
+				`  · 实际请求地址：${audio?.currentSrc || audio?.src || "(未知)"}\n` +
+				`  · MediaError.code：${code ?? "(无)"} ${code != null ? codeText[code] || "" : ""}\n` +
+				`  · readyState=${audio?.readyState ?? "?"} networkState=${audio?.networkState ?? "?"}`
+		);
+	}
+
+	/**
 	 * 技能的音频是否存在
 	 * @param {string} skill 技能名,如果是死亡配音此参数没有意义
 	 * @param {string} char 角色名
@@ -958,8 +1263,11 @@ class WhichWayAudio {
 		if (!char?.whichWay?.charId) return;
 		const name = char.whichWay.charId;
 
+		//阵亡语音必须写成 `ext:` 形态：game.playAudio 只认 blob:/data:/ext:/db:，其余一律前置 `audio/`
+		//（game/index.js:2488-2497）。旧写法（compilePath 产物 `extension/WhichWay/...`）会被拼成
+		//`audio/extension/WhichWay/...` ⇒ 每次必然 404，所以这里改用引擎能正确解析的 ext: 前缀。
 		//@ts-ignore
-		char.dieAudios = [whichWayFile.compilePath(`audio:${this.getCharacterLang(name)}/die/${name}.mp3`)];
+		char.dieAudios = [`ext:WhichWay/audio/${this.getCharacterLang(name)}/die/${name}.mp3`];
 
 		if (!this.exsitAudioSync(null!, name, true)) {
 			if (whichWayArknight.inArknightChars(name)) char.whichWay.dieAudio = new whichWayWebPlayDie(char);

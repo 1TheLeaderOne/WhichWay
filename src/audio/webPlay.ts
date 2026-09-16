@@ -49,9 +49,32 @@ export class whichWayWebPlay {
 		return whichWayUtil.config("autoDownloadAudio") || false;
 	}
 
+	/**
+	 * 上一次播放的音频实例。
+	 *
+	 * 同一个 (技能, 干员) 再次播放时会先停掉旧的：技能被反复触发时（例如触发技在
+	 * 玩家选择期间再次结算），否则多段配音会叠在一起，听起来像「配音一直在响」。
+	 */
+	private _playing?: HTMLAudioElement;
+
+	/**
+	 * 停止这个 (技能, 干员) 上一次播放的配音
+	 */
+	stop(): void {
+		if (!this._playing) return;
+		try {
+			this._playing.pause();
+		} catch (e) {
+			//忽略：pause 在部分环境可能抛错，不影响后续播放
+		}
+		this._playing = undefined;
+	}
+
 	play(): HTMLAudioElement {
+		this.stop();
 		const audio = new Audio(this.voiceUrl.randomGet());
 		audio.play();
+		this._playing = audio;
 
 		if (!whichWayUtil.config("noTipUseWeb")) {
 			whichWayToast.showToast(`[驶舰之向] 正在使用网络!`);

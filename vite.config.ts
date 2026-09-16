@@ -66,7 +66,17 @@ export default defineConfig(({ mode }) => ({
 			formats: ["es"],
 		},
 		outDir: `../../../apps/core/extension/${info.name}`,
-		emptyOutDir: true,
+		/**
+		 * 必须保持 false：构建时**不能**先清空输出目录。
+		 *
+		 * 该扩展的产物目录同时承载音频/图片等海量静态资源（audio 下 2200+ 个文件），
+		 * 静态复制是逐个文件写回的。若先整体删除再复制，一旦游戏正在运行或刚刷新，
+		 * 音频目录就会处于「部分文件存在、部分还不存在」的中间状态 —— 而引擎
+		 * `game.tryAudio` 的 `onError: play` + `refresh` 只要遇到「部分缺失」的候选列表
+		 * 就会无限重试（听感是「一句配音播完又随机播另一句、永不停歇」）。
+		 * 产物 JS 都是带 hash 的 chunk，旧的残留文件不会被引用，因此不清空是安全的。
+		 */
+		emptyOutDir: false,
 		rollupOptions: {
 			preserveEntrySignatures: "strict",
 			external: [/^noname(\/.*)?$/, "vue", "pinyin-pro"],
