@@ -6,6 +6,11 @@ declare module "@/library/element" {
         effectCount?:number;
 
 		/**
+		 * 是否是第一个目标，通常用在“指定目标”场景中使用
+		 */
+		isFirstTarget?:boolean;
+
+		/**
 		 * 向下（子事件）查找第一个满足条件的子事件
 		 *
 		 * @param filter 过滤函数，或事件名（字符串，等价于 `e => e.name === filter`）

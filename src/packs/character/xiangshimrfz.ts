@@ -1,6 +1,8 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
 
+const tmpSave = window.whichWaySave.tmpSave;
+
 character("xiangshimrfz", { pack: "epicSJZX",
 			sex: "female",
 			group: "gemrfz",
@@ -35,7 +37,7 @@ skill({
 			},
 			/**@param {Player} player  */
 			getUsedSuit(player) {
-				const used = [];
+				const used:any[] = [];
 				const histroies = player.getHistory("useSkill", evt => evt.skill === "xuanshuimrfz");
 				for (const history of histroies) {
 					const event = history.event;
@@ -100,13 +102,13 @@ skill({
 			mod: {
 				cardEnabled(card, player) {
 					const suit = lib.skill.xuanshuimrfz.suitList[player.storage.xuanshuimrfz.index || 0];
-					if (get.suit(card) !== suit && lib.skill.xuanshuimrfz.forced === true && _status.currentPhase === player) {
+					if (get.suit((card as VCard)) !== suit && lib.skill.xuanshuimrfz.forced === true && _status.currentPhase === player) {
 						return false;
 					}
 				},
 				cardSavable(card, player) {
 					const suit = lib.skill.xuanshuimrfz.suitList[player.storage.xuanshuimrfz.index || 0];
-					if (get.suit(card) !== suit && lib.skill.xuanshuimrfz.forced === true && _status.currentPhase === player) {
+					if (get.suit((card as VCard)) !== suit && lib.skill.xuanshuimrfz.forced === true && _status.currentPhase === player) {
 						return false;
 					}
 				},
@@ -134,7 +136,9 @@ skill({
 					return Object.keys(info).some(key => ["forced", "locked", "zhuanhuanji", "juexingji", "limited", "dutySkill"].includes(key));
 				});
 				const { index } = await player
-					.chooseControl(skills.map(skill => get.translation(skill)))
+					.chooseControl({
+						controls:skills.map(skill => get.translation(skill))
+					})
 					.set(
 						"choiceList",
 						skills.map(skill => `${get.translation(skill)}:${get.skillInfoTranslation(skill)}`)

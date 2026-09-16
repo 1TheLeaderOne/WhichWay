@@ -11,12 +11,12 @@
 			<div v-if="segment.type === 'html'" class="UpdateCurrentContent md-body" v-html="segment.html"></div>
 
 			<div v-else-if="segment.type === 'player'" class="UpdateCurrentOther">
-				<div class="section-title">新增干员</div>
+				<div class="section-title">{{ sectionTitle(segment) }}</div>
 				<div :ref="el => setGridRef(el, index)" class="character-container"></div>
 			</div>
 
 			<div v-else class="UpdateCurrentOther">
-				<div class="section-title">新增卡牌</div>
+				<div class="section-title">{{ sectionTitle(segment) }}</div>
 				<div :ref="el => setGridRef(el, index)" class="card-container"></div>
 			</div>
 		</template>
@@ -41,6 +41,17 @@ const updateData = whichWayUpdateLog.currentLog;
  * 兼容旧结构 `{ intro: string[], player, cards }`。
  */
 const segments = computed(() => splitNotice(updateData?.md, updateData));
+
+/**
+ * 按钮组的小标题：按「类型 + 分组」区分新增 / 调整
+ * @param {{ type: "player" | "card", group: "add" | "adjust" }} segment 片段
+ */
+const sectionTitle = segment => {
+	const isPlayer = segment.type === "player";
+	const isAdd = segment.group !== "adjust";
+	if (isPlayer) return isAdd ? "新增干员" : "调整干员";
+	return isAdd ? "新增卡牌" : "调整卡牌";
+};
 
 // 片段下标 → 按钮组容器（一个公告里可能出现多个 :::player / :::cards）
 const gridRefs = new Map();

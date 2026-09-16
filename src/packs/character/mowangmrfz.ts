@@ -12,7 +12,7 @@ skill({
 	"duanzhangmrfz": {
 			intro: {
 				mark: function (dialog, storage, player) {
-					var players = player.storage.duanzhangmrfz.slice().filter(target => target != player);
+					let players = player.storage.duanzhangmrfz.slice().filter(target => target != player);
 					if (players && players.length > 0) {
 						dialog.addAuto("这一次我不会离开了...");
 						players = players.map(i => i.name);

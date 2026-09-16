@@ -6,6 +6,7 @@ export const upDataContentCurrent = {
 	md: `
 ### 更新概要
 
+- **新增武将**: 晓歌
 - **技能 / 武将调整**：白面鸮、重岳、帕拉斯
 - **新增 API**：\`Player.chooseTargetControl\`、\`Player.chooseFakeCard\`
 - **修复**：嘉欣塔【飞旅】\`dynamicTranslate\` 仍停留在未削弱版本的 bug
@@ -17,14 +18,24 @@ export const upDataContentCurrent = {
 `,
 
 	/**
-	 * 新增 / 调整的干员（干员 id），渲染成可双击查看信息卡的干员按钮
-	 * @type {string[]}
+	 * 干员按钮组（干员 id），分「新增」与「调整」两组渲染，按钮可双击查看信息卡
+	 * @type {{ add: string[], adjust: string[] }}
 	 */
-	player: ["baimianxiaomrfz", "chongyuemrfz", "palasimrfz"],
+	player: {
+		/** 本版新增的干员 */
+		add: ["xiaogemrfz"],
+		/** 本版调整过技能 / 数据的干员 */
+		adjust: ["baimianxiaomrfz", "chongyuemrfz", "palasimrfz"],
+	},
 
 	/**
-	 * 新增卡牌（牌名 / 牌 id）
-	 * @type {string[]}
+	 * 卡牌按钮组（牌名 / 牌 id），同样分「新增」与「调整」
+	 * @type {{ add: string[], adjust: string[] }}
 	 */
-	cards: [],
+	cards: {
+		/** 本版新增的卡牌 */
+		add: [],
+		/** 本版调整过的卡牌 */
+		adjust: [],
+	},
 };

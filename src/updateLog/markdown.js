@@ -9,19 +9,26 @@
  * - GFM 表格（表头行 + `| --- | --- |` 分隔行）
  * - 段落内的单个换行按 `<br>` 处理（与改造前"一行一条"的观感一致，写公告更省事）
  *
- * 指令块（把引擎生成的按钮组嵌进正文任意位置；块内每行一个条目名，写空则回落到 `info.player` / `info.cards`）：
+ * 指令块（把引擎生成的按钮组嵌进正文任意位置；块内每行一个条目名，写空则回落到 `info` 对应分组）：
  * ```
- * :::player
- * baimianxiaomrfz
- * chongyuemrfz
+ * :::player add
+ * xin_ganyuan_id
  * :::
  *
- * :::cards
+ * :::player adjust
+ * tiaozheng_ganyuan_id
+ * :::
+ *
+ * :::cards adjust
  * 杀
  * :::
  * ```
- * 别名：`players` / `character` 等价于 `player`，`card` / `vcards` 等价于 `cards`。
- * 正文里**没写**指令的类型，会按改造前的老行为自动追加到末尾（见 {@link splitNotice}）。
+ * - 名称：`player`（别名 `players` / `character`）、`cards`（别名 `card` / `vcard`）；
+ * - 分组（写在小标题之后，可省略）：`add`（别名 `new`、`新增`，默认）表示**新增**，
+ *   `adjust`（别名 `change`、`modify`、`调整`）表示**调整**；
+ * - 小标题由名称 + 分组自动生成（新增干员 / 调整干员 / 新增卡牌 / 调整卡牌），无需手写。
+ *
+ * 正文里**没写**（某个名称 + 分组）的按钮组，会按改造前的老行为自动追加到末尾（见 {@link splitNotice}）。
  *
  * 安全性：正文来自扩展自带文件（作者可控），因此**保留原始 HTML 标签**，与改造前 `v-html` 的行为一致；
  * 只对链接地址做 `javascript:` 过滤。
@@ -30,7 +37,13 @@
  * 所以 configUI 里的组件与 `createApp` 独立挂载的公告弹窗都能复用它。
  */
 
-/** 指令名 → 数据类型（`player` 走干员按钮，`card` 走卡牌按钮） */
+/** 按钮组的数据类型：`player` 走干员按钮，`card` 走卡牌按钮 */
+/** @typedef {"player" | "card"} NoticeItemType */
+/** 按钮组的分组：`add` 新增、`adjust` 调整 */
+/** @typedef {"add" | "adjust"} NoticeItemGroup */
+/** @typedef {{ type: NoticeItemType, group: NoticeItemGroup, items: string[] }} NoticeSegment */
+
+/** 指令名 → 数据类型 */
 const DIRECTIVE_TYPES = {
 	player: "player",
 	players: "player",
@@ -38,6 +51,17 @@ const DIRECTIVE_TYPES = {
 	card: "card",
 	cards: "card",
 	vcard: "card",
+};
+
+/** 指令里的分组词 → 分组（缺省 `add`，与改造前"数组即新增"的语义一致） */
+const DIRECTIVE_GROUPS = {
+	add: "add",
+	new: "add",
+	新增: "add",
+	adjust: "adjust",
+	change: "adjust",
+	modify: "adjust",
+	调整: "adjust",
 };
 
 /** 行首的列表标记：无序 `- * +` 或有序 `1.` / `1)` */
@@ -50,20 +74,29 @@ const RE_HR = /^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/;
 const RE_QUOTE = /^\s*>\s?/;
 /** 围栏代码块 */
 const RE_FENCE = /^\s*```/;
-/** 指令块开始 / 结束 */
-const RE_DIRECTIVE_OPEN = /^\s*:::\s*([A-Za-z]+)\s*$/;
+/** 指令块开始：`:::` + 名称 [+ 分组]；结束时只有一个 `:::` */
+const RE_DIRECTIVE_OPEN = /^\s*:::\s*([^\s:]+)(?:\s+([^\s:]+))?\s*$/;
 const RE_DIRECTIVE_CLOSE = /^\s*:::\s*$/;
 /** 表格分隔行：`| --- | :--: |` 之类 */
 const RE_TABLE_SEP = /^\s*\|?[\s:|-]*-{3,}[\s:|-]*\|?\s*$/;
 
 /**
- * 取某个类型在 `info` 里的回落列表（兼容旧的 `{ intro, player, cards }` 结构）
+ * 取某个（类型 + 分组）在 `info` 里的回落列表。
+ *
+ * 兼容三种写法：
+ * - `{ player: { add: [], adjust: [] }, cards: { add: [], adjust: [] } }`（当前推荐）
+ * - `{ player: [], cards: [] }`（旧结构：数组一律视为「新增」）
+ * - 缺失 / 非数组 ⇒ 空列表
+ *
  * @param {object} info 更新信息对象
- * @param {"player" | "card"} type 条目类型
+ * @param {NoticeItemType} type 条目类型
+ * @param {NoticeItemGroup} group 分组（新增 / 调整）
  * @returns {string[]} 条目名数组
  */
-function fallbackItems(info, type) {
-	const list = type === "player" ? info?.player : info?.cards;
+function fallbackItems(info, type, group) {
+	const raw = type === "player" ? info?.player : info?.cards;
+	if (Array.isArray(raw)) return group === "add" ? raw.slice() : [];
+	const list = raw?.[group];
 	return Array.isArray(list) ? list.slice() : [];
 }
 
@@ -255,15 +288,17 @@ export function renderMarkdown(source) {
 /**
  * 把公告正文切成「HTML 片段」与「干员 / 卡牌按钮组」两种片段，供两个 UI 依次渲染。
  *
- * - 正文里写了 `:::player` / `:::cards` 指令 ⇒ 按钮组渲染在指令位置，条目取指令块内的行；
- * - 指令块里没写条目 ⇒ 回落到 `info.player` / `info.cards`；
- * - 正文里完全没写某类指令（改造前的写法）⇒ 该类按钮组自动追加到末尾，行为与改造前一致。
+ * - 正文里写了指令（如 `:::player adjust`）⇒ 按钮组渲染在指令位置，条目取指令块内的行；
+ * - 指令块里没写条目 ⇒ 回落到 `info` 里对应（类型 + 分组）的数组；
+ * - 正文里完全没写某个（类型 + 分组）⇒ 该按钮组自动追加到末尾，行为与改造前一致。
  *
- * 另外兼容旧的 `{ intro: string[], player, cards }`：没有 `md` 时把 `intro` 逐条当无序列表渲染。
+ * 另外兼容两种旧结构：
+ * - `{ md, player: [], cards: [] }`：数组一律视为「新增」；
+ * - `{ intro: string[], player, cards }`（没有 `md`）：把 `intro` 逐条当无序列表渲染。
  *
  * @param {string} [md] 公告正文（Markdown）
- * @param {object} [info] 更新信息对象（`{ md, player, cards }`）
- * @returns {Array<{ type: "html", html: string } | { type: "player" | "card", items: string[] }>} 片段数组
+ * @param {object} [info] 更新信息对象（`{ md, player: { add, adjust }, cards: { add, adjust } }`）
+ * @returns {NoticeSegment[]} 片段数组
  */
 export function splitNotice(md, info = {}) {
 	let source = md;
@@ -273,7 +308,7 @@ export function splitNotice(md, info = {}) {
 	}
 
 	const lines = source.replace(/\r\n?/g, "\n").split("\n");
-	/** @type {Array<{ type: "html", html: string } | { type: "player" | "card", items: string[] }>} */
+	/** @type {NoticeSegment[]} */
 	const segments = [];
 	/** @type {string[]} */
 	let buffer = [];
@@ -282,10 +317,17 @@ export function splitNotice(md, info = {}) {
 		buffer = [];
 	};
 
+	/** @type {Array<NoticeItemType>} */
+	const types = ["player", "card"];
+	/** @type {Array<NoticeItemGroup>} */
+	const groups = ["add", "adjust"];
+
 	for (let index = 0; index < lines.length; index++) {
 		const open = lines[index].match(RE_DIRECTIVE_OPEN);
 		const type = open ? DIRECTIVE_TYPES[open[1].toLowerCase()] : void 0;
-		if (!type) {
+		//名称不认识、或分组词不认识：当普通文本处理（写在正文里能看见，方便发现笔误）
+		const group = type && open[2] ? DIRECTIVE_GROUPS[open[2].toLowerCase()] : type ? "add" : void 0;
+		if (!type || !group) {
 			buffer.push(lines[index]);
 			continue;
 		}
@@ -297,25 +339,27 @@ export function splitNotice(md, info = {}) {
 			index++;
 		}
 		flush();
-		const fallback = fallbackItems(info, type);
-		segments.push({ type, items: items.length ? items : fallback });
+		const fallback = fallbackItems(info, type, group);
+		segments.push({ type, group, items: items.length ? items : fallback });
 	}
 	flush();
 
-	//正文没写指令的类型：按改造前的老行为补到末尾
-	for (const type of /** @type {const} */ (["player", "card"])) {
-		if (segments.some(segment => segment.type === type)) continue;
-		const items = fallbackItems(info, type);
-		if (items.length) segments.push({ type, items });
+	//正文没写指令的（类型 + 分组）：按改造前的老行为补到末尾
+	for (const type of types) {
+		for (const group of groups) {
+			if (segments.some(segment => segment.type === type && segment.group === group)) continue;
+			const items = fallbackItems(info, type, group);
+			if (items.length) segments.push({ type, group, items });
+		}
 	}
 
 	return segments;
 }
 
 /**
- * 是否需要在公告里显示"新增干员 / 新增卡片"这类按钮组
+ * 是否有任何可展示的内容（正文片段或按钮组条目）
  * @param {object} [info] 更新信息对象
- * @returns {boolean} 有任何条目时为 true
+ * @returns {boolean} 有内容时为 true
  */
 export function hasNoticeContent(info = {}) {
 	const segments = splitNotice(info?.md, info);
