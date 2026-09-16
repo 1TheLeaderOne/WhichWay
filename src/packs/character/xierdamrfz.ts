@@ -128,9 +128,8 @@ skill({
 					.set("filterCard", card => {
 						//@ts-ignore
 						if (get.event().shenciCard.has(get.name(card))) {
-							let info = ui.create.div(".promptSJZX", card);
-							info.classList.add("promptCardSJZX");
-							info.innerHTML = `可摸牌`;
+							//提示的 DOM 与样式都由 src/tips/promptSJZX.vue 组件负责（wrapper 也由组件渲染）
+							card.addPromptSJZX(`可摸牌`, "shencimrfz_shenci");
 						}
 						return true;
 					})
@@ -156,10 +155,9 @@ skill({
 					)
 					.forResult();
 
+				//提示统一由 src/tips/promptSJZX.vue 组件渲染，这里用卡牌 API 清理（会连同空容器一起收掉）
 				player.getCards("hes", card => {
-					if (card.querySelector(".promptSJZX")) {
-						card.querySelector(".promptSJZX")?.remove();
-					}
+					card.removePromptSJZX();
 				});
 			},
 			async content(event, trigger, player) {

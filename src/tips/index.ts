@@ -1,5 +1,6 @@
 import { onArenaReady, onSetDev } from "../hooks/index.js";
 import { lib, game, ui, get, ai, _status } from "noname";
+import { addPromptTo, removePromptsFrom } from "./prompt.js";
 
 type delPromptFitler = boolean | ((event: GameEvent, trigger: delTrigger, player: Player) => boolean);
 
@@ -109,58 +110,39 @@ class WhichWayTips {
 
 	isPlayer: (el: Card | Player) => boolean = el => get.itemtype(el) === "player";
 
+	/**
+	 * 在卡牌 / 角色上添加一条提示（同 id 则更新文本）。
+	 *
+	 * 提示的 DOM 与样式由 `src/tips/promptSJZX.vue` 组件负责（原 `css/extension.css` 里的
+	 * `.promptSJZX` 系列已挪进该组件，`.promptSJZX-Wrapper` 也由组件渲染 —— 不会再出现
+	 * "只挂了 `.promptSJZX`、导致 `.promptSJZX-Wrapper .promptSJZX` 匹配不上"的情况），
+	 * 这里只负责登记与（配合 `registerDel` 的）自动清除。
+	 *
+	 * @param el 目标卡牌 / 角色
+	 * @param str 提示内容（按 HTML 渲染，与改造前 `innerHTML` 一致）
+	 * @param id 提示 id，缺省用内容本身；同 id 视为更新
+	 * @param del 自动清除的触发时机
+	 */
 	addPrompt(el: Card | Player, str: string, id?: string, del?: delTrigger): Card | Player {
-		const isPlayer = this.isPlayer(el);
-		const prompts = this[isPlayer ? "promptsPlayer" : "promptsCard"];
-		const elID = this.getID(el);
-		prompts[elID] ??= {};
-
-		let wrapper = el.querySelector(".promptSJZX-Wrapper") || ui.create.div(".promptSJZX-Wrapper", el);
-
-		if (id && prompts[elID]?.[id]) {
-			prompts[elID][id].innerHTML = str;
-			if (del) this.registerDel(el, del, id);
-			return el;
-		}
-
-		let info = ui.create.div(".promptSJZX", wrapper);
-		info.classList.add(isPlayer ? "promptCharacterSJZX" : "promptCardSJZX");
-		info.innerHTML = str;
-		prompts[elID][id || str] = info;
-		if (del) this.registerDel(el, del, id || str);
+		const promptID = id || str;
+		addPromptTo(el as unknown as HTMLElement, {
+			id: promptID,
+			text: str,
+			type: this.isPlayer(el) ? "character" : "card",
+		});
+		if (del) this.registerDel(el, del, promptID);
 		return el;
 	}
 
+	/**
+	 * 移除卡牌 / 角色上的提示（删空后容器会自动收掉）
+	 * @param el 目标卡牌 / 角色
+	 * @param id 只移除该 id 的提示；不传则移除全部
+	 */
 	removePrompt(el: Card | Player, id?: string): Card | Player {
-		const isPlayer = this.isPlayer(el);
-		const prompts = this[isPlayer ? "promptsPlayer" : "promptsCard"];
-		const elID = this.getID(el);
-		prompts[elID] ??= {};
-
-		let targets = el.querySelectorAll(".promptSJZX");
-		if (!targets) return el;
-		else if (typeof id !== "string")
-			targets.forEach(i => {
-				for (let key in prompts) {
-					if (prompts[elID][key] === i) {
-						delete prompts[elID][key];
-					}
-				}
-				i.remove();
-			});
-		else {
-			if (prompts[elID][id]) {
-				prompts[elID][id].remove();
-				delete prompts[elID][id];
-			}
-		}
-		if (!Object.keys(prompts[elID]).length) delete prompts[elID];
+		removePromptsFrom(el as unknown as HTMLElement, typeof id === "string" ? id : void 0);
 		return el;
 	}
-
-	promptsCard: Record<string, Record<string, HTMLElement>> = {};
-
-	promptsPlayer: Record<string, Record<string, HTMLElement>> = {};
 
 	autoDelPrompt: autoDelPrompt = {
 		player: {},

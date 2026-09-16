@@ -39,8 +39,9 @@ skill({
 	guanhuomrfz: {
 		audio: ["观看作战记录", "行动出发"],
 		trigger: { player: "useCardToPlayer" },
-		filter(event, player, name, target) {
-			return !getStorageGuanhuo(player).includes(target);
+		filter(event, player) {
+			const target = event.target;
+			return !getStorageGuanhuo(player).includes(target) && player !== target;
 		},
 		init(player, skill) {
 			player.storage[skill] = [];
@@ -58,7 +59,10 @@ skill({
 			},
 		},
 		prompt2(event, player) {
-			return `是否将${get.translation(event.player)}，然后你获得其一张牌？`;
+			return `是否记录该角色(${get.translation(event.target)})，然后你获得其一张牌？`;
+		},
+		check(event, player) {
+			return 114514 - get.attitude(event.player, player);
 		},
 		async content(event, trigger, player) {
 			getStorageGuanhuo(player).add(trigger.target);
@@ -72,6 +76,13 @@ skill({
 		},
 	},
 	fuguangmrfz: {
+		mod: {
+			targetInRange(card: Card, player) {
+				if (!getStoragefuguang_suits(player).includes(get.suit(card)!)) {
+					return true;
+				}
+			},
+		},
 		audio: ["部署1", "部署2"],
 		forced: true,
 		init(player, skill) {
@@ -80,7 +91,10 @@ skill({
 				damaged: false,
 			};
 		},
-		onremove: true,
+		onremove(player, type) {
+            player.removePromptSJZX("fuguangmrfz_prompt");
+            delete player.storage.fuguangmrfz;
+        },
 		trigger: {
 			player: ["useCardAfter", "damageBegin4"],
 		},
@@ -100,24 +114,48 @@ skill({
 			if (trigger.name === "useCard") {
 				const card = trigger.card;
 				getStoragefuguang_suits(player).add(get.suit(trigger.card)!);
-				player
-					.when({ player: "useCardAfter", source: "damageSource" })
-					.filter((event, plaeyr) => {
-						if (event.name === "damage") return event.card === card;
-						return true;
-					})
-					.step(async (event, trigger, player) => {
-						if (trigger.name === "damage") return;
+				if (player.getStat("card")?.[card.name]) {
+					player.getStat("card")[card.name] -= 1;
+				}
+				player.when({ player: "useCardAfter" }).step(async (event, trigger, player) => {
+					if (
+						player.getHistory("sourceDamage", evt => {
+							if (!evt.card) return false;
+							return evt.card === trigger.card;
+						}).length < 1
+					) {
 						player.draw();
-						player.logSkill("fuguangmrfz");
-					});
+					}
+				});
 				return;
 			}
 			player.storage["fuguangmrfz"]["damaged"] = true;
 			player.addTempSkill("fuguangmrfz_clear_damaged", { global: "roundStart" });
 			trigger.cancel();
 		},
+        group:["fuguangmrfz_gain_tips","fuguangmrfz_clear_tips"],
 		subSkill: {
+            gain_tips:{
+                charlotte:true,
+                silent:true,
+                trigger:{
+                    player:["phaseUseBegin","useCardAfter","gainAfter"]
+                },
+                lastDo:true,
+                async content(event,trigger,player){
+                    refreshTips(player);
+                },
+            },
+            clear_tips:{
+                charlotte:true,
+                silent:true,
+                trigger:{
+                    player:"phaseUseEnd"
+                },
+                async content(event,trigger,player){
+                    player.removePromptSJZX("fuguangmrfz_prompt");
+                },
+            },
 			clear_damaged: {
 				mark: true,
 				intro: {
@@ -165,10 +203,7 @@ skill({
 			const result = await player
 				.chooseControl({
 					controls: ["fuguangmrfz", "guanhuomrfz"],
-					choiceList: [
-						`重置你【浮光】记录过的花色`,
-						`重置你【观火】记录过的角色`,
-					],
+					choiceList: [`重置你【浮光】记录过的花色`, `重置你【观火】记录过的角色`],
 					ai(event, player) {
 						if (!player.hasSkill("fuguangmrfz")) return "guanhuomrfz";
 						if (!player.hasSkill("guanhuomrfz")) return "fuguangmrfz";
@@ -211,6 +246,16 @@ skill({
 		},
 	},
 });
+
+function refreshTips(player:Player):void {
+    player.removePromptSJZX("fuguangmrfz_prompt");
+    const cards = player.getCards("h");
+    for(let card of cards){
+        if(!getStoragefuguang_suits(player).includes(get.suit(card)!)){
+            card.addPromptSJZX("浮光·未记录","fuguangmrfz_prompt");
+        }
+    }
+}
 
 function getStorageGuanhuo(player: Player): Player[] {
 	if (!Array.isArray(player.storage["guanhuomrfz"])) player.storage["guanhuomrfz"] = [];

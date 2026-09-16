@@ -71,7 +71,7 @@ export class whichWayWebPlay {
 	}
 
 	play(): HTMLAudioElement {
-		this.stop();
+		// this.stop();
 		const audio = new Audio(this.voiceUrl.randomGet());
 		audio.play();
 		this._playing = audio;

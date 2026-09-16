@@ -1,36 +1,28 @@
 import { lib, game, ui, get, ai, _status } from "noname";
+import { addPromptTo, removePromptsFrom } from "../../../tips/prompt.js";
 
 export class CardExt extends lib.element.Card {
+	/**
+	 * 移除卡牌上的（驶舰之向）提示
+	 * @param {string} [id] 只移除该 id 的提示；不传则移除全部
+	 * @returns {this}
+	 */
 	removePromptSJZX(id){
-		let targets = this.querySelectorAll(".promptSJZX");
-		if(!targets) return this;
-		else if(typeof id !== "string") targets.forEach(i=>i.remove());
-		else{
-			for(let target of targets){
-				//@ts-ignore
-				if(target.dataset.promptID === id) target.remove();
-			}
-		}
+		removePromptsFrom(this, typeof id === "string" ? id : void 0);
 		return this;
 	}
 
+	/**
+	 * 在卡牌上添加一条提示（同 id 则更新文本）
+	 *
+	 * DOM 与样式都在 `src/tips/promptSJZX.vue` 组件里（wrapper 也由组件渲染，
+	 * 不会再出现"没有 `.promptSJZX-Wrapper` 祖先导致样式匹配不上"的问题）。
+	 * @param {string} str 提示内容（按 HTML 渲染）
+	 * @param {string} [id] 提示 id，缺省用内容本身
+	 * @returns {this}
+	 */
 	addPromptSJZX(str,id){
-		let wrapper = this.querySelector(".promptSJZX-Wrapper") || ui.create.div(".promptSJZX-Wrapper",this);
-
-		let prompts = Array.from(wrapper.querySelectorAll(".promptSJZX"));
-
-		for(let prompt of prompts){
-			//@ts-ignore
-			if(prompt.dataset.promptID === id){
-				prompt.innerHTML = str;
-				return this;
-			}
-		}
-
-		let info = ui.create.div(".promptSJZX",wrapper);
-        info.classList.add("promptCardSJZX");
-        info.innerHTML = str;
-		info.dataset.promptID = id || str;
+		addPromptTo(this, { id: id || str, text: str, type: "card" });
 		return this;
 	}
 
