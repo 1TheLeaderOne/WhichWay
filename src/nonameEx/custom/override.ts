@@ -18,7 +18,7 @@ whichWayAPIOverride.overrideAPI("lib.skill.jiu", {
 	forced: true,
 	charlotte: true,
 	firstDo: true,
-	content: function () {
+	content: async function (event, trigger, player) {
 		/**@ts-ignore */
 		if (!player.hasSkill("tiaojiumrfz")) {
 			/**@ts-ignore */
@@ -62,7 +62,7 @@ whichWayAPIOverride.overrideAPI("lib.skill.jiu", {
 		},
 	},
 	group: "jiu2",
-});
+} as CardInfo);
 whichWayAPIOverride.overrideAPI("lib.skill.jiu2.filter", function (event, player) {
 	if (player.hasSkillTag("jiuSustain", null, event.name)) return false;
 	if (event.name == "useCard") {
@@ -87,56 +87,37 @@ if (!lib.card.binglinchengxia) {
 			if (get.suit(card) == "diamond") return 0;
 			return -3;
 		},
-		effect: function () {
-			"step 0";
-			// @ts-ignore
+		effect: async function (event, trigger, player) {
+			const result = event.result;
 			if (result.bool == false) {
 				if (
-					// @ts-ignore
 					!player.countCards("e", function (card) {
-						return lib.filter.cardDiscardable(
-							card,
-							// @ts-ignore
-							player,
-							"shuiyanqijuny"
-						);
+						return lib.filter.cardDiscardable(card, player, "shuiyanqijuny");
 					})
 				) {
-					// @ts-ignore
-					player.damage("nosource");
-					// @ts-ignore
-					event.finish();
+					player.damage().set("nosource", true);
 					return;
 				} else
-					// @ts-ignore
-					player.chooseControl("discard_card", "take_damage", function (event, player) {
-						if (get.damageEffect(player, event.player, player) >= 0) {
-							return "take_damage";
-						}
-						if (player.hp >= 3 && player.countCards("e") >= 2) {
-							return "take_damage";
-						}
-						return "discard_card";
+					player.chooseControl({
+						controls: ["discard_card", "take_damage"],
+						ai(event, player) {
+							if (get.damageEffect(player, event.player, player) >= 0) {
+								return "take_damage";
+							}
+							if (player.hp >= 3 && player.countCards("e") >= 2) {
+								return "take_damage";
+							}
+							return "discard_card";
+						},
 					});
-				// @ts-ignore
-			} else event.finish();
-			"step 1";
-			// @ts-ignore
+			} else return;
 			if (result.control == "discard_card") {
-				// @ts-ignore
-				player.discard(
-					// @ts-ignore
-					player.getCards("e", function (card) {
-						return lib.filter.cardDiscardable(
-							card,
-							// @ts-ignore
-							player,
-							"shuiyanqijuny"
-						);
-					})
-				);
-				// @ts-ignore
-			} else player.damage("nosource");
+				player.discard({
+					cards: player.getCards("e", function (card) {
+						return lib.filter.cardDiscardable(card, player, "shuiyanqijuny");
+					}),
+				});
+			} else player.damage().set("nosource", true);
 		},
 		ai: {
 			order: 1,
@@ -147,17 +128,16 @@ if (!lib.card.binglinchengxia) {
 				loseCard: 1,
 			},
 			result: {
-				// @ts-ignore
 				target: function (player, target, card, isLink) {
-					var es = target.getCards("e");
+					let es = target.getCards("e");
 					if (!es.length) return -1.5;
-					var val = 0;
-					for (var i of es) val += get.value(i, target);
+					let val = 0;
+					for (let i of es) val += get.value(i, target);
 					return -Math.min(1.5, val / 5);
 				},
 			},
 		},
-	};
+	} as CardInfo;
 	lib.translate["binglinchengxia"] = "兵临城下";
 	lib.translate["binglinchengxia_info"] = "出牌阶段，对一名其他角色使用。将此牌横置于目标角色的判定区内。目标角色于判定阶段进行判定，若判定结果不为♦，则其弃置装备区内的所有牌或受到1点伤害。";
 }

@@ -32,25 +32,27 @@ skill({
 			},
 			async content(event, trigger, player) {
 				const { targets } = await player
-					.chooseTarget(true)
+					.chooseTarget({
+						forced:true
+					})
 					.set("prompt", `【断章】:请选择【断章】目标`)
 					.set("filterTarget", lib.filter.notMe)
 					.set("ai", target => {
-						var att = get.attitude(_status.event.player, target);
+						let att = get.attitude(_status.event.player, target);
 						if (att > 0) return att + 1;
 						if (att == 0) return Math.random();
 						return att;
 					})
 					.forResult();
 				if (!targets) return;
-				var target = targets[0];
+				let target = targets[0];
 				if (!player.storage.duanzhangmrfz) player.storage.duanzhangmrfz = [];
 				if (!target.storage.duanzhangmrfz) target.storage.duanzhangmrfz = [];
 				player.storage.duanzhangmrfz.addArray([target, player]);
 				target.storage.duanzhangmrfz.addArray([target, player]);
 				player.markSkill("duanzhangmrfz");
 				player.line(target);
-				for (var i of player.storage.duanzhangmrfz) {
+				for (let i of player.storage.duanzhangmrfz) {
 					if (i != player) i.addSkill("canxiangmrfz_nodelay");
 					i.addSkill("duanzhangmrfz_eff1");
 				}
@@ -65,10 +67,9 @@ skill({
 					filter(event, player) {
 						return event.player.hasSkill("duanzhangmrfz_eff1");
 					},
-					content() {
-						for (var i of game.players) {
+					async content(event,trigger,player) {
+						for (let i of game.players) {
 							if (!i.storage.duanzhangmrfz) continue;
-							//@ts-ignore
 							if (i.storage.duanzhangmrfz.includes(trigger.player)) i.storage.duanzhangmrfz.remove(trigger.player);
 						}
 					},
@@ -86,18 +87,18 @@ skill({
 					},
 					async content(event, trigger, player) {
 						if (player.storage.duanzhangmrfz && player.storage.duanzhangmrfz.length > 1) {
-							var cards = [],
+							let cards:Card[] = [],
 								target = game.findPlayer(current => {
 									return player.storage.duanzhangmrfz.includes(current);
 								});
 							if (!target) return;
-							for (var i of target.storage.duanzhangmrfz) {
+							for (let i of target.storage.duanzhangmrfz) {
 								if (i.countCards("h") == 0) continue;
 								if (i == player) continue;
-								for (var j of i.getCards("h")) cards.push(j);
+								for (let j of i.getCards("h")) cards.push(j);
 							}
-							var cardsx = cards.map(card => {
-								var cardx = ui.create.card();
+							let cardsx = cards.map(card => {
+								let cardx = ui.create.card();
 								cardx.init(get.cardInfo(card));
 								cardx._cardid = card.cardid;
 								return cardx;
@@ -118,11 +119,11 @@ skill({
 					silent: true,
 					filter: function (event, player) {
 						if (event.name == "gain") return event.cards.length;
-						var cards = event.getd();
+						let cards = event.getd();
 						return cards.length;
 					},
 					onremove: function (player) {
-						var cards2 = player.getCards("s", card => {
+						let cards2 = player.getCards("s", card => {
 							return card.hasGaintag("duanzhangmrfz");
 						});
 						if (player.isOnline2()) {
@@ -139,21 +140,22 @@ skill({
 						if (player == game.me) ui.updatehl();
 					},
 					async content(event, trigger, player) {
-						var cards = [];
-						var idList = player.getCards("s", card => card.hasGaintag("duanzhangmrfz")).map(i => i._cardid);
-						var target = game.findPlayer(current => {
+						let cards:Card[] = [];
+						let idList = player.getCards("s", card => card.hasGaintag("duanzhangmrfz")).map(i => i._cardid);
+						let target = game.findPlayer(current => {
 							return player.storage.duanzhangmrfz.includes(current);
 						});
-						for (var i of target.storage.duanzhangmrfz) {
+						if(!target) return;
+						for (let i of target.storage.duanzhangmrfz) {
 							if (i.countCards("h") == 0) continue;
 							if (i == player) continue;
-							for (var j of i.getCards("h")) {
+							for (let j of i.getCards("h")) {
 								if (idList.includes(j.cardid)) continue;
 								cards.push(j);
 							}
 						}
-						var cards2 = cards.map(card => {
-							var cardx = ui.create.card();
+						let cards2 = cards.map(card => {
+							let cardx = ui.create.card();
 							cardx.init(get.cardInfo(card));
 							cardx._cardid = card.cardid;
 							return cardx;
@@ -170,7 +172,7 @@ skill({
 					popup: false,
 					firstDo: true,
 					filter: function (event, player) {
-						var cards = player.getCards("s", card => card.hasGaintag("duanzhangmrfz") && card._cardid);
+						let cards = player.getCards("s", card => card.hasGaintag("duanzhangmrfz") && card._cardid);
 						return (
 							event.cards &&
 							event.cards.some(card => {
@@ -179,25 +181,26 @@ skill({
 						);
 					},
 					async content(event, trigger, player) {
-						var idList = player.getCards("s", card => card.hasGaintag("duanzhangmrfz")).map(i => i._cardid);
-						var cards = [];
-						var target = game.findPlayer(current => {
+						let idList = player.getCards("s", card => card.hasGaintag("duanzhangmrfz")).map(i => i._cardid);
+						let cards:Card[] = [];
+						let target = game.findPlayer(current => {
 							return player.storage.duanzhangmrfz.includes(current);
 						});
-						for (var i of target.storage.duanzhangmrfz) {
+						if(!target) return;
+						for (let i of target.storage.duanzhangmrfz) {
 							if (i.countCards("h") == 0) continue;
 							if (i == player) continue;
-							for (var j of i.getCards("h")) {
+							for (let j of i.getCards("h")) {
 								if (!idList.includes(j.cardid)) continue;
 								cards.push(j);
 							}
 						}
-						var cards2 = [];
-						for (var card of trigger.cards) {
-							var cardx = cards.find(cardx => cardx.cardid == card._cardid);
+						let cards2:Card[] = [];
+						for (let card of trigger.cards) {
+							let cardx = cards.find(cardx => cardx.cardid == card._cardid);
 							if (cardx) cards2.push(cardx);
 						}
-						var cards3 = trigger.cards.slice();
+						let cards3 = trigger.cards.slice();
 						trigger.cards = cards2;
 						trigger.card.cards = cards2;
 						if (player.isOnline2()) {
@@ -223,7 +226,7 @@ skill({
 					popup: false,
 					firstDo: true,
 					filter: function (event, player) {
-						var idList = player.getCards("s", card => card.hasGaintag("duanzhangmrfz")).map(i => i._cardid);
+						let idList = player.getCards("s", card => card.hasGaintag("duanzhangmrfz")).map(i => i._cardid);
 						return (
 							event.cards &&
 							event.cards.some(card => {
@@ -232,15 +235,16 @@ skill({
 						);
 					},
 					async content(event, trigger, player) {
-						var cards2;
-						var idList = [];
-						var target = game.findPlayer(current => {
+						let cards2;
+						let idList:string[] = [];
+						let target = game.findPlayer(current => {
 							return player.storage.duanzhangmrfz.includes(current);
 						});
-						for (var i of target.storage.duanzhangmrfz) {
+						if(!target) return;
+						for (let i of target.storage.duanzhangmrfz) {
 							if (i.countCards("h") == 0) continue;
 							if (i == player) continue;
-							for (var j of i.getCards("h")) {
+							for (let j of i.getCards("h")) {
 								idList.add(j.cardid);
 							}
 						}
@@ -282,10 +286,15 @@ skill({
 			async content(event, trigger, player) {
 				const { targets } = await player
 					.chooseTarget(
-						get.prompt("chenaimrfz"),
-						"将" + get.translation(trigger.cards) + "交给一名其他角色",
-						function (card, player, target) {
-							return target != player;
+						// get.prompt("chenaimrfz"),
+						// "将" + get.translation(trigger.cards) + "交给一名其他角色",
+						// function (card, player, target) {
+						// 	return target != player;
+						// }
+						{
+							prompt:get.prompt("chenaimrfz"),
+							prompt2:"将" + get.translation(trigger.cards) + "交给一名其他角色",
+							filterTarget:lib.filter.notMe
 						}
 					)
 					.set("ai", function (target) {
@@ -303,16 +312,15 @@ skill({
 					.set("cards", trigger.cards)
 					.forResult();
 				if (!targets) return;
-				//@ts-ignore
 				player.logSkill("chenaimrfz", targets[0]);
-				targets[0].gain(trigger.cards.filterInD(), "gain2");
+				targets[0].gain({cards:trigger.cards.filterInD(), animate:"gain2"});
 				player.getHistory("custom").push({ chenaimrfz_type: get.type2(trigger.card) });
 				if (player.storage.duanzhangmrfz && player.storage.duanzhangmrfz.includes(targets[0])) targets[0].draw();
 			},
 		},
 	"canxiangmrfz": {
 			mod: {
-				targetEnabled: function (card, player, target) {
+				targetEnabled: function (card:Card, player, target) {
 					if (get.type(card) == "delay") {
 						return false;
 					}
@@ -322,7 +330,7 @@ skill({
 			forced: true,
 			trigger: { global: "damageBegin4" },
 			filter(event, player) {
-				var storage = player.storage.duanzhangmrfz;
+				let storage = player.storage.duanzhangmrfz;
 				if (event.player != player && (!storage || !storage.includes(event.player))) return false;
 				return event.hasNature();
 			},
@@ -338,8 +346,8 @@ skill({
 					firstDo: true,
 					forceDie: true,
 					async content(event, trigger, player) {
-						var storage = player.storage.duanzhangmrfz;
-						for (var i of storage) {
+						let storage = player.storage.duanzhangmrfz;
+						for (let i of storage) {
 							if (!i.storage.duanzhangmrfz) continue;
 							if (i.storage.duanzhangmrfz.length <= 2) i.removeSkill("canxiangmrfz_nodelay");
 							else i.storage.duanzhangmrfz.remove(player);
@@ -352,7 +360,7 @@ skill({
 						content: "属性伤害无效；无法成为延时锦囊牌的目标",
 					},
 					mod: {
-						targetEnabled: function (card, player, target) {
+						targetEnabled: function (card:Card, player, target) {
 							if (get.type(card) == "delay") {
 								return false;
 							}

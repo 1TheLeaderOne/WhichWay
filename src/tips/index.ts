@@ -118,17 +118,22 @@ class WhichWayTips {
 	 * "只挂了 `.promptSJZX`、导致 `.promptSJZX-Wrapper .promptSJZX` 匹配不上"的情况），
 	 * 这里只负责登记与（配合 `registerDel` 的）自动清除。
 	 *
+	 * **卡牌提示默认「离手自动清除」**：卡牌离开手牌区（进弃牌堆 / 装备区 / 判定区 / 牌堆 / 特殊区…）后，
+	 * 该牌上所有未声明保留的提示都会被清掉；需要让提示跟着牌走时把 `keepOnLeave` 传 `true`。
+	 *
 	 * @param el 目标卡牌 / 角色
 	 * @param str 提示内容（按 HTML 渲染，与改造前 `innerHTML` 一致）
 	 * @param id 提示 id，缺省用内容本身；同 id 视为更新
 	 * @param del 自动清除的触发时机
+	 * @param keepOnLeave 仅对卡牌提示有意义：离开手牌区后是否保留，默认 false（自动清除）
 	 */
-	addPrompt(el: Card | Player, str: string, id?: string, del?: delTrigger): Card | Player {
+	addPrompt(el: Card | Player, str: string, id?: string, del?: delTrigger, keepOnLeave = false): Card | Player {
 		const promptID = id || str;
 		addPromptTo(el as unknown as HTMLElement, {
 			id: promptID,
 			text: str,
 			type: this.isPlayer(el) ? "character" : "card",
+			keepOnLeave,
 		});
 		if (del) this.registerDel(el, del, promptID);
 		return el;
