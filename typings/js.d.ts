@@ -45,6 +45,13 @@ interface Array<T> {
 	add2(): Array<any>;
 
 	/**
+	 * @deprecated 已废弃，请直接使用 `randomGets(n)`
+	 * @param n 取出的元素个数
+	 * @returns 随机取出的 n 个元素组成的数组（不修改原数组）
+	 */
+	randomGet2(n: number): T[];
+
+	/**
 	 * 是否是superset的子集
 	 * @param { Array } superset
 	 */

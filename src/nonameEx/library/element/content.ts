@@ -193,4 +193,192 @@ export const ContentExt = {
 			}
 		},
 	],
+
+	/**
+	 * 同时选择角色与选项（`player.chooseTargetControl()` 的 content）。
+	 *
+	 * 布局：提示文本在对话框里，**选项渲染在 `ui.control`（`#control`）里**，与引擎的「确定」同栏
+	 * （`ui.create.control`，与本体 `chooseControl` 的 controlbar 形态一致）；角色仍在战场点选。
+	 * 目标选择由引擎的 `chooseTarget` 流程托管 —— 把自建 dialog 作为 `dialog` 传进去后，
+	 * 引擎会把 `prompt` 置为 false，于是它会跳过自建提示与 promptbar，但仍负责 AI / 在线 / 多端、
+	 * `selectTarget` 范围门控（不满足范围时「确定」不出现）与收尾关框。
+	 *
+	 * **结束条件：必须同时选定目标与选项才会结束**（本 content 的核心约束）：
+	 * - 引擎的「确定」由 `filterOk` 门控：本地交互时只有**已点选选项**（或该目标没有可选项）才会出现；
+	 *   目标数不满足 `selectTarget` 时引擎本来就不显示「确定」；
+	 * - 引擎的「取消」按钮被 `fakeforce` 隐藏，否则"只选目标、不选选项"也能结束，与上面的约束冲突；
+	 *   需要允许放弃的调用方，请在 `controls` 里自己加 `"cancel2"` —— 点它即取消
+	 *   （立即结束，`bool=false`、`control="cancel2"`，与本体 `chooseControl` 一致）。
+	 *
+	 * ⛔ 选项条目的点击**不能**走引擎默认的 `ui.click.control`：它会直接写 `_status.event.result`
+	 * 并无条件 `game.resume()`，把暂停中的目标选择提前结束（结果还缺 `bool/targets`）。
+	 * 这里用 `ui.create.control([...controls, handler])` 传入自定义处理函数：引擎会把它存进
+	 * `control.custom`，点击条目时以 `(link, node)` 调用并**跳过**默认逻辑（`ui/click/index.js`），
+	 * 于是我们只记录选项、刷新高亮，再调 `game.check()` 重算「确定」是否出现。
+	 *
+	 * 选项随目标联动：引擎在每次目标点选 / `game.check()` 后都会调用当前事件的 `custom.add.target`
+	 * （`ui/click/index.js`、`game/check.js`），我们在那里重建选项条；同时留档已选目标，
+	 * 因为取消时 `game.uncheck()` 会清空 `ui.selected.targets`，而结果里需要保留"选了人没选选项"的信息。
+	 *
+	 * @type { ContentFuncByAll[] }
+	 */
+	chooseTargetControl: [
+		async function (event, trigger, player) {
+			//兜底：任何提前返回 / 异常路径下 result 都是合法的空结果
+			event.result = { bool: false, targets: [], control: undefined, index: -1, confirm: "cancel" };
+			/** 本次点选的选项（条目点击只记录，最终是否生效由「确定」决定） */
+			let picked;
+			/** 已选目标快照：取消时 game.uncheck() 会清空选择，这里留档以便结果里仍能带上 targets */
+			let snapTargets = [];
+			/** 是否是本地玩家的交互路径（AI / 托管 / 联机客机不渲染选项条，选项由 controlAi 补） */
+			const interactive = event.isMine();
+			/** @type { Dialog | undefined } */
+			let dialog;
+			/** 选项条：`ui.control` 里的一个 `.control`（无可选项时不创建） */
+			let bar;
+			/** 已渲染的选项集合签名：集合没变就只刷高亮，避免重建带来的闪烁 */
+			let rendered = null;
+			/** @type { GameEvent | undefined } 目标事件（`filterOk` 需要读它的 result 判断是否走 AI 路径） */
+			let targetEvent;
+			//防连点：引擎的控件点击也有类似保护，这里用局部锁避免污染全局 _status.clicked
+			let lock = false;
+
+			/** 选项列表：`controls` 可为 `(targets) => string[]` 以随已选目标动态变化 */
+			const resolveControls = targets => {
+				const list = typeof event.controls === "function" ? event.controls(targets.slice()) : event.controls;
+				return Array.isArray(list) ? list.slice() : [];
+			};
+
+			/**
+			 * 选项条目被点击：只记录选择、刷新高亮、重算「确定」是否出现（**绝不写 result、不 resume**）。
+			 * `"cancel2"` 特殊：与本体 `chooseControl` 一致，点它**立即**取消本次选择（见文件头注释）。
+			 */
+			function onClickOption(link, node) {
+				if (lock || _status.dragged || _status.justdragged) return;
+				lock = true;
+				setTimeout(() => (lock = false), 200);
+				//先记录再分流：cancel2 也写进 picked，这样结果里仍能拿到 control="cancel2"（与 chooseControl 一致）
+				picked = link;
+				if (link === "cancel2") {
+					//「确定」栏可能因为上一步选过普通选项而存在；ui.click.cancel()（不带 node）不会关它，
+					//这里按引擎 ui.create.confirm("") 的做法清掉，避免事件结束后残留按钮
+					if (ui.confirm) {
+						ui.confirm.close();
+						delete ui.confirm;
+					}
+					//引擎的取消路径会写 result（confirm: "cancel"）并 resume
+					ui.click.cancel();
+					return;
+				}
+				updateBar();
+				game.check();
+			}
+
+			/** 同步选项条：集合变化才重建条目，否则只更新高亮；已失效的点选会被作废 */
+			function updateBar() {
+				const targets = ui.selected.targets.slice();
+				if (targets.length) snapTargets = targets;
+				const list = resolveControls(targets);
+				const signature = list.join("\u0000");
+				if (signature !== rendered) {
+					rendered = signature;
+					//选项集合变了：之前点的选项若已不在列表里就作废（否则「确定」会带着失效的选项出现）
+					if (picked != null && !list.includes(picked)) picked = void 0;
+					if (interactive) {
+						if (list.length) {
+							//引擎会把最后一个函数存成 control.custom，点击条目时以 (link, node) 调用它
+							if (bar) bar.replace(list.concat(onClickOption));
+							else bar = ui.create.control(list.concat(onClickOption));
+						} else if (bar) {
+							//调用方没给可选项：不占用控制栏（「确定」此时不受选项门控，见 filterOk）
+							bar.close();
+							bar = void 0;
+						}
+					}
+				}
+				if (!bar) return;
+				//复用引擎的高亮样式（`.glow:not(.button):not(.card)`）标示已选项
+				for (const node of Array.from(bar.childNodes)) node.classList.toggle("glow", node.link === picked);
+			}
+
+			try {
+				if (interactive) {
+					//清掉上一个事件可能残留的选择，避免污染本次判定
+					game.uncheck();
+					dialog = ui.create.dialog("", "hidden");
+					if (event.prompt) dialog.addText(event.prompt, event.prompt.length <= 20);
+					if (event.prompt2) dialog.addText(event.prompt2, event.prompt2.length <= 20);
+					dialog.open();
+					//选项条：渲染在 ui.control（#control）里，与引擎的「确定」同栏
+					updateBar();
+				}
+
+				//把自建 dialog 交给引擎托管：引擎据 dialog 参数把 prompt 置 false，从而跳过自建提示/promptbar，
+				//同时负责 AI / 在线 / 多端、范围门控与收尾（收尾会 close 这个 dialog）
+				targetEvent = player.chooseTarget({
+					filterTarget: event.filterTarget,
+					selectTarget: event.selectTarget,
+					//隐藏技能：与本体一致，引擎会在需要时（`_status.prehidden_skills`）直接取消本次选择
+					hsskill: event.hsskill,
+					ai: event.ai,
+					forced: event.forced,
+					dialog: dialog,
+					//隐藏「取消」按钮：本函数的约束是"必须同时选定目标与选项才结束"（fakeforce 只影响这个按钮，
+					//不影响 forced 对目标数下限的门控；想允许放弃的调用方请在 controls 里加 "cancel2"）
+					fakeforce: true,
+					//「确定」门控：本地交互时必须已点选选项才会出现（见文件头注释）。
+					//AI / 托管 / 联机客机走引擎自己的收尾（选项由事件结束后按 controlAi 补），这里不能拦：
+					//引擎的 AI 分支会因 filterOk 不通过而直接取消事件，AI 就永远选不到选项了。
+					filterOk: () => {
+						if (typeof event.filterOk === "function" && !event.filterOk()) return false;
+						if (!interactive || _status.auto || targetEvent?.result === "ai") return true;
+						//没有可选项时不要求选（否则玩家无路可走；此时结果 bool 仍为 false）
+						return picked != null || !resolveControls(ui.selected.targets.slice()).length;
+					},
+				});
+				if (interactive) {
+					//传了 dialog 时引擎不会再占用 custom.add.target，这里接管它做"选项随目标联动"
+					if (!targetEvent.custom) targetEvent.custom = { add: {}, replace: {} };
+					if (!targetEvent.custom.add) targetEvent.custom.add = {};
+					const addTarget = targetEvent.custom.add.target;
+					targetEvent.custom.add.target = () => {
+						if (typeof addTarget === "function") addTarget.call(this);
+						updateBar();
+					};
+				}
+
+				const inner = (await targetEvent.forResult()) || {};
+				const ok = !!inner.bool;
+				const targets = ok && Array.isArray(inner.targets) ? inner.targets.slice() : snapTargets.slice();
+
+				//AI / 托管 / 联机客机：目标选完后，再按 controlAi（缺省第一个选项）补上选项
+				if (picked == null && targets.length) {
+					const list = resolveControls(targets);
+					if (list.length) {
+						let choice = typeof event.controlAi === "function" ? event.controlAi(event.getParent(), player) : void 0;
+						if (typeof choice === "number") choice = list[choice];
+						if (choice == null) choice = list[0];
+						picked = choice;
+					}
+				}
+
+				const finalList = resolveControls(targets);
+				const control = picked != null && finalList.includes(picked) ? picked : void 0;
+				//"cancel2" 视为取消（与本体 chooseControl 的惯例一致）
+				const engaged = control != null && control !== "cancel2";
+				event.result = {
+					bool: ok && engaged,
+					targets: targets,
+					control: control,
+					index: control != null ? finalList.indexOf(control) : -1,
+					confirm: engaged ? "ok" : "cancel",
+				};
+			} finally {
+				//选项条与提示对话框都可能不存在（AI / 提前异常），逐一清理
+				if (bar) bar.close();
+				if (dialog) dialog.close();
+				game.uncheck();
+			}
+		},
+	],
 };

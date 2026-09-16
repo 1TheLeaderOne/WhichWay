@@ -4,30 +4,26 @@
       <h2>驶舰之向 v{{ version }} 更新公告</h2>
       <button @click="handleClose" class="close-btn">×</button>
     </div>
-    
+
     <div class="notice-content">
       <!-- 最低适配版本提示 -->
       <div class="update-section">最低适配版本: {{ over }}</div>
 
-      <!-- 更新简介 -->
-      <section v-if="info.intro?.length" class="update-section">
-        <h3>📝 更新概要</h3>
-        <ul class="intro-list">
-          <li v-for="(item, index) in info.intro" :key="index">{{ item }}</li>
-        </ul>
-      </section>
+      <!-- 正文（Markdown）与「干员 / 卡牌」按钮组：顺序由正文里的 :::player / :::cards 指令决定，
+           没写指令的类型会在片段末尾自动补上（与改造前一致） -->
+      <template v-for="(segment, index) in segments" :key="index">
+        <section v-if="segment.type === 'html'" class="update-section md-body" v-html="segment.html"></section>
 
-      <!-- 新增干员 -->
-      <section v-if="info.player?.length" class="update-section">
-        <h3>👥 新增干员</h3>
-        <div ref="playerContainer" class="character-grid"></div>
-      </section>
+        <section v-else-if="segment.type === 'player'" class="update-section">
+          <h3>👥 新增干员</h3>
+          <div :ref="el => setGridRef(el, index)" class="character-grid"></div>
+        </section>
 
-      <!-- 新增卡片 -->
-      <section v-if="info.cards?.length" class="update-section">
-        <h3>🃏 新增卡片</h3>
-        <div ref="cardsContainer" class="card-grid"></div>
-      </section>
+        <section v-else class="update-section">
+          <h3>🃏 新增卡片</h3>
+          <div :ref="el => setGridRef(el, index)" class="card-grid"></div>
+        </section>
+      </template>
 
       <!-- 空状态提示 -->
       <div v-if="!hasContent" class="empty-state">暂无更新内容</div>
@@ -36,8 +32,9 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { whichWayVersion } from '../version.js';
+import { splitNotice, hasNoticeContent } from './markdown.js';
 
 let version = whichWayVersion.ext;
 let over = whichWayVersion.noname.over;
@@ -47,7 +44,7 @@ const props = defineProps({
   info: {
     type: Object,
     required: true,
-    default: () => ({ intro: [], player: [], cards: [] })
+    default: () => ({ md: '', intro: [], player: [], cards: [] })
   },
   onClose: {
     type: Function,
@@ -58,60 +55,47 @@ const props = defineProps({
 // Emits
 const emit = defineEmits(['close']);
 
-// Refs
-const playerContainer = ref(null);
-const cardsContainer = ref(null);
-const hasRendered = ref(false);
+/**
+ * 正文片段：Markdown 渲染结果 + 干员 / 卡牌按钮组（见 markdown.js 的 splitNotice）。
+ * 兼容旧结构 `{ intro: string[], player, cards }`。
+ */
+const segments = computed(() => splitNotice(props.info?.md, props.info));
 
-// Computed
-const hasContent = computed(() => {
-  return props.info.intro?.length || props.info.player?.length || props.info.cards?.length;
-});
+// 是否有任何可展示的内容（正文片段或按钮组条目）
+const hasContent = computed(() => hasNoticeContent(props.info));
+
+// Refs：片段下标 → 按钮组容器（一个公告里可能出现多个 :::player / :::cards）
+const gridRefs = new Map();
+const setGridRef = (el, index) => {
+  if (el) gridRefs.set(index, el);
+  else gridRefs.delete(index);
+};
 
 // Methods
-const clearContainer = (containerRef) => {
-  const container = containerRef.value;
-  if (!container) return;
-  while (container.firstChild) {
-    container.removeChild(container.firstChild);
-  }
-};
+/** 用引擎的按钮预设填充各按钮组容器 */
+const renderGrids = () => {
+  gridRefs.forEach((container, index) => {
+    const segment = segments.value[index];
+    if (!container || !segment || segment.type === 'html') return;
 
-const renderPlayers = () => {
-  if (!playerContainer.value || !Array.isArray(props.info.player)) return;
-  clearContainer(playerContainer);
+    while (container.firstChild) container.removeChild(container.firstChild);
 
-  props.info.player.forEach(name => {
-    try {
-      if (typeof window?.ui?.create?.buttonPresets?.character !== 'function') {
-        console.warn(`[UpdateNotice] character API not available for: ${name}`);
-        return;
-      }
-      const btn = window.ui.create.buttonPresets.character(name);
-      //@ts-ignore
-      if (btn?.nodeType === 1) playerContainer.value.appendChild(btn);
-    } catch (e) {
-      console.error(`渲染干员按钮失败 (${name}):`, e);
+    const presets = window?.ui?.create?.buttonPresets;
+    const preset = segment.type === 'player' ? presets?.character : presets?.vcard;
+    if (typeof preset !== 'function') {
+      console.warn(`[UpdateNotice] 按钮 API 不可用，跳过渲染：${segment.type}`);
+      return;
     }
-  });
-};
 
-const renderCards = () => {
-  if (!cardsContainer.value || !Array.isArray(props.info.cards)) return;
-  clearContainer(cardsContainer);
-
-  props.info.cards.forEach(name => {
-    try {
-      if (typeof window?.ui?.create?.buttonPresets?.vcard !== 'function') {
-        console.warn(`[UpdateNotice] vcard API not available for: ${name}`);
-        return;
+    segment.items.forEach(name => {
+      try {
+        const btn = preset(name);
+        //@ts-ignore
+        if (btn?.nodeType === 1) container.appendChild(btn);
+      } catch (e) {
+        console.error(`渲染${segment.type === 'player' ? '干员' : '卡片'}按钮失败 (${name}):`, e);
       }
-      const btn = window.ui.create.buttonPresets.vcard(name);
-      //@ts-ignore
-      if (btn?.nodeType === 1) cardsContainer.value.appendChild(btn);
-    } catch (e) {
-      console.error(`渲染卡片按钮失败 (${name}):`, e);
-    }
+    });
   });
 };
 
@@ -124,31 +108,21 @@ const handleClose = () => {
 
 // Lifecycle Hooks
 onMounted(() => {
-  nextTick(() => {
-    renderPlayers();
-    renderCards();
-    hasRendered.value = true;
-  });
+  nextTick(renderGrids);
 });
 
 onBeforeUnmount(() => {
-  clearContainer(playerContainer);
-  clearContainer(cardsContainer);
+  gridRefs.forEach(container => {
+    while (container.firstChild) container.removeChild(container.firstChild);
+  });
+  gridRefs.clear();
 });
 
 // Watchers
 watch(
-  () => props.info.player,
+  () => props.info,
   () => {
-    renderPlayers();
-  },
-  { deep: true }
-);
-
-watch(
-  () => props.info.cards,
-  () => {
-    renderCards();
+    nextTick(renderGrids);
   },
   { deep: true }
 );
@@ -231,21 +205,6 @@ watch(
 	border-radius: 2px;
 	margin-right: 10px;
 }
-.intro-list {
-	padding-left: 20px;
-	line-height: 1.6;
-}
-.intro-list li {
-	margin-bottom: 8px;
-	position: relative;
-}
-.intro-list li::before {
-	content: "·";
-	color: #ff9a9e;
-	font-weight: bold;
-	position: absolute;
-	left: -15px;
-}
 .character-grid,
 .card-grid {
 	width: 100%;
@@ -260,6 +219,119 @@ watch(
 	padding: 20px;
 	font-style: italic;
 }
+
+/* ---------- Markdown 正文 ---------- */
+/* v-html 插入的节点不带 scoped 属性，需要用 :deep 命中 */
+.md-body :deep(.md-h) {
+	color: #a1c4fd;
+	margin: 18px 0 10px;
+	line-height: 1.4;
+}
+.md-body :deep(.md-h1),
+.md-body :deep(.md-h2) {
+	font-size: 1.45rem;
+}
+.md-body :deep(.md-h3) {
+	font-size: 1.3rem;
+	display: flex;
+	align-items: center;
+}
+.md-body :deep(.md-h3)::before {
+	content: "";
+	display: inline-block;
+	width: 8px;
+	height: 16px;
+	background: #ff9a9e;
+	border-radius: 2px;
+	margin-right: 10px;
+}
+.md-body :deep(.md-h4),
+.md-body :deep(.md-h5),
+.md-body :deep(.md-h6) {
+	font-size: 1.1rem;
+	color: #c3d6f7;
+}
+.md-body :deep(.md-h:first-child) {
+	margin-top: 0;
+}
+.md-body :deep(.md-p) {
+	margin: 8px 0;
+	line-height: 1.75;
+}
+.md-body :deep(.md-ul),
+.md-body :deep(.md-ol) {
+	margin: 8px 0;
+	padding-left: 22px;
+	line-height: 1.7;
+}
+.md-body :deep(li) {
+	margin-bottom: 6px;
+}
+.md-body :deep(li::marker) {
+	color: #ff9a9e;
+}
+.md-body :deep(.md-code) {
+	background: rgba(255, 255, 255, 0.12);
+	border-radius: 4px;
+	padding: 1px 5px;
+	font-family: Consolas, Monaco, "Courier New", monospace;
+	font-size: 0.92em;
+	color: #ffd7a1;
+}
+.md-body :deep(.md-pre) {
+	background: rgba(0, 0, 0, 0.35);
+	border-radius: 8px;
+	padding: 12px;
+	margin: 10px 0;
+	overflow-x: auto;
+}
+.md-body :deep(.md-pre code) {
+	font-family: Consolas, Monaco, "Courier New", monospace;
+	font-size: 0.9em;
+	color: #d7e3ff;
+	white-space: pre;
+}
+.md-body :deep(.md-quote) {
+	margin: 10px 0;
+	padding: 8px 12px;
+	border-left: 4px solid #5a5a8a;
+	background: rgba(255, 255, 255, 0.05);
+	border-radius: 0 6px 6px 0;
+	color: #c9c9e6;
+}
+.md-body :deep(.md-hr) {
+	border: none;
+	border-top: 1px dashed #3a3a6a;
+	margin: 16px 0;
+}
+.md-body :deep(.md-a) {
+	color: #7fb2ff;
+	text-decoration: none;
+	border-bottom: 1px dashed currentColor;
+	word-break: break-all;
+}
+.md-body :deep(.md-a:hover) {
+	color: #a8c8ff;
+}
+.md-body :deep(.md-table) {
+	border-collapse: collapse;
+	margin: 10px 0;
+	width: 100%;
+}
+.md-body :deep(.md-table th),
+.md-body :deep(.md-table td) {
+	border: 1px solid #3a3a6a;
+	padding: 6px 10px;
+	text-align: left;
+}
+.md-body :deep(.md-table th) {
+	background: rgba(74, 144, 226, 0.18);
+	color: #a1c4fd;
+}
+.md-body :deep(strong) {
+	color: #ffd7a1;
+}
+
 /* 滚动条美化 */
 .notice-content::-webkit-scrollbar {
 	width: 6px;

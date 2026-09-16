@@ -106,6 +106,86 @@ export class PlayerExt extends lib.element.Player {
 	}
 
 	/**
+	 * 同时选择角色（目标）与选项。
+	 *
+	 * 交互形态：**选项渲染在 `ui.control`（`#control`）里**，与引擎的「确定」同栏（与本体
+	 * `chooseControl` 的 controlbar 形态一致），角色仍在战场点选；选项支持随已选目标动态变化
+	 * （`controls` 可写成函数）。
+	 *
+	 * **必须同时选定目标与选项才会结束**：
+	 * - 「确定」由引擎生成并被门控 —— 只有已点选选项（或该目标确实没有可选项）才会出现，
+	 *   目标数不满足 `selectTarget` 范围时同样不会出现；
+	 * - 「取消」按钮被隐藏（`fakeforce`），所以**没有**"只选目标、不选选项"就结束的路径；
+	 * - 需要允许玩家放弃的调用方，请在 `controls` 里自己加 `"cancel2"` —— 点它即取消
+	 *   （立即结束，`bool=false`、`control="cancel2"`、`confirm="cancel"`，与本体 `chooseControl` 一致）。
+	 *
+	 * 参数（对象式，全部可选）：
+	 * - `filterTarget` / `selectTarget` / `filterOk` / `ai` / `forced` / `hsskill`：与本体 `chooseTarget` 完全一致；
+	 * - `controls`：选项列表，`string[]`；也可写成 `(targets: Player[]) => string[]` 以随已选目标动态生成；
+	 * - `choiceList`：等价于 `controls`（展示时会过 `get.translation`，值仍取原字符串）；
+	 * - `controlAi`：AI 选择选项的方式，`(event, player) => number | string`（number 取 `controls` 下标；缺省取第一个选项）；
+	 * - `prompt` / `prompt2`：对话框提示（`prompt` 支持 `get.evtprompt` 的 `"提示|提示2"` 写法）。
+	 *
+	 * 结果（`result`）：
+	 * - `bool`：**同时**选中了目标与选项（且选项不是 `"cancel2"`）才为 true（任一环节缺失都为 false）；
+	 * - `targets`：选中的角色。目标已选但未选选项（或选了 `"cancel2"` 取消）时**仍会保留**，便于调用方区分
+	 *   “完全没选人”与“选了人没选选项”；目标本身未选/被取消时为空数组；
+	 * - `control`：选中的选项原字符串（未选为 `undefined`；`"cancel2"` 视为取消）；
+	 * - `index`：`control` 在当时的选项列表中的下标（未选为 -1）；
+	 * - `confirm`：`"ok"` / `"cancel"`，与本体语义一致。
+	 *
+	 * @example
+	 * ```js
+	 * const result = await player
+	 * 	.chooseTargetControl({
+	 * 		filterTarget: (card, player, target) => target != player,
+	 * 		selectTarget: 1,
+	 * 		prompt: "选择一名角色，再选择一项",
+	 * 		//想允许玩家放弃时，把 "cancel2" 也放进来（点它即取消，与 chooseControl 一致）
+	 * 		controls: targets => (targets[0]?.countCards("h") > 0 ? ["弃置其一张牌", "令其摸一张牌"] : ["令其摸一张牌"]),
+	 * 	})
+	 * 	.forResult();
+	 * if (result.bool) {
+	 * 	// result.targets[0] 是选中的角色，result.control 是选中的选项
+	 * }
+	 * ```
+	 */
+	chooseTargetControl(params) {
+		const next = game.createEvent("chooseTargetControl");
+		next.player = this;
+
+		//参数处理与本体 chooseTarget 一致（仅对象式）
+		Object.assign(next, params);
+		if (typeof next.selectTarget === "number") {
+			next.selectTarget = [next.selectTarget, next.selectTarget];
+		}
+		if (next.filterTarget == undefined) {
+			next.filterTarget = lib.filter.all;
+		}
+		if (next.selectTarget == undefined) {
+			next.selectTarget = [1, 1];
+		}
+		if (next.ai == undefined) {
+			next.ai = get.attitude2;
+		}
+		//选项列表：controls 优先，其次 choiceList；两者都没有时视为“没有可选项”
+		if (next.controls == undefined && Array.isArray(next.choiceList)) {
+			next.controls = next.choiceList.slice();
+		}
+		if (next.controls == undefined) {
+			next.controls = [];
+		}
+		//prompt 支持 "提示|提示2" 写法（与本体一致）
+		if (params && params.prompt != null) {
+			delete next.prompt;
+			get.evtprompt(next, params.prompt);
+		}
+		next.setContent("chooseTargetControl");
+		next._args = [params];
+		return next;
+	}
+
+	/**
 	 * 显示提示
 	 * @param {string} str 显示的内容
 	 * @param {string} nature 颜色

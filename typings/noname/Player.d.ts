@@ -1,5 +1,5 @@
 import { Player } from "@/library/element";
-import type { CardFilter, EventChooseCardParams } from "@/library/element/Player/type.d";
+import type { CardFilter, EventChooseCardParams, EventChooseTargetParams } from "@/library/element/Player/type.d";
 
 declare global {
 	/**
@@ -57,6 +57,63 @@ declare global {
 		/** 上面的假牌所对应的真实值：调用方传入的 Card / VCard 原对象 */
 		links?: Array<Card | VCard>;
 	};
+
+	/**
+	 * `player.chooseTargetControl()` 的参数对象：字段与本体 `chooseTarget` 的 `EventChooseTargetParams` 一致
+	 * （`filterTarget` / `selectTarget` / `filterOk` / `ai` / `forced` / `hsskill` 等），
+	 * 另外多了选项相关的 `controls` / `choiceList` / `controlAi`。
+	 */
+	type ChooseTargetControlParams = Omit<EventChooseTargetParams, "prompt" | "prompt2" | "dialog"> & {
+		/** 对话框提示；支持本体的 `"提示|提示2"` 写法（`|` 之后的内容作为第二段文本） */
+		prompt?: string;
+		/** 第二段提示（等价于 `prompt` 里 `|` 之后的部分） */
+		prompt2?: string;
+		/**
+		 * 选项列表。可写成函数 `(targets: Player[]) => string[]` 以**随已选目标动态变化**
+		 * （引擎会在每次目标选择变化后重绘选项条）。
+		 *
+		 * 与 `choiceList` 二者给其一即可；都不给时视为"没有可选项"：此时不要求选选项，
+		 * 直接点「确定」即可结束，结果 `bool` 恒为 false（`control` 为 `undefined`）。
+		 *
+		 * 在本函数里**没有**「取消」按钮（见 {@link Player.chooseTargetControl}），所以：
+		 * 若希望玩家可以放弃本次选择，请把 `"cancel2"` 加进列表 —— 点它即取消
+		 * （立即结束，`bool=false`、`control="cancel2"`、`confirm="cancel"`，与本体 `chooseControl` 一致）。
+		 */
+		controls?: string[] | ((targets: Player[]) => string[]);
+		/** 等价于 `controls`（展示时过 `get.translation`，值仍取原字符串） */
+		choiceList?: string[];
+		/** AI 选择选项的方式：返回 number 取 `controls` 下标、返回 string 直接采用；缺省取第一个选项 */
+		controlAi?: (event: GameEvent, player: Player) => number | string;
+	};
+
+	/**
+	 * `player.chooseTargetControl()` 的结果。
+	 *
+	 * - `bool`：**同时**选中了目标与选项（且选项不是 `"cancel2"`）才为 true；
+	 * - `targets`：选中的角色。**目标已选但未选选项（或选了 `"cancel2"` 取消）时会保留**，便于区分
+	 *   "完全没选人"与"选了人没选选项"；目标本身未选/被取消时为空数组；
+	 * - `control`：选中的选项原字符串（未选为 `undefined`；`"cancel2"` 表示取消）；
+	 * - `index`：`control` 在当时的选项列表中的下标（未选为 -1）；
+	 * - `confirm`：`"ok"` / `"cancel"`。
+	 *
+	 * @example
+	 * ```ts
+	 * const result = await player
+	 * 	.chooseTargetControl({ filterTarget: (c, p, t) => t != p, controls: ["摸一张牌", "弃一张牌"] })
+	 * 	.forResult();
+	 * if (result.bool) {
+	 * 	// result.targets[0] 是选中的角色，result.control 是选中的选项，result.index 是下标
+	 * }
+	 * ```
+	 */
+	type ChooseTargetControlResult = Omit<Partial<Result>, "targets"> & {
+		/** 选中的角色；目标已选但未选选项/取消时会保留，目标未选时为空数组 */
+		targets: Player[];
+		/** 选中的选项原字符串（未选为 `undefined`；`"cancel2"` 表示取消） */
+		control?: string;
+		/** `control` 在当时的选项列表中的下标（未选为 -1） */
+		index: number;
+	};
 }
 
 declare module "@/library/element" {
@@ -93,6 +150,40 @@ declare module "@/library/element" {
 		 * ```
 		 */
 		chooseFakeCard(params: ChooseFakeCardParams): GameEvent;
+
+		/**
+		 * 同时选择角色（目标）与选项（`chooseTarget` + `chooseControl` 的结合）。
+		 *
+		 * 交互形态：**选项渲染在 `ui.control`（`#control`）里**，与引擎的「确定」同栏（与本体
+		 * `chooseControl` 的 controlbar 形态一致），角色仍在战场点选。
+		 *
+		 * 注意事项：
+		 * - **必须同时选定目标与选项才会结束**：「确定」只在已点选选项（或该目标确实没有可选项）时出现；
+		 * - 本函数**没有「取消」按钮**（`fakeforce`），所以"只选目标、不选选项"无法结束选择；
+		 *   想允许玩家放弃，请在 `controls` 里加 `"cancel2"` —— 点它即取消（`bool=false`、`control="cancel2"`）；
+		 * - `controls` 可写成 `(targets) => string[]`，选项条会随已选目标动态重绘；已点选的选项若在新列表里
+		 *   不存在会被自动作废（不会带着失效选项放行「确定」）；
+		 * - 选项条目点击**只记录选择**，仍需点「确定」才算完成（因此"选了人没选选项"时 `bool=false` 但保留 `targets`）；
+		 * - AI / 托管由引擎的 `ai` 选目标，选项按 `controlAi`（缺省第一个）选取；
+		 * - 在线（多端）场景下选项条只在主机侧渲染，客机端暂不支持（与本体 `chooseCardTarget` 的差异）。
+		 *
+		 * @param params 见 {@link ChooseTargetControlParams}
+		 * @returns 可链式 `.set(...)`、可 `.forResult()` 的事件；`forResult()` 的返回值见 {@link ChooseTargetControlResult}
+		 *
+		 * @example
+		 * ```ts
+		 * const result = await player
+		 * 	.chooseTargetControl({
+		 * 		filterTarget: (card, player, target) => target != player,
+		 * 		selectTarget: 1,
+		 * 		prompt: "选择一名角色，再选择一项",
+		 * 		//想允许玩家放弃时，把 "cancel2" 也放进来（点它即取消，与 chooseControl 一致）
+		 * 		controls: targets => (targets[0]?.countCards("h") > 0 ? ["弃置其一张牌", "令其摸一张牌"] : ["令其摸一张牌"]),
+		 * 	})
+		 * 	.forResult();
+		 * ```
+		 */
+		chooseTargetControl(params: ChooseTargetControlParams): GameEvent;
 
 		/**
 		 * 移除自己手牌中所有的（驶舰之向）提示

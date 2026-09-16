@@ -32,7 +32,7 @@ WW_SKIP_STATIC_COPY=1 pnpm -F ./packages/extension/WhichWay build
 cd packages/extension/WhichWay && pnpm build
 ```
 
-- 构建使用 `vite build`（lib 模式），入口为 `extension.js`，输出目录为 `../../../apps/core/extension/WhichWay`（即 `apps/core/extension/WhichWay`），构建时清空输出目录。
+- 构建使用 `vite build`（lib 模式），入口为 `extension.js`，输出目录为 `../../../apps/core/extension/WhichWay`（即 `apps/core/extension/WhichWay`）。**`emptyOutDir` 必须保持 `false`**（`vite.config.ts` 内有详细注释）：产物目录同时承载 2200+ 个音频等静态资源，先清空再复制会让 `audio` 处于「部分存在」的中间状态，触发引擎 `game.tryAudio` 的 `onError` 重试死循环；而产物 JS 都带 hash，旧的残留文件不会被引用。因此构建前不必、也不要手动清空输出目录。
 - **不要开启 `preserveModules`**：产物形态应为「入口 `extension.js` + `chunks/*.js`（约 25 个，其中 `packs-*.js` 是全部干员/卡牌聚合成的单个 chunk）」，而不是「一个模块一个文件」。全量复制静态资源时构建约 3~4 分钟，加 `WW_SKIP_STATIC_COPY=1` 时约 4 秒。
 - 静态资源（`audio`、`image`、`info.json`、`LICENSE`、`json`、`font`、`dynamicSkin`、`css`、`README.md`、`vedio`、`src/updateLog/updateContent.txt`、`.gitignore`）通过 `vite-plugin-static-copy` 原样复制到输出目录，无需手动处理。
 - `assetFileNames` 必须保持 `css/viteAutoCreateStyle[extname]`：`whichWayFile.autoLoadCSS()` 会扫描整个 `css/` 目录并按文件名注入 `<link>`，改名会导致样式重复或丢失。
@@ -104,7 +104,7 @@ WhichWay/
 │   ├── toast/            # toast 提示组件
 │   ├── tips/             # 卡牌/角色提示组件（whichWayTips）
 │   ├── poptip/           # poptip 组件
-│   ├── updateLog/        # 更新日志（updateContent.txt + 展示组件）
+│   ├── updateLog/        # 更新公告 / 更新日志（updateContentCurrent.js 用 Markdown 写本版公告、markdown.js 渲染、updateContent.txt 是历史日志、updateNotice.vue 是弹出窗口）
 │   ├── videoPlayer/      # 视频播放组件
 │   ├── dataManager/      # 简单数据管理器（get/set/on/off）
 │   └── math/             # 数学工具
@@ -295,11 +295,40 @@ const result = await player
 - 已知降级：`single-handcard` 布局（`mobile` / `long` / `long2` / `nova`）下 `#handcards2` 被隐藏，且 `directgains` 也会把假牌放进 `handcards1`，无法做到「只折真牌」，此时降级为整行折叠。
 - `createFakeCards` 用源牌的 `cardid` 作为 `_cardid`，而 `deleteFakeCards` 只清理 `_cardid` 为真的假牌；VCard 可能没有 `cardid`，因此 content 里会对缺失者补一个合成 id，否则假牌会残留在手牌里。
 
+### 角色+选项同屏选择（`player.chooseTargetControl`）
+
+需要"选一名角色，同时选一项"时用它（`chooseTarget` + `chooseControl` 的结合）：
+
+```js
+const result = await player
+	.chooseTargetControl({
+		filterTarget: (card, player, target) => target != player,
+		selectTarget: 1,
+		prompt: "选择一名角色，再选择一项",
+		//controls 也可写成函数，选项区会随已选目标动态重绘
+		controls: targets => (targets[0]?.countCards("h") > 0 ? ["弃置其一张牌", "令其摸一张牌"] : ["令其摸一张牌"]),
+	})
+	.forResult();
+if (result.bool) {
+	// result.targets[0] 为选中的角色，result.control 为选中的选项，result.index 为其下标
+}
+```
+
+- 实现位置：`src/nonameEx/library/element/player.js`（`PlayerExt.chooseTargetControl` 事件工厂）+ `src/nonameEx/library/element/content.js`（`ContentExt.chooseTargetControl` 单段 content），类型声明见 `typings/noname/Player.d.ts`（`ChooseTargetControlParams` / `ChooseTargetControlResult`）。
+- 参数为**单一对象**：`filterTarget` / `selectTarget` / `filterOk` / `ai` / `forced` / `hsskill`（与本体 `chooseTarget` 一致）+ 选项相关的 `controls`（可为 `(targets) => string[]`）/ `choiceList` / `controlAi` + `prompt` / `prompt2`。
+- 结果：`bool`（**同时**选中目标与选项才为 true）、`targets`、`control`、`index`、`confirm`。**目标已选但未选选项（或取消）时 `targets` 仍会保留**，用于区分"完全没选人"与"选了人没选项"；目标本身未选/取消时 `targets` 为空数组；`"cancel2"` 视为取消。
+- ⛔ **不要复用 `ui.click.dialogcontrol` 处理选项条目**：它（`apps/core/noname/ui/click/index.js`）会直接写 `_status.event.result` 并无条件 `game.resume()`，会把暂停中的目标选择提前结束、结果还缺 `bool/targets`。本实现用自建 click 处理器：只记录选项、刷新选中态，绝不写 result / 不 resume。
+- 同屏与联动原理：把自建对话框作为 `dialog` 交给引擎的 `chooseTarget` 托管（引擎工厂会据此把 `prompt` 置 false，跳过自建提示与 promptbar，但仍负责 AI / 在线 / 多端、`selectTarget` 范围门控与收尾关框）；选项区随目标刷新则挂在**子事件**的 `custom.add.target` 上（引擎在每次目标点选 / `game.check()` 后都会调用它）。取消时 `game.uncheck()` 会清空 `ui.selected.targets`，所以刷新回调里要**留档已选目标**，否则拿不到"选了谁"。
+- 已知限制：在线（多端）场景下选项区只在主机侧渲染，客机端暂不支持选项选择（与本体 `chooseCardTarget` 的差异）；`controls` 为空时视为"没有可选项"，`bool` 恒为 false。
+
 ## 类型系统（typings/）
 
-- `typings/` 下提供全局类型声明：`WhichWayCharacter` / `WhichWayCharacterPending` / `ExtendedSkill` / `WhichWayCharConfig` / `WhichWay`（window）/ `whichWayConfig` / 钩子注册类型 / `ChooseFakeCardResult`（`player.chooseFakeCard()` 的结果，`links` 为传入的原牌）等，编写 TS 时可直接使用。
+- `typings/` 下提供全局类型声明：`WhichWayCharacter` / `WhichWayCharacterPending` / `ExtendedSkill` / `WhichWayCharConfig` / `WhichWay`（window）/ `whichWayConfig` / 钩子注册类型 / `ChooseFakeCardParams`·`ChooseFakeCardResult`（`player.chooseFakeCard()`）/ `ChooseTargetControlParams`·`ChooseTargetControlResult`（`player.chooseTargetControl()`）等，编写 TS 时可直接使用。
 - `typings/noname/` 下是对 noname 本体接口的模块增强，与 `src/nonameEx/` 的目录一一对应：`Game.d.ts`（对应 `nonameEx/game/`）、`Get.d.ts`（对应 `nonameEx/get/`）、`Card.d.ts` / `Player.d.ts` / `GameEvent.d.ts`（对应 `nonameEx/library/element/`）。`nonameEx/library/element/content.js` 里的 content 函数**不需要**声明：本体的 `lib.element.content` 本身就是 `Record<string, ContentFuncByAll | ContentFuncsByAll>`，任何键都能通过。
 - ⚠️ 给 `nonameEx/` 下的类新增方法后，记得在对应的 `typings/noname/*.d.ts` 里补声明，否则调用处只能拿到 `any`（`content.js` 除外，见上一条）。`typings/extNonameClass/` 是早期的同类模块增强目录（如 `Character.whichWay`），新声明请统一放 `typings/noname/`。
+- ⚠️ **凡是为无名杀类（Player / Card / GameEvent / Game / Get / 内置原型等）新增的扩展函数，都必须在 `typings/noname/` 下对应文件里写类型声明并配 JSDoc 注释**：`player.js` → `Player.d.ts`、`card.js` → `Card.d.ts`、`gameEvent.js` → `GameEvent.d.ts`、`game/index.js` → `Game.d.ts`、`get/index.js` → `Get.d.ts`、`jsExt/ArrayExt.js`·`jsExt/HTMLDivElementExt.js` → `typings/js.d.ts`。注释要写清"做什么、参数含义、返回值形态、注意事项/已知限制"，参数与结果复杂时提供 `@example` 与独立类型别名（如 `ChooseTargetControlParams` / `ChooseTargetControlResult`）。新增后可用"源码方法名 vs typings 文件名"逐条对账命令自查漏项。
+- ⚠️ 在 `ui.control`（`#control`）里放自定义按钮（`ui.create.control(...)`）时：条目点击走 `ui.click.control`，它会**直接写 `_status.event.result` 并无条件 `game.resume()`** —— 想把点击当"记录选择"用，必须把处理函数作为最后一个参数传给 `ui.create.control([...items, fn])`（引擎存进 `control.custom`，点击时以 `(link, node)` 调用并跳过默认逻辑）。另外 `Control#replace` 会保留该函数，可用于随选择动态重建条目。相关门控：`filterOk` 决定「确定」是否出现（`game/index.js`）、`event.fakeforce = true` 隐藏「取消」按钮（不影响 `forced` 对目标数下限的门控）。
+- 📝 **更新公告（`src/updateLog/`）**：本版公告写在 `updateContentCurrent.js` 的 `md` 字段（Markdown，渲染器是自实现的 `markdown.js`，无第三方依赖），`player` / `cards` 是引擎按钮组的数据源。正文里用 `:::player` / `:::cards` 指令块可把按钮组嵌到任意位置（块内每行一个条目名；不写指令则按老行为自动追加到末尾）。**改公告只动 `updateContentCurrent.js`**；若要新增 Markdown 语法或指令，改 `markdown.js`，并在 `updateNotice.vue`（弹窗）与 `configUI/component/updateCurrent.vue`（设置界面「更新公告」页）两处都补样式 —— 两处的 `v-html` 内容不带 scoped 属性，样式必须写成 `:deep(...)`。历史日志 `updateContent.txt` 是另一套解析（`configUI/component/updateLog.vue`），与公告互不影响。
 - 代码中存在较多 `@ts-ignore` / `@ts-nocheck` 与 `any`，与根项目一致允许宽松类型。
 
 ## 代码风格
