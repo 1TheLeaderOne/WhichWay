@@ -3,9 +3,6 @@ import { lib, game, ui, get, ai, _status } from "noname";
 /** 临时假牌使用的 gaintag：directgains 会带上它，用于识别与清理本次选择产生的假牌 */
 const FAKE_CARD_TAG = "whichWayFakeCard";
 
-/** 折叠真牌时的重叠偏移（px）。引擎的最小折叠偏移是 32，取略大以免被夹到 32 而多出横向滚动条 */
-const FOLD_OFFSET = 34;
-
 /**
  * 从 chooseFakeCard 的事件对象透传给内层 chooseCard 的参数名，
  * 与本体 chooseCard 的参数集（ChooseBase / CheckCardParams / EventChooseCardParams）保持一致。
@@ -14,51 +11,243 @@ const FOLD_OFFSET = 34;
 const PASSTHROUGH_KEYS = ["prompt", "prompt2", "promptx", "selectCard", "filterOk", "ai", "forced", "complexCard", "complexSelect", "allowChooseAll", "hsskill", "type"];
 
 /**
- * 选择期间折叠真实手牌（只改本地 UI，不动游戏状态）。
+ * 选择期间重排本地玩家的手牌：**一组折成细条、另一组按引擎自己的折叠展示**（只改本地 UI，不动游戏状态）。
  *
- * 这里刻意**不自己算布局**，而是借引擎自己的折叠能力：
- * `ui.updatehl` 会分别对 handcards1 / handcards2 按
- * `offset = min(112, (容器 offsetWidth - 128) / (张数 - 1))` 计算重叠偏移，而两个手牌容器
- * 各自定位、各自设宽（如 default 布局：hc1 在左半、hc2 在右半，宽度均为 calc(50% - 140px)），
- * 所以只要把真牌集中到 handcards1 并收窄它，引擎就会把真牌压成只露左边缘的重叠条，
- * 而假牌所在的 handcards2 宽度不变、仍按 112px 正常间距平铺。
+ * 分工（`foldedGroup` 决定当前折的是哪一组，默认折**真牌**）：
+ * - **展开的那一组**：完全不干预引擎的布局 —— 引擎 `ui.updatehl` 会按容器宽度折叠
+ *   （`offset = min(112, (容器宽 - 128) / (张数 - 1))`，下限 32px），并负责悬停摊开
+ *   （`getSpreadOffset`）、`selected` 抬升、横向滚动与各种动画，这些"特效"都要原样保留；
+ * - **折叠的那一组**：压成比引擎下限更小的 `FOLD_PITCH`（10px，几乎只剩左边缘），并把压缩出来的
+ *   位移量补给其后的牌，因此展开组之间的相对间距、悬停摊开的形状都不变。
  *
- * 折叠后的「悬停 / 点选展开」同样是引擎原生的：`ui.click.cardmouseenter` 会设置
- * `ui._handcardHover` 并调用 `ui.updatehl()`，由 `ui.getSpreadOffset` 把被指向的牌及其邻居摊开。
+ * **点击切换视图**（点击"折叠的那一组"即可）：
+ * - 点折叠的**真牌** → 折叠假牌、展开真牌；点折叠的**假牌** → 折叠真牌、展开假牌；
+ * - 折叠组**不会被误选**：布局时把它们的 `selectable` 摘掉并记账（`strippedSelectable`），
+ *   重新展开或复原时补回 —— 引擎 `ui.click.card` 在 `selectable` 缺失时会直接返回
+ *   （`ui/click/index.js`），所以既不用拦截事件（不会破坏引擎的拖拽 / 触摸收尾与 `_status.clicked`
+ *   复位），也绝对不会选中折叠的牌。
  *
- * 已知降级：`single-handcard` 布局（mobile / long / long2 / nova）下 `#handcards2` 被隐藏，
- * 且 `directgains` 也会把假牌放进 handcards1，无法做到「只折真牌」，此时整行一起折叠。
+ * 真牌假牌同处一个容器时（`single-handcard` 布局：`#handcards2` 被隐藏、`directgains` 把假牌也放进
+ * handcards1）也成立 —— 这正是引擎做不到"分组折叠"的场景（它只能整容器一个间距）。
+ *
+ * 为了"引擎一重排就被纠正"，折叠期间把 `ui.updatehl` 包一层（见 `patchedUpdatehl`）：
+ * 引擎初始化、摸牌、悬停、选牌等任何一次重排之后都会立刻重新应用本布局 ——
+ * 既不会出现"假牌进手牌几秒后才折叠"的延迟，也不会被引擎的原生折叠覆盖。
+ *
+ * `restore` 会还原 `ui.updatehl`、解绑点击监听、把摘掉的 `selectable` 补回、清掉内层宽度与 `scrollh`、
+ * 把集中过来的真牌放回原容器，最后让引擎自己重新排版一次（它会整行重写 transform）。
  *
  * @param { Player } player 本地玩家（game.me）
  * @param { Card[] } fakes 本次创建的假牌
- * @returns { (() => void) | null } 复原函数；没有可折叠的手牌时返回 null
+ * @returns { (() => void) | null } 复原函数；没有可重排的手牌时返回 null
  */
 function foldRealHand(player, fakes) {
-	const container = ui.handcards1Container;
-	if (!container || !container.firstChild) return null;
 	const cards1 = player.node.handcards1;
 	const cards2 = player.node.handcards2;
+	const box1 = ui.handcards1Container;
+	const box2 = ui.handcards2Container;
+	if (!box1 || !cards1) return null;
 	const fakeSet = new Set(fakes);
+	/** 折叠组的间距：比引擎的折叠下限（32px）更小，压成一条几乎只剩左边缘的细边 */
+	const FOLD_PITCH = 10;
+	/** 当前被折成细条的那一组（另一组按引擎的折叠展示）；默认折真牌，点折叠组即可切换 */
+	let foldedGroup: "fake" | "real" = "real";
+	/** 被临时摘掉 `selectable` 的牌（折叠期间不允许被选中），重新展开或复原时补回 */
+	const strippedSelectable = new Set<HTMLElement>();
+	/** 已绑定"点击切换视图"监听的牌 */
+	const boundCards = new Set<HTMLElement>();
+	/** 上一次切换的时间戳：触摸端 touchend 之后浏览器可能再补一个 click，只算一次 */
+	let lastToggle = 0;
 	/** @type { Array<{ card: Card, origin: HTMLElement }> } 被挪动的真牌及其原容器，复原时按此归位 */
 	const moved = [];
-	const style = container.style;
-	const prevWidth = style.width;
-	const prevFold = lib.config.fold_card;
+	/** 内层（放牌）+ 外层（管横向滚动）两个手牌容器 */
+	const boxes = [
+		{ inner: cards1, outer: box1 },
+		{ inner: cards2, outer: box2 },
+	];
+	/** 引擎原本的 `ui.updatehl`：折叠期间被包一层，复原时还原 */
+	const originalUpdatehl = ui.updatehl;
 
-	/** 把本函数造成的改动（容器宽度、fold_card、牌的所属容器）全部还原，并让引擎重新布局 */
+	/**
+	 * 该牌是不是本次的假牌（归"假牌组"）。
+	 *
+	 * `directgains` 会给假牌加 `glows`（特殊区标记），所以除 `fakeSet` 之外，
+	 * 带 `glows` 的牌也按"假牌组"处理 —— 那类牌同样不是玩家的真手牌。
+	 */
+	const isFake = card => fakeSet.has(card) || card.classList.contains("glows");
+
+	/** 该牌是否属于"当前被折叠的那一组"（点它切换视图，而不是选牌） */
+	const isFolded = card => (foldedGroup === "fake" ? isFake(card) : !isFake(card));
+
+	/** 数一数某一组在容器里有多少张：切换前确认另一组确实有牌可展开 */
+	const countGroup = fakeGroup => {
+		let count = 0;
+		for (const { inner } of boxes) {
+			if (!inner) continue;
+			for (const node of inner.childNodes) {
+				const card = /** @type { HTMLElement } */ (node);
+				if (!card.classList || !card.classList.contains("card") || card.classList.contains("removing")) continue;
+				if (isFake(card) === fakeGroup) count++;
+			}
+		}
+		return count;
+	};
+
+	/**
+	 * 切换视图：把当前折叠的组展开、把另一组折起来。
+	 *
+	 * 直接调 `ui.updatehl()` 让引擎整行重排（它会按自己的算法重写所有 transform），
+	 * 随后由 `patchedUpdatehl` 立刻套用新布局 —— 展开组的悬停摊开等特效依旧由引擎负责。
+	 */
+	const toggleFold = () => {
+		const next = foldedGroup === "real" ? "fake" : "real";
+		//另一组一张牌都没有（比如全是假牌）⇒ 展开也没意义，保持现状
+		if (!countGroup(next === "fake")) return;
+		foldedGroup = next;
+		console.log(`[chooseFakeCard] 视图切换：展开${next === "fake" ? "假牌" : "真牌"}、折叠${next === "fake" ? "真牌" : "假牌"}`);
+		ui.updatehl();
+	};
+
+	/**
+	 * 折叠组的牌被点击：切换视图（**不会选中牌**）。
+	 *
+	 * 之所以点折叠组不会误选：布局时已把折叠牌的 `selectable` 摘掉，而引擎 `ui.click.card`
+	 * 在 `selectable` 缺失时会直接返回（`ui/click/index.js`），所以这里只管切视图 ——
+	 * 不拦截事件，引擎自己的拖拽 / 触摸收尾与 `_status.clicked` 复位都照常进行。
+	 */
+	const onFoldClick = function () {
+		//拖动手牌（横向滚动）之后浏览器仍可能补一个 click，别把它当成点击
+		if (_status.dragged || _status.justdragged) return;
+		if (!isFolded(this) || this.classList.contains("removing")) return;
+		const now = Date.now();
+		if (now - lastToggle < 350) return;
+		lastToggle = now;
+		toggleFold();
+	};
+
+	/** 给牌绑上点击切换的监听（与引擎一致：触屏用 touchend，桌面用 click） */
+	const bindCard = card => {
+		if (boundCards.has(card)) return;
+		boundCards.add(card);
+		card.addEventListener(lib.config.touchscreen ? "touchend" : "click", onFoldClick);
+	};
+
+	/**
+	 * 重排一次手牌：**折叠组压成更细的一条，展开组完全沿用引擎自己的折叠结果**。
+	 *
+	 * 引擎 `ui.updatehl` 会把两个容器各自按宽度折叠（`offset = min(112, (容器宽 - 128) / (张数 - 1))`，
+	 * 下限 32px），并处理悬停摊开（`getSpreadOffset`）、`selected` 抬升、横向滚动 —— 这些"特效"
+	 * 都要保留，所以**展开组的位置我们不动**（只整体减去折叠组压缩出来的位移量，牌与牌之间的相对
+	 * 间距、悬停摊开的形状都保持引擎原样），只把**折叠组**换成更小的 `FOLD_PITCH`。
+	 *
+	 * 折叠组的位置取**引擎的基准位置**（下标 × 间距），**不跟随悬停摊开**：引擎的摊开是把悬停点之前
+	 * 的牌整体左移、之后的整体右移（`spreadLeft / spreadRight`），照抄会让整条折叠带跟着鼠标漂。
+	 *
+	 * 折叠组还会被摘掉 `selectable`：点击它只切换视图，绝不会被误选（见 `onFoldClick`）。
+	 */
+	const applyLayout = () => {
+		//@ts-ignore 引擎在 cardmouseenter 时记下的当前悬停牌
+		const hover = ui._handcardHover;
+		for (const { inner, outer } of boxes) {
+			if (!inner || !outer || !inner.childNodes.length) continue;
+			const cards = Array.from(inner.childNodes).filter(
+				node => node.classList && node.classList.contains("card") && !node.classList.contains("removing")
+			);
+			if (!cards.length) continue;
+			/** 读引擎刚写在这张牌上的 translateX（读不到就按下标推算） */
+			const readX = (card, index, fallback) => {
+				const matched = /translateX\((-?[\d.]+)px\)/.exec(card.style.transform || "");
+				return matched ? parseFloat(matched[1]) : index * fallback;
+			};
+			//引擎给这个容器算的折叠间距：与 ui.updatehl 用同一个式子 —— 关了 `fold_card` 就是 112；否则
+			//min(112, (容器宽 - 128) / (张数 - 1))，张数 > 1 时下限 32（只有一张牌时该式天然得 112）。
+			//**不能**用"前两张牌的位置差"反推：引擎的悬停摊开会把悬停点之前的牌整体左移、之后的整体右移，
+			//位置差被污染，折叠组就会跟着鼠标漂。
+			const enginePitch = !lib.config.fold_card
+				? 112
+				: cards.length > 1
+					? Math.max(32, Math.min(112, (outer.offsetWidth - 128) / (cards.length - 1)))
+					: 112;
+			/** 折叠组每压小一张，后面的牌就要跟进的位移 */
+			let shift = 0;
+			/** @type { HTMLElement | undefined } */
+			let last;
+			let lastX = 0;
+			cards.forEach((node, index) => {
+				const card = /** @type { HTMLElement } */ (node);
+				bindCard(card);
+				if (isFolded(card)) {
+					//折叠组：压成 FOLD_PITCH 的细条；被悬停时给它让出一张牌宽，能看清是哪张。
+					//位置取**引擎的基准位置**（下标 × 间距），而不是牌上的 transform —— 后者带着悬停摊开的
+					//偏移，照抄会让整条折叠带跟着鼠标左右漂。
+					const pitch = card === hover ? Math.max(FOLD_PITCH, card.offsetWidth || 0) : FOLD_PITCH;
+					lastX = index * enginePitch - shift;
+					shift += enginePitch - pitch;
+					//折叠期间禁止被选中：摘掉 selectable（引擎 ui.click.card 见它缺失即直接返回）
+					if (card.classList.contains("selectable")) {
+						strippedSelectable.add(card);
+						card.classList.remove("selectable");
+					}
+				} else {
+					//展开组：沿用引擎算好的位置（含悬停摊开），只跟进折叠组压缩造成的整体位移
+					lastX = readX(card, index, enginePitch) - shift;
+					//之前被折叠过、重新展开的牌，把 selectable 补回去
+					if (strippedSelectable.delete(card)) card.classList.add("selectable");
+				}
+				const base = `translateX(${Math.round(lastX)}px)`;
+				//@ts-ignore 引擎用 _transform 记录基准位置，悬停摊开以它为起点
+				card._transform = base;
+				card.style.transform = card.classList.contains("selected") ? `${base} translateY(-20px)` : base;
+				last = card;
+			});
+			const total = Math.round(lastX) + (last?.offsetWidth || 0);
+			inner.style.setProperty("width", `${total}px`, "important");
+			outer.classList.toggle("scrollh", total > outer.offsetWidth);
+		}
+	};
+
+	/**
+	 * 包住 `ui.updatehl`：引擎每次重排（初始化、摸牌、悬停、选牌…）后立刻重新应用我们的布局。
+	 *
+	 * 这样"真牌折叠、假牌平铺"始终成立，也不会再出现"假牌进手牌几秒后才折叠"的延迟。
+	 */
+	const patchedUpdatehl = function (...args) {
+		const result = originalUpdatehl.apply(this, args);
+		try {
+			applyLayout();
+		} catch (e) {
+			//布局失败不能影响引擎自身的重排
+			console.warn("[chooseFakeCard] 应用假牌布局失败：", e);
+		}
+		return result;
+	};
+
+	/** 把本函数造成的改动（updatehl 包装、点击监听、摘掉的 selectable、内层宽度、scrollh、牌的所属容器）全部还原 */
 	const restore = () => {
-		style.width = prevWidth;
-		lib.config.fold_card = prevFold;
+		ui.updatehl = originalUpdatehl;
+		for (const card of boundCards) card.removeEventListener(lib.config.touchscreen ? "touchend" : "click", onFoldClick);
+		boundCards.clear();
+		//折叠期间摘掉的 selectable 补回去，免得引擎的选牌逻辑少认了牌
+		for (const card of strippedSelectable) card.classList.add("selectable");
+		strippedSelectable.clear();
+		for (const { inner, outer } of boxes) {
+			if (!inner || !outer) continue;
+			inner.style.removeProperty("width");
+			outer.classList.remove("scrollh");
+			//牌上的 transform 交回引擎：紧接着的 ui.updatehl() 会按它自己的算法整行重写
+		}
 		for (const { card, origin } of moved) {
 			//牌可能在选择期间被弃置 / 移走（此时它已不在手牌区），只在仍留在手牌区时归位
 			if (card.parentNode !== cards1 && card.parentNode !== cards2) continue;
 			origin.appendChild(card);
 		}
+		//交回引擎自己排版（它会重写 transform，并重新计算 scrollh）
 		ui.updatehl();
 	};
 
 	try {
-		//single-handcard 布局只有一个手牌容器，真假牌混在一起，只能整行折叠
+		//single-handcard 布局只有一个手牌容器（handcards2 被隐藏），真假牌混在一起 —— 这时不搬牌，
+		//靠逐张定位把真牌折起来、假牌留平铺（见 applyLayout）
 		if (!get.is.singleHandcard()) {
 			//把真手牌集中到 handcards1。两个容器同属 node.handcards1/2，getCards("h"/"s") 会同时遍历它们，
 			//因此在两者之间移动牌不影响任何游戏逻辑（只是显示位置变了）。
@@ -71,32 +260,30 @@ function foldRealHand(player, fakes) {
 			}
 		}
 
-		//引擎只在 fold_card 为真时才按宽度算重叠偏移；否则对任何容器都用 112px 间距并给容器加
-		//scrollh（横向滚动），此时收窄容器不会折叠、只会出现滚动条。
-		//这里只改运行期值，绝不 saveConfig 写回配置。
-		lib.config.fold_card = true;
+		//接管"引擎重排之后的收尾"，并立刻排一次：不依赖容器宽度，因此不受外部样式影响，也没有延迟
+		ui.updatehl = patchedUpdatehl;
+		ui.updatehl();
 
-		//各布局的盒模型 / padding 不同，先测出 style.width 与 offsetWidth 之间的差值再换算，避免硬编码
-		const naturalWidth = parseFloat(window.getComputedStyle(container).width) || container.offsetWidth;
-		const gap = container.offsetWidth - naturalWidth;
-		const count = Array.from(cards1.childNodes).filter(node => !node.classList.contains("removing")).length;
-		if (count < 2) {
-			//只有 0~1 张真牌，没有重叠可言，交给引擎原生布局
-			ui.updatehl();
-			return restore;
-		}
-		//按引擎公式反推 offsetWidth = FOLD_OFFSET * (count - 1) + 128，使算出的 offset 刚好不小于 32
-		//（既折叠到只露左边缘，又不出现滚动条）；不超过容器在布局里的原宽度，避免压到假牌区域
-		let width = FOLD_OFFSET * (count - 1) + 128 - gap;
-		for (let i = 0; i < 3; i++) {
-			style.width = Math.max(Math.min(width, naturalWidth), 0) + "px";
-			ui.updatehl();
-			//仍然是 scrollh，说明算出的 offset 被夹到了 32（宽度不够），加宽一点再试
-			if (!container.classList.contains("scrollh")) break;
-			width += 32;
-		}
+		/** 某个容器里前两张牌的实际间距（含 transform 效果），用于核对折叠结果 */
+		const pitchOf = inner => {
+			if (!inner) return "-";
+			const cards = Array.from(inner.childNodes).filter(
+				node => node.classList && node.classList.contains("card") && !node.classList.contains("removing")
+			);
+			if (cards.length < 2) return "-";
+			return `${Math.round(cards[1].getBoundingClientRect().left - cards[0].getBoundingClientRect().left)}px`;
+		};
+		const isRealCard = node => node.classList && node.classList.contains("card") && !node.classList.contains("removing") && !isFake(node);
+		const realCount =
+			Array.from(cards1.childNodes).filter(isRealCard).length + Array.from(cards2.childNodes).filter(isRealCard).length;
+		const fakeCount = fakes.filter(card => card.parentNode === cards1 || card.parentNode === cards2).length;
+		console.log(
+			`[chooseFakeCard] 已重排手牌（默认折真牌、假牌按引擎折叠）：布局=${get.is.singleHandcard() ? "singleHandcard" : "default"}，` +
+				`真牌 ${realCount} 张（handcards1 首张间距 ${pitchOf(cards1)}）、假牌 ${fakeCount} 张（handcards2 首张间距 ${pitchOf(cards2)}）` +
+				"；点击折叠的那一组即可切换展开真牌 / 假牌"
+		);
 	} catch (e) {
-		//任何一步出错都立刻回滚：fold_card 与容器宽度是全局状态，绝不能泄漏出去
+		//任何一步出错都立刻回滚：updatehl 包装与各种内联样式都是全局状态，绝不能泄漏出去
 		restore();
 		throw e;
 	}

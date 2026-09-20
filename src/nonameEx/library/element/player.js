@@ -35,8 +35,10 @@ export class PlayerExt extends lib.element.Player {
 	 * 从传入的牌中选牌（假牌版）。
 	 *
 	 * 把 `params.cards` 里的每张牌复制成一张**假牌**直接置入自己的手牌（`directgains`，不触发获得事件），
-	 * 玩家从这些假牌中挑选；选择期间自己的真实手牌会被折叠成只露左边缘的重叠条
-	 * （鼠标悬停 / 触屏点选被折叠的牌可以展开查看），假牌则按正常间距平铺。
+	 * 玩家从这些假牌中挑选；选择期间手牌分成两组：**一组折成只露左边缘的细条，另一组按引擎自己的折叠
+	 * 展示**（会折、会悬停摊开、有动画），默认折真牌、展开假牌。**点击折叠的那一组即可切换视图**
+	 * （点折叠的真牌 → 展开真牌、折叠假牌；点折叠的假牌 → 展开假牌、折叠真牌），
+	 * 折叠组的点击**不会选中牌**（选择期间它们的 `selectable` 被摘掉，重新展开时补回）。
 	 * 选择结束后假牌被全部删除、手牌布局完全复原。
 	 *
 	 * **参数是一个对象，字段与本体 `chooseCard` 一致**（`EventChooseCardParams`），另外多一个必填的 `cards`：
@@ -56,6 +58,7 @@ export class PlayerExt extends lib.element.Player {
 	 * - 临时牌走 `directgains` 带 gaintag，归入「特殊区」，因此**不污染真实手牌数据**
 	 *   （`countCards("h")` / 手牌上限 / 弃牌结算都只看到真牌）。
 	 * - `result.cards` 是玩家选中的假牌，它们对应的原牌（Card 或 VCard）放在 `result.links` 里。
+	 * - 手牌按"分组折叠"逐张定位，不依赖容器宽度，`single-handcard` 布局下同样成立。
 	 *
 	 * @param { import("@/library/element/Player/type.d").EventChooseCardParams & { cards: Array<Card|VCard> } } params 参数对象，见上方说明
 	 * @returns { GameEvent } 可链式 `.set(...)`、可 `.forResult()` 的事件；

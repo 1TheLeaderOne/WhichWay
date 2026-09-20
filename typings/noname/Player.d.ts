@@ -122,8 +122,10 @@ declare module "@/library/element" {
 		 * 从传入的牌中选牌（假牌版）。
 		 *
 		 * 把传入的每张牌复制成一张**假牌**直接置入自己的手牌（`directgains`，不触发获得事件），
-		 * 玩家从这些假牌中挑选；选择期间自己的真实手牌会被折叠成只露左边缘的重叠条
-		 * （鼠标悬停 / 触屏点选被折叠的牌可以展开查看），假牌则按正常间距平铺。
+		 * 玩家从这些假牌中挑选；选择期间手牌分成两组：**一组折成只露左边缘的细条，另一组按引擎自己的折叠
+		 * 展示**（会折、会悬停摊开、有动画），默认折真牌、展开假牌。**点击折叠的那一组即可切换视图**
+		 * （点折叠的真牌 → 展开真牌、折叠假牌；点折叠的假牌 → 展开假牌、折叠真牌），
+		 * 折叠组的点击**不会选中牌**（选择期间它们的 `selectable` 被摘掉，重新展开时补回）。
 		 * 选择结束后假牌被全部删除、手牌布局完全复原。
 		 *
 		 * 结果形态与 `chooseCard` 一致（`result.cards` 就是玩家选中的假牌），
@@ -133,8 +135,8 @@ declare module "@/library/element" {
 		 * - 临时假牌归入「特殊区」（不参与手牌数 / 手牌上限 / 弃牌结算），
 		 *   选择期间 `player.countCards("h")` 仍是真实手牌数；
 		 * - 只有本地玩家（`game.me`）会折叠手牌，其它客户端只同步假牌本身；
-		 * - `single-handcard` 布局（mobile / long / long2 / nova）下只有一个手牌容器，
-		 *   无法做到「只折真牌」，此时降级为整行折叠。
+		 * - `single-handcard` 布局（mobile / long / long2 / nova）下两个组共用一个手牌容器，
+		 *   因为采用逐张定位，同样能"分组折叠"，表现与默认布局一致。
 		 *
 		 * @param params 参数对象，字段与本体 `chooseCard` 一致（`selectCard` / `filterCard` / `ai` / `forced` /
 		 * `prompt` / `prompt2` / `promptx` / `complexCard` / `complexSelect` / `allowChooseAll` / `glow_result` 等），

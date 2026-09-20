@@ -19,7 +19,7 @@ skill({
 			},
 			forced: true,
 			async content(event, trigger, player) {
-				var num = player.maxHp - trigger.cards.length;
+				let num = player.maxHp - trigger.cards.length;
 				player.draw(num);
 			},
 		},
@@ -37,17 +37,17 @@ skill({
 				return player.countCards("h") > 0;
 			},
 			async content(event, trigger, player) {
-				var suit = [];
-				for (var i of player.getCards("h")) {
-					if (suit.includes(get.suit(i))) continue;
-					suit.push(get.suit(i));
+				let suit:string[] = [];
+				for (let i of player.getCards("h")) {
+					if (suit.includes(get.suit(i)!)) continue;
+					suit.push(get.suit(i)!);
 				}
 				if (suit.length == 0) return;
 				const { control } = await player
-					.chooseControl(suit, "cancel2")
+					.chooseControl({controls:[...suit, "cancel2"]})
 					.set("prompt", "【秉烛】:请选择一种花色")
 					.set("ai", function () {
-						var suit = _status.event.suit;
+						let suit = _status.event.suit;
 						return suit.randomGet();
 					})
 					.set("suit", suit)
@@ -58,17 +58,20 @@ skill({
 					}
 					return;
 				}
-				var hs = player.getCards("h", card => {
+				let hs = player.getCards("h", card => {
 					return get.suit(card) == control;
 				});
 				if (hs.length == 0) return;
-				let list = [];
+				let list:any[] = [];
 				while (hs.length) {
 					const { cards } = await player
-						.chooseCard(true, `【秉烛】:请分配第${get.cnNumber(list.length + 1)}组手牌`)
+						.chooseCard({
+							forced:true,
+							prompt:`【秉烛】:请分配第${get.cnNumber(list.length + 1)}组手牌`
+						})
 						.set("selectCard", function () {
-							var player = _status.event.player;
-							var num = game.countPlayer(current => current != player) - (list.length + 1) > 0 ? 1 : hs.length;
+							let player = _status.event.player;
+							let num = game.countPlayer(current => current != player) - (list.length + 1) > 0 ? 1 : hs.length;
 							return [num, Infinity];
 						})
 						.set("ai", function (card) {
@@ -79,13 +82,13 @@ skill({
 								}) < 2
 							)
 								return 1;
-							for (var i of ui.selected.cards) {
+							for (let i of ui.selected.cards) {
 								if (get.suit(i) == get.suit(card)) return [-1, -1, 1, 1].randomGet();
 								return 1;
 							}
 						})
 						.set("filterCard", card => {
-							var hs = _status.event.hs;
+							let hs = _status.event.hs;
 							return hs.includes(card);
 						})
 						.set("hs", hs)
@@ -95,12 +98,15 @@ skill({
 					hs.removeArray(cards);
 				}
 				let count = list.length,
-					list2 = [];
+					list2:Player[] = [];
 				while (count) {
 					const { targets } = await player
-						.chooseTarget(true, `【秉烛】:请将${get.translation(list[list2.length])}置于一名其他角色的武将牌上`)
+						.chooseTarget({
+							prompt:`【秉烛】:请将${get.translation(list[list2.length])}置于一名其他角色的武将牌上`,
+							forced:true
+						})
 						.set("ai", function (target) {
-							var player = _status.event.player;
+							let player = _status.event.player;
 							return get.attitude(player, target) < 0;
 						})
 						.set("filterTarget", lib.filter.notMe)
@@ -119,39 +125,40 @@ skill({
 					direct: true,
 					trigger: { global: "useCardToTargeted" },
 					filter: function (event, player) {
-						var cards = event.player.getExpansions("bingzhumrfz");
+						let cards = event.player.getExpansions("bingzhumrfz");
 						if (!cards.length || !event.card) return false;
 						//@ts-ignore
 						if (get.type2(event.card) != "trick" && get.type(event.card) != "basic") return false;
-						for (var i of cards) {
+						for (let i of cards) {
 							if (get.name(i) == get.name(event.card) || get.suit(i) == get.suit(event.card)) return true;
 						}
 						return false;
 					},
 					async content(event, trigger, player) {
-						var cards = trigger.player
+						let cards = trigger.player
 							.getExpansions("bingzhumrfz")
 							.filter(i => get.name(i) == get.name(trigger.card) || get.suit(i) == get.suit(trigger.card));
-						const {
-							result: { bool, links },
-						} = await player.chooseCardButton("【秉烛】:你可以弃置其一张‘司’并令此牌对一名目标角色无效", cards).set("ai", () => {
-							var player = _status.event.player,
+						const { bool, links } = await player.chooseCardButton({cards,prompt:"【秉烛】:你可以弃置其一张‘司’并令此牌对一名目标角色无效"}).set("ai", () => {
+							let player = _status.event.player,
 								event = _status.event.getTrigger(),
 								friend = game.filterPlayer(current => current == player || get.attitude(current, player) > 0);
-							for (var i of event.targets) {
+							for (let i of event.targets) {
 								if (friend.includes(i)) return 1;
 							}
 							return 0;
-						});
+						}).forResult();
 						if (!bool) return;
 						const { targets } = await player
-							.chooseTarget("【秉烛】:请选择一名目标角色，然后此牌对该角色无效", true)
+							.chooseTarget({
+								prompt:"【秉烛】:请选择一名目标角色，然后此牌对该角色无效",
+								forced:true
+							})
 							.set("ai", function (target) {
-								var player = _status.event.player;
+								let player = _status.event.player;
 								return get.attitude(target, player) > 0;
 							})
 							.set("filterTarget", (card, player, target) => {
-								var targets = _status.event.targets;
+								let targets = _status.event.targets;
 								return targets.includes(target);
 							})
 							.set("targets", trigger.targets)
@@ -159,7 +166,7 @@ skill({
 						if (!targets) return;
 						//@ts-ignore
 						trigger.getParent().excluded.add(targets[0]);
-						trigger.player.loseToDiscardpile(links);
+						trigger.player.loseToDiscardpile({cards:links});
 						player.draw();
 						//@ts-ignore
 						player.logSkill("bingzhumrfz", targets[0]);
@@ -169,10 +176,10 @@ skill({
 					charlotte: true,
 					silent: true,
 					trigger: { player: "dieAfter" },
-					content() {
-						for (var i of game.players) {
-							var cards = i.getExpansions("bingzhumrfz");
-							if (cards.length) i.loseToDiscardpile(cards);
+					async content(event,trigger,player) {
+						for (let i of game.players) {
+							let cards = i.getExpansions("bingzhumrfz");
+							if (cards.length) i.loseToDiscardpile({cards});
 						}
 					},
 				},
