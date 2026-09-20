@@ -135,6 +135,30 @@ jobs:
           # DEV_REF 可能是 refs/remotes/origin/dev（含 /），分隔符不能用 /，否则
           # sed 会报 "unknown option to `s'"
           sed -i "s|VERSION|${VERSION}|g; s|DEVREF|${DEV_REF}|g" notes.md
+          # 把本版公告正文附在版本说明后面：内容取自源码树 src/updateLog/updateContentCurrent.js
+          # 的 upDataContentCurrent.md。标签树是构建产物、不含该文件，所以从 DEV_REF（dev 那次提交）取；
+          # 用 node 动态 import 求值，模板字符串里的转义（如 \`）会被正确还原。
+          if git cat-file -e "${DEV_REF}:src/updateLog/updateContentCurrent.js" 2>/dev/null; then
+            git show "${DEV_REF}:src/updateLog/updateContentCurrent.js" > announcement.mjs
+            cat > extract-announcement.mjs <<'EOF'
+          import { pathToFileURL } from "node:url";
+          const mod = await import(pathToFileURL(process.argv[2]).href);
+          process.stdout.write(String(mod.upDataContentCurrent?.md ?? ""));
+          EOF
+            if command -v node >/dev/null 2>&1 && MDA="$(node extract-announcement.mjs announcement.mjs)"; then
+              if [ -n "${MDA//[[:space:]]/}" ]; then
+                { echo ""; printf '%s' "${MDA}"; echo ""; } >> notes.md
+                echo "note: appended the update announcement from ${DEV_REF}"
+              else
+                echo "note: the update announcement is empty, nothing appended"
+              fi
+            else
+              echo "::warning::could not read upDataContentCurrent.md from ${DEV_REF}; the release notes will not include the update announcement"
+            fi
+            rm -f announcement.mjs extract-announcement.mjs
+          else
+            echo "note: ${DEV_REF} has no src/updateLog/updateContentCurrent.js, skipping the update announcement"
+          fi
           if gh release view "${VERSION}" >/dev/null 2>&1; then
             gh release edit "${VERSION}" --title "${VERSION}" --notes-file notes.md
             gh release upload "${VERSION}" dist/*.zip --clobber
