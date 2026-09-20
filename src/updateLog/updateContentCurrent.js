@@ -6,7 +6,7 @@ export const upDataContentCurrent = {
 	md: `
 ### 更新概要
 
-- **新增武将**: 晓歌
+- **新增武将**: 晓歌、埃癸斯
 - **技能 / 武将调整**：白面鸮、重岳、帕拉斯
 - **新增 API**：\`Player.chooseTargetControl\`、\`Player.chooseFakeCard\`
 - **修复**：\`override.ts\`中仍然使用\`StepContent\`的bug
@@ -17,6 +17,9 @@ export const upDataContentCurrent = {
 - **重构**：阿、安洁莉娜、安哲拉、ASH、白金、白铁、柏喙、澄闪、斥罪、重岳、初雪、刺玫、魔王、戴菲恩、德克萨斯、医生、多萝西、艾拉、菲莱、风笛、风丸、弗里斯腾、格劳克斯、黑、歌蕾蒂娅、瑰盐、哈蒂娅、海沫、号角、红、红隼的技能部分改用新写法
 - **优化**：优化加载流程，减少加载时间
 - **优化**: 优化\`WhichWayTips\`
+
+### 进行中
+- **优化**: 优化势力显示，现在联动角色会正确显示其势力
 `,
 
 	/**
@@ -25,7 +28,7 @@ export const upDataContentCurrent = {
 	 */
 	player: {
 		/** 本版新增的干员 */
-		add: ["xiaogemrfz"],
+		add: ["xiaogemrfz","aiguisimrfz"],
 		/** 本版调整过技能 / 数据的干员 */
 		adjust: ["baimianxiaomrfz", "chongyuemrfz", "palasimrfz"],
 	},

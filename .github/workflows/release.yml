@@ -3,7 +3,7 @@ name: release
 # 一个 tag = 一个 Release = 三份附件：
 #   WhichWay-<tag>.zip        完整包   （取自标签自身的树，即 output 分支）
 #   WhichWay-<tag>-core.zip   增量包   （取自 output-core 分支，覆盖安装用）
-#   WhichWay-<tag>-dev.zip    源码包   （取自 scripts/release.bat 记录在该标签提交信息里的 dev-commit）
+#   WhichWay-<tag>-dev.zip    源码包   （取自 scripts/release.bat 记录在该标签提交信息里的 dev-commit；不含 scripts/）
 #
 # 触发方式：
 #   1) push tag（v*）——scripts/release.bat 用一次 --atomic push 把
@@ -15,7 +15,8 @@ name: release
 #
 # 注意：GitHub 只在「被标记的提交里存在该工作流文件」时才会为 tag push 运行工作流，
 # 因此 scripts/release.bat 会把本文件注入到 tags 指向的那棵树（构建目录本身保持干净），
-# 而两个附件都会排除 .github，避免把 CI 配置发给用户。
+# 而两个附件都会排除 .github，避免把 CI 配置发给用户；
+# 源码包另外排除 scripts/（打包 / 发布工具，只随仓库走，使用者用不到）。
 
 on:
   push:
@@ -85,10 +86,11 @@ jobs:
             --prefix=WhichWay/ "refs/tags/${VERSION}" -- . ":(exclude).github"
           # 增量包：output-core 分支头部（release.bat 生成时已忽略 .github）
           git archive --format=zip -o "dist/WhichWay-${VERSION}-core.zip" --prefix=WhichWay/ origin/output-core
-          # 源码包：该次发布所使用的 dev 提交
-          git archive --format=zip -o "dist/WhichWay-${VERSION}-dev.zip" --prefix=WhichWay/ "${DEV_REF}"
+          # 源码包：该次发布所使用的 dev 提交，排除 scripts/（仓库自带的打包 / 发布工具）
+          git archive --format=zip -o "dist/WhichWay-${VERSION}-dev.zip" \
+            --prefix=WhichWay/ "${DEV_REF}" -- . ":(exclude)scripts"
           ls -lh dist
-          # 检查三个包：顶层必须是 WhichWay/，安装包不得带 CI 配置。
+          # 检查三个包：顶层必须是 WhichWay/；安装包不得带 CI 配置；任何包都不得带 scripts/。
           # 注意：这里一律不用 `... | head -n 1` / `... | grep -q`。仓库有几千个
           # 条目，下游提前退出会让上游（unzip 或 printf）收到 SIGPIPE（退出码
           # 141），在 set -o pipefail 下整条管道被判为失败——包其实是对的却报错。
@@ -106,6 +108,9 @@ jobs:
                 *-dev.zip) echo "note: $f keeps .github (it is the source tree)" ;;
                 *) echo "::error::$f: contains .github"; exit 1 ;;
               esac
+            fi
+            if [[ "${entries}" == "WhichWay/scripts/"* || "${entries}" == *$'\n'"WhichWay/scripts/"* ]]; then
+              echo "::error::$f: contains scripts/ (packaging tools must not ship)"; exit 1
             fi
           done
 

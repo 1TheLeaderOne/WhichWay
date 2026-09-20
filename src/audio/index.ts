@@ -670,7 +670,7 @@ class WhichWayAudio {
 			before: function (player) {
 				const name = typeof player === "string" ? player : player ? get.name(player) : void 0;
 				if (!name) return;
-				const info: WhichWayCharacterPending = get.character(name);
+				const info: WhichWayCharacter = get.character(name);
 
 				//initDieAudio 只在本地文件缺失时才挂 dieAudio，因此有实例就意味着要走在线
 				if (!info?.whichWay?.dieAudio) return;
@@ -1269,9 +1269,12 @@ class WhichWayAudio {
 		//@ts-ignore
 		char.dieAudios = [`ext:WhichWay/audio/${this.getCharacterLang(name)}/die/${name}.mp3`];
 
+		//武将包自定义的 dieAudio（不是本模块挂的在线播放器）一律保留：
+		//模块只对自己挂的那个负责（缺本地语音时挂、有本地语音时清）
+		const customDieAudio = !!char.whichWay.dieAudio && !(char.whichWay.dieAudio instanceof whichWayWebPlayDie);
 		if (!this.exsitAudioSync(null!, name, true)) {
-			if (whichWayArknight.inArknightChars(name)) char.whichWay.dieAudio = new whichWayWebPlayDie(char);
-		} else if (char.whichWay.dieAudio) {
+			if (!customDieAudio && whichWayArknight.inArknightChars(name)) char.whichWay.dieAudio = new whichWayWebPlayDie(char);
+		} else if (char.whichWay.dieAudio && !customDieAudio) {
 			//@ts-ignore
 			char.whichWay.dieAudio = undefined;
 		}

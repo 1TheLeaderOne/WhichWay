@@ -4,6 +4,7 @@ import { whichWayCharacterCardClick as click } from "./click.ts";
 import { whichWayUtil } from "../utill.js";
 import { whichWaySkin } from "../skin/index.ts";
 import { getDesigner, getCamp } from "./../packs/base/index.js";
+import { getGroupData } from "./../packs/base/groups.js";
 import { whichWayAudio } from "../audio/index.ts";
 import { whichWayToast } from "../toast/index.ts";
 import Sortable from "./../../lib/Sortable/Sortable.js";
@@ -96,17 +97,37 @@ class WhichWayCharacterCard {
 	async createCampLogo(container: HTMLElement, name: string) {
 		const campWrapper = ui.create.div(".camplogo-wrapper", container);
 		const imgDef = ui.create.div(".img-def", campWrapper);
-		let camp = getCamp(name);
+
+		//图标来源按优先级：
+		//1. 角色自己的明日方舟阵营（`whichWay.arknight.camp`，可自定义）—— 直接取 `arknight/<camp>.png`。
+		//   这里**不再**拿它去 shcema 的映射表做白名单校验：像埃癸斯的 `persona`（联动、不在映射表里但图标确实存在）
+		//   会被误判成"非明日方舟"，于是跑到 noname 文件夹去取图。
+		//2. groupData 里该势力配置的图标（`logo` 缺省就是它的真实势力名，如 sui / rhodes）；
+		//   角色的 `group` 可能被「统一势力」改成 `sjzx_group`，所以再用真实势力兜底查一次。
+		const camp = getCamp(name);
+		const char = get.character(name);
+		//角色的自定义阵营（如埃癸斯的 `persona`）也参与查表：groupData 里为某个阵营单开一条时，
+		//只有把阵营一起传进去才能命中（角色的 group 未必等于该条目的键）
+		const arknightsCamp = char?.whichWay?.arknight?.camp;
+		const groupInfo = getGroupData(char?.group, whichWayUtil.getCharExtConfig(name)?.reallyGroup, arknightsCamp);
+		const arknightLogo = arknightsCamp || groupInfo?.logo || groupInfo?.reallyGroup;
+		//是否反色（`css/characterCard.css` 的 `.arknightCamp` = `filter: invert(1)`）：
+		//groupData 里配了 `filter` 就按它来，没配才走原流程 —— 明日方舟图标反色、其它不反色
+		const useFilter = groupInfo?.filter ?? !!arknightLogo;
+		if (arknightLogo) {
+			if (useFilter) imgDef.classList.add("arknightCamp");
+			imgDef.style.backgroundImage = `url(${whichWayFile.extDir}/image/camplogo/arknight/${arknightLogo}.png)`;
+			return campWrapper;
+		}
+
+		//剩下的都不是明日方舟阵营（引擎势力等）：`getCamp` 此时返回的是角色的 group，取 noname/name_*.png；
+		//连这个都没有就显示势力文字。
 		if (camp) {
-			const isNoname = !whichWayArknight.shcema.group.arknight.includes(camp);
-			if (!isNoname) imgDef.classList.add("arknightCamp");
-			let url = whichWayFile.extDir + "/image/camplogo/" + (isNoname ? "noname" : "arknight") + "/" + (isNoname ? "name_" : "" ) + getCamp(name) + ".png";
-			imgDef.style.backgroundImage = "url(" + url + ")";
-		} else {
-			if (lib.translate[get.character(name).group]) {
-				const groupText = ui.create.div(".group-text", imgDef);
-				groupText.innerHTML = lib.translate[get.character(name).group];
-			}
+			if (useFilter) imgDef.classList.add("arknightCamp");
+			imgDef.style.backgroundImage = `url(${whichWayFile.extDir}/image/camplogo/noname/name_${camp}.png)`;
+		} else if (lib.translate[char?.group]) {
+			const groupText = ui.create.div(".group-text", imgDef);
+			groupText.innerHTML = lib.translate[char.group];
 		}
 
 		return campWrapper;

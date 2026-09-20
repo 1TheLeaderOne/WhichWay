@@ -1,35 +1,53 @@
+/**
+ * 驶舰之向角色设置（挂在 `char.whichWay` 上）。
+ *
+ * **声明时每个字段都可以自定义**：写了就一律以声明为准（包括显式写 `false`），
+ * 没写的字段在注册阶段（`initCharConfig` → `whichWayArknight.initCharArknight`）
+ * 用默认值 / 明日方舟数据补全 —— 补全规则写在每个字段的注释里。
+ */
 declare type WhichWayCharConfig = {
 	/**
 	 * 是否为支援器械
-	 * @type { boolean }
+	 *
+	 * 缺省（`undefined`）时按明日方舟 tag 里的「支援机器」推导
 	 */
-	supportingEquipment: boolean;
+	supportingEquipment?: boolean;
 
 	/**
 	 * 设计者
-	 * @type { Array<string> }
+	 *
+	 * 声明成字符串时会被规整成数组
 	 */
-	designer: Array<string>;
+	designer?: string | Array<string>;
 
 	/**
-	 * 真正的势力
+	 * 真正的势力（明日方舟势力 id，取值见 `src/packs/base/groups.js` 的 `groupData.reallyGroup`）
+	 *
+	 * 缺省时取角色的 `group`
 	 */
-	reallyGroup: string;
+	reallyGroup?: string;
 
 	/**
 	 * 角色id(驶舰之向)
+	 *
+	 * 缺省时取角色的名字（注册时的 `name`）
 	 */
-	charId: string;
+	charId?: string;
 
 	/**
 	 * 是不是联动角色
+	 *
+	 * 缺省（`undefined`）时按明日方舟可用配音语言里是否含 `LINKAGE` 推导
 	 */
-	linkage: boolean;
+	linkage?: boolean;
 
 	/**
 	 * 死亡音频相关
+	 *
+	 * 运行期由音频模块（`whichWayAudio.initDieAudio`）在「本地缺少阵亡语音 + 明日方舟干员」时挂载；
+	 * 自行提供实现即可覆盖模块行为（提供了就不再被模块改写/清除）。
 	 */
-	dieAudio: {
+	dieAudio?: {
 		that: WhichWayCharConfig;
 		get useLocalAudio(): boolean;
 		get lang(): string;
@@ -40,18 +58,34 @@ declare type WhichWayCharConfig = {
 
 	/**
 	 * 明日方舟数据
+	 *
+	 * 每个字段同样可自定义，缺省时才用明日方舟表格补全（`initCharArknight`），详见各字段注释。
 	 */
-	arknight: {
+	arknight?: {
 		/**
 		 * 角色id(明日方舟)
+		 *
+		 * 缺省时优先取角色声明的 `arkuid`，再按角色id反查
 		 */
-		charId: string;
-		/**明日方舟阵营 */
-		camp: ArksCamps | string;
-		/**明日方舟可用配音语言 */
-		avaiableLangs: string[];
-		/**角色tag */
-		tags: string[];
+		charId?: string;
+		/**
+		 * 明日方舟阵营
+		 *
+		 * 缺省时按真实势力（`reallyGroup`）映射
+		 */
+		camp?: ArksCamps | string;
+		/**
+		 * 明日方舟可用配音语言
+		 *
+		 * 声明了就完全采用声明的列表（不再按明日方舟数据推导）
+		 */
+		avaiableLangs?: string[];
+		/**
+		 * 角色tag
+		 *
+		 * 声明了就完全采用声明的列表（不再按明日方舟数据推导）
+		 */
+		tags?: string[];
 	};
 };
 
@@ -237,53 +271,51 @@ interface WhichWayCharacterPrototype {
 
 declare type WhichWayCharacterPackNames = "epicSJZX" | "legendSJZX" | "especialSJZX" | "plotSJZX" | "specialSJZX" | "rareSJZX" | "mediocreSJZX" | "normalSJZX";
 
+/**
+ * 驶舰之向角色数据（**声明态**：武将包里写的、`get.character()` 拿到的原始对象）。
+ *
+ * 除 {@link WhichWayCharacterPrototype} 的必填字段外都可缺省，注册阶段会补默认值，
+ * 补全后的形态见 {@link WhichWayCharacterInitialized}。
+ */
 declare interface WhichWayCharacter extends WhichWayCharacterPrototype {
 	/**
-	 * 驶舰之向角色设置
-	 */
-	whichWay: WhichWayCharConfig;
-	/**
-	 * 设计者
-	 */
-	designer: string | Array<string>;
-	pack: WhichWayCharacterPackNames;
-
-	/**
-	 * 明日方舟角色uid
-	 */
-	arkuid?:string;
-}
-
-declare interface WhichWayCharacterPending extends WhichWayCharacterPrototype {
-	/**
-	 * 设计者
-	 * @type { string|Array<string> }
-	 */
-	designer?: string | Array<string>;
-
-	/**
-	 * 驶舰之向角色设置
+	 * 驶舰之向角色设置（声明时每个字段都可自定义，见 {@link WhichWayCharConfig}）
 	 */
 	whichWay?: WhichWayCharConfig;
 
 	/**
-	 * 所属将包(会自动添加到对应将包)
+	 * 设计者（可写字符串，注册时会规整成数组；也可写在 `whichWay.designer` 里）
+	 */
+	designer?: string | Array<string>;
+
+	/**
+	 * 所属将包(会自动添加到对应将包)；缺省归入 `specialSJZX`
 	 */
 	pack?: WhichWayCharacterPackNames;
 
 	/**
-	 * 明日方舟角色uid
+	 * 明日方舟角色uid（显式指定可跳过按名字反查）
 	 */
-	arkuid?:string;
+	arkuid?: string;
+}
+
+/**
+ * 注册完成后的驶舰之向角色数据：`whichWay` 与 `pack` 必定存在。
+ *
+ * 由 `initCharConfig()` 产出，注册流程（`packs/index.ts`）与依赖补全结果的模块使用。
+ */
+declare interface WhichWayCharacterInitialized extends WhichWayCharacter {
+	whichWay: WhichWayCharConfig;
+	pack: WhichWayCharacterPackNames;
 }
 
 declare interface WhichWayCharacterPack {
-	character: Record<string, WhichWayCharacter | WhichWayCharacterPending | WhichWayCharacterArray>;
+	character: Record<string, WhichWayCharacter | WhichWayCharacterArray>;
 	skill: Record<string, ExtendedSkill>;
 }
 
 declare interface WhichWayObjectificationCharacterPack {
-	character: Record<string, WhichWayCharacter>;
+	character: Record<string, WhichWayCharacterInitialized>;
 	skill: Record<string, ExtendedSkill>;
 }
 

@@ -87,7 +87,7 @@ WhichWay/
 │   │   ├── index.js      # WhichWayCharacterPack：仅保留 initTranslate（动态翻译/势力分组）与设计者导出
 │   │   ├── packs/*/*SJZX.js  # 旧式武将包文件（历史遗留，已不再加载，仅作参考）
 │   │   ├── translate/    # 旧式集中翻译（历史遗留；characterName/skillsTranslate/characterTitle/characterIntro 已被新式角色文件覆盖，仅 dynamicTranslate.js 仍被 initTranslate 使用）
-│   │   ├── groups.js     # 势力数据（groupData）
+│   │   ├── groups.js     # 势力数据（groupData：group / sort / reallyGroup / logo）
 │   │   ├── characterDesigner.js # 干员设计者记录
 │   │   └── extCharConfig.ts    # char.whichWay 扩展配置结构
 │   ├── card/index.js     # 卡牌包（game.import("card", ...) 写法）
@@ -226,7 +226,7 @@ skill({ huozhimrfz: { /* lib.skill 标准技能对象 */ } });
 
 - 干员 id：`{拼音/英文}mrfz` 结尾，如 `beiluoneimrfz`、`keluxiermrfz`、`wangmrfz`。
 - 技能 id：`{拼音}mrfz` 结尾，如 `huozhimrfz`、`qingsuanmrfz`；子技能按引擎规则 `技能名_子技能名`。
-- 势力 id：`{拼音}mrfz` 结尾（`src/character/groups.js` 的 `groupData`），如 `suimrfz`（岁）、`luomrfz`（罗德岛）；可通过配置"统一势力"把所有干员并入 `sjzx_group`（泰拉）。
+- 势力 id：`{拼音}mrfz` 结尾（`src/packs/base/groups.js` 的 `groupData`），如 `suimrfz`（岁）、`luomrfz`（罗德岛）；可通过配置"统一势力"把所有干员并入 `sjzx_group`（泰拉）。`groupData` 的每一项还要写 `reallyGroup`（该势力在明日方舟里的真实势力 id，用于映射阵营）与 `logo`（图标名，取 `image/camplogo/arknight/<logo>.png`，**默认就是真实势力名**）；`CharacterCard` 取势力图标时默认用这里的配置，`getGroupData(group, reallyGroup)` 负责查表（"统一势力"下 group 已变成 `sjzx_group`，靠 reallyGroup 兜底）。还可写 `filter`（图标是否反色，对应 `.arknightCamp` 的 `filter: invert(1)`）：配了就按它，不配才沿用原流程（明日方舟图标反色、`noname/name_*.png` 不反色）。
 - 卡牌 id：`{拼音}mrfz` 或 `{拼音}mrfzCard` 结尾，图片放 `image/card/`。
 - 干员立绘：`image/character/{干员id}.jpg`；皮肤图片在 `image/skin/{干员id}/`。
 
@@ -253,6 +253,7 @@ skill({ huozhimrfz: { /* lib.skill 标准技能对象 */ } });
   - ⚠️ **新增对这三张表的字段读取时，必须三处同步**：`slimArknightData()` 白名单、`typings/arknight.d.ts` 的 `*Slim` 类型、`WhichWayArknight.slimCacheSchema`（+1 让老缓存失效）。只改读取代码会导致精简缓存静默缺字段。
   - `handbook_team_table` 零运行时引用，既在 `loadSkipFiles` 里跳过读取，也不进精简缓存。
 - `whichWayArknight` 提供：干员 id 映射（驶舰之向 ↔ 明日方舟）、阵营查询、语音语言查询、干员 tag 查询等。
+- `char.whichWay`（{@link WhichWayCharConfig}）的**每个字段都可由武将包自定义**：`supportingEquipment` / `designer` / `reallyGroup` / `charId` / `linkage` / `dieAudio` / `arknight.*`。声明过的一律保留（含显式 `false`、空数组），只补 `undefined` 的字段 —— 角色自身字段由 `initCharConfig`（`src/packs/base/extCharConfig.ts`）规整，明日方舟数据由 `initCharArknight`（`src/arknight/index.ts`）补全；`supportingEquipment` / `linkage` 缺省时分别按 tag「支援机器」与配音语言里的 `LINKAGE` 推导。
 - 每个干员注册后自动绑定 `char.whichWay.arknight`（`charId` / `camp` / `avaiableLangs` / `tags`）。
 
 ## 语音 / 皮肤 / 模组
@@ -324,7 +325,7 @@ if (result.bool) {
 
 ## 类型系统（typings/）
 
-- `typings/` 下提供全局类型声明：`WhichWayCharacter` / `WhichWayCharacterPending` / `ExtendedSkill` / `WhichWayCharConfig` / `WhichWay`（window）/ `whichWayConfig` / 钩子注册类型 / `ChooseFakeCardParams`·`ChooseFakeCardResult`（`player.chooseFakeCard()`）/ `ChooseTargetControlParams`·`ChooseTargetControlResult`（`player.chooseTargetControl()`）等，编写 TS 时可直接使用。
+- `typings/` 下提供全局类型声明：`WhichWayCharacter`（**声明态**：武将包里写的角色数据，`whichWay` / `pack` / `designer` 均可缺省）/ `WhichWayCharacterInitialized`（`initCharConfig()` 之后的初始化态，`whichWay` / `pack` 必定存在）/ `WhichWayCharConfig`（`char.whichWay`，声明时每个字段都可自定义）/ `ExtendedSkill` / `WhichWay`（window）/ `whichWayConfig` / 钩子注册类型 / `ChooseFakeCardParams`·`ChooseFakeCardResult`（`player.chooseFakeCard()`）/ `ChooseTargetControlParams`·`ChooseTargetControlResult`（`player.chooseTargetControl()`）等，编写 TS 时可直接使用。
 - `typings/noname/` 下是对 noname 本体接口的模块增强，与 `src/nonameEx/` 的目录一一对应：`Game.d.ts`（对应 `nonameEx/game/`）、`Get.d.ts`（对应 `nonameEx/get/`）、`Card.d.ts` / `Player.d.ts` / `GameEvent.d.ts`（对应 `nonameEx/library/element/`）。`nonameEx/library/element/content.js` 里的 content 函数**不需要**声明：本体的 `lib.element.content` 本身就是 `Record<string, ContentFuncByAll | ContentFuncsByAll>`，任何键都能通过。
 - ⚠️ 给 `nonameEx/` 下的类新增方法后，记得在对应的 `typings/noname/*.d.ts` 里补声明，否则调用处只能拿到 `any`（`content.js` 除外，见上一条）。`typings/extNonameClass/` 是早期的同类模块增强目录（如 `Character.whichWay`），新声明请统一放 `typings/noname/`。
 - ⚠️ **凡是为无名杀类（Player / Card / GameEvent / Game / Get / 内置原型等）新增的扩展函数，都必须在 `typings/noname/` 下对应文件里写类型声明并配 JSDoc 注释**：`player.js` → `Player.d.ts`、`card.js` → `Card.d.ts`、`gameEvent.js` → `GameEvent.d.ts`、`game/index.js` → `Game.d.ts`、`get/index.js` → `Get.d.ts`、`jsExt/ArrayExt.js`·`jsExt/HTMLDivElementExt.js` → `typings/js.d.ts`。注释要写清"做什么、参数含义、返回值形态、注意事项/已知限制"，参数与结果复杂时提供 `@example` 与独立类型别名（如 `ChooseTargetControlParams` / `ChooseTargetControlResult`）。新增后可用"源码方法名 vs typings 文件名"逐条对账命令自查漏项。

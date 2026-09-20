@@ -144,18 +144,15 @@ class WhichWayPackManager {
 			char.img = whichWayFile.compilePath(`img:character/${name}.jpg`);
 
 			//————初始化WhichWay配置————//
-			char = initCharConfig(char);
+			//声明态 → 初始化态：补全 whichWay / pack，**声明过的字段（含 whichWay 里的）一律保留**，
+			//因此下面几处缺省赋值都用 ??=，让武将包可以自定义每一项
+			const data = initCharConfig(char);
 
-			//————势力设置————//
-			char.whichWay.reallyGroup = char.group;
+			//————势力设置————//（缺省取角色 group）
+			data.whichWay.reallyGroup ??= char.group;
 
-			//————添加WhichWay配置————//
-			char.whichWay.charId = name;
-
-			//————设置将包————//
-			if (!char.pack) {
-				char.pack = "specialSJZX";
-			}
+			//————添加WhichWay配置————//（缺省取注册名）
+			data.whichWay.charId ??= name;
 
 			//————引擎可用性注册————//
 			// WhichWay 的干员不走引擎普通武将包导入流程（game.import/addCharacterPack），
@@ -167,7 +164,7 @@ class WhichWayPackManager {
 			//   玩家点将仍可选用；与引擎普通包的 forbidai 语义一致）
 			// isUnseen 角色仍保留在 lib.characterPack 中，WhichWay 图鉴/立绘等内部逻辑不受影响。
 			const packEnabled =
-				lib.config.extension_WhichWay_characters_enable !== false && lib.config.characters.includes(char.pack);
+				lib.config.extension_WhichWay_characters_enable !== false && lib.config.characters.includes(data.pack);
 			if (!packEnabled) {
 				//@ts-ignore isUnseen 为引擎角色标记字段（类型未在 WhichWayCharacter 上声明）
 				(char as any).isUnseen = true;
@@ -175,22 +172,25 @@ class WhichWayPackManager {
 				// 整体“仅点将可用”（引擎扩展包 tab：forbidai_user_mode_extension_WhichWay）
 				lib.config.forbidai_user_mode_extension_WhichWay === true ||
 				// 子包“仅点将可用”（forbidai_user_<子包>）
-				lib.config[`forbidai_user_${char.pack}`] === true
+				lib.config[`forbidai_user_${data.pack}`] === true
 			) {
 				if (!lib.config.forbidai.includes(name)) {
 					lib.config.forbidai.add(name);
 				}
 			}
 
-			lib.characterPack[char.pack][name] ??= char;
+			lib.characterPack[data.pack][name] ??= char;
 
+			//设计者：优先武将包声明的（顶层 designer 或 whichWay.designer），都没有才查设计者记录
 			//@ts-ignore
 			if (char.designer) {
-				char.whichWay.designer = Array.isArray(char.designer) ? char.designer : [char.designer];
+				data.whichWay.designer = Array.isArray(char.designer) ? char.designer : [char.designer];
+			} else if (!data.whichWay.designer?.length) {
+				data.whichWay.designer = getDesigner(char, false, true);
+			}
+			if (data.whichWay.designer?.length) {
 				designer[name] ??= [];
-				designer[name].push(...char.whichWay.designer.filter(designerx => !designer[name].includes(designerx)));
-			} else {
-				char.whichWay.designer = getDesigner(char, false, true);
+				designer[name].push(...data.whichWay.designer.filter(designerx => !designer[name].includes(designerx)));
 			}
 
 			if (!whichWayUtil.config("unityGroup")) {
@@ -212,22 +212,8 @@ class WhichWayPackManager {
 			//————设置Arknight配置————//
 			whichWayArknight.addShcema(name, char);
 
-			whichWayArknight.initCharArknight(char);
-
-			// onAfterInit({
-			// 	name:`whichWayPackManager_ArknightInit_${name}`,
-			// 	fn: (func) => {
-			// 		func(char);
-
-			// 		char.whichWay.supportingEquipment = char.whichWay.arknight.tags.includes("支援机器");
-			// 		char.whichWay.linkage = char.whichWay.arknight.avaiableLangs.includes("LINKAGE");
-
-			// 		console.log(char);
-			// 	}
-			// })
-
-			// char.whichWay.supportingEquipment = char.whichWay.arknight.tags.includes("支援机器");
-			// char.whichWay.linkage = char.whichWay.arknight.avaiableLangs.includes("LINKAGE");
+			//补全明日方舟数据（同样只补缺省字段，逐个字段都可用 whichWay.arknight 自定义）
+			whichWayArknight.initCharArknight(data);
 
 			return char;
 		});

@@ -104,7 +104,6 @@ function foldRealHand(player, fakes) {
 		//另一组一张牌都没有（比如全是假牌）⇒ 展开也没意义，保持现状
 		if (!countGroup(next === "fake")) return;
 		foldedGroup = next;
-		console.log(`[chooseFakeCard] 视图切换：展开${next === "fake" ? "假牌" : "真牌"}、折叠${next === "fake" ? "真牌" : "假牌"}`);
 		ui.updatehl();
 	};
 
@@ -264,24 +263,6 @@ function foldRealHand(player, fakes) {
 		ui.updatehl = patchedUpdatehl;
 		ui.updatehl();
 
-		/** 某个容器里前两张牌的实际间距（含 transform 效果），用于核对折叠结果 */
-		const pitchOf = inner => {
-			if (!inner) return "-";
-			const cards = Array.from(inner.childNodes).filter(
-				node => node.classList && node.classList.contains("card") && !node.classList.contains("removing")
-			);
-			if (cards.length < 2) return "-";
-			return `${Math.round(cards[1].getBoundingClientRect().left - cards[0].getBoundingClientRect().left)}px`;
-		};
-		const isRealCard = node => node.classList && node.classList.contains("card") && !node.classList.contains("removing") && !isFake(node);
-		const realCount =
-			Array.from(cards1.childNodes).filter(isRealCard).length + Array.from(cards2.childNodes).filter(isRealCard).length;
-		const fakeCount = fakes.filter(card => card.parentNode === cards1 || card.parentNode === cards2).length;
-		console.log(
-			`[chooseFakeCard] 已重排手牌（默认折真牌、假牌按引擎折叠）：布局=${get.is.singleHandcard() ? "singleHandcard" : "default"}，` +
-				`真牌 ${realCount} 张（handcards1 首张间距 ${pitchOf(cards1)}）、假牌 ${fakeCount} 张（handcards2 首张间距 ${pitchOf(cards2)}）` +
-				"；点击折叠的那一组即可切换展开真牌 / 假牌"
-		);
 	} catch (e) {
 		//任何一步出错都立刻回滚：updatehl 包装与各种内联样式都是全局状态，绝不能泄漏出去
 		restore();

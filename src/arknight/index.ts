@@ -197,7 +197,7 @@ class WhichWayArknight {
 		//以下中间量与具体 key 无关，提前算好。
 		//原先它们在循环体内构建，每个 key 都对全部干员重算一遍 filter/map
 		const hasArkCharacters = characters.filter(i => {
-			const char = get.character(i) as WhichWayCharacterPending;
+			const char = get.character(i) as WhichWayCharacter;
 			return !!char && typeof char.arkuid === "string";
 		});
 		//显式声明了 arkuid 的干员按 arkuid 建索引：原实现是
@@ -205,7 +205,7 @@ class WhichWayArknight {
 		//（表大小 × 干员数），建索引后整段降为线性。
 		const arkUidToNames = new Map<string, string[]>();
 		for (const name of hasArkCharacters) {
-			const arkuid = (get.character(name) as WhichWayCharacterPending).arkuid!;
+			const arkuid = (get.character(name) as WhichWayCharacter).arkuid!;
 			let names = arkUidToNames.get(arkuid);
 			if (!names) arkUidToNames.set(arkuid, (names = []));
 			names.push(name);
@@ -356,25 +356,32 @@ class WhichWayArknight {
 	}
 
 	/**
-	 * 初始化角色的明日方舟数据
-	 * @param {WhichWayCharacter} char 角色数据
+	 * 初始化角色的明日方舟数据（**每个字段都支持自定义**）
+	 *
+	 * `whichWay.arknight` 里声明过的值一律保留（包括空数组），只补 `undefined` 的字段；
+	 * `supportingEquipment` / `linkage` 同理：缺省（`undefined`）时才按明日方舟数据推导。
+	 *
+	 * @param {WhichWayCharacterInitialized} char 角色数据（`initCharConfig` 之后的初始化态）
 	 */
-	initCharArknight(char: WhichWayCharacter) {
-		//@ts-ignore 设置明日方舟uid
-		if (char.arkuid) {
-			char.whichWay.arknight.charId = char.arkuid;
-		} else {
-			char.whichWay.arknight.charId = this.shcema.transfer(char.whichWay.charId, "character", "whichWayUID") as string;
-		}
+	initCharArknight(char: WhichWayCharacterInitialized) {
+		const config = char.whichWay;
+		const arknight = (config.arknight ??= {});
+		//@ts-ignore arkuid 为武将包声明字段（不在 WhichWayCharacterPrototype 内）
+		const arkuid: string | undefined = char.arkuid;
 
-		//@ts-ignore 设置对应阵容
-		char.whichWay.arknight.camp = this.getCamp(char);
+		//明日方舟uid：声明（含 arkuid）优先，缺省时按角色id反查
+		arknight.charId ??= arkuid || (this.shcema.transfer(config.charId, "character", "whichWayUID") as string) || "";
 
-		//@ts-ignore 设置可用的语音语言
-		char.whichWay.arknight.avaiableLangs = this.getAviableLangs(char.whichWay.charId) || [];
+		//阵营：缺省时按真实势力（reallyGroup）映射
+		arknight.camp ??= (this.getCamp(char) as string) ?? "";
 
-		//角色tag
-		char.whichWay.arknight.tags = this.getTags(char.whichWay.charId) || [];
+		//可用语音语言 / tag：声明了就完全采用声明的列表
+		arknight.avaiableLangs ??= this.getAviableLangs(config.charId) || [];
+		arknight.tags ??= this.getTags(config.charId) || [];
+
+		//这两项同样是"缺省才推导"：显式写 false 也以声明为准
+		config.supportingEquipment ??= arknight.tags.includes("支援机器");
+		config.linkage ??= arknight.avaiableLangs.includes("LINKAGE");
 	}
 
 	/**

@@ -276,8 +276,8 @@ class WhichWayPackHooks {
 	) => void;
 
 	declare character: (
-		key: string | Record<string, WhichWayCharacterPending>,
-		content?: WhichWayCharacterPending
+		key: string | Record<string, WhichWayCharacter>,
+		content?: WhichWayCharacter
 	) => void;
 
 	declare skill: (
