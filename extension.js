@@ -1,40 +1,34 @@
 import "noname";
-import { whichWayHooksApi } from "./src/hooks/index.js";
-import { whichWayInit } from "./src/init.js";
-import { whichWayUtil } from "./src/utill.js";
-import { mainPackage } from "./src/package/index.js";
-await start();
-await whichWayHooksApi.extension();
-const type = "extension";
-function extension() {
+await import("./chunks/whichWay-yZyYMVS2.js");
+await import("./chunks/globalSave-DhSqROmJ.js");
+const { whichWayInit: i } = await import("./chunks/init-Cgxy6wlg.js"), { whichWayHooksApi: a } = await import("./chunks/hooks-BscfO9lD.js"), { whichWayUtil: e } = await import("./chunks/utill-DpF3UCI4.js"), { mainPackage: o } = await import("./chunks/package-D8x49H6V.js");
+await i();
+await e.developerSet();
+await a.extension();
+const r = "extension";
+function p() {
   return {
     name: "WhichWay",
     arenaReady: async function() {
-      await whichWayHooksApi.arenaReady();
+      await a.arenaReady();
     },
-    content: async function(config, pack) {
-      await whichWayHooksApi.content(config, pack);
+    content: async function(t, n) {
+      await a.content(t, n);
     },
     prepare: async function() {
-      await whichWayHooksApi.prepare();
+      await a.prepare();
     },
     precontent: async function() {
-      await whichWayHooksApi.precontent();
+      await a.precontent();
     },
-    config: whichWayHooksApi.config,
+    config: a.config,
     help: {},
-    package: mainPackage(),
+    package: o(),
     files: { character: [], card: [], skill: [], audio: [] },
-    connect: true
+    connect: !0
   };
 }
-async function start() {
-  await import("./src/whichWay.js");
-  await import("./src/globalSave/index.js");
-  await whichWayInit();
-  await whichWayUtil.developerSet();
-}
 export {
-  extension as default,
-  type
+  p as default,
+  r as type
 };
