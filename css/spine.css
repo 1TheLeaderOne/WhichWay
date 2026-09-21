@@ -56,9 +56,13 @@
 }
 
 .sjzxDycWrapper {
-    width: var(--SJZX-dyc-width);
+    /* 必须定位，才能保证它从父元素左上角开始铺满；尺寸由 spineWork 的 fit() 用内联样式
+       设成与父元素完全一致（放大 time 倍 + zoom 1/time 保画质），这里的 100% 只是兜底 */
+    position: absolute;
+    left: var(--SJZX-dyc-left, 0);
+    top: 0;
+    width: var(--SJZX-dyc-width, 100%);
     height: 100%;
-    left: var(--SJZX-dyc-left);
     pointer-events: none;
 }
 

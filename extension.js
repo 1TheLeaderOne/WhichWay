@@ -1,7 +1,7 @@
 import "noname";
 await import("./chunks/whichWay-yZyYMVS2.js");
 await import("./chunks/globalSave-DhSqROmJ.js");
-const { whichWayInit: i } = await import("./chunks/init-Cgxy6wlg.js"), { whichWayHooksApi: a } = await import("./chunks/hooks-BscfO9lD.js"), { whichWayUtil: e } = await import("./chunks/utill-DpF3UCI4.js"), { mainPackage: o } = await import("./chunks/package-D8x49H6V.js");
+const { whichWayInit: i } = await import("./chunks/init-B6pvdLsz.js"), { whichWayHooksApi: a } = await import("./chunks/hooks-BscfO9lD.js"), { whichWayUtil: e } = await import("./chunks/utill-DpF3UCI4.js"), { mainPackage: o } = await import("./chunks/package-aCiiG3MH.js");
 await i();
 await e.developerSet();
 await a.extension();

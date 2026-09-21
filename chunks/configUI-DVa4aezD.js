@@ -1,9 +1,9 @@
 import { ui as S, lib as V, game as O } from "noname";
 import { ref as p, computed as j, onMounted as D, nextTick as z, onUnmounted as F, watch as ne, openBlock as i, createElementBlock as a, createElementVNode as e, toDisplayString as b, Fragment as T, renderList as P, reactive as se, createCommentVNode as I, withDirectives as G, vModelText as Y, createTextVNode as U, normalizeClass as W, vShow as oe, unref as J, createBlock as ie, resolveDynamicComponent as ae, createApp as re } from "vue";
 import { onArenaReady as le, onContent as ce, onSetDev as de } from "./hooks-BscfO9lD.js";
-import { w as K } from "./version-shared-C3acQ_GF.js";
-import { w as N, s as ue } from "./updateLog-shared-eMt4sRyN.js";
-import { whichWayCharacterCard as pe } from "./characterCard-BLQBYyJf.js";
+import { w as K } from "./version-shared-BUx8npJy.js";
+import { w as N, s as ue } from "./updateLog-shared-yraLkER2.js";
+import { whichWayCharacterCard as pe } from "./characterCard-Bm35FGUC.js";
 import { _ as R } from "./_plugin-vue_export-helper-CHgC5LLL.js";
 import { w as X, E as ge } from "./config-data-shared-Dp8x7s31.js";
 import * as Z from "pinyin-pro";

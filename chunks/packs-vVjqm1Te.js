@@ -1,5 +1,5 @@
 import { lib as g, game as c, _status as m, get as i, ui as _ } from "noname";
-import { whichWayUtil as A } from "./utill-DpF3UCI4.js";
+import { whichWayUtil as q } from "./utill-DpF3UCI4.js";
 import { whichWayTips as H } from "./tips-DleQAbQn.js";
 import { s as re } from "./nonameEx-custom-skill-shared-lwtFvTKr.js";
 import { onSetDev as Oe, onBeforeInit as fr } from "./hooks-BscfO9lD.js";
@@ -9,7 +9,7 @@ import { whichWayToast as cr } from "./toast-BKImUKDM.js";
 import { defineComponent as gr, ref as $e, onMounted as dr, openBlock as Ce, createElementBlock as je, createElementVNode as ue, toDisplayString as Te, Fragment as mr, renderList as hr, unref as zr, createApp as pr } from "vue";
 import { _ as _r } from "./_plugin-vue_export-helper-CHgC5LLL.js";
 import { g as br, d as Me, a as kr } from "./packs-base-characterDesigner-shared-CffpBhTy.js";
-import { whichWayArknight as Xe } from "./arknight-CNwD5MVC.js";
+import { whichWayArknight as Xe } from "./arknight-B76Ucf1-.js";
 const yr = (r) => {
   const t = r.whichWay ??= {};
   return t.designer = t.designer === void 0 ? [] : Array.isArray(t.designer) ? t.designer : [t.designer], t.arknight ??= {}, r.pack ??= "specialSJZX", r;
@@ -779,17 +779,17 @@ y({
       function n(p) {
         let w = p.getCards("h");
         if (w.length < 2) return w;
-        let v = w.sort((M, q) => i.number(q, p) - i.number(M, p)), C = w.sort((M, q) => i.value(q, p) - i.value(M, p)), T = v[0], j = v[v.length - 1];
+        let v = w.sort((M, A) => i.number(A, p) - i.number(M, p)), C = w.sort((M, A) => i.value(A, p) - i.value(M, p)), T = v[0], j = v[v.length - 1];
         if (e.countCards("h", { color: "red" }) < 1)
           return [T, C[C.length - 1]];
         if (e.countCards("h", { color: "black" }) < 1)
           return [j, C[C.length - 1]];
         if (Math.random() > 0.5) {
-          let M = w.filter((q) => i.color(q) === "black" && q !== T);
-          return [T, M.length > 0 ? M.randomGet() : w.filter((q) => q !== T).randomGet()];
+          let M = w.filter((A) => i.color(A) === "black" && A !== T);
+          return [T, M.length > 0 ? M.randomGet() : w.filter((A) => A !== T).randomGet()];
         } else {
-          let M = w.filter((q) => i.color(q) === "red" && q !== j);
-          return [j, M.length > 0 ? M.randomGet() : w.filter((q) => q !== j).randomGet()];
+          let M = w.filter((A) => i.color(A) === "red" && A !== j);
+          return [j, M.length > 0 ? M.randomGet() : w.filter((A) => A !== j).randomGet()];
         }
       }
       let o = [];
@@ -798,9 +798,9 @@ y({
         const v = await p.chooseCard().set("forced", !0).set("prompt", "【刈诈】：请选择一张手牌进行拼点").set("type", "compare").set("ai", (j) => (i.player(), i.event().aiChooseResult[0] === j)).set("aiChooseResult", n(p)).forResult();
         if (!v || !v.cards) return;
         v.skill ? w = g.skill[v.skill].onCompare(p)[0] : w = v.cards[0];
-        const { cards: C } = await p.chooseCard().set("forced", !0).set("type", "debate").set("source", e).set("prompt", "【刈诈】：请选择一张手牌进行议事").set("filterCard", (j, M, q) => {
-          let R = i.event().banCard;
-          return j !== R;
+        const { cards: C } = await p.chooseCard().set("forced", !0).set("type", "debate").set("source", e).set("prompt", "【刈诈】：请选择一张手牌进行议事").set("filterCard", (j, M, A) => {
+          let E = i.event().banCard;
+          return j !== E;
         }).set("complexCard", !0).set("ai", (j) => (i.player(), i.event().aiChooseResult[0] === j)).set("aiChooseResult", n(p)).set("banCard", w).forResult();
         if (!C) return;
         const T = C[0];
@@ -902,7 +902,7 @@ k(pe, {
   }
 });
 x(pe, "埃癸斯，1102年3月于中庭公证所登记为第三类驻留人员，根据拉特兰公民权利章程附录第三十六条、入境人员管理条例第二章第五条，由圣马尔索综合学校接收入学。<br>教师评语：埃癸斯同学聪明好学，认真严谨，富有责任心，自我要求严格，在类铳型武装系列课程中取得了不俗的成绩。望能敞开心扉，更多地尝试集体活动，在学习进步之余，亦能享受美好的校园生活。");
-S(pe, A.colorize("#r战车#"));
+S(pe, q.colorize("#r战车#"));
 b({
   [pe]: "埃癸斯",
   zhenyingmrfz: "镇影",
@@ -1017,7 +1017,7 @@ y({
       const a = t.card, n = t.cards;
       await e.draw();
       const { cards: o } = await e.chooseToDiscard({
-        prompt: `【开来】:请弃置一张牌，若你弃置的牌的花色[是/不是]${A.colorize(`#b${i.translation(i.suit(a))}#`)}，你[使用/改为使用]弃置的牌。`,
+        prompt: `【开来】:请弃置一张牌，若你弃置的牌的花色[是/不是]${q.colorize(`#b${i.translation(i.suit(a))}#`)}，你[使用/改为使用]弃置的牌。`,
         forced: !0,
         filterCard(z, p, w) {
           const v = i.event().cards;
@@ -1026,16 +1026,16 @@ y({
               C.addPromptSJZX("已使用此牌", "kailaimrfz_prompt");
               continue;
             }
-            const { name: T, suit: j, nature: M, storage: q, number: R } = C;
-            p.hasUseTarget({ name: T, suit: j, nature: M, storage: q, number: R }) || C.addPromptSJZX(A.colorize("#r无合法目标#"), "kailaimrfz_prompt");
+            const { name: T, suit: j, nature: M, storage: A, number: E } = C;
+            p.hasUseTarget({ name: T, suit: j, nature: M, storage: A, number: E }) || C.addPromptSJZX(q.colorize("#r无合法目标#"), "kailaimrfz_prompt");
           }
           return !v.includes(z);
         },
         ai(z) {
           const p = i.player(), w = i.event().cardx;
           let v = i.value(z) - i.value(w);
-          const { name: C, suit: T, nature: j, storage: M, number: q } = w;
-          return p.hasUseTarget({ name: C, suit: T, nature: j, storage: M, number: q }) || (v -= 10), i.suit(z) === i.suit(w) && (v += 8), v;
+          const { name: C, suit: T, nature: j, storage: M, number: A } = w;
+          return p.hasUseTarget({ name: C, suit: T, nature: j, storage: M, number: A }) || (v -= 10), i.suit(z) === i.suit(w) && (v += 8), v;
         },
         chooseonly: !0
       }).set("cardx", a).set("cards", n).forResult();
@@ -1077,77 +1077,62 @@ y({
     filter: function(r, t) {
       return r.name === "draw" ? r.num > 0 : r.name === "lose" ? r.type == "discard" : r.name === "phase" ? !t.storage.xinjunxingmrfz || !t.storage.xinjunxingmrfz.isSubset(t.getSkills(null, !1, !1)) : !1;
     },
-    // @ts-ignore
     async content(r, t, e) {
       Array.isArray(e.storage.xinjunxingmrfz) || (e.storage.xinjunxingmrfz = []), t.name === "draw" ? e.storage.xinjunxingmrfz = ["sptunjiang", "reqiaobian"] : t.name === "lose" ? e.storage.xinjunxingmrfz = ["xinlvli", "rezhanjue"] : (await e.removeSkill(["sptunjiang", "reqiaobian", "xinlvli", "rezhanjue"]), e.addSkill(e.storage.xinjunxingmrfz), e.logSkill("xinjunxingmrfz"));
     }
   },
   youjimrfz: {
     //audio:2,
-    onremove: !0,
     forced: !0,
-    init: function(r) {
-      r.storage.youjimrfz = [];
-    },
     trigger: {
       player: "phaseBegin"
     },
     async content(r, t, e) {
       e.isUnderControl() && c.swapPlayerAuto(e);
       const a = function(s, u) {
-        const f = m.event;
-        f._result || (f._result = {}), f._result.phases = [], f._result.phases2 = [];
-        const l = f._result.phases;
-        f._result.phases2;
-        const d = _.create.dialog("【游击】:你可以掉换执行阶段的顺序</br>执行顺序为由左到右依次执行", "hidden");
-        f.dialog = d;
+        const f = (T) => {
+          const [j] = String(T).split("|"), [M] = j.split("-");
+          if (M.startsWith("skip")) {
+            const A = "phase" + M.slice(4);
+            return "跳过·" + (i.tranPhase(A) ?? i.translation(A));
+          }
+          return i.tranPhase(M) ?? i.translation(M);
+        }, l = m.event, d = _.create.dialog("【游击】:你可以掉换执行阶段的顺序</br>执行顺序为由左到右依次执行", "hidden");
+        l.dialog = d;
         const h = document.createElement("div");
         h.classList.add("add-setting"), h.style.margin = "0", h.style.width = "100%", h.style.position = "relative";
-        const z = [], p = function() {
+        const z = [], p = (T, j) => {
+          const M = z.indexOf(T), A = z.indexOf(j), E = T.link;
+          T.link = j.link, j.link = E, T.innerHTML = "<span>" + f(T.link) + "</span>", j.innerHTML = "<span>" + f(j.link) + "</span>", [s[M], s[A]] = [s[A], s[M]], T.classList.remove("bluebg"), j.classList.remove("bluebg");
+        }, w = function() {
           if (m.dragged || m.justdragged) return;
-          m.tempNoButton = !0, setTimeout(function() {
+          if (m.tempNoButton = !0, setTimeout(function() {
             m.tempNoButton = !1;
-          }, 500);
-          const w = this.link;
-          if (this.classList.contains("bluebg"))
-            this.classList.remove("bluebg"), l.splice(l.indexOf(w), 1);
-          else {
-            if (l.length >= 2) return;
-            l.push(w), this.classList.add("bluebg");
+          }, 500), this.classList.contains("bluebg")) {
+            this.classList.remove("bluebg");
+            return;
           }
-          for (let v = 0; v < z.length; v++)
-            z[v] !== this && z[v].classList.remove("bluebg");
-          if (l.length === 2) {
-            const v = s.indexOf(l[0]), C = s.indexOf(l[1]);
-            if (v >= 0 && C >= 0 && v < z.length && C < z.length) {
-              const T = z[v], j = z[C], M = T.link;
-              s.indexOf(T.link), T.link = j.link, T.innerHTML = "<span>" + i.tranPhase(j.link) + "</span>", j.link = M, j.innerHTML = "<span>" + i.tranPhase(M) + "</span>", s[v] = T.link, s[C] = j.link, T.classList.remove("bluebg"), j.classList.remove("bluebg"), f._result.phases2 = s, f._result.phases.length = 0;
-            }
-          }
+          this.classList.add("bluebg");
+          const T = z.filter((j) => j.classList.contains("bluebg"));
+          T.length === 2 && p(T[0], T[1]);
         };
-        for (let w = 0; w < s.length; w++) {
-          const v = _.create.div(".shadowed.reduce_radius.pointerdiv.tdnode");
-          v.link = s[w], h.appendChild(v), v.innerHTML = "<span>" + i.tranPhase(s[w]) + "</span>", z.push(v), v.addEventListener(g.config.touchscreen ? "touchend" : "click", p);
-        }
-        d.content.appendChild(h), d.add("  "), d.open(), f.switchToAuto = function() {
-          f.dialog.close(), f.control.close(), c.resume(), m.imchoosing = !1;
-        }, f.control = _.create.control("ok", function(w) {
-          f.dialog.close(), f.control.close(), c.resume(), m.imchoosing = !1, u && u(!0);
-        });
-        for (let w = 0; w < f.dialog.buttons.length; w++)
-          f.dialog.buttons[w].classList.add("selectable");
-        c.pause();
-      }, n = function() {
-        m.imchoosing = !1, r._result = {
-          bool: !0,
-          phases2: ["phaseUse", "phaseDraw", "phaseDiscard", "phaseZhunbei", "phaseJieshu", "phaseJudge"]
-        }, r.dialog && r.dialog.close(), r.control && r.control.close();
+        s.forEach((T) => {
+          const j = _.create.div(".shadowed.reduce_radius.pointerdiv.tdnode");
+          j.link = T, j.innerHTML = "<span>" + f(T) + "</span>", j.addEventListener(g.config.touchscreen ? "touchend" : "click", w), z.push(j), h.appendChild(j);
+        }), d.content.appendChild(h), d.add("  "), d.open();
+        let v = !1;
+        const C = () => {
+          v || (v = !0, l._result || (l._result = {}), l._result.phases2 = s, d.close(), l.control && l.control.close(), c.resume(), m.imchoosing = !1, u && u(!0));
+        };
+        l.switchToAuto = C, l.control = _.create.control("ok", C), c.pause();
       };
       r.isMine() ? await new Promise((s) => {
         a(t.phaseList, s);
-      }) : r.isOnline() ? (r.player.send(a, t.phaseList), r.player.wait(), c.pause()) : n();
-      const o = r.result || r._result;
-      t.phaseList = o.phases2.length ? o.phases2 : t.phaseList, c.log(e, "阶段执行顺序为", `#y${i.translation(t.phaseList)}`);
+      }) : r.isOnline() && (r.player.send(a, t.phaseList), r.player.wait(), c.pause());
+      const n = r.result || r._result;
+      n?.phases2?.length && (t.phaseList = n.phases2);
+      const o = t.phaseList.map((s) => i.tranPhase(s) ?? i.translation(String(s).split("|")[0]));
+      c.log(e, "阶段执行顺序为", `#y${o.join("、")}`);
     }
   }
 });
@@ -1158,6 +1143,7 @@ b({
   youjimrfz: "游击",
   youjimrfz_info: "锁定技，回合开始时，你选择以任意顺序执行本回合的所有阶段。"
 });
+S("aiguozhemrfz", "永恒行军");
 x("aiguozhemrfz", "摘自PRTS的梗概</br>爱国者，本名博卓卡斯替，整合运动干部，霜星的养父。属于萨卡兹中的古老分支——温迪戈，且是最后一位纯血温迪戈。与凯尔希和特蕾西娅是旧识。曾与赫拉格同为乌萨斯军官，后不幸感染矿石病并隐瞒了病情。因在镇压感染者暴动中误杀自己的儿子格罗瓦兹尔而决定放弃军官身份组成游击队，在乌萨斯的雪原上游走，保护感染者。在雪原上的矿场救下即将被处死的霜星。后在塔露拉的邀请下加入整合运动。对下属整合运动军纪要求十分严格。非常尊敬赫拉格，并与其达成了互不开战的承诺。在守卫切尔诺伯格核心城时固执地与罗德岛发生战斗，最终以自己的阵亡反抗命运。");
 const Ar = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
@@ -2492,7 +2478,7 @@ y({
     },
     onremove: !0,
     async cost(r, t, e) {
-      r.result = await e.chooseCard({ position: "he" }).set("prompt", i.prompt("wenchoumrfz")).set("prompt2", A.colorize(`你可以重铸一张牌,若你重铸的牌是：<br>①【杀】或武器牌：令包含你在内的至多两名角色将手牌调整至#r${e.storage.wenchoumrfz || 4}#并跳过此阶段；<br>②非伤害类基本牌：你视为使用一张无距离和次数限制的【杀】，然后此技能本回合失效，并令此技能中的红色数字-1。`)).set("ai", (a) => {
+      r.result = await e.chooseCard({ position: "he" }).set("prompt", i.prompt("wenchoumrfz")).set("prompt2", q.colorize(`你可以重铸一张牌,若你重铸的牌是：<br>①【杀】或武器牌：令包含你在内的至多两名角色将手牌调整至#r${e.storage.wenchoumrfz || 4}#并跳过此阶段；<br>②非伤害类基本牌：你视为使用一张无距离和次数限制的【杀】，然后此技能本回合失效，并令此技能中的红色数字-1。`)).set("ai", (a) => {
         const n = i.player(), o = n.storage.wenchoumrfz || 4;
         let u = 8 - i.value(a);
         if (i.subtype(a) === "equip1" || i.name(a) === "sha")
@@ -2515,13 +2501,13 @@ y({
         if (await e.recast(a), i.subtype(a) === "equip1" || i.name(a) === "sha") {
           let n = function(s) {
             const u = e.storage.wenchoumrfz || 4;
-            s.countCards("h") < u ? s.drawTo(u) : s.countCards("h") > u && s.chooseToDiscard({ selectCard: s.countCards("h") - u, forced: !0 }).set("ai", (f) => -i.value(f)).set("prompt", `【问仇】：将手牌调整至${u}张`).set("prompt2", A.colorize("#s化干戈为玉帛，也是需要代价的#"));
+            s.countCards("h") < u ? s.drawTo(u) : s.countCards("h") > u && s.chooseToDiscard({ selectCard: s.countCards("h") - u, forced: !0 }).set("ai", (f) => -i.value(f)).set("prompt", `【问仇】：将手牌调整至${u}张`).set("prompt2", q.colorize("#s化干戈为玉帛，也是需要代价的#"));
           };
           e.skip(t.phaseList[t.num]), c.log(e, "跳过了", i.translation(t.phaseList[t.num]));
           const {
             //@ts-ignore
             targets: [o]
-          } = await e.chooseTarget({ forced: !0, selectTarget: [0, 1] }).set("prompt", A.colorize(`【问仇】：请选择一名其他角色，令其和#r你#将手牌调整至${e.storage.wenchoumrfz || 4}`)).set("prompt2", A.colorize("#s或许，旧时的恩怨已经结束了#")).set("filterTarget", g.filter.notMe).set(
+          } = await e.chooseTarget({ forced: !0, selectTarget: [0, 1] }).set("prompt", q.colorize(`【问仇】：请选择一名其他角色，令其和#r你#将手牌调整至${e.storage.wenchoumrfz || 4}`)).set("prompt2", q.colorize("#s或许，旧时的恩怨已经结束了#")).set("filterTarget", g.filter.notMe).set(
             "ai",
             /**@param {Player} target */
             (s) => {
@@ -2532,7 +2518,7 @@ y({
           if (!o) return;
           [o, e].sort(g.sort.seat).forEach((s) => n(s));
         }
-        i.type(a) === "basic" && !i.tag(a, "damage") && (await e.chooseUseTarget({ card: i.autoViewAs({ name: "sha", isCard: !0 }) }).set("forced", !0).set("addCount", !1).set("nodistance", !0).set("prompt", "你视为使用一张无距离和次数限制的【杀】，然后此技能本回合失效").set("prompt2", A.colorize("#s血债血偿！#")), e.storage.wenchoumrfz--, e.disableSkill("wenchoumrfz", ["wenchoumrfz"]), e.when({ global: "phaseEnd" }).step(async (n, o, s) => {
+        i.type(a) === "basic" && !i.tag(a, "damage") && (await e.chooseUseTarget({ card: i.autoViewAs({ name: "sha", isCard: !0 }) }).set("forced", !0).set("addCount", !1).set("nodistance", !0).set("prompt", "你视为使用一张无距离和次数限制的【杀】，然后此技能本回合失效").set("prompt2", q.colorize("#s血债血偿！#")), e.storage.wenchoumrfz--, e.disableSkill("wenchoumrfz", ["wenchoumrfz"]), e.when({ global: "phaseEnd" }).step(async (n, o, s) => {
           s.enableSkill("wenchoumrfz");
         }));
       }
@@ -2692,7 +2678,7 @@ const Zr = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
 }, Symbol.toStringTag, { value: "Module" }));
 k("baimianxiaomrfz", { pack: "epicSJZX", sex: "female", group: "lymrfz", hp: 3, skills: ["gushimrfz", "shouzhongmrfz"] });
 x("baimianxiaomrfz", "......</br>已在20593个搜索结果中，为您选择了相对精准的答案。</br>白面鸮，前莱茵生命公司，数据维护专员。在医疗类源石技艺领域取得不菲成就，于医疗数据维护，常规医疗方案应用，多项目医疗行为等相关领域，拥有丰富经验。</br>现于罗德岛担任医疗干员，亦就职于医疗部门，某临床实验小组，项目领头人：赫默医生。同时，为罗德岛提供若干项医疗项目的相关辅助工作。</br>......");
-S("baimianxiaomrfz", A.colorize("#r循迹之鸮#"));
+S("baimianxiaomrfz", q.colorize("#r循迹之鸮#"));
 b({
   baimianxiaomrfz: "白面鸮",
   gushimrfz: "估势",
@@ -5439,13 +5425,13 @@ y({
         const f = u.getContext("2d");
         for (let C = 0; C < o.width; C++)
           for (let T = 0; T < o.height; T++) {
-            const j = C / o.width * 360, M = T / o.height, q = w(j, M, n), R = f.createImageData(1, 1), J = R.data;
-            J[0] = q.r, J[1] = q.g, J[2] = q.b, J[3] = 255, f.putImageData(R, C, T);
+            const j = C / o.width * 360, M = T / o.height, A = w(j, M, n), E = f.createImageData(1, 1), J = E.data;
+            J[0] = A.r, J[1] = A.g, J[2] = A.b, J[3] = 255, f.putImageData(E, C, T);
           }
         s.appendChild(u);
         function l(C, T, j) {
-          const M = v(C, T, j), q = M.h / 360 * o.width, R = M.s * o.height;
-          return { x: q, y: R };
+          const M = v(C, T, j), A = M.h / 360 * o.width, E = M.s * o.height;
+          return { x: A, y: E };
         }
         const d = l(t.r, t.g, t.b);
         _.create.div(
@@ -5510,7 +5496,7 @@ y({
         );
         p.appendChild(z), p.innerHTML += `RGB(${t.r}, ${t.g}, ${t.b})`;
         function w(C, T, j) {
-          let M = (q, R = (q + C / 60) % 6) => j - j * T * Math.max(Math.min(R, 4 - R, 1), 0);
+          let M = (A, E = (A + C / 60) % 6) => j - j * T * Math.max(Math.min(E, 4 - E, 1), 0);
           return {
             r: Math.round(M(5) * 255),
             g: Math.round(M(3) * 255),
@@ -5519,24 +5505,24 @@ y({
         }
         function v(C, T, j) {
           C /= 255, T /= 255, j /= 255;
-          let M = Math.max(C, T, j), q = Math.min(C, T, j), R, J, ur = M, se = M - q;
-          if (J = M === 0 ? 0 : se / M, M === q)
-            R = 0;
+          let M = Math.max(C, T, j), A = Math.min(C, T, j), E, J, ur = M, se = M - A;
+          if (J = M === 0 ? 0 : se / M, M === A)
+            E = 0;
           else {
             switch (M) {
               case C:
-                R = (T - j) / se + (T < j ? 6 : 0);
+                E = (T - j) / se + (T < j ? 6 : 0);
                 break;
               case T:
-                R = (j - C) / se + 2;
+                E = (j - C) / se + 2;
                 break;
               case j:
-                R = (C - T) / se + 4;
+                E = (C - T) / se + 4;
                 break;
             }
-            R /= 6;
+            E /= 6;
           }
-          return { h: R * 360, s: J, v: ur };
+          return { h: E * 360, s: J, v: ur };
         }
       }
     },
@@ -7028,7 +7014,7 @@ k("fengxumrfz", {
   group: "samrfz",
   sex: "male"
 });
-S("fengxumrfz", A.colorize("#b何处着#"));
+S("fengxumrfz", q.colorize("#b何处着#"));
 b({
   fengxumrfz: "风絮",
   fengxumrfz_youyimrfz: "游医",
@@ -7095,7 +7081,7 @@ y({
       return Ae(t) !== void 0 && _.discardPile.children.length > 0;
     },
     prompt2(r, t) {
-      return A.colorize(`你可以展示弃牌堆顶的#r${Ae(t)}#张牌，任意角色可选择展示其手牌中与展示的牌同名的牌，然后你与其摸一张牌并将展示牌中与此同名的牌插入牌堆中。`);
+      return q.colorize(`你可以展示弃牌堆顶的#r${Ae(t)}#张牌，任意角色可选择展示其手牌中与展示的牌同名的牌，然后你与其摸一张牌并将展示牌中与此同名的牌插入牌堆中。`);
     },
     async content(r, t, e) {
       const a = Ae(e), n = [];
@@ -7354,7 +7340,7 @@ k("fuzoumrfz", {
   hp: 4,
   pack: "epicSJZX"
 });
-S("fuzoumrfz", A.colorize("#r职业经理#"));
+S("fuzoumrfz", q.colorize("#r职业经理#"));
 b({
   fuzoumrfz: "复奏",
   mutuanmrfz: "募团",
@@ -10534,7 +10520,7 @@ k("jiaxintamrfz", {
   skills: ["feilvmrfz", "zhixingmrfz"],
   sex: "female"
 });
-S("jiaxintamrfz", A.colorize("#r不一样的旷野#"));
+S("jiaxintamrfz", q.colorize("#r不一样的旷野#"));
 x("jiaxintamrfz", "嘉辛塔，雷姆必拓知名矿业大亨坎贝尔夫妇的千金，前来罗德岛接受矿石病治疗。根据本人意愿，现作为先锋干员为罗德岛提供帮助。");
 b({
   jiaxintamrfz: "嘉辛塔",
@@ -10545,7 +10531,7 @@ b({
 });
 oe("feilvmrfz", (r) => {
   const t = (Re(r) || 0) + 1;
-  return `使命技，回合结束时，你可以将一张牌当做本回合第一张使用的牌使用，若你未因此使用过此牌，你摸两张牌。<br>成功：本局游戏使用过3X(${A.colorize(`#r${3 * t}#`)})张牌：摸2张牌。(X=本技能的成功次数+1)`;
+  return `使命技，回合结束时，你可以将一张牌当做本回合第一张使用的牌使用，若你未因此使用过此牌，你摸两张牌。<br>成功：本局游戏使用过3X(${q.colorize(`#r${3 * t}#`)})张牌：摸2张牌。(X=本技能的成功次数+1)`;
 });
 y({
   feilvmrfz: {
@@ -10854,7 +10840,7 @@ oe("lushimrfz", (r) => {
   }, e = r.getStorage("lushimrfz")?.index || 0, a = t[e];
   let n = "锁定技，转换技，每有十二张牌被使用时，你<br>➀手牌上限+1<br>➁攻击距离+1<br>➂额定摸牌数+1<br>➃失去一点体力。";
   for (let o = 0; o < 4; o++)
-    o === e ? n = n.replace(a, A.colorize(`#r${a}#`)) : n = n.replace(t[o], A.colorize(`#s${t[o]}#`));
+    o === e ? n = n.replace(a, q.colorize(`#r${a}#`)) : n = n.replace(t[o], q.colorize(`#s${t[o]}#`));
   return n;
 });
 y({
@@ -13167,10 +13153,10 @@ const W = {
     let a = e.filter((o) => o.name.startsWith(r));
     if (a.length === 0) return;
     const n = a.randomGet();
-    A.playSound(n.path);
+    q.playSound(n.path);
   }
 };
-A.isDeveloperMode() && (window.stratagemSupport = W);
+q.isDeveloperMode() && (window.stratagemSupport = W);
 b({
   keluxiermrfz: "可露希尔",
   jiongtumrfz: "迥途",
@@ -18104,7 +18090,7 @@ k(ke, {
   group: "gemrfz",
   pack: "legendSJZX"
 });
-S(ke, A.colorize("#r绕动之谬#"));
+S(ke, q.colorize("#r绕动之谬#"));
 x(ke, "谬因，哥伦比亚人，常居玻利瓦尔。原哥伦比亚卢米内斯大学（拉乌尼达分校）副教授，在应用源石学、信息与计算科学领域造诣颇深。于玻利瓦尔大行军事件后辞去教学职务，现以术师干员身份供职于罗德岛。");
 b({
   [ke]: "谬因",
@@ -19694,7 +19680,7 @@ b({
   yingfenmrfz: "英奋",
   yingfenmrfz_info: "当你使用的【桃】结算完成后，你可以令一名已受伤的角色回复一点体力。"
 });
-S("palasimrfz", A.colorize("#b赫里亚之辉#"));
+S("palasimrfz", q.colorize("#b赫里亚之辉#"));
 x("palasimrfz", "帕拉斯，曾在米诺斯担任祭司职务。在离开雅赛努斯城邦去往阿克罗蒂村任职期间，带领当地民众进行了对萨尔贡周边部落长年侵扰的反抗，并在当地推行旅游及文化产业的发展。后因矿石病病况恶化，来到罗德岛进行秘密治疗。");
 const en = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
@@ -19776,9 +19762,9 @@ k(ye, {
   designer: ["Flandre"],
   skills: ["funanmrfz"]
 });
-S(ye, A.colorize("#s觉悟的游击手#"));
+S(ye, q.colorize("#s觉悟的游击手#"));
 x(ye, "佩德洛，玻利瓦尔人。曾被数支不同的真正玻利瓦尔人部队征召，通常以游击队员或情报人员的身份参与作战。在玻利瓦尔大行军事件后离开真正玻利瓦尔人部队，现与罗德岛合作，协助部分情报工作。");
-const Ie = A.colorize("#g一#");
+const Ie = q.colorize("#g一#");
 b({
   [ye]: "佩德洛",
   funanmrfz: "赴难",
@@ -19812,7 +19798,7 @@ y({
       return n ? !0 : !n && c.hasPlayer((o) => t.countDiscardableCards(o, "he") > 0);
     },
     async cost(r, t, e) {
-      const a = e?.storage?.funanmrfz === !1, n = i.cnNumber(1 + (e.storage.funanmrfz_extra || 0)), o = A.colorize(`#g${n}#`);
+      const a = e?.storage?.funanmrfz === !1, n = i.cnNumber(1 + (e.storage.funanmrfz_extra || 0)), o = q.colorize(`#g${n}#`);
       r.result = await e.chooseTarget({
         prompt: i.prompt("funanmrfz"),
         prompt2: `你可以${a ? `摸一张牌并对一名角色${o}造成伤害` : `回复一点体力并弃置一名角色${o}张牌`}，然后若场上没有其他角色与你的体力值和手牌数相同，本回合【赴难】描述中绿色的数字+1`,
@@ -19827,7 +19813,7 @@ y({
     async content(r, t, e) {
       const {
         targets: [a]
-      } = r, n = e?.storage?.funanmrfz === !1, o = i.cnNumber(1 + (e.storage.funanmrfz_extra || 0)), s = A.colorize(`#g${o}#`);
+      } = r, n = e?.storage?.funanmrfz === !1, o = i.cnNumber(1 + (e.storage.funanmrfz_extra || 0)), s = q.colorize(`#g${o}#`);
       e.changeZhuanhuanji("funanmrfz"), n ? (await e.draw(), await a.damage({
         source: e,
         num: 1 + (e.storage.funanmrfz_extra || 0)
@@ -19863,7 +19849,7 @@ y({
           return t?.storage?.funanmrfz === !1 ? !0 : t.countDiscardableCards(t, "he") > 0;
         },
         prompt(r, t) {
-          const e = t?.storage?.funanmrfz === !1, a = i.cnNumber(1 + (t.storage.funanmrfz_extra || 0)), n = A.colorize(`#g${a}#`);
+          const e = t?.storage?.funanmrfz === !1, a = i.cnNumber(1 + (t.storage.funanmrfz_extra || 0)), n = q.colorize(`#g${a}#`);
           return `你可以${e ? `摸一张牌并对一名角色${n}造成伤害` : `回复一点体力并弃置一名角色${n}张牌`}，然后若场上没有其他角色与你的体力值和手牌数相同，本回合【赴难】描述中绿色的数字+1`;
         },
         async content(r, t, e) {
@@ -19881,8 +19867,8 @@ y({
   }
 });
 function ir(r) {
-  const t = i.cnNumber(1 + (r.storage.funanmrfz_extra || 0)), e = A.colorize(`#g${t}#`);
-  return r?.storage?.funanmrfz === !1 ? `转换技，出牌阶段限一次或受到伤害后，你可以：<br>阳：摸一张牌并对一名角色造成${e}点伤害${A.colorize(`#s;<br>阴：回复一点体力并弃置一名角色${e}张牌#`)}。<br>然后若场上没有其他角色与你的体力值和手牌数相同，本回合【赴难】描述中绿色的数字+1。` : `转换技，出牌阶段限一次或受到伤害后，你可以：<br>${A.colorize(`#s阳：摸一张牌并对一名角色造成${e}点伤害;#`)}<br>阴：回复一点体力并弃置一名角色${e}张牌。<br>然后若场上没有其他角色与你的体力值和手牌数相同，本回合【赴难】描述中绿色的数字+1。`;
+  const t = i.cnNumber(1 + (r.storage.funanmrfz_extra || 0)), e = q.colorize(`#g${t}#`);
+  return r?.storage?.funanmrfz === !1 ? `转换技，出牌阶段限一次或受到伤害后，你可以：<br>阳：摸一张牌并对一名角色造成${e}点伤害${q.colorize(`#s;<br>阴：回复一点体力并弃置一名角色${e}张牌#`)}。<br>然后若场上没有其他角色与你的体力值和手牌数相同，本回合【赴难】描述中绿色的数字+1。` : `转换技，出牌阶段限一次或受到伤害后，你可以：<br>${q.colorize(`#s阳：摸一张牌并对一名角色造成${e}点伤害;#`)}<br>阴：回复一点体力并弃置一名角色${e}张牌。<br>然后若场上没有其他角色与你的体力值和手牌数相同，本回合【赴难】描述中绿色的数字+1。`;
 }
 const tn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
@@ -20516,8 +20502,8 @@ y({
         let p;
         if ((e.isUnderControl() || c.me == e) && !a)
           p = (await e.chooseButton().set("filterOk", (M) => {
-            const q = _.selected.buttons.slice().map((R) => i.itemtype(R.link) || typeof R.link);
-            return q.includes("card") && q.includes("number");
+            const A = _.selected.buttons.slice().map((E) => i.itemtype(E.link) || typeof E.link);
+            return A.includes("card") && A.includes("number");
           }).set("dialog", r.videoId).set("filterButton", function(M) {
             return !0;
           }).set("selectButton", 2).set("autoSelected", u).set("showCards", s).set("cards", f.slice()).forResult()).links;
@@ -20526,13 +20512,13 @@ y({
             e.popup("探索失败"), c.broadcastAll("closeDialog", r.videoId);
             return;
           }
-          let j = f.slice(0).map((q) => q[1]);
+          let j = f.slice(0).map((A) => A[1]);
           p = [];
           let M = [...u[0], ...u[1], ...u[2]];
-          for (let q = 0; q < 9; q++) {
-            if (j.includes(q)) continue;
-            let R = s.filter((J) => i.suit(J) == M[q])[0];
-            p.push(R, q);
+          for (let A = 0; A < 9; A++) {
+            if (j.includes(A)) continue;
+            let E = s.filter((J) => i.suit(J) == M[A])[0];
+            p.push(E, A);
             break;
           }
         }
@@ -20542,8 +20528,8 @@ y({
         }
         let w = p.filter((j) => typeof j == "number")[0], v = p.filter((j) => i.itemtype(j) == "card")[0];
         c.broadcastAll(
-          function(j, M, q, R) {
-            g.skill.tangongmrfz.addCard(j, M, q), g.skill.tangongmrfz.changePrompt(i.translation(R) + "放置了" + i.translation(j), M);
+          function(j, M, A, E) {
+            g.skill.tangongmrfz.addCard(j, M, A), g.skill.tangongmrfz.changePrompt(i.translation(E) + "放置了" + i.translation(j), M);
           },
           v,
           r.videoId,
@@ -21504,7 +21490,7 @@ k("sbchenmrfz", {
   group: "yanmrfz",
   sex: "female"
 });
-S("sbchenmrfz", A.colorize("#r当明则明#"));
+S("sbchenmrfz", q.colorize("#r当明则明#"));
 b({
   sbchenmrfz: "赤刃明霄陈",
   sbchenmrfz_prefix: "赤刃明霄",
@@ -22186,7 +22172,7 @@ k(xe, {
   designer: ["Flandre"]
 });
 x(xe, "珊比，来自雷姆必拓大涌泉镇，前来罗德岛接受矿石病治疗，并经由干员安洁莉娜的推荐，以及根据本人意愿，加入外勤部作为重装干员为罗德岛提供帮助。");
-S(xe, A.colorize("#b不一样的遗愿#"));
+S(xe, q.colorize("#b不一样的遗愿#"));
 b({
   [xe]: "珊比",
   feiyuanmrfz: "飞愿",
@@ -22227,7 +22213,7 @@ y({
         },
         ai(a) {
           let n = 0;
-          const o = i.player(), s = o.storage.feiyuanmrfz_extra || 0, u = o.getCards("h"), f = A.filterArray(u, (d, h) => h.isMax(i.number(d))), l = i.number(f[0]);
+          const o = i.player(), s = o.storage.feiyuanmrfz_extra || 0, u = o.getCards("h"), f = q.filterArray(u, (d, h) => h.isMax(i.number(d))), l = i.number(f[0]);
           return i.attitude2(a) < 0 ? n += typeof l == "number" ? l + s : 0 : n += i.rand(5, 10), n;
         }
       }).forResult();
@@ -22950,7 +22936,7 @@ y({
       for (let t of c.players)
         t.removeSkill("xingxingmrfz"), t.unmarkSkill("xingxingmrfz");
       c.broadcastAll(function() {
-        A.setBgI();
+        q.setBgI();
       });
     },
     audio: 2,
@@ -22999,7 +22985,7 @@ y({
           for (let t of c.players)
             t.removeSkill("xingxingmrfz"), t.unmarkSkill("xingxingmrfz");
           c.broadcastAll(function() {
-            A.setBgI();
+            q.setBgI();
           });
         }
       }
@@ -23240,7 +23226,7 @@ b({
 x("shixiemrfz", "狮蝎，履历大部分缺失，已知其入职前曾从事指定对象清除工作，推测身份：杀手。在潜伏、侵扰、突袭敌军阵线等行动中均表现出过硬的战斗技巧。<br>现作为特种干员，为罗德岛提供特别行动服务。");
 const Cn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), ve = "shiximrfz", P = "tower_shiximrfz", E = window.whichWaySave.tmpSave;
+}, Symbol.toStringTag, { value: "Module" })), ve = "shiximrfz", P = "tower_shiximrfz", R = window.whichWaySave.tmpSave;
 k(ve, {
   sex: "female",
   group: "leimrfz",
@@ -23248,7 +23234,7 @@ k(ve, {
   pack: "epicSJZX",
   skills: ["feishengmrfz", "zhixingmrfz"]
 });
-S(ve, A.colorize("#b不一样的梦想#"));
+S(ve, q.colorize("#b不一样的梦想#"));
 x(ve, "时隙,通讯技术工程师，其研究成果已应用于雷姆必拓远程通讯系统。现加入罗德岛工程部，为罗德岛基地远程通讯提供技术支持。");
 const Q = i.poptip(`${P}_skill`);
 b({
@@ -23326,15 +23312,15 @@ U(P, {
   // 离开装备区时执行 onLose（丢弃置于其上的牌 + 销毁音效）
   clearLose: !0,
   async onLose(r, t, e) {
-    if (e.playerid !== void 0 && E[P] && Array.isArray(E[P][e.playerid])) {
-      const a = E[P][e.playerid];
+    if (e.playerid !== void 0 && R[P] && Array.isArray(R[P][e.playerid])) {
+      const a = R[P][e.playerid];
       if (a.length) {
         const n = a.slice();
         a.length = 0, n.forEach((o) => o.removeGaintag(P)), await c.cardsDiscard(n), e.$throw(n, 1e3), e.popup(P), c.log(e, "的【通讯塔】被销毁，置于其上的牌被弃置", n);
       }
-      delete E[P][e.playerid], e.unmarkSkill(`${P}_skill`), we();
+      delete R[P][e.playerid], e.unmarkSkill(`${P}_skill`), we();
     }
-    E[P] && Object.keys(E[P]).length === 0 && or();
+    R[P] && Object.keys(R[P]).length === 0 && or();
   },
   destroy: !0,
   ai: {
@@ -23347,8 +23333,8 @@ let ee = null, ae = null;
 const ce = /* @__PURE__ */ new WeakSet();
 function jn() {
   if (ee?.alive) return;
-  E[P] ??= {};
-  const r = E[P], t = {
+  R[P] ??= {};
+  const r = R[P], t = {
     set(a, n, o) {
       return Reflect.set(a, n, o), ge(), !0;
     },
@@ -23369,10 +23355,10 @@ function jn() {
     const n = r[a];
     Array.isArray(n) && !ce.has(n) && (ce.add(n), r[a] = new Proxy(n, t));
   }
-  E[P] = new Proxy(r, e), ee = { raw: r, alive: !0 };
+  R[P] = new Proxy(r, e), ee = { raw: r, alive: !0 };
 }
 function or() {
-  ae !== null && (clearTimeout(ae), ae = null), ee?.alive && (E[P] = ee.raw, ee.alive = !1, ee = null);
+  ae !== null && (clearTimeout(ae), ae = null), ee?.alive && (R[P] = ee.raw, ee.alive = !1, ee = null);
 }
 function ge() {
   ae === null && (ae = window.setTimeout(() => {
@@ -23381,15 +23367,15 @@ function ge() {
 }
 function sr() {
   const r = [];
-  if (!E[P]) return r;
-  for (const t in E[P])
-    r.addArray(E[P][t]);
+  if (!R[P]) return r;
+  for (const t in R[P])
+    r.addArray(R[P][t]);
   return r;
 }
 function Tn(r) {
-  if (E[P])
-    for (const t in E[P]) {
-      const e = E[P][t];
+  if (R[P])
+    for (const t in R[P]) {
+      const e = R[P][t];
       if (e.includes(r)) {
         e.remove(r);
         return;
@@ -23401,9 +23387,9 @@ function Ve(r) {
 }
 function Mn(r) {
   const t = r._cardid;
-  if (!(!t || !E[P]))
-    for (const e in E[P]) {
-      const n = E[P][e].find((o) => o.cardid === t);
+  if (!(!t || !R[P]))
+    for (const e in R[P]) {
+      const n = R[P][e].find((o) => o.cardid === t);
       if (n) return n;
     }
 }
@@ -23415,9 +23401,9 @@ function we() {
   for (const t of c.players.slice().concat(c.dead))
     t.getCards("hs", (e) => e.hasGaintag(P)).forEach((e) => e.delete());
   const r = [];
-  for (const t in E[P]) {
+  for (const t in R[P]) {
     const e = c.findPlayer((a) => a.playerid === t);
-    e && r.push([e, E[P][t]]);
+    e && r.push([e, R[P][t]]);
   }
   for (const [t] of r) {
     const e = r.flatMap(
@@ -23439,7 +23425,7 @@ X({
     mark: !0,
     intro: {
       content(r, t, e) {
-        let a = E?.[P]?.[t.playerid || ""]?.length || 0;
+        let a = R?.[P]?.[t.playerid || ""]?.length || 0;
         return `·${i.translation(t)}的【通讯塔】中有${a}张牌<br><p><i>几根替换用的天线。虽然很纤细，虽然很易折，但你知道这种小小的东西能够连接人与人，连接整片大地。</i></p>`;
       }
     },
@@ -23453,16 +23439,16 @@ X({
       return !1;
     },
     init(r, t) {
-      E[P] ??= {}, E[P][r.playerid] ??= [], r.markSkill(`${P}_skill`), jn(), we();
+      R[P] ??= {}, R[P][r.playerid] ??= [], r.markSkill(`${P}_skill`), jn(), we();
     },
     forced: !0,
     async content(r, t, e) {
-      E[P] ??= {};
-      const a = E[P][e.playerid] ||= [], o = (t.getl(e).cards2 || []).filter((s) => i.position(s, !0) == "d" && !a.includes(s));
+      R[P] ??= {};
+      const a = R[P][e.playerid] ||= [], o = (t.getl(e).cards2 || []).filter((s) => i.position(s, !0) == "d" && !a.includes(s));
       o.length && (m.discarded?.removeArray?.(o), await c.cardsGotoSpecial(o, !1), o.forEach((s) => s.addGaintag(P)), a.push(...o));
     },
     onremove(r, t) {
-      E[P] && r.playerid !== void 0 && (E[P][r.playerid]?.length || delete E[P][r.playerid]), E[P] && Object.keys(E[P]).length === 0 && or();
+      R[P] && r.playerid !== void 0 && (R[P][r.playerid]?.length || delete R[P][r.playerid]), R[P] && Object.keys(R[P]).length === 0 && or();
     }
   }
 });
@@ -23667,7 +23653,7 @@ y({
       a.push("guguomrfz", "xingjunmrfz", "datongmrfz");
       for (let n of a)
         await e.removeSkill(n);
-      e.addSkill("bengjiemrfz"), e.sex = "male", c.log(e, "将性别变为了", "#y男性"), e.node.avatar.setBackgroundImage("extension/whitherHelm/image/skill/shuangwang2mrfz.jpg");
+      e.addSkill("bengjiemrfz"), e.sex = "male", c.log(e, "将性别变为了", "#y男性"), e.node.avatar.setBackgroundImage("extension/WhichWay/image/skill/shuangwang2mrfz.jpg");
     }
   },
   jiangqingmrfz: {
@@ -24993,7 +24979,7 @@ k(I, {
   sex: "female"
 });
 x(I, "安洁莉娜，服务于罗德岛的资深信使，足迹遍布迄今为止已知的大多数国家。同时，她也作为资深术师干员，利用其独特的源石技艺为罗德岛提供帮助。");
-S(I, A.colorize("#y不一样的愿景#"));
+S(I, q.colorize("#y不一样的愿景#"));
 nr(I, [I, "anjielinamrfz"]);
 b({
   [I]: "予愿安洁莉娜",
@@ -25271,7 +25257,7 @@ y({
         let e = i.translation(t), a = r.acted;
         if (r.target < 1) return `·看来${e}不打算采取任何行动`;
         let n = [`·${e}需要推动#r${r.target}#项改革，否则其会失去#r1#点体力！`, "———已行之事———"];
-        return a.includes("purge") && n.push("已放逐蔓珠院保守派"), a.includes("education") && n.push("已推动基础教育"), a.includes("cohesion") && n.push("已加强宗教凝聚力"), n.map((o) => A.colorize(o)).join("<br>");
+        return a.includes("purge") && n.push("已放逐蔓珠院保守派"), a.includes("education") && n.push("已推动基础教育"), a.includes("cohesion") && n.push("已加强宗教凝聚力"), n.map((o) => q.colorize(o)).join("<br>");
       }
     },
     onremove: !0,
@@ -26981,13 +26967,7 @@ function Qn(r) {
 const ei = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
-k("splapulandemrfz", {
-  pack: "legendSJZX",
-  sex: "female",
-  group: "xumrfz",
-  hp: 3,
-  skills: ["shilangmrfz", "toulangmrfz", "kuanglangmrfz"]
-});
+k("splapulandemrfz", { pack: "legendSJZX", sex: "female", group: "xumrfz", hp: 3, skills: ["shilangmrfz", "toulangmrfz", "kuanglangmrfz"] });
 y({
   shilangmrfz: {
     audio: 2,
@@ -27035,8 +27015,17 @@ y({
     async content(r, t, e) {
       let a = t.player;
       e.storage.toulangmrfz[t.name === "damage" ? t.name : "useSkill"] = !0;
-      const { cards: n } = await a.chooseCard(!0, "h", (o) => !i.is.shownCard(o), [1, 2]).set("prompt", "【头狼】:请明置1-2张手牌").set("ai", (o) => -i.value(o)).forResult();
-      n && a.addShownCards(n, "visible_toulangmrfz");
+      const { cards: n } = await a.chooseCard({
+        //true, "h", card => !get.is.shownCard(card), [1, 2]
+        forced: !0,
+        filterCard(o, s, u) {
+          return !i.is.shownCard(o);
+        },
+        selectCard() {
+          return [1, 2];
+        }
+      }).set("prompt", "【头狼】:请明置1-2张手牌").set("ai", (o) => -i.value(o)).forResult();
+      n && a.addShownCards({ cards: n, gaintag: ["visible_toulangmrfz"] });
     },
     group: "toulangmrfz_clear",
     subSkill: {
@@ -27045,8 +27034,8 @@ y({
         silent: !0,
         lastDo: !0,
         trigger: { global: "roundStart" },
-        content() {
-          player.storage.toulangmrfz = {
+        async content(r, t, e) {
+          e.storage.toulangmrfz = {
             damage: !1,
             useSkill: !1
           };
@@ -27081,13 +27070,17 @@ y({
     },
     async content(r, t, e) {
       const a = r.targets[0];
-      if (!a.countGainableCards(
-        e,
-        "hej",
-        (d) => i.is.shownCard(d) || i.position(d) === "e" || i.position(d) === "j"
-      ))
-        return;
-      const { links: n } = await e.choosePlayerCard("hej", a, !0).set("filterButton", (d) => i.position(d.link) === "e" || i.position(d.link) === "j" || i.is.shownCard(d.link)).set("target", a).set("complexSelect", !1).set("ai", g.card.shunshou.ai.button).forResult(), o = r.getParent(2)?.kuanglangmrfz_list, { links: s } = await e.chooseButton(["狂狼", [o, "vcard"]], !0).set("ai", (d) => i.event().player.getUseValue({
+      if (!a.countGainableCards(e, "hej", (d) => i.is.shownCard(d) || i.position(d) === "e" || i.position(d) === "j")) return;
+      const { links: n } = await e.choosePlayerCard({
+        //"hej", target, true
+        position: "hej",
+        target: a,
+        forced: !0
+      }).set("filterButton", (d) => i.position(d.link) === "e" || i.position(d.link) === "j" || i.is.shownCard(d.link)).set("target", a).set("complexSelect", !1).set("ai", g.card.shunshou.ai.button).forResult(), o = r.getParent(2)?.kuanglangmrfz_list, { links: s } = await e.chooseButton({
+        //["狂狼", [list, "vcard"]], true
+        createDialog: ["狂狼", [o, "vcard"]],
+        forced: !0
+      }).set("ai", (d) => i.event().player.getUseValue({
         name: d.link[2],
         nature: d.link[3]
       })).forResult(), u = r.getParent(2);
@@ -27098,13 +27091,14 @@ y({
           g.skill.kuanglangmrfz_backup.viewAs = {
             name: h,
             nature: z,
-            cards: d
+            cards: d,
+            isCard: !0
           }, g.skill.kuanglangmrfz_backup.prompt = "选择" + i.translation(h) + "（" + i.translation(d) + "）的目标";
         },
         n,
         f,
         l
-      ), u.set("_backupevent", "kuanglangmrfz_backup"), u.backup("kuanglangmrfz_backup"), u.set("openskilldialog", "选择" + i.translation(f) + "（" + i.translation(n) + "）的目标"), u.set("norestore", !0), u.set("custom", {
+      ), u.set("_backupevent", "kuanglangmrfz_backup"), u.backup("kuanglangmrfz_backup"), u.set("logSkill", "kuanglangmrfz"), u.set("openskilldialog", "选择" + i.translation(f) + "（" + i.translation(n) + "）的目标"), u.set("norestore", !0), u.set("custom", {
         add: {},
         replace: { window() {
         } }
@@ -27117,6 +27111,35 @@ y({
         player(r, t) {
           let e = 1, a = i.attitude(r, t);
           return r.countCards("j") > 0 && t === r ? 114514 : (a > 0 && t.countCards("j") > 0 && (e += 5), a <= 0 && t.countCards("j") > 0 && t.countCards("e") < 1 && t.countCards("h", (n) => i.is.shownCard(n)) < 1 && (e -= 5), a > 0 && (e -= 0.5), a <= 0 && (e += 1), t === r && (e -= 0.9), e);
+        }
+      }
+    },
+    subSkill: {
+      /**
+       * 「将场上或明置的牌当作一张基本牌 / 单一目标普通锦囊使用」的备份技能。
+       *
+       * content 里选好实体牌与牌名后会通过 broadcastAll 动态写入 viewAs / prompt，
+       * 再 `evt.set("_backupevent", ...)` + `evt.backup(...)` + `evt.goto(0)` 重开 chooseToUse，
+       * 由引擎按这里的 viewAs 直接进入目标选择。
+       *
+       * 之前漏写了这个 subSkill ⇒ `lib.skill.kuanglangmrfz_backup` 是 undefined，
+       * 于是 broadcastAll 里抛出 “Cannot set properties of undefined (setting 'viewAs')”。
+       * 引擎在 `game.finishCards()`（开局 / prepareArena）里会遍历 lib.skill 调用
+       * `finishSkill`，把 subSkill 展开成 `lib.skill.<技能名>_<子技能名>`。
+       */
+      backup: {
+        audio: !1,
+        log: !1,
+        /** 牌已在 content 里从目标处取好（写进 viewAs.cards），这里不再让玩家选牌 */
+        filterCard: () => !1,
+        selectCard: -1,
+        /** 占位，真正的 viewAs 由 content 动态覆盖 */
+        viewAs: { name: "sha", isCard: !0 },
+        /** 把按 viewAs 生成的虚拟牌重整为「由实体牌构成」的牌，否则牌的消耗与结算都不对 */
+        async precontent(r) {
+          delete r.result.skill;
+          const t = r.result.card, e = (t?.cards || []).slice(0);
+          r.result.cards = e, r.result.card = i.autoViewAs({ name: t.name, nature: t.nature, isCard: !0 }, e);
         }
       }
     }
@@ -27735,41 +27758,53 @@ x("spshihuaiyamrfz", "诗怀雅，龙门近卫局局长。</br>于汐斯塔度�
 const ii = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
-k("spsikadimrfz", {
-  pack: "legendSJZX",
-  sex: "female",
-  group: "haimrfz",
-  hp: 4,
-  skills: ["newqianximrfz", "haixuanmrfz"]
-});
+k("spsikadimrfz", { pack: "legendSJZX", sex: "female", group: "haimrfz", hp: 4, skills: ["newqianximrfz", "haixuanmrfz"] });
 y({
   newqianximrfz: {
-    audio: "qianximrfz",
+    audio: ["作战中1", "作战中2"],
     trigger: {
       global: "phaseOver"
     },
     forced: !0,
+    /**
+     * 取「刚刚结束回合的角色」。
+     *
+     * `phaseOver` 是 `content.phaseLoop` 里 `await event.trigger("phaseOver")` 发出的，
+     * 触发时的链路是 phaseLoop -> arrangeTrigger -> trigger，技能 filter / content
+     * 收到的 `event` / `trigger` 就是这个 **phaseLoop 事件**：此刻它的 `player` 仍然是
+     * 刚结束回合的角色（`event.player = findNext(...)` 在这次触发被 await 完之后才执行）。
+     *
+     * 原先这里用的是 `event.getChildren("phase").player` —— 但 `getChildren` 只沿
+     * `childEvents` **往下**找，而每回合的 `phase` 事件只是 phaseLoop 的子事件、还会随
+     * 回合不断累积，于是永远取到**第一回合**的角色（filter 恒为假、技能完全不触发，
+     * 这正是本 bug 的根因）。
+     */
+    getTurnPlayer(r) {
+      if (!r) return null;
+      if (r.player) return r.player;
+      const t = r.getParent?.("phaseLoop");
+      return t && t.player || null;
+    },
+    /** 所有角色（含已阵亡者）按座次号排序后，取 `player` 的下个座位号角色；末位回绕到首位 */
     getNextByAll(r) {
-      let t = c.players.slice().concat(c.dead).sort(g.sort.position), e = t.indexOf(r);
-      return t[e + 1 > t.length ? 0 : e + 1];
+      const t = c.players.slice().concat(c.dead).sort(g.sort.position), e = t.indexOf(r);
+      return e < 0 || !t.length ? null : t[(e + 1) % t.length];
     },
     filter(r, t) {
-      let e = r.getChildren("phase");
-      if (!e.player) return !1;
-      let a = this.getNextByAll(e.player);
-      return a && !a.isAlive();
+      const e = i.info("newqianximrfz").getTurnPlayer(r);
+      if (!e) return !1;
+      const a = i.info("newqianximrfz").getNextByAll(e);
+      return !!a && !a.isAlive();
     },
     async content(r, t, e) {
-      let a = t.getChildren("phase"), n = g.skill.newqianximrfz.getNextByAll(a.player);
-      c.broadcastAll(
-        //@ts-ignore
-        function(o, s) {
-          c.swapSeat(o, s);
+      const a = i.info("newqianximrfz"), n = a.getTurnPlayer(t), o = n && a.getNextByAll(n);
+      o && c.broadcastAll(
+        function(s, u) {
+          c.swapSeat(s, u);
         },
-        //@ts-ignore
         e,
-        n
-      ), t.player = n;
+        o
+      );
     }
   },
   haixuanmrfz: {
@@ -27788,12 +27823,15 @@ y({
       return i.attitude2(r.player) < 0 && t.hp > 2 && r.player.countCards("he") > 1;
     },
     async content(r, t, e) {
-      const a = t.player, { cards: n } = await a.chooseToDiscard("he", !0).set("prompt", `弃置${e.hp}张牌`).set("prompt2", i.skillInfoTranslation("duwu")).set("selectCard", Math.min(e.hp, a.countCards("he"))).set("ai", (u) => -i.value(u)).forResult();
+      const a = t.player, { cards: n } = await a.chooseToDiscard({
+        forced: !0,
+        position: "he"
+      }).set("prompt", `弃置${e.hp}张牌`).set("prompt2", i.skillInfoTranslation("duwu")).set("selectCard", Math.min(e.hp, a.countCards("he"))).set("ai", (u) => -i.value(u)).forResult();
       if (!n) return;
       const o = c.createEvent("haixuanmrfz_duwu");
       o.target = e, o.player = a, o.setContent(g.skill.duwu.content), await o;
       let s = n.filter((u) => !i.tag(u, "damage") && i.position(u) === "d");
-      s.length && (e.gain(s, "gain2"), new Set(s.map((u) => i.suit(u))).size === s.length && e.recover());
+      s.length && (e.gain({ cards: s, animate: "gain2" }), new Set(s.map((u) => i.suit(u))).size === s.length && e.recover());
     }
   }
 });
@@ -29258,7 +29296,7 @@ y({
     delay: !1,
     prompt() {
       let t = i.player()?.storage?.kuangshimrfz_used || [];
-      return A.colorize(`请将一张手牌当【决斗】使用${t.length > 0 ? `<br>选择#r${i.translation(t)}#的牌会令#r手牌上限-1#` : ""}`);
+      return q.colorize(`请将一张手牌当【决斗】使用${t.length > 0 ? `<br>选择#r${i.translation(t)}#的牌会令#r手牌上限-1#` : ""}`);
     },
     check(r) {
       return 8 - i.value(r);
@@ -30197,7 +30235,7 @@ y({
       const u = {
         选项一: "gain",
         选项二: "tao"
-      }, f = A.getRandomNumber(8);
+      }, f = q.getRandomNumber(8);
       e.storage.yuyimrfz[u[s]][f] = {
         turn: o.cards.length + (u[s] === "gain" ? 1 : 0),
         accumulate: 0,
@@ -31228,10 +31266,10 @@ y({
       return c.hasPlayer((e) => e !== t && i.effect(e, { name: "sha" }, t, t) > 0 && r.list.includes(e));
     },
     async content(r, t, e) {
-      const a = t.list.filter((o) => o !== e), n = A.getRandomNumber();
+      const a = t.list.filter((o) => o !== e), n = q.getRandomNumber();
       await e.chooseUseTarget({
         card: i.autoViewAs({ name: "sha", storage: { tiankonghe_zhenlimrfz: n } })
-      }).set("forced", !0).set("addCount", !1).set("nodistance", !0).set("filterTarget", (o, s, u) => a.includes(u)).set("prompt", "【真理】:对参与拼点的其他角色视为使用一张【杀】"), e.hasHistory("sourceDamage", (o) => o.card && o.card?.storage.tiankonghe_zhenlimrfz === n) && (t[t.player === e ? "num1" : "num2"] += 1908, c.log(A.colorize("#r天空管理局突击中#")), c.log(e, "的拼点牌点数+1908"));
+      }).set("forced", !0).set("addCount", !1).set("nodistance", !0).set("filterTarget", (o, s, u) => a.includes(u)).set("prompt", "【真理】:对参与拼点的其他角色视为使用一张【杀】"), e.hasHistory("sourceDamage", (o) => o.card && o.card?.storage.tiankonghe_zhenlimrfz === n) && (t[t.player === e ? "num1" : "num2"] += 1908, c.log(q.colorize("#r天空管理局突击中#")), c.log(e, "的拼点牌点数+1908"));
     }
   }
 });
@@ -31393,7 +31431,7 @@ y({
       } = r, {
         //@ts-ignore
         cards: [o]
-      } = await a.chooseCard("he").set("forced", !0).set("position", "he").set("prompt", A.colorize(`【修使】:请选择你要交给${i.translation(e)}的牌，若为#r装备牌#，你与其各摸一张牌`)).set("ai", (u) => {
+      } = await a.chooseCard("he").set("forced", !0).set("position", "he").set("prompt", q.colorize(`【修使】:请选择你要交给${i.translation(e)}的牌，若为#r装备牌#，你与其各摸一张牌`)).set("ai", (u) => {
         let f = i.player(), l = i.event().targetx;
         return i.attitude(f, l) < 0 ? -i.value(u) : i.type(u) === "equip" ? 10 - i.value(u) : i.tag(u, "damage") > 0 ? 8 - i.value(u) : -i.value(u);
       }).set("targetx", e).forResult();
@@ -31456,7 +31494,7 @@ y({
     marktext: "☯",
     intro: {
       content(r, t, e) {
-        return A.colorize(`转换技，${r ? "#s阳：出牌阶段限一次#;#y阴：当你受到伤害后#" : "#r阳：出牌阶段限一次#;#s阴：当你受到伤害后#"}。你可以展示手牌，并使用其中一张普通锦囊牌，你因此使用的普通锦囊牌额外结算Y次。（Y=你手牌中普通锦囊牌的数量）`);
+        return q.colorize(`转换技，${r ? "#s阳：出牌阶段限一次#;#y阴：当你受到伤害后#" : "#r阳：出牌阶段限一次#;#s阴：当你受到伤害后#"}。你可以展示手牌，并使用其中一张普通锦囊牌，你因此使用的普通锦囊牌额外结算Y次。（Y=你手牌中普通锦囊牌的数量）`);
       }
     },
     trigger: {
@@ -31474,7 +31512,7 @@ y({
       const a = e.countCards("h", (o) => i.type(o) === "trick"), n = e.getCards("h");
       e.showCards(e.getCards("h"), `${i.translation(e)}【明史】展示的牌`), !(a < 1) && (e.when({ player: "useCard" }).filter((o) => o.getParent().titimrfz_mingshimrfz_useCard === !0).step(async (o, s, u) => {
         s.effectCount += a, c.log(u, "因", "#g【明史】", "令", `#y${i.translation(s.card)}`, "额外结算", a, "次");
-      }), await e.chooseToUse().set("titimrfz_mingshimrfz_useCard", !0).set("filterCard", (o) => (n.includes(o) && H.addPrompt(o, "【明史】展示", "titimrfz_mingshimrfz_tip", "uncheckEnd"), i.type(o) === "trick" && n.includes(o))).set("forced", !0).set("prompt", A.colorize(`【明史】:请选择你要使用的普通锦囊牌<br>#r此牌额外结算${a}次#`)).set("ai", (o) => i.value(o)));
+      }), await e.chooseToUse().set("titimrfz_mingshimrfz_useCard", !0).set("filterCard", (o) => (n.includes(o) && H.addPrompt(o, "【明史】展示", "titimrfz_mingshimrfz_tip", "uncheckEnd"), i.type(o) === "trick" && n.includes(o))).set("forced", !0).set("prompt", q.colorize(`【明史】:请选择你要使用的普通锦囊牌<br>#r此牌额外结算${a}次#`)).set("ai", (o) => i.value(o)));
     },
     group: ["titimrfz_mingshimrfz_phaseUse"],
     subSkill: {
@@ -33227,7 +33265,7 @@ k(Se, {
   pack: "epicSJZX",
   designer: ["培嵩"]
 });
-S(Se, A.colorize("#r不发声者#"));
+S(Se, q.colorize("#r不发声者#"));
 x(Se, "晓歌，罗德岛驻玻利瓦尔办事处在难民区解救出来的矿石病患者，转交本舰进行后续治疗。根据本人意愿，于半年后以正式干员身份加入罗德岛。");
 b({
   [Se]: "晓歌",
@@ -36005,8 +36043,8 @@ y({
       const { moved: o } = await e.chooseToMove().set("list", [["牌堆顶", n], ["牌堆底"]]).set("prompt", "点击将牌移动到牌堆顶或牌堆底").set("processAI", function(h) {
         var z = h[0][1], p = m.event.player, w = [], v;
         for (z.sort(function(T, j) {
-          var M = i.color(T, p) == "red" ? 3 : 5, q = i.color(j, p) == "red" ? 3 : 5, R = p.hp;
-          return R < 3 && (i.color(T, p) == "red", i.color(j, p) == "red"), q - M;
+          var M = i.color(T, p) == "red" ? 3 : 5, A = i.color(j, p) == "red" ? 3 : 5, E = p.hp;
+          return E < 3 && (i.color(T, p) == "red", i.color(j, p) == "red"), A - M;
         }); z.length; ) {
           var C = 0;
           if (p.hp < 3 ? i.color(z[0], p) == "red" && C++ : i.color(z[0], p) == "black" && C++, C <= 0) break;
@@ -39544,10 +39582,10 @@ y({
         let C = v[0].filter((j) => w.includes(j));
         return JSON.stringify(w) === JSON.stringify(C);
         function T(j, M) {
-          for (let q = 0; q < j.length; q++) {
-            let R = j[q].indexOf(M);
-            if (R !== -1)
-              return { arrayIndex: q, elementIndex: R };
+          for (let A = 0; A < j.length; A++) {
+            let E = j[A].indexOf(M);
+            if (E !== -1)
+              return { arrayIndex: A, elementIndex: E };
           }
           return null;
         }
@@ -39881,7 +39919,7 @@ const he = {
       return e && e.length > 0;
     },
     async content(r, t, e) {
-      const a = t.targets.filter((s) => s.isAlive() && s.isIn()), n = await e.chooseTarget().set("forced", !0).set("prompt", "朔：对一名目标角色造成一点伤害").set("prompt2", A.colorize("#r劲发江潮落，气收秋毫平！#")).set("filterTarget", (s, u, f) => a.includes(f)).set("ai", (s) => i.damageEffect(s, e, e)).forResult();
+      const a = t.targets.filter((s) => s.isAlive() && s.isIn()), n = await e.chooseTarget().set("forced", !0).set("prompt", "朔：对一名目标角色造成一点伤害").set("prompt2", q.colorize("#r劲发江潮落，气收秋毫平！#")).set("filterTarget", (s, u, f) => a.includes(f)).set("ai", (s) => i.damageEffect(s, e, e)).forResult();
       if (!n.targets) return;
       const o = n.targets[0];
       o.damage(), e.line(o);
@@ -39892,7 +39930,7 @@ const he = {
       return t.hasUseTarget({ name: "sha", nature: "stab", isCard: !0 }, !0, !0);
     },
     async content(r, t, e) {
-      await e.chooseUseTarget().set("card", { name: "sha", nature: "stab", isCard: !0 }).set("prompt", "望：视为使用一张刺【杀】").set("prompt2", A.colorize("#r眼观全局，胜负不在一处。#")).set("addCount", !1).set("nodistance", !0);
+      await e.chooseUseTarget().set("card", { name: "sha", nature: "stab", isCard: !0 }).set("prompt", "望：视为使用一张刺【杀】").set("prompt2", q.colorize("#r眼观全局，胜负不在一处。#")).set("addCount", !1).set("nodistance", !0);
     }
   },
   lingmrfz: {
@@ -39904,7 +39942,7 @@ const he = {
       return t.hasUseTarget("jiu");
     },
     async content(r, t, e) {
-      await e.chooseUseTarget(i.autoViewAs("jiu")).set("prompt", "令：视为使用一张【酒】").set("prompt2", A.colorize("#r直抒胸臆，酣畅淋漓。#"));
+      await e.chooseUseTarget(i.autoViewAs("jiu")).set("prompt", "令：视为使用一张【酒】").set("prompt2", q.colorize("#r直抒胸臆，酣畅淋漓。#"));
     }
   },
   junmrfz: {
@@ -39926,13 +39964,13 @@ const he = {
           e.getHistory("useCard", (u) => u.card && i.type(u.card) === "basic").map((u) => u.card.name).flat()
         )
         //@ts-ignore
-      ).filter((u) => e.hasUseTarget(u, !0, !1)).map((u) => [i.type(u), "", u]), o = await e.chooseButton().set("createDialog", ["颉", [n, "vcard"]]).set("prompt", "颉：视为使用一张你本回合使用过的基本牌").set("prompt2", A.colorize("#r就这样吧#")).set("ai", (u) => {
+      ).filter((u) => e.hasUseTarget(u, !0, !1)).map((u) => [i.type(u), "", u]), o = await e.chooseButton().set("createDialog", ["颉", [n, "vcard"]]).set("prompt", "颉：视为使用一张你本回合使用过的基本牌").set("prompt2", q.colorize("#r就这样吧#")).set("ai", (u) => {
         const f = i.player(), l = u.link[2];
         return f.getUseValue(l, !0, !1);
       }).forResult();
       if (!o.links) return;
       const s = o.links[0][2];
-      e.chooseUseTarget().set("card", { name: s, isCard: !0 }).set("forced", !0).set("prompt", "颉：视为使用一张你本回合使用过的基本牌").set("prompt2", A.colorize("#r就这样吧#")).set("addCount", !1).set("nodistance", !0);
+      e.chooseUseTarget().set("card", { name: s, isCard: !0 }).set("forced", !0).set("prompt", "颉：视为使用一张你本回合使用过的基本牌").set("prompt2", q.colorize("#r就这样吧#")).set("addCount", !1).set("nodistance", !0);
     }
   },
   shumrfz: {
@@ -39976,7 +40014,7 @@ const he = {
       return t.countCards("he") > 0;
     },
     async content(r, t, e) {
-      const a = await e.chooseToDiscard().set("prompt", `易：${i.poptip("sjzx_zhiheng")}3`).set("prompt2", A.colorize("#r纵横捭阖，自有制衡之道。#")).set("ai", (n) => i.value(n, e) < 6).set("selectCard", [0, 3]).set("position", "he").forResult();
+      const a = await e.chooseToDiscard().set("prompt", `易：${i.poptip("sjzx_zhiheng")}3`).set("prompt2", q.colorize("#r纵横捭阖，自有制衡之道。#")).set("ai", (n) => i.value(n, e) < 6).set("selectCard", [0, 3]).set("position", "he").forResult();
       a.cards && e.draw(a.cards.length);
     }
   },
@@ -40005,7 +40043,7 @@ const he = {
     async content(r, t, e) {
       const a = await e.chooseControl({
         controls: ["basic", "trick", "equip"]
-      }).set("prompt", "余：选择从牌堆中获得任意类型的一张牌。").set("prompt2", A.colorize("#r热锅冷油，火候正好#")).set("ai", function() {
+      }).set("prompt", "余：选择从牌堆中获得任意类型的一张牌。").set("prompt2", q.colorize("#r热锅冷油，火候正好#")).set("ai", function() {
         const o = i.player();
         return o.hp <= 3 && !o.countCards("h", { name: ["shan", "tao"] }) ? "basic" : o.countCards("he", { type: "equip" }) < 2 ? "equip" : "trick";
       }).forResult(), n = i.cardPile(function(o) {
@@ -40948,7 +40986,7 @@ class ze {
    * 初始化
    */
   async init() {
-    this.pendingRun = xr, await this.initCharacterPack(), await this.initCardPack(), Be("translate", (t, e) => (e.endsWith("_prefix") && (t = this.setNamePrefix(t).name || t), t = A.colorize(t), t)), fr({
+    this.pendingRun = xr, await this.initCharacterPack(), await this.initCardPack(), Be("translate", (t, e) => (e.endsWith("_prefix") && (t = this.setNamePrefix(t).name || t), t = q.colorize(t), t)), fr({
       name: "whichWayPackManager_init",
       fn: async () => {
         for (const t of this.pendingRun)
@@ -40985,7 +41023,7 @@ class ze {
         // 整体“仅点将可用”（引擎扩展包 tab：forbidai_user_mode_extension_WhichWay）
         (g.config.forbidai_user_mode_extension_WhichWay === !0 || // 子包“仅点将可用”（forbidai_user_<子包>）
         g.config[`forbidai_user_${l.pack}`] === !0) && (g.config.forbidai.includes(f) || g.config.forbidai.add(f))
-      ) : u.isUnseen = !0, g.characterPack[l.pack][f] ??= u, u.designer ? l.whichWay.designer = Array.isArray(u.designer) ? u.designer : [u.designer] : l.whichWay.designer?.length || (l.whichWay.designer = br(u, !1, !0)), l.whichWay.designer?.length && (Me[f] ??= [], Me[f].push(...l.whichWay.designer.filter((h) => !Me[f].includes(h)))), A.config("unityGroup"))
+      ) : u.isUnseen = !0, g.characterPack[l.pack][f] ??= u, u.designer ? l.whichWay.designer = Array.isArray(u.designer) ? u.designer : [u.designer] : l.whichWay.designer?.length || (l.whichWay.designer = br(u, !1, !0)), l.whichWay.designer?.length && (Me[f] ??= [], Me[f].push(...l.whichWay.designer.filter((h) => !Me[f].includes(h)))), q.config("unityGroup"))
         u.group = "sjzx_group", g.translate.sjzx_group || (g.translate.sjzx_group = "泰拉");
       else if (this._addedGroup === !1) {
         this._addedGroup = !0;

@@ -1,4 +1,4 @@
-import { whichWayArknight as m } from "./arknight-CNwD5MVC.js";
+import { whichWayArknight as m } from "./arknight-B76Ucf1-.js";
 import { whichWayFile as A } from "./file-CXhVBbUa.js";
 import { get as h, lib as w, game as L } from "noname";
 import { onArenaReady as M, onConfig as S, onSetDev as T } from "./hooks-BscfO9lD.js";

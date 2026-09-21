@@ -1,7 +1,7 @@
 import { defineComponent as d, openBlock as u, createElementBlock as h, createElementVNode as o, Fragment as m, renderList as p, toDisplayString as g, createApp as f } from "vue";
 import { lib as b, ui as v } from "noname";
 import { _ as y } from "./_plugin-vue_export-helper-CHgC5LLL.js";
-import { w as _ } from "./version-shared-C3acQ_GF.js";
+import { w as _ } from "./version-shared-BUx8npJy.js";
 import { onArenaReady as w } from "./hooks-BscfO9lD.js";
 const L = { class: "author-background" }, k = ["src"], E = { class: "author-name" }, x = /* @__PURE__ */ d({
   __name: "author",

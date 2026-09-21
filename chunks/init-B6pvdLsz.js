@@ -1,6 +1,6 @@
 import { lib as d } from "noname";
 import { whichWayHooksApi as h } from "./hooks-BscfO9lD.js";
-import { w } from "./version-shared-C3acQ_GF.js";
+import { w } from "./version-shared-BUx8npJy.js";
 async function f(a) {
   const e = /* @__PURE__ */ new Map();
   for (const n of a) {
@@ -56,7 +56,7 @@ const m = [], u = (a) => {
      * 导入noname扩展
      * TODO 这坨东西真要该全删了xd
      */
-    { name: "nonameEx", load: () => import("./nonameEx-CTPhrjAX.js") },
+    { name: "nonameEx", load: () => import("./nonameEx-fJBDwvJ3.js") },
     //导入配置
     { name: "config", load: () => import("./config-data-shared-Dp8x7s31.js").then((o) => o.i) },
     //————————————启动页美化（WhichWay 视差轮播）————————————//
@@ -67,7 +67,7 @@ const m = [], u = (a) => {
       name: "launchPad(启动页美化)",
       optional: !0,
       load: async () => {
-        const { registerLaunchPadSplash: o } = await import("./launchPad-Bgl-Jo98.js");
+        const { registerLaunchPadSplash: o } = await import("./launchPad-Dtvx3_ab.js");
         o();
       }
     },
@@ -92,25 +92,25 @@ const m = [], u = (a) => {
      * 新的添加将包的方法（干员/卡牌模块清单在构建期由 import.meta.glob 确定，
      * 整个武将包只占一个 chunk）
      */
-    { name: "packs(新)", load: () => import("./packs-A0wRqvLR.js") },
+    { name: "packs(新)", load: () => import("./packs-vVjqm1Te.js") },
     //导入明日方舟数据
-    { name: "arknight", load: () => import("./arknight-CNwD5MVC.js") },
+    { name: "arknight", load: () => import("./arknight-B76Ucf1-.js") },
     //导入音频组件
-    { name: "audio", load: () => import("./audio-2wIS4ukw.js") },
+    { name: "audio", load: () => import("./audio-C8ufhcsM.js") },
     //导入皮肤
-    { name: "skin", load: () => import("./skin-confOverride-shared-BVzlctbo.js").then((o) => o.i) },
+    { name: "skin", load: () => import("./skin-confOverride-shared-6cQoTXiO.js").then((o) => o.i) },
     //导入poptip
     { name: "poptip", load: () => import("./poptip-DiPwnQCH.js") },
     //导入tips
     { name: "tips", load: () => import("./tips-DleQAbQn.js") },
     //导入角色卡片
-    { name: "characterCard", load: () => import("./characterCard-BLQBYyJf.js") },
+    { name: "characterCard", load: () => import("./characterCard-Bm35FGUC.js") },
     //扩展适配
     { name: "extCompatible", load: () => import("./extCompatible-D-EyN427.js") },
     //导入更新日志
-    { name: "updateLog", load: () => import("./updateLog-shared-eMt4sRyN.js").then((o) => o.i) },
+    { name: "updateLog", load: () => import("./updateLog-shared-yraLkER2.js").then((o) => o.i) },
     //快速设置界面
-    { name: "configUI", load: () => import("./configUI-BmkLBr9O.js") },
+    { name: "configUI", load: () => import("./configUI-DVa4aezD.js") },
     //导入模组系统
     { name: "modules", load: () => import("./modules-CttU88aU.js") }
   ], e = performance.now();

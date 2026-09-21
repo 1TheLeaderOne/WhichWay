@@ -2,7 +2,7 @@ import { whichWayFile as w } from "./file-CXhVBbUa.js";
 import { onInit as U, onConfig as C, onSetDev as b } from "./hooks-BscfO9lD.js";
 import { get as f } from "noname";
 import { whichWayUtil as u } from "./utill-DpF3UCI4.js";
-import { w as W } from "./version-shared-C3acQ_GF.js";
+import { w as W } from "./version-shared-BUx8npJy.js";
 import { whichWayToast as k } from "./toast-BKImUKDM.js";
 class I {
   audio = {

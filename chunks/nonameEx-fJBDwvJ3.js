@@ -15,9 +15,9 @@ function te(a, t) {
     { inner: r, outer: s }
   ], h = x.updatehl, p = (c) => o.has(c) || c.classList.contains("glows"), v = (c) => u === "fake" ? p(c) : !p(c), A = (c) => {
     let C = 0;
-    for (const { inner: H } of _)
-      if (H)
-        for (const P of H.childNodes) {
+    for (const { inner: b } of _)
+      if (b)
+        for (const P of b.childNodes) {
           const F = (
             /** @type { HTMLElement } */
             P
@@ -32,12 +32,12 @@ function te(a, t) {
     if (g.dragged || g.justdragged || !v(this) || this.classList.contains("removing")) return;
     const c = Date.now();
     c - k < 350 || (k = c, E());
-  }, b = (c) => {
+  }, H = (c) => {
     y.has(c) || (y.add(c), c.addEventListener(i.config.touchscreen ? "touchend" : "click", G));
   }, T = () => {
     const c = x._handcardHover;
-    for (const { inner: C, outer: H } of _) {
-      if (!C || !H || !C.childNodes.length) continue;
+    for (const { inner: C, outer: b } of _) {
+      if (!C || !b || !C.childNodes.length) continue;
       const P = Array.from(C.childNodes).filter(
         (L) => L.classList && L.classList.contains("card") && !L.classList.contains("removing")
       );
@@ -45,33 +45,33 @@ function te(a, t) {
       const F = (L, I, w) => {
         const O = /translateX\((-?[\d.]+)px\)/.exec(L.style.transform || "");
         return O ? parseFloat(O[1]) : I * w;
-      }, R = i.config.fold_card && P.length > 1 ? Math.max(32, Math.min(112, (H.offsetWidth - 128) / (P.length - 1))) : 112;
-      let U = 0, J, N = 0;
+      }, R = i.config.fold_card && P.length > 1 ? Math.max(32, Math.min(112, (b.offsetWidth - 128) / (P.length - 1))) : 112;
+      let U = 0, $, N = 0;
       P.forEach((L, I) => {
         const w = (
           /** @type { HTMLElement } */
           L
         );
-        if (b(w), v(w)) {
+        if (H(w), v(w)) {
           const z = w === c ? Math.max(f, w.offsetWidth || 0) : f;
           N = I * R - U, U += R - z, w.classList.contains("selectable") && (d.add(w), w.classList.remove("selectable"));
         } else
           N = F(w, I, R) - U, d.delete(w) && w.classList.add("selectable");
         const O = `translateX(${Math.round(N)}px)`;
-        w._transform = O, w.style.transform = w.classList.contains("selected") ? `${O} translateY(-20px)` : O, J = w;
+        w._transform = O, w.style.transform = w.classList.contains("selected") ? `${O} translateY(-20px)` : O, $ = w;
       });
-      const W = Math.round(N) + (J?.offsetWidth || 0);
-      C.style.setProperty("width", `${W}px`, "important"), H.classList.toggle("scrollh", W > H.offsetWidth);
+      const J = Math.round(N) + ($?.offsetWidth || 0);
+      C.style.setProperty("width", `${J}px`, "important"), b.classList.toggle("scrollh", J > b.offsetWidth);
     }
   }, q = function(...c) {
     const C = h.apply(this, c);
     try {
       T();
-    } catch (H) {
-      console.warn("[chooseFakeCard] 应用假牌布局失败：", H);
+    } catch (b) {
+      console.warn("[chooseFakeCard] 应用假牌布局失败：", b);
     }
     return C;
-  }, $ = () => {
+  }, W = () => {
     x.updatehl = h;
     for (const c of y) c.removeEventListener(i.config.touchscreen ? "touchend" : "click", G);
     y.clear();
@@ -94,9 +94,9 @@ function te(a, t) {
       }
     x.updatehl = q, x.updatehl();
   } catch (c) {
-    throw $(), c;
+    throw W(), c;
   }
-  return $;
+  return W;
 }
 const Z = {
   /**
@@ -221,17 +221,17 @@ const Z = {
           filterOk: () => typeof a.filterOk == "function" && !a.filterOk() ? !1 : !s || g.auto || d?.result === "ai" ? !0 : r != null || !k(x.selected.targets.slice()).length
         }), s) {
           d.custom || (d.custom = { add: {}, replace: {} }), d.custom.add || (d.custom.add = {});
-          const b = d.custom.add.target;
+          const H = d.custom.add.target;
           d.custom.add.target = () => {
-            typeof b == "function" && b.call(this), _();
+            typeof H == "function" && H.call(this), _();
           };
         }
         const h = await d.forResult() || {}, p = !!h.bool, v = p && Array.isArray(h.targets) ? h.targets.slice() : n.slice();
         if (r == null && v.length) {
-          const b = k(v);
-          if (b.length) {
+          const H = k(v);
+          if (H.length) {
             let T = typeof a.controlAi == "function" ? a.controlAi(a.getParent(), e) : void 0;
-            typeof T == "number" && (T = b[T]), T == null && (T = b[0]), r = T;
+            typeof T == "number" && (T = H[T]), T == null && (T = H[0]), r = T;
           }
         }
         const A = k(v), E = r != null && A.includes(r) ? r : void 0, G = E != null && E !== "cancel2";
