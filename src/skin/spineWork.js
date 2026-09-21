@@ -61,6 +61,27 @@ function wrapSpinePlayerUnpack(player) {
 	am.textureLoader.__whichWayUnpackWrapped = true;
 }
 
+/**
+ * 解析动皮容器的**宿主元素**（容器最终要挂进去、并与之等大的那个元素）。
+ *
+ * 之所以不直接用 `target`：
+ * - `loadDyc` 的 target 可能是 Player 对象（`node.avatar` 才是头像）；
+ * - 也可能是 `div.player` 这类元素（调用方直接传了玩家节点，而头像在它内部）；
+ * 实测出现过容器落在 `div.player`（120x180）里头像只有 114x174 的情况，
+ * 容器于是永远比头像大一圈。
+ *
+ * @param {any} target loadDyc / updateDyc 收到的目标（Player 或元素）
+ * @param {HTMLElement} container 动皮容器
+ * @returns {HTMLElement|null} 宿主元素
+ */
+function resolveHost(target, container) {
+	if (!target) return container?.parentElement ?? null;
+	const avatar = target.node?.avatar ?? target.querySelector?.(".avatar");
+	if (avatar) return avatar;
+	if (target.nodeType === 1) return target;
+	return container?.parentElement ?? null;
+}
+
 const dycSave = window.whichWaySave.dycSave;
 
 class SpineWorker {
@@ -198,6 +219,9 @@ class SpineWorker {
 			player.context = null;
 		}
 
+		//断开尺寸监听（容器被移除后不必再贴合）
+		container?.__whichWayResizeObserver?.disconnect?.();
+
 		if (container) container.remove();
 	}
 
@@ -218,7 +242,9 @@ class SpineWorker {
 				target[key] = newValue;
 				if (target.dycLoaded && target.decadeUIFit) {
 					if (whichWayUtil.isDeveloperMode()) console.log("【驶舰之向】:已调整动态皮肤：", target.container);
-					fit(target.container, target.parent);
+					//这里拿到的 startFit.parent 是 updateDyc 的 target（可能是 Player），
+					//统一交给 resolveHost 解析成真正的宿主元素
+					fit(target.container, resolveHost(target.parent, target.container));
 					//@ts-ignore
 					delete dycSave.startFit;
 				}
@@ -297,6 +323,9 @@ class SpineWorker {
 			const player = new spine.SpinePlayer(container, config);
 			wrapSpinePlayerUnpack(player);
 
+			//供 fit() 重算骨骼位置
+			container.__whichWaySpinePlayer = player;
+
 			let cache = spineWorker.spineCache;
 			if (!cache.get(dynamicName)) cache.set(dynamicName, {});
 			let dycSkin = cache.get(dynamicName);
@@ -334,39 +363,120 @@ class SpineWorker {
 					startFit.decadeUIFit = true;
 				}, 1000);
 			}
+
+			//宿主解析 → 搬进宿主 → 贴合，并在之后布局/缩放变动时补贴合。
+			//
+			//这里刻意不再依赖 `get.itemtype(target) === "player"` 这类判定：
+			//`ui.create.div(cls, target)` 对 Player / 元素的落点并不确定，实测出现过容器落在
+			//div.player（120x180）里、而头像只有 114x174 的情况 —— 容器于是永远大一圈。
+			//统一由 resolveHost() 解析出 avatar 并把容器搬进去，保证「包含块」「量到的尺寸」
+			//「实际摆放位置」三者是同一个元素。
+			const host = resolveHost(target, container);
+			if (host && container.parentElement !== host) host.appendChild(container);
+			container.__whichWayFitTarget = target;
+			container.__whichWayFitHost = host;
+			if (host) {
+				fit(container, host);
+				//布局 / 界面缩放常在这之后才稳定（UI 扩展也会在这段时间改尺寸），补几次贴合
+				[600, 1500].forEach(ms => {
+					setTimeout(() => {
+						const current = container.__whichWayFitHost;
+						if (container.isConnected && current?.isConnected) fit(container, current);
+					}, ms);
+				});
+				if (typeof ResizeObserver !== "undefined") {
+					const observer = new ResizeObserver(() => {
+						const current = container.__whichWayFitHost;
+						if (current?.isConnected) fit(container, current);
+					});
+					observer.observe(host);
+					container.__whichWayResizeObserver = observer;
+				}
+			}
 			return player;
 		} else console.error(`no skin data ${charName} ${skinName}`);
 
-		function fit(target, player, time = 4) {
-			const transferNum = str => parseFloat(str.match(/-?\d*\.?\d+/)?.[0] || "0");
-			const oldTransition = target.style.transition;
-			target.style.transition = "none";
+		/**
+		 * 让动皮容器贴合父元素：渲染尺寸与父元素**完全一致**（放大 time 倍再用 zoom 缩回，保证画质）。
+		 *
+		 * 原先这里把容器尺寸按 "2:3" 比例调整、并只把父元素尺寸当**下限**，
+		 * 于是 114×174 的 avatar 会得到 120×180 的容器而溢出父元素边界。
+		 *
+		 * 父元素尺寸变化时由 ResizeObserver 再次调用，所以对同一尺寸做了幂等处理。
+		 *
+		 * @param {HTMLElement} container 动皮容器（.sjzxDycWrapper）
+		 * @param {HTMLElement} parent 父元素（avatar / 立绘等）
+		 * @param {HTMLElement} host 宿主元素（avatar / 立绘等）
+		 */
+		function fit(container, host) {
+			if (!container?.isConnected || !host?.isConnected) return;
 
-			let style = getComputedStyle(target);
-			let width = transferNum(style.width);
-			let height = transferNum(style.height);
-			let left = transferNum(style.left);
+			const width = host.clientWidth;
+			const height = host.clientHeight;
+			if (!width || !height) return;
 
-			let playerStyle = getComputedStyle(player);
-			let playerWidth = transferNum(playerStyle.width);
-			let playerHeight = transferNum(playerStyle.height);
+			const sizeKey = `${width}x${height}`;
+			if (container.dataset.dycFitSize !== sizeKey) {
+				container.dataset.dycFitSize = sizeKey;
 
-			if (width > 360) {
-				target.style.transition = oldTransition;
-				return;
+				//容器是 absolute：宿主若是 static，它会以更外层的定位元素为包含块，
+				//left:0 与百分比都会算到那个盒子上。顺手把宿主变成包含块（已是定位元素就跳过）。
+				if (getComputedStyle(host).position === "static") host.style.position = "relative";
+
+				//容器尺寸 = 宿主尺寸，一一对应（宿主自己的圆角 / overflow 照旧生效）
+				const oldTransition = container.style.transition;
+				container.style.transition = "none";
+				container.style.width = `${width}px`;
+				container.style.height = `${height}px`;
+				container.style.zoom = "";
+				container.style.left = "0";
+				container.style.top = "0";
+				void container.offsetWidth;
+				container.style.transition = oldTransition;
+
+				//画布：CSS 尺寸铺满容器；**渲染缓冲**交给 enableSupersampling 处理。
+				//不能在这里直接写 canvas.width —— 库的渲染循环每帧都会调用
+				//`SceneRenderer.resize(ResizeMode.Expand)` 把它重置成 CSS 尺寸，
+				//所以"只写一次缓冲"会被下一帧覆盖（这正是之前超采样不生效的原因）。
+				const spinePlayer = container.__whichWaySpinePlayer;
+				const canvas = spinePlayer?.canvas;
+				if (canvas?.style) {
+					canvas.style.width = "100%";
+					canvas.style.height = "100%";
+				}
+				if (spinePlayer) {
+					//按当前容器尺寸更新超采样系数，并立刻应用一次（不等下一帧）
+					spineWorker.enableSupersampling(spinePlayer);
+				}
+				//尺寸变了：骨骼按新的容器尺寸重新摆位（骨骼坐标与画布缓冲无关）
+				if (spinePlayer?.skeleton) spineWorker.setSkeletonPosition(spinePlayer, spinePlayer.config.originalOptions);
 			}
 
-			[width, height] = whichWayUtil.adjustToRatio(width, height, "2:3", [playerWidth, playerHeight]);
-
-			target.style.width = `${width * time}px`;
-			target.style.height = `${height * time}px`;
-			target.style.zoom = `${1 / time}`;
-			if (typeof left === "number") target.style.left = `${left * time}px`;
-			// target.style.left = `-50%`;
-			void target.offsetWidth;
-			target.style.transition = oldTransition;
-
-			dycSave.dycZoom = `${1 / time}`;
+			//回读校验：容器实际渲染尺寸必须等于宿主尺寸，不一致就下一帧重试（最多 3 次）。
+			//这样无论夹在中间的是布局未稳定、UI 扩展改尺寸还是挂错宿主，最终状态都必然对齐。
+			const rect = container.getBoundingClientRect();
+			const aligned = Math.abs(rect.width - width) < 1 && Math.abs(rect.height - height) < 1;
+			if (whichWayUtil.isDeveloperMode()) {
+				const canvas = container.__whichWaySpinePlayer?.canvas;
+				console.log(
+					`[whichWayDyc] fit host=${host.className || host.tagName} ${width}x${height}` +
+						` -> container ${Math.round(rect.width)}x${Math.round(rect.height)}` +
+						(canvas ? `, buffer ${canvas.width}x${canvas.height}` : "") +
+						(aligned ? "" : " (retry)")
+				);
+			}
+			if (!aligned) {
+				const tries = (container.__whichWayFitTries || 0) + 1;
+				container.__whichWayFitTries = tries;
+				if (tries <= 3) {
+					requestAnimationFrame(() => {
+						const current = container.__whichWayFitHost;
+						if (container.isConnected && current?.isConnected) fit(container, current);
+					});
+				}
+			} else {
+				container.__whichWayFitTries = 0;
+			}
 		}
 	}
 
@@ -419,22 +529,94 @@ class SpineWorker {
 		}
 	}
 
+	/**
+	 * 取动皮容器的目标尺寸（= 父元素的真实尺寸，也是动皮配置里 x/y/scale 的基准空间）。
+	 *
+	 * 优先用 `fit()` 记录下来的尺寸 —— 容器的 `clientWidth` 在画布超采样等场景下不一定可信；
+	 * 还没有记录时（容器刚创建、尚未 fit）退回 `clientWidth` / 设计基准 120x180。
+	 *
+	 * @param {HTMLElement} container 动皮容器
+	 * @returns {[number, number]} 宽高
+	 */
+	getDycFitSize(container) {
+		const [width, height] = (container?.dataset?.dycFitSize || "").split("x").map(Number);
+		if (width > 0 && height > 0) return [width, height];
+		return [container?.clientWidth || 120, container?.clientHeight || 180];
+	}
+
+	/**
+	 * 给动皮开启超采样（画布缓冲放大），像素更多、观感不变。
+	 *
+	 * 两个关键点（都由 lib/spine-player.js 的行为决定）：
+	 * 1. `SceneRenderer.resize()` 每次都会 `canvas.width = canvas.clientWidth` 重置缓冲，
+	 *    而渲染循环**每帧**都会调用 `resize(ResizeMode.Expand)` ⇒ 缓冲必须在 resize 里放大，
+	 *    在外面写一次会被下一帧覆盖；
+	 * 2. `SpinePlayer.draw()` 用 `zoom = 视口宽 / scale(视口, 缓冲)` 设相机，缓冲放大 k 倍
+	 *    会让 zoom 变成 1/k（画面被放大裁切）⇒ 在 `begin()`（相机 update 之前）把 zoom 乘回 k，
+	 *    画面几何就与不放大时**完全一致**，区别只有缓冲像素更多 ⇒ 更清晰。
+	 *
+	 * @param {any} player SpinePlayer
+	 */
+	enableSupersampling(player) {
+		const renderer = player?.sceneRenderer;
+		if (!renderer) return;
+
+		if (renderer.__whichWaySupersampled) {
+			renderer.resize(spine.webgl?.ResizeMode?.Expand ?? 1);
+			return;
+		}
+		renderer.__whichWaySupersampled = true;
+
+		const rawResize = renderer.resize;
+		const rawBegin = renderer.begin;
+
+		renderer.resize = function (mode) {
+			rawResize.call(this, mode);
+
+			const canvas = this.canvas;
+			const cssWidth = canvas.clientWidth;
+			const cssHeight = canvas.clientHeight;
+			//未布局（display:none / 尚未挂上 DOM）时保持库的设置，等下一帧再说
+			if (!cssWidth || !cssHeight) return;
+
+			//density：至少跟得上屏幕像素密度；小容器保证短边 >= 360 缓冲像素；最多 4 倍
+			const density = Math.min(4, Math.max(window.devicePixelRatio || 1, 360 / Math.min(cssWidth, cssHeight)));
+			player.__whichWayDensity = density;
+			const bufferWidth = Math.round(cssWidth * density);
+			const bufferHeight = Math.round(cssHeight * density);
+			if (canvas.width !== bufferWidth || canvas.height !== bufferHeight) {
+				canvas.width = bufferWidth;
+				canvas.height = bufferHeight;
+			}
+			//rawResize 会把 viewport 设成 CSS 尺寸，这里每帧都要改回缓冲尺寸
+			this.context.gl.viewport(0, 0, canvas.width, canvas.height);
+		};
+
+		renderer.begin = function () {
+			const camera = this.camera;
+			//库的 zoom 与缓冲尺寸成反比，乘回 density 即可还原原本的画面几何
+			if (camera) camera.zoom *= player.__whichWayDensity || 1;
+			rawBegin.call(this);
+		};
+
+		renderer.resize(spine.webgl?.ResizeMode?.Expand ?? 1);
+	}
+
 	setSkeletonPosition(player, options, noFix) {
 		const parent = player.dom.parentNode;
-		//@ts-ignore
-		const offset = new spine.Vector2();
-		//@ts-ignore
-		const size = new spine.Vector2();
-		player.skeleton.getBounds(offset, size, []);
+		const [width, height] = spineWorker.getDycFitSize(parent);
 
-		let index = [parent.clientWidth / 120, parent.clientHeight / 180];
+		//骨骼坐标活在**容器尺寸**空间里：超采样只增加画布缓冲像素，
+		//相机 zoom 会按「缓冲 / 视口」同步修正（见 enableSupersampling），
+		//所以这里不需要、也不能再乘缓冲比例。
+		let index = [width / 120, height / 180];
 
 		if (noFix) index = [1, 1];
 
 		player.skeleton.scaleX = options.scale * index[0];
 		player.skeleton.scaleY = options.scale * index[1];
-		player.skeleton.x = parent.clientWidth * options.x[1] + options.x[0];
-		player.skeleton.y = parent.clientHeight * options.y[1] + options.y[0];
+		player.skeleton.x = width * options.x[1] + options.x[0];
+		player.skeleton.y = height * options.y[1] + options.y[0];
 	}
 
 	playAction(player, action, duration = 3000) {
@@ -526,6 +708,9 @@ class SpineWorker {
 				},
 			});
 			wrapSpinePlayerUnpack(actionPlayer);
+			//动作层（出场 / 攻击 / 特殊）同样开超采样：density 由渲染循环按实际 CSS 尺寸
+			//自适应，大画布只会取 devicePixelRatio，不会无谓地把缓冲放大 4 倍
+			spineWorker.enableSupersampling(actionPlayer);
 			dycSkin[playerid][action] = actionPlayer;
 		} else {
 			dycSkin[playerid][action].parent.style.display = "";
@@ -595,18 +780,6 @@ class SpineWorker {
 			return;
 		}
 
-		const parseZoomFactor = zoomStr => {
-			if (!zoomStr) return 1;
-			if (typeof zoomStr === "number") return zoomStr;
-			const match = zoomStr
-				.toString()
-				.trim()
-				.match(/^([\d.]+)%?$/);
-			return match ? (match[0].includes("%") ? parseFloat(match[1]) / 100 : parseFloat(match[1])) : 1;
-		};
-
-		const zoomFactor = parseZoomFactor(lib.config.ui_zoom)
-
 		whichWayToast.showToast("已开启动皮拖拽");
 
 		//文本复制
@@ -618,10 +791,11 @@ class SpineWorker {
 
 		copyBtn.addEventListener("click", () => {
 			let context = [];
-			let skeleton = dycSave?.skeletonPostion;
-			if (skeleton?.x) context.push(`x:[0,${skeleton.x.toFixed(2)}],`);
-			if (skeleton?.y) context.push(`y:[0,${skeleton.y.toFixed(2)}],`);
-			if (skeleton?.scale) context.push(`scale:${skeleton.scale.toFixed(2)},`);
+			const position = dycSave?.skeletonPostion;
+			//x / y 与 setSkeletonPosition 的公式一致：x = 容器宽 * x[1] + x[0]
+			if (position?.x) context.push(`x:[${position.x[0] ?? 0},${position.x[1].toFixed(2)}],`);
+			if (position?.y) context.push(`y:[${position.y[0] ?? 0},${position.y[1].toFixed(2)}],`);
+			if (position?.scale !== undefined) context.push(`scale:${position.scale.toFixed(2)},`);
 			if (context.length > 0) {
 				navigator.clipboard
 					.writeText(context.join("\n"))
@@ -666,6 +840,33 @@ class SpineWorker {
 		let lastLogTime = 0;
 		const logInterval = 200;
 
+		/**
+		 * 屏幕位移 → 骨骼坐标：1 CSS 像素位移 = 1 骨骼单位。
+		 * 相机视口宽 = 容器宽、`zoom` 已被超采样逻辑修正，所以两者是 1:1。
+		 * 注意不能用 `canvas.width / rect.width`：那是「缓冲 / 显示」比例（= 超采样系数），
+		 * 会把拖拽幅度放大 density 倍。
+		 */
+		const toSkeletonDelta = (dx, dy) => [dx, dy];
+
+		/**
+		 * 把当前骨骼状态换算成动皮配置里的参数，与 `setSkeletonPosition` 的公式严格互逆：
+		 *   x = 宽 * x[1] + x[0]                ⇒ x[1] = skeleton.x / 宽，x[0] = 0
+		 *   scaleX = scale * (宽 / 120)          ⇒ scale = skeleton.scaleX / (宽 / 120)
+		 * 尺寸取与运行时同一个来源（getDycFitSize），所以拖出来的参数就是实际生效的参数
+		 * （骨骼坐标就在容器尺寸空间里，与画布缓冲无关，不需要按缓冲比例换算）。
+		 */
+		const saveParams = () => {
+			const [width, height] = spineWorker.getDycFitSize(parent);
+			//骨骼一旦被污染成 NaN，就别把坏值写进配置（finite 兜底）
+			const finite = (value, fallback = 0) => (Number.isFinite(value) ? value : fallback);
+			if (!dycSave.skeletonPostion) dycSave.skeletonPostion = {};
+			const position = dycSave.skeletonPostion;
+			position.x = [0, width ? finite(skeleton.x / width) : 0];
+			position.y = [0, height ? finite(skeleton.y / height) : 0];
+			position.scale = width ? finite(skeleton.scaleX / (width / 120), 1) : finite(skeleton.scaleX, 1);
+			return position;
+		};
+
 		const onMouseDown = e => {
 			isDragging = true;
 			lastX = e.clientX;
@@ -675,9 +876,7 @@ class SpineWorker {
 		const onMouseMove = e => {
 			if (!isDragging) return;
 
-			const dx = e.clientX - lastX;
-			const dy = e.clientY - lastY;
-
+			const [dx, dy] = toSkeletonDelta(e.clientX - lastX, e.clientY - lastY);
 			skeleton.x += dx;
 			skeleton.y += dy;
 
@@ -685,23 +884,15 @@ class SpineWorker {
 			lastY = e.clientY;
 
 			const now = Date.now();
-
-			const viewportWidth = parent.clientWidth;
-			const viewportHeight = parent.clientHeight;
-			console.log(viewportWidth, viewportHeight);
-
-			const percentX = skeleton.x / viewportWidth;
-			const percentY = skeleton.y / viewportHeight;
-
 			if (now - lastLogTime > logInterval) {
-				const str = `骨骼位置: x=${skeleton.x.toFixed(2)} (${percentX.toFixed(2)}), y=${skeleton.y.toFixed(2)} (${percentY.toFixed(2)})`;
-				whichWayToast.showToast(str, true, "topLeft", "dragging_xAndy");
+				const position = saveParams();
+				whichWayToast.showToast(
+					`骨骼位置: x=[${position.x[0]},${position.x[1].toFixed(2)}], y=[${position.y[0]},${position.y[1].toFixed(2)}]`,
+					true,
+					"topLeft",
+					"dragging_xAndy"
+				);
 				lastLogTime = now;
-
-				let zoom = dycSave.dycZoom || 1;
-				if (!dycSave.skeletonPostion) dycSave.skeletonPostion = {};
-				dycSave.skeletonPostion.x = (percentX / zoom) / zoomFactor;
-				dycSave.skeletonPostion.y = (percentY / zoom) / zoomFactor;
 			}
 		};
 
@@ -725,10 +916,8 @@ class SpineWorker {
 
 			skeleton.scaleX = skeleton.scaleY = newScale;
 
-			whichWayToast.showToast(`当前骨骼缩放: scale=${newScale.toFixed(2)}`, true, "topLeft", "dragging_scale");
-
-			if (!dycSave.skeletonPostion) dycSave.skeletonPostion = {};
-			dycSave.skeletonPostion.scale = newScale / zoomFactor;
+			const position = saveParams();
+			whichWayToast.showToast(`当前骨骼缩放: scale=${position.scale.toFixed(2)}`, true, "topLeft", "dragging_scale");
 		};
 
 		spineWorker.eventListenersMap.set(domElement, { onMouseDown, onMouseMove, onMouseUp, onWheel });

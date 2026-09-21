@@ -4,18 +4,27 @@ setlocal enabledelayedexpansion
 REM ============================================================
 REM  WhichWay dev-output sync
 REM
-REM  Builds the extension and pushes ONLY the dev-output branch
-REM  (the build tree produced from dev). Use it when you just want
-REM  the build branch up to date without doing a release:
+REM  Builds the extension, packs the build tree into a local zip inside this
+REM  scripts folder, and pushes ONLY the dev-output branch (the build tree
+REM  produced from dev). Use it when you just want the build branch up to
+REM  date without doing a release:
 REM    - no tag, no output / output-core merge
-REM    - no GitHub Release, no archives
+REM    - no GitHub Release, no CI archives (but a local zip is made)
 REM    - dev itself is not pushed either
 REM
-REM  Full release (all branches + tag + archives): scripts\release.bat
+REM  Full release (all branches + tag + CI archives): scripts\release.bat
 REM
 REM  Usage:
-REM    release-dev.bat                build + sync dev-output
+REM    release-dev.bat                build + pack zip + sync dev-output
+REM    release-dev.bat --no-zip       same, but skip the local zip
 REM    release-dev.bat --push-only    push the existing local dev-output only
+REM                                   (no build, so no zip either)
+REM
+REM  Local package (on by default):
+REM    Written next to this script as WhichWay-dev-<sha7>.zip, where <sha7>
+REM    is the short dev-output commit. Top-level entry is WhichWay/ and the
+REM    tree comes straight from the build dir, so it never contains .github
+REM    or scripts/ - same layout as the CI release archives (drop-in install).
 REM
 REM  Notes:
 REM  - Uses plumbing git commands: never switches branches, never touches
@@ -44,17 +53,26 @@ set "MSGDEV=%TEMPDIR%\msg-dev.txt"
 
 cd /d "%REPO%" || (echo [ERROR] repo dir not found: %REPO% & exit /b 1)
 
-REM ---- args ----
+REM ---- args ---- (loop so --no-zip can be combined with --push-only) ----
 set "PUSHONLY="
+set "NOZIP="
+:parseargs
+if "%~1"=="" goto :argsdone
 if /i "%~1"=="--push-only" (
 	set "PUSHONLY=1"
-) else if not "%~1"=="" (
+) else if /i "%~1"=="--no-zip" (
+	set "NOZIP=1"
+) else (
 	echo [ERROR] unknown option: %~1
 	echo.
-	echo   release-dev.bat               build + sync dev-output
-	echo   release-dev.bat --push-only   push the existing local dev-output only
+	echo   release-dev.bat               build + pack zip + sync dev-output
+	echo   release-dev.bat --no-zip       same, but skip the local zip
+	echo   release-dev.bat --push-only    push the existing local dev-output only
 	exit /b 1
 )
+shift
+goto :parseargs
+:argsdone
 
 REM ---- precheck: working tree must be clean (build mode only) ----
 if not defined PUSHONLY (
@@ -83,9 +101,11 @@ set "DEVAHEAD=0"
 for /f "delims=" %%n in ('git rev-list --count origin/dev..refs/heads/dev 2^>nul') do set DEVAHEAD=%%n
 
 if defined PUSHONLY (
-	echo [INFO] mode     = push-only ^(no build: push the existing local dev-output^)
+	echo [INFO] mode     = push-only ^(no build, no zip: push the existing local dev-output^)
+) else if defined NOZIP (
+	echo [INFO] mode     = build + sync dev-output ^(local zip skipped: --no-zip^)
 ) else (
-	echo [INFO] mode     = build + sync dev-output
+	echo [INFO] mode     = build + pack zip + sync dev-output
 )
 echo [INFO] branch   = %ORIGBRANCH%   dev head = !DEVSHA!  ^(dev unpushed: !DEVAHEAD!^)
 if /i not "%ORIGBRANCH%"=="dev" (
@@ -105,9 +125,9 @@ if not exist "%VITEBIN%" (
 )
 
 REM ============================================================
-REM [1/3] build
+REM [1/4] build
 REM ============================================================
-echo [1/3] build extension...
+echo [1/4] build extension...
 if exist "%BUILD%" (
 	rd /s /q "%BUILD%" 2>nul
 	if exist "%BUILD%" (
@@ -139,9 +159,9 @@ if not defined BUILTANY (
 )
 
 REM ============================================================
-REM [2/3] dev-output: build tree via temp index, commit, update-ref
+REM [2/4] dev-output: build tree via temp index, commit, update-ref
 REM ============================================================
-echo [2/3] create dev-output commit...
+echo [2/4] create dev-output commit...
 del "%TMPIDX%" 2>nul
 set "GIT_INDEX_FILE=%TMPIDX%"
 git read-tree --empty
@@ -182,7 +202,21 @@ echo       dev-output = !DOCOMMIT!
 del "%MSGDEV%" 2>nul
 
 REM ============================================================
-REM [3/3] push dev-output (with pause)
+REM [3/4] local package: build tree -> scripts\WhichWay-dev-<sha7>.zip
+REM ============================================================
+if defined NOZIP (
+	echo [3/4] pack build tree into a zip... skipped ^(--no-zip^)
+) else (
+	echo [3/4] pack build tree into a zip...
+	call :pack_zip
+	if errorlevel 1 (
+		echo [ERROR] packing failed. Nothing was pushed; fix it or re-run with --no-zip.
+		exit /b 1
+	)
+)
+
+REM ============================================================
+REM [4/4] push dev-output (with pause)
 REM ============================================================
 :push
 set "DOCOMMIT="
@@ -217,7 +251,85 @@ if errorlevel 1 (
 rd /s /q "%TEMPDIR%" 2>nul
 echo.
 echo [DONE] dev-output synced: !DOCOMMIT!
+if defined ZIPPATH echo        local package: !ZIPPATH!
 echo        pushed: dev-output only ^(no tag, no output / output-core, no release^)
 echo        still on !ORIGBRANCH!, worktree untouched.
 endlocal
+exit /b 0
+
+REM ============================================================
+REM [3/4] pack_zip - zip the build tree into this scripts folder.
+REM
+REM   - tar.exe (bsdtar, Win10 1803+) is used when available: far faster
+REM     than Compress-Archive on asset-heavy trees. PowerShell is only a
+REM     fallback for older systems.
+REM   - -C <extension dir> + "WhichWay" gives the WhichWay/ top level that
+REM     the CI archives also use (drop-in install).
+REM   - Sanity checks (tar path only) mirror the CI ones: every entry stays
+REM     under WhichWay/, and no CI-only .github/ or packaging scripts/ entry
+REM     may appear.
+REM   - Returns 0 on success (sets ZIPPATH / ZIPNAME), 1 on failure.
+REM ============================================================
+:pack_zip
+set "ZIPPATH="
+set "ZIPNAME="
+set "SHORT="
+for /f "delims=" %%s in ('git rev-parse --short=7 refs/heads/dev-output') do set SHORT=%%s
+if "!SHORT!"=="" set "SHORT=local"
+set "ZIPNAME=WhichWay-dev-!SHORT!.zip"
+set "ZIPPATH=%SCRIPTS%!ZIPNAME!"
+if exist "!ZIPPATH!" del "!ZIPPATH!" 2>nul
+
+set "TARBIN="
+for /f "delims=" %%t in ('where tar 2^>nul') do if not defined TARBIN set "TARBIN=%%t"
+if defined TARBIN (
+	"%TARBIN%" -a -c -f "!ZIPPATH!" -C "%ROOT%\apps\core\extension" "WhichWay"
+	if errorlevel 1 (
+		del "!ZIPPATH!" 2>nul
+		set "TARBIN="
+	)
+)
+if not defined TARBIN (
+	echo       ^(tar.exe unavailable, falling back to PowerShell Compress-Archive^)
+	powershell -NoProfile -ExecutionPolicy Bypass -Command "Compress-Archive -LiteralPath '%BUILD%' -DestinationPath '!ZIPPATH!' -CompressionLevel Optimal -Force"
+	if errorlevel 1 (
+		echo [ERROR] Compress-Archive failed.
+		exit /b 1
+	)
+)
+if not exist "!ZIPPATH!" (
+	echo [ERROR] zip was not created: !ZIPPATH!
+	exit /b 1
+)
+
+REM ---- sanity: list entries, then check the layout (ASCII prefixes only) ----
+if defined TARBIN (
+	"%TARBIN%" -tf "!ZIPPATH!" > "%TEMPDIR%\ziplist.txt" 2>nul
+	set "ZIPLISTBYTES="
+	for %%l in ("%TEMPDIR%\ziplist.txt") do set "ZIPLISTBYTES=%%~zl"
+	if not defined ZIPLISTBYTES set "ZIPLISTBYTES=0"
+	if "!ZIPLISTBYTES!"=="0" (
+		echo [ERROR] zip sanity failed: cannot list the archive.
+		del "!ZIPPATH!" 2>nul
+		exit /b 1
+	)
+	REM every entry must live under WhichWay/ ...
+	findstr /v /b /l /c:"WhichWay/" "%TEMPDIR%\ziplist.txt" >nul
+	if not errorlevel 1 (
+		echo [ERROR] zip sanity failed: entries outside WhichWay\.
+		del "!ZIPPATH!" 2>nul
+		exit /b 1
+	)
+	REM ... and the install pack must not ship CI-only or packaging files
+	findstr /b /l /c:"WhichWay/.github/" /c:"WhichWay/scripts/" "%TEMPDIR%\ziplist.txt" >nul
+	if not errorlevel 1 (
+		echo [ERROR] zip sanity failed: it contains .github\ or scripts\.
+		del "!ZIPPATH!" 2>nul
+		exit /b 1
+	)
+	del "%TEMPDIR%\ziplist.txt" 2>nul
+)
+
+for %%z in ("!ZIPPATH!") do set "ZIPSIZE=%%~zz"
+echo       !ZIPNAME!  ^(!ZIPSIZE! bytes, top level WhichWay/^)
 exit /b 0
