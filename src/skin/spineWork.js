@@ -1,4 +1,4 @@
-import { spineWhitherHelm as spine } from "../../lib/spine-player.js";
+import { spineWhichWay as spine } from "../../lib/spine-player.js";
 import { lib, game, ui, get, ai, _status } from "noname";
 import { whichWayUtil } from "../utill.js";
 import { whichWayToast } from "../toast/index.ts";

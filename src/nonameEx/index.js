@@ -30,17 +30,17 @@ nonameEx["customFuc"] = {
  */
 
 nonameEx.jsExt ??= {};
-nonameEx["ArrayExt"] = patchPrototypeWhitherHelm(ArrayExt, Array.prototype, Array.prototype)
-nonameEx["HTMLDivElementExt"] = patchPrototypeWhitherHelm(HTMLDivElementExt, HTMLDivElement.prototype)
+nonameEx["ArrayExt"] = patchPrototypeWhichWay(ArrayExt, Array.prototype, Array.prototype)
+nonameEx["HTMLDivElementExt"] = patchPrototypeWhichWay(HTMLDivElementExt, HTMLDivElement.prototype)
 
 onBeforeContent({
 	name: "WhichWayNonameEx",
 	fn: async () => {
-		nonameEx["CardExt"] = patchPrototypeWhitherHelm(CardExt, lib.element.card);
-		nonameEx["PlayerExt"] = patchPrototypeWhitherHelm(PlayerExt,lib.element.player);
-		nonameEx["GameExt"] = patchPrototypeWhitherHelm(GameExt, Game.prototype);
-		nonameEx["GetExt"] = patchPrototypeWhitherHelm(GetExt, Get.prototype);
-		nonameEx["GameEventExt"] = patchPrototypeWhitherHelm(GameEventExt, lib.element.GameEvent.prototype);
+		nonameEx["CardExt"] = patchPrototypeWhichWay(CardExt, lib.element.card);
+		nonameEx["PlayerExt"] = patchPrototypeWhichWay(PlayerExt,lib.element.player);
+		nonameEx["GameExt"] = patchPrototypeWhichWay(GameExt, Game.prototype);
+		nonameEx["GetExt"] = patchPrototypeWhichWay(GetExt, Get.prototype);
+		nonameEx["GameEventExt"] = patchPrototypeWhichWay(GameEventExt, lib.element.GameEvent.prototype);
 
 		nonameEx["ContentExt"] = ContentExt;
 		Object.assign(lib.element.content, ContentExt);
@@ -55,7 +55,7 @@ onBeforeContent({
 	},
 });
 
-function patchPrototypeWhitherHelm(ExtensionClass, NativePrototype, BasePrototype) {
+function patchPrototypeWhichWay(ExtensionClass, NativePrototype, BasePrototype) {
 	BasePrototype = BasePrototype || Object.getPrototypeOf(NativePrototype);
 	const descriptors = Object.getOwnPropertyDescriptors(ExtensionClass.prototype);
 	const injectedMethods = {};

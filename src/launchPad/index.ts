@@ -67,6 +67,10 @@ class WhichWayCarouselSplash {
 		this.app = createApp(ModeCarousel, {
 			items,
 			bg,
+			//默认停在上一次启动的模式：引擎在 splash 返回后就会 game.saveConfig("mode", result)
+			//（见 noname/init/index.ts），所以 lib.config.mode 就是「上一次启动的模式」；
+			//没有记录、或该模式已不在列表里时，由组件回落到身份模式。
+			initialMode: typeof lib.config.mode === "string" ? lib.config.mode : "",
 			onPick: (mode: string) => {
 				this.dispose(node);
 				resolve(mode);

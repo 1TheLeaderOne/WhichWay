@@ -40,7 +40,7 @@ skill({
 				player.addSkill("bengjiemrfz");
 				player.sex = "male";
 				game.log(player, "将性别变为了", "#y男性");
-				player.node.avatar.setBackgroundImage("extension/whitherHelm/image/skill/shuangwang2mrfz.jpg");
+				player.node.avatar.setBackgroundImage("extension/WhichWay/image/skill/shuangwang2mrfz.jpg");
 			},
 		},
 	"jiangqingmrfz": {

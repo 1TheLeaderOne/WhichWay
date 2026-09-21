@@ -7,7 +7,7 @@
  *   少数势力（前文明 / 整合运动 / 卡兹戴尔相关）在明日方舟里没有对应，留空即可
  * - `logo`：势力图标名，对应 `image/camplogo/arknight/<logo>.png`；**默认就是真实势力名**，
  *   需要换图标时才单独写（`CharacterCard` 取势力图标时优先用这里的配置）
- * - `filter`：图标是否反色（`css/characterCard.css` 的 `.arknightCamp`，即 `filter: invert(1)`）。
+ * - `filter`：图标是否反色（`src/characterCard/CharacterCard.vue` 的 `.arknightCamp`，即 `filter: invert(1)`）。
  *   **不写**则沿用原流程：用明日方舟图标就反色、非明日方舟（`noname/name_*.png`）不反色
  *
  * @typedef {{ group: string, sort: string, reallyGroup?: string, logo?: string, filter?: boolean }} GroupDataItem

@@ -239,8 +239,7 @@ skill({
 					if (get.isLuckyStar(player)) num = 0.1;
 					if (num < 0.2 && lib.config.FTLmrfz !== true) {
 						ui.backgroundMusic.src = lib.assetURL + "extension/WhichWay/audio/BGM/fasterthanlight.mp3";
-						//TODO: 成就
-						// whitherHelm.ShowGetAch("FTLmrfz");
+						//TODO: 成就（成就系统待实现）
 					}
 					player.removeSkill("xingtumrfz");
 					player.addSkill("xingyoumrfz");

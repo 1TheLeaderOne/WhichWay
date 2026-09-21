@@ -125,4 +125,3 @@ export class ArrayExt extends Array {
 	}
 }
 
-// export const arrayExtWhither = patchPrototypeWhitherHelm(ArrayExt, Array.prototype, Array.prototype);

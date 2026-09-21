@@ -274,6 +274,7 @@ skill({ huozhimrfz: { /* lib.skill 标准技能对象 */ } });
 - **卡牌**：`src/card/index.js` 使用 `game.import("card", function (lib, game, ui, get, ai, _status) {...})` 定义卡牌包，`card` 字段为 `{ id: { image, type, enable, content, ai } }`。
 - 常用全局对象从 `"noname"` 导入：`import { lib, game, ui, get, ai, _status } from "noname";`。
 - 本扩展特有工具：`whichWayUtil`（配置/颜色/音频等）、`whichWayTips`（卡牌提示）、`whichWayToast`（提示框）、`whichWayFile`（文件与路径）。
+- ⚠️ **写 `trigger` 时先弄清 `filter` / `content` 收到的到底是哪个事件**。以 `global: "phaseOver"` 为例：它在 `content.phaseLoop`（`apps/core/noname/library/element/content.ts`）里由 `await event.trigger("phaseOver")` 发出，链路是 `phaseLoop -> arrangeTrigger -> trigger`，所以技能的 `filter(event, ...)` / `content(event, trigger, ...)` 拿到的**就是那个 `phaseLoop` 事件**：`.player` 正是刚结束回合的角色（`event.player = findNext(event.player)` 在这次触发被 await 完之后才执行；`lib.filter.filterTrigger` 亦以它作首参调用 `info.filter`）。**不要**用本扩展的 `event.getChildren("phase").player` 取这个角色：`getChildren`（`src/nonameEx/library/element/gameEvent.js`）只沿 `childEvents` 往**下**找且从自身开始，而每回合的 `phase` 事件是 `phaseLoop` 的子事件、还会随回合不断累积 ⇒ 永远返回**第一回合**的那个 `phase`（`spsikadimrfz` 的 `newqianximrfz` 曾因此完全不触发）。`getChildren` 只适合 `dying -> recover` 这类**确实的父子事件**；取"触发上下文"用 `event.player` / `event.getParent("事件名")`（如 `getParent("phaseLoop")`）。
 
 ### 假牌选牌（`player.chooseFakeCard`）
 

@@ -45,4 +45,3 @@ export class HTMLDivElementExt extends HTMLDivElement {
 	}
 }
 
-// export const HTMLDivElementExtWhitherHelm = patchPrototypeWhitherHelm(HTMLDivElementExt, HTMLDivElement.prototype);

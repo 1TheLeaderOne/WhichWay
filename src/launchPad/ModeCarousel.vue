@@ -2,7 +2,7 @@
 import { ref, reactive, onMounted, onBeforeUnmount, nextTick, computed } from "vue";
 import type { LaunchPadItem } from "./data.js";
 
-const props = defineProps<{ items: LaunchPadItem[]; bg: string }>();
+const props = defineProps<{ items: LaunchPadItem[]; bg: string; initialMode?: string }>();
 const emit = defineEmits<{ (e: "pick", mode: string): void }>();
 
 /* ---------------- 状态 ---------------- */
@@ -34,7 +34,7 @@ async function slideSwap(el: HTMLElement | null, dir: 1 | -1, setText: () => voi
 	const offset = dir * 50;
 	el.style.setProperty("--mcb-dx", offset + "px");
 	el.classList.add("mcb-t-out");
-	await sleep(230);
+	await sleep(180);
 	el.classList.remove("mcb-t-out");
 	setText();
 	await nextTick();
@@ -67,11 +67,11 @@ async function imageZoom(dir: 1 | -1, newBg: string) {
 	oldLayer.style.opacity = "1";
 	newLayer.style.opacity = "1";
 	await nextTick();
-	oldLayer.style.transition = "transform .6s cubic-bezier(.6,.05,.3,1)";
-	newLayer.style.transition = "transform .6s cubic-bezier(.6,.05,.3,1)";
+	oldLayer.style.transition = "transform .42s cubic-bezier(.6,.05,.3,1)";
+	newLayer.style.transition = "transform .42s cubic-bezier(.6,.05,.3,1)";
 	oldLayer.style.transform = "scale(0)";
 	newLayer.style.transform = "scale(1)";
-	await sleep(620);
+	await sleep(420);
 	oldLayer.remove();
 	newLayer.classList.remove("mcb-stage-img-active");
 	curArt.value = newBg;
@@ -84,6 +84,35 @@ async function imageZoom(dir: 1 | -1, newBg: string) {
 	}
 }
 
+/* ---------------- 封面图预解码：切页卡顿的主因 ---------------- */
+/**
+ * 让浏览器提前把封面图解码好。轮播用的是大图（carousel_N.png），
+ * 若等到切页那一刻才解码，切换瞬间会明显掉帧（"切模式卡顿"的主要来源）。
+ * 缩略条本来就引用了同一批 URL，这里只补一次 decode，不会多下载图片。
+ */
+const warmed = new Set<string>();
+function warmup(url: string) {
+	if (!url || warmed.has(url)) return;
+	warmed.add(url);
+	const img = new Image();
+	img.decoding = "async";
+	img.src = url;
+	//decode() 让解码在空闲时完成；不支持 / 失败就忽略，不影响切页
+	img.decode?.().catch(() => {});
+}
+
+/** 预热顺序：当前页 → 左右相邻（下一次切页立刻可用）→ 其余（空闲时补上） */
+function warmupImages(center: number) {
+	const total = props.items.length;
+	if (!total) return;
+	const at = (i: number) => props.items[((i % total) + total) % total].art;
+	[center, center + 1, center - 1].forEach(i => warmup(at(i)));
+	const rest = () => props.items.forEach(item => warmup(item.art));
+	const idle = window.requestIdleCallback;
+	if (typeof idle === "function") idle(rest, { timeout: 2000 });
+	else setTimeout(rest, 600);
+}
+
 /* ---------------- 切页 ---------------- */
 async function goTo(index: number, dir: 1 | -1) {
 	if (animating.value || leaving.value) return;
@@ -92,11 +121,15 @@ async function goTo(index: number, dir: 1 | -1) {
 	const next = (index + total) % total;
 	const item = props.items[next];
 	animating.value = true;
-	await Promise.all([slideSwap(serialEl.value, dir, () => (serial.value = item.serial)), slideSwap(titleEl.value, dir, () => (title.value = item.title)), slideSwap(descEl.value, dir, () => (desc.value = item.desc)), imageZoom(dir, item.art)]);
+	//缩略条与指示器跟点击同时起跑，并和大图共用同一段时长（0.42s）：
+	//原先它们被排在整段动画结束之后才开始挪，看起来总比文字/大图"慢半拍"
 	active.value = next;
-	animating.value = false;
 	await nextTick();
 	shiftThumbs();
+	//提前解码目标页（以及它的相邻页），大跨度跳页时也不会现场解码掉帧
+	warmupImages(next);
+	await Promise.all([slideSwap(serialEl.value, dir, () => (serial.value = item.serial)), slideSwap(titleEl.value, dir, () => (title.value = item.title)), slideSwap(descEl.value, dir, () => (desc.value = item.desc)), imageZoom(dir, item.art)]);
+	animating.value = false;
 }
 
 /* ---------------- 缩略条平移窗口（active 居中，前后各 2） ---------------- */
@@ -164,11 +197,12 @@ const calc = (n: number) => n * RANGE - RANGE / 2;
 function onMove(e: MouseEvent) {
 	mouse.x = e.clientX / window.innerWidth;
 	mouse.y = e.clientY / window.innerHeight;
+	startParallax();
 }
 let rafId = 0;
-function parallaxLoop() {
-	pos.x += (mouse.x - pos.x) / 10;
-	pos.y += (mouse.y - pos.y) / 10;
+let parallaxRunning = false;
+/** 把当前 pos 应用到两个视差层（只在需要时写样式，避免空转重排） */
+function applyParallax() {
 	const xV = calc(pos.x);
 	const yV = calc(pos.y);
 	if (mediaViewEl.value) {
@@ -177,6 +211,26 @@ function parallaxLoop() {
 	if (frontEl.value) {
 		frontEl.value.style.transform = `translate3d(${xV * 7.7}px, ${yV * 3}px, 50px) rotateX(${-yV}deg) rotateY(${xV}deg)`;
 	}
+}
+function parallaxLoop() {
+	pos.x += (mouse.x - pos.x) / 10;
+	pos.y += (mouse.y - pos.y) / 10;
+	//已经追上目标（鼠标停住了）就写最后一次并停机：原先会一直空转，每帧重写大图层样式
+	if (Math.abs(mouse.x - pos.x) < 0.0005 && Math.abs(mouse.y - pos.y) < 0.0005) {
+		pos.x = mouse.x;
+		pos.y = mouse.y;
+		applyParallax();
+		rafId = 0;
+		parallaxRunning = false;
+		return;
+	}
+	applyParallax();
+	rafId = requestAnimationFrame(parallaxLoop);
+}
+/** 鼠标动了才启动循环（静止时不占主线程，切页动画也不被抢帧） */
+function startParallax() {
+	if (parallaxRunning) return;
+	parallaxRunning = true;
 	rafId = requestAnimationFrame(parallaxLoop);
 }
 
@@ -213,7 +267,15 @@ function initParticles() {
 		vy: -0.005 + Math.random() * 0.01,
 		a: 0.1 + Math.random() * 0.32,
 	}));
-	const loop = () => {
+	//粒子移动很慢，30fps 足够；把省下的主线程时间留给切页动画（原先每帧都全屏 clear + 重绘）
+	const interval = 1000 / 30;
+	let last = 0;
+	const loop = (ts = 0) => {
+		if (ts - last < interval) {
+			pRaf = requestAnimationFrame(loop);
+			return;
+		}
+		last = ts;
 		const ctx = pCtx;
 		const c = canvasEl.value;
 		if (ctx && c) {
@@ -243,7 +305,12 @@ function onWheel(e: WheelEvent) {
 /* ---------------- 生命周期 ---------------- */
 onMounted(async () => {
 	if (!props.items.length) return;
-	const first = props.items[0];
+	//默认落在「上一次启动的模式」；没有记录（或该模式不在列表里）就回到身份模式
+	const wanted = props.items.findIndex(item => item.mode === props.initialMode);
+	const identity = props.items.findIndex(item => item.mode === "identity");
+	const start = wanted >= 0 ? wanted : identity >= 0 ? identity : 0;
+	active.value = start;
+	const first = props.items[start];
 	serial.value = first.serial;
 	title.value = first.title;
 	desc.value = first.desc;
@@ -252,10 +319,12 @@ onMounted(async () => {
 	imageZoom(1, first.art);
 	await nextTick();
 	shiftThumbs();
+	//提前解码封面图，避免切页时现场解码掉帧
+	warmupImages(start);
 	window.addEventListener("mousemove", onMove);
 	window.addEventListener("keydown", onKey);
 	document.addEventListener("wheel", onWheel, { passive: true });
-	parallaxLoop();
+	startParallax();
 	initParticles();
 });
 onBeforeUnmount(() => {
@@ -357,8 +426,8 @@ html body .mcb-root *::after {
 /* 文字滑入动画类（响应式文本 + 类切换） */
 .mcb-root .mcb-t-out {
 	transition:
-		transform 0.23s ease-in,
-		opacity 0.23s ease-in !important;
+		transform 0.18s ease-in,
+		opacity 0.18s ease-in !important;
 	opacity: 0 !important;
 	transform: translateX(var(--mcb-dx, 50px)) !important;
 }
@@ -687,10 +756,13 @@ html body .mcb-root *::after {
 	/* 居中靠 left:calc(50% - w/2) + transform 平移；shiftThumbs 会覆盖 transform */
 	left: calc(50% - 6.4rem);
 	transform: translateX(0);
+	/* 注意 1：不要给 filter 加过渡——切换时 18 个缩略图同时做 saturate 过渡会疯狂重绘；
+	   饱和度改为随类名瞬时切换，肉眼几乎看不出差别，但省下大量合成/光栅化开销。
+	   注意 2：transform 时长要和主图缩放（imageZoom 内联的 .42s）一致，
+	   配合 goTo 里"同时起跑"，缩略条才会和文字/大图同拍结束，不再慢半拍。 */
 	transition:
-		transform 0.5s cubic-bezier(0.25, 0.8, 0.3, 1),
-		opacity 0.45s,
-		filter 0.3s;
+		transform 0.42s cubic-bezier(0.25, 0.8, 0.3, 1),
+		opacity 0.3s;
 	cursor: pointer;
 	opacity: 0.6;
 	filter: saturate(0.85);

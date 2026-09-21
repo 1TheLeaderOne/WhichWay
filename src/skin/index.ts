@@ -272,31 +272,37 @@ class WhichWaySkin {
 	 * @param skin 皮肤名（可选）
 	 * @returns 皮肤路径或皮肤名数组
 	 */
-	getCharacterSkin(name: string, skin?: string): Record<string, string> | undefined {
-		if (!this.skinData[name]) return;
+	getCharacterSkin(name: string, skin?: string): Record<string, string> | { name: string; path: string } | undefined {
+		const data = this.skinData[name];
+		if (!data) return;
 		if (!skin) {
-			const result = {};
-			for (const key in this.skinData[name].skins) {
-				result[key] = this.skinData[name].skins[key].path;
+			const result: Record<string, string> = {};
+			for (const key in data.skins) {
+				result[key] = data.skins[key].path;
 			}
 			return result;
 		}
-		skin = whichWayFile.removeExt(skin);
-		return this.skinData[name].skins[skin];
+		//皮肤名既可能是条目名，也可能是带扩展名的文件名，两种都认
+		return data.skins[skin] ?? data.skins[whichWayFile.removeExt(skin)];
 	}
 
 	/**
 	 * 设置角色皮肤
+	 * @returns 是否写入成功：找不到该皮肤时为 false（调用方据此决定要不要更新界面，避免"界面切了但配置没变"）
 	 */
-	setCharacterSkin(name: string, skin: string): void {
+	setCharacterSkin(name: string, skin: string): boolean {
 		if (whichWayUtil.isDeveloperMode()) console.log(`[whichWaySkin] setCharacterSkin ${name} ${skin}`);
 		if (skin === "经典形象" && whichWaySkin._skinStore[name]) {
 			this.syncSkin({key:name,del:true});
-			return;
+			return true;
 		}
 		const skinData = this.getCharacterSkin(name, skin);
-		if (!skinData) return;
+		if (!skinData) {
+			console.warn(`[whichWaySkin] 找不到皮肤「${skin}」（角色：${name}），本次切换已忽略`);
+			return false;
+		}
 		this.syncSkin({key:name,value:[skinData.name,skinData.path]});
+		return true;
 	}
 
 	syncSkin({key, value,del}: {key:string,value?:[string,string|undefined],del?:boolean}){
