@@ -1,15 +1,23 @@
 /**
- * format.ts —— 两个 UI 系统共用的展示辅助（干员名 / 状态徽章 / 等级星等）
- * 数据来源：引擎 get.character（中文名）、campaign 的 OperatorState。
+ * format.ts —— 两个 UI 系统共用的展示辅助（干员名 / 状态徽章 / 等级星等 / 立绘与资源 URL）
+ * 数据来源：引擎 get.character（中文名）、campaign 的 OperatorState、WhichWay 立绘资源。
  */
-import { get } from "noname";
-import type { OperatorState } from "../../state/campaign.js";
+import { get, lib } from "noname";
+import { whichWayFile } from "../../../../file.js";
+import type { OperatorState, DeathInfo } from "../../state/campaign.js";
+import { getDungeon } from "../../../data/dungeons.js";
 
-/** 干员显示名：优先引擎角色中文名，取不到退回原始 id（如 amiyamrfz） */
+/** 扩展内图片资源 URL（相对 image/ 目录，如 "character/amiyamrfz.jpg"、"background/ideal.jpg"） */
+export const giImg = (rel: string): string => whichWayFile.compilePath(`img:${rel}`);
+
+/** 干员立绘 URL：image/character/{id}.jpg（部分干员可能缺图，配合 <img @error> 回退到首字头像） */
+export const opPortrait = (id: string): string => giImg(`character/${id}.jpg`);
+
+/** 干员显示名：get.translation 查 lib.translate 中文译名（查不到退回原始 id） */
 export const opName = (id: string): string => {
 	try {
-		const c = get.character(id) as { name?: string } | undefined;
-		if (c && typeof c.name === "string" && c.name) return c.name;
+		const t = get.translation(id);
+		if (typeof t === "string" && t && t !== id) return t;
 	} catch {
 		/* ignore */
 	}
@@ -57,4 +65,151 @@ export const buildingIcon = (id: string): string => {
 export const opAvatar = (id: string): string => {
 	const n = opName(id);
 	return n !== id ? n.charAt(0) : id.charAt(0).toUpperCase();
+};
+
+/* ============ 干员资料读取（引擎 lib.character） ============ */
+
+interface CharacterDef {
+	hp?: number;
+	maxHp?: number;
+	hujia?: number;
+	group?: string;
+	sex?: string;
+	skills?: string[];
+	whichWay?: { arknight?: { camp?: string; tags?: string[] } };
+}
+
+/** 取干员角色定义（读不到返回空对象，调用方需容错） */
+export const opChar = (id: string): CharacterDef => {
+	try {
+		return (lib.character as Record<string, CharacterDef>)[id] || {};
+	} catch {
+		return {};
+	}
+};
+
+/** 体力上限 */
+export const opMaxHp = (id: string): number => opChar(id).maxHp ?? 4;
+/** 护甲值 */
+export const opArmor = (id: string): number => opChar(id).hujia ?? 0;
+
+/** 翻译一个引擎 key（阵营/势力/技能名等），查不到退回原文 */
+const tr = (key?: string): string => {
+	if (!key) return "";
+	try {
+		const t = get.translation(key);
+		return typeof t === "string" && t ? t : key;
+	} catch {
+		return key;
+	}
+};
+
+/** 阵营（如 泰拉） */
+export const opGroup = (id: string): string => tr(opChar(id).group);
+/** 性别中文 */
+export const opSex = (id: string): string => {
+	const s = opChar(id).sex;
+	return s === "male" ? "男" : s === "female" ? "女" : s ? s : "未知";
+};
+/** 势力 + 定位标签（如 “victoria · 输出”） */
+export const opMeta = (id: string): string => {
+	const ak = opChar(id).whichWay?.arknight;
+	const camp = ak?.camp ? tr(ak.camp) || ak.camp : "";
+	const tags = (ak?.tags || []).join(" / ");
+	return [camp, tags].filter(Boolean).join(" · ");
+};
+
+/** 干员简介：引擎档案人物介绍（lib.characterIntro[id]），去 HTML 标签后返回纯文本 */
+export const opIntro = (id: string): string => {
+	try {
+		const raw = (lib as unknown as { characterIntro?: Record<string, string> }).characterIntro?.[id];
+		if (typeof raw === "string" && raw) return raw.replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, "").trim();
+	} catch {
+		/* ignore */
+	}
+	return "";
+};
+
+/** 干员称号：lib.characterTitle[id]（含 HTML 富文本，去标签） */
+export const opTitle = (id: string): string => {
+	try {
+		const raw = (lib as unknown as { characterTitle?: Record<string, string> }).characterTitle?.[id];
+		if (typeof raw === "string" && raw) return raw.replace(/<[^>]+>/g, "").trim();
+	} catch {
+		/* ignore */
+	}
+	return "";
+};
+
+export interface OpSkill {
+	id: string;
+	name: string;
+	info: string;
+}
+/** 技能列表：名 + 描述（来自 lib.translate[skill] / [skill_info]） */
+export const opSkills = (id: string): OpSkill[] => {
+	const skills = opChar(id).skills || [];
+	return skills
+		.map(sk => {
+			let name = sk;
+			let info = "";
+			try {
+				const tn = lib.translate[sk];
+				if (typeof tn === "string" && tn) name = tn;
+				const ti = lib.translate[sk + "_info"];
+				if (typeof ti === "string") info = ti;
+			} catch {
+				/* ignore */
+			}
+			return { id: sk, name, info };
+		})
+		.filter(s => s.name || s.info);
+};
+
+/* ============ 墓园：副本名 / 死因文案 ============ */
+
+/** 副本显示名（无 id 返回空串） */
+export const dungeonName = (id: string | null): string => {
+	if (!id) return "";
+	try {
+		return getDungeon(id)?.name ?? id;
+	} catch {
+		return id;
+	}
+};
+
+/**
+ * 死因文案（墓园展示）：
+ *  - 压力爆炸 → 崩溃而亡
+ *  - 无来源   → 某天在某副本意外牺牲
+ *  - 击杀者是自己 → 自杀；是友方 → 死于友方之手；是敌方 → 被其杀死
+ */
+export const deathReasonText = (d: DeathInfo): string => {
+	const day = `第 ${d.day} 天`;
+	const where = d.dungeonId ? `在「${dungeonName(d.dungeonId)}」` : "";
+	if (d.cause === "stress") return `${day}${where}压力崩溃而亡`;
+	if (d.cause === "accident" || !d.killerFaction) return `${day}${where}意外牺牲`;
+	const who = d.killerId ? opName(d.killerId) : d.killerFaction === "enemy" ? "敌军" : "友军";
+	switch (d.killerFaction) {
+		case "self":
+			return `${day}${where}自杀`;
+		case "ally":
+			return `${day}${where}死于友方（${who}）之手`;
+		default:
+			return `${day}${where}被${who}杀死`;
+	}
+};
+
+/** 死因分类的短标签（徽章用） */
+export const deathCauseBadge = (d: DeathInfo): { label: string; cls: string } => {
+	switch (d.cause) {
+		case "stress":
+			return { label: "压力崩溃", cls: "warn" };
+		case "accident":
+			return { label: "意外", cls: "dead" };
+		default:
+			if (d.killerFaction === "self") return { label: "自杀", cls: "dead" };
+			if (d.killerFaction === "ally") return { label: "误伤", cls: "warn" };
+			return { label: "战死", cls: "bad" };
+	}
 };

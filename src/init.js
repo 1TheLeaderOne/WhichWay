@@ -83,14 +83,14 @@ export const whichWayInit = async () => {
 
 		//————————————模式：特蕾西娅与瑰丽理想————————————//
 		// 还处于测试阶段,暂时不进行添加
-		// {
-		// 	name: "gloriousIdeal(新模式)",
-		// 	optional: true,
-		// 	load: async () => {
-		// 		const { registerGloriousIdealMode } = await import("./GloriousIdeal/index.js");
-		// 		registerGloriousIdealMode();
-		// 	},
-		// },
+		{
+			name: "gloriousIdeal(新模式)",
+			optional: true,
+			load: async () => {
+				const { registerGloriousIdealMode } = await import("./GloriousIdeal/index.js");
+				registerGloriousIdealMode();
+			},
+		},
 
 		//导入视频播放组件
 		{ name: "videoPlayer", load: () => import("./videoPlayer/index.js") },

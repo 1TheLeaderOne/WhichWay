@@ -8,7 +8,8 @@ import { CONFIG, view } from "../../store.js";
 import * as store from "../../store.js";
 import StatusBar from "../common/StatusBar.vue";
 import type { Difficulty } from "../../data/dungeons.js";
-import { opName, opAvatar, statusBadge } from "../common/format.js";
+import { opName, statusBadge } from "../common/format.js";
+import OperatorAvatar from "../common/OperatorAvatar.vue";
 
 const livings = () => view.ctrl?.liveOperators() ?? [];
 const selected = () => view.selected ?? [];
@@ -44,7 +45,8 @@ const go = (dungeonId: string, diff: string) => {
 		console.warn("[GloriousIdeal] 请先选择出战干员（1~3 名）");
 		return;
 	}
-	store.goDungeon(selected(), dungeonId, diff as Difficulty);
+	// 进入开局商店（购买消耗品），出发才真正进入副本
+	store.goSupply(selected(), dungeonId, diff as Difficulty);
 };
 </script>
 
@@ -78,7 +80,7 @@ const go = (dungeonId: string, diff: string) => {
               @click="store.toggleSelected(op.id)"
             >
               <span class="gi-op-check">{{ selected().includes(op.id) ? "✓" : "" }}</span>
-              <span class="gi-op-avatar">{{ opAvatar(op.id) }}</span>
+              <OperatorAvatar :id="op.id" class="gi-op-avatar" />
               <span class="gi-op-name">{{ opName(op.id) }}</span>
               <span class="gi-op-tags">
                 <span class="gi-tag">Lv{{ op.level }}</span>
@@ -144,7 +146,7 @@ const go = (dungeonId: string, diff: string) => {
           <h3 class="gi-side-title">📋 出征集结单</h3>
           <div class="gi-order-squad">
             <div v-for="op in selectedOps()" :key="op.id" class="gi-order-op">
-              <span class="gi-order-avatar">{{ opAvatar(op.id) }}</span>
+              <OperatorAvatar :id="op.id" shape="rounded" class="gi-order-avatar" />
               <div class="gi-order-info">
                 <b>{{ opName(op.id) }}</b>
                 <span class="dim">{{ statusBadge(op).label }}</span>
@@ -231,17 +233,8 @@ const go = (dungeonId: string, diff: string) => {
   font-weight: 800;
 }
 .gi-op-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--gi-gold);
-  background: radial-gradient(circle at 50% 32%, var(--gi-panel2), var(--gi-bg1));
-  border: 1px solid var(--gi-line2);
+  --gi-av-size: 54px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 .gi-op-name {
   font-size: 12.5px;
@@ -369,17 +362,7 @@ const go = (dungeonId: string, diff: string) => {
   padding: 8px 10px;
 }
 .gi-order-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--gi-gold);
-  background: var(--gi-panel2);
-  border: 1px solid var(--gi-line2);
+  --gi-av-size: 34px;
 }
 .gi-order-info {
   display: flex;

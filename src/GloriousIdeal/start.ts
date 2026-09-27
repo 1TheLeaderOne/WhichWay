@@ -29,8 +29,8 @@ export async function start(): Promise<void> {
 		vueApp.mount(host);
 	}
 
-	// 每次进入本模式回到标题（有存档则显示“继续”）
-	store.goTitle();
+	// 优先处理真实对局回传/副本恢复；无存档则回到标题（有存档则显示“继续”）
+	store.bootFromSaveOrTitle();
 	console.log("[GloriousIdeal] 模式启动（框架版 · Vue UI）：营地 → 派遣 → 副本探索 → 结算 → 下一天");
 }
 

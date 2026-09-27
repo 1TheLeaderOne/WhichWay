@@ -4,7 +4,9 @@
  * 含已阵亡干员（灰显）。压力 >=100 即到判定线，200 永久死亡。
  */
 import { view } from "../../store.js";
-import { opAvatar, opName, levelStars, statusBadge, stressTone } from "../common/format.js";
+import * as store from "../../store.js";
+import { opName, levelStars, statusBadge, stressTone } from "../common/format.js";
+import OperatorAvatar from "../common/OperatorAvatar.vue";
 
 /** 展示全部名册（阵亡者放末尾） */
 const rows = () => {
@@ -20,7 +22,7 @@ const stressWidth = (s: number) => Math.min(100, Math.max(0, s / 2));
   <table class="gi-table gi-roster">
     <thead>
       <tr>
-        <th style="width: 36px"></th>
+        <th style="width: 46px"></th>
         <th>干员</th>
         <th style="width: 110px">等级</th>
         <th style="width: 70px">经验</th>
@@ -29,9 +31,9 @@ const stressWidth = (s: number) => Math.min(100, Math.max(0, s / 2));
       </tr>
     </thead>
     <tbody>
-      <tr v-for="op in rows()" :key="op.id" :class="{ dead: op.dead }">
+      <tr v-for="op in rows()" :key="op.id" :class="{ dead: op.dead }" title="点击查看干员详情" @click="store.openDetail(op.id)">
         <td>
-          <span class="gi-avatar" :class="{ dead: op.dead }">{{ opAvatar(op.id) }}</span>
+          <OperatorAvatar :id="op.id" shape="rounded" :dead="op.dead" class="gi-roster-av" />
         </td>
         <td>
           <span class="gi-op-name">{{ opName(op.id) }}</span>
@@ -71,6 +73,7 @@ const stressWidth = (s: number) => Math.min(100, Math.max(0, s / 2));
 }
 .gi-roster tbody tr {
   transition: background 0.15s;
+  cursor: pointer;
 }
 .gi-roster tbody tr:hover {
   background: rgba(255, 255, 255, 0.03);
@@ -91,22 +94,9 @@ const stressWidth = (s: number) => Math.min(100, Math.max(0, s / 2));
   border-bottom: 1px solid rgba(42, 50, 70, 0.55);
   vertical-align: middle;
 }
-.gi-avatar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--gi-gold);
-  background: linear-gradient(180deg, var(--gi-panel2), var(--gi-bg1));
-  border: 1px solid var(--gi-line2);
-}
-.gi-avatar.dead {
-  color: var(--gi-dim);
-  border-color: var(--gi-line);
+.gi-roster-av {
+  --gi-av-size: 34px;
+  vertical-align: middle;
 }
 .gi-op-name {
   font-weight: 600;

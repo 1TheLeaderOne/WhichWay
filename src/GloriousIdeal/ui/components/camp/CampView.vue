@@ -6,6 +6,7 @@
 import { CONFIG, view } from "../../store.js";
 import * as store from "../../store.js";
 import StatusBar from "../common/StatusBar.vue";
+import PartyRail from "../common/PartyRail.vue";
 import BuildingCard from "./BuildingCard.vue";
 import RosterTable from "./RosterTable.vue";
 
@@ -15,6 +16,8 @@ const campCapacity = () => {
 };
 const aliveCount = () => view.ctrl?.liveOperators().length ?? 0;
 const deadCount = () => (view.ctrl?.data.roster ?? []).filter(o => o.dead).length;
+/** 营地右侧队伍栏：展示全部存活干员 */
+const rosterIds = () => (view.ctrl?.data.roster ?? []).filter(o => !o.dead).map(o => o.id);
 </script>
 
 <template>
@@ -38,7 +41,8 @@ const deadCount = () => (view.ctrl?.data.roster ?? []).filter(o => o.dead).lengt
           <div class="gi-section-head">
             <h2 class="gi-h2">队伍名册</h2>
             <span class="dim gi-hint">
-              {{ aliveCount() }} / {{ campCapacity() }} 在营 · 墓园 {{ deadCount() }} 人
+              {{ aliveCount() }} / {{ campCapacity() }} 在营 ·
+              <button class="gi-link" :disabled="!deadCount()" @click="store.goGraveyard()">墓园 {{ deadCount() }} 人</button>
             </span>
           </div>
           <RosterTable />
@@ -54,7 +58,8 @@ const deadCount = () => (view.ctrl?.data.roster ?? []).filter(o => o.dead).lengt
             ⚔ 派遣 · 远征副本
           </button>
           <button class="gi-btn gi-btn-block" @click="store.goRecruit()">🕊 招募干员</button>
-          <button class="gi-btn gi-btn-block" disabled title="尚未开放">🏪 商店（建设中）</button>
+          <button class="gi-btn gi-btn-block" :disabled="!deadCount()" @click="store.goGraveyard()">🪦 墓园</button>
+          <button class="gi-btn gi-btn-block" @click="store.goShop()">🏪 装备商人 · 砍诺特</button>
         </div>
 
         <div class="gi-side-card">
@@ -75,10 +80,17 @@ const deadCount = () => (view.ctrl?.data.roster ?? []).filter(o => o.dead).lengt
         </p>
       </aside>
     </div>
+
+    <!-- 右侧队伍栏（暗黑地牢 1 式，营地内不显示副本体力） -->
+    <PartyRail v-if="rosterIds().length" :ids="rosterIds()" />
   </div>
 </template>
 
 <style scoped>
+.gi-camp {
+  /* 给右侧固定队伍栏(210px)让位 */
+  padding-right: 226px;
+}
 .gi-camp-body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 264px;

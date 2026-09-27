@@ -10,17 +10,47 @@
  *
  * 页面切换以 :key="view.tick" 强制整体重建（与旧实现一致）。
  */
+import { computed } from "vue";
 import { view } from "./store.js";
+import { giImg } from "./components/common/format.js";
 import TitleScreen from "./components/title/TitleScreen.vue";
 import EndScreen from "./components/title/EndScreen.vue";
 import CampView from "./components/camp/CampView.vue";
 import RecruitView from "./components/camp/RecruitView.vue";
+import GraveyardView from "./components/camp/GraveyardView.vue";
+import ShopView from "./components/camp/ShopView.vue";
 import DispatchView from "./components/battle/DispatchView.vue";
 import DungeonView from "./components/battle/DungeonView.vue";
+import BattleReport from "./components/battle/BattleReport.vue";
+import OperatorDetail from "./components/common/OperatorDetail.vue";
+
+/** 各阶段氛围背景图（取自 image/background/ 主题图） */
+const BACKDROP: Record<string, string> = {
+  title: "background/MonumentalMelodyTracey.jpg",
+  camp: "background/landLife.jpg",
+  recruit: "background/companion.jpg",
+  graveyard: "background/landLife.jpg",
+  shop: "background/landLife.jpg",
+  supply: "background/battlefront.jpg",
+  dispatch: "background/battlefront.jpg",
+  dungeon: "background/PrimevalChaos.jpg",
+  end: "background/ideal.jpg",
+};
+
+const backdropFile = computed(() => {
+  if (view.phase === "end" && !view.endWin) return "background/PrimevalChaos.jpg";
+  return BACKDROP[view.phase] ?? BACKDROP.title;
+});
+const backdropUrl = computed(() => `url("${giImg(backdropFile.value)}")`);
+/** 标题 / 结算是英雄屏，背景更浓；营地内页更淡以保证可读性 */
+const isHero = computed(() => view.phase === "title" || view.phase === "end");
 </script>
 
 <template>
-  <div id="gi-layer" :key="view.tick">
+  <div id="gi-layer" :class="{ 'gi-battling': view.battling }" :key="view.tick">
+    <!-- 氛围背景层（随 phase 切换，暗化以保证前景可读） -->
+    <div class="gi-backdrop" :class="{ hero: isHero }" :style="{ backgroundImage: backdropUrl }" aria-hidden="true" />
+
     <!-- 标题 / 结算 -->
     <TitleScreen v-if="view.phase === 'title'" />
     <EndScreen v-else-if="view.phase === 'end'" />
@@ -28,10 +58,18 @@ import DungeonView from "./components/battle/DungeonView.vue";
     <!-- 营地系统 -->
     <CampView v-else-if="view.phase === 'camp'" />
     <RecruitView v-else-if="view.phase === 'recruit'" />
+    <GraveyardView v-else-if="view.phase === 'graveyard'" />
+    <ShopView v-else-if="view.phase === 'shop' || view.phase === 'supply'" />
 
     <!-- 战斗系统 -->
     <DispatchView v-else-if="view.phase === 'dispatch'" />
     <DungeonView v-else-if="view.phase === 'dungeon'" />
+
+    <!-- 全局浮层：战斗简报（真实对局结束后弹出，确认后才落库推进） -->
+    <BattleReport v-if="view.battleReport" />
+
+    <!-- 全局浮层：干员详情（营地 / 副本点击干员时弹出） -->
+    <OperatorDetail />
   </div>
 </template>
 
@@ -69,6 +107,11 @@ import DungeonView from "./components/battle/DungeonView.vue";
     linear-gradient(180deg, #10141f 0%, #0a0d15 100%);
   -webkit-font-smoothing: antialiased;
 }
+/* 真实对局进行中：整体隐藏 GI 覆盖层，露出下层无名杀棋盘（#1）。
+   战斗简报在对局结束、battling 复位后才渲染，不受影响。 */
+#gi-layer.gi-battling {
+  display: none;
+}
 #gi-layer ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -96,6 +139,29 @@ import DungeonView from "./components/battle/DungeonView.vue";
 /* 少数需要绝对定位的装饰性 div：在通用重置之后显式恢复 */
 #gi-layer .gi-title-rings {
   position: absolute;
+}
+
+/* ---------- 氛围背景层 ---------- */
+/* 用 id 级选择器压过上面的 #gi-layer div{position:static}；z-index:-1 沉到内容之下、
+   #gi-layer 自身背景之上。图片由 :style 动态注入，::after 暗化以保证前景可读。 */
+#gi-layer .gi-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-size: cover;
+  background-position: center 15%;
+  background-repeat: no-repeat;
+}
+#gi-layer .gi-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(10, 13, 21, 0.86), rgba(10, 13, 21, 0.92) 60%, #0a0d15);
+}
+#gi-layer .gi-backdrop.hero::after {
+  background:
+    radial-gradient(1200px 520px at 50% -140px, rgba(224, 179, 87, 0.12), transparent 60%),
+    linear-gradient(180deg, rgba(10, 13, 21, 0.5), rgba(10, 13, 21, 0.72) 62%, rgba(10, 13, 21, 0.92));
 }
 
 /* ---------- 页面容器 ---------- */

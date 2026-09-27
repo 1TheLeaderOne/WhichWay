@@ -6,7 +6,8 @@
 import { CONFIG, view } from "../../store.js";
 import * as store from "../../store.js";
 import StatusBar from "../common/StatusBar.vue";
-import { opName, opAvatar } from "../common/format.js";
+import { opName } from "../common/format.js";
+import OperatorAvatar from "../common/OperatorAvatar.vue";
 
 const candidates = () => view.ctrl?.data.candidates ?? [];
 const capacity = () => {
@@ -35,9 +36,14 @@ const full = () => alive() >= capacity();
     <!-- 候选卡 -->
     <div v-if="candidates().length" class="gi-cand-grid">
       <div v-for="id in candidates()" :key="id" class="gi-cand" :class="{ 'is-full': full() }">
-        <div class="gi-cand-avatar">{{ opAvatar(id) }}</div>
-        <div class="gi-cand-name">{{ opName(id) }}</div>
-        <div class="gi-cand-id dim">{{ id }}</div>
+        <div class="gi-cand-portrait">
+          <OperatorAvatar :id="id" shape="rounded" class="gi-cand-av" />
+          <div class="gi-cand-shade" />
+          <div class="gi-cand-namebar">
+            <div class="gi-cand-name">{{ opName(id) }}</div>
+            <div class="gi-cand-id dim">{{ id }}</div>
+          </div>
+        </div>
         <p class="gi-cand-tip dim">免费招募 · 加入即 1 级</p>
         <button
           class="gi-btn gi-btn-primary gi-btn-block"
@@ -84,54 +90,71 @@ const full = () => alive() >= capacity();
 }
 .gi-cand-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+  gap: 14px;
 }
 .gi-cand {
   background: var(--gi-panel);
   border: 1px solid var(--gi-line);
   border-radius: 14px;
-  padding: 18px 14px 14px;
+  padding: 10px 10px 12px;
   text-align: center;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  transition: border-color 0.2s, transform 0.2s;
+  align-items: stretch;
+  gap: 8px;
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 .gi-cand:hover {
-  border-color: var(--gi-line2);
-  transform: translateY(-2px);
+  border-color: var(--gi-gold-dim);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.4);
 }
 .gi-cand.is-full {
   opacity: 0.6;
 }
-.gi-cand-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--gi-gold);
-  background: radial-gradient(circle at 50% 32%, var(--gi-panel2), var(--gi-bg1));
-  border: 1px solid var(--gi-gold-dim);
-  margin-bottom: 6px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+/* 立绘主视觉 */
+.gi-cand-portrait {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+}
+.gi-cand-av {
+  --gi-av-size: 100%;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.gi-cand-av :deep(.gi-av-ring) {
+  border: none;
+  box-shadow: none;
+}
+.gi-cand-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 45%, rgba(8, 10, 16, 0.85) 100%);
+  pointer-events: none;
+}
+.gi-cand-namebar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 6px 8px 8px;
+  text-align: left;
 }
 .gi-cand-name {
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 700;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
 }
 .gi-cand-id {
-  font-size: 10.5px;
+  font-size: 10px;
 }
 .gi-cand-tip {
-  margin: 4px 0 8px;
+  margin: 0;
   font-size: 11px;
-  flex: 1;
 }
 .gi-empty-card {
   background: var(--gi-panel);

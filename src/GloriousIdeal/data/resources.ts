@@ -53,5 +53,18 @@ export const UNITY_EVENTS = {
 /** 每名干员携带/消耗：压力相关见 operators.ts */
 export const STRESS = { init: 0, max: 200, agonyAt: 100 } as const;
 
+/**
+ * 粮草 / 行动经济（策划案「局内资源」，行动计数阈值 ACTION_TO_RATION 见 dungeon.ts）。
+ * 缺粮惩罚与主动投喂冷却集中在此，便于后续调平衡。
+ */
+export const PROVISION = {
+	/** 主动投喂（1 粮草→1 干员 +1 体力）两次之间的最小行动间隔 */
+	feedGap: 3,
+	/** 缺粮：压力 +20 */
+	starveStress: 20,
+	/** 缺粮：流失 1 点体力 */
+	starveHpLoss: 1,
+} as const;
+
 /** 模式最长天数：超过视为失败（设计案：100 天内通关凯尔希军） */
 export const MAX_DAY = 100;
