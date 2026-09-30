@@ -7,11 +7,12 @@
 import { computed, ref } from "vue";
 import { view, CONFIG } from "../../store.js";
 import * as store from "../../store.js";
-import { ITEMS, getItem } from "../../../data/items.js";
+import { ITEMS, getItem, type ItemId } from "../../../data/items.js";
 import { CONSUMABLE_PRICES } from "../../../data/shop.js";
 import { getEquipment, RARITY_LABEL } from "../../../data/equipment.js";
 import { getDungeon } from "../../../data/dungeons.js";
 import { opName } from "../common/format.js";
+import EquipIcon from "../common/EquipIcon.vue";
 import StatusBar from "../common/StatusBar.vue";
 
 const notice = ref("");
@@ -33,7 +34,7 @@ const pending = computed(() => {
 	return { name: dungeon?.name ?? pd.dungeonId, difficulty: diff?.name ?? pd.difficulty, party: pd.party.map(opName).join("、") };
 });
 
-/** 消耗品货架：定价值 + 当前持有量 + 可否购买 */
+/** 消耗品货架：定价值 + 当前持有量 + 可否购买/出售（出售按原价回购） */
 const consumables = computed(() => {
 	const inv = view.ctrl?.data.inventory ?? {};
 	return CONSUMABLE_PRICES.map(entry => {
@@ -43,37 +44,35 @@ const consumables = computed(() => {
 		const full = have >= def.maxStack;
 		const poor = originite() < entry.price;
 		const noBag = isnew && freeSlots() <= 0;
-		return { id: entry.id, name: def.name, desc: def.desc, price: entry.price, have, maxStack: def.maxStack, disabled: full || poor || noBag, reason: full ? `堆叠已满 ${def.maxStack}` : poor ? "源石碇不足" : noBag ? "背包已满" : "" };
+		return { id: entry.id, name: def.name, desc: def.desc, price: entry.price, have, maxStack: def.maxStack, disabled: full || poor || noBag, canSell: have > 0, reason: full ? `堆叠已满 ${def.maxStack}` : poor ? "源石碇不足" : noBag ? "背包已满" : "" };
 	});
 });
 
-/** 装备库存：按原始 stock 顺序（下标须与 purchaseEquipment(stockIndex) 对齐，不能重排） */
+/** 装备库存：按原始 stock 顺序（下标须与 purchaseEquipment(stockIndex) 对齐，不能重排）；装备入全局仓库、不受背包限制 */
 const stock = computed(() => {
 	const s = view.ctrl?.data.shop.stock ?? [];
 	return s.map((id, index) => {
 		const def = getEquipment(id);
 		const price = view.ctrl ? view.ctrl.equipPrice(id) : 0;
 		const poor = originite() < price;
-		const noBag = freeSlots() <= 0;
-		return { index, id, name: def?.name ?? id, desc: def?.desc ?? "", rarity: def?.rarity ?? "common", price, base: def?.price ?? price, disabled: poor || noBag, reason: poor ? "源石碇不足" : noBag ? "背包已满" : "" };
+		return { index, id, img: def?.img, name: def?.name ?? id, desc: def?.desc ?? "", rarity: def?.rarity ?? "common", price, base: def?.price ?? price, disabled: poor, reason: poor ? "源石碇不足" : "" };
 	});
 });
 
-/** 背包内容：消耗品（含数量）+ 装备实例，逐格展示 */
+/** 局内背包：仅消耗品（每类占一格）；战前补给站里点击可出售的格子 = 出售 1 个 */
 const bagSlots = computed(() => {
 	const total = view.ctrl?.backpackSlots() ?? 8;
-	const cells: Array<{ key: string; name: string; sub: string; kind: "consumable" | "equip" }> = [];
+	type Cell = { key: string; id?: ItemId; name: string; sub: string; price: number; sellable: boolean };
+	const cells: Cell[] = [];
 	const inv = view.ctrl?.data.inventory ?? {};
 	for (const d of ITEMS) {
 		const n = inv[d.id] ?? 0;
-		if (n > 0) cells.push({ key: `c_${d.id}`, name: d.name, sub: `×${n}`, kind: "consumable" });
+		if (n <= 0) continue;
+		const entry = CONSUMABLE_PRICES.find(c => c.id === d.id);
+		cells.push({ key: `c_${d.id}`, id: d.id, name: d.name, sub: `×${n}`, price: entry?.price ?? 0, sellable: !!entry });
 	}
-	(view.ctrl?.data.ownedEquips ?? []).forEach((id, i) => {
-		const def = getEquipment(id);
-		cells.push({ key: `e_${id}_${i}`, name: def?.name ?? id, sub: def ? RARITY_LABEL[def.rarity] : "", kind: "equip" });
-	});
 	const used = cells.length;
-	for (let i = used; i < total; i++) cells.push({ key: `empty_${i}`, name: "", sub: "", kind: "consumable" });
+	for (let i = used; i < total; i++) cells.push({ key: `empty_${i}`, name: "", sub: "", price: 0, sellable: false });
 	return { cells, used, total };
 });
 
@@ -81,6 +80,7 @@ const show = (r: { ok: boolean; reason?: string }) => {
 	notice.value = r.ok ? "" : r.reason ?? "无法购买";
 };
 const buy = (id: Parameters<typeof store.buyConsumable>[0]) => show(store.buyConsumable(id, 1));
+const sell = (id: Parameters<typeof store.sellConsumable>[0]) => show(store.sellConsumable(id, 1));
 const buyEquip = (i: number) => show(store.buyEquipment(i));
 const doRefresh = () => show(store.refreshShop());
 const depart = () => store.goDungeon();
@@ -122,7 +122,7 @@ const depart = () => store.goDungeon();
 
     <p v-if="notice" class="gi-shop-notice">{{ notice }}</p>
 
-    <!-- 战前补给：消耗品货架 -->
+    <!-- 战前补给：消耗品货架（买 + 原价回购） -->
     <div v-if="isSupply" class="gi-goods">
       <div v-for="g in consumables" :key="g.id" class="gi-good">
         <div class="gi-good-top">
@@ -132,7 +132,10 @@ const depart = () => store.goDungeon();
         <p class="gi-good-desc dim">{{ g.desc }}</p>
         <div class="gi-good-foot">
           <span class="gi-price">💠 {{ g.price }}</span>
-          <button class="gi-btn gi-btn-primary gi-btn-sm" :disabled="g.disabled" :title="g.reason" @click="buy(g.id)">购买</button>
+          <div class="gi-good-btns">
+            <button v-if="g.canSell" class="gi-btn gi-btn-ghost gi-btn-sm" title="原价回购" @click="sell(g.id)">出售 💠{{ g.price }}</button>
+            <button class="gi-btn gi-btn-primary gi-btn-sm" :disabled="g.disabled" :title="g.reason" @click="buy(g.id)">购买</button>
+          </div>
         </div>
       </div>
     </div>
@@ -142,8 +145,11 @@ const depart = () => store.goDungeon();
       <p v-if="!stock.length" class="gi-empty dim">今日库存已售罄，明天再来。</p>
       <div v-for="g in stock" :key="g.index" class="gi-good" :class="'rarity-' + g.rarity">
         <div class="gi-good-top">
-          <span class="gi-good-name">{{ g.name }}</span>
-          <span class="gi-badge" :class="g.rarity === 'epic' ? 'gold' : g.rarity === 'rare' ? 'virtue' : 'dead'">{{ RARITY_LABEL[g.rarity] }}</span>
+          <EquipIcon :id="g.id" :img="g.img" :size="40" class="gi-good-icon" />
+          <div class="gi-good-titlerow">
+            <span class="gi-good-name">{{ g.name }}</span>
+            <span class="gi-badge" :class="g.rarity === 'epic' ? 'gold' : g.rarity === 'rare' ? 'virtue' : 'dead'">{{ RARITY_LABEL[g.rarity] }}</span>
+          </div>
         </div>
         <p class="gi-good-desc dim">{{ g.desc }}</p>
         <div class="gi-good-foot">
@@ -155,19 +161,32 @@ const depart = () => store.goDungeon();
       </div>
     </div>
 
-    <!-- 背包 -->
+    <!-- 局内背包（仅消耗品）：战前补给站内点击可出售格 = 卖 1 个 -->
     <section class="gi-bag">
-      <h3 class="gi-bag-title">🎒 背包 <span class="dim">{{ bagSlots.used }}/{{ bagSlots.total }}</span></h3>
+      <h3 class="gi-bag-title">🎒 局内背包 <span class="dim">{{ bagSlots.used }}/{{ bagSlots.total }}</span></h3>
       <div class="gi-bag-grid">
-        <div v-for="c in bagSlots.cells" :key="c.key" class="gi-bag-cell" :class="[c.kind, { blank: !c.name }]">
-          <template v-if="c.name">
+        <template v-for="c in bagSlots.cells" :key="c.key">
+          <button
+            v-if="isSupply && c.sellable"
+            class="gi-bag-cell sellable"
+            :title="`点击出售 1 个（原价 💠${c.price}）`"
+            @click="sell(c.id!)"
+          >
             <span class="gi-bag-name">{{ c.name }}</span>
             <span class="gi-bag-sub dim">{{ c.sub }}</span>
-          </template>
-          <span v-else class="gi-bag-empty">·</span>
-        </div>
+            <span class="gi-bag-sell">出售 💠{{ c.price }}</span>
+          </button>
+          <div v-else class="gi-bag-cell" :class="{ blank: !c.name }">
+            <template v-if="c.name">
+              <span class="gi-bag-name">{{ c.name }}</span>
+              <span class="gi-bag-sub dim">{{ c.sub }}</span>
+            </template>
+            <span v-else class="gi-bag-empty">·</span>
+          </div>
+        </template>
       </div>
-      <p class="gi-bag-note dim">每件装备与每类消耗品各占一格；消耗品在副本内使用，装备请到干员详情穿戴。</p>
+      <p v-if="isSupply" class="gi-bag-note dim">点击背包中的消耗品即可原价出售（每点一次卖 1 个）；返回上一页会自动出售背包内全部补给。</p>
+      <p v-else class="gi-bag-note dim">局内背包只放消耗品（每类占一格），在副本内使用。装备存放于全局仓库（无上限），到干员详情穿戴。</p>
     </section>
 
     <!-- 战前补给：出发 / 返回选派 -->
@@ -244,6 +263,22 @@ const depart = () => store.goDungeon();
   justify-content: space-between;
   gap: 8px;
 }
+.gi-good-icon {
+  flex-shrink: 0;
+}
+.gi-good-titlerow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.gi-good-btns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 .gi-good-name {
   font-size: 14px;
   font-weight: 700;
@@ -303,8 +338,20 @@ const depart = () => store.goDungeon();
   background: var(--gi-panel2);
   text-align: center;
 }
-.gi-bag-cell.equip {
-  border-color: rgba(224, 179, 87, 0.4);
+.gi-bag-cell.sellable {
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  transition: border-color 0.15s, background 0.15s;
+}
+.gi-bag-cell.sellable:hover {
+  border-color: var(--gi-gold-dim);
+  background: rgba(224, 179, 87, 0.08);
+}
+.gi-bag-sell {
+  font-size: 10.5px;
+  color: var(--gi-gold);
+  margin-top: 2px;
 }
 .gi-bag-cell.blank {
   border-style: dashed;

@@ -13,6 +13,14 @@ export const giImg = (rel: string): string => whichWayFile.compilePath(`img:${re
 /** 干员立绘 URL：image/character/{id}.jpg（部分干员可能缺图，配合 <img @error> 回退到首字头像） */
 export const opPortrait = (id: string): string => giImg(`character/${id}.jpg`);
 
+/**
+ * 装备图 URL：image/model/GloriousIdeal/equips/{img ?? id}.png。
+ * 可为装备指定图片名（img 字段）；缺省用同 id 图片。磁盘上找不到时由 EquipIcon 的 @error 回退到默认图。
+ */
+export const equipImage = (id: string, img?: string): string => giImg(`model/GloriousIdeal/equips/${img || id}.png`);
+/** 缺省装备图（equips 中找不到对应图片时回退） */
+export const equipDefaultImage = (): string => giImg(`model/GloriousIdeal/equips/rogue_6_relic_legacy_1.png`);
+
 /** 干员显示名：get.translation 查 lib.translate 中文译名（查不到退回原始 id） */
 export const opName = (id: string): string => {
 	try {
@@ -92,32 +100,6 @@ export const opChar = (id: string): CharacterDef => {
 export const opMaxHp = (id: string): number => opChar(id).maxHp ?? 4;
 /** 护甲值 */
 export const opArmor = (id: string): number => opChar(id).hujia ?? 0;
-
-/** 翻译一个引擎 key（阵营/势力/技能名等），查不到退回原文 */
-const tr = (key?: string): string => {
-	if (!key) return "";
-	try {
-		const t = get.translation(key);
-		return typeof t === "string" && t ? t : key;
-	} catch {
-		return key;
-	}
-};
-
-/** 阵营（如 泰拉） */
-export const opGroup = (id: string): string => tr(opChar(id).group);
-/** 性别中文 */
-export const opSex = (id: string): string => {
-	const s = opChar(id).sex;
-	return s === "male" ? "男" : s === "female" ? "女" : s ? s : "未知";
-};
-/** 势力 + 定位标签（如 “victoria · 输出”） */
-export const opMeta = (id: string): string => {
-	const ak = opChar(id).whichWay?.arknight;
-	const camp = ak?.camp ? tr(ak.camp) || ak.camp : "";
-	const tags = (ak?.tags || []).join(" / ");
-	return [camp, tags].filter(Boolean).join(" · ");
-};
 
 /** 干员简介：引擎档案人物介绍（lib.characterIntro[id]），去 HTML 标签后返回纯文本 */
 export const opIntro = (id: string): string => {

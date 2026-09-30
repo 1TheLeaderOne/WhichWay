@@ -84,7 +84,7 @@ export interface OperatorState {
 	death?: DeathInfo;
 	/** 装备栏上限（战役层个人槽）：初始 1，2 级 +1（见 addExp，后续手动加槽改这里） */
 	maxEquipSlots: number;
-	/** 已穿戴装备 id 列表（长度 <= maxEquipSlots；装备实例仍来自 ownedEquips，占背包格） */
+	/** 已穿戴装备 id 列表（长度 <= maxEquipSlots；装备实例来自全局仓库 ownedEquips，不占局内背包） */
 	equipped: string[];
 }
 
@@ -112,7 +112,7 @@ export interface CampaignData {
 	candidates: string[];
 	/** 局内背包：物品 id → 数量（消耗品/兑换物，按类型各占 1 格） */
 	inventory: Record<string, number>;
-	/** 已拥有装备 id 列表（每件各占背包 1 格；可离散重复拥有） */
+	/** 全局装备仓库：已拥有装备 id 列表（无上限、不占局内背包；可离散重复拥有） */
 	ownedEquips: string[];
 	/** 商人每日库存状态 */
 	shop: ShopState;
@@ -212,10 +212,9 @@ export class CampaignController {
 		return INVENTORY_SLOTS_BASE + Math.max(0, this.data.buildings.camel ?? 0);
 	}
 
-	/** 已占用背包格：有库存的消耗品类型数 + 拥有装备件数（每件各占一格） */
+	/** 已占用局内背包格：仅统计有库存的消耗品类型数（装备存全局仓库、不占格） */
 	usedBackpackSlots(): number {
-		const consumableTypes = ITEMS.filter(d => (this.data.inventory[d.id] ?? 0) > 0).length;
-		return consumableTypes + this.data.ownedEquips.length;
+		return ITEMS.filter(d => (this.data.inventory[d.id] ?? 0) > 0).length;
 	}
 
 	freeBackpackSlots(): number {
@@ -592,13 +591,39 @@ export class CampaignController {
 		return { ok: true };
 	}
 
-	/** 购买一件库存装备（校验余额 + 背包空格），成功从库存移除 */
+	/** 出售消耗品（战前补给站原价回购）：按 CONSUMABLE_PRICES 单价退款，扣减库存 */
+	sellConsumable(id: ItemId, qty = 1): { ok: boolean; reason?: string } {
+		const entry = CONSUMABLE_PRICES.find(c => c.id === id);
+		if (!entry) return { ok: false, reason: "商品不存在" };
+		if (qty <= 0) return { ok: false, reason: "数量需大于 0" };
+		const have = this.data.inventory[id] ?? 0;
+		if (have < qty) return { ok: false, reason: "持有数量不足" };
+		this.data.inventory[id] = have - qty;
+		this.data.originite += entry.price * qty;
+		return { ok: true };
+	}
+
+	/** 放弃本次讨伐：把局内背包中所有「可出售消耗品」按原价全额回售、清空。返回出售后退款额（供提示） */
+	sellAllConsumables(): { sold: number; refund: number } {
+		let sold = 0;
+		let refund = 0;
+		for (const entry of CONSUMABLE_PRICES) {
+			const have = this.data.inventory[entry.id] ?? 0;
+			if (have <= 0) continue;
+			refund += entry.price * have;
+			sold += have;
+			delete this.data.inventory[entry.id];
+		}
+		if (refund > 0) this.data.originite += refund;
+		return { sold, refund };
+	}
+
+	/** 购买一件库存装备（仅校验余额；装备入全局仓库、不占局内背包），成功从库存移除 */
 	purchaseEquipment(stockIndex: number): { ok: boolean; reason?: string } {
 		this.ensureShopToday();
 		const s = this.data.shop;
 		const equipId = s.stock[stockIndex];
 		if (!equipId || !getEquipment(equipId)) return { ok: false, reason: "该商品已售出" };
-		if (this.freeBackpackSlots() <= 0) return { ok: false, reason: "背包已满" };
 		const cost = this.equipPrice(equipId);
 		if (this.data.originite < cost) return { ok: false, reason: "源石碇不足" };
 		this.data.originite -= cost;
@@ -614,12 +639,12 @@ export class CampaignController {
 		if (!getEquipment(equipId)) return { ok: false, reason: "装备不存在" };
 		if (!this.data.ownedEquips.includes(equipId)) return { ok: false, reason: "未拥有该装备" };
 		if (op.equipped.includes(equipId)) return { ok: false, reason: "该干员已穿戴" };
-		if (op.equipped.length >= op.maxEquipSlots) return { ok: false, reason: "装备栏已满" };
+		if (op.equipped.length >= op.maxEquipSlots) return { ok: false, reason: "需要有空置的装备栏" };
 		op.equipped.push(equipId);
 		return { ok: true };
 	}
 
-	/** 卸下干员身上的一件装备（回到拥有池，仍占背包格） */
+	/** 卸下干员身上的一件装备（回到全局仓库/可用池，不占局内背包） */
 	unequipOp(opId: string, equipId: string): { ok: boolean; reason?: string } {
 		const op = this.roster(opId);
 		if (!op) return { ok: false, reason: "干员不存在" };

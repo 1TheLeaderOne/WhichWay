@@ -1,64 +1,50 @@
 <script setup lang="ts">
 /**
- * common/OperatorDetail.vue —— 干员详情面板（点击干员弹出）
- * 内容：立绘 / 简介 / 基础属性 / 技能 / 压力 / 装备 /（副本内）当前体力。
+ * common/OperatorDetail.vue —— 干员详情 + 装备界面（点击干员弹出）
+ * 左列：立绘 / 简介 / 属性 / 技能 / 压力 +（固定底部）该干员已穿戴装备。
+ * 右列：全局装备仓库（独立面板）——点击条目装备到干员，点击已穿戴退回仓库；装备栏满时无法装备并提示。
  * 由 view.detailId 驱动；detailId=null 时不渲染。营地与副本页共用。
  */
 import { computed, ref } from "vue";
 import { view, opMaxHp } from "../../store.js";
 import * as store from "../../store.js";
 import { AGONY, VIRTUES } from "../../../data/operators.js";
-import { getEquipment } from "../../../data/equipment.js";
-import {
-	opName,
-	opIntro,
-	opTitle,
-	opGroup,
-	opSex,
-	opMeta,
-	opSkills,
-	levelStars,
-	statusBadge,
-	stressTone,
-} from "./format.js";
+import { getEquipment, RARITY_LABEL } from "../../../data/equipment.js";
+import { opName, opIntro, opTitle, opSkills, levelStars, statusBadge, stressTone } from "./format.js";
 import OperatorAvatar from "./OperatorAvatar.vue";
+import EquipIcon from "./EquipIcon.vue";
 
 const id = computed(() => view.detailId);
 const rosterOp = computed(() => (id.value ? (view.ctrl?.data.roster ?? []).find(o => o.id === id.value) : undefined));
 
 /** 是否在副本中且该干员随队 —— 只有此时展示「当前体力/上限」 */
 const inDungeon = computed(() => !!id.value && view.phase === "dungeon" && view.party.includes(id.value));
-const hp = computed(() => (id.value ? (view.dungeonHp[id.value] ?? opMaxHp(id.value)) : 0));
+const hp = computed(() => (id.value ? view.dungeonHp[id.value] ?? opMaxHp(id.value) : 0));
 const maxHp = computed(() => (id.value ? opMaxHp(id.value) : 0));
 
 const intro = computed(() => (id.value ? opIntro(id.value) : ""));
 const title = computed(() => (id.value ? opTitle(id.value) : ""));
 const skills = computed(() => (id.value ? opSkills(id.value) : []));
-const meta = computed(() => (id.value ? opMeta(id.value) : ""));
 
 /** 装备栏上限：读战役层个人槽（初始 1，2 级 +1，见 campaign.addExp） */
 const equipSlots = computed(() => rosterOp.value?.maxEquipSlots ?? 1);
-/** 已穿戴装备（id + 定义） */
+/** 已穿戴装备（左列底部固定展示；点击退回仓库） */
 const equippedList = computed(() => (rosterOp.value?.equipped ?? []).map(eid => ({ eid, def: getEquipment(eid) })));
-/** 可用装备池：已拥有但未穿戴的实例（按数量去重展示，取一个即可穿） */
-const availableList = computed(() => {
+/** 全局仓库可用池：已拥有且未被任何存活干员穿戴，按 id 聚合计数 */
+const warehouse = computed(() => {
 	const pool = view.ctrl?.availableEquips() ?? [];
-	const seen = new Set<string>();
-	const out: { eid: string; def: ReturnType<typeof getEquipment> }[] = [];
-	for (const eid of pool) {
-		if (seen.has(eid)) continue;
-		seen.add(eid);
-		out.push({ eid, def: getEquipment(eid) });
-	}
-	return out;
+	const counts = new Map<string, number>();
+	for (const eid of pool) counts.set(eid, (counts.get(eid) ?? 0) + 1);
+	return [...counts].map(([eid, count]) => ({ eid, count, def: getEquipment(eid) }));
 });
+const slotsFull = computed(() => !!rosterOp.value && rosterOp.value.equipped.length >= equipSlots.value);
+
 /** 面板操作反馈 */
 const eqNotice = ref("");
-const canEquip = computed(() => !!rosterOp.value && !rosterOp.value.dead && rosterOp.value.equipped.length < equipSlots.value);
 const equip = (eid: string) => {
 	if (!id.value) return;
 	const r = store.equipOp(id.value, eid);
-	eqNotice.value = r.ok ? "" : r.reason ?? "";
+	eqNotice.value = r.ok ? "" : `装备失败：${r.reason ?? "无法装备"}`;
 };
 const unequip = (eid: string) => {
 	if (!id.value) return;
@@ -73,7 +59,10 @@ const virtueName = computed(() => {
 
 const stressPct = computed(() => Math.max(0, Math.min(100, ((rosterOp.value?.stress ?? 0) / AGONY.deathAt) * 100)));
 
-const close = () => store.closeDetail();
+const close = () => {
+	eqNotice.value = "";
+	store.closeDetail();
+};
 </script>
 
 <template>
@@ -88,9 +77,6 @@ const close = () => store.closeDetail();
             <span class="gi-badge" :class="statusBadge(rosterOp).cls">{{ statusBadge(rosterOp).label }}</span>
           </div>
           <div v-if="title" class="gi-detail-title">{{ title }}</div>
-          <div class="gi-detail-sub dim">
-            {{ opGroup(id) }} · {{ opSex(id) }}<template v-if="meta"> · {{ meta }}</template>
-          </div>
           <div class="gi-detail-lvline">
             <span class="gi-stars">{{ levelStars(rosterOp.level) }}</span>
             <span class="dim">Lv {{ rosterOp.level }}</span>
@@ -100,80 +86,116 @@ const close = () => store.closeDetail();
         <button class="gi-detail-x" title="关闭" @click="close">✕</button>
       </header>
 
-      <div class="gi-detail-body">
-        <!-- 副本体力 -->
-        <section v-if="inDungeon" class="gi-detail-sec">
-          <h4 class="gi-detail-h">当前体力</h4>
-          <div class="gi-hpbar">
-            <div class="gi-progress">
-              <div class="gi-progress-fill" :style="{ width: (hp / maxHp) * 100 + '%' }" />
+      <div class="gi-detail-split">
+        <!-- ============ 左列：干员信息 ============ -->
+        <div class="gi-detail-main">
+          <!-- 副本体力 -->
+          <section v-if="inDungeon" class="gi-detail-sec">
+            <h4 class="gi-detail-h">当前体力</h4>
+            <div class="gi-hpbar">
+              <div class="gi-progress">
+                <div class="gi-progress-fill" :style="{ width: (hp / maxHp) * 100 + '%' }" />
+              </div>
+              <span class="gi-hp-num">{{ hp }} / {{ maxHp }}</span>
             </div>
-            <span class="gi-hp-num">{{ hp }} / {{ maxHp }}</span>
-          </div>
-        </section>
+          </section>
 
-        <!-- 压力 -->
-        <section class="gi-detail-sec">
-          <div class="gi-detail-hrow">
-            <h4 class="gi-detail-h">压力</h4>
-            <span class="gi-detail-val" :class="'txt-' + stressTone(rosterOp.stress)">
-              {{ Math.round(rosterOp.stress) }} / {{ AGONY.deathAt }}
-            </span>
-          </div>
-          <div class="gi-progress gi-stressbar">
-            <div class="gi-progress-fill" :class="'stress-' + stressTone(rosterOp.stress)" :style="{ width: stressPct + '%' }" />
-          </div>
-          <p class="gi-detail-note dim">
-            <template v-if="rosterOp.dead">压力突破 {{ AGONY.deathAt }}，干员已永久牺牲。</template>
-            <template v-else-if="rosterOp.agony">已达 {{ AGONY.stressAt }} 陷入「折磨」：压力增长 +20%。</template>
-            <template v-else-if="virtueName">曾触发美德「{{ virtueName }}」。</template>
-            <template v-else>达 {{ AGONY.stressAt }} 判定美德 / 折磨，达 {{ AGONY.deathAt }} 永久牺牲。</template>
-          </p>
-        </section>
-
-        <!-- 装备 -->
-        <section class="gi-detail-sec">
-          <h4 class="gi-detail-h">装备</h4>
-          <div class="gi-equip-grid">
-            <div v-for="(e, i) in equippedList" :key="'w' + i" class="gi-equip-slot worn">
-              <span class="gi-equip-slot-name">{{ e.def?.name ?? e.eid }}</span>
-              <span class="gi-equip-slot-sub dim">{{ e.def?.desc ?? "" }}</span>
-              <button class="gi-equip-x" title="卸下" @click="unequip(e.eid)">✕</button>
+          <!-- 压力 -->
+          <section class="gi-detail-sec">
+            <div class="gi-detail-hrow">
+              <h4 class="gi-detail-h">压力</h4>
+              <span class="gi-detail-val" :class="'txt-' + stressTone(rosterOp.stress)">
+                {{ Math.round(rosterOp.stress) }} / {{ AGONY.deathAt }}
+              </span>
             </div>
-            <span v-for="k in (equipSlots - equippedList.length)" :key="'e' + k" class="gi-equip-slot empty">空装备栏</span>
-          </div>
+            <div class="gi-progress gi-stressbar">
+              <div class="gi-progress-fill" :class="'stress-' + stressTone(rosterOp.stress)" :style="{ width: stressPct + '%' }" />
+            </div>
+            <p class="gi-detail-note dim">
+              <template v-if="rosterOp.dead">压力突破 {{ AGONY.deathAt }}，干员已永久牺牲。</template>
+              <template v-else-if="rosterOp.agony">已达 {{ AGONY.stressAt }} 陷入「折磨」：压力增长 +20%。</template>
+              <template v-else-if="virtueName">曾触发美德「{{ virtueName }}」。</template>
+              <template v-else>达 {{ AGONY.stressAt }} 判定美德 / 折磨，达 {{ AGONY.deathAt }} 永久牺牲。</template>
+            </p>
+          </section>
 
-          <p v-if="availableList.length" class="gi-equip-pool-label dim">行囊中可装备：</p>
-          <div v-if="availableList.length" class="gi-equip-pool">
-            <button v-for="a in availableList" :key="a.eid" class="gi-equip-chip" :disabled="!canEquip" :title="canEquip ? '穿戴' : '装备栏已满'" @click="equip(a.eid)">
-              <b>{{ a.def?.name ?? a.eid }}</b>
-              <span class="dim">{{ a.def?.desc ?? "" }}</span>
+          <!-- 简介 -->
+          <section class="gi-detail-sec">
+            <h4 class="gi-detail-h">简介</h4>
+            <p class="gi-detail-intro">{{ intro || "（该干员暂无档案记载。）" }}</p>
+          </section>
+
+          <!-- 技能 -->
+          <section class="gi-detail-sec">
+            <h4 class="gi-detail-h">技能</h4>
+            <ul v-if="skills.length" class="gi-skill-list">
+              <li v-for="s in skills" :key="s.id" class="gi-skill">
+                <span class="gi-skill-name">{{ s.name }}</span>
+                <span class="gi-skill-info" v-html="s.info || '—'" />
+              </li>
+            </ul>
+            <p v-else class="gi-detail-note dim">该干员未配置技能。</p>
+          </section>
+
+          <!-- 已穿戴：固定在左列最下方 -->
+          <section class="gi-detail-sec gi-detail-sec-last">
+            <div class="gi-detail-hrow">
+              <h4 class="gi-detail-h">已穿戴</h4>
+              <span class="gi-detail-val dim" :class="{ 'txt-high': slotsFull }">{{ equippedList.length }}/{{ equipSlots }}</span>
+            </div>
+            <div class="gi-equip-grid">
+              <button
+                v-for="(e, i) in equippedList"
+                :key="'w' + i"
+                class="gi-equip-slot worn"
+                title="点击退回右侧仓库"
+                @click="unequip(e.eid)"
+              >
+                <EquipIcon :id="e.eid" :img="e.def?.img" :size="36" />
+                <span class="gi-equip-info">
+                  <span class="gi-equip-slot-name">{{ e.def?.name ?? e.eid }}</span>
+                  <span class="gi-equip-slot-sub dim">{{ e.def?.desc ?? "" }}</span>
+                </span>
+                <span class="gi-equip-return" title="退回仓库">↩</span>
+              </button>
+              <div v-for="k in equipSlots - equippedList.length" :key="'e' + k" class="gi-equip-slot empty">空装备栏</div>
+            </div>
+            <p class="gi-detail-note dim">
+              {{ equipSlots }} 个装备栏{{ rosterOp.level >= 2 ? "（2 级额外 +1）" : "，升到 2 级可再 +1" }}。点击已穿戴可退回右侧仓库。
+            </p>
+          </section>
+        </div>
+
+        <!-- ============ 右列：全局装备仓库（独立面板） ============ -->
+        <aside class="gi-detail-warehouse">
+          <div class="gi-wh-head">
+            <h4 class="gi-detail-h">装备仓库</h4>
+            <span class="gi-badge" :class="slotsFull ? 'dead' : 'ok'">{{ slotsFull ? "栏位已满" : "可装备" }}</span>
+          </div>
+          <p v-if="eqNotice" class="gi-equip-notice">{{ eqNotice }}</p>
+
+          <div v-if="warehouse.length" class="gi-wh-list">
+            <button
+              v-for="w in warehouse"
+              :key="w.eid"
+              class="gi-wh-item"
+              :class="{ blocked: slotsFull }"
+              :title="slotsFull ? '需要有空置的装备栏' : '装备到该干员'"
+              @click="equip(w.eid)"
+            >
+              <EquipIcon :id="w.eid" :img="w.def?.img" :size="40" />
+              <span class="gi-wh-info">
+                <span class="gi-wh-name">
+                  {{ w.def?.name ?? w.eid }}
+                  <span v-if="w.count > 1" class="gi-wh-count">×{{ w.count }}</span>
+                </span>
+                <span class="gi-wh-sub dim">{{ w.def?.desc ?? "" }}</span>
+              </span>
+              <span v-if="w.def" class="gi-wh-rar" :class="'r-' + w.def.rarity">{{ RARITY_LABEL[w.def.rarity] }}</span>
             </button>
           </div>
-
-          <p v-if="eqNotice" class="gi-equip-notice">{{ eqNotice }}</p>
-          <p class="gi-detail-note dim">
-            {{ equipSlots }} 个装备栏{{ rosterOp.level >= 2 ? "（2 级额外 +1）" : "，升到 2 级可再 +1" }}。装备效果将在进入战斗时生效。
-          </p>
-        </section>
-
-        <!-- 简介 -->
-        <section class="gi-detail-sec">
-          <h4 class="gi-detail-h">简介</h4>
-          <p class="gi-detail-intro">{{ intro || "（该干员暂无档案记载。）" }}</p>
-        </section>
-
-        <!-- 技能 -->
-        <section class="gi-detail-sec">
-          <h4 class="gi-detail-h">技能</h4>
-          <ul v-if="skills.length" class="gi-skill-list">
-            <li v-for="s in skills" :key="s.id" class="gi-skill">
-              <span class="gi-skill-name">{{ s.name }}</span>
-              <span class="gi-skill-info" v-html="s.info || '—'" />
-            </li>
-          </ul>
-          <p v-else class="gi-detail-note dim">该干员未配置技能。</p>
-        </section>
+          <p v-else class="gi-empty dim">仓库中暂无可穿戴装备。去营地「砍诺特」购入后到此装备。</p>
+        </aside>
       </div>
     </div>
   </div>
@@ -194,8 +216,8 @@ const close = () => store.closeDetail();
 }
 #gi-layer .gi-detail {
   position: relative;
-  width: min(560px, 100%);
-  max-height: min(86vh, 720px);
+  width: min(920px, 100%);
+  max-height: min(88vh, 760px);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -207,6 +229,7 @@ const close = () => store.closeDetail();
 /* 头部 */
 .gi-detail-head {
   position: relative;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -236,10 +259,6 @@ const close = () => store.closeDetail();
   font-size: 12px;
   color: var(--gi-gold);
   margin-top: 2px;
-}
-.gi-detail-sub {
-  font-size: 12px;
-  margin-top: 3px;
 }
 .gi-detail-lvline {
   display: flex;
@@ -272,17 +291,111 @@ const close = () => store.closeDetail();
   color: var(--gi-text);
   border-color: var(--gi-gold-dim);
 }
-/* 主体（可滚动） */
-.gi-detail-body {
+/* 双栏主体 */
+.gi-detail-split {
   flex: 1 1 auto;
+  display: flex;
+  min-height: 0;
+}
+/* 左列（可滚动） */
+.gi-detail-main {
+  flex: 1 1 auto;
+  min-width: 0;
   overflow-y: auto;
   padding: 4px 16px 18px;
+}
+.gi-detail-warehouse {
+  flex: 0 0 280px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-left: 1px solid var(--gi-line);
+  background: linear-gradient(180deg, #101522, #0c1019);
+  padding: 14px;
+}
+.gi-wh-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.gi-wh-head .gi-detail-h {
+  margin: 0;
+}
+.gi-wh-list {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.gi-wh-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 9px;
+  border: 1px solid var(--gi-line2);
+  border-left: 3px solid var(--gi-gold-dim);
+  background: linear-gradient(180deg, #161c2c, #12162180);
+  color: var(--gi-text);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s, opacity 0.15s;
+}
+.gi-wh-item:hover:not(.blocked) {
+  border-color: var(--gi-gold-dim);
+  transform: translateX(2px);
+}
+.gi-wh-item.blocked {
+  cursor: not-allowed;
+}
+.gi-wh-info {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.gi-wh-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gi-gold2);
+}
+.gi-wh-count {
+  color: var(--gi-gold);
+  font-size: 11.5px;
+  margin-left: 4px;
+}
+.gi-wh-sub {
+  font-size: 11px;
+  line-height: 1.4;
+}
+.gi-wh-rar {
+  flex-shrink: 0;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--gi-line2);
+}
+.gi-wh-rar.r-common {
+  color: var(--gi-text);
+}
+.gi-wh-rar.r-rare {
+  color: var(--gi-gold);
+  border-color: var(--gi-gold-dim);
+}
+.gi-wh-rar.r-epic {
+  color: #ffd27a;
+  border-color: rgba(224, 179, 87, 0.6);
 }
 .gi-detail-sec {
   padding: 12px 0;
   border-bottom: 1px solid rgba(42, 50, 70, 0.5);
 }
-.gi-detail-sec:last-child {
+.gi-detail-sec-last {
   border-bottom: none;
 }
 .gi-detail-h {
@@ -341,36 +454,45 @@ const close = () => store.closeDetail();
   width: 100%;
   height: 10px;
 }
-/* 装备 */
+/* 已穿戴（左下） */
 .gi-equip-grid {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 8px;
 }
 .gi-equip-slot {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
   padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid var(--gi-line2);
   background: var(--gi-panel2);
   font-size: 12px;
   color: var(--gi-text);
+  font-family: inherit;
 }
 .gi-equip-slot.empty {
+  justify-content: center;
   border-style: dashed;
   color: var(--gi-dim);
   background: transparent;
 }
 .gi-equip-slot.worn {
-  position: relative;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  padding: 8px 30px 8px 12px;
+  cursor: pointer;
   border-color: var(--gi-gold-dim);
   background: rgba(224, 179, 87, 0.06);
+  transition: border-color 0.15s;
+}
+.gi-equip-slot.worn:hover {
+  border-color: var(--gi-red);
+}
+.gi-equip-info {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 .gi-equip-slot-name {
   font-size: 12.5px;
@@ -381,66 +503,13 @@ const close = () => store.closeDetail();
   font-size: 11px;
   line-height: 1.4;
 }
-.gi-equip-x {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 20px;
-  height: 20px;
-  border: 1px solid var(--gi-line2);
-  border-radius: 5px;
-  background: rgba(255, 255, 255, 0.03);
+.gi-equip-return {
+  flex-shrink: 0;
   color: var(--gi-dim);
-  font-size: 11px;
-  line-height: 1;
-  cursor: pointer;
-  font-family: inherit;
-}
-.gi-equip-x:hover {
-  color: var(--gi-red);
-  border-color: rgba(224, 106, 94, 0.55);
-}
-.gi-equip-pool-label {
-  margin: 12px 0 6px;
-  font-size: 11.5px;
-}
-.gi-equip-pool {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.gi-equip-chip {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  padding: 7px 11px;
-  border-radius: 8px;
-  border: 1px dashed var(--gi-line2);
-  background: transparent;
-  color: var(--gi-text);
-  font-family: inherit;
-  font-size: 11.5px;
-  line-height: 1.4;
-  cursor: pointer;
-  text-align: left;
-  transition: border-color 0.15s, background 0.15s;
-}
-.gi-equip-chip b {
-  font-size: 12.5px;
-  color: var(--gi-text);
-}
-.gi-equip-chip:hover:not(:disabled) {
-  border-style: solid;
-  border-color: var(--gi-gold-dim);
-  background: rgba(224, 179, 87, 0.06);
-}
-.gi-equip-chip:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
+  font-size: 15px;
 }
 .gi-equip-notice {
-  margin: 8px 0 0;
+  margin: 0 0 10px;
   font-size: 11.5px;
   color: var(--gi-red);
 }

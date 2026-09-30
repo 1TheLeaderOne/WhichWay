@@ -3,7 +3,7 @@
  *
  * 设计口径（用户 2026-09-22 确认）：
  *  - 装备栏是**战役层干员个人槽**（OperatorState.maxEquipSlots，初始 1，2 级 +1），
- *    与无名杀原生装备区（武器/防具/±1马）**无关**；一件装备占背包 1 格。
+ *    与无名杀原生装备区（武器/防具/±1马）**无关**；装备存放于**全局仓库（无上限）**，不占局内背包格。
  *  - 每件装备自带效果；效果用**可序列化字段**描述（存进战役存档无副作用），
  *    战斗内的施加（护甲/手牌/杀次数…）在 Phase C 通过 dungeon.ts 开局钩子落地。
  *  - 提供注册表：registerEquipment()/getEquipment()/allEquipment()，商店库存与装备 UI 都查这里。
@@ -35,6 +35,8 @@ export interface EquipmentDef {
 	price: number;
 	stat: EquipStat;
 	desc: string;
+	/** 指定图片名（image/model/GloriousIdeal/equips/ 下、不含扩展名）；缺省用同 id 图片，找不到回退默认图 */
+	img?: string;
 }
 
 /** 稀有度展示名 / 顺序（数值大=稀有） */

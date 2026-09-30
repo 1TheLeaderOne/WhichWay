@@ -193,9 +193,11 @@ export function goSupply(party: string[], dungeonId: string, difficulty: Difficu
 	bump();
 }
 
-/** 从开局商店返回选派（保留已选干员，不清空 selected） */
+/** 从开局商店返回选派（保留已选干员，不清空 selected）：放弃本次出击 → 自动原价回售背包全部消耗品 */
 export function backToDispatch() {
+	if (view.phase === "supply") view.ctrl?.sellAllConsumables();
 	view.phase = "dispatch";
+	persist();
 	bump();
 }
 
@@ -217,6 +219,15 @@ export function goShop() {
 
 export function buyConsumable(id: ItemId, qty = 1): { ok: boolean; reason?: string } {
 	const r = view.ctrl?.purchaseConsumable(id, qty) ?? { ok: false, reason: "无战役" };
+	if (r.ok) {
+		persist();
+		bump();
+	}
+	return r;
+}
+
+export function sellConsumable(id: ItemId, qty = 1): { ok: boolean; reason?: string } {
+	const r = view.ctrl?.sellConsumable(id, qty) ?? { ok: false, reason: "无战役" };
 	if (r.ok) {
 		persist();
 		bump();
