@@ -10,9 +10,11 @@
 GloriousIdeal/
 ├── index.ts           模式注册入口（lib.mode + setMode_ + 模式本体；splash 指向
 │                      image/mode/backgroud/gloriousideal.png，构建随 image/ 复制）
-├── start.ts           模式启动入口：挂载 Vue 应用（start 支持 async）
-├── dungeon.ts         副本探索图生成与行动/遭遇占位（startBattle TODO）
-├── data/              策划案数值表（资源/团结度、建筑、干员、物品、副本×难度）
+├── start.ts           模式启动入口：挂载 Vue 应用（start 支持 async）；giBattle=1 时转入子实例裸对局路径
+├── dungeon.ts         副本探索图生成与行动计数；launchBrawlMatch 在本 realm 内跑完一局标准对局
+├── battleHost.ts      战斗宿主（父窗口）：拉起同源 iframe 子实例、下发 BattleInit、收 BattleResult 后销毁 iframe
+├── battleChild.ts     战斗子实例（iframe 内）：boot 完成后与父窗口握手，调 launchBrawlMatch 跑一局并回传结果
+├── data/              策划案数值表（资源/团结度、建筑、干员、物品、副本×难度、怪物池/组、奖励）
 ├── state/campaign.ts  战役状态（CampaignData）与推进逻辑（CampaignController）+ 存档
 └── ui/
     ├── store.ts       Vue 响应式状态（view）与全部页面流转 action
@@ -46,8 +48,13 @@ GloriousIdeal/
 
 ## TODO 路线（对照策划案）
 
-- [ ] **标准对垒战斗**：`dungeon.ts → startBattle()`。用 party 干员建玩家阵营、按难度生成
-      敌人阵营；体力跨战斗保留、手牌每场重置；击杀数回流压力结算。
+- [x] **标准对垒战斗**：每场节点战斗在**同源 iframe 子实例**里跑一局真实 identity 对局
+      （`battleHost` 拉起 → `battleChild` → `dungeon.ts launchBrawlMatch`），打完销毁 iframe、
+      经 `postMessage` 回传 `BattleResult`。体力跨战斗保留、手牌每场重置、击杀数回流压力结算。
+      子实例用 `directstart` 跳过选模式 splash、以 `?giBattle=1` 走裸对局路径，父层 GI 覆盖层与战役存档全程不被触碰。
+- [x] **战斗载入遮罩 + 子场景锁定**：`battleHost` 在 iframe 之上盖随机 `image/background` 氛围图 + 底部进度条
+      （5s 内爬满 90%；就绪则快速补到 100% 后淡出，淡出伊始才下发 init）。`battleChild` 全程 `#system{display:none!important}`
+      隐藏 `ui.system`（选项/暂停/托管/重来等其它功能）并 boot 后默认暂停，init 到达再解除。
 - [ ] **战斗结算**：任务 绘图/清扫/击败boss 真判定；副本经验、掉落、小队全灭不归还物资。
 - [ ] **压力全链路**：折磨负面（出牌阶段末弃牌/濒死流失体力/压力+20%）；美德五项实现。
 - [ ] **建筑升级数值**：data/buildings.ts 的 cost 全为 0，需填入设计者给定数值。

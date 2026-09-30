@@ -14,7 +14,7 @@ import { BUILDINGS, BuildingId, buildingDailyEffect } from "../data/buildings.js
 import { UNITY, UNITY_EVENTS, UNITY_TIERS, MAX_DAY, STRESS, PROVISION } from "../data/resources.js";
 import { OPERATOR_LEVELS, AGONY, BARRACKS_CAPACITY, rollAgonyOutcome, KILL_STRESS_RELIEF, VirtueId } from "../data/operators.js";
 import { ITEMS, ItemId, INVENTORY_SLOTS_BASE } from "../data/items.js";
-import { getEquipment } from "../data/equipment.js";
+import { getEquipment, type EquipStat } from "../data/equipment.js";
 import { CONSUMABLE_PRICES, rollMerchantStock, merchantDiscount, merchantDailyRefresh, discountedPrice } from "../data/shop.js";
 import { DUNGEONS, DUNGEON_EXP_CAP, Difficulty } from "../data/dungeons.js";
 import { ACTION_TO_RATION, type DungeonLayout } from "../dungeon.js";
@@ -665,6 +665,28 @@ export class CampaignController {
 		const out: string[] = [];
 		for (const [id, n] of counts) for (let k = 0; k < n; k++) out.push(id);
 		return out;
+	}
+
+	/**
+	 * 汇总某干员已穿戴装备的属性加成为一份 EquipStat（供战斗开局施加）。
+	 * 仅累加存活/在册干员身上的实例；stressReduce 属战役层压力结算，一并汇总但战斗内不使用。
+	 */
+	equipStatOf(opId: string): EquipStat {
+		const op = this.roster(opId);
+		const sum: Required<EquipStat> = { maxHp: 0, hujia: 0, maxHandcard: 0, drawStart: 0, attackExtra: 0, stressReduce: 0 };
+		if (op) {
+			for (const id of op.equipped) {
+				const s = getEquipment(id)?.stat;
+				if (!s) continue;
+				sum.maxHp += s.maxHp ?? 0;
+				sum.hujia += s.hujia ?? 0;
+				sum.maxHandcard += s.maxHandcard ?? 0;
+				sum.drawStart += s.drawStart ?? 0;
+				sum.attackExtra += s.attackExtra ?? 0;
+				sum.stressReduce += s.stressReduce ?? 0;
+			}
+		}
+		return sum;
 	}
 
 	// ---------- 天/流程 ----------

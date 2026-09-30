@@ -411,6 +411,7 @@ const isHero = computed(() => view.phase === "title" || view.phase === "end");
   left: 0;
   top: 0;
   bottom: 0;
+  height: 100%;
   border-radius: 3px;
   background: linear-gradient(90deg, var(--gi-gold-dim), var(--gi-gold));
   transition: width 0.4s ease;

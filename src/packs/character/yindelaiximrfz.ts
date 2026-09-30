@@ -27,6 +27,8 @@ skill({
 			async content(event, trigger, player) {
 				await player.useCard(
 					{
+						card:get.autoViewAs(
+							{
 						name: "dongzhuxianji",
 						suit: trigger.card.suit,
 						number: trigger.card.number,
@@ -34,11 +36,11 @@ skill({
 						storage: {
 							...trigger.card.storage,
 							zhishuimrfz: true,
-						},
-						isCard: true,
-					},
-					trigger.cards,
-					player
+						}}
+						),
+						cards:trigger.cards,
+						targets:[player]
+					}
 				);
 				trigger.cancel();
 			},
@@ -55,7 +57,7 @@ skill({
 			},
 			filter(event, player) {
 				if (!["trick", "basic"].includes(get.type(event.card))) return false;
-				return player === event.target || event.getParent().triggeredTargets3.length === 1;
+				return player === event.target || event.getParent()!.triggeredTargets3.length === 1;
 			},
 			mark: true,
 			intro: {
@@ -122,7 +124,7 @@ skill({
 				player.markSkill("dunkongmrfz");
 				player
 					.when("phaseEnd")
-					.then(() => {
+					.then(async (event,trigger,player) => {
 						player.enableSkill("dunkongmrfz");
 						player.unmarkSkill("dunkongmrfz");
 						if (player.storage.qianxianmrfz?.length > 0) {
@@ -158,22 +160,20 @@ skill({
 			trigger: { player: "drawAfter" },
 			filter: function (event, player) {
 				if (player.hasSkill("liangtianmrfz_ban")) return false;
-				//@ts-ignore
-				return event.getParent(2).name != "liangtianmrfz";
+				return event.getParent(2)!.name != "liangtianmrfz";
 			},
 			content: async function (event, trigger, player) {
-				var list = ["phaseZhunbei", "phaseJudge", "phaseDraw", "phaseUse", "phaseDiscard", "phaseJieshu"],
+				let list = ["phaseZhunbei", "phaseJudge", "phaseDraw", "phaseUse", "phaseDiscard", "phaseJieshu"],
 					phase;
-				for (var i of list) {
+				for (let i of list) {
 					//@ts-ignore
-					var evt = trigger.getParent(i).name;
+					let evt = trigger.getParent(i).name;
 					if (evt == i) {
 						phase = i;
 						break;
 					}
 				}
-				//@ts-ignore
-				var phase = phase + "After";
+				phase = phase + "After";
 				player.draw();
 				player.addTempSkill("liangtianmrfz_ban", { global: phase });
 			},
@@ -219,7 +219,7 @@ skill({
 						let { sourceDamage, damage, all } = get.event().info;
 						//技能提示
 						for (let char of game.players) {
-							let prompt = [];
+							let prompt:string[] = [];
 							if (sourceDamage.includes(char)) prompt.push("使用【杀】");
 							if (damage.includes(char)) prompt.push("使用【桃】");
 							if (prompt.length > 0)
@@ -238,7 +238,7 @@ skill({
 			async content(event, trigger, player) {
 				let { sourceDamage, damage, all } = lib.skill.pingyimrfz.getCharacter();
 				let target = event.targets[0];
-				let name = [];
+				let name:string[] = [];
 				if (sourceDamage.includes(target)) name.add("sha");
 				if (damage.includes(target)) name.add("tao");
 				let prompt = `对${get.translation(target)}使用一张`;
@@ -340,10 +340,10 @@ skill({
 							//@ts-ignore
 							return event.cards && event.cards[0] === cards[0];
 						})
-						.then(() => {
+						.then(async (event,trigger,player) => {
 							player.draw(2);
 						})
-						.then(() => {
+						.then(async (event,trigger,player) => {
 							// let cards = player.getCards("h")
 							// 	.filter(card=>card.storage&&typeof card.storage.beinuomrfz === "number")
 							// 	.sort((a,b)=>{
@@ -354,7 +354,9 @@ skill({
 							// cards[0].storage.beinuomrfz = last;
 							// cards[cards.length-1].storage.beinuomrfz = earliest;
 							player
-								.chooseCard("你可以将一张手牌视为你最先获得的牌")
+								.chooseCard({
+									prompt:"你可以将一张手牌视为你最先获得的牌"
+								})
 								.set("filterCard", card => {
 									return card !== lib.skill.beinuomrfz.getCard(true);
 								})
@@ -366,13 +368,13 @@ skill({
 									return get.value(earliest) >= get.value(card) ? -1 : get.value(card);
 								});
 						})
-						.then(() => {
+						.then(async (event,trigger,player) => {
 							let result = event._result;
 							if (result.cards) {
 								result.cards[0].storage.beinuomrfz = lib.skill.beinuomrfz.getCard(true).storage.beinuomrfz - 1;
 							}
 						})
-						.then(() => {
+						.then(async (event,trigger,player) => {
 							//@ts-ignore
 							lib.skill.beinuomrfz.subSkill.tip.content(event, trigger, player);
 						});
@@ -427,16 +429,16 @@ skill({
 
 translate({
 	"yindelaiximrfz": "隐德莱希",
-	"zhishuimrfz": "止水",
-	"zhishuimrfz_info": "锁定技，当你使用一张背面朝上的手牌时，若其不能被合法的使用，则你将此牌视为【洞烛先机】使用。",
-	"qianxianmrfz": "千相",
-	"qianxianmrfz_info": "锁定技，当你成为或指定基本牌或普通锦囊牌的目标后，若你[记录/没有记录]此牌，你[移除此牌的记录/记录此牌并取消此牌的所有目标],然后[你/此牌的使用者]模[一/两]张牌。",
-	"ziwumrfz": "自悟",
-	"ziwumrfz_info": "觉醒技，准备阶段，若“千相”记录了至少5张牌，你将体力值回复至3点，移除“千相”记录的牌名并摸等量张牌，然后你获得“遁空”。",
-	"dunkongmrfz": "遁空",
-	"dunkongmrfz_info": "出牌阶段限一次，你可以令“千相”失效直到回合结束，然后你摸X张牌，且令本回合出【杀】次数+X；你计算与他角色距离-X；手牌上限+X，并于回合结束时随机移除“千相”中记录的一张牌。（X为“千相”记录牌名且至多为5）",
-	"liangtianmrfz": "良田",
-	"liangtianmrfz_info": "锁定技，每阶段限一次，当你不因此技能而摸牌后，你摸一张牌。",
+	// "zhishuimrfz": "止水",
+	// "zhishuimrfz_info": "锁定技，当你使用一张背面朝上的手牌时，若其不能被合法的使用，则你将此牌视为【洞烛先机】使用。",
+	// "qianxianmrfz": "千相",
+	// "qianxianmrfz_info": "锁定技，当你成为或指定基本牌或普通锦囊牌的目标后，若你[记录/没有记录]此牌，你[移除此牌的记录/记录此牌并取消此牌的所有目标],然后[你/此牌的使用者]模[一/两]张牌。",
+	// "ziwumrfz": "自悟",
+	// "ziwumrfz_info": "觉醒技，准备阶段，若“千相”记录了至少5张牌，你将体力值回复至3点，移除“千相”记录的牌名并摸等量张牌，然后你获得“遁空”。",
+	// "dunkongmrfz": "遁空",
+	// "dunkongmrfz_info": "出牌阶段限一次，你可以令“千相”失效直到回合结束，然后你摸X张牌，且令本回合出【杀】次数+X；你计算与他角色距离-X；手牌上限+X，并于回合结束时随机移除“千相”中记录的一张牌。（X为“千相”记录牌名且至多为5）",
+	// "liangtianmrfz": "良田",
+	// "liangtianmrfz_info": "锁定技，每阶段限一次，当你不因此技能而摸牌后，你摸一张牌。",
 	"pingyimrfz": "平漪",
 	"pingyimrfz_info": "其他角色的回合结束时，你可以对本回合[受到伤害/造成伤害]的一名角色使用一张[【桃】/【杀】]，若有角色体力值发生变化，你可以重复这个流程。",
 	"beinuomrfz": "悖诺",

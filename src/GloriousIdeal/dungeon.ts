@@ -4,12 +4,14 @@
  * 副本 = 驻扎点(outpost) + 通路(path)。每条通路由 1~5 个通路节点组成；
  * 每经过一个通路/驻扎点算一次行动。驻扎点可能遭遇敌人；boss 只在驻扎点。
  *
- * 本模块只负责“图”的生成与行动计数；遭遇/战斗在 startBattle 的 TODO 处接入标准对垒。
+ * 本模块负责“图”的生成与行动计数，以及在本 realm 内跑完一局对局（launchBrawlMatch）。
+ * 实际战斗由父窗口的 battleHost 拉起同源 iframe 子实例、在其中调用本模块的 launchBrawlMatch 完成。
  */
 
 import { lib, game, ui, get, _status } from "noname";
 import { DIFFICULTY, Difficulty } from "./data/dungeons.js";
 import { rollMonsterGroup, getCharSpeed, getInitHandSize, rollBattleRewards, type MonsterGroup, type BattleRewards } from "./data/monsters.js";
+import { type EquipStat } from "./data/equipment.js";
 
 export type NodeKind = "outpost" | "path";
 
@@ -92,7 +94,7 @@ export const ACTION_TO_RATION = 10;
 /** 任务目标结算辅助：绘图 = 探索 >= outposts*0.8 */
 export const exploreGoalRatio = 0.8;
 
-// ---------------- 战斗系统：就地拉起无名杀自带标准对局（brawl scene → identity 模式，不 reload） ----------------
+// ---------------- 战斗系统：在本 realm 内拉起一场无名杀标准对局（brawl scene → identity 模式） ----------------
 
 /** 一场战斗的入场参数 */
 export interface BattleInit {
@@ -106,9 +108,11 @@ export interface BattleInit {
 	allyHp: Record<string, number>;
 	/** 我方各干员等级（驱动开局等级效果：3 级额外摸牌 / 4 级闪杀 / 5 级护甲 / 6 级手牌上限） */
 	allyLevel: Record<string, number>;
+	/** 我方各干员装备属性加成汇总（开局施加：护甲/手牌上限/开局摸牌/杀次数/体力上限） */
+	allyEquip?: Record<string, EquipStat>;
 }
 
-/** startBattle 的结算返回（供战斗简报使用） */
+/** launchBrawlMatch 的结算返回（经 battleChild 回传父窗口，供战斗简报使用） */
 export interface BattleResult {
 	win: boolean;
 	nodeIndex: number;
@@ -133,6 +137,8 @@ interface SceneCard {
 	maxHp: number;
 	/** 我方干员等级（敌方/缺省按 1）；驱动 gameStart 开局等级效果 */
 	level?: number;
+	/** 我方干员装备加成汇总（仅 playercontrol 携带）；驱动开局护甲/手牌/摸牌/杀次数效果 */
+	equip?: EquipStat;
 	handcards: string[][];
 	equips: string[][];
 	judges: string[][];
@@ -182,12 +188,14 @@ function installDeathRecorder(): { read: (p: GameStatusPlayer) => GameStatusPlay
 /**
  * 临时启用「基于 side 的全员玩家操控」——照抄 versus/boss 的多控机制，只在战斗窗口内生效，结束即还原。
  *
- * 引擎事实：把一场对局的某个玩家交给真人操作，全靠两个协作钩子（见 content.ts）：
+ * 引擎事实：把一场对局的某个玩家交给真人操作，靠三处协作（见 content.ts / skill.js）：
  *  - Player.prototype.isUnderControl()：控制门的判定（versus 用 this.side==me.side，boss 用 side+single_control）；
- *  - game.modeSwapPlayer(player)：通用交换点（chooseToUse 的 phase 提示 5134、响应 4146/4155/13250）据此
- *    调 game.swapControl 把 game.me 切到待行动玩家，令其 isMine() 为真、由真人操作而非跑 AI。
- * identity 两样都不给（非 game.me 一律判假、modeSwapPlayer 未定义），所以原生无法多控。
- * 这里以最小、可逆的方式补上这两处，等价于把 versus/boss 的 side 控制搬到当前对局：
+ *  - game.modeSwapPlayer(player)：内联交换点（chooseToUse 5134、chooseToRespond 5489、chooseToDiscard 5942）据此
+ *    调 game.swapControl 把 game.me 切到待行动玩家，令其 isMine() 为真、由真人操作而非跑 AI；
+ *  - 全局技 autoswap（lib.skill.autoswap）：对 chooseToCompare/chooseCard/chooseButton/choosePlayerCard… 等
+ *    一批「比牌 / 展示牌 / 选按钮」事件才触发换人（火攻比牌即走此路）。versus/boss 一律 game.addGlobalSkill。
+ * identity 三者都不给（非 game.me 一律判假、modeSwapPlayer 未定义、不加 autoswap），所以原生无法多控。
+ * 这里以最小、可逆的方式补齐这三处，等价于把 versus/boss 的 side 控制搬到当前对局：
  *  1) isUnderControl：**仅开赛后**(_status.gameStarted)把本场我方在场干员一律判为玩家操控，
  *     选人阶段仍走 identity 原逻辑（避免引擎为每名我方各弹一次选将框）。
  *  2) modeSwapPlayer：identity 未定义，补一个转调 game.swapPlayer 的实现——把待行动我方转到 0 号底栏座并刷新
@@ -211,38 +219,50 @@ function installSideControl(): { uninstall: () => void } {
 		// 底栏放大「武将展示」仍停在开局那位；swapPlayer 会把待行动者转到 0 号座并刷新身份/高亮，面板才随之切换。
 		(game as unknown as { swapPlayer?: (player: GameStatusPlayer) => void }).swapPlayer?.(player);
 	};
+	// 关键补全：引擎的通用换人靠全局技 autoswap（见 skill.js），它对 chooseToCompareBegin/chooseCardBegin/
+	// chooseButtonBegin/choosePlayerCardBegin… 等一系列「展示牌 / 比较牌 / 选按钮」事件触发时才调 swapPlayerAuto。
+	// chooseToUse/Respond/Discard 有内联 modeSwapPlayer，但**火攻(比牌)与诸多展示牌流程只走 autoswap**——
+	// versus/boss 都靠 game.addGlobalSkill("autoswap") 打开多控；identity 不加，故此前这些技能不会换人。
+	// 加上它（本子实例 realm 独立，卸载或随 iframe 销毁即还原），令上述遗漏场景全部随操控切换。
+	game.addGlobalSkill("autoswap");
 	return {
 		uninstall: () => {
 			if (proto && orig) proto.isUnderControl = orig;
 			const g = game as unknown as { modeSwapPlayer?: (player: GameStatusPlayer) => void };
 			if (hadModeSwap) g.modeSwapPlayer = hadModeSwap;
 			else delete g.modeSwapPlayer;
+			game.removeGlobalSkill("autoswap");
 		},
 	};
 }
 
 /**
- * 就地拉起一场真实对局：抽怪物组 → 组装 brawl「场景」→ game.switchMode('identity')。
- * 胜利=击杀全部敌方（自定义 checkResult）。对局结束由 onover 捕获血量/击杀并 resolve 本 Promise，
- * **不 reload**：调用方（store）随后重新显示 GI 覆盖层并弹出战斗简报。
+ * 在「本 realm」内拉起一场真实对局：抽怪物组 → 组装 brawl「场景」→ game.switchMode('identity')。
+ * 胜利=击杀全部敌方（自定义 checkResult）。对局结束由 onover 捕获血量/击杀并 resolve 本 Promise。
+ *
+ * 调用方是战斗子实例（battleChild，见 iframe 隔离方案）：本函数只负责“在当前 realm 跑完一局并给出结果”，
+ * 打完即由上层把结果 postMessage 回父窗口、iframe 随即销毁——因此**不再需要**就地连开多场那套
+ * resetArenaForNextMatch/cleanupOverUI（它们是为“同一 realm 复用、不刷新继续下一场”而生的历史包袱）。
  *
  * 引擎事实：identity 只回调 brawl 的 chooseCharacter 系列与 checkResult 钩子，**不回调 gameStart/noGameDraw**，
  * 且 game.me 会被 identity 以面板值重新 init。故血量与我方初始手牌统一在 lib.onphase 首个阶段做一次性归一化。
  * 座位按武将速度（getCharSpeed，暂恒 0）→ 同速随机。无法开新局时回退占位结果，绝不卡死。
  */
-export async function startBattle(init: BattleInit): Promise<BattleResult> {
+export async function launchBrawlMatch(init: BattleInit): Promise<BattleResult> {
 	const enemyGroup = rollEnemies(init.dungeonId);
 	const players: SceneCard[] = [];
 
 	init.party.forEach((id, i) => {
 		const p = panel(id);
+		const eq = init.allyEquip?.[id];
 		players.push({
 			name2: "none",
 			position: 0,
 			identity: i === 0 ? "zhu" : "zhong",
 			hp: Math.max(1, Math.floor(init.allyHp[id] ?? p.hp)),
-			maxHp: p.maxHp,
+			maxHp: p.maxHp + (eq?.maxHp ?? 0),
 			level: init.allyLevel[id] ?? 1,
+			equip: eq,
 			handcards: [], // 初始手牌交给 gameDraw + onphase 归一化(getInitHandSize)
 			equips: [],
 			judges: [],
@@ -333,7 +353,7 @@ export async function startBattle(init: BattleInit): Promise<BattleResult> {
 					if (p.hp > p.maxHp) p.maxHp = p.hp;
 				}
 				if (info.playercontrol) {
-					const target = getInitHandSize(info.name, info.level ?? 1);
+					const target = getInitHandSize(info.name, info.level ?? 1) + (info.equip?.drawStart ?? 0);
 					const cur = p.countCards("h");
 					if (cur < target) p.draw(target - cur);
 					// cur>target 的削减留待需要时再补
@@ -388,13 +408,10 @@ export async function startBattle(init: BattleInit): Promise<BattleResult> {
 			}
 			for (const id of init.party) if (finalHp[id] == null) finalHp[id] = 0; // 缺席按阵亡
 			const win = bool === true;
-			game.saveConfig("mode", "gloriousideal");
-			cleanupOverUI();
 			finish({ win, nodeIndex: init.nodeIndex, finalHp, killedEnemies, kills, deaths, rewards: rollBattleRewards(win, init.dungeonId) });
 		};
 
 		try {
-			resetArenaForNextMatch(); // 就地开新局：清掉上一场对局遗留的对局态（本模式首战时近似空操作）
 			lib.configOL.number = scenePlayers.length; // arena 人数
 			_status.brawl = content as never;
 			const aiStatus = ((_status as unknown as { ai?: Record<string, unknown> }).ai ??= {});
@@ -413,56 +430,6 @@ export async function startBattle(init: BattleInit): Promise<BattleResult> {
 			finish({ win, nodeIndex: init.nodeIndex, finalHp, killedEnemies: [], kills: {}, deaths: {}, rewards: rollBattleRewards(win, init.dungeonId) });
 		}
 	});
-}
-
-/** 关掉 identity 结束后遗留的控制条/对话框，让 GI 覆盖层接管视觉 */
-function cleanupOverUI() {
-	try {
-		if (ui.control) {
-			ui.control.innerHTML = "";
-			ui.control.hide();
-		}
-		if (ui.dialog) ui.dialog.delete();
-	} catch {
-		/* ignore */
-	}
-}
-
-/**
- * 就地开启下一场对局前的最小复位（不刷新页面）。
- * 引擎自身在断线重连里也是用这套原语重建对局（见 library 的 reconnect：players=[]/dead=[]/clearArena），
- * 而 game.over 只把 _status.over 置真、从不清回假——只有整页 reload 才会重置。
- * 故这里显式清场：清 arena DOM + 玩家/阵亡列表 + 结束标志 + 上局引用，令随后 game.switchMode('identity')
- * 像在菜单里首次进入场景一样从零 init 出新对局，从而实现「胜利后不重启、原地继续探索并再战」。
- */
-function resetArenaForNextMatch() {
-	const g = game as unknown as Record<string, unknown>;
-	try {
-		if (typeof game.clearArena === "function") game.clearArena();
-	} catch {
-		/* ignore */
-	}
-	g.players = [];
-	g.dead = [];
-	for (const k of ["zhu", "current", "winner", "extra", "additionaldead", "innertab"]) delete g[k];
-	try {
-		_status.over = false;
-		_status.firstAct = undefined;
-		// 首轮「每轮开始时」修复：本模式不刷新、就地连开多场，而引擎仅在整页重载时才清这些轮次字段。
-		// 残留的 _status.roundStart 仍指向上局旧角色，新局首位 phase() 见其非空便不再认领，
-		// content.phase 的 `player == _status.roundStart` 判定永不成立 → 首轮不触发 roundStart。
-		// 清成 undefined 即等价于「刚开页」：令新局首位行动者重新认领 roundStart，第一轮正常触发。
-		const s = _status as unknown as Record<string, unknown>;
-		s.roundStart = undefined;
-		s.seatNumSettled = undefined;
-		s.lastPhasedPlayer = undefined;
-		s.roundSkipped = undefined;
-		s.isRoundFilter = undefined;
-		game.roundNumber = 0;
-		game.phaseNumber = 0;
-	} catch {
-		/* ignore */
-	}
 }
 
 // ---------------- brawl「场景」钩子（照抄 core/mode/brawl.js 场景运行器的等价逻辑） ----------------
@@ -561,6 +528,12 @@ function makeChooseCharacter() {
  * 战斗结束玩家对象销毁即失效，无需还原；全局技能定义留着无害。
  */
 const LV6_HAND_SKILL = "gloriousIdealLv6Hand";
+/**
+ * 装备被动技能：读取持有者 brawlinfo.equip，动态改写【杀】次数与手牌上限。
+ * 一个定义服务所有干员（各自 brawlinfo 不同）；仅在 attackExtra/maxHandcard 非零时挂上。
+ */
+const EQUIP_SKILL = "gloriousIdealEquip";
+const equipOf = (player: GameStatusPlayer): EquipStat | undefined => (player.brawlinfo as SceneCard | undefined)?.equip;
 let levelSkillsRegistered = false;
 function ensureLevelSkills() {
 	if (levelSkillsRegistered) return;
@@ -571,10 +544,23 @@ function ensureLevelSkills() {
 			mod: { maxHandcard: (_player: GameStatusPlayer, num: number) => num + 1 },
 		};
 	}
+	if (skillLib && !skillLib[EQUIP_SKILL]) {
+		skillLib[EQUIP_SKILL] = {
+			lock: true,
+			mod: {
+				cardUsable: (card: { name?: string }, player: GameStatusPlayer, num: number) => {
+					if (card.name === "sha") return num + (equipOf(player)?.attackExtra ?? 0);
+				},
+				maxHandcard: (player: GameStatusPlayer, num: number) => num + (equipOf(player)?.maxHandcard ?? 0),
+			},
+		};
+	}
 	const translate = lib.translate as Record<string, string>;
 	if (translate) {
 		if (translate[LV6_HAND_SKILL] === undefined) translate[LV6_HAND_SKILL] = "久经沙场";
 		if (translate[LV6_HAND_SKILL + "_info"] === undefined) translate[LV6_HAND_SKILL + "_info"] = "手牌上限+1。";
+		if (translate[EQUIP_SKILL] === undefined) translate[EQUIP_SKILL] = "装备加成";
+		if (translate[EQUIP_SKILL + "_info"] === undefined) translate[EQUIP_SKILL + "_info"] = "来自所穿戴装备的持续加成。";
 	}
 	levelSkillsRegistered = true;
 }
@@ -603,6 +589,11 @@ function makeGameStart() {
 			}
 			if (level >= 5) p.changeHujia(1);
 			if (level >= 6) p.addSkill(LV6_HAND_SKILL);
+			const eq = info.equip;
+			if (eq) {
+				if (eq.hujia) p.changeHujia(eq.hujia);
+				if (eq.attackExtra || eq.maxHandcard) p.addSkill(EQUIP_SKILL);
+			}
 		}
 	};
 }

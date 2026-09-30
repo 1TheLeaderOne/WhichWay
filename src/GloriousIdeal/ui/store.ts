@@ -425,17 +425,19 @@ export async function moveTo(index: number) {
 		const preHp = { ...view.dungeonHp };
 		const party = view.party.slice();
 		const allyLevel = Object.fromEntries(party.map(id => [id, view.ctrl?.data.roster.find(o => o.id === id)?.level ?? 1]));
+		const allyEquip = Object.fromEntries(party.map(id => [id, view.ctrl?.equipStatOf(id) ?? {}]));
 		view.battling = true; // 隐藏 GI 覆盖层，露出真实对局界面
 		bump();
 		let res: BattleResult;
 		try {
-			const { startBattle } = await import("../dungeon.js");
+			const { startBattle } = await import("../battleHost.js");
 			res = await startBattle({
 				dungeonId: view.layout.dungeonId,
 				nodeIndex: index,
 				party,
 				allyHp: preHp,
 				allyLevel,
+				allyEquip,
 			});
 		} finally {
 			view.battling = false;

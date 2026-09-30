@@ -439,7 +439,11 @@ const close = () => {
   gap: 10px;
 }
 .gi-hpbar .gi-progress {
-  flex: 1 1 auto;
+  /* 轨道内唯一子元素是绝对定位的 fill（零内在宽度），flex:1 1 auto 的 basis 会解析成 0；
+     显式 basis:0 + min-width 兜底，保证轨道一定撑开（照搬 RosterTable 里可用的进度条写法）。 */
+  display: block;
+  flex: 1 1 0;
+  min-width: 80px;
   height: 10px;
 }
 .gi-hp-num {
@@ -452,6 +456,7 @@ const close = () => {
 .gi-stressbar {
   display: block;
   width: 100%;
+  min-width: 80px;
   height: 10px;
 }
 /* 已穿戴（左下） */

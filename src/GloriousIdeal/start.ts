@@ -12,6 +12,14 @@ let vueApp: App | null = null;
 
 /** 引擎在选定本模式后调用 */
 export async function start(): Promise<void> {
+	// 战斗子实例（iframe、独立 realm）：只跑一局裸对局，不挂 Vue、不碰战役存档。
+	// 见 battleHost.ts（父端编排）与 battleChild.ts（子端握手）。
+	if (new URLSearchParams(location.search).get("giBattle") === "1") {
+		const { runBattleChild } = await import("./battleChild.js");
+		runBattleChild();
+		return;
+	}
+
 	const pool: string[] = (window.whichWaySave?.allCharacters || []) as string[];
 	store.setPool(pool);
 	store.refreshHasSave();
