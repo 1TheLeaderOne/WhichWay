@@ -37,6 +37,13 @@ export interface EquipmentDef {
 	desc: string;
 	/** 指定图片名（image/model/GloriousIdeal/equips/ 下、不含扩展名）；缺省用同 id 图片，找不到回退默认图 */
 	img?: string;
+	/**
+	 * 战斗内自定义效果（补充 stat 之外的复杂行为）。在所有角色初始化完成后、每场战斗对**持有者**各调用一次。
+	 * 与 stat 并存：stat 由 dungeon.ts 自动施加（护甲/手牌/摸牌/杀次数/体力上限），effect 负责额外逻辑。
+	 * @param event 当前 _status.event
+	 * @param player 装备持有者（无名杀 Player）
+	 */
+	effect?: (event: any, player: GameStatusPlayer) => void;
 }
 
 /** 稀有度展示名 / 顺序（数值大=稀有） */

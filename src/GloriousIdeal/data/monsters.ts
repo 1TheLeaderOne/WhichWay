@@ -57,6 +57,7 @@ export function getBaseEnemyPool(): string[] {
 	let hasWWChar: ((id: string) => boolean) | null = null;
 	try {
 		const save = (window as unknown as { whichWaySave?: { hasChar?: (id: string) => boolean } }).whichWaySave;
+		//@ts-ignore
 		if (save && typeof save.hasChar === "function") hasWWChar = id => save.hasChar(id);
 	} catch {
 		/* whichWaySave 不可用：不排除，退化为全体非隐藏 */

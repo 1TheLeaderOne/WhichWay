@@ -14,6 +14,23 @@ export const giImg = (rel: string): string => whichWayFile.compilePath(`img:${re
 export const opPortrait = (id: string): string => giImg(`character/${id}.jpg`);
 
 /**
+ * 干员「当前皮肤」立绘 URL：优先走驶舰之向皮肤系统（whichWay.skin.getCurrentSkinPath），
+ * 它会按玩家选定的皮肤返回对应图片、非 WhichWay 武将回退本体 img，取不到再退回基础立绘。
+ */
+export const opSkinPortrait = (id: string): string => {
+	const skin = (window as unknown as { whichWay?: { skin?: { getCurrentSkinPath?: (n: string) => string } } }).whichWay?.skin;
+	if (skin?.getCurrentSkinPath) {
+		try {
+			const p = skin.getCurrentSkinPath(id);
+			if (typeof p === "string" && p) return p;
+		} catch {
+			/* ignore */
+		}
+	}
+	return opPortrait(id);
+};
+
+/**
  * 装备图 URL：image/model/GloriousIdeal/equips/{img ?? id}.png。
  * 可为装备指定图片名（img 字段）；缺省用同 id 图片。磁盘上找不到时由 EquipIcon 的 @error 回退到默认图。
  */
@@ -78,7 +95,7 @@ export const opAvatar = (id: string): string => {
 /* ============ 干员资料读取（引擎 lib.character） ============ */
 
 interface CharacterDef {
-	hp?: number;
+	hp?: number | [number, number];
 	maxHp?: number;
 	hujia?: number;
 	group?: string;
@@ -96,10 +113,47 @@ export const opChar = (id: string): CharacterDef => {
 	}
 };
 
+/** 读取初始体力值 / 体力上限：兼容 `hp` 为数字或 `[体力, 上限]` 数组、缺省一方互相回填 */
+const rawHpPair = (id: string): { hp: number; maxHp: number } => {
+	const c = opChar(id);
+	const raw = c.hp;
+	let hp: number | undefined;
+	let maxHp: number | undefined = c.maxHp;
+	if (Array.isArray(raw)) {
+		hp = raw[0];
+		if (maxHp === undefined) maxHp = raw[1];
+	} else {
+		hp = raw;
+	}
+	if (maxHp === undefined) maxHp = hp;
+	if (hp === undefined) hp = maxHp;
+	return { hp: hp ?? 4, maxHp: maxHp ?? 4 };
+};
+
 /** 体力上限 */
-export const opMaxHp = (id: string): number => opChar(id).maxHp ?? 4;
-/** 护甲值 */
+export const opMaxHp = (id: string): number => rawHpPair(id).maxHp;
+/** 初始体力值（可能小于体力上限） */
+export const opHp = (id: string): number => rawHpPair(id).hp;
+/** 护甲值（=初始护盾） */
 export const opArmor = (id: string): number => opChar(id).hujia ?? 0;
+
+/** 体力/护盾展示视图：compact=true 表示上限+护盾 >6，改用纯数字而非格子展示 */
+export interface HpView {
+	hp: number;
+	maxHp: number;
+	hujia: number;
+	compact: boolean;
+}
+export const opHpView = (id: string): HpView => {
+	const { hp, maxHp } = rawHpPair(id);
+	const hujia = opArmor(id);
+	return { hp, maxHp, hujia, compact: maxHp + hujia > 6 };
+};
+
+/** 体力条图片（image/ui 下引擎素材） */
+export const hpFullIcon = (): string => giImg("ui/actualHp.png");
+export const hpEmptyIcon = (): string => giImg("ui/emptyHp.png");
+export const hpShieldIcon = (): string => giImg("ui/shield.png");
 
 /** 干员简介：引擎档案人物介绍（lib.characterIntro[id]），去 HTML 标签后返回纯文本 */
 export const opIntro = (id: string): string => {

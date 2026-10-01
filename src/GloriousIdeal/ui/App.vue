@@ -15,6 +15,7 @@ import { view } from "./store.js";
 import { giImg } from "./components/common/format.js";
 import TitleScreen from "./components/title/TitleScreen.vue";
 import EndScreen from "./components/title/EndScreen.vue";
+import InitialSelectView from "./components/title/InitialSelectView.vue";
 import CampView from "./components/camp/CampView.vue";
 import RecruitView from "./components/camp/RecruitView.vue";
 import GraveyardView from "./components/camp/GraveyardView.vue";
@@ -27,6 +28,7 @@ import OperatorDetail from "./components/common/OperatorDetail.vue";
 /** 各阶段氛围背景图（取自 image/background/ 主题图） */
 const BACKDROP: Record<string, string> = {
   title: "background/MonumentalMelodyTracey.jpg",
+  start: "background/companion.jpg",
   camp: "background/landLife.jpg",
   recruit: "background/companion.jpg",
   graveyard: "background/landLife.jpg",
@@ -54,6 +56,9 @@ const isHero = computed(() => view.phase === "title" || view.phase === "end");
     <!-- 标题 / 结算 -->
     <TitleScreen v-if="view.phase === 'title'" />
     <EndScreen v-else-if="view.phase === 'end'" />
+
+    <!-- 开局初始干员选择（四选二 + 自由选将） -->
+    <InitialSelectView v-else-if="view.phase === 'start'" />
 
     <!-- 营地系统 -->
     <CampView v-else-if="view.phase === 'camp'" />

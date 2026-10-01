@@ -8,6 +8,12 @@ character("xirenmrfz", { pack: "epicSJZX",
 			skills: ["suximrfz","sanzhongmrfz"],
 		});
 
+const MAPS_TYPES = {
+				basic: "tao",
+				trick: "shunshou",
+				equip: "wuzhong",
+			}
+
 skill({
 	"suximrfz": {
 			audio: 2,
@@ -24,7 +30,11 @@ skill({
 						cards.length == 1
 							? { links: cards }
 							: await player
-									.chooseCardButton("【宿锡】:请选择你要使用的牌", cards)
+									.chooseCardButton({
+										// "【宿锡】:请选择你要使用的牌", cards
+										prompt:"【宿锡】:请选择你要使用的牌",
+										cards
+									})
 									.set("ai", button => get.player().getUseValue(button, undefined, true))
 									.forResult();
 					if (!links) return;
@@ -50,7 +60,7 @@ skill({
 			audio: 2,
 			enable: "chooseToUse",
 			hiddenCard: function (player, name) {
-				const maps = lib.skill.sanzhongmrfz.maps;
+				const maps = MAPS_TYPES;
 				if (!Object.values(maps).includes(name)) return false;
 				for (let key in maps) {
 					if (name == maps[key] && player.countCards("hes", { type: key }) > 0) return true;
@@ -60,7 +70,7 @@ skill({
 				const types = Object.entries(player.storage.sanzhongmrfz)
 					.filter(([key, value]) => value === false)
 					.map(([key, value]) => key);
-				const maps = lib.skill.sanzhongmrfz.maps;
+				const maps = MAPS_TYPES;
 				if (types.length < 1) return false;
 				for (let type of types) {
 					if (
@@ -73,12 +83,12 @@ skill({
 			},
 			chooseButton: {
 				dialog: function (event, player) {
-					const maps = lib.skill.sanzhongmrfz.maps;
+					const maps = MAPS_TYPES as Record<string,string>;
 					const swapped = {};
 					Object.keys(maps).forEach(key => {
 						swapped[maps[key]] = key;
 					});
-					let list = [];
+					let list:any[] = [];
 					for (let name of Object.values(maps)) {
 						if (event.filterCard && event.filterCard({ name: name }, player, event)) {
 							if (player.storage.sanzhongmrfz[swapped[name]] != false) continue;
@@ -93,9 +103,8 @@ skill({
 					return ui.create.dialog("三众", [list, "vcard"]);
 				},
 				check: function (button) {
-					//@ts-ignore
-					if (_status.event.getParent().type != "phase") return 1;
-					var player = _status.event.player;
+					if (_status.event.getParent()!.type != "phase") return 1;
+					let player = _status.event.player;
 					return player.getUseValue({
 						name: button.link[2],
 					});
@@ -104,13 +113,12 @@ skill({
 					return {
 						filterCard(card) {
 							const player = get.player();
-							const maps = lib.skill.sanzhongmrfz.maps;
+							const maps = MAPS_TYPES;
 							const swapped = {};
 							Object.keys(maps).forEach(key => {
 								swapped[maps[key]] = key;
 							});
-							const name = lib.skill.sanzhongmrfz_backup.card;
-							return get.type2(card) == swapped[name];
+							return get.type2(card) == swapped[links[0][2]];
 						},
 						audio: "sanzhongmrfz",
 						popname: true,
@@ -120,8 +128,8 @@ skill({
 						position: "hse",
 						viewAs: { name: links[0][2] },
 						card: links[0][2],
-						precontent: function () {
-							const maps = lib.skill.sanzhongmrfz.maps;
+						precontent: async function (event,trigger,player) {
+							const maps = MAPS_TYPES;
 							const swapped = {};
 							Object.keys(maps).forEach(key => {
 								swapped[maps[key]] = key;
@@ -135,7 +143,7 @@ skill({
 				},
 				prompt: function (links, player) {
 					const swapped = {};
-					const maps = lib.skill.sanzhongmrfz.maps;
+					const maps = MAPS_TYPES;
 					const name = links[0][2];
 					Object.keys(maps).forEach(key => {
 						swapped[maps[key]] = key;

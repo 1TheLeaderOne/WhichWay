@@ -110,6 +110,8 @@ export interface CampaignData {
 	roster: OperatorState[];
 	/** 招募候选（未领走前固定） */
 	candidates: string[];
+	/** 最近一次成功招募的天数：等于当前 day 表示「今天已招募过」→ 天灾信使不可再刷新候选 */
+	recruitDay: number;
 	/** 局内背包：物品 id → 数量（消耗品/兑换物，按类型各占 1 格） */
 	inventory: Record<string, number>;
 	/** 全局装备仓库：已拥有装备 id 列表（无上限、不占局内背包；可离散重复拥有） */
@@ -150,6 +152,7 @@ export const createInitialCampaign = (recruits: string[]): CampaignData => {
 		buildings,
 		roster,
 		candidates: [],
+		recruitDay: 0,
 		inventory: {},
 		ownedEquips: [],
 		shop: { day: 0, refreshLeft: 0, stock: [] },
@@ -173,6 +176,7 @@ function normalizeCampaign(data: CampaignData): CampaignData {
 	if (!Array.isArray(d.shop.stock)) d.shop.stock = [];
 	if (typeof d.shop.day !== "number") d.shop.day = 0;
 	if (typeof d.shop.refreshLeft !== "number") d.shop.refreshLeft = 0;
+	if (typeof d.recruitDay !== "number") d.recruitDay = 0;
 	if (Array.isArray(d.roster)) {
 		for (const op of d.roster) {
 			if (typeof op.maxEquipSlots !== "number") op.maxEquipSlots = op.level >= 2 ? 2 : 1;
@@ -290,7 +294,13 @@ export class CampaignController {
 		if (this.liveOperators().length >= cap) return { ok: false, reason: "军营名额已满" };
 		this.data.roster.push({ id, level: 1, exp: 0, stress: 0, agony: false, virtue: null, dead: false, maxEquipSlots: 1, equipped: [] });
 		this.data.candidates = this.data.candidates.filter(c => c !== id);
+		this.data.recruitDay = this.data.day;
 		return { ok: true };
+	}
+
+	/** 今天是否已招募过干员：招募过则天灾信使当天不能再刷新候选（换天后自动恢复） */
+	hasRecruitedToday(): boolean {
+		return this.data.recruitDay === this.data.day;
 	}
 
 	/** 压力增加（按等级/建筑/折磨修正；>=100 判定美德/折磨；>=200 压力爆炸死亡） */

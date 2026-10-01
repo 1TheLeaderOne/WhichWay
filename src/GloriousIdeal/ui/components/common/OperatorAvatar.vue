@@ -5,7 +5,7 @@
  * 尺寸由外层用 width/height（或 --gi-av-size）控制；本组件只负责裁切与回退。
  */
 import { ref, computed } from "vue";
-import { opPortrait, opAvatar } from "./format.js";
+import { opPortrait, opSkinPortrait, opAvatar } from "./format.js";
 
 const props = withDefaults(
 	defineProps<{
@@ -14,12 +14,14 @@ const props = withDefaults(
 		shape?: "circle" | "rounded";
 		/** 阵亡态：灰度 + 暗化 */
 		dead?: boolean;
+		/** 皮肤态：立绘走皮肤系统（getCurrentSkinPath），缺省用本体 image/character/{id}.jpg */
+		skin?: boolean;
 	}>(),
-	{ shape: "circle", dead: false }
+	{ shape: "circle", dead: false, skin: false }
 );
 
 const failed = ref(false);
-const url = computed(() => opPortrait(props.id));
+const url = computed(() => (props.skin ? opSkinPortrait(props.id) : opPortrait(props.id)));
 const letter = computed(() => opAvatar(props.id));
 </script>
 

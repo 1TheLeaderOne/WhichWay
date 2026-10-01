@@ -18,7 +18,11 @@ import { UNITY, MAX_DAY } from "../data/resources.js";
 import { ITEMS, INVENTORY_SLOTS_BASE, type ItemId } from "../data/items.js";
 import { opName } from "./components/common/format.js";
 
-export type Phase = "title" | "camp" | "recruit" | "dispatch" | "supply" | "dungeon" | "graveyard" | "shop" | "end";
+export type Phase = "title" | "start" | "camp" | "recruit" | "dispatch" | "supply" | "dungeon" | "graveyard" | "shop" | "end";
+
+/** 开局初始干员选择：从 WhichWay 池给出 4 名候选、玩家选 2 名（四选二）；另有自由选将可浏览全部武将 */
+export const INITIAL_PICK_COUNT = 2;
+export const INITIAL_CANDIDATE_COUNT = 4;
 
 /**
  * 战斗简报（#5）：真实对局结束后先展示，待玩家点击确认再落库结算。
@@ -61,6 +65,14 @@ export interface ViewState {
 	pendingDispatch: { party: string[]; dungeonId: string; difficulty: Difficulty } | null;
 	/** 副本内一次行动/投喂的结算提示（粮草消耗、缺粮惩罚等）；瞬态、不入存档 */
 	dungeonNotice: string;
+	/** 开局四选二：本批候选（WhichWay 武将 id） */
+	initialCandidates: string[];
+	/** 开局已选初始干员（≤INITIAL_PICK_COUNT，可来自候选或自由选将） */
+	initialPicked: string[];
+	/** 自由选将面板是否展开 */
+	initialFreeOpen: boolean;
+	/** 自由选将池（全部可玩武将，含非 WhichWay；懒建） */
+	initialFreePool: string[];
 }
 
 export const view = reactive<ViewState>({
@@ -81,6 +93,10 @@ export const view = reactive<ViewState>({
 	battleReport: null,
 	pendingDispatch: null,
 	dungeonNotice: "",
+	initialCandidates: [],
+	initialPicked: [],
+	initialFreeOpen: false,
+	initialFreePool: [],
 });
 
 export const bump = () => {
@@ -137,17 +153,87 @@ export function goTitle() {
 	view.battleReport = null;
 	view.pendingDispatch = null;
 	view.dungeonNotice = "";
+	view.initialCandidates = [];
+	view.initialPicked = [];
+	view.initialFreeOpen = false;
+	view.initialFreePool = [];
 	refreshHasSave();
 	bump();
 }
 
 export function startNew() {
 	clearCampaignSave();
-	// TODO: 开局初始 3 名干员提供可选 UI；现在随机
-	const initOps = shuffle(view.pool).slice(0, 3);
-	view.ctrl = new CampaignController(createInitialCampaign(initOps));
+	view.ctrl = null;
+	rollInitialCandidates();
+	view.initialPicked = [];
+	view.initialFreeOpen = false;
+	view.initialFreePool = [];
+	view.phase = "start";
+	bump();
+}
+
+/** 抽一批开局候选（WhichWay 池里随机 N 名，构成「四选二」的四） */
+export function rollInitialCandidates() {
+	view.initialCandidates = shuffle(view.pool).slice(0, INITIAL_CANDIDATE_COUNT);
+}
+
+/** 切换选择某名初始干员（候选或自由池均可）；上限 INITIAL_PICK_COUNT */
+export function toggleInitialPick(id: string) {
+	const i = view.initialPicked.indexOf(id);
+	if (i >= 0) view.initialPicked.splice(i, 1);
+	else if (view.initialPicked.length < INITIAL_PICK_COUNT) view.initialPicked.push(id);
+	bump();
+}
+
+/** 展开/收起自由选将；首次展开时懒建全武将池（含非 WhichWay） */
+export function toggleInitialFree() {
+	view.initialFreeOpen = !view.initialFreeOpen;
+	if (view.initialFreeOpen && !view.initialFreePool.length) view.initialFreePool = allSelectableCharacters();
+	bump();
+}
+
+/** 确认开局：选满 INITIAL_PICK_COUNT 名即创建战役并进入营地 */
+export function confirmInitialStart() {
+	if (view.initialPicked.length !== INITIAL_PICK_COUNT) {
+		console.warn(`[GloriousIdeal] 请选择 ${INITIAL_PICK_COUNT} 名初始干员`);
+		return;
+	}
+	view.ctrl = new CampaignController(createInitialCampaign(view.initialPicked.slice()));
 	persist();
+	view.initialCandidates = [];
+	view.initialPicked = [];
+	view.initialFreeOpen = false;
+	view.initialFreePool = [];
 	goCamp();
+}
+
+/**
+ * 自由选将池：全部可玩武将（含非 WhichWay，如本体/其他扩展）。
+ * 过滤口径对齐引擎 ui.create.characterDialog2：跳过 boss/隐藏皮肤/禁用/封禁项，且需具备面板血量。
+ */
+export function allSelectableCharacters(): string[] {
+	const out: string[] = [];
+	const chars = lib.character as Record<string, any>;
+	const banned = ((lib.config as unknown as { banned?: string[] }).banned ?? []) as string[];
+	const filt = lib.filter as unknown as { characterDisabled?: (id: string) => boolean; characterDisabled2?: (id: string) => boolean };
+	for (const id in chars) {
+		if (!Object.prototype.hasOwnProperty.call(chars, id)) continue;
+		if (id === "unknown" || id === "shadow") continue;
+		const c = chars[id];
+		if (!c || typeof c !== "object") continue;
+		if (c.isBoss || c.isHiddenBoss || c.isMinskin || c.isUnseen || c.isHiddenInStoneMode) continue;
+		if (banned.includes(id)) continue;
+		// 需像武将：对象含面板血量，或为 [hp, maxHp] 数组形态
+		if (!Array.isArray(c) && c.hp == null && c.maxHp == null) continue;
+		try {
+			if (filt.characterDisabled?.(id)) continue;
+			if (filt.characterDisabled2?.(id)) continue;
+		} catch {
+			/* ignore */
+		}
+		out.push(id);
+	}
+	return out;
 }
 
 export function continueLast() {
@@ -358,6 +444,11 @@ export function upgradeBuilding(id: BuildingId) {
 
 export function rollRecruits() {
 	if (view.ctrl) {
+		// 当天已招募过干员则不可再刷新候选（换天后自动恢复）
+		if (view.ctrl.hasRecruitedToday()) {
+			console.warn("[GloriousIdeal] 今日已招募，天灾信使暂不提供刷新");
+			return;
+		}
 		view.ctrl.data.candidates = [];
 		view.ctrl.rollCandidates(view.pool);
 		bump();
@@ -426,6 +517,8 @@ export async function moveTo(index: number) {
 		const party = view.party.slice();
 		const allyLevel = Object.fromEntries(party.map(id => [id, view.ctrl?.data.roster.find(o => o.id === id)?.level ?? 1]));
 		const allyEquip = Object.fromEntries(party.map(id => [id, view.ctrl?.equipStatOf(id) ?? {}]));
+		// equipped 处于 reactive 视图内是 Proxy，postMessage 的结构化克隆会拒绝 Proxy → 必须转成普通数组再下发
+		const allyEquips = Object.fromEntries(party.map(id => [id, [...(view.ctrl?.data.roster.find(o => o.id === id)?.equipped ?? [])]]));
 		view.battling = true; // 隐藏 GI 覆盖层，露出真实对局界面
 		bump();
 		let res: BattleResult;
@@ -438,6 +531,7 @@ export async function moveTo(index: number) {
 				allyHp: preHp,
 				allyLevel,
 				allyEquip,
+				allyEquips,
 			});
 		} finally {
 			view.battling = false;

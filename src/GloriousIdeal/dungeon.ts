@@ -11,7 +11,8 @@
 import { lib, game, ui, get, _status } from "noname";
 import { DIFFICULTY, Difficulty } from "./data/dungeons.js";
 import { rollMonsterGroup, getCharSpeed, getInitHandSize, rollBattleRewards, type MonsterGroup, type BattleRewards } from "./data/monsters.js";
-import { type EquipStat } from "./data/equipment.js";
+import { type EquipStat, getEquipment } from "./data/equipment.js";
+import { installBattleOverlays } from "./battleOverlay.js";
 
 export type NodeKind = "outpost" | "path";
 
@@ -110,6 +111,8 @@ export interface BattleInit {
 	allyLevel: Record<string, number>;
 	/** 我方各干员装备属性加成汇总（开局施加：护甲/手牌上限/开局摸牌/杀次数/体力上限） */
 	allyEquip?: Record<string, EquipStat>;
+	/** 我方各干员已穿戴装备 id 列表（供开局调用各装备的自定义 effect 钩子） */
+	allyEquips?: Record<string, string[]>;
 }
 
 /** launchBrawlMatch 的结算返回（经 battleChild 回传父窗口，供战斗简报使用） */
@@ -139,6 +142,8 @@ interface SceneCard {
 	level?: number;
 	/** 我方干员装备加成汇总（仅 playercontrol 携带）；驱动开局护甲/手牌/摸牌/杀次数效果 */
 	equip?: EquipStat;
+	/** 我方干员已穿戴装备 id 列表（仅 playercontrol 携带）；开局后逐一调用其 EquipmentDef.effect */
+	equipIds?: string[];
 	handcards: string[][];
 	equips: string[][];
 	judges: string[][];
@@ -163,12 +168,12 @@ export const rollEnemies = (dungeonId: string): MonsterGroup => rollMonsterGroup
  * 纯读取、立即转调原实现、整体 try 包裹，且战斗结束即还原——绝不改变死亡流程本身。
  * 拿不到来源（reason 无 source）时归因留空，墓园按「意外死亡」处理。
  */
-function installDeathRecorder(): { read: (p: GameStatusPlayer) => GameStatusPlayer | undefined; uninstall: () => void } {
-	const byVictim = new Map<GameStatusPlayer, GameStatusPlayer | undefined>();
+function installDeathRecorder(): { read: (p: Player) => Player | undefined; uninstall: () => void } {
+	const byVictim = new Map<Player, Player | undefined>();
 	const proto = (lib.element as unknown as { player?: { die?: (...a: never[]) => unknown } })?.player;
 	const orig = proto && typeof proto.die === "function" ? proto.die : undefined;
 	if (proto && orig) {
-		proto.die = function (this: GameStatusPlayer, ...args: [{ source?: GameStatusPlayer } | undefined]) {
+		proto.die = function (this: Player, ...args: [{ source?: Player } | undefined]) {
 			try {
 				if (!byVictim.has(this)) byVictim.set(this, args[0]?.source);
 			} catch {
@@ -202,10 +207,10 @@ function installDeathRecorder(): { read: (p: GameStatusPlayer) => GameStatusPlay
  *     身份/高亮，令「武将展示」随操控对象切换（不碰 versus/boss 的 onSwapControl/fakeme 装饰）。
  */
 function installSideControl(): { uninstall: () => void } {
-	const proto = (lib.element as unknown as { player?: { isUnderControl?: (self?: boolean, me?: GameStatusPlayer) => boolean } })?.player;
+	const proto = (lib.element as unknown as { player?: { isUnderControl?: (self?: boolean, me?: Player) => boolean } })?.player;
 	const orig = proto && typeof proto.isUnderControl === "function" ? proto.isUnderControl : undefined;
 	if (proto && orig) {
-		proto.isUnderControl = function (this: GameStatusPlayer, self?: boolean, me?: GameStatusPlayer) {
+		proto.isUnderControl = function (this: Player, self?: boolean, me?: Player) {
 			if (_status.gameStarted && this !== (me || game.me)) {
 				const info = this.brawlinfo as SceneCard | undefined;
 				if (info && info.playercontrol === true && !this.isDead() && !this.isMad()) return true;
@@ -213,11 +218,11 @@ function installSideControl(): { uninstall: () => void } {
 			return orig.call(this, self, me);
 		} as typeof orig;
 	}
-	const hadModeSwap = (game as unknown as { modeSwapPlayer?: (player: GameStatusPlayer) => void }).modeSwapPlayer;
-	(game as unknown as { modeSwapPlayer?: (player: GameStatusPlayer) => void }).modeSwapPlayer = (player: GameStatusPlayer) => {
+	const hadModeSwap = (game as unknown as { modeSwapPlayer?: (player: Player) => void }).modeSwapPlayer;
+	(game as unknown as { modeSwapPlayer?: (player: Player) => void }).modeSwapPlayer = (player: Player) => {
 		// 用 swapPlayer 而非 swapControl：后者只换 game.me+手牌、不动座位(dataset.position)，
 		// 底栏放大「武将展示」仍停在开局那位；swapPlayer 会把待行动者转到 0 号座并刷新身份/高亮，面板才随之切换。
-		(game as unknown as { swapPlayer?: (player: GameStatusPlayer) => void }).swapPlayer?.(player);
+		(game as unknown as { swapPlayer?: (player: Player) => void }).swapPlayer?.(player);
 	};
 	// 关键补全：引擎的通用换人靠全局技 autoswap（见 skill.js），它对 chooseToCompareBegin/chooseCardBegin/
 	// chooseButtonBegin/choosePlayerCardBegin… 等一系列「展示牌 / 比较牌 / 选按钮」事件触发时才调 swapPlayerAuto。
@@ -228,7 +233,7 @@ function installSideControl(): { uninstall: () => void } {
 	return {
 		uninstall: () => {
 			if (proto && orig) proto.isUnderControl = orig;
-			const g = game as unknown as { modeSwapPlayer?: (player: GameStatusPlayer) => void };
+			const g = game as unknown as { modeSwapPlayer?: (player: Player) => void };
 			if (hadModeSwap) g.modeSwapPlayer = hadModeSwap;
 			else delete g.modeSwapPlayer;
 			game.removeGlobalSkill("autoswap");
@@ -263,6 +268,7 @@ export async function launchBrawlMatch(init: BattleInit): Promise<BattleResult> 
 			maxHp: p.maxHp + (eq?.maxHp ?? 0),
 			level: init.allyLevel[id] ?? 1,
 			equip: eq,
+			equipIds: init.allyEquips?.[id],
 			handcards: [], // 初始手牌交给 gameDraw + onphase 归一化(getInitHandSize)
 			equips: [],
 			judges: [],
@@ -320,9 +326,11 @@ export async function launchBrawlMatch(init: BattleInit): Promise<BattleResult> 
 		let normalized = false;
 		const recorder = installDeathRecorder();
 		let sideControl: { uninstall: () => void } | null = null;
+		let overlays: { refresh: () => void; uninstall: () => void } | null = null;
 		const finish = (r: BattleResult) => {
 			if (settled) return;
 			settled = true;
+			overlays?.uninstall();
 			sideControl?.uninstall();
 			const oi = lib.onover.indexOf(onover as never);
 			if (oi >= 0) lib.onover.splice(oi, 1);
@@ -341,6 +349,7 @@ export async function launchBrawlMatch(init: BattleInit): Promise<BattleResult> 
 		const normalize = () => {
 			if (normalized) return;
 			normalized = true;
+			const allies: { player: GameStatusPlayer; ids?: string[] }[] = [];
 			for (const p of game.players) {
 				const info = p.brawlinfo as SceneCard | undefined;
 				if (!info) continue;
@@ -357,8 +366,31 @@ export async function launchBrawlMatch(init: BattleInit): Promise<BattleResult> 
 					const cur = p.countCards("h");
 					if (cur < target) p.draw(target - cur);
 					// cur>target 的削减留待需要时再补
+					allies.push({ player: p, ids: info.equipIds });
 				}
 				p.update();
+			}
+			// 所有角色初始化完成后：对每名我方干员的每件装备各调用一次自定义 effect（补充 stat 之外的行为）。
+			// 血量/手牌已就位，effect 里的 changeHujia/draw/addSkill 等即时且持久效果才不会被上面的归一化覆盖。
+			for (const { player, ids } of allies) {
+				if (!ids) continue;
+				for (const id of ids) {
+					const eff = getEquipment(id)?.effect;
+					if (typeof eff !== "function") continue;
+					try {
+						eff(_status.event, player);
+					} catch (e) {
+						console.error(`[GloriousIdeal] 装备 effect 执行失败 ${id}`, e);
+					}
+				}
+			}
+			// 角色与手牌就位后安装战斗覆盖层（队友手牌 / 装备面板）；幂等，只装一次。
+			if (!overlays) {
+				try {
+					overlays = installBattleOverlays();
+				} catch (e) {
+					console.error("[GloriousIdeal] 战斗覆盖层安装失败", e);
+				}
 			}
 		};
 		const phaseHook = () => {
@@ -368,7 +400,7 @@ export async function launchBrawlMatch(init: BattleInit): Promise<BattleResult> 
 		// 分队：显式给 AI 一个敌我态度，绕开 identity 的"身份隐藏→态度归零"路径
 		// （identity.js:3866 会把非主公的态度乘 ai.shown，开局多为 0，导致友军互相不认识、敌军乱打）。
 		// rawAttitude 若拿到 customAttitude 的非 undefined 值即优先采用，故以 brawlinfo.playercontrol 定敌我。
-		const customAttitude = (from: GameStatusPlayer, to: GameStatusPlayer): number | undefined => {
+		const customAttitude = (from: Player, to: Player): number | undefined => {
 			if (from === to) return undefined;
 			const a = (from.brawlinfo as SceneCard | undefined)?.playercontrol;
 			const b = (to.brawlinfo as SceneCard | undefined)?.playercontrol;
@@ -506,7 +538,7 @@ function makeChooseCharacterAi() {
 	// identity.js:1690 规定返回值 !== false 时才跳过引擎自带的随机选将；返回 false 会让 identity
 	// 用随机武将重新 init 每个 AI 玩家（我方队友/敌方全部被打乱），这正是"队友变随机角色"的根因。
 	// name2 恒为 "none"，故仅需处理 name==="random" 的情况；其余武将已在 chooseCharacterBefore 就位。
-	return function (player: GameStatusPlayer, list: string[]) {
+	return function (player: Player, list: string[]) {
 		const info = player.brawlinfo as SceneCard & { name: string };
 		if (info.name === "random") player.init(list.randomGet());
 	};
@@ -533,7 +565,7 @@ const LV6_HAND_SKILL = "gloriousIdealLv6Hand";
  * 一个定义服务所有干员（各自 brawlinfo 不同）；仅在 attackExtra/maxHandcard 非零时挂上。
  */
 const EQUIP_SKILL = "gloriousIdealEquip";
-const equipOf = (player: GameStatusPlayer): EquipStat | undefined => (player.brawlinfo as SceneCard | undefined)?.equip;
+const equipOf = (player: Player): EquipStat | undefined => (player.brawlinfo as SceneCard | undefined)?.equip;
 let levelSkillsRegistered = false;
 function ensureLevelSkills() {
 	if (levelSkillsRegistered) return;
@@ -541,17 +573,17 @@ function ensureLevelSkills() {
 	if (skillLib && !skillLib[LV6_HAND_SKILL]) {
 		skillLib[LV6_HAND_SKILL] = {
 			lock: true,
-			mod: { maxHandcard: (_player: GameStatusPlayer, num: number) => num + 1 },
+			mod: { maxHandcard: (_player: Player, num: number) => num + 1 },
 		};
 	}
 	if (skillLib && !skillLib[EQUIP_SKILL]) {
 		skillLib[EQUIP_SKILL] = {
 			lock: true,
 			mod: {
-				cardUsable: (card: { name?: string }, player: GameStatusPlayer, num: number) => {
+				cardUsable: (card: { name?: string }, player: Player, num: number) => {
 					if (card.name === "sha") return num + (equipOf(player)?.attackExtra ?? 0);
 				},
-				maxHandcard: (player: GameStatusPlayer, num: number) => num + (equipOf(player)?.maxHandcard ?? 0),
+				maxHandcard: (player: Player, num: number) => num + (equipOf(player)?.maxHandcard ?? 0),
 			},
 		};
 	}
