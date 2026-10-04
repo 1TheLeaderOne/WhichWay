@@ -25,7 +25,7 @@ skill({
 			// direct: true,
 			async cost(event, trigger, player) {
 				let sourceCards = trigger.cards || undefined;
-				const { result } = await player
+				const result = await player
 					.chooseToDiscard("he")
 					.set("prompt", get.prompt("baidumrfz"))
 					.set(
@@ -47,7 +47,8 @@ skill({
 						}
 					})
 					.set("targetx", trigger.player)
-					.set("cardx", trigger.card);
+					.set("cardx", trigger.card)
+					.forResult();
 				event.result = result;
 			},
 			async content(event, trigger, player) {

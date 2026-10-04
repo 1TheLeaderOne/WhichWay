@@ -118,6 +118,15 @@ skill({
 				trigger.player.damage();
 			},
 		},
+	"shihuangmrfz2": {
+			direct: true,
+			silent: true,
+			charlotte: true,
+			trigger: { global: "phaseEnd" },
+			async content(event, trigger, player) {
+				player.removeSkill("shihuangmrfz2");
+			}
+		},
 });
 
 translate({

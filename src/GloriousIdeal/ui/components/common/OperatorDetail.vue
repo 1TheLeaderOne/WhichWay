@@ -391,6 +391,10 @@ const close = () => {
   color: #ffd27a;
   border-color: rgba(224, 179, 87, 0.6);
 }
+.gi-wh-rar.r-legendary {
+  color: var(--gi-orange);
+  border-color: rgba(229, 154, 75, 0.65);
+}
 .gi-detail-sec {
   padding: 12px 0;
   border-bottom: 1px solid rgba(42, 50, 70, 0.5);

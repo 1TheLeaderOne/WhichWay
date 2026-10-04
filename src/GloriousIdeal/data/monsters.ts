@@ -83,17 +83,6 @@ export function getInitHandSize(_id: string, level = 1): number {
 	return DEFAULT_HAND_SIZE + (level >= 3 ? 1 : 0);
 }
 
-/** 战斗奖励（#5）：源石碇 / 装备。数值未设计，暂返回空，仅留接口。 */
-export interface BattleRewards {
-	originite: number;
-	equips: string[];
-}
-
-/** 结算一场战斗的奖励。目前留空——接入奖励表后按 win/dungeon 计算。 */
-export function rollBattleRewards(_win: boolean, _dungeonId: string): BattleRewards {
-	return { originite: 0, equips: [] };
-}
-
 /** 默认怪物组人数（池为空时随机抽的武将数） */
 export const FALLBACK_GROUP_SIZE = 3;
 

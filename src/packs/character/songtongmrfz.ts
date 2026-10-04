@@ -75,7 +75,7 @@ skill({
 						target.storage.xianchoumrfz_igCount = true;
 						target
 							.when({ global: "roundStart" })
-							.then(() => {
+							.then(async (event, trigger, player) => {
 								delete player.storage.xianchoumrfz_igCount;
 								player.removeGaintag("xianchoumrfz");
 							})

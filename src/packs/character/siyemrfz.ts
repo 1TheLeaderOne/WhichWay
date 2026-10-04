@@ -183,6 +183,7 @@ skill({
 				expose: 0.1,
 			},
 		},
+	"langqunmrfz2": {},
 });
 
 translate({

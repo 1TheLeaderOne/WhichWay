@@ -146,7 +146,7 @@ skill({
 						if (event.name == "phase") return true;
 						else return event.player == target;
 					})
-					.then(() => {
+					.then(async (event, trigger, player) => {
 						// @ts-ignore
 						var target = _status.SJZX_tmpleitingmrfz;
 						if (trigger.name == "die") {

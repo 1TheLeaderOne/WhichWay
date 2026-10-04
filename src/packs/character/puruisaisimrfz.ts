@@ -40,7 +40,7 @@ skill({
 					player
 						.when({ player: ["chooseToUseAfter", "chooseToRespondAfter"] })
 						// @ts-ignore
-						.step(() => {})
+						.step(async () => {})
 						.assign({
 							mod: {
 								// @ts-ignore

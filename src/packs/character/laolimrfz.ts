@@ -284,6 +284,7 @@ skill({
 				}
 			},
 		},
+	"mingshimrfz2": {},
 });
 
 translate({

@@ -54,6 +54,22 @@ export const UNITY_EVENTS = {
 export const STRESS = { init: 0, max: 200, agonyAt: 100 } as const;
 
 /**
+ * 障碍节点（策划案「通路障碍」）：铲除不给任何奖励，只是开路。
+ * 两种手段 + 放弃（放弃后该节点依旧不可通行）。
+ */
+export const OBSTACLE = {
+	/** 手段一：消耗 1 个后勤小队 */
+	supplyCost: 1,
+	/** 手段二：在场每名干员失去 1 点体力 */
+	hpLoss: 1,
+	/** 手段二：在场每名干员压力 +12 */
+	stress: 12,
+} as const;
+
+/** 宝箱节点：开启消耗 1 个后勤小队（放弃则不消耗、无奖励） */
+export const TREASURE = { supplyCost: 1 } as const;
+
+/**
  * 粮草 / 行动经济（策划案「局内资源」，行动计数阈值 ACTION_TO_RATION 见 dungeon.ts）。
  * 缺粮惩罚与主动投喂冷却集中在此，便于后续调平衡。
  */

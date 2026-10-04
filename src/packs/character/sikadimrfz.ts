@@ -21,7 +21,7 @@ skill({
 				});
 			},
 			async cost(event, trigger, player) {
-				const { result } = await player
+				const result = await player
 					.chooseTarget()
 					.set("prompt", get.prompt("shulangmrfz"))
 					.set(
@@ -36,7 +36,8 @@ skill({
 						if (att >= 0) num += 2;
 						else num += 5 + target.getDamagedHp();
 						return (num += target.countCards("h") / 2);
-					});
+					})
+					.forResult();
 				event.result = result;
 			},
 			async content(event, trigger, player) {
@@ -217,7 +218,7 @@ skill({
 				return "你可以对" + get.translation(event.player) + "使用一张杀";
 			},
 			async content(event, trigger, player) {
-				const { result } = await player
+				await player
 					.chooseToUse(function (card, player, event) {
 						if (get.name(card) != "sha") return false;
 						return true;
@@ -230,7 +231,8 @@ skill({
 						if (target != _status.event.sourcex && !ui.selected.targets.includes(_status.event.sourcex)) return false;
 						return player.canUse({ name: "sha" }, target, false);
 					})
-					.set("sourcex", trigger.player);
+					.set("sourcex", trigger.player)
+					.forResult();
 				if (
 					player.hasHistory("useCard", evt => {
 						return (

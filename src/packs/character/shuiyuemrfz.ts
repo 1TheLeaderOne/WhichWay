@@ -131,6 +131,20 @@ skill({
 				}
 			},
 		},
+	"jinghuamrfz2": {
+			charlotte: true,
+			direct: true,
+			trigger: { player: "useCardEnd" },
+			filter: function (event, player) {
+				if (event.card.name != "sha") return false;
+				return player.getHistory("sourceDamage", function (evt) {
+					return evt.card == event.card;
+				}).length <= 2;
+			},
+			async content(event, trigger, player) {
+				player.loseHp();
+			}
+		},
 });
 
 translate({
@@ -141,6 +155,7 @@ translate({
 	"chuangshangmrfz_info": "当你不因【创伤】而对其他角色造成伤害后，每满足下列一项你便可以摸一张牌，若满足所有选项，你可以放弃摸牌，然后对受伤角色造成一点伤害：①目标是场上体力值最少的角色；②你的攻击范围内有生命值不大于一半的其他角色。",
 	"jinghuamrfz": "镜花",
 	"jinghuamrfz_info": "每回合限一次，当你使用【杀】时，你可以额外指定至多两个目标（无距离限制），若你造成的伤害不大于2，你流失一点体力。",
+	"jinghuamrfz2": "镜花",
 });
 
 characterIntro("shuiyuemrfz", "水月于玻利瓦尔的多索雷斯城与我们的部分干员有所接触，并随行至本舰，经相关干员初步问询考察后批准其暂时留舰。</br>其学习能力较为优秀，现阶段已经能协助完成相当一部分的文职工作内容，或可考虑往干员的方向培养。经调查与评估后批准其长期留舰。");

@@ -259,6 +259,7 @@ skill({
 			},
 		},
 	},
+	xinshimrfz2: {},
 });
 
 translate({

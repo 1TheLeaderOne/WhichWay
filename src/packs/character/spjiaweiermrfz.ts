@@ -141,6 +141,57 @@ skill({
 				},
 			},
 		},
+	"juximrfz2": {
+			intro: {
+				markcount: "expansion",
+				mark: function (dialog, storage, player) {
+					let cards = player.getExpansions("juximrfz2");
+					if (player.isUnderControl(true)) dialog.addAuto(cards);
+					else return "共有" + get.cnNumber(cards.length) + "张牌";
+				}
+			},
+			trigger: { player: "useCardAfter" },
+			forced: true,
+			filter: function (event, player) {
+				if (event.card.name != "sha") return false;
+				return player.getExpansions("juximrfz2").length > 0;
+			},
+			async content(event, trigger, player) {
+				const history = player.getHistory("sourceDamage", function (evt) {
+					return evt.card == trigger.card;
+				}).length;
+				const cards = player.getExpansions("juximrfz2");
+				let result;
+				if (history > 0) {
+					result = await player.chooseButton(["你可以至多获得两张牌", cards], [0, Math.min(2, cards.length)], true).set("ai", function (button) {
+						return get.value(button.link, _status.event.player);
+					}).forResult();
+				} else {
+					result = await trigger.targets[0].chooseButton(["你可以至多获得两张牌", cards], [0, Math.min(2, cards.length)], true).set("ai", function (button) {
+						return get.value(button.link, _status.event.player);
+					}).forResult();
+				}
+				if (result.bool) {
+					if (history > 0) await player.gain(result.links, "gain2");
+					else await trigger.targets[0].gain(result.links, "gain2");
+					cards.removeArray(result.links);
+				}
+				player.loseToDiscardpile(cards);
+				player.removeSkill("juximrfz2");
+			}
+		},
+	"yixuemrfz2": {
+			silent: true,
+			firstDo: true,
+			charlotte: true,
+			trigger: { global: "roundStart" },
+			filter: function (event, player) {
+				return player.hasSkill("yixuemrfz2");
+			},
+			async content(event, trigger, player) {
+				player.removeSkill("yixuemrfz2");
+			}
+		},
 });
 
 translate({
@@ -152,6 +203,7 @@ translate({
 	"juximrfz_info": "当你使用的【杀】指定目标后且目标数不大于1，你可以将目标角色的X张牌置于你的武将牌上，若此杀造成了伤害，你可以至多获得你武将牌上的两张牌，否则，目标角色至多获得你武将牌上的两张牌，然后弃置你武将牌上的牌。（X=目标角色区域内牌的花色数）",
 	"conghunmrfz": "丛魂",
 	"conghunmrfz_info": "①每轮开始时，若你没有‘坚韧’标记且上轮没有使用过【丛魂①】，你可以令你本轮受到伤害时，令此伤害-1且你获得一个‘坚韧’标记。②锁定技，任意角色的回合开始阶段，若你本轮没有使用过【丛魂①】且你的‘坚韧’标记数大于1，你失去一点体力并移去一个‘坚韧’标记。",
+	"juximrfz2": "锯袭",
 });
 
 characterIntro("spjiaweiermrfz", "嘉维尔，现在仍是罗德岛医疗部的一员，但在罗德岛需要她发挥自己的战斗力而非医学素养的时候，她也会拿起战斧，冲锋陷阵。");

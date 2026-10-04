@@ -83,7 +83,7 @@ skill({
 					.filter((event, player) => {
 						return event.card === trigger.card;
 					})
-					.then(() => {
+					.then(async (event, trigger, player) => {
 						player.removeMark("lianqimrfz", 1);
 					});
 

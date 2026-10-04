@@ -207,6 +207,15 @@ skill({
 				},
 			},
 		},
+	"ruximrfz2": {
+			charlotte: true,
+			onremove: true,
+			mod: {
+				cardUsable: function (card, player, num) {
+					if (card.name == "sha") return num + player.countMark("ruximrfz2");
+				}
+			}
+		},
 });
 
 translate({

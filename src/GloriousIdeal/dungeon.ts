@@ -10,7 +10,7 @@
 
 import { lib, game, ui, get, _status } from "noname";
 import { DIFFICULTY, Difficulty } from "./data/dungeons.js";
-import { rollMonsterGroup, getCharSpeed, getInitHandSize, rollBattleRewards, type MonsterGroup, type BattleRewards } from "./data/monsters.js";
+import { rollMonsterGroup, getCharSpeed, getInitHandSize, type MonsterGroup } from "./data/monsters.js";
 import { type EquipStat, getEquipment } from "./data/equipment.js";
 import { installBattleOverlays } from "./battleOverlay.js";
 
@@ -20,7 +20,7 @@ export interface DungeonNode {
 	/** 全局编号 */
 	index: number;
 	kind: NodeKind;
-	/** 驻扎点类型占位：normal | elite | boss | treasure(宝箱) | obstacle(障碍) */
+	/** 节点事件：驻扎点 normal | elite | boss；通路 treasure(宝箱) | obstacle(障碍) */
 	event?: "normal" | "elite" | "boss" | "treasure" | "obstacle";
 	/** 本节点是否已有敌人（清扫目标） */
 	hasEnemy?: boolean;
@@ -28,7 +28,10 @@ export interface DungeonNode {
 	neighbors: number[];
 	/** 是否已被探索/清扫 */
 	explored?: boolean;
+	/** 事件已了结：宝箱已开启 / 障碍已铲除 */
 	cleared?: boolean;
+	/** 宝箱已被玩家答复（开过或放弃路过）：避免同一节点反复弹窗 */
+	decided?: boolean;
 }
 
 export interface DungeonLayout {
@@ -45,6 +48,7 @@ const randInt = (min: number, max: number) => min + Math.floor(Math.random() * (
  * 生成一个副本布局：
  *  - 先把 outposts 个驻扎点按“链 + 随机捷径”连成主干；
  *  - 每条相邻驻扎点之间的通路插入 1~5 个通路节点；
+ *  - 通路节点里按比例撒宝箱（可放弃）与障碍（不铲除就无法通过，见 outposts*0.4 / *0.3）；
  *  - boss 出现在最远端驻扎点（TODO：具体哪只 boss 由敌人配置表给出）。
  */
 export function generateDungeon(dungeonId: string, difficulty: Difficulty): DungeonLayout {
@@ -67,11 +71,13 @@ export function generateDungeon(dungeonId: string, difficulty: Difficulty): Dung
 	for (let i = 0; i < outposts; i++) opList.push(mk("outpost", { event: i === 0 ? "normal" : i === outposts - 1 ? "boss" : "normal", hasEnemy: true }));
 
 	// 驻扎点之间插通路节点（1~5 个），并连成一段
+	const pathNodes: DungeonNode[] = [];
 	const bridge = (a: DungeonNode, b: DungeonNode) => {
 		let prev = a;
 		const seg = randInt(1, 5);
 		for (let s = 0; s < seg; s++) {
-			const node = mk("path", { event: Math.random() < 0.3 ? "treasure" : undefined });
+			const node = mk("path");
+			pathNodes.push(node);
 			link(prev, node);
 			prev = node;
 		}
@@ -86,6 +92,19 @@ export function generateDungeon(dungeonId: string, difficulty: Difficulty): Dung
 		if (a !== b && !a.neighbors.includes(b.index)) bridge(a, b);
 	}
 
+	// 通路节点撒事件：宝箱（可花 1 后勤小队开箱，或放弃通过）+ 障碍（不铲除就无法通过）。
+	// 数量随驻扎点规模走（占位比例，待平衡）；一个节点只带一种事件，故池不足时自然少出几个。
+	const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v));
+	const treasureCount = clamp(Math.round(outposts * 0.4), 2, 6);
+	const obstacleCount = clamp(Math.round(outposts * 0.3), 1, 4);
+	const eventNodes = [...pathNodes];
+	for (let i = eventNodes.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[eventNodes[i], eventNodes[j]] = [eventNodes[j], eventNodes[i]];
+	}
+	for (const node of eventNodes.splice(0, treasureCount)) node.event = "treasure";
+	for (const node of eventNodes.splice(0, obstacleCount)) node.event = "obstacle";
+
 	return { dungeonId, difficulty, nodes, entry: 0 };
 }
 
@@ -94,6 +113,12 @@ export const ACTION_TO_RATION = 10;
 
 /** 任务目标结算辅助：绘图 = 探索 >= outposts*0.8 */
 export const exploreGoalRatio = 0.8;
+
+/** 需玩家答复才了结的通路节点：宝箱（可放弃）、障碍（必须铲除才能通过） */
+export const isEventNode = (n: DungeonNode): boolean => n.event === "treasure" || n.event === "obstacle";
+
+/** 未铲除的障碍：走上去可以，但也仅此而已——不铲掉就堵死这条路 */
+export const isBlockedObstacle = (n: DungeonNode): boolean => n.event === "obstacle" && !n.cleared;
 
 // ---------------- 战斗系统：在本 realm 内拉起一场无名杀标准对局（brawl scene → identity 模式） ----------------
 
@@ -127,8 +152,6 @@ export interface BattleResult {
 	deaths: Record<string, { id: string | null; faction: "enemy" | "ally" | "self" } | undefined>;
 	/** 我方各干员的击杀数（干员 id → 击杀敌人数），用于 1 级「击杀减压力」结算 */
 	kills: Record<string, number>;
-	/** 奖励（源石碇/装备，目前留空，由 rollBattleRewards 提供接口） */
-	rewards: BattleRewards;
 }
 
 interface SceneCard {
@@ -440,7 +463,7 @@ export async function launchBrawlMatch(init: BattleInit): Promise<BattleResult> 
 			}
 			for (const id of init.party) if (finalHp[id] == null) finalHp[id] = 0; // 缺席按阵亡
 			const win = bool === true;
-			finish({ win, nodeIndex: init.nodeIndex, finalHp, killedEnemies, kills, deaths, rewards: rollBattleRewards(win, init.dungeonId) });
+			finish({ win, nodeIndex: init.nodeIndex, finalHp, killedEnemies, kills, deaths });
 		};
 
 		try {
@@ -459,7 +482,7 @@ export async function launchBrawlMatch(init: BattleInit): Promise<BattleResult> 
 			const win = Math.random() > 0.4;
 			const finalHp: Record<string, number> = {};
 			for (const id of init.party) finalHp[id] = Math.max(0, Math.floor(init.allyHp[id] ?? panel(id).hp) - (win ? 1 : 2));
-			finish({ win, nodeIndex: init.nodeIndex, finalHp, killedEnemies: [], kills: {}, deaths: {}, rewards: rollBattleRewards(win, init.dungeonId) });
+			finish({ win, nodeIndex: init.nodeIndex, finalHp, killedEnemies: [], kills: {}, deaths: {} });
 		}
 	});
 }

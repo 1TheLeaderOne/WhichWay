@@ -40,7 +40,7 @@ skill({
 					player
 						.when({ player: "phaseEnd" })
 						// @ts-ignore
-						.step(() => {
+						.step(async () => {
 							player.draw(3);
 							// @ts-ignore
 							player.logSkill("qiansongmrfz");

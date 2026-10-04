@@ -129,7 +129,7 @@ skill({
 				);
 			},
 			async cost(event, trigger, player) {
-				const { result } = await player
+				const result = await player
 					.chooseTarget({
 						prompt:`【灼息】:你可以对一名与你距离为${player.hp}的角色造成一点火焰伤害`
 					})
@@ -139,7 +139,8 @@ skill({
 					.set("ai", target => {
 						let player = get.event().player;
 						return get.damageEffect(target, player, player, "fire") > 0;
-					});
+					})
+					.forResult();
 				if (!result) return;
 				event.result = result;
 			},

@@ -183,6 +183,78 @@ skill({
 				player.storage.shuoguangmrfz = true;
 			},
 		},
+	"zhuguangmrfz2": {
+			audio: false,
+			silent: true,
+			trigger: { source: "damageBegin2" },
+			filter: function (event, player, card) {
+				return event.card.name == "juedou";
+			},
+			prompt: function (event, player) {
+				if (!player.storage.zhuguangmrfz_change) return "是否防止此伤害并选择一项";
+				return "是否发动【逐光】";
+			},
+			frequent: function (event, player) {
+				if (!player.storage.zhuguangmrfz_change) return false;
+				return true;
+			},
+			async content(event, trigger, player) {
+				if (!player.storage.zhuguangmrfz_change) trigger.cancel();
+				let list = [];
+				if (!player.storage.kuanmrfz && player.hasSkill("kuanmrfz")) list.add("修改【苦暗】");
+				if (!player.storage.zhuguangmrfz_change) list.add("修改【逐光】");
+				if (!player.storage.zhuguangmrfz_change) list.add("摸一张牌");
+				if (player.storage.zhuguangmrfz_change) list.add("摸两张牌");
+				if (list.length == 1) {
+					player.draw(player.storage.zhuguangmrfz_change ? 2 : 1);
+					player.logSkill("zhuguangmrfz");
+					return;
+				} else {
+					list.add("cancel2");
+					const result = await player.chooseControl(list).set("prompt", get.prompt("zhuguangmrfz")).set("prompt2", "选择一项").set("ai", function () {
+						if (!player.storage.zhuguangmrfz_change) return 1;
+						if (!player.storage.kuanmrfz && player.hasSkill("kuanmrfz")) return 0;
+						return [0, 1].randomGet();
+					}).forResult();
+					if (result.control != "cancel2") {
+						player.logSkill("zhuguangmrfz");
+						if (result.control == "修改【苦暗】") {
+							player.storage.kuanmrfz = true;
+						}
+						if (result.control == "修改【逐光】") {
+							player.storage.zhuguangmrfz_change = true;
+						}
+						if (result.control == "摸一张牌") {
+							player.draw();
+						}
+						if (result.control == "摸两张牌") {
+							player.draw(2);
+						}
+					}
+				}
+			}
+		},
+	"zhuguangmrfz3": {
+			trigger: {
+				player: "useCard"
+			},
+			forced: true,
+			charlotte: true,
+			silent: true,
+			filter: function (event, player) {
+				return event.card.name == "juedou" && event.card.zhuguangmrfz == true;
+			},
+			async content(event, trigger, player) {
+				trigger.directHit.addArray(
+					game.filterPlayer(function (current) {
+						return current != player;
+					})
+				);
+			},
+			ai: {
+				directHit_ai: true
+			}
+		},
 });
 
 translate({
@@ -199,6 +271,8 @@ translate({
 	"kuanmrfz5": "苦暗",
 	"shuoguangmrfz": "烁光",
 	"shuoguangmrfz_info": "锁定技，你跳过你的第一个弃牌阶段。",
+	"zhuguangmrfz2": "逐光",
+	"zhuguangmrfz3": "逐光",
 });
 
 characterTitle("splinguangmrfz", "<font color=#00868B>长夜临光</font>");

@@ -117,7 +117,7 @@ skill({
 					player.draw(2);
 					player.recover();
 					player.disableSkill("sheguomrfz_disable", ["sheguomrfz"]);
-					player.when({ global: "phaseEnd" }).then(() => {
+					player.when({ global: "phaseEnd" }).then(async (event, trigger, player) => {
 						player.enableSkill("sheguomrfz_disable");
 					});
 				}

@@ -30,7 +30,7 @@ skill({
 						//@ts-ignore
 						return event.card == _status.tmpCard || event.name == "dying";
 					})
-					.then(() => {
+					.then(async (event, trigger, player) => {
 						player.removeSkill("lianmangmrfz_ban");
 						//@ts-ignore
 						delete _status.tmpCard;

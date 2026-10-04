@@ -11,16 +11,17 @@ import { CONFIG, view } from "../../store.js";
 import * as store from "../../store.js";
 import StatusBar from "../common/StatusBar.vue";
 import PartyRail from "../common/PartyRail.vue";
-import { ACTION_TO_RATION, type DungeonNode } from "../../../dungeon.js";
+import { ACTION_TO_RATION, isBlockedObstacle, type DungeonNode } from "../../../dungeon.js";
+import { CONSUMABLE_RECYCLE_PRICE } from "../../../data/loot.js";
 
 const layout = () => view.layout;
 const curIndex = () => view.cur;
 const curNode = (): DungeonNode | undefined => layout()?.nodes.find(n => n.index === curIndex());
 
-/** 当前所在节点的可前往邻居 */
+/** 当前所在节点的可前往邻居；脚下堵着未铲的障碍时哪儿也去不了 */
 const canGo = (n: DungeonNode): boolean => {
 	const c = curNode();
-	if (!c) return false;
+	if (!c || isBlockedObstacle(c)) return false;
 	return c.neighbors.includes(n.index) && n.index !== curIndex();
 };
 
@@ -104,6 +105,7 @@ const isKnown = (n: DungeonNode): boolean => canGo(n) || !!n.explored || !!n.cle
 /** 节点图标与语义 */
 const nodeIcon = (n: DungeonNode): string => {
 	if (!isKnown(n)) return "?";
+	if (n.event === "obstacle") return "🪨";
 	if (n.kind === "outpost") {
 		if (n.event === "boss") return "💀";
 		if (n.hasEnemy) return "⚔";
@@ -113,9 +115,10 @@ const nodeIcon = (n: DungeonNode): string => {
 };
 
 const nodeState = (n: DungeonNode): string => {
-	if (n.index === curIndex()) return "cur";
+	if (n.index === curIndex()) return isBlockedObstacle(n) ? "cur blocked" : "cur";
 	if (canGo(n)) return "go";
 	if (!isKnown(n)) return "unknown";
+	if (n.event === "obstacle" && !n.cleared) return "blocked";
 	if (n.kind === "outpost" && n.event === "boss" && n.hasEnemy) return "boss";
 	if (n.hasEnemy) return "foe";
 	if (n.cleared) return "cleared";
@@ -125,6 +128,7 @@ const nodeState = (n: DungeonNode): string => {
 
 const nodeLabel = (n: DungeonNode): string => {
 	if (n.index === view.layout?.entry) return "出发点";
+	if (n.event === "obstacle") return n.cleared ? "路障（已清除）" : "路障";
 	if (n.kind === "outpost") return n.event === "boss" ? "敌军主将" : `营地 ${n.index}`;
 	return n.event === "treasure" ? "物资" : "";
 };
@@ -147,6 +151,23 @@ const feedCd = () => {
 
 const moveTo = (n: DungeonNode) => {
 	store.moveTo(n.index);
+};
+
+/** 悬停提示：位置 / 可前往 / 堵路障碍 / 未知 */
+const nodeTitle = (n: DungeonNode): string => {
+	if (n.index === curIndex()) return isBlockedObstacle(n) ? "我军当前位置 · 脚下障碍未铲除，先处理它" : "我军当前位置";
+	if (canGo(n)) return n.hasEnemy ? "前往：遭遇敌军！" : "前往此地";
+	if (n.event === "obstacle" && !n.cleared && isKnown(n)) return "路障：不铲除无法通过";
+	return isKnown(n) ? "（需绕路抵达）" : "未知区域";
+};
+
+/* ---------- 撤退二次确认（撤退按讨伐失败计） ---------- */
+const retreatAsk = ref(false);
+const askRetreat = () => (retreatAsk.value = true);
+const cancelRetreat = () => (retreatAsk.value = false);
+const doRetreat = () => {
+	retreatAsk.value = false;
+	store.retreat();
 };
 
 /* ---------- 视口自动对准当前节点 ---------- */
@@ -204,15 +225,7 @@ watch(curIndex, () => nextTick(() => scrollToCur(true)));
             :class="[n.kind === 'outpost' ? 'kind-outpost' : 'kind-path', nodeState(n), { clickable: canGo(n) }]"
             :disabled="!canGo(n)"
             :style="nodeStyle(n)"
-            :title="
-              n.index === curIndex()
-                ? '我军当前位置'
-                : canGo(n)
-                  ? (n.hasEnemy ? '前往：遭遇敌军！' : '前往此地')
-                  : isKnown(n)
-                    ? '（需绕路抵达）'
-                    : '未知区域'
-            "
+            :title="nodeTitle(n)"
             @click="moveTo(n)"
           >
             <span v-if="n.index === curIndex()" class="gi-mnode-flag">我军</span>
@@ -231,6 +244,7 @@ watch(curIndex, () => nextTick(() => scrollToCur(true)));
         <span><i class="lg lg-go" /> 可前往（点击）</span>
         <span><i class="lg lg-foe" /> 遭遇敌人</span>
         <span><i class="lg lg-boss" /> 敌军主将</span>
+        <span><i class="lg lg-block" /> 路障（挡路）</span>
         <span><i class="lg lg-cleared" /> 已清扫</span>
         <span><i class="lg lg-dark" /> 未知</span>
       </div>
@@ -257,17 +271,39 @@ watch(curIndex, () => nextTick(() => scrollToCur(true)));
             投喂{{ feedCd() > 0 ? `冷却 ${feedCd()} 行动` : '就绪' }}
           </span>
         </p>
-        <p class="gi-hint-sm dim">体力跨战斗保留，手牌每场重置（占位）。抵达 BOSS 前先清空沿途敌军吧。</p>
+        <p class="gi-hint-sm dim">体力跨战斗保留，手牌每场重置（占位）。路障不铲除就哪儿也去不了；抵达 BOSS 前先清空沿途敌军吧。</p>
       </div>
       <div class="gi-run-btns">
-        <button class="gi-btn gi-btn-outline" title="返回营地，按任务完成度结算" @click="store.endDungeon()">
-          撤离并结算 →
+        <button v-if="store.curInteractable()" class="gi-btn gi-btn-primary" title="处理脚下的路障 / 物资箱" @click="store.reopenNodeDialog()">
+          ✋ 交互
+        </button>
+        <button v-if="store.canComplete()" class="gi-btn gi-btn-outline" title="主将已被击败，可结束讨伐" @click="store.completeDungeon()">
+          🏆 完成讨伐 →
+        </button>
+        <button class="gi-btn gi-btn-danger" title="按讨伐失败结算，收获按能否带回决定去留" @click="askRetreat()">
+          🏳️ 撤退
         </button>
       </div>
     </div>
 
     <!-- ============ 右侧队伍栏（暗黑地牢 1 式，副本内显示体力 + 投喂） ============ -->
     <PartyRail :ids="view.party" show-hp allow-feed />
+
+    <!-- ============ 撤退二次确认 ============ -->
+    <div v-if="retreatAsk" class="gi-ask-scrim" @click.self="cancelRetreat">
+      <div class="gi-ask" role="dialog" aria-modal="true">
+        <h3 class="gi-ask-title">确认撤退？</h3>
+        <p class="gi-ask-body">
+          撤退会以<b class="gi-ask-bad">讨伐失败</b>进入结算页：本次一路暂存的收获，只要还有干员活着就能带回营地，
+          全员阵亡则整趟遗落在副本里。出发前购买的补给会在结算页按每个 <b>{{ CONSUMABLE_RECYCLE_PRICE }}</b> 源石碇回收。
+        </p>
+        <p class="gi-ask-hint dim">已清扫的营地与击败的敌人不会被抹除，但主将仍未倒下。</p>
+        <div class="gi-ask-btns">
+          <button class="gi-btn gi-btn-ghost" @click="cancelRetreat">再想想</button>
+          <button class="gi-btn gi-btn-danger" @click="doRetreat">确认撤退</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -523,6 +559,28 @@ watch(curIndex, () => nextTick(() => scrollToCur(true)));
     box-shadow: 0 0 20px rgba(217, 83, 79, 0.6);
   }
 }
+/* 路障：橙色斜纹边框 + 禁止光标感（未铲时挡住整条路） */
+.gi-mnode.blocked .gi-mnode-medal {
+  border-color: var(--gi-orange);
+  border-style: dashed;
+  outline-color: rgba(229, 154, 75, 0.35);
+}
+.gi-mnode.blocked .gi-mnode-icon {
+  font-size: 18px;
+}
+.gi-mnode.cur.blocked .gi-mnode-medal {
+  border-color: var(--gi-red);
+  animation: gi-block-pulse 1.6s ease-in-out infinite;
+}
+@keyframes gi-block-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(229, 154, 75, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(229, 154, 75, 0.6);
+  }
+}
 /* 图例 */
 .gi-map-legend {
   display: flex;
@@ -555,6 +613,10 @@ watch(curIndex, () => nextTick(() => scrollToCur(true)));
 .lg-foe,
 .lg-boss {
   border-color: var(--gi-red) !important;
+}
+.lg-block {
+  border-color: var(--gi-orange) !important;
+  border-style: dashed !important;
 }
 .lg-cleared {
   border-color: var(--gi-green) !important;
@@ -632,5 +694,51 @@ watch(curIndex, () => nextTick(() => scrollToCur(true)));
 .gi-eco-chip.warn {
   border-color: var(--gi-red);
   color: var(--gi-red);
+}
+/* 撤退二次确认浮层：#gi-layer + 类名压过引擎全局 div{position:static} */
+#gi-layer .gi-ask-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(6, 8, 14, 0.7);
+  backdrop-filter: blur(2px);
+}
+#gi-layer .gi-ask {
+  position: relative;
+  display: block;
+  width: min(430px, 100%);
+  padding: 18px 20px;
+  border-radius: var(--gi-radius);
+  border: 1px solid rgba(224, 106, 94, 0.45);
+  background: linear-gradient(180deg, #171d2c, #0e1220);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+.gi-ask-title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: var(--gi-red);
+  letter-spacing: 1px;
+}
+.gi-ask-body {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.9;
+}
+.gi-ask-bad {
+  color: var(--gi-red);
+}
+.gi-ask-hint {
+  margin: 8px 0 0;
+  font-size: 11.5px;
+}
+.gi-ask-btns {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 14px;
 }
 </style>

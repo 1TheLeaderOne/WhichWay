@@ -208,6 +208,33 @@ skill({
 				},
 			},
 		},
+	"hechimrfz2": {
+			onremove: true,
+			mark: true,
+			marktext: "斥",
+			intro: {
+				name: "呵斥",
+				content: "受到了陈的*龙门粗口*，手牌上限-#"
+			},
+			trigger: { player: "phaseDiscardEnd" },
+			forced: true,
+			charlotte: true,
+			silent: true,
+			async content(event, trigger, player) {
+				player.removeMark("hechimrfz2", player.countMark("hechimrfz2"));
+				player.removeSkill("hechimrfz2");
+				if (Math.random() < 0.1) player.logSkill("chencaidanmrfz");
+			},
+			mod: {
+				maxHandcardBase: function (player, num) {
+					return num -= player.countMark("hechimrfz2");
+				}
+			}
+		},
+	"chencaidanmrfz": {
+			//彩蛋
+			audio: 3
+		},
 });
 
 translate({

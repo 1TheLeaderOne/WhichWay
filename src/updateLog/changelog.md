@@ -241,4 +241,103 @@
 5. 连开两扇 → 第二扇往右错开、两扇标题栏都露得出来，各自独立拖动、独立关闭；
 6. 全部关闭后对局恢复（暂停计数归零），战斗结束 `uninstall` 无残留面板/宿主，拖动监听 `unset` 后不再响应已消失的窗。
 
+### 瑰丽理想 · Phase D（R12）：掉落层 + 障碍/宝箱交互 + 撤退与结算页
 
+策划案 Phase D：`generateDungeon` 补 obstacle/treasure 产出、战斗依胜负与难度发消耗品/兑换物/装备、撤退按「全员阵亡丢弃、有存活带回」处理。数值口径由用户明确给定，其余按策划案占位（下面逐条标了哪些是**待平衡**）。
+
+- **`data/loot.ts`（新增，掉落层全在这里）**
+  - 装备掉落**两段式**：先判「掉不掉装备」（基础概率 `EQUIP_DROP_BASE_CHANCE = 0.1`），掉了再抽品级。API：`addEquipDropChance(delta)` 累加、`equipDropChance()` 读当前值（夹在 0~1）、`resetEquipDropChance()` 每局开局清零。
+  - 品级权重按难度（用户给定）：`RARITY_WEIGHTS` = 侦查 0.8/0.2/0/0、小队 0.6/0.3/0.1/0、主力 0.4/0.3/0.2/0.1（普通/罕见/史诗/传奇）；某档品级池为空时逐级降级，不出空结果。
+  - `rollBattleRewards(win, difficulty)`：胜利才有内容——消耗品包 50%、兑换物 35%、局内货币 `randInt(10,20) × {侦查1, 小队1.5, 主力2}`、外加一次装备判定（以上概率与倍率均**待平衡**，取自策划案）；失败只回一个空包。
+  - `rollTreasureLoot(difficulty)`：宝箱必出消耗品 + 兑换物 50% + 货币 40%，装备判定额外带 `TREASURE_EQUIP_BONUS = 0.15`（待平衡）。
+  - `CONSUMABLE_RECYCLE_PRICE = 2`：**除战前补给站（原价出售）外，任何回收都按每个 2 源石碇**——结算页的随身补给回收就用它。
+  - `LootBundle = { items, equips, originite }` 与 `emptyLoot/mergeLoot/lootItemList` 辅助。
+- **`data/equipment.ts`**：品质从三档扩到四档，新增 `legendary`（标签「传奇」，`RARITY_ORDER` 3），原 `rare` 标签改为「罕见」；补 3 件传奇装备（天灾核心/卡兹戴尔纪念碑/星钢法典，数值**待平衡**）。
+- **`dungeon.ts`**：`generateDungeon` 现在会真产出事件节点——通路节点洗牌后按驻扎点规模分配：宝箱 `clamp(round(outposts*0.4), 2, 6)` 个、障碍 `clamp(round(outposts*0.3), 1, 4)` 个（比例**待平衡**；一个节点只带一种事件，池子不够就少出）。新增 `isEventNode()`、`isBlockedObstacle()`（障碍未 `cleared` 就挡路），`DungeonNode` 增 `decided?`（已经答复过、不再重复弹窗）。
+  - **`BattleResult` 去掉了 `rewards` 字段**：掉落改在**父 realm** roll（`moveTo` 里、`rollBattleRewards`），因为 `addEquipDropChance` 是模块级累加器，战斗子 iframe 有自己的一份模块实例，在那边 roll 会绕过加成。同理 `BattleInit` **没有**加 `difficulty` 参数。
+- **`state/campaign.ts`**
+  - `DungeonRun` 增四字段并全部入档：`loot`（一路暂存）、`startConsumables`（出发时各类消耗品持有量，回收基准）、`snapshot`（进本时每名干员的 等级/经验/压力/体力，结算页对比用）、`settleWin`（`null`=仍在探索；已判胜负则等结算页确认）。`normalizeCampaign` 对旧档全部补齐。
+  - `beginRun` 会 `resetEquipDropChance()` 并打两份快照。
+  - 节点交互：`clearObstacle(index, "supply" | "force")`（后勤小队扣 1；或全员 −1 体力 +12 压力，可能当场把人挖死——`OBSTACLE` 常量在 `data/resources.ts`）、`openTreasure(index)`（扣 1 后勤小队，roll 进 `run.loot`）、`dismissNode(index)`（不消耗；宝箱＝直接路过，障碍＝继续堵着）。**铲障碍不给任何收获**（用户口径）。
+  - `settlePreview()` 纯读预览（与实际落库口径一致：回收量按「战利品入账后」的持有量算）；`finishRun()` 是**唯一落库点**：有存活带回（消耗品/兑换物进背包、装备进全局仓库、局内源石碇 1:1 变现为局外源石碇、背包放不下的溢出记进 `lost`）→ 全员阵亡则整包丢弃并清掉随身消耗品；随后按 `settleWin` 记副本经验/BOSS 首杀。
+  - `applyBattleResult()` 改为返回 `{ win, deaths, ended }`：战败不再自行清进行态/进第二天，只 `requestSettlement(false)`；小队被打光同样如此。
+- **UI**
+  - 新增 `ui/components/battle/NodeDialog.vue`：走上障碍/宝箱即弹窗答复。障碍三选项（派后勤小队 / 亲手挖开（有人体力 ≤ 损耗值时给红色警示）/ 放弃交互且继续堵路），宝箱两选项（撬开 / 不碰它）。
+  - 新增 `ui/components/battle/RunSummary.vue`（phase `settle`）：顶部状态条 + 讨伐成功/撤退结算标题；**全员阵亡**时红条提示、清单整体划线；每名干员列 体力/压力/经验/等级 的前→后与差值；带回（或遗落）物资清单含装备品级徽章；随身补给回收逐条列出并按 `×2` 合计。确认按钮才调 `store.confirmSettlement()`。
+  - `DungeonView.vue`：行动区去掉「撤离并结算」，改为 **✋交互**（脚下待处理时）/ **🏆完成讨伐**（主将已被击败）/ **🏳️撤退**（**二次确认浮层**，说明按讨伐失败计）；`canGo()` 在脚下是未铲障碍时一律不可前往；新增路障图标 🪨、`blocked` 节点样式与图例、悬停提示。
+  - `BattleReport.vue`：「获得奖励」区改读 `report.loot`（物品/装备+品级/源石碇），并注明「结算页统一入账」。
+  - `store.ts`：`endDungeon()` 删除，改为 `requestSettlement/retreat/canComplete/completeDungeon/confirmSettlement`；`resumeRun()` 在 `settleWin != null` 时直接回结算页（刷新也不丢结算）；`App.vue` 注册 `settle` 相位与 `NodeDialog` 浮层。
+
+构建（`WW_SKIP_STATIC_COPY=1 pnpm -F ./packages/extension/WhichWay build` → `✓ built in 2.53s`）、`pnpm eslint packages/extension/WhichWay/src/GloriousIdeal/` 退出 0、入口红线自检为空；产物 chunk 已确认含「随身补给回收」「确认撤退」「派后勤小队清开」三段文案。**未做浏览器实测**（本机 MCP 起不了 dev app），需手动验证：
+1. 进副本后行动区只有 交互/完成讨伐/撤退 三个按钮，没有「返回营地」；点撤退弹二次确认，「再想想」留在原地；
+2. 走上 🪨 → 弹窗三选项：派后勤小队（无库存时置灰）能铲开且**无任何收获**；亲手挖开让全员 −1 体力 +12 压力（有人因此倒下会进墓园）；放弃交互后脚下所有邻居都不再可点，「✋交互」可反复重开弹窗；
+3. 走上 ✨ → 撬开要花 1 后勤小队、提示「结算时入账」且不立刻进背包；选「不碰它」则零消耗零收获、路照常能走；
+4. 战斗简报的「获得奖励」列出本场物品/装备/源石碇，确认前后背包数字不变（收获先在暂存行囊）；
+5. 撤退/完成 → 结算页：每人 体力·压力·经验 前后与差值正确，「带回物资」与实际入账一致，回收合计 = 件数 × 2；确认后营地源石碇增量 = 回收 + 局内货币变现 + `loot.originite`，装备进全局仓库、可在干员详情穿戴；
+6. 小队全灭 → 结算页顶部红条 + 清单划线，确认后背包/仓库/货币都拿不到，随身消耗品清空；
+7. 连打若干场主力难度 → 至少出现过一次「史诗/传奇」徽章，侦查难度不得出史诗以上（掉率 0）；
+8. 已判胜负后刷新页面 → 直接回到结算页而不是副本地图。
+
+修复（玩家实测报错 `Uncaught ReferenceError: getDungeon is not defined`，来自结算页确认 → `finishRun`）：`finishRun` 里「特殊副本通关即整局胜利」那句调用了 `getDungeon()`，但 `state/campaign.ts` 的 `../data/dungeons.js` 只 import 了 `DUNGEONS/DIFFICULTY/DUNGEON_EXP_CAP/Difficulty`。esbuild 不查未定义标识符、ESLint 的 `no-undef` 对 TS 关闭，所以构建与 lint 都没拦住，运行到那条分支才炸。现在把 `getDungeon` 补进 import；顺带补上 `applyBattleResult` 在无进行态分支漏掉的 `ended: false`（返回类型声明了 `ended`）。凯尔希军的收尾本身是通的：`winGame()` 置 `data.win` → `confirmSettlement()` → `goCamp()` 检到 `data.win` 播胜利结算屏。
+自查命令（这轮新加的固定检查）：`npx tsc --noEmit -p tsconfig.json | grep GloriousIdeal.*TS2304` —— 现在只剩 `GameStatusPlayer` 两处（`WhichWay/typings` 里的全局类型，根 tsconfig 收不到，属历史噪音），campaign/store/loot 三层已无未定义标识符。
+
+
+
+## 2026-10-02
+
+### 干员技能包全量排查（`src/packs/character`，268 个文件）
+
+按四条重点逐项扫描：StepContent 残留、`player.when()` 链回调是否异步、`Lib.element.player` 返回值的解构写法、文件内冗余代码。共改动 16 个文件。
+
+#### 修复：`const { result } = await` 解构（await GameEvent 恒为 undefined，发动即抛 TypeError）
+
+引擎里 `await <GameEvent>` 走 `then()` 只 await 结算完成、返回 `undefined`，结果对象必须用 `.forResult()` 取，因此下列解构在技能发动时必然崩溃：
+
+- **修复**：斗士塔露拉【灼息】`async cost` 解构 `await player.chooseTarget()` 恒为 undefined，改为 `.forResult()` 取结果。
+- **修复**：逻格斯【摆渡】`async content` 同上，改为 `const result = await player.chooseTarget(...)…forResult()`。
+- **修复**：斯卡蒂【鲸猎】`async content` 同上，改为 `.forResult()`。
+- **修复**：斯卡蒂【倏浪】解构 `await player.chooseToUse()` 后 `result` 从未被使用（解构本身就抛），改为不绑定变量的 `await ….forResult()`。
+- 复核：全目录已无 `const { result } = await` 残留（0 处）；赋值型 `await` 共 117 处均已带 `.forResult()`，0 处遗漏。
+
+#### 清理：async content 内残留的 StepContent 步骤标记
+
+- **清理**：闪击【炫目】删除 `("step 1");` —— 所在 content 已是 `async content`，该语句在异步内容里只是无效空表达式（步骤标记仅对 StepContent 生效）。
+- **清理**：陨星【流铭】删除 `("step 1");`，原因同上。
+- 复核：全目录 `content`/`cost` 已无非异步定义（0 处），数组形 StepContent（`content: [`）亦为 0 处。
+
+#### 改造：`player.when()` 链的 `.then()`/`.step()` 回调统一为 AsyncContent
+
+非异步回调会被 `when()` 以「函数源码字符串重编译」的方式执行，只能拿到引擎注入的 `event/trigger/player/lib/game/ui/get/ai/_status`，任何外层闭包变量都会丢；改成 async 后按闭包直接执行。逐个核对回调体后为：
+
+- **改造**：煌【严训】、双月【设彀】、玛恩纳【敛芒】、桥夹克里夫【雷霆】、松桐【先筹】、太刀侠火龙S黑角【登龙】、云青萍【录武】——`.then()` 回调改为 `async (event, trigger, player) => {}`，显式形参与原注入实参一致（其中【录武】的 when 挂在 `target` 上，保留 `player` 绑定到 when 持有者，行为不变）。
+- **改造**：特克诺【塑偶】、真言【聆心】、普瑞赛斯【千面】——回调体本就为空或只引用模块级对象，改 async 属统一写法，行为不变。
+- **改造**：聆音【虔颂】——`.step()` 回调改 async；`step()` 一直以闭包执行，行为不变。
+- 复核：全目录 `.then()`/`.step()` 已无非异步回调（0 处）。
+
+#### 排查结论：冗余代码
+
+- 注册层面干净：268 个文件共 639 个技能键、258 个武将 id，无跨文件重复注册、无文件名/武将 id 不匹配、无文件内重复 key。
+- 已删除的死配置：本次未删（属描述性文案，非代码 bug），但发现三类残留：`hongxuemrfz.ts` 的 `sujimrfz_ban(_info)`、`ailinimrfz.ts` 的 `zhidengmrfz2(_info)`、`midiexiangmrfz.ts` 的 `nianshoumrfz2` 在全扩展内都没有对应技能，属改名后遗留的无用翻译键。
+- 发现迁移遗留：`addSkill/addTempSkill` 引用的派生技能（`sujimrfz2`、`zhuguangmrfz2/3`、`hechimrfz2`、`guirenmrfz2`、`dizhumrfzx`、`jinghuamrfz2` 等 23 个）只存在于旧构建 `dist/extension/WhichWay/src/character/packs/…`，模块化拆分时未搬进 `src/packs/character`，引擎 `addSkill` 对不存在的技能直接 return，导致这些技能的后续效果静默失效（已恢复，见下节）。
+- `rendongmrfz.ts`【阴虎】的 `switch (num)` 只有 `case 3/2/1`，标记累计到 4 及以上时无任何分支命中（且 `case 3` 依赖 fallthrough），疑为逻辑缺陷，未改动。
+
+### 迁移遗留技能恢复（24 个派生技能 + 13 条技能名翻译，18 个文件）
+
+定义一律从旧构建 `dist/extension/WhichWay/src/character/packs/legend/legend1SJZX.js` 逐字取回（只做机械还原：打包器改名的 `event2/trigger2/player2/result2` → `event/trigger/player/result`、`var`→`let`、`function(`→`function (`、缩进对齐各文件既有风格），按「谁调用就归位到谁的文件」插入该干员文件 `skill({})` 的末尾；旧构建里存在、拆分时一并丢失的 13 条技能名翻译补进同文件的 `translate({})`。唯一写法调整：【守望】标记的旧式无参 `content: function() {}` 改成 `async content(event, trigger, player)`，步骤体不变。ESLint 复核：18 个文件在恢复块内 0 报错、无语法错误，剩余报错全是改动前就存在的 `no-var`。
+
+- **恢复**：耀骑士临光【逐光】`zhuguangmrfz2`（防止决斗伤害并四选一，含改写 `kuanmrfz`/`zhuguangmrfz_change` 存储的分支）与 `zhuguangmrfz3`（修改版决斗全场 directHit）——此前 `addSkill` 直接 return，【逐光】的全部后续效果静默失效。
+- **恢复**：百炼嘉维尔【锯袭】`juximrfz2`（用【杀】结算后从扩张区取牌并清空）与【医学】`yixuemrfz2`（下一轮开始时自清的回血加成标记）。
+- **恢复**：淬羽赫默【人本】`renbenmrfz2`（遵守宣言者出牌阶段交牌摸一，带 `renbenmrfz2_lose` 子技能）、`renbenmrfz3`（不遵守者的攻击范围削减）与【砥柱】`dizhumrfzx`（“夜灯”标记本体：伤害-1，致命则防止并移除）。
+- **恢复**：保存者【守望】`shouwangmrfz2`（“保存”标记持有者摸牌后回摸给守望者）——它的 filter 排除 `shouwangmrfz_draw`、现有 `shouwangmrfz_draw` 的 filter 排除 `shouwangmrfz2`，两处本就互为防回环判断，恢复后【守望②】的双向摸牌才成立。
+- **恢复**：陈【呵斥】`hechimrfz2`（“斥”标记本体：手牌上限-#、弃牌阶段结束清除）与 `chencaidanmrfz`（10% 概率 `logSkill` 的彩蛋目标；不补回会让这次恢复自己引入一个悬空引用）。
+- **恢复**：麒麟R夜刀【鬼人】`guirenmrfz2`（按本阶段已用次数扣手牌上限，`init` 负责把 storage 归零——此前 `storage.guirenmrfz2++` 是在 undefined 上自增得 NaN）与【乱舞】`luanwumrfza`（把目标复制进父事件两次）——后者缺失时【乱舞】号称“结算三次”实际只结算一次。
+- **恢复**：水月【镜花】`jinghuamrfz2`（此【杀】造成的伤害记录不足 3 点时，结算结束后失去 1 点体力）。
+- **恢复**：仇白【入隙】`ruximrfz2`（按标记数增加【杀】使用次数，`onremove` 清标记）。
+- **恢复**：刻俄柏【拾荒】`shihuangmrfz2`（阶段结束自清的“本阶段已拾取”flag，父技能 `usable: 2` 的门槛判断依赖它）。
+- **恢复**：灵知【思涌】`siyongmrfz2`（已用花色 storage 的标记本体，配合 `markSkill` 显示“当前已使用花色：$”）。
+- **恢复**：闪灵【力场】`lichangmrfz2`、伺夜【狼群】`langqunmrfz2`、老鲤【明事】`mingshimrfz2`、安洁莉娜【信使】`xinshimrfz2` —— 四个 `{}`/`charlotte` 纯 flag 技能，缺失时 `addTempSkill` 不落账，`hasSkill()`/`tempSkills.xinshimrfz2` 恒假，目标与次数限制全部失效。
+- **恢复**：鸿雪【速记】`sujimrfz2`（“弱点”标记本体）——`sujimrfz_damage` 全程靠 `hasSkill("sujimrfz2")` 找目标，缺失时【速记】的增伤/无视防具整条链失效；同时补回翻译 `sujimrfz2: "速记"`。
+- **恢复**：赫拉格【盈亏】`yingkuimrfza`、菲亚梅塔【述难】`shunanmrfza` —— 两者都只被 `logSkill` 引用（`{ audio: 2 }`）。`logSkill` 以 `lib.translate[name]` 为开关，故一并补回旧构建里的 `yingkuimrfza: "盈亏"`；旧构建本来就没有 `shunanmrfza` 的翻译，按原样保留（该次播报仍不弹技能名，属旧行为）。
+- **恢复**：缪尔赛思 `kaiyuanmrfz`（旧版【源流】整段定义 + `kaiyuanmrfz(_info)` 翻译）。该干员现已改用重制的 `yuanliumrfz`，但仍写着 `audio: "kaiyuanmrfz"`（音频文件确为 `kaiyuanmrfz1/2.mp3`）并两处 `logSkill("kaiyuanmrfz")`；旧构建同样保留这份不挂角色的定义，恢复后 `logSkill` 才拿得到“源流”，否则【源流】发动完全不播报。
+- 忠实保留的旧疑点：`renbenmrfz3` 的 `attackRange` 旧构建就写作 `num - Math.max(2, atk)`，与文案“攻击范围-X（X=选‘是’的人数）”不符（最少扣 2），本次只恢复不改数值。
+- 复核：`src` 技能键 1414 → 1441；“被引用但全扩展无定义”的技能 id 从 53 降至 30，剩余为核心跨包引用（`qinggang2` 等在 `apps/core/card`）与上节记录的 11 个确实不存在的 flag 名。

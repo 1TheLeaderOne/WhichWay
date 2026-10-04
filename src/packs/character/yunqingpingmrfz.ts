@@ -77,7 +77,7 @@ skill({
 				card.addGaintag("luwumrfz_tag");
 				target
 					.when({ player: "phaseEnd" })
-					.then(() => {
+					.then(async (event, trigger, player) => {
 						player.unmarkSkill(event.name);
 						//@ts-ignore
 						game.broadcastAll(skill => {

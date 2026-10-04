@@ -2,12 +2,14 @@
 /**
  * battle/BattleReport.vue —— 战斗简报（#5）
  * 真实对局结束后弹出（此时覆盖层已随 battling 复位重新可见）。
- * 内容：击杀的敌人 / 我方体力变化与阵亡 / 奖励（源石碇、装备，暂留空由 API 提供）。
+ * 内容：击杀的敌人 / 我方体力变化与阵亡 / 本场掉落（当场 roll，结算页才入账）。
  * 仅作展示：点击「确认」才调用 store.confirmBattleReport() 落库并推进副本。
  */
 import { computed } from "vue";
 import { view, opMaxHp } from "../../store.js";
 import * as store from "../../store.js";
+import { getItem, type ItemId } from "../../../data/items.js";
+import { getEquipment, RARITY_LABEL, type EquipRarity } from "../../../data/equipment.js";
 import { opName } from "../common/format.js";
 import OperatorAvatar from "../common/OperatorAvatar.vue";
 
@@ -38,7 +40,19 @@ const xpGain = 2;
 const survivors = computed(() => allies.value.filter(a => !a.dead).length);
 
 const enemies = computed(() => report.value?.result.killedEnemies ?? []);
-const rewards = computed(() => report.value?.result.rewards ?? { originite: 0, equips: [] });
+/** 本场掉落（当场 roll，确认后进暂存战利品，撤退/完成时才入账） */
+const loot = computed(() => report.value?.loot);
+const lootItems = computed(() => {
+	const l = loot.value;
+	if (!l) return [];
+	return Object.entries(l.items)
+		.filter(([, n]) => n > 0)
+		.map(([id, n]) => ({ id, name: id === "originite" ? "源石碇" : (getItem(id as ItemId)?.name ?? id), count: n }));
+});
+const lootEquips = computed(() => (loot.value?.equips ?? []).map(id => ({ id, name: getEquipment(id)?.name ?? id, rarity: getEquipment(id)?.rarity })));
+const eqBadge = (r?: EquipRarity) => (r === "epic" || r === "legendary" ? "gold" : r === "rare" ? "virtue" : "dead");
+const lootMoney = computed(() => loot.value?.originite ?? 0);
+const lootEmpty = computed(() => lootItems.value.length === 0 && lootEquips.value.length === 0 && lootMoney.value === 0);
 
 const confirm = () => store.confirmBattleReport();
 </script>
@@ -80,22 +94,23 @@ const confirm = () => store.confirmBattleReport();
           <p v-else class="gi-empty dim">本次未歼灭任何敌人。</p>
         </section>
 
-        <!-- 奖励（源石碇 / 装备，暂留空，接口见 rollBattleRewards） -->
+        <!-- 本场掉落（当场 roll；撤退/完成时才在结算页入账） -->
         <section class="gi-report-sec">
           <h3 class="gi-h3">获得奖励</h3>
-          <div class="gi-report-rewards">
-            <span class="gi-report-reward">
-              <span class="gi-report-dot" /> 源石碇 <b>{{ rewards.originite }}</b>
+          <p v-if="lootEmpty" class="gi-empty dim">本次没有拾获任何物资。</p>
+          <div v-else class="gi-report-rewards">
+            <span v-for="it in lootItems" :key="it.id" class="gi-report-reward">
+              {{ it.name }} <b>×{{ it.count }}</b>
             </span>
-            <span class="gi-report-reward">
-              装备
-              <template v-if="rewards.equips.length">
-                <span v-for="(q, i) in rewards.equips" :key="i" class="gi-tag gold">{{ opName(q) }}</span>
-              </template>
-              <b v-else>无</b>
+            <span v-for="(q, i) in lootEquips" :key="i" class="gi-report-reward gi-report-equip">
+              <b>{{ q.name }}</b>
+              <span v-if="q.rarity" class="gi-badge" :class="eqBadge(q.rarity)">{{ RARITY_LABEL[q.rarity] }}</span>
+            </span>
+            <span v-if="lootMoney > 0" class="gi-report-reward">
+              <span class="gi-report-dot" /> 💠 源石碇 <b>{{ lootMoney }}</b>
             </span>
           </div>
-          <p class="gi-hint dim">奖励结算接口已预留（rollBattleRewards），数值待设计。</p>
+          <p class="gi-hint dim">奖励先记入本次远征的暂存行囊，撤退或完成讨伐时在结算页统一入账。</p>
         </section>
       </div>
 

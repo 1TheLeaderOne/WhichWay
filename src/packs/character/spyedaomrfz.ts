@@ -142,6 +142,41 @@ skill({
 				},
 			},
 		},
+	"guirenmrfz2": {
+			silent: true,
+			charlotte: true,
+			firstDo: true,
+			trigger: { player: "phaseAfter" },
+			init: function (player) {
+				player.storage.guirenmrfz2 = 0;
+			},
+			async content(event, trigger, player) {
+				player.storage.guirenmrfz2 = 0;
+			},
+			mod: {
+				maxHandcard: function (player, num) {
+					return num - player.storage.guirenmrfz2;
+				}
+			}
+		},
+	"luanwumrfza": {
+			audio: 2,
+			direct: true,
+			trigger: { player: "useCardToTargeted" },
+			filter: function (event, player) {
+				return event.card.name == "sha";
+			},
+			async content(event, trigger, player) {
+				event.num = 2;
+				while (event.num > 0) {
+					event.num--;
+					player.logSkill("luanwumrfza");
+					trigger.getParent().targets = trigger.getParent().targets.concat(trigger.targets);
+					trigger.getParent().triggeredTargets4 = trigger.getParent().triggeredTargets4.concat(trigger.targets);
+				}
+				player.removeSkill("luanwumrfza");
+			}
+		},
 });
 
 translate({
@@ -152,6 +187,7 @@ translate({
 	"guiqiangmrfz_info": "准备阶段，你可以将手牌补至你的体力上限（至多补至4张），然后你可以弃置一张牌失去【鬼强】并获得【鬼人】。",
 	"luanwumrfz": "乱舞",
 	"luanwumrfz_info": "①准备阶段，若你拥有【鬼人】，你可以跳过你的判定、摸牌和出牌阶段，然后视为使用一张结算三次的【杀】，然后你下次受到的伤害+1（此效果不叠加）。②锁定技，出牌阶段开始时，你获得【鬼人】，然后失去【乱舞②】。",
+	"luanwumrfza": "乱舞",
 });
 
 characterIntro("spyedaomrfz", "<span class=firetext>联动：怪物猎人</span></br>夜刀，经过短暂的治疗后，从东国回到岗位，继续履行罗德岛A4行动组组长的职责。换上了由艾露猫打造的全新装备，她将会承担更多高难度的攻坚行动，而她的意志也比以往都要强大。");

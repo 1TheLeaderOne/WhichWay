@@ -9,7 +9,7 @@ import { view, CONFIG } from "../../store.js";
 import * as store from "../../store.js";
 import { ITEMS, getItem, type ItemId } from "../../../data/items.js";
 import { CONSUMABLE_PRICES } from "../../../data/shop.js";
-import { getEquipment, RARITY_LABEL } from "../../../data/equipment.js";
+import { getEquipment, RARITY_LABEL, type EquipRarity } from "../../../data/equipment.js";
 import { getDungeon } from "../../../data/dungeons.js";
 import { opName } from "../common/format.js";
 import EquipIcon from "../common/EquipIcon.vue";
@@ -33,6 +33,9 @@ const pending = computed(() => {
 	const diff = CONFIG.DIFFICULTY[pd.difficulty];
 	return { name: dungeon?.name ?? pd.dungeonId, difficulty: diff?.name ?? pd.difficulty, party: pd.party.map(opName).join("、") };
 });
+
+/** 品质档 → 徽章配色（传奇橙、史诗金、罕见浅金、普通灰） */
+const rarityBadge = (r: EquipRarity): string => (r === "legendary" ? "warn" : r === "epic" ? "gold" : r === "rare" ? "virtue" : "dead");
 
 /** 消耗品货架：定价值 + 当前持有量 + 可否购买/出售（出售按原价回购） */
 const consumables = computed(() => {
@@ -148,7 +151,7 @@ const depart = () => store.goDungeon();
           <EquipIcon :id="g.id" :img="g.img" :size="40" class="gi-good-icon" />
           <div class="gi-good-titlerow">
             <span class="gi-good-name">{{ g.name }}</span>
-            <span class="gi-badge" :class="g.rarity === 'epic' ? 'gold' : g.rarity === 'rare' ? 'virtue' : 'dead'">{{ RARITY_LABEL[g.rarity] }}</span>
+            <span class="gi-badge" :class="rarityBadge(g.rarity)">{{ RARITY_LABEL[g.rarity] }}</span>
           </div>
         </div>
         <p class="gi-good-desc dim">{{ g.desc }}</p>
@@ -256,6 +259,12 @@ const depart = () => store.goDungeon();
 .gi-good.rarity-epic {
   border-color: rgba(224, 179, 87, 0.6);
   box-shadow: 0 0 0 1px rgba(224, 179, 87, 0.15) inset;
+}
+.gi-good.rarity-legendary {
+  border-color: rgba(229, 154, 75, 0.7);
+  box-shadow:
+    0 0 0 1px rgba(229, 154, 75, 0.2) inset,
+    0 0 14px rgba(229, 154, 75, 0.12);
 }
 .gi-good-top {
   display: flex;

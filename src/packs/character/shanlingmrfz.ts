@@ -229,6 +229,9 @@ skill({
 				},
 			},
 		},
+	"lichangmrfz2": {
+			charlotte: true
+		},
 });
 
 translate({

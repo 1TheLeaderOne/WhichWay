@@ -20,7 +20,6 @@
 import { lib } from "noname";
 import { whichWayFile } from "../file.js";
 import type { BattleInit, BattleResult } from "./dungeon.js";
-import { rollBattleRewards } from "./data/monsters.js";
 
 /** 子实例 boot + 回 ready 的等待上限；超时按占位结果兜底，绝不卡死战役 */
 const BOOT_TIMEOUT = 30000;
@@ -74,7 +73,7 @@ const fallbackResult = (init: BattleInit): BattleResult => {
 	const win = Math.random() > 0.4;
 	const finalHp: Record<string, number> = {};
 	for (const id of init.party) finalHp[id] = Math.max(0, Math.floor((init.allyHp[id] ?? 4) - (win ? 1 : 2)));
-	return { win, nodeIndex: init.nodeIndex, finalHp, killedEnemies: [], kills: {}, deaths: {}, rewards: rollBattleRewards(win, init.dungeonId) };
+	return { win, nodeIndex: init.nodeIndex, finalHp, killedEnemies: [], kills: {}, deaths: {} };
 };
 
 /** 父窗口发起一场战斗：拉起 iframe 子实例 + 载入遮罩，await 其回传的结算结果 */

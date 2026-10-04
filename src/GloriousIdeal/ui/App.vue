@@ -22,7 +22,9 @@ import GraveyardView from "./components/camp/GraveyardView.vue";
 import ShopView from "./components/camp/ShopView.vue";
 import DispatchView from "./components/battle/DispatchView.vue";
 import DungeonView from "./components/battle/DungeonView.vue";
+import RunSummary from "./components/battle/RunSummary.vue";
 import BattleReport from "./components/battle/BattleReport.vue";
+import NodeDialog from "./components/battle/NodeDialog.vue";
 import OperatorDetail from "./components/common/OperatorDetail.vue";
 
 /** 各阶段氛围背景图（取自 image/background/ 主题图） */
@@ -36,6 +38,7 @@ const BACKDROP: Record<string, string> = {
   supply: "background/battlefront.jpg",
   dispatch: "background/battlefront.jpg",
   dungeon: "background/PrimevalChaos.jpg",
+  settle: "background/PrimevalChaos.jpg",
   end: "background/ideal.jpg",
 };
 
@@ -69,9 +72,12 @@ const isHero = computed(() => view.phase === "title" || view.phase === "end");
     <!-- 战斗系统 -->
     <DispatchView v-else-if="view.phase === 'dispatch'" />
     <DungeonView v-else-if="view.phase === 'dungeon'" />
+    <RunSummary v-else-if="view.phase === 'settle'" />
 
     <!-- 全局浮层：战斗简报（真实对局结束后弹出，确认后才落库推进） -->
     <BattleReport v-if="view.battleReport" />
+    <!-- 全局浮层：节点交互（路障 / 物资箱走上去要先答复） -->
+    <NodeDialog v-if="view.nodeDialog != null" />
 
     <!-- 全局浮层：干员详情（营地 / 副本点击干员时弹出） -->
     <OperatorDetail />

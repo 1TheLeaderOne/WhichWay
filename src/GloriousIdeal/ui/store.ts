@@ -9,24 +9,27 @@
 import { reactive } from "vue";
 import { lib } from "noname";
 import { CampaignController, CampaignData, createInitialCampaign, saveCampaign, loadCampaign, clearCampaignSave } from "../state/campaign.js";
-import { generateDungeon, DungeonLayout, type BattleResult } from "../dungeon.js";
+import { generateDungeon, isBlockedObstacle, isEventNode, DungeonLayout, type BattleResult } from "../dungeon.js";
+import { rollBattleRewards, type LootBundle } from "../data/loot.js";
 import { Difficulty } from "../data/dungeons.js";
 import { BUILDINGS, BuildingId } from "../data/buildings.js";
 import { DUNGEONS, DIFFICULTY, SPECIAL_UNLOCK } from "../data/dungeons.js";
 import { BARRACKS_CAPACITY } from "../data/operators.js";
 import { UNITY, MAX_DAY } from "../data/resources.js";
-import { ITEMS, INVENTORY_SLOTS_BASE, type ItemId } from "../data/items.js";
+import { ITEMS, INVENTORY_SLOTS_BASE, getItem, type ItemId } from "../data/items.js";
+import { getEquipment } from "../data/equipment.js";
 import { opName } from "./components/common/format.js";
 
-export type Phase = "title" | "start" | "camp" | "recruit" | "dispatch" | "supply" | "dungeon" | "graveyard" | "shop" | "end";
+export type Phase = "title" | "start" | "camp" | "recruit" | "dispatch" | "supply" | "dungeon" | "settle" | "graveyard" | "shop" | "end";
 
 /** 开局初始干员选择：从 WhichWay 池给出 4 名候选、玩家选 2 名（四选二）；另有自由选将可浏览全部武将 */
 export const INITIAL_PICK_COUNT = 2;
 export const INITIAL_CANDIDATE_COUNT = 4;
 
 /**
- * 战斗简报（#5）：真实对局结束后先展示，待玩家点击确认再落库结算。
+ * 战斗简报（#5）：真实对局结束后先弹出展示，待玩家点击确认再落库结算。
  * 直接携带 startBattle 的返回值 + 战前血量快照，供 UI 计算我方每个干员的体力变化。
+ * loot 在这里就 roll 好（当场 roll、结算页入账），确认时原样交给战役层，保证展示与落库一致。
  */
 export interface BattleReport {
 	result: BattleResult;
@@ -34,6 +37,8 @@ export interface BattleReport {
 	preHp: Record<string, number>;
 	/** 参战我方 id（战前小队，保证阵亡者也出现在简报里） */
 	party: string[];
+	/** 本场掉落（暂存进 run.loot，撤退/完成时才入账） */
+	loot: LootBundle;
 }
 
 export interface ViewState {
@@ -65,6 +70,8 @@ export interface ViewState {
 	pendingDispatch: { party: string[]; dungeonId: string; difficulty: Difficulty } | null;
 	/** 副本内一次行动/投喂的结算提示（粮草消耗、缺粮惩罚等）；瞬态、不入存档 */
 	dungeonNotice: string;
+	/** 待玩家答复的节点 index（null=无弹窗）：障碍/宝箱走上去都要弹一层 */
+	nodeDialog: number | null;
 	/** 开局四选二：本批候选（WhichWay 武将 id） */
 	initialCandidates: string[];
 	/** 开局已选初始干员（≤INITIAL_PICK_COUNT，可来自候选或自由选将） */
@@ -93,6 +100,7 @@ export const view = reactive<ViewState>({
 	battleReport: null,
 	pendingDispatch: null,
 	dungeonNotice: "",
+	nodeDialog: null,
 	initialCandidates: [],
 	initialPicked: [],
 	initialFreeOpen: false,
@@ -153,6 +161,7 @@ export function goTitle() {
 	view.battleReport = null;
 	view.pendingDispatch = null;
 	view.dungeonNotice = "";
+	view.nodeDialog = null;
 	view.initialCandidates = [];
 	view.initialPicked = [];
 	view.initialFreeOpen = false;
@@ -374,11 +383,12 @@ export function goDungeon(party?: string[], dungeonId?: string, difficulty?: Dif
 	view.cur = layout.entry;
 	view.dungeonHp = hp;
 	view.dungeonNotice = "";
+	view.nodeDialog = null;
 	view.phase = "dungeon";
 	bump();
 }
 
-/** 从存档里的进行态恢复副本探索（真实对局结束/刷新页面后回到副本页） */
+/** 从存档里的进行态恢复副本探索（真实对局结束/刷新页面后回到副本页；已判定胜负的回到结算页） */
 export function resumeRun() {
 	const run = view.ctrl?.data.run;
 	if (!run) return false;
@@ -386,7 +396,7 @@ export function resumeRun() {
 	view.party = run.party.slice();
 	view.cur = run.cur;
 	view.dungeonHp = { ...run.hp };
-	view.phase = "dungeon";
+	view.phase = run.settleWin == null ? "dungeon" : "settle";
 	bump();
 	return true;
 }
@@ -500,6 +510,9 @@ export async function moveTo(index: number) {
 	const run = view.ctrl.data.run;
 	const node = view.layout.nodes.find(n => n.index === index);
 	if (!node) return;
+	// 脚下是没铲开的障碍：这条路整个堵死，只能重新尝试铲除或撤退
+	const here = view.layout.nodes.find(n => n.index === view.cur);
+	if (here && isBlockedObstacle(here)) return;
 
 	// 每经过一个节点 = 1 行动：驱动粮草经济（进食/缺粮惩罚在 campaign.advanceAction）
 	const econ = view.ctrl.advanceAction();
@@ -536,8 +549,8 @@ export async function moveTo(index: number) {
 		} finally {
 			view.battling = false;
 		}
-		// 战斗结束：先弹简报（#5），玩家确认后再落库结算，不即时推进。
-		view.battleReport = { result: res, preHp, party };
+		// 掉落当场 roll 好随简报一起展示；玩家确认简报时才并入 run.loot。
+		view.battleReport = { result: res, preHp, party, loot: rollBattleRewards(res.win, view.layout.difficulty) };
 		bump();
 		return;
 	}
@@ -549,7 +562,128 @@ export async function moveTo(index: number) {
 		run.hp = { ...view.dungeonHp };
 		persist();
 	}
+	// 障碍/宝箱：走上去就要玩家答复（障碍不铲不开、宝箱可放弃），答复过就不再弹
+	if (isEventNode(node) && !node.cleared && !node.decided) view.nodeDialog = index;
 	bump();
+}
+
+/** 当前脚下节点是否还能再交互（未铲的障碍 / 未开的宝箱）：行动区据此给「交互」入口 */
+export function curInteractable(): boolean {
+	const l = view.layout;
+	if (!l) return false;
+	const here = l.nodes.find(n => n.index === view.cur);
+	if (!here || !isEventNode(here) || here.cleared) return false;
+	// 障碍即使已放弃交互也仍待处理（它就是堵路的那块石头）
+	return here.event === "obstacle" || !here.decided;
+}
+
+/** 重新打开当前节点的交互弹窗 */
+export function reopenNodeDialog() {
+	if (!curInteractable()) return;
+	view.nodeDialog = view.cur;
+	bump();
+}
+
+/** 铲除障碍（不给任何奖励，只开路）：消耗 1 后勤小队，或全员 -1 体力 +12 压力 */
+export function clearObstacle(index: number, mode: "supply" | "force"): { ok: boolean; reason?: string } {
+	if (!view.ctrl) return { ok: false, reason: "无战役" };
+	const r = view.ctrl.clearObstacle(index, mode);
+	if (r.ok) {
+		const run = view.ctrl.data.run;
+		if (run) {
+			view.dungeonHp = { ...run.hp };
+			view.party = run.party.slice();
+			if (!run.party.length) requestSettlement(false); // 开路开到人没了
+		}
+		view.dungeonNotice = r.died?.length ? `💀 铲除障碍时倒下：${r.died.map(opName).join("、")}` : "🪨 障碍已铲除，路通了";
+		view.nodeDialog = null;
+		persist();
+		bump();
+	}
+	return r;
+}
+
+/** 开启宝箱：消耗 1 后勤小队，掉落当场 roll 进暂存战利品 */
+export function openTreasure(index: number): { ok: boolean; reason?: string } {
+	if (!view.ctrl) return { ok: false, reason: "无战役" };
+	const r = view.ctrl.openTreasure(index);
+	if (r.ok) {
+		const list = lootNames(r.loot);
+		view.dungeonNotice = list ? `✨ 开箱收获（结算时入账）：${list}` : "✨ 箱子是空的";
+		view.nodeDialog = null;
+		persist();
+		bump();
+	}
+	return r;
+}
+
+/** 放弃节点交互：不消耗任何东西。宝箱＝直接路过；障碍＝继续堵着（弹窗关掉，人还站在原地） */
+export function dismissNode() {
+	const index = view.nodeDialog;
+	if (index == null || !view.ctrl) return;
+	view.ctrl.dismissNode(index);
+	view.nodeDialog = null;
+	view.dungeonNotice = "🚶 你没有动它";
+	persist();
+	bump();
+}
+
+/** 掉落摘要文案（物品名 + 装备名），供提示条使用 */
+function lootNames(loot?: LootBundle): string {
+	if (!loot) return "";
+	const parts: string[] = [];
+	for (const [id, n] of Object.entries(loot.items)) {
+		if (n > 0) parts.push(`${getItem(id as ItemId)?.name ?? id}×${n}`);
+	}
+	for (const q of loot.equips) parts.push(getEquipment(q)?.name ?? q);
+	if (loot.originite > 0) parts.push(`源石碇 ${loot.originite}`);
+	return parts.join("、");
+}
+
+/**
+ * 请求结束本次远征（只打标记 + 进结算页，真正入账/丢弃等结算页确认）。
+ * 撤退走 win=false（讨伐失败口径），完成走 win=true。
+ */
+export function requestSettlement(win: boolean) {
+	if (!view.ctrl?.data.run) return;
+	view.ctrl.requestSettlement(win);
+	view.nodeDialog = null;
+	view.battleReport = null;
+	view.phase = "settle";
+	persist();
+	bump();
+}
+
+/** 撤退：按讨伐失败结算（UI 需先做二次确认） */
+export const retreat = () => requestSettlement(false);
+
+/** 完成讨伐：仅在主将已被击败后可用 */
+export function canComplete(): boolean {
+	const l = view.layout;
+	if (!l) return false;
+	const boss = l.nodes.find(n => n.event === "boss");
+	return !!boss?.cleared;
+}
+
+export const completeDungeon = () => requestSettlement(true);
+
+/** 结算页确认：此刻才落库（战利品入账/丢弃 + 消耗品回收 + 任务结算 + 清进行态） */
+export function confirmSettlement() {
+	const ctrl = view.ctrl;
+	if (!ctrl?.data.run) {
+		view.phase = "camp";
+		goCamp();
+		return;
+	}
+	const s = ctrl.finishRun();
+	console.log("[GloriousIdeal] 远征结算", s);
+	view.layout = null;
+	view.dungeonHp = {};
+	view.dungeonNotice = "";
+	view.nodeDialog = null;
+	view.party = [];
+	persist();
+	goCamp();
 }
 
 /** 主动投喂：消耗 1 粮草给 1 名在场干员 +1 体力（受行动冷却限制） */
@@ -572,42 +706,26 @@ export const clearDungeonNotice = () => {
 
 /**
  * 确认战斗简报：此刻才把结果落库、推进副本。
- * 胜利 → 节点通过并把当前节点设为该战斗节点（#4）；失败 → 清进行态回营地（applyBattleResult 内已进第二天）。
+ * 胜利 → 节点通过并把当前节点设为该战斗节点（#4）；
+ * 失败 / 小队打光 → 进结算页（撤退同一路径），由玩家在结算页确认后统一落库。
  */
 export function confirmBattleReport() {
 	const rep = view.battleReport;
 	if (!rep || !view.ctrl) return;
 	view.battleReport = null;
 	const { result } = rep;
-	view.ctrl.applyBattleResult(result.win, result.finalHp, result.nodeIndex, result.deaths, result.kills);
+	const out = view.ctrl.applyBattleResult(result.win, result.finalHp, result.nodeIndex, result.deaths, result.kills, rep.loot);
 	persist();
-
-	if (!result.win) {
-		view.layout = null;
-		view.dungeonHp = {};
-		goCamp();
-		return;
-	}
 
 	const run = view.ctrl.data.run;
-	if (run) {
-		view.party = run.party.slice();
-		view.dungeonHp = { ...run.hp };
-		run.cur = result.nodeIndex;
+	if (!run) return;
+	view.party = run.party.slice();
+	view.dungeonHp = { ...run.hp };
+	if (out.ended) {
+		requestSettlement(false); // 讨伐失败：走结算页（按失败口径）
+		return;
 	}
+	run.cur = result.nodeIndex;
 	view.cur = result.nodeIndex;
 	bump();
-}
-
-/** 结束探索：任务结算占位 → 回到营地（已推进到第二天） */
-export function endDungeon() {
-	if (!view.ctrl) return;
-	// TODO: 按 绘图/清扫/击败boss 判定；成功加副本经验
-	view.ctrl.settleMission(Math.random() > 0.4);
-	view.ctrl.clearRun(); // 撤离：清空进行态
-	view.layout = null;
-	view.dungeonHp = {};
-	view.dungeonNotice = "";
-	persist();
-	goCamp();
 }

@@ -293,7 +293,6 @@ skill({
 								player.addTempSkill("yxliumingmrfz_ban", { global: "phaseEnd" });
 							}
 						}
-						("step 1");
 						const cardx = player.getExpansions("yxliumingmrfz")[0];
 						if (get.suit(cardx) == get.suit(trigger.card)) {
 							player.gain(cardx, "gain2");

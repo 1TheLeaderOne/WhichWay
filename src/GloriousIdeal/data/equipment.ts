@@ -9,7 +9,7 @@
  *  - 提供注册表：registerEquipment()/getEquipment()/allEquipment()，商店库存与装备 UI 都查这里。
  */
 
-export type EquipRarity = "common" | "rare" | "epic";
+export type EquipRarity = "common" | "rare" | "epic" | "legendary";
 
 /** 装备属性加成（可序列化；Phase C 负责在战斗开局施加） */
 export interface EquipStat {
@@ -46,9 +46,9 @@ export interface EquipmentDef {
 	effect?: (event: any, player: GameStatusPlayer) => void;
 }
 
-/** 稀有度展示名 / 顺序（数值大=稀有） */
-export const RARITY_LABEL: Record<EquipRarity, string> = { common: "普通", rare: "稀有", epic: "史诗" };
-export const RARITY_ORDER: Record<EquipRarity, number> = { common: 0, rare: 1, epic: 2 };
+/** 稀有度展示名 / 顺序（数值大=稀有）。四档口径（用户 2026-10-02）：普通/罕见/史诗/传奇 */
+export const RARITY_LABEL: Record<EquipRarity, string> = { common: "普通", rare: "罕见", epic: "史诗", legendary: "传奇" };
+export const RARITY_ORDER: Record<EquipRarity, number> = { common: 0, rare: 1, epic: 2, legendary: 3 };
 
 // ---------------- 注册表 ----------------
 
@@ -62,6 +62,8 @@ export function registerEquipment(def: EquipmentDef): EquipmentDef {
 
 export const getEquipment = (id: string): EquipmentDef | undefined => REGISTRY.get(id);
 export const allEquipment = (): EquipmentDef[] => [...REGISTRY.values()];
+/** 某一品质档的全部装备（掉落抽品级后用；空档会让该权重落空，调用方需兜底降级） */
+export const equipsOfRarity = (rarity: EquipRarity): EquipmentDef[] => allEquipment().filter(e => e.rarity === rarity);
 
 // ---------------- 初始装备表（占位数值，待平衡） ----------------
 
@@ -80,6 +82,10 @@ const EQUIPMENTS: EquipmentDef[] = [
 	{ id: "eq_ace", name: "王牌瞄准镜", rarity: "epic", price: 90, stat: { attackExtra: 2 }, desc: "出牌阶段【杀】次数 +2" },
 	{ id: "eq_aegis", name: "埃癸斯装甲", rarity: "epic", price: 100, stat: { maxHp: 2, hujia: 2 }, desc: "体力上限 +2，开局护甲 +2" },
 	{ id: "eq_crown", name: "王冠残片", rarity: "epic", price: 110, stat: { maxHandcard: 2, stressReduce: 0.2 }, desc: "手牌上限 +2，压力减免 20%" },
+	// 传奇（Phase D 新增第四档；仅供主力难度 10% 传奇权重抽取，数值待平衡）
+	{ id: "eq_calamity", name: "天灾核心", rarity: "legendary", price: 180, stat: { attackExtra: 2, drawStart: 2 }, desc: "【杀】次数 +2，开局额外摸 2 张" },
+	{ id: "eq_monument", name: "卡兹戴尔纪念碑", rarity: "legendary", price: 200, stat: { maxHp: 2, hujia: 3, stressReduce: 0.2 }, desc: "体力上限 +2，开局护甲 +3，压力减免 20%" },
+	{ id: "eq_starsteel", name: "星钢法典", rarity: "legendary", price: 190, stat: { maxHandcard: 3, drawStart: 1 }, desc: "手牌上限 +3，开局额外摸 1 张" },
 ];
 
 for (const def of EQUIPMENTS) registerEquipment(def);

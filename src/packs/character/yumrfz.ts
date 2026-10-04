@@ -147,7 +147,7 @@ skill({
 						return cardx;
 					});
 					await player.directgains(cardsx, null, "zhonglemrfz_tag");
-					const { result } = await player.chooseCardTarget({
+					const result  = await player.chooseCardTarget({
 						prompt: "是否要发动【众乐】？",
 						prompt2: "你可以将你判定区内任意牌当作至多指定相同目标数的【五谷丰登】使用",
 						filterCard(card) {
@@ -162,7 +162,7 @@ skill({
 							return ui.selected.targets.length === ui.selected.cards.length;
 						},
 						position: "s",
-					});
+					}).forResult();
 					var cards2 = player.getCards("s", card => card.hasGaintag("zhonglemrfz_tag"));
 					if (player.isOnline2()) {
 						player.send(

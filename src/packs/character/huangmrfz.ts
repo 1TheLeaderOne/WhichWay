@@ -28,7 +28,7 @@ skill({
 					}, player);
 					player
 						.when({ player: "phaseEnd" })
-						.then(() => {
+						.then(async (event, trigger, player) => {
 							player.removeMark("newyanxunmrfz", player.countMark("newyanxunmrfz"), false);
 							game.broadcastAll(player => {
 								delete player.storage.newyanxunmrfz_addTempSkill;

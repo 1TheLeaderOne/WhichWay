@@ -26,7 +26,7 @@ skill({
 						console.log(event);
 						return !(event.name.endsWith("_cost") && event.result?.bool === true);
 					})
-					.then(() => {})
+					.then(async () => {})
 					.assign({
 						ai: {
 							viewHandcard: true,

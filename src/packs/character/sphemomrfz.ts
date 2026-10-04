@@ -188,6 +188,94 @@ skill({
 				}
 			},
 		},
+	"renbenmrfz2": {
+			mark: true,
+			intro: {
+				content: "接受《特里蒙科学伦理宣言》"
+			},
+			audio: "renbenmrfz",
+			enable: "phaseUse",
+			filterCard: function (card, player) {
+				return card.name == player.storage.renbenmrfz;
+			},
+			discard: false,
+			lose: false,
+			filter: function (event, player) {
+				return player.hasCard(function (card) {
+					return card.name == player.storage.renbenmrfz;
+				}, "h");
+			},
+			filterTarget: function (card, player, target) {
+				return target != player && target.hasSkill("renbenmrfz");
+			},
+			async content(event, trigger, player) {
+				await player.draw();
+				player.give(event.cards, event.target);
+			},
+			group: "renbenmrfz2_lose",
+			subSkill: {
+				lose: {
+					charlotte: true,
+					silent: true,
+					firstDo: true,
+					priority: 50,
+					trigger: { global: "die" },
+					filter: function (event, player) {
+						return event.player.hasSkill("renbenmrfz");
+					},
+					async content(event, trigger, player) {
+						player.removeSkill("renbenmrfz2");
+					}
+				}
+			},
+			ai: {
+				order: 13,
+				result: {
+					player: function (player, target) {
+						if (get.attitude(player, target) > 0) return 1;
+						return -1;
+					}
+				}
+			}
+		},
+	"renbenmrfz3": {
+			mark: true,
+			markimage: "extension/WhichWay/image/skill/rejecthmmrfz.png",
+			intro: {
+				content: function (event, player) {
+					return "不接受《特里蒙科学伦理宣言》</br>当前攻击距离为" + player.getAttackRange(false);
+				}
+			},
+			mod: {
+				attackRange: function (player, num) {
+					let atk = 0;
+					for (let i = 0; i < game.players.length; i++) {
+						if (game.players[i] == player) continue;
+						if (game.players[i].hasSkill("renbenmrfz2")) atk++;
+					}
+					return num - Math.max(2, atk);
+				}
+			}
+		},
+	"dizhumrfzx": {
+			mark: true,
+			markimage: "extension/WhichWay/image/skill/yedengmrfz.png",
+			intro: {
+				content: function (event, player) {
+					return "受到的伤害-1，若为致命伤害，则防止之";
+				}
+			},
+			audio: 2,
+			forced: true,
+			trigger: { player: "damageBegin3" },
+			async content(event, trigger, player) {
+				if (trigger.num < player.hp) trigger.num--;
+				else trigger.num = 0;
+				player.removeMark("dizhumrfz");
+				player.removeSkill("dizhumrfzx");
+				player.logSkill("dizhumrfz");
+			}
+		},
 });
 
 translate({
@@ -197,6 +285,9 @@ translate({
 	"renbenmrfz_info": "锁定技，每轮开始时，每名角色各声明一张基本牌或普通锦囊牌，全部角色声明完毕后，你选择一张被声明最多或之一的牌，然后其他角色依次选择本轮内其是否不可弃置且不可使用或打出与声明的牌牌名相同的牌，选择‘是’的角色出牌阶段可以交给你与被声明的牌牌名相同的牌并摸一张牌，选择‘否’的角色本轮的攻击范围-X（X=本次选择‘是’的角色的数量）；你手牌中的与本次被声明的牌牌名相同的牌不计入手牌上限、不可弃置且不可使用或打出。",
 	"dizhumrfz": "砥柱",
 	"dizhumrfz_info": "出牌阶段开始时，你可以选择至多两名角色，然后其获得一个“夜灯”标记直到你的下个回合开始；锁定技，拥有“夜灯”标记的角色受到伤害时，此伤害-1，若此伤害数不小于其体力值，则改为防止此次伤害，然后移除‘夜灯’标记。",
+	"renbenmrfz2": "人本",
+	"renbenmrfz3": "人本",
+	"dizhumrfzx": "夜灯",
 });
 
 characterTitle("sphemomrfz", "<font color=#4EEE94>伦理坚守者</font>");

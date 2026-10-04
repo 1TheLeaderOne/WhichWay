@@ -11,16 +11,25 @@
  */
 
 import { BUILDINGS, BuildingId, buildingDailyEffect } from "../data/buildings.js";
-import { UNITY, UNITY_EVENTS, UNITY_TIERS, MAX_DAY, STRESS, PROVISION } from "../data/resources.js";
+import { UNITY, UNITY_EVENTS, UNITY_TIERS, MAX_DAY, STRESS, PROVISION, OBSTACLE, TREASURE } from "../data/resources.js";
 import { OPERATOR_LEVELS, AGONY, BARRACKS_CAPACITY, rollAgonyOutcome, KILL_STRESS_RELIEF, VirtueId } from "../data/operators.js";
 import { ITEMS, ItemId, INVENTORY_SLOTS_BASE } from "../data/items.js";
 import { getEquipment, type EquipStat } from "../data/equipment.js";
 import { CONSUMABLE_PRICES, rollMerchantStock, merchantDiscount, merchantDailyRefresh, discountedPrice } from "../data/shop.js";
-import { DUNGEONS, DUNGEON_EXP_CAP, Difficulty } from "../data/dungeons.js";
-import { ACTION_TO_RATION, type DungeonLayout } from "../dungeon.js";
+import { DUNGEONS, DIFFICULTY, DUNGEON_EXP_CAP, Difficulty, getDungeon } from "../data/dungeons.js";
+import { CONSUMABLE_RECYCLE_PRICE, emptyLoot, lootIsEmpty, mergeLoot, resetEquipDropChance, rollBattleRewards, rollTreasureLoot, type LootBundle } from "../data/loot.js";
+import { ACTION_TO_RATION, type DungeonLayout, type DungeonNode } from "../dungeon.js";
 
 /** 存档 localStorage key（战役数据整体 JSON 存一份，不依赖引擎按模式隔离的 lib.storage） */
 export const SAVE_KEY = "gloriousIdeal_campaign_v1";
+
+/** 进副本时的干员状态快照：结算页用它展示「压力 / 经验 / 体力」的前后变化 */
+export interface RunOpSnapshot {
+	level: number;
+	exp: number;
+	stress: number;
+	hp: number;
+}
 
 /**
  * 副本进行态：需要在「真实对局」离栈（game.switchMode → identity → 结算返回）后仍能恢复，
@@ -44,6 +53,27 @@ export interface DungeonRun {
 	feedReadyAt: number;
 	/** 刚结束一场战斗、待结算返回的节点 index（null=无待处理战斗） */
 	pendingBattle: number | null;
+	/** 本次远征暂存的战利品：节点/战斗当场 roll 进来，撤退或完成时才入账 */
+	loot: LootBundle;
+	/** 进副本时的消耗品持有量快照：结算时其中「仍带在身上」的部分按回收价折算 */
+	startConsumables: Record<string, number>;
+	/** 进副本时的干员状态快照（id→快照），供结算页对比 */
+	snapshot: Record<string, RunOpSnapshot>;
+	/** 待结算：null=仍在探索；true/false=已判胜/判负，等玩家在结算页确认 */
+	settleWin: boolean | null;
+}
+
+/** 一次远征结算的结果摘要（供结算页/提示展示） */
+export interface RunSettlement {
+	win: boolean;
+	/** 是否把收获带回了营地（全员阵亡=false → 整包丢弃） */
+	carried: boolean;
+	/** 实际入账的战利品 */
+	gained: LootBundle;
+	/** 因背包满/全员阵亡而未能入账的条目 */
+	lost: LootBundle;
+	/** 按回收价折算的消耗品：件数与源石碇 */
+	recycled: { count: number; originite: number };
 }
 
 /** 死因分类：战斗中被杀 / 意外（无明确来源）/ 压力爆炸 */
@@ -188,6 +218,14 @@ function normalizeCampaign(data: CampaignData): CampaignData {
 		if (typeof d.run.actions !== "number") d.run.actions = 0;
 		if (typeof d.run.feedReadyAt !== "number") d.run.feedReadyAt = 0;
 		if (!d.run.maxHp || typeof d.run.maxHp !== "object") d.run.maxHp = { ...d.run.hp };
+		// Phase D：战利品暂存 / 出发前消耗品快照 / 状态快照 / 待结算标记
+		if (!d.run.loot || typeof d.run.loot !== "object") d.run.loot = emptyLoot();
+		if (!d.run.loot.items || typeof d.run.loot.items !== "object") d.run.loot.items = {};
+		if (!Array.isArray(d.run.loot.equips)) d.run.loot.equips = [];
+		if (typeof d.run.loot.originite !== "number") d.run.loot.originite = 0;
+		if (!d.run.startConsumables || typeof d.run.startConsumables !== "object") d.run.startConsumables = {};
+		if (!d.run.snapshot || typeof d.run.snapshot !== "object") d.run.snapshot = {};
+		if (d.run.settleWin !== true && d.run.settleWin !== false) d.run.settleWin = null;
 	}
 	delete d.backpackBonus;
 	return d;
@@ -396,6 +434,18 @@ export class CampaignController {
 
 	/** 进入副本：把进行态挂到存档（跨真实对局持久化），返回该 run 供 UI 使用 */
 	beginRun(layout: DungeonLayout, party: string[], hp: Record<string, number>, maxHp?: Record<string, number>): DungeonRun {
+		// 装备掉率增量按「每局战役的设计加成」维护，新开一次远征即复位到基础值，避免跨局残留
+		resetEquipDropChance();
+		const snapshot: Record<string, RunOpSnapshot> = {};
+		for (const id of party) {
+			const op = this.roster(id);
+			if (op) snapshot[id] = { level: op.level, exp: op.exp, stress: op.stress, hp: hp[id] ?? 0 };
+		}
+		const startConsumables: Record<string, number> = {};
+		for (const c of CONSUMABLE_PRICES) {
+			const n = this.data.inventory[c.id] ?? 0;
+			if (n > 0) startConsumables[c.id] = n;
+		}
 		const run: DungeonRun = {
 			dungeonId: layout.dungeonId,
 			difficulty: layout.difficulty,
@@ -407,6 +457,10 @@ export class CampaignController {
 			actions: 0,
 			feedReadyAt: 0,
 			pendingBattle: null,
+			loot: emptyLoot(),
+			startConsumables,
+			snapshot,
+			settleWin: null,
 		};
 		this.data.run = run;
 		this.data.phase = "dungeon";
@@ -417,6 +471,19 @@ export class CampaignController {
 	clearRun() {
 		this.data.run = null;
 		this.data.phase = "camp";
+	}
+
+	/** 本次远征是否已结束（胜/负已判定，等结算页确认） */
+	pendingSettlement(): boolean {
+		return this.data.run?.settleWin != null;
+	}
+
+	/**
+	 * 结束本次远征的判定入口：只打标记、不改数据，真正入账/丢弃由结算页确认后调 finishRun。
+	 * 战斗失败与主动撤退都走 win=false（撤退按讨伐失败算，用户口径）。
+	 */
+	requestSettlement(win: boolean) {
+		if (this.data.run) this.data.run.settleWin = win;
 	}
 
 	/**
@@ -475,6 +542,183 @@ export class CampaignController {
 		return { ok: true };
 	}
 
+	// ---------- 节点事件（障碍 / 宝箱）：当场 roll 进 run.loot，结算页确认后才入账 ----------
+
+	/** 把一次掉落并入本次远征的暂存战利品（撤退/完成时才入背包与仓库） */
+	addLoot(loot: LootBundle) {
+		const run = this.data.run;
+		if (!run || lootIsEmpty(loot)) return;
+		mergeLoot(run.loot, loot);
+	}
+
+	/** 当前所在节点 */
+	curNode(): DungeonNode | undefined {
+		const run = this.data.run;
+		return run?.layout.nodes.find(n => n.index === run.cur);
+	}
+
+	private node(index: number): DungeonNode | undefined {
+		return this.data.run?.layout.nodes.find(n => n.index === index);
+	}
+
+	/**
+	 * 铲除障碍：不给任何东西，只是把路打开（用户口径）。
+	 *  - `supply`：消耗 1 个后勤小队；
+	 *  - `force` ：在场每名干员失去 1 点体力并 +12 压力（体力归零即阵亡离队）。
+	 * 放弃交互不走这里——那样节点保持 cleared=false，依旧不可通行。
+	 */
+	clearObstacle(index: number, mode: "supply" | "force"): { ok: boolean; reason?: string; died?: string[] } {
+		const run = this.data.run;
+		const node = this.node(index);
+		if (!run || !node) return { ok: false, reason: "不在副本中" };
+		if (node.event !== "obstacle") return { ok: false, reason: "这里没有障碍" };
+		if (node.cleared) return { ok: false, reason: "障碍已经清开了" };
+		const died: string[] = [];
+		if (mode === "supply") {
+			if (!this.consumeItem("supply", OBSTACLE.supplyCost)) return { ok: false, reason: `后勤小队不足（需要 ${OBSTACLE.supplyCost} 个）` };
+		} else {
+			if (!run.party.length) return { ok: false, reason: "没有干员能干活" };
+			for (const id of [...run.party]) {
+				run.hp[id] = (run.hp[id] ?? 0) - OBSTACLE.hpLoss;
+				this.changeStress(id, OBSTACLE.stress);
+				if ((run.hp[id] ?? 0) <= 0) {
+					this.markOperatorDead(id); // 无致死来源 → 按意外死亡归档
+					run.party.remove(id);
+					died.push(id);
+				}
+			}
+		}
+		node.cleared = true;
+		node.explored = true;
+		return { ok: true, died };
+	}
+
+	/**
+	 * 开宝箱：消耗 1 个后勤小队，掉落当场 roll 进暂存战利品（不进背包）。
+	 * 不想花小队的玩家走 dismissNode()——不消耗、无奖励，但节点照常通过。
+	 */
+	openTreasure(index: number): { ok: boolean; reason?: string; loot?: LootBundle } {
+		const run = this.data.run;
+		const node = this.node(index);
+		if (!run || !node) return { ok: false, reason: "不在副本中" };
+		if (node.event !== "treasure") return { ok: false, reason: "这里没有宝箱" };
+		if (node.cleared) return { ok: false, reason: "箱子已经开过了" };
+		if (!this.consumeItem("supply", TREASURE.supplyCost)) return { ok: false, reason: `后勤小队不足（需要 ${TREASURE.supplyCost} 个）` };
+		const loot = rollTreasureLoot(run.difficulty);
+		node.cleared = true;
+		node.explored = true;
+		node.decided = true;
+		this.addLoot(loot);
+		return { ok: true, loot };
+	}
+
+	/** 放弃本次节点交互：不消耗任何东西；宝箱视作路过，障碍则继续堵着 */
+	dismissNode(index: number) {
+		const node = this.node(index);
+		if (!node) return;
+		node.decided = true;
+		node.explored = true;
+	}
+
+	/** 战利品入背包：受堆叠上限与新占格限制，返回实际入账数量（差额即为丢弃量） */
+	addLootItem(id: ItemId, count: number): number {
+		const def = ITEMS.find(i => i.id === id);
+		if (!def || count <= 0) return 0;
+		const have = this.data.inventory[id] ?? 0;
+		if (have === 0 && this.freeBackpackSlots() <= 0) return 0; // 新类型挤不出格子 → 整份丢弃
+		const n = Math.min(count, def.maxStack - have);
+		if (n > 0) this.data.inventory[id] = have + n;
+		return Math.max(0, n);
+	}
+
+	/**
+	 * 结算页预览（纯读、不改状态）：本次远征能带回什么、消耗品能回收多少源石碇。
+	 * 与 finishRun 的口径保持一致：回收量按「战利品入账后」的持有权重算，避免预览与实际不符。
+	 */
+	settlePreview(): { carried: boolean; loot: LootBundle; recycle: Array<{ id: ItemId; name: string; count: number }>; recycled: number; refund: number } {
+		const run = this.data.run;
+		const loot = run?.loot ?? emptyLoot();
+		const carried = (run?.party.length ?? 0) > 0;
+		const recycle: Array<{ id: ItemId; name: string; count: number }> = [];
+		let recycled = 0;
+		if (run && carried) {
+			for (const [id, start] of Object.entries(run.startConsumables)) {
+				const projected = (this.data.inventory[id] ?? 0) + (loot.items[id] ?? 0);
+				const n = Math.min(start, projected);
+				if (n <= 0) continue;
+				const def = ITEMS.find(i => i.id === id);
+				recycle.push({ id: id as ItemId, name: def?.name ?? id, count: n });
+				recycled += n;
+			}
+		}
+		return { carried, loot, recycle, recycled, refund: recycled * CONSUMABLE_RECYCLE_PRICE };
+	}
+
+	/**
+	 * 结束远征并落库（结算页确认后调用）：
+	 *  - 有存活随队干员 → 战利品入账（消耗品/兑换物进背包、装备进全局仓库、局内源石碇按 1:1 变现），
+	 *    出发前购买的消耗品按 CONSUMABLE_RECYCLE_PRICE 逐个回收；
+	 *  - 全员阵亡 → 战利品与随身消耗品全部丢弃（暗黑地牢口径）。
+	 * 随后走 settleMission（团结度 / 兑换物自动兑换 / 进入第二天）并清空进行态。
+	 */
+	finishRun(): RunSettlement {
+		const run = this.data.run;
+		const win = run?.settleWin === true;
+		if (!run) return { win, carried: false, gained: emptyLoot(), lost: emptyLoot(), recycled: { count: 0, originite: 0 } };
+		const carried = run.party.length > 0;
+		const gained = emptyLoot();
+		const lost = emptyLoot();
+		const recycled = { count: 0, originite: 0 };
+
+		if (carried) {
+			for (const [id, n] of Object.entries(run.loot.items)) {
+				if (n <= 0) continue;
+				if (id === "originite") {
+					// 局内货币没有「带回家继续用」的用途：带回即 1:1 变现为局外源石碇，也不占背包格
+					this.data.originite += n;
+					gained.items[id] = n;
+					continue;
+				}
+				const got = this.addLootItem(id as ItemId, n);
+				if (got > 0) gained.items[id] = got;
+				if (got < n) lost.items[id] = (lost.items[id] ?? 0) + (n - got);
+			}
+			gained.equips.push(...run.loot.equips);
+			this.data.ownedEquips.push(...run.loot.equips);
+			if (run.loot.originite > 0) {
+				this.data.originite += run.loot.originite;
+				gained.originite = run.loot.originite;
+			}
+			for (const [id, start] of Object.entries(run.startConsumables)) {
+				const have = this.data.inventory[id] ?? 0;
+				const n = Math.min(start, have);
+				if (n <= 0) continue;
+				const left = have - n;
+				if (left > 0) this.data.inventory[id] = left;
+				else delete this.data.inventory[id];
+				recycled.count += n;
+				recycled.originite += n * CONSUMABLE_RECYCLE_PRICE;
+			}
+			this.data.originite += recycled.originite;
+		} else {
+			mergeLoot(lost, run.loot); // 全员阵亡：一整趟的收获留在地里
+			for (const id of Object.keys(run.startConsumables)) delete this.data.inventory[id];
+		}
+
+		if (win) {
+			this.addDungeonExp(run.dungeonId, DIFFICULTY[run.difficulty].gainExp);
+			const boss = run.layout.nodes.find(n => n.event === "boss");
+			if (boss?.cleared) {
+				const p = this.data.dungeonProgress[run.dungeonId];
+				if (p && !p.bossSlain.includes(run.difficulty)) p.bossSlain.push(run.difficulty);
+				if (getDungeon(run.dungeonId)?.isSpecial) this.winGame(); // 特殊副本：通关即整局胜利
+			}
+		}
+		this.settleMission(win);
+		this.clearRun();
+		return { win, carried, gained, lost, recycled };
+	}
+
 	/**
 	 * 应用一场真实对局的结果（战斗系统回调入口）。
 	 * @param win       是否击杀了全部敌方（判定通过）
@@ -486,11 +730,12 @@ export class CampaignController {
 	 * 规则：血量在本副本内跨节点不重置（写入 run.hp）；我方阵亡者移出小队并进墓地
 	 * （markOperatorDead，墓地成员不再进招募候选）；胜利=节点通过，失败=不通过并进入第二天。
 	 * 结算：1 级效果——每名干员按击杀数减压（击杀 ×3，胜败都算）；胜利——全体存活随队干员 +2 经验。
+	 * @param loot 本场战斗的掉落（简报页已 roll 过就传进来，保证展示与入账一致；缺省则此处现 roll）
 	 */
-	applyBattleResult(win: boolean, finalHp: Record<string, number>, nodeIndex: number, deaths?: Record<string, { id: string | null; faction: KillerFaction | null } | undefined>, kills?: Record<string, number>): { win: boolean; deaths: string[] } {
+	applyBattleResult(win: boolean, finalHp: Record<string, number>, nodeIndex: number, deaths?: Record<string, { id: string | null; faction: KillerFaction | null } | undefined>, kills?: Record<string, number>, loot?: LootBundle): { win: boolean; deaths: string[]; ended: boolean } {
 		const run = this.data.run;
 		const dead: string[] = [];
-		if (!run) return { win, deaths: dead };
+		if (!run) return { win, deaths: dead, ended: false };
 
 		// 记录我方最终体力（仅仍在队的干员；本副本内持久，不重置）
 		for (const id of run.party) {
@@ -527,15 +772,16 @@ export class CampaignController {
 			run.pendingBattle = null;
 			this.data.missionResult.win++;
 			this.applyUnityEvent("missionSuccess");
+			// 当场 roll 战利品：只暂存进 run.loot，撤退/完成时才入账（用户口径）
+			this.addLoot(loot ?? rollBattleRewards(true, run.difficulty));
 		} else {
-			// 未通过：本次远征失败，直接进入第二天
+			// 未通过：本次讨伐判负，但结算要等玩家在结算页确认后才落库
 			run.pendingBattle = null;
-			this.clearRun();
-			this.data.missionResult.fail++;
-			this.applyUnityEvent("missionFail");
-			this.advanceDay();
+			this.requestSettlement(false);
 		}
-		return { win, deaths: dead };
+		// 小队打光：没有存活者就没人把物资带回营地，远征就此结束（按失败结算）
+		if (!run.party.length) this.requestSettlement(false);
+		return { win, deaths: dead, ended: run.settleWin != null };
 	}
 
 	// ---------- 背包 ----------
@@ -703,8 +949,8 @@ export class CampaignController {
 
 	/**
 	 * 进入下一天：每日结算 + 一天结束。
-	 * TODO 与战斗阶段的关系：战斗结束（无论成败）进入第二天；
-	 *      撤退全员阵亡则不带回物资（回营地时丢弃，规则实现点）
+	 * 由 finishRun（远征结算页确认）与旧的占位路径调用；
+	 * 「全员阵亡不带回物资」的规则在 finishRun 的 carryBack 分支里落地。
 	 */
 	advanceDay() {
 		this.data.day++;
@@ -717,7 +963,10 @@ export class CampaignController {
 		this.checkDayLimit();
 	}
 
-	/** 任务结算（临时占位：真实结果接入战斗后替换） */
+	/**
+	 * 任务结算：团结度增减 + 背包兑换物自动换钱 + 进入第二天。
+	 * win 由 finishRun 给出真实判定（击败 boss 后才允许走完成；撤退一律 false）。
+	 */
 	settleMission(win: boolean) {
 		if (win) {
 			this.applyUnityEvent("missionSuccess");

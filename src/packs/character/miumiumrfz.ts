@@ -144,6 +144,48 @@ skill({
 				},
 			},
 		},
+	"kaiyuanmrfz": {
+			audio: 2,
+			trigger: {
+				global: "roundStart"
+			},
+			firstDo: true,
+			filter: function (event, player) {
+				return game.roundNumber == 1;
+			},
+			direct: true,
+			async content(event, trigger, player) {
+				let result;
+				result = await player.chooseTarget("【开源】:请选择一名角色令其摸两张牌且本局游戏使用【杀】的次数 +1，若该角色是你，你摸一张牌", true).set("ai", target => {
+					return get.attitude(player, target) > 0;
+				}).forResult();
+				if (result.targets) {
+					const target = result.targets[0];
+					await target.draw(2);
+					target.addSkill("kaiyuanmrfz_buff");
+					if (target === player) {
+						await player.draw();
+						player.logSkill("kaiyuanmrfz");
+					} else {
+						player.logSkill("kaiyuanmrfz", target);
+					}
+				}
+			},
+			subSkill: {
+				buff: {
+					mark: true,
+					intro: {
+						content: "使用【杀】的次数+1"
+					},
+					charlotte: true,
+					mod: {
+						cardUsable: function (card, player, num) {
+							if (card.name == "sha") return num + 1;
+						}
+					}
+				}
+			}
+		},
 });
 
 translate({
@@ -154,6 +196,8 @@ translate({
 	"xinjingshuimrfz_info": "当你于出牌阶段第一次使用非延时锦囊牌或基本牌指定唯一目标后，你可以令此牌额外结算X次，然后你移除你所有的“流形”。（X=你拥有的“流形”数）",
 	"shuilingmrfz": "水灵",
 	"shuilingmrfz_info": "锁定技，每回合限一次，若你的手牌不大于你的体力值，你受到的非属性伤害-1。",
+	"kaiyuanmrfz": "源流",
+	"kaiyuanmrfz_info": "锁定技，第一轮游戏开始时，你令一名角色摸两张牌且其本局游戏使用【杀】的次数+1，若该角色为你，你额外摸一张牌。",
 });
 
 characterTitle("miumiumrfz", "<font color=#6575f1>孑然水灵</font>");

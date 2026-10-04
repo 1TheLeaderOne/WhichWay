@@ -191,6 +191,37 @@ skill({
 				},
 			},
 		},
+	"shouwangmrfz2": {
+			mark: true,
+			intro: {
+				content: "文明的消亡"
+			},
+			trigger: { player: "drawAfter" },
+			// @ts-ignore
+			filter: function (event, player) {
+				return event.getParent().name != "shouwangmrfz_draw";
+			},
+			// @ts-ignore
+			prompt: function (event, player) {
+				let target = game.findPlayer(function (current) {
+					return current.hasSkill("shouwangmrfz");
+				});
+				return "是否令" + get.translation(target) + "摸一张牌？";
+			},
+			// @ts-ignore
+			check: function (event, player) {
+				let target = game.findPlayer(function (current) {
+					return current.hasSkill("shouwangmrfz");
+				});
+				return get.attitude(player, target) > 0;
+			},
+			async content(event, trigger, player) {
+				player.logSkill("shouwangmrfz");
+				game.countPlayer(function (current) {
+					if (current.hasSkill("shouwangmrfz")) current.draw();
+				});
+			}
+		},
 });
 
 translate({
@@ -201,6 +232,7 @@ translate({
 	"xijimrfz_info": "①出牌阶段，若你的体力上限不大于5，你可以失去所有体力上限并摸X张牌（X=你的体力上限的一半，向下取整，X∈[1,3]）。②当你死亡时，你可以将你区域内所有的牌交给一名其他角色，你每交给其一张牌，其下个回合使用【杀】的次数和攻击距离便+1。",
 	"jingmomrfz": "静默",
 	"jingmomrfz_info": "锁定技，你的手牌上限视为5；每轮开始时，你失去一点体力上限。",
+	"shouwangmrfz2": "保存",
 });
 
 characterIntro("baocunzhemrfz", "摘自PRTS的梗概</br>‘保存者’，前人类文明休眠计划的人格模拟，也是特雷弗·弗里斯顿。在4,765,403天的时光中践行着前文明的计划守望者庞大的石棺群，但在漫长的等待与空寂中失去了希望，直到克丽斯腾来访后的对谈让他对泰拉重新燃起了信心，决定以石棺中所有人永远沉睡的代价将最后的前文明能源供给为克丽斯腾突破天空屏障的巨炮。知晓凯尔希的本质，通过“辩论”的方式了解了博士与凯尔希的决心，最后请求凯尔希删去他这万年来的记忆，但在最后一刻被误入的霍尔海雅当作“神明”，被其存储记忆的源石技艺抢救下来，在保存了弗里斯顿最基础记忆的情况下被转制成为罗德岛“自研作业平台”Friston-3。");

@@ -40,7 +40,6 @@ skill({
 				if (!player.storage.xuanmumrfz_roundcount) player.storage.xuanmumrfz_roundcount = 0;
 				player.storage.xuanmumrfz_roundcount++;
 				const result = await player.choosePlayerCard(trigger.targets[0], true, "h").forResult();
-				("step 1");
 				if (result.cards) {
 					const card = result.cards[0];
 					//@ts-ignore

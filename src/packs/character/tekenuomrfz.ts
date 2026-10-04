@@ -71,7 +71,7 @@ skill({
 							chars.remove(trigger.player);
 							chars = chars.map(i => i.name);
 							if (chars.every(i => i === "muouwuzhemrfz") || chars.length === 0) {
-								player.when({ global: "dieAfter" }).then(() => {
+								player.when({ global: "dieAfter" }).then(async () => {
 									game.over(true);
 								});
 							}

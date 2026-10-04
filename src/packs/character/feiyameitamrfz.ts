@@ -42,6 +42,9 @@ skill({
 				threaten: 1.2,
 			},
 		},
+	"shunanmrfza": {
+			audio: 2
+		},
 });
 
 translate({
