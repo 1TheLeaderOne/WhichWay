@@ -341,3 +341,14 @@
 - **恢复**：缪尔赛思 `kaiyuanmrfz`（旧版【源流】整段定义 + `kaiyuanmrfz(_info)` 翻译）。该干员现已改用重制的 `yuanliumrfz`，但仍写着 `audio: "kaiyuanmrfz"`（音频文件确为 `kaiyuanmrfz1/2.mp3`）并两处 `logSkill("kaiyuanmrfz")`；旧构建同样保留这份不挂角色的定义，恢复后 `logSkill` 才拿得到“源流”，否则【源流】发动完全不播报。
 - 忠实保留的旧疑点：`renbenmrfz3` 的 `attackRange` 旧构建就写作 `num - Math.max(2, atk)`，与文案“攻击范围-X（X=选‘是’的人数）”不符（最少扣 2），本次只恢复不改数值。
 - 复核：`src` 技能键 1414 → 1441；“被引用但全扩展无定义”的技能 id 从 53 降至 30，剩余为核心跨包引用（`qinggang2` 等在 `apps/core/card`）与上节记录的 11 个确实不存在的 flag 名。
+
+## 2026-10-06
+
+### 麦哲伦【龙腾】AsyncContent 重构（`src/packs/character/maizhelunmrfz.ts`）
+
+- **重构**：麦哲伦【龙腾】`longtengmrfz` 及六个 subSkill 按技能描述重写为 AsyncContent——去掉 `// step N`/`goto` 脚手架和 `event.cards`/`event.cards2` 传值，改用局部 `const`；`_trick` 与 `_equip` 里逐字重复的“额外指定目标”filter/ai 提到文件顶层 `longtengCanAddTarget`/`longtengAddTargetAI`；“哪些牌算弃进了弃牌堆”提到 `getLongtengDiscardedCards`，让 `filter` 与 `content` 共用同一份口径（旧代码 `content` 用了更宽的判断）；`_changeI` 的三行 `if` 改 `longtengMarkImages` 表 + 循环；`_equip` 的 `if/else if` 链改 `switch`。技能 id（`_changeI`/`_basic_1`/`_basic_2`/`_trick`/`_trick2`/`_equip`/`_clear`）、`global`/`group`、提示文案、AI 取值、`audio: 8`/`markimage`/`intro`/`onremove`/`ai.expose` 全部保持；各触发条件集合与旧版等价（仅调整判断顺序：先查失效标记再查牌类型）。
+- **修复**：【龙腾】`content` 首行 `event.cards2 = cards[0];` 写在 `const cards = []` 之前，触发 TDZ `ReferenceError`——即旧版发动【龙腾】直接抛错；该赋值本身也是死代码（全技能无人再读 `event.cards2`），重构后一并消失。
+- **修复**：【龙腾】锦囊分支 `chooseBool(是否令此牌伤害+1)` 选“否”时旧代码仍执行 `trigger.baseDamage++`（原 `step 4` 无条件跑），现只在答“是”时加伤，符合“你可以令此牌造成的伤害+1”。
+- **修复**：`addTempSkill("longtengmrfz_trick2")`（“然后本回合此技能失效”）旧代码只在“牌带伤害标签”分支里登记，无伤害标签的普通锦囊加完目标后本回合还能再发动一次；现改为只要实际加了目标就本回合失效。
+- **修复**：`_clear` 里 `current.getExpansions()` 被调用两次（判断一次、取值一次），改为取一次复用。
+- 校验：`pnpm eslint` 该文件仅剩 `kanchamrfz.check` 里一处历史 `no-var`（【勘查】不在本次范围内，未动）；未打包、未进游戏实测（浏览器 MCP 起不了 dev app），游戏内表现需手动验证。

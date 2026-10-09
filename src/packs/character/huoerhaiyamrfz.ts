@@ -1,6 +1,8 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
 
+const tmpSave = window.whichWaySave.tmpSave
+
 character("huoerhaiyamrfz", { pack: "legendSJZX",
 			sex: "female",
 			hp: 4,
@@ -277,8 +279,8 @@ skill({
 				let list = ["请选择你要交换的数字<br>(选择两个数字即可交换)", "你的额定摸牌数为", [[draw], "tdnodes"], "出牌阶段【杀】的使用次数+", [[sha], "tdnodes"], "你的基础攻击范围为", [[attack], "tdnodes"]];
 				let dialog = ui.create.dialog(...list, "hidden");
 
-				let texts = [],
-					buttons = [];
+				let texts:any[] = [],
+					buttons:any[] = [];
 				let content = dialog.querySelector(".content");
 				let firstSelected;
 				//@ts-ignore
@@ -459,7 +461,7 @@ skill({
 						for (let i = 0; i < packs.length; i++) {
 							list.push([i, getPacksTranslation(packs[i])]);
 						}
-						for (var i = 0; i < Math.ceil(list.length / 4); i++) {
+						for (let i = 0; i < Math.ceil(list.length / 4); i++) {
 							//@ts-ignore
 							buttonList.push([list.slice(count, count + 4 >= list.length ? list.length : count + 4), "tdnodes"]);
 							count += 4;
