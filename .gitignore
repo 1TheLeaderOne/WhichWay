@@ -3,6 +3,9 @@ output
 package-lock.json
 node_modules/
 
+# locally exported release packages (release.bat -> pack-local.bat)
+release/
+
 # IDE
 .idea/
 .vscode/

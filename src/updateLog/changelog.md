@@ -498,6 +498,19 @@
 - 修复：强制回流后取 `node.offsetWidth / node.offsetHeight`（布局像素、不受 transform 影响），显式传给 `domToJpeg({ width, height, ... })`，让画布尺寸与克隆体一致，消除两个方向的空白。
 - 校验：`vue/compiler-sfc` + `pnpm eslint` 通过。**仍未游戏内实测**——请**重新构建**后（上一张仍是 `.png`，说明改动尚未编译进产物）复核：截图应紧贴公告内容、右侧与底部无多余空白。若仍偏大/偏小，多半是 `offsetWidth` 含了滚动条宽，届时改用 `clientWidth` 或再减 `padding`。
 
+## 2026-10-12
+
+### 新增：本地留包 + 一键打包到 scripts（`scripts/release.bat` / `scripts/pack-local.bat`）
+
+需求两条：① `release.bat` 打包完成后在本地留下 output 包与 output-core 包；② 新增 bat 把这两个包（可选 output / output-core / 全部）打包到 `scripts/` 下。
+
+- `scripts/release.bat`：新增 `:export_tree <tree-sha> <target-dir>` 子程序，在 push-only 复读块之后、推送之前把两棵提交树导出到本地目录——`output` 树（`!MERGE!`）→ `release\output`，`output-core` 树（`!CORE!`）→ `release\output-core`。放在推送前且 `call` 不判 errorlevel，故取消推送 / 导出失败都不影响发布主流程，只是本地包缺失时告警。
+  - **为什么走「pushd + ASCII tar」而不是 `git archive <sha> | tar -xf - -C "<dir>"`**：仓库在中文路径 `F:\无名杀\...` 下，把 CJK 路径作为参数传给外部 `tar.exe` 存在代码页乱码风险（这也是本脚本早先刻意用 Node 助手 `make-core-index.cjs` 处理 CJK 路径的同类原因）。改为先 `pushd` 到目标目录（cmd 内建，正确处理 CJK），再 `git archive -o export.tar "<sha>"`（sha 与 export.tar 全 ASCII）→ `tar -xf export.tar` → `del` → `popd`，全程不让 git/tar 收到 CJK 参数。
+  - 顶部说明块与 `[INFO]` 补注：产物落在 gitignore 的 `release\` 目录；`release/` 已加入 `.gitignore`（原 `output` 规则只盖得到 `release/output`，盖不到 `release/output-core`，否则下次 `release.bat` 的「工作区必须干净」预检会被未跟踪文件挡下）。
+- `scripts/pack-local.bat`（新增，ASCII + CRLF，与 release.bat 同规范）：读 `release\output` / `release\output-core`，用 PowerShell `Compress-Archive` 压成 `scripts\WhichWay-<version>.zip` 与 `WhichWay-<version>-core.zip`（`<version>` 取 `git describe` 的 output 分支最新 `v*`，无标签回退 `local`）。参数 `output` | `core` | `all`（默认 `all`）。源目录缺失/空则 `[WARN]` 跳过并提示先跑 `release.bat`。CJK 路径经 `$env:WP_SRC`（进程环境变量，UTF‑16 无损传给子进程）拼 `\*` 交给 Compress-Archive，避开命令行代码页问题；不依赖 `tar`。
+  - 已知：本地 `output` 包内含注入的 `.github/workflows/release.yml`（导出的是打了 tag 的整棵树），比 CI 产物多一份 CI 配置，无害。
+- 校验：脚本纯静态检查——`release.bat` 改后仍 ASCII-only、580 行全 CRLF 无裸 LF；`pack-local.bat` 同样 ASCII+CRLF。**未实跑批处理**（cmd 交互 + 需真实 git 仓库状态），请你择机验证：① `release.bat v1.x.y` 跑完 `release\output`、`release\output-core` 目录确有内容；② `git status` 仍干净（`release/` 被忽略）；③ `pack-local.bat`（及分别传 `output`/`core`）在 `scripts\` 生成对应 zip，解压后为扩展内容根目录。
+
 
 
 

@@ -49,6 +49,9 @@ REM    The remote is therefore probed BEFORE pushing: an identical tag is
 REM    dropped from the ref list, a conflicting tag aborts with instructions.
 REM  - dev is pushed too, because the -dev asset is built from the dev branch.
 REM  - Build output goes to apps/core/extension/WhichWay (overwritten).
+REM  - After building, the output / output-core trees are exported into the
+REM    gitignored release\ folder (release\output, release\output-core) so the
+REM    packages survive locally. Zip them into scripts\ with pack-local.bat.
 REM  - Scratch files (temp index, commit messages, baseline) are written to
 REM    %TEMP%\whichway-release, so a failed run never dirties the repo.
 REM  - Pauses before pushing so you can review.
@@ -60,6 +63,7 @@ set "SCRIPTS=%~dp0"
 for %%I in ("%SCRIPTS%..") do set "REPO=%%~fI"
 for %%I in ("%REPO%\..\..\..") do set "ROOT=%%~fI"
 set "BUILD=%ROOT%\apps\core\extension\WhichWay"
+set "RELDIR=%REPO%\release"
 
 REM ---- scratch files live in %TEMP% so a failed run never dirties the repo ----
 set "TEMPDIR=%TEMP%\whichway-release"
@@ -398,6 +402,12 @@ if defined PUSHONLY (
 		exit /b 1
 	)
 )
+
+REM ---- leave the packages on disk: export the output / output-core trees ----
+echo [INFO] exporting local packages into the release folder...
+call :export_tree "!MERGE!" "!RELDIR!\output"
+call :export_tree "!CORE!" "!RELDIR!\output-core"
+echo.
 set "PUSHREFS=dev dev-output output output-core"
 set "PUSHTAG=%VERSION%"
 
@@ -529,3 +539,42 @@ echo [HINT] Nothing was pushed and nothing else was touched. Once the network is
 echo [HINT] back, finish the release without rebuilding:
 echo [HINT]     scripts\release.bat --push-only %VERSION%
 exit /b 1
+
+REM ============================================================
+REM export_tree <tree-sha> <target-dir>
+REM   Extract a commit's tree into a fresh directory using an ASCII
+REM   tarball, so no CJK path is ever passed to git/tar (the repo lives
+REM   under a Chinese path). Leaves the output / output-core packages on
+REM   disk for pack-local.bat to zip.
+REM ============================================================
+:export_tree
+if "%~1"=="" exit /b 1
+if "%~2"=="" exit /b 1
+if exist "%~2" rd /s /q "%~2" 2>nul
+if not exist "%~2" md "%~2" 2>nul
+pushd "%~2" 2>nul || (
+	echo [WARN] could not enter %~2 - export skipped.
+	exit /b 1
+)
+git archive -o export.tar "%~1"
+if errorlevel 1 (
+	popd
+	echo [WARN] git archive failed for %~1 - export skipped.
+	exit /b 1
+)
+tar -xf export.tar
+if errorlevel 1 (
+	popd
+	echo [WARN] extracting export.tar failed - is tar.exe available?
+	exit /b 1
+)
+del export.tar 2>nul
+popd
+set "EXPORTED="
+for /f "delims=" %%f in ('dir /b "%~2" 2^>nul') do set EXPORTED=1
+if not defined EXPORTED (
+	echo [WARN] %~2 is empty after export.
+	exit /b 1
+)
+echo       exported %~1 -^> %~2
+exit /b 0
