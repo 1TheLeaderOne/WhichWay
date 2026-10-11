@@ -85,6 +85,11 @@ skill({
 				}
 				dialog.addText("充能球区");
 				dialog.addAuto(storage);
+
+                const num = player.storage[`jibaomrfz_hujia`];
+                if(typeof num === "number" && num>0){
+                    dialog.addText(`·临时护甲：${num}`);
+                }
 			},
 		},
 		init(player, skill) {
@@ -112,8 +117,22 @@ skill({
 				}
 			}
 		},
-		group: "jibaomrfz_round",
+		group: ["jibaomrfz_round","jibaomrfz_hujiaCount"],
 		subSkill: {
+            hujiaCount:{
+                silent:true,
+                charlotte:true,
+                trigger:{
+                    player:"damageEnd"
+                },
+                filter(event, player, name, target) {
+                    const num = player.storage[`jibaomrfz_hujia`];
+                    return typeof num === "number" && num>0 && event.hujia;
+                },
+                async content(event,trigger,player){
+                    player.storage[`jibaomrfz_hujia`] -= trigger.hujia;
+                },
+            },
 			round: {
 				audio: "jibaomrfz",
 				forced: true,
@@ -125,21 +144,9 @@ skill({
 				},
 				async content(event, trigger, player) {
 					//删除获得护甲
-					const pre_histories = _status.globalHistory[_status.globalHistory.length - 2];
-					if (pre_histories && player.hujia > 0) {
-						let changeHpEvts = pre_histories.changeHp;
-						changeHpEvts = changeHpEvts.filter(evt => {
-							const evtx = evt.getParent();
-							return evt.player === player && evtx && evtx.name === "damage" && typeof evtx.hujia === "number";
-						});
-						let num = 0;
-						for (let history of changeHpEvts) {
-							num += history.hujia;
-						}
-						let reduce = player.storage[`jibaomrfz_hujia`] - num;
-						if (reduce > 0) {
-							player.changeHujia(-reduce, "lose");
-						}
+					const hujiaCount:number = (player.storage[`jibaomrfz_hujia`] || 0);
+					if (hujiaCount>0 && player.hujia > 0) {
+						player.changeHujia(-hujiaCount, "lose");
 					}
 					player.storage[`jibaomrfz_hujia`] = 0;
 					//被动
