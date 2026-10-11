@@ -96,7 +96,7 @@ skill({
 			if (cards && cards.length) {
 				player.loseToDiscardpile({ cards });
 			}
-            delete player.storage[`jibaomrfz_hujia`];
+			delete player.storage[`jibaomrfz_hujia`];
 		},
 		async content(event, trigger, player) {
 			const cards = trigger.cards;
@@ -127,20 +127,21 @@ skill({
 					//删除获得护甲
 					const pre_histories = _status.globalHistory[_status.globalHistory.length - 2];
 					if (pre_histories && player.hujia > 0) {
-						const histories = pre_histories.changeHp.filter(evt => {
+						let changeHpEvts = pre_histories.changeHp;
+						changeHpEvts = changeHpEvts.filter(evt => {
 							const evtx = evt.getParent();
-							return evt.player && evtx && evtx.name === "damage" && typeof evtx.hujia === "number";
+							return evt.player === player && evtx && evtx.name === "damage" && typeof evtx.hujia === "number";
 						});
 						let num = 0;
-						for (let history of histories) {
+						for (let history of changeHpEvts) {
 							num += history.hujia;
 						}
 						let reduce = player.storage[`jibaomrfz_hujia`] - num;
 						if (reduce > 0) {
-							player.changeHujia(player.storage[`jibaomrfz_hujia`] - num, "lose");
+							player.changeHujia(-reduce, "lose");
 						}
 					}
-                    player.storage[`jibaomrfz_hujia`] = 0;
+					player.storage[`jibaomrfz_hujia`] = 0;
 					//被动
 					for (let card of player.storage.jibaomrfz) {
 						await orb(card, player, "beidong");
