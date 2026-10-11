@@ -1,7 +1,14 @@
 <template>
-	<div class="updateCurrent">
+	<div ref="rootRef" class="updateCurrent">
 		<!-- 版本标题 -->
 		<div class="UpdateCurrentTitle">驶舰之向 v{{ version }}更新内容</div>
+
+		<!-- 操作栏（仅开发者模式显示；截图时通过 filter 排除，不出现在图片里） -->
+		<div v-if="devMode" class="UpdateCurrentActions">
+			<button type="button" class="capture-btn" :disabled="capturing" @click="captureScreenshot">
+				{{ capturing ? "截图中…" : "截图本页" }}
+			</button>
+		</div>
 
 		<div class = "UpdateCurrentOverVersion">最低适配版本: {{ over }}</div>
 
@@ -26,6 +33,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { ui } from "noname";
+import { whichWayUtil } from "../../utill";
 import { whichWayVersion } from "../../version.js";
 import { whichWayUpdateLog } from "../../updateLog/index.js";
 import { whichWayCharacterCard } from "../../characterCard/index.ts";
@@ -102,9 +110,7 @@ const renderGrids = () => {
 // 组件挂载
 onMounted(() => {
 	nextTick(renderGrids);
-});
-
-// 组件卸载时清理
+});// 组件卸载时清理
 onUnmounted(() => {
 	gridRefs.forEach(container => {
 		container.innerHTML = "";
@@ -120,6 +126,69 @@ watch(
 	},
 	{ deep: true }
 );
+
+// ———— 截图导出（modern-screenshot，MIT，仅开发者模式可见）————
+const rootRef = ref(null);
+const capturing = ref(false);
+const devMode = whichWayUtil.isDeveloperMode();
+
+/** 把当前更新公告面板整页导出为 JPEG（含滚动区外的全部内容，操作栏不进图） */
+const captureScreenshot = async () => {
+	const node = rootRef.value;
+	if (!node || capturing.value) return;
+
+	capturing.value = true;
+	//面板本身是 `height:calc(100%-40px)+overflow:auto` 的滚动容器，且引擎全局
+	//`div{position:absolute;transition:all .5s}` 会让尺寸变化带 0.5s 过渡。
+	//截图前关掉过渡、改为静态按内容收缩，并强制回流，否则会把大段空白一起截进去。
+	const prev = {
+		transition: node.style.transition,
+		position: node.style.position,
+		height: node.style.height,
+		maxHeight: node.style.maxHeight,
+		overflow: node.style.overflow,
+	};
+	node.style.transition = "none";
+	node.style.position = "static";
+	node.style.height = "auto";
+	node.style.maxHeight = "none";
+	node.style.overflow = "visible";
+	void node.offsetHeight; //强制回流，让上面的尺寸立即生效
+	//用未缩放的布局尺寸（offsetWidth/offsetHeight）当画布尺寸：
+	//无名杀把整个 UI 用 `body{transform:scale(zoom)}` 缩放适配窗口，
+	//modern-screenshot 默认取 getBoundingClientRect()（缩放后尺寸）建画布，
+	//而克隆体按未缩放布局渲染，zoom>1 时右侧/底部就会多出空白。显式传尺寸可消除。
+	const captureWidth = node.offsetWidth;
+	const captureHeight = node.offsetHeight;
+
+	try {
+		const { domToJpeg } = await import("modern-screenshot");
+		const dataUrl = await domToJpeg(node, {
+			width: captureWidth,
+			height: captureHeight,
+			scale: 1.5,
+			quality: 0.82,
+			backgroundColor: "#1e2733",
+			//排除操作栏（截图按钮自身）
+			filter: el => !(el instanceof HTMLElement && el.classList.contains("UpdateCurrentActions")),
+		});
+
+		const link = document.createElement("a");
+		link.download = `驶舰之向-更新公告-v${version.value}.jpg`;
+		link.href = dataUrl;
+		link.click();
+	} catch (error) {
+		console.error("[UpdateCurrent] 截图失败:", error);
+		alert("截图失败，详见控制台");
+	} finally {
+		node.style.transition = prev.transition;
+		node.style.position = prev.position;
+		node.style.height = prev.height;
+		node.style.maxHeight = prev.maxHeight;
+		node.style.overflow = prev.overflow;
+		capturing.value = false;
+	}
+};
 </script>
 
 <style scoped>
@@ -317,6 +386,39 @@ watch(
 }
 .md-body :deep(strong) {
 	color: #ffd7a1;
+}
+
+/* ---------- 操作栏 / 截图按钮 ---------- */
+/* `.UpdateCurrentActions` 是 div，必须显式 position，否则被引擎全局
+   `div{position:absolute}` 命中而脱离文档流（与扩展介绍页同样的坑） */
+.UpdateCurrentActions {
+	position: relative;
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	margin-bottom: 16px;
+}
+
+.capture-btn {
+	position: relative;
+	padding: 6px 16px;
+	font-size: 14px;
+	color: #cfe0ff;
+	background: rgba(74, 144, 226, 0.18);
+	border: 1px solid rgba(74, 144, 226, 0.55);
+	border-radius: 8px;
+	cursor: pointer;
+	transition: background 0.15s, box-shadow 0.15s;
+}
+
+.capture-btn:hover:not(:disabled) {
+	background: rgba(74, 144, 226, 0.32);
+	box-shadow: 0 0 10px rgba(74, 144, 226, 0.4);
+}
+
+.capture-btn:disabled {
+	opacity: 0.6;
+	cursor: default;
 }
 
 /* 滚动条样式 */

@@ -9,6 +9,7 @@
 	},
 	"dependencies": {
 		"interactjs": "^1.10.28",
+		"modern-screenshot": "^4.7.0",
 		"noname": "workspace:*",
 		"vue": "^3.5.28"
 	},

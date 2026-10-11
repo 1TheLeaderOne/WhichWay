@@ -469,4 +469,36 @@
 - 样式：新增 `.repo-row / .repo-link / .repo-text / .repo-name / .repo-url`（`.repo-row / .repo-link` 为 div，已补 `position: relative` 防前述全局 `div{position:absolute}` 塌陷；`.repo-link` 用 `inline-flex` + 悬停金色高亮）。移除已不再使用的 `.llm-link / .llm-link:hover`。`.llm-chip` 复用不变。
 - 校验：`vue/compiler-sfc` 编译通过、`pnpm eslint src/config/extIntro.vue` 无报错，已断言 `.repo-row / .repo-link` 编译后为 `position: relative`、`.llm-link` 已从产物移除。**仍未游戏内实测**。
 
+### 新增：更新公告面板「截图本页」导出（`src/configUI/component/updateCurrent.vue`）
+
+需求是给 `updateCurrent.vue` 这个界面加 DOM 截图能力。选型对比了 GitHub 开源方案并核对协议（扩展 GPL-3.0-only，只引宽松许可）：`modern-screenshot`（MIT，活跃，2026‑04 有提交）> `html-to-image`（MIT，同类 foreignObject 方案）> `html2canvas`（MIT 但基本停更、对本面板用到的多层渐变/现代 CSS 还原差）。选定 **modern-screenshot 4.7.0（MIT）**，对现代 CSS 还原最好。
+
+- `package.json`：新增依赖 `modern-screenshot: ^4.7.0`（已 `pnpm install` 落地到扩展 node_modules，确认 MIT、导出含 `domToPng`、`filter?: (el: Node) => boolean`）。
+- 组件：根节点加 `ref="rootRef"`；标题下方新增操作栏 `.UpdateCurrentActions > button.capture-btn`，点击调用截图。逻辑：
+  - 截图前临时把根节点（原本是 `height:calc(100%-40px)+overflow:auto` 的滚动容器）改成 `height:auto; overflow:visible`，让整页内容（滚动区之外）都进图，`finally` 还原；
+  - `await import("modern-screenshot")` 懒加载（不进主包解析路径，避开入口红线），`domToPng(node, { scale: 2, backgroundColor:"#1e2733", filter: 排除 .UpdateCurrentActions })`——操作栏（按钮自身）不进图；
+  - 生成 `驶舰之向-更新公告-v{版本}.png` 经 `<a download>` 下载；`capturing` 期间按钮禁用并显示「截图中…」，失败 `console.error` + `alert`。
+- 样式：`.UpdateCurrentActions / .capture-btn` 均显式 `position: relative`（同样是 div，防引擎全局 `div{position:absolute}` 塌陷）。
+- 校验：`vue/compiler-sfc` parse+script+template+style 通过、`pnpm eslint src/configUI/component/updateCurrent.vue` 无报错；已核对依赖安装与 API 导出。**未游戏内实测截图效果**（browser MCP 起不了 dev app）——需你在 `pnpm dev` 里打开「设置 → 驶舰之向快速设置 → 更新公告」点按钮验证：PNG 是否含全部公告内容、干员/卡牌按钮组与立绘是否正常进图、操作栏是否被排除。
+- 已知风险：立绘走 `ext:/blob/data:` 需同源可读才能内联进 SVG；扩展自定义字体（lishu 等）由 modern-screenshot 尝试抓取内联，若拿不到会用回退字体。若图里缺图/缺字，多半是这两点，届时再调 `filter`/`fontEmbedCSS`。
+
+### 调整：截图三处修正（`src/configUI/component/updateCurrent.vue`）
+
+首版实测反馈：①截到的页面过大（下半屏全是空白）、②非开发者模式不该显示按钮、③图片文件过大。逐条修：
+
+- **页面过大**：根因是引擎全局 `div { transition: all 0.5s }`（`apps/core/layout/default/layout.css:34`）——把根节点改成 `height:auto` 时带了 0.5s 过渡，`domToXxx` 同步取到的还是旧的大高度，于是把整屏空白截了进去。改为截图前一并 `transition:none; position:static; height:auto; max-height:none; overflow:visible` + `void node.offsetHeight` 强制回流，尺寸立即按内容收缩；`finally` 逐个还原。（`.updateCurrent` 原本没写 `position`，也被全局 `div{position:absolute}` 命中，这里顺带 `position:static`。）
+- **仅开发者模式**：`import { whichWayUtil } from "../../utill"`，`const devMode = whichWayUtil.isDeveloperMode()`，操作栏加 `v-if="devMode"`（与 `src/component/sort.vue` 同一判定口径）。非开发者模式下按钮不渲染。
+- **压缩图片**：`domToPng` 换成 `domToJpeg(node, { scale: 1.5, quality: 0.82, backgroundColor:"#1e2733", filter })`，文件名改 `.jpg`。scale 由 2 降到 1.5、PNG→JPEG(0.82)，配合去掉空白，体积显著下降；JPEG 无透明故保留深色 `backgroundColor`。
+- 校验：`vue/compiler-sfc` 全量编译通过、`pnpm eslint` 无报错；已核对 `domToJpeg(node, options)` 与 `Options.quality` 存在于 4.7.0 的 `index.d.ts`。**仍未游戏内实测**——请开发者模式下重开「更新公告」页点按钮复核：图片高度贴合内容、无大片空白、文件明显变小、非开发者模式下看不到按钮。
+
+### 修正：截图右侧/底部仍大片空白 = 画布尺寸取了缩放后尺寸（`src/configUI/component/updateCurrent.vue`）
+
+上一版只压了纵向、横向空白仍在。真因：无名杀用 `document.body.style.transform = scale(zoom)` 把整个 UI 缩放适配窗口（`apps/core/noname/ui/index.js:606-608`），而 modern-screenshot 未显式传 `width/height` 时回退用 `node.getBoundingClientRect()`（**缩放后**尺寸）建画布，克隆体却按**未缩放布局**渲染（body 的 scale 不被克隆进去）——`zoom > 1` 时画布比内容大，内容贴左上、右侧与底部多出空白。
+
+- 修复：强制回流后取 `node.offsetWidth / node.offsetHeight`（布局像素、不受 transform 影响），显式传给 `domToJpeg({ width, height, ... })`，让画布尺寸与克隆体一致，消除两个方向的空白。
+- 校验：`vue/compiler-sfc` + `pnpm eslint` 通过。**仍未游戏内实测**——请**重新构建**后（上一张仍是 `.png`，说明改动尚未编译进产物）复核：截图应紧贴公告内容、右侧与底部无多余空白。若仍偏大/偏小，多半是 `offsetWidth` 含了滚动条宽，届时改用 `clientWidth` 或再减 `padding`。
+
+
+
+
 

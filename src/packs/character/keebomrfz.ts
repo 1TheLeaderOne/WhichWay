@@ -12,7 +12,7 @@ skill({
 	"jiemimrfz": {
 			intro: {
 				content: function (event, player) {
-					var num = player.countMark("jiemimrfz") + 1;
+					let num = player.countMark("jiemimrfz") + 1;
 					if (player != _status.currentPhase && player.countMark("jiemimrfz") % 2 == 1) return "弃置" + get.cnNumber(num) + "张牌";
 					if (player != _status.currentPhase && player.countMark("jiemimrfz") % 2 != 1) return "摸" + get.cnNumber(num) + "张牌";
 					if (player == _status.currentPhase && player.countMark("jiemimrfz") % 2 == 1) return "摸" + get.cnNumber(num) + "张牌";
@@ -45,12 +45,15 @@ skill({
 						if (player.countMark("jiemimrfz") % 2 == 1) player.draw(player.countMark("jiemimrfz"));
 						else
 							player.chooseToDiscard(
-								"弃置" + get.cnNumber(player.countMark("jiemimrfz")) + "张手牌",
-								player.countMark("jiemimrfz"),
-								true,
-								"h"
+								{
+									prompt:"弃置" + get.cnNumber(player.countMark("jiemimrfz")) + "张手牌",
+									filterCard:()=>true,
+									selectCard() {
+										return player.countMark("jiemimrfz");
+									},
+									forced:true,
+								}
 							);
-						//@ts-ignore
 						player.logSkill("jiemimrfz");
 					},
 				},
@@ -66,13 +69,22 @@ skill({
 
 						if (player.countMark("jiemimrfz") % 2 == 1)
 							player.chooseToDiscard(
-								"弃置" + get.cnNumber(player.countMark("jiemimrfz")) + "张手牌",
-								player.countMark("jiemimrfz"),
-								true,
-								"h"
+								// "弃置" + get.cnNumber(player.countMark("jiemimrfz")) + "张手牌",
+								// player.countMark("jiemimrfz"),
+								// true,
+								// "h"
+								{
+									prompt:"弃置" + get.cnNumber(player.countMark("jiemimrfz")) + "张手牌",
+									filterCard(card, player, event) {
+										return true
+									},
+									selectCard() {
+										return player.countMark("jiemimrfz");
+									},
+									forced:true
+								}
 							);
 						else player.draw(player.countMark("jiemimrfz"));
-						//@ts-ignore
 						player.logSkill("jiemimrfz");
 					},
 				},
@@ -85,21 +97,23 @@ skill({
 			filter: function (event, player) {
 				if (event.type != "discard" || event.getlx === false) return false;
 				if (event.name.indexOf("lose") != 0) return event.name != "phase" || game.phaseNumber == 0;
-				var evt = event.getl(player);
-				var num = 0;
-				for (var i = 0; i < evt.cards2.length; i++) {
+				let evt = event.getl(player);
+				let num = 0;
+				for (let i = 0; i < evt.cards2.length; i++) {
 					num += evt.cards2[i].number;
 				}
 				return num > player.hp * 2 && !player.hasSkill("shihuangmrfz2");
 			},
 			async content(event, trigger, player) {
-				var num = 0;
-				for (var i = 0; i < trigger.cards.length; i++) {
-					//@ts-ignore
-					num += trigger.cards[i].number;
+				let num = 0;
+				for (let i = 0; i < trigger.cards.length; i++) {
+					num += (trigger.cards[i].number || 0);
 				}
 				player.addSkill("shihuangmrfz2");
-				player.gain(trigger.cards, "gain2", "log");
+				player.gain({
+					cards:trigger.cards,
+					animate:"gain2"
+				});
 			},
 		},
 	"baokemrfz": {
@@ -107,8 +121,7 @@ skill({
 			usable: 1,
 			trigger: { source: "damageEnd" },
 			filter: function (event, player) {
-				//@ts-ignore
-				if (event.getParent("phaseUse") && event.getParent("phaseUse").player != player) return false;
+				if (event.getParent("phaseUse") && event.getParent("phaseUse")!.player != player) return false;
 				if (event.player == player) return false;
 				if (!event.player.isAlive()) return false;
 				if (event.nature) return true;

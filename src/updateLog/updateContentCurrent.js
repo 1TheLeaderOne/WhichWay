@@ -7,8 +7,9 @@ export const upDataContentCurrent = {
 ### 更新概要
 - **特别鸣谢**：Flandre的设计投稿
 - **新增皮肤**: 烈夏【来日欢歌】、真言【万籁俱寂】、女神异闻录联动角色皮肤
-- **新增武将**: 晓歌、埃癸斯、格拉尼、烈夏、虎狼丸
+- **新增武将**: 晓歌、埃癸斯、格拉尼、烈夏、虎狼丸、克莱门莎
 - **技能 / 武将调整**：白面鸮、重岳、帕拉斯
+- **削弱**：GALLUS²【鸡煲】获得的护甲仅可保留一轮
 - **新增**：驶舰之向卡牌样式现在可以切换背景了，背景读取路径为\`WhichWay/image/background/*\`
 - **新增 API**：\`Player.chooseTargetControl\`、\`Player.chooseFakeCard\`
 - **修复**：\`override.ts\`中仍然使用\`StepContent\`的bug
@@ -20,7 +21,7 @@ export const upDataContentCurrent = {
 - **修复**：希尔达语音解码错误导致无限递归播放语音的 bug
 - **修复**：焰影苇草语音缺失的bug
 - **修复**：焰影苇草【共熄】濒死状态每回合可多次发动的bug
-- **重构**：阿、安洁莉娜、安哲拉、ASH、白金、白铁、柏喙、澄闪、斥罪、重岳、初雪、刺玫、魔王、戴菲恩、德克萨斯、医生、多萝西、艾拉、菲莱、风笛、风丸、弗里斯腾、格劳克斯、黑、歌蕾蒂娅、瑰盐、哈蒂娅、海沫、号角、红、红隼、溯光星源的技能部分改用新写法
+- **重构**：阿、安洁莉娜、安哲拉、ASH、白金、白铁、柏喙、澄闪、斥罪、重岳、初雪、刺玫、魔王、戴菲恩、德克萨斯、医生、多萝西、艾拉、菲莱、风笛、风丸、弗里斯腾、格劳克斯、黑、歌蕾蒂娅、瑰盐、哈蒂娅、海沫、号角、红、红隼、溯光星源、刻俄柏的技能部分改用新写法
 - **优化**：优化加载流程，减少加载时间
 - **优化**: 优化\`WhichWayTips\`，现在绑定在Card上的Prompt会在Card离开手牌区时自动销毁
 - **优化**: 优化\`WhichWayTips\`，现在Prompt会自动调整文字大小
@@ -40,9 +41,9 @@ export const upDataContentCurrent = {
 	 */
 	player: {
 		/** 本版新增的干员 */
-		add: ["xiaogemrfz","aiguisimrfz","gelanimrfz","liexiamrfz","hulangwanmrfz"],
+		add: ["xiaogemrfz","aiguisimrfz","gelanimrfz","liexiamrfz","hulangwanmrfz","kelaimenshamrfz"],
 		/** 本版调整过技能 / 数据的干员 */
-		adjust: ["baimianxiaomrfz", "chongyuemrfz", "palasimrfz"],
+		adjust: ["baimianxiaomrfz", "chongyuemrfz", "palasimrfz","gallusmrfz"],
 	},
 
 	/**

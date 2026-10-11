@@ -8,7 +8,7 @@ character(CHARNAME, {
 	sex: "female",
 	skills: ["jibaomrfz"],
 	hp: 4,
-    pack:"mediocreSJZX",
+	pack: "mediocreSJZX",
 });
 
 characterTitle(CHARNAME, "<font color = #2463d0>电流相生</font>");
@@ -42,8 +42,8 @@ translate({
     <font color = #e40fcf>被动：造成一点伤害</font><br>
 
     <b>锦囊牌</b><br>
-    <font color = red>激发：获得两点护甲</font><br>
-    <font color = #e40fcf>被动：获得一点护甲</font><br>
+    <font color = red>激发：获得两点护甲（下一轮开始时失去之）</font><br>
+    <font color = #e40fcf>被动：获得一点护甲（下一轮开始时失去之）</font><br>
 
     <b>装备牌</b><br><font color = red>激发：摸四张牌</font><br>
     <font color = #e40fcf>被动：摸两张牌</font>`,
@@ -53,25 +53,26 @@ skill({
 	jibaomrfz: {
 		audio: ["作战中1", "作战中2", "作战中3", "作战中4"],
 		trigger: {
-			global:"cardsDiscardAfter"
+			global: "cardsDiscardAfter",
 		},
 		forced: true,
 		filter(event, player, name, target) {
 			return game
-                    .getGlobalHistory("cardMove", evt => {
-                        if (evt.name !== "cardsDiscard") {
-                            return false;
-                        }
-                        const evtx = evt.getParent()!;
-                        if (evtx.name !== "orderingDiscard") {
-                            return false;
-                        }
-                        const evt2 = evtx.relatedEvent || evtx.getParent();
-                        if (evt2.name != "useCard" || evt2?.player !== player) {
-                            return false;
-                        }
-                        return evt.getd?.()?.length>0;
-                    }).includes(event);
+				.getGlobalHistory("cardMove", evt => {
+					if (evt.name !== "cardsDiscard") {
+						return false;
+					}
+					const evtx = evt.getParent()!;
+					if (evtx.name !== "orderingDiscard") {
+						return false;
+					}
+					const evt2 = evtx.relatedEvent || evtx.getParent();
+					if (evt2.name != "useCard" || evt2?.player !== player) {
+						return false;
+					}
+					return evt.getd?.()?.length > 0;
+				})
+				.includes(event);
 		},
 		mark: true,
 		markimage: "extension/WhichWay/image/skill/orb.webp",
@@ -80,7 +81,7 @@ skill({
 			mark(dialog, storage: Array<Card>, player) {
 				if (storage.length < 1) {
 					dialog.addText("无");
-                    return;
+					return;
 				}
 				dialog.addText("充能球区");
 				dialog.addAuto(storage);
@@ -88,69 +89,92 @@ skill({
 		},
 		init(player, skill) {
 			player.storage[skill] = [];
+			player.storage[`${skill}_hujia`] = 0;
 		},
 		onremove(player, skill) {
 			const cards = player.storage[skill];
 			if (cards && cards.length) {
-				player.loseToDiscardpile({cards});
+				player.loseToDiscardpile({ cards });
 			}
+            delete player.storage[`jibaomrfz_hujia`];
 		},
 		async content(event, trigger, player) {
-            const cards = trigger.cards;
-            (player.storage.jibaomrfz as Card[]).addArray(cards);
+			const cards = trigger.cards;
+			(player.storage.jibaomrfz as Card[]).addArray(cards);
 
-            const orbs = player.storage.jibaomrfz as Card[];
-            if(orbs.length>3){
-                const cards2 = orbs.slice(0,orbs.length - 3);
-                for(let card of cards2){
-                    (player.storage.jibaomrfz as Card[]).remove(card);
-                    await player.loseToDiscardpile({cards:[card]});
-                    await orb(card,player,"jifa");
-                }
-            }
-        },
-        group:"jibaomrfz_round",
-        subSkill:{
-            round:{
-                audio:"jibaomrfz",
-                forced:true,
-                trigger:{
-                    global:"roundStart",
-                },
-                filter(event, player, name, target) {
-                    return (player.storage.jibaomrfz as Card[]).length>0;
-                },
-                async content(event,trigger,player){
-                    for(let card of player.storage.jibaomrfz){
-                        await orb(card,player,"beidong");
-                    }
-                }
-            },
-        },
+			const orbs = player.storage.jibaomrfz as Card[];
+			if (orbs.length > 3) {
+				const cards2 = orbs.slice(0, orbs.length - 3);
+				for (let card of cards2) {
+					(player.storage.jibaomrfz as Card[]).remove(card);
+					await player.loseToDiscardpile({ cards: [card] });
+					await orb(card, player, "jifa");
+				}
+			}
+		},
+		group: "jibaomrfz_round",
+		subSkill: {
+			round: {
+				audio: "jibaomrfz",
+				forced: true,
+				trigger: {
+					global: "roundStart",
+				},
+				filter(event, player, name, target) {
+					return (player.storage.jibaomrfz as Card[]).length > 0;
+				},
+				async content(event, trigger, player) {
+					//删除获得护甲
+					const pre_histories = _status.globalHistory[_status.globalHistory.length - 2];
+					if (pre_histories && player.hujia > 0) {
+						const histories = pre_histories.changeHp.filter(evt => {
+							const evtx = evt.getParent();
+							return evt.player && evtx && evtx.name === "damage" && typeof evtx.hujia === "number";
+						});
+						let num = 0;
+						for (let history of histories) {
+							num += history.hujia;
+						}
+						let reduce = player.storage[`jibaomrfz_hujia`] - num;
+						if (reduce > 0) {
+							player.changeHujia(player.storage[`jibaomrfz_hujia`] - num, "lose");
+						}
+					}
+                    player.storage[`jibaomrfz_hujia`] = 0;
+					//被动
+					for (let card of player.storage.jibaomrfz) {
+						await orb(card, player, "beidong");
+					}
+				},
+			},
+		},
 	},
 });
 
-async function orb(card:Card,player:Player,type: "jifa" | "beidong"){
-    if(!["trick","basic","equip"].includes(get.type(card))) return;
-    if(get.type(card) === "basic"){
-        const result = await player.chooseTarget({
-            prompt:`【充能球】:你可以对一名角色造成${type === "jifa" ? 1 : 1}点伤害`,
-            ai(target) {
-                return get.attitude2(target)<0 ? 1 : -1;
-            },
-        }).forResult();
-        if(result?.targets){
-            result.targets[0].damage({
-                num:type === "jifa" ? 1 : 1,
-                source:player
-            });
-        }
-    } else if(get.type(card) === "equip"){
-        player.draw({
-            num:type === "jifa" ? 4 : 2,
-        })
-    }
-    else{
-        player.changeHujia(type === "jifa" ? 2 : 1,"gain",5);
-    }
+async function orb(card: Card, player: Player, type: "jifa" | "beidong") {
+	if (!["trick", "basic", "equip"].includes(get.type(card))) return;
+	if (get.type(card) === "basic") {
+		const result = await player
+			.chooseTarget({
+				prompt: `【充能球】:你可以对一名角色造成${type === "jifa" ? 1 : 1}点伤害`,
+				ai(target) {
+					return get.attitude2(target) < 0 ? 1 : -1;
+				},
+			})
+			.forResult();
+		if (result?.targets) {
+			result.targets[0].damage({
+				num: type === "jifa" ? 1 : 1,
+				source: player,
+			});
+		}
+	} else if (get.type(card) === "equip") {
+		player.draw({
+			num: type === "jifa" ? 4 : 2,
+		});
+	} else {
+		const num = type === "jifa" ? 2 : 1;
+		player.changeHujia(num, "gain");
+		player.storage[`jibaomrfz_hujia`] += num;
+	}
 }
