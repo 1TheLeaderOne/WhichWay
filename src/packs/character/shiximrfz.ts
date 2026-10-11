@@ -22,6 +22,7 @@ character(NAME, {
 	hp: 3,
 	pack: "epicSJZX",
 	skills: ["feishengmrfz", "zhixingmrfz"],
+	llm:"DeepSeek-4.1-Flash"
 });
 
 characterTitle(NAME, whichWayUtil.colorize("#b不一样的梦想#"));

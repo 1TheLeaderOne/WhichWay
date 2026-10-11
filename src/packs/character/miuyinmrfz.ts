@@ -11,6 +11,7 @@ character(NAME, {
 	skills: ["miuyuanmrfz", "zhengguomrfz", "qianshimrfz"],
 	group: "gemrfz",
 	pack: "legendSJZX",
+	llm:"DeepSeek-4.1-Flash"
 });
 
 characterTitle(NAME, whichWayUtil.colorize(`#r绕动之谬#`));

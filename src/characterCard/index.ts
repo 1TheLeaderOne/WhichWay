@@ -5,6 +5,7 @@ import { whichWayUtil } from "../utill.js";
 import { whichWaySkin } from "../skin/index.ts";
 import { onConfig, onContent, onSetDev } from "../hooks/index.js";
 import { whichWayAPIOverride } from "../override/index.js";
+import { BACKGROUND_SOURCE_CONFIG_NAME, backgroundSourceItems } from "./backgroundSource.ts";
 
 /** 武将卡样式开关：关闭 / 仅驶舰之向角色 / 所有角色 */
 export type CharacterCardStyleMode = "off" | "whichWay" | "all";
@@ -21,7 +22,7 @@ const STYLE_CONFIG_NAME = "enableWhichWayCharacterCardStyle";
  *
  * 本类只负责三件事：
  * 1. 劫持 `ui.click.charactercard`（按样式开关决定是否接管）；
- * 2. 注册样式开关配置项；
+ * 2. 注册样式开关与「武将卡背景来源」配置项；
  * 3. 创建 / 关闭武将卡（挂载与卸载 Vue 应用）。
  */
 class WhichWayCharacterCard {
@@ -66,6 +67,20 @@ class WhichWayCharacterCard {
 						whichWay: "扩展角色",
 						all: "所有角色",
 					},
+				},
+			},
+		});
+
+		onConfig({
+			name: "whichWayCharacterCardBackgroundSourceConfig_add",
+			priority: 769,
+			obj: {
+				name: BACKGROUND_SOURCE_CONFIG_NAME,
+				options: {
+					name: "武将卡背景来源",
+					intro: "武将卡「背景」面板扫描哪些目录（精选：仅 dynamicSkin/background，省性能；全部：再加上 image/background 与 image/ui/background）",
+					init: "featured",
+					item: backgroundSourceItems,
 				},
 			},
 		});

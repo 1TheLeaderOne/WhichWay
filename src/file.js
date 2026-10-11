@@ -26,8 +26,10 @@ class WhichWayFile {
 		"ui:": `${this.extDir}image/ui/`,
 		"img:": `${this.extDir}image/`,
 		"dyc:": `${this.extDir}dynamicSkin/illust/`,
+		"dybg:": `${this.extDir}dynamicSkin/background/`,
 		"mod:": `${this.extDir}image/modules/`,
 		"test:": `${this.extDir}test/`,
+		"logo:": `${this.extDir}image/logo/`,
 	};
 
 	/**

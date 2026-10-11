@@ -33,7 +33,9 @@ skill({
 				if (player.storage.yulimrfz) {
 					let types = ["basic", "trick", "equip"].filter(type => !trigger.cards.map(i => get.type2(i)).includes(type));
 					const result = await player
-						.chooseControl(...types, "cancel2")
+						.chooseControl({
+							controls:[...types, "cancel2"]
+						})
 						.set("prompt", `【迂理】:请选择你要从牌堆中获得的牌的类型`)
 						.set("ai", () => {
 							//@ts-ignore
@@ -60,7 +62,10 @@ skill({
 			async content(event, trigger, player) {
 				let { control } = event.cost_data;
 				let card = get.cardPile(card => get.type2(card) === control, "cardPile");
-				if (card) player.gain(card, "gain2");
+				if (card) player.gain({
+					cards:[card],
+					animate:"gain2"
+				});
 				else player.chat(`牌堆中没有${get.translation(control)}牌了！`);
 			},
 			ai: {
@@ -89,7 +94,7 @@ skill({
 			mark: true,
 			intro: {
 				content(storage, player) {
-					let list = [];
+					let list:any[] = [];
 					if (Array.isArray(storage) && storage.length > 0) list.push(`·本阶段已弃置的类型：${get.translation(storage)}`);
 					if (player.storage.yulimrfz === true) {
 						if (player.hasSkill("yulimrfz")) list.push("·已修改【迂理】");
@@ -130,7 +135,7 @@ skill({
 
 				player.storage.sulimrfz.addArray(cards.map(i => get.type2(i)));
 
-				await player.discard(cards);
+				await player.discard({cards});
 
 				const maxType = lib.skill.sulimrfz.getMaxType(player);
 

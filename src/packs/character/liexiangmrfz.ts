@@ -135,7 +135,7 @@ skill({
                 .step(async (event,trigger,player)=>{})
                 .assign({
                     mod:{
-                        cardEnabled2(card, player, result) {
+                        cardEnabled2(card:Card, player, result) {
                             if(get.suit(card) === player.storage.buxiumrfz){
                                 return false;
                             }

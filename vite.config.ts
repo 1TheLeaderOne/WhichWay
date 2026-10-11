@@ -1,8 +1,9 @@
-import { defineConfig, type PluginOption } from "vite";
+import { defineConfig, type Plugin, type PluginOption } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import info from "./info.json";
 import path from "node:path";
+import fs from "node:fs";
 
 /**
  * WW_SKIP_STATIC_COPY=1 时跳过静态资源复制。
@@ -10,6 +11,45 @@ import path from "node:path";
  * （此时产物不含 audio/image/json/font/dynamicSkin/css 等资源，不可直接游玩）。
  */
 const skipStaticCopy = process.env.WW_SKIP_STATIC_COPY === "1";
+
+/** WW_KEEP_OLD_CHUNKS=1 时不删除输出目录里过期的 chunk（排查产物对比时用）。 */
+const keepOldChunks = process.env.WW_KEEP_OLD_CHUNKS === "1";
+
+const outDir = `../../../apps/core/extension/${info.name}`;
+
+/**
+ * 构建写盘后，删掉 `<outDir>/chunks/` 里不属于本次产物的 `.js`。
+ *
+ * 为什么必须删：`emptyOutDir` 只能是 false（见 build 里的注释），也就是说构建从来不清空输出目录，
+ * 而发布只是把产物按文件名覆盖过去。chunk 名一旦带 hash，每次构建都是「新增一批、旧的一个不删」，
+ * 实测当前 `chunks/` 已堆了 38 个文件（历史上堆过 596 个，同名 `GloriousIdeal-battleOverlay-shared-*` 有 26 份），
+ * 用户每次更新都在自己机器上多攒一批永远不会再被引用的死文件。
+ * 现在 chunk 名固定（同名就地覆盖），本插件只负责回收 hash 时代留下的残留，
+ * 以及日后 chunk 改名（模块在 chunk 之间迁移导致 `-shared` 名字变化）产生的孤儿。
+ *
+ * 删除范围严格限定在 `chunks/*.js`，绝不碰 audio/image/dynamicSkin 等静态资源。
+ */
+function pruneStaleChunks(): Plugin {
+	const chunksDir = path.resolve(__dirname, outDir, "chunks");
+	return {
+		name: "whichWayPruneStaleChunks",
+		apply: "build",
+		writeBundle(_options, bundle) {
+			const keep = new Set<string>();
+			for (const [fileName, output] of Object.entries(bundle)) {
+				if (output.type === "chunk") keep.add(path.basename(fileName));
+			}
+			//首次构建时输出目录还不存在
+			if (!fs.existsSync(chunksDir)) return;
+			for (const file of fs.readdirSync(chunksDir)) {
+				if (!file.endsWith(".js") || keep.has(file)) continue;
+				if (!fs.statSync(path.join(chunksDir, file)).isFile()) continue;
+				fs.rmSync(path.join(chunksDir, file));
+				console.log(`[WhichWay] 删除过期 chunk: chunks/${file}`);
+			}
+		},
+	};
+}
 
 export default defineConfig(({ mode }) => ({
 	define: {
@@ -22,6 +62,7 @@ export default defineConfig(({ mode }) => ({
 	},
 	plugins: [
 		vue() as PluginOption,
+		...(keepOldChunks ? [] : [pruneStaleChunks()]),
 		...(skipStaticCopy
 			? []
 			: [
@@ -65,7 +106,7 @@ export default defineConfig(({ mode }) => ({
 			},
 			formats: ["es"],
 		},
-		outDir: `../../../apps/core/extension/${info.name}`,
+		outDir,
 		/**
 		 * 必须保持 false：构建时**不能**先清空输出目录。
 		 *
@@ -74,7 +115,9 @@ export default defineConfig(({ mode }) => ({
 		 * 音频目录就会处于「部分文件存在、部分还不存在」的中间状态 —— 而引擎
 		 * `game.tryAudio` 的 `onError: play` + `refresh` 只要遇到「部分缺失」的候选列表
 		 * 就会无限重试（听感是「一句配音播完又随机播另一句、永不停歇」）。
-		 * 产物 JS 都是带 hash 的 chunk，旧的残留文件不会被引用，因此不清空是安全的。
+		 *
+		 * 不清空之所以不会让产物目录无限膨胀，靠的是 chunk 文件名固定（同名覆盖）
+		 * 加上面的 `pruneStaleChunks` 回收孤儿，而不是靠 hash —— hash 只会让残留永远删不掉。
 		 */
 		emptyOutDir: false,
 		rollupOptions: {
@@ -85,9 +128,16 @@ export default defineConfig(({ mode }) => ({
 				// 「入口 + 按动态入口自然分包（约 25 个）」，启动期模块请求数大幅下降。
 				// 入口固定叫 extension.js（宿主按 /extension/WhichWay/extension.js 加载）。
 				entryFileNames: "[name].js",
-				// 其余 chunk 带 hash（避免重名互相覆盖），并按源码路径起名。
-				// 不做这件事的话，大量动态入口都叫 `index`，产物里会是一堆
-				// index-<hash>.js，堆栈里完全无法定位。
+				/**
+				 * chunk 名字里**不能带 `[hash]`**（本文件顶部 `pruneStaleChunks` 的注释记录了带 hash 的实际后果：
+				 * 不清空输出目录 + 按文件名覆盖发布 ⇒ 每次构建净增一批死文件，用户侧 `chunks/` 无限膨胀）。
+				 * 名字仍按源码路径起，否则大量动态入口都叫 `index`，产物里会是一堆
+				 * index-xxx.js，堆栈里完全无法定位。
+				 *
+				 * 万一两个 chunk 推出同一个名字（例如同时存在 `src/a.ts` 与 `src/a/index.ts`），
+				 * rollup 会静默把后者改成 `chunks/a2.js`（已实测：既不报警也不覆盖，import 路径同步更新），
+				 * 所以这里不需要自己再加 hash 去重名；真出现了就按日志里的文件名去调整 `derive` 的规则。
+				 */
 				chunkFileNames(chunkInfo) {
 					const derive = id => {
 						const matched = (id || "").replace(/\\/g, "/").match(/\/src\/(.+?)\.(?:ts|js|mjs|vue)$/);
@@ -100,7 +150,7 @@ export default defineConfig(({ mode }) => ({
 						const inner = [...chunkInfo.moduleIds].sort().map(derive).find(Boolean);
 						if (inner) name = `${inner}-shared`;
 					}
-					return `chunks/${name || chunkInfo.name}-[hash].js`;
+					return `chunks/${name || chunkInfo.name}.js`;
 				},
 				// 必须保持这个名字：file.js#autoLoadCSS 会扫描整个 css/ 目录并按文件名注入，
 				// 改名会导致样式重复或丢失。

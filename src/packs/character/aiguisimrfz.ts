@@ -9,13 +9,14 @@ character(NAME, {
 	sex: "female",
 	hp: 3,
 	group: "persona",
-	pack: "epicSJZX",
 	whichWay: {
 		linkage: true,
 		arknight: {
 			camp: "persona",
 		},
 	},
+	pack: "epicSJZX",
+	llm:"Qwen-3.8-Flash"
 });
 
 characterIntro(NAME, "埃癸斯，1102年3月于中庭公证所登记为第三类驻留人员，根据拉特兰公民权利章程附录第三十六条、入境人员管理条例第二章第五条，由圣马尔索综合学校接收入学。<br>教师评语：埃癸斯同学聪明好学，认真严谨，富有责任心，自我要求严格，在类铳型武装系列课程中取得了不俗的成绩。望能敞开心扉，更多地尝试集体活动，在学习进步之余，亦能享受美好的校园生活。");

@@ -13,7 +13,7 @@ class WhichWayCharacterPack {
 	 * 设计者
 	 * @type {Record<string, string[]>}
 	 */
-	designer = charDes;
+	designer: Record<string, string[]> = charDes;
 
 	/**
 	 * 初始化
@@ -45,8 +45,11 @@ class WhichWayCharacterPack {
 			obj: {
 				name: "numberOfExtChars",
 				options: {
-					name: `已实装干员数:${window.whichWaySave.allCharacters.length}`,
-					clear:true,
+					// name: `已实装干员数:${window.whichWaySave.allCharacters.length}`,
+					get name() {
+						return `已实装干员数:${window.whichWaySave.allCharacters.length}`;
+					},
+					clear: true,
 				},
 			},
 		});
@@ -74,7 +77,7 @@ class WhichWayCharacterPack {
 	 * @param {boolean} [fromStorage=false] - 是否从charDes中获取
 	 * @returns {string[]} 角色设计者
 	 */
-	getDesigner(char, igDefault = false, fromStorage = false) {
+	getDesigner(char: string | WhichWayCharacter, igDefault = false, fromStorage = false): string[] {
 		//@ts-ignore 不是本扩展的角色直接返回佚名
 		if ((get.is.object(char) && !char?.whichWay) || (typeof char === "string" && !window.whichWaySave.hasChar(char))) {
 			return ["佚名"];
@@ -83,8 +86,8 @@ class WhichWayCharacterPack {
 		if (typeof char === "string") {
 			if (Object.keys(whichWayCharacterPack.designer).includes(char)) return whichWayCharacterPack.designer[char];
 		} else if (get.is.object(char)) {
-			if (char.whichWay.designer && char.whichWay.designer.length > 0 && !fromStorage) return char.whichWay.designer;
-			if (Object.keys(whichWayCharacterPack.designer).includes(char.whichWay.charId)) return whichWayCharacterPack.designer[char.whichWay.charId];
+			const config = char.whichWay!;
+			if (config.designer && config.designer.length > 0 && !fromStorage) return Array.isArray(config.designer) ? config.designer : [config.designer];
 		}
 		return igDefault ? ["佚名"] : ["林登万"];
 	}
@@ -94,15 +97,25 @@ class WhichWayCharacterPack {
 	 * @param {string} name - 角色名
 	 * @returns {string | undefined} 角色阵营
 	 */
-	getCamp(name) {
+	getCamp(name: string): string | void {
 		let char = get.character(name);
-		return char.whichWay?.arknight.camp || char.group;
+		return char.whichWay?.arknight?.camp || char.group;
+	}
+
+	/**
+	 * 获取角色使用的LLM
+	 * @param {string} name - 角色名
+	 * @returns {LLM_Names |  void} LLM名称
+	 */
+	getLLM(name:string):LLM_Names | void {
+		let char:WhichWayCharacter = get.character(name);
+		return char.llm;
 	}
 }
 
 const whichWayCharacterPack = new WhichWayCharacterPack();
 
-export const { getDesigner, getCamp, designer } = whichWayCharacterPack;
+export const { getDesigner, getCamp, designer,getLLM } = whichWayCharacterPack;
 
 await whichWayCharacterPack.init();
 

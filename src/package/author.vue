@@ -5,6 +5,11 @@
 			<img :src="item[1]" class="author-icon" alt="" />
 			<div class="author-name">{{ item[0] }}</div>
 		</div>
+		<div class = "author-title">LLM</div>
+		<div v-for="(item, index) in agents" :key="index" class="author-container">
+			<img :src="item[1]" class="author-icon" alt="" />
+			<div class="author-name agent-name">{{ item[0] }}</div>
+		</div>
         <div class = "github-container">
             <img :src="githubLogo" class="github-img" alt="" />
             <div class="github-text">访问本扩展仓库</div>
@@ -16,13 +21,19 @@
 import { lib } from "noname";
 
 const path = `${lib.assetURL}extension/WhichWay/image/decoration/`;
+const logo_path = `${lib.assetURL}extension/WhichWay/image/logo/`;
 
 const authors = [
 	["TheLeaderOne", `${path}1.jpg`],
 	["圣晴天空", `${path}0.jpg`],
 ];
 
-const githubLogo = `${path}github.png`
+const agents = [
+	["DeepSeek-v4.1-Flash",`${logo_path}DeepSeek.png`],
+	["Qwen3.8-Flash",`${logo_path}Qwen.png`],
+]
+
+const githubLogo = `${logo_path}github.png`
 </script>
 
 <style scoped>
@@ -91,5 +102,9 @@ const githubLogo = `${path}github.png`
 	justify-content: left;
 	align-items: center;
 	left: 10px;
+}
+
+.agent-name {
+	font-size: 10px !important;
 }
 </style>

@@ -7,6 +7,7 @@ character("jiaxintamrfz", {
 	pack: "epicSJZX",
 	skills: ["feilvmrfz", "zhixingmrfz"],
 	sex: "female",
+	llm:"DeepSeek-4.1-Flash"
 });
 characterTitle("jiaxintamrfz", whichWayUtil.colorize("#r不一样的旷野#"));
 characterIntro("jiaxintamrfz", "嘉辛塔，雷姆必拓知名矿业大亨坎贝尔夫妇的千金，前来罗德岛接受矿石病治疗。根据本人意愿，现作为先锋干员为罗德岛提供帮助。");

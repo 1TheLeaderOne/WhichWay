@@ -271,6 +271,9 @@ interface WhichWayCharacterPrototype {
 
 declare type WhichWayCharacterPackNames = "epicSJZX" | "legendSJZX" | "especialSJZX" | "plotSJZX" | "specialSJZX" | "rareSJZX" | "mediocreSJZX" | "normalSJZX";
 
+
+type LLM_Names = "Qwen-3.8-Flash" | "DeepSeek-4.1-Flash"
+
 /**
  * 驶舰之向角色数据（**声明态**：武将包里写的、`get.character()` 拿到的原始对象）。
  *
@@ -297,6 +300,12 @@ declare interface WhichWayCharacter extends WhichWayCharacterPrototype {
 	 * 明日方舟角色uid（显式指定可跳过按名字反查）
 	 */
 	arkuid?: string;
+
+	/**
+	 * 技能代码是否由AI生成,当此项不存在时默认为不是由AI生成的
+	 * 填AI的名称,会在驶舰之向武将卡界面展示
+	 */
+	llm?:LLM_Names;
 }
 
 /**

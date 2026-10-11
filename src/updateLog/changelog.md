@@ -352,3 +352,121 @@
 - **修复**：`addTempSkill("longtengmrfz_trick2")`（“然后本回合此技能失效”）旧代码只在“牌带伤害标签”分支里登记，无伤害标签的普通锦囊加完目标后本回合还能再发动一次；现改为只要实际加了目标就本回合失效。
 - **修复**：`_clear` 里 `current.getExpansions()` 被调用两次（判断一次、取值一次），改为取一次复用。
 - 校验：`pnpm eslint` 该文件仅剩 `kanchamrfz.check` 里一处历史 `no-var`（【勘查】不在本次范围内，未动）；未打包、未进游戏实测（浏览器 MCP 起不了 dev app），游戏内表现需手动验证。
+
+## 2026-10-09
+
+### 配音兼容修复：候选裁剪从解析层挪回播放层（`src/audio/index.ts`）
+
+驶舰之向与千幻聆音同开时，千幻武将卡界面的**本体武将台词全部消失**。根因是修希尔达语音时把「只留一条候选」做在了**解析层**：`get.Audio` 就是引擎的 `Audio` 类本身（`get/index.js:22`），`appendHook("get.Audio.skill")` / `("get.Audio.die")` 的 after 钩子对所有调用方生效，`filterExistingAudio` 把解析结果压成 `{audioList:[一条], fileList:[一条], textList:[一条]}`（在线组合还直接返回冻结的空 `onlineAudioStub`）。千幻的卡片台词 100% 走 `game.parseSkillTextMap`（`lib.qhly_sanguotaici = {}` ⇒ `characterTaici` 恒 undefined 必走兜底），于是本体武将只剩一句、且那句没有 `#技能1` 翻译时 shousha 主题会把全部台词槽清空；本体详情弹窗读 `.textList` 的位置同样受害。而 `game.tryAudio` 的无限重试只存在于**播放层**（`game/index.js:2569-2602`），且所有播放入口（`trySkillAudio` 2686、`tryDieAudio` 2699、弹窗预览 `ui/click/index.js:3705/3730/4079/4104`）传给它的 `audioList` 一律是 `fileList` 字符串数组。
+
+- **修复**：删除 `filterExistingAudio`、`onlineAudioStub` 与两个 `get.Audio.skill`/`get.Audio.die` after 钩子，改为新增 `trimOwnAudioList(audioList)` + `appendHook("game.tryAudio", { before })`：把候选里**属于本扩展**的条目收敛成一条确实存在的文件（全缺则整批剔除，在线配音不刷 404 靠这里），本体技能与其它扩展的候选原样交回引擎。台词 `textList`/`textMap` 从此不再被改动。`game.playAudio` 的 onError 熔断保留（弹窗复用同一 `playAudio` 闭包时，单条候选失败仍会因 `refresh` 已置真而循环，裁剪不足以覆盖该场景）。
+- **修复（隐患 1）**：`game.trySkillAudio` 的去重（`isRepeatedSkillAudio`/`markSkillAudioPlayed`）此前对所有技能无差别生效，会误吞本体武将技能 30 秒内第二次触发的配音；现用 `window.whichWaySave.hasSkill(skill) || hasSkill(trueSkill)` 门控，只对本扩展技能记录/拦截。
+- **修复（隐患 2）**：`applySkillAudio` 总改写 `info.audio` 却只在旧值**不是字符串**时备份，借用配音（`audio: "eagle"`）拿不到备份 ⇒ `refreshAudioIndex` 无法还原、切换默认配音语言后借用语义永久丢失。改为 `if (!this._originalAudio.has(skill))` 首次无条件备份。
+- **修复（隐患 3）**：`initAllAudio` 的共享技能循环把干员名推进 `lib.skill[getReferSkill(skill)].audioname`，却没有 `applySkillAudio` 里那道 `hasSkill(target)` 守卫，会污染本体技能的共享数组；已补齐守卫（顺带不再把借用技能登记进 `_suffixSkills`，`getAudioBaseName` 对借用技能改为返回终点技能名，与引擎解析一致）。
+- **调整**：`auditEngineAudioList` 签名改为接收播放层候选 `audioList`，去重键为「本扩展候选文件拼接串」；措辞不再宣称「无限重试」，改为提示候选数与磁盘文件数对不上。`game.trySkillAudio` 钩子内两处引用 `get.Audio.skill` 的注释同步改为 `game.tryAudio`。
+- 校验：`pnpm eslint packages/extension/WhichWay/src/audio/index.ts` 通过（0 报错）。**未构建、未游戏内实测**（浏览器 MCP 无法加载 dev app）。手动清单：①千幻+驶舰同开时本体武将卡台词全部恢复；②驶舰干员仍无台词（无翻译，预期）且无 404 风暴；③希尔达类部分缺失干员配音一句播完即止；④本体技能二次触发配音正常；⑤切换默认语言后 `audio: "eagle"` 类技能能还原；⑥本体技能 `audioname` 不再出现 WhichWay 干员名。
+
+## 2026-10-10
+
+### 格拉尼【骑术】两处修复 + 特殊马注册流程重构（`src/packs/character/gelainimrfz.ts`）
+
+- **修复（锁定技②完全不生效）**：`mod.targetEnabled` 里把使用者当成了自己——`game.checkMod` 的 `targetEnabled` 是从**被指定者**的技能池执行的（`lib.filter.targetEnabled` → `game.checkMod(card, player, target, "unchanged", "targetEnabled", target)`），所以形参 `player` 是【杀】的使用者、`target` 才是格拉尼。旧代码用 `player.hasEmptySlot(3)`/`player.getEquips(3)` 判的是**攻击方**的防御马栏，格拉尼自己出牌时反而可能误拦。现改为以 `target` 为准，并加 `player === target` 守卫（只拦“其他角色”）。
+- **修复（锁定技②会放行不该放行的牌）**：旧代码在点数合规时 `return true`，而 `lib.filter.targetEnabled` 对 mod 结果只要不是 `"unchanged"` 就 `Boolean()` 直接返回，`true` 会**短路掉牌自身的 `filterTarget`**（距离/已死亡/已指定过目标等判定全部跳过，等于把【杀】改成可乱指定）。现改为只在点数 ≤ 马栏点数之和时 `return false`，其余情况 `return undefined` 不表态。
+- **修复（①描述不符：追加的【杀】静默失效）**：`content` 用 `chooseUseTarget` 出这张牌却没传 `addCount: false`，而 `chooseUseTarget` 第一步就检查 `lib.filter.cardUsable`（`content.ts:2627`）——本回合那张【杀】已经把次数用满，于是事件直接 `result={bool:false}` 结束，表现就是“能弹选牌框、选完什么都没发生”。现改为选完牌和目标后 `player.useCard(vcard, targets, cards, false)` 走 `addCount=false`，既绕过次数检查也不占用次数。
+- **修复（①与描述不符：目标问了两遍且问错了人）**：旧代码两处 `filterTarget` 用的集合是**受到伤害的角色本身**（`[trigger.player].filter(...)`），而描述要求的是「该角色的**上家**」；并且 `chooseCardTarget` 选完一次目标后 `chooseUseTarget` 又弹一次同一个目标。现新增 `getQishuTargets(player, damagedList)` 统一口径（取上家 + `player.canUse("sha", 上家)` 合法性过滤，`canUse` 的第四参默认不校验次数，正是追加杀需要的），`filter`/`ai`/`prompt2`/`content` 全部复用，弹窗收敛为「一次选牌+选目标」。
+- **修复（①把“你可以”做成了“你必须”）**：`chooseCardTarget` 的 `forced: true` 会去掉取消按钮（`game/check.js:89`）。已去掉，玩家可不追加。顺带 `ai` 旧写法 `[..].some(char => get.effect(...))` 返回布尔值且负收益也算真，改为收益求和。
+- **重构（新增一匹马从 4 处改动降到 1 处）**：原来一匹马要写 `card()` + `cardTranslate()` + `cardSkill()` 三个块，外加 `ORGS`/`HORSES`/`HORSES_SKILLS`/`HORSES_INFOS` 四个按下标对齐的平行数组（下标写错即静默错位）。现改为单一 `HORSE_DEFS: HorseDef[]` 表 + `registerHorse(def)`：`subtype`（`equip3`/`equip4`）与 `distance`（`globalTo:1`/`globalFrom:-1`）由 `slot` 推导，卡牌/技能翻译、`audio:false`/`equipSkill:true` 默认值统一补，技能体写成 `skill: (skillId) => ExtendedSkill` 以便日蚀的 `group`、黑贝丝的 `storage`/`addTip` 引用自己的 id 而不再硬编下标。「飞驹」的选马列表也改成从同一张表 `game.createCard()` 生成，加马不再需要改 `content`。
+  - 卡牌 id（`{Org}_gelanimrfz`）、技能 id（`{Org}_skill_gelanimrfz`）、花色点数、装备价值、各技能逻辑与文案全部保持原样；顺手删掉黑贝丝 `cost` 里残留的 `console.log`。
+  - 复核时发现并修回一处重构过程引入的偏差：黑贝丝 `filter` 的 `getAllGlobalHistory(...).length` 一度被写成少了 `.length`，导致 `typeof num === "number"` 恒假、技能永不触发；已恢复 `.length` 并把 `typeof` 冗余判断简化为 `isPrime(num)`。
+- 校验：`pnpm eslint packages/extension/WhichWay/src/packs/character/gelainimrfz.ts` 通过（0 报错）。**未构建、未游戏内实测**（浏览器 MCP 起不了 dev app）。手动清单：①格拉尼装防御马（哥本哈根/达利阿拉伯）后，他人以点数 ≤ 马栏点数之和的【杀】应无法指定她，点数更大或无点数的【杀】可指定，且她**自己**出【杀】不受限制；②出【杀】造成伤害后应弹一次「选一张手牌 + 选受害者上家」的框、带取消按钮，选完这张【杀】真的结算（即使本回合【杀】次数已用完）；③目标不可达（上家不在距离内/已死亡）时不弹框；④飞驹开局选马仍是防御马+进攻马各一张、装备后技能（回血/废除马栏/判定阶段杀/失去手牌摸牌）表现不变。
+
+### 武将卡界面三处修改：背景图标尺寸 / 背景加载延迟 / 衍生技能与衍生卡牌（`src/characterCard/`）
+
+- **修复（「背景」图标过大）**：`image/ui/back_switch.png` 是 36×36 的方图，而 `.btn-img` 只写了 `width: 50px` 没约束高度，其它四个图标（skill/skin/mode/resume.png 均 60×45）按 50px 宽出来是 50×37.5，这个方形图标却出来 50×50，上下都溢出 38px 高的按钮。现补 `max-height: 38px` + `object-fit: scale-down`：60×45 的仍是 50×37.5（观感不变），方图被夹到 38×38，`scale-down` 保证不把 36px 的图放大糊掉。
+- **修复（选背景明显延迟）**：两处。
+  - `BackgroundPanel.vue` 原来把十几张背景（`image/background` 合计约 19MB，单张 0.2–3.6MB）全部写成 CSS `background-image`，面板一挂载就一次性全取、且要等解码；改为 `<img loading="lazy" decoding="async" fetchpriority="low">`，滚进视口才取，并把 `getFileTree` 的扫描结果缓存在模块级（面板每次开关都重新 mount，目录内容不会变，第二次起不再发 readdir+stat 的 IPC）。占位用 `img` 自己的深色底色，不用透明度渐显——那样一旦 `load` 不触发就会留一张永远看不见的透明图。
+  - `CharacterCard.vue` 原来点一下就直接改容器 `backgroundImage`，浏览器要等新图解码完才上色，中间是纯空窗。现在 `background`（选中值，面板高亮立刻跟随、配置立刻落盘）与 `shownBackground`（真正画上去的）分开：先 `new Image().decode()`，解码完成再一次性换；`decode()` reject（图坏/不支持）时照样切，不让界面永久停在旧背景；连点时用 `background.value === value` 判断只让最后一次选择上画，避免先解码完的那张顶掉后选的那张。
+- **调整（衍生技不再与主技能平级）**：`SkillPanel.vue` 原来把 `lib.skill[x].derivation` 拉平成顶层条目（`.dskillname` 区分颜色），衍生技看起来和干员自己的技能并列。现在每名技能一个 `.skillWrapper`，衍生内容渲染在该条目**内部**的 `.derivationBox`（标题「衍生技能」），试听按钮仍播主技能的音、「自动发动」仍写 `lib.config.autoskilllist`，行为与旧版一致。
+- **新增（衍生卡牌）**：衍生条目里带 `lib.skill[x].equipSkill` 的表示它有对应的装备牌（如格拉尼【飞驹】的四匹马），这类不再列成技能，而是用 `game.createCard(cardId)` + `ui.create.buttons([card], "card", host, true)`（内部走 `ui.create.buttonPresets.card`）画出真正的引擎牌面，放进单独的 `.derivationCardBox`（标题「衍生卡牌」）并与文字说明并排。
+  - `lib.card` 只有「牌 → 技能」（`lib.card[id].skills`）这一层、没有反向索引，故在模块级扫一遍 `lib.card` 建「技能 → 牌」反查表并缓存。
+  - `game.createCard` 的**原件挂在 `ui.special`**，card 预设 `copy(false)` 出副本后原件已无用，故 `node.remove()`，否则每开一次面板攒一批幽灵牌。传 `noclick`：展示用，不该参与任何结算。
+  - 超出字面要求的一处判断（可回退）：有些 `derivation` 直接写的是**卡牌 id**（老实【拾剑】→ `jianzhumrfz`），这种也画成牌面；`equipSkill` 查不到对应牌（牌包被关等）时退回列成衍生技能，信息不丢。
+- **新增（衍生区可折叠）**：「衍生技能」「衍生卡牌」两块各加一个折叠开关，**默认展开**，状态存在条目上（`item.foldDerivations` / `item.foldCards`）。开关是 `.derivationTitle` 的 `::before` 伪元素（展开 `content: "-"`、折叠 `content: "+"`，18px/700/16px 宽/`line-height:1`），整行标题即热区（`cursor:pointer` + `user-select:none`）；`--ak-font-label`/`--ak-accent`/`--ak-dur-fast` 扩展里目前没有定义，一律写了回退值（沿用标题自己的字体与 `currentColor`，过渡 0.2s），折叠态额外 `transform: rotate(90deg)`——加号转 90° 看上去仍是加号，于是过渡表现为「符号转过来变成减号」而不是凭空加动画。折叠用 `v-show` 而不是 `v-if`：牌面是 `renderCards()` 命令式塞进挂载点的，`v-if` 会把挂载点连同牌面一起销毁、再展开时 `hasChildNodes()` 的判空逻辑就再也补不回来了。
+- 校验：`pnpm eslint` 三个文件 0 报错；另用 `vue/compiler-sfc` 的 `parse`/`compileScript`/`compileTemplate` 逐一编译 `SkillPanel.vue`、`BackgroundPanel.vue`、`CharacterCard.vue`，均无错误（两个面板新增了与 `<script setup>` 并存的模块级 `<script>` 块，需确认可合并）。**未构建、未游戏内实测**（浏览器 MCP 起不了 dev app）。手动清单：①顶栏五个图标大小观感一致、「背景」不再溢出；②首次打开背景面板列表立出、缩略图随滚动逐张出现；③点选大背景时旧背景保持到新高图就绪、不闪空窗，连点多张最终停在最后一张；④格拉尼技能面板出现「衍生技能」+「衍生卡牌」两块，四匹马牌面带花色/点数缺失时的「无」字角标、牌面右侧显示马名与描述；⑤老实【拾剑】的【剑助】显示为武器牌面；⑥无 deriv 的干员面板与旧版一致、拖动排序与「自动发动」照常；⑦点「衍生技能」/「衍生卡牌」标题行能收起/展开（标题前的符号 −／+ 随之切换），**衍生卡牌折叠后再展开牌面仍在**（不出现空白格）。
+
+### 武将卡背景来源：新增 `dynamicSkin/background` 目录 + 「武将卡背景来源」设置（`src/file.js`、`src/characterCard/`）
+
+- **新增来源目录**：`whichWayFile.pathShceme` 加 `dybg:` → `extension/WhichWay/dynamicSkin/background/`（本次实测该目录 48 张 PNG、合计约 82MB，全是活动场景图，自带 `default.png`）。
+  - 过程中曾写成 `ext:dynamicSkin/background/`：`ext:` 是**引擎**的前缀（`ext:WhichWay/…` → `extension/WhichWay/…`，见 `src/skin/index.ts:356`、`src/audio/index.ts:1240`），而 `compilePath` 只认本扩展自己的 scheme、不会替换它，于是 `getFileTree` 与缩略图 `src` 拿到的都是未编译的原始串（列目录与图片双双失败）。换 `dybg:` 后与现有 `dyc:`/`bg:` 无前缀冲突（`compilePath` 是逐 key `startsWith` + `replace`，`"dybg:…"` 既不以 `dyc:` 开头也不以 `bg:` 开头）。
+- **新增设置项**「武将卡背景来源」（键 `characterCardBackgroundSource`，选项 `featured` 精选 / `all` 全部，**默认精选**）：在 `src/characterCard/index.ts` 构造器里再注册一个 `onConfig`，priority 769 紧跟样式开关的 770，菜单里就挨着排。
+- **配置名/文案/读取抽到 `src/characterCard/backgroundSource.ts`**（`BACKGROUND_SOURCE_CONFIG_NAME`、`backgroundSourceItems`、`getBackgroundSourceMode()`）。单独成模块的原因：面板不能反过来 import `characterCard/index.ts`——`index.ts` → `CharacterCard.vue` → `BackgroundPanel.vue` 已经是链路，再导回来就是循环依赖。读取沿用样式开关那套「值缺失/异常按默认处理」的写法，从未配置过即精选。
+- **面板行为**：`featured` 只扫 `dybg:`（`image/background` 那十几张 JPG 不再扫描、也不再一次性取图）；`all` 才扫 `dybg:` + `ui:background/` + `bg:`。
+  - 列表顺序改为「按来源分组、组内按文件名字典序」，不再对整个列表做全局字典序（旧写法会把 `bg:` 的图排在最前，与「精选优先」的意图相反）。
+  - 模块级缓存由 `cachedList` 改成 `cached = { mode, list }`：模式一变就重扫，否则改了设置还把旧模式的列表端出去。
+- **需要知道的副作用**：切到精选时 `ui:background/default.png` 不再出现在列表里——正在使用的背景（`characterCardBackground` 的配置值）不受影响、照常画着，只是面板里没有对应条目可高亮；`dynamicSkin/background` 自己有 `default.png` 可作回退。
+- 校验：`pnpm eslint` 四个文件（`file.js`、`characterCard/index.ts`、`characterCard/backgroundSource.ts`、`panels/BackgroundPanel.vue`）0 报错；另用 `vue/compiler-sfc` 的 `parse`/`compileScript`/`compileTemplate`/`compileStyle` 编译 `BackgroundPanel.vue`，脚本/模板/样式均 0 错误。**未构建、未游戏内实测**（浏览器 MCP 起不了 dev app）。手动清单：①设置里出现「武将卡背景来源」，默认「精选」，文案为 精选/全部；②精选下背景面板只列 `dynamicSkin/background` 的图、打开明显变快；③切「全部」后重开面板多出 `image/background` 与 `image/ui/background` 的图；④切回「精选」不再看到旧模式的列表（缓存按模式失效）；⑤选中 `dynamicSkin/background` 里任意图后武将卡背景真的换掉（验证 `dybg:` 编译出的 URL 可用、缩略图滚进视口才取）。
+
+### 构建：chunk 去掉 `[hash]`（发布后用户 `chunks/` 无限增大的问题）
+
+- **现象**：`vite.config.ts` 的 `chunkFileNames` 返回 `chunks/${name}-[hash].js`，而 `emptyOutDir` 必须为 `false`（见同文件注释：先清空会让 2200+ 个音频进入「部分存在」的中间状态，触发引擎 `game.tryAudio` 的重试死循环）。两者叠加 = 每次构建都**只新增、从不删除** chunk；发布又是按文件名覆盖到用户目录，于是用户每更新一次就攒一批永不再被引用的死文件。实测本机 `apps/core/extension/WhichWay/chunks/` 已有 38 个文件（历史上堆到 596 个，同名 `GloriousIdeal-battleOverlay-shared-*` 有 26 份），其中 `characterCard-*`、`configUI-*`、`init-*` 各自都是「上一版构建留下的孤儿 + 本次的」两份不同 md5 的文件。
+- **改法一（主因）**：`chunkFileNames` 去掉 `-[hash]` → `chunks/${name}.js`。名字仍按源码路径推导（`src/x/index.ts` → `x`、共享 chunk → `x-shared`），同名 chunk 每次构建**就地覆盖**，用户侧目录大小与更新次数无关。
+  - 去掉 hash 后靠什么避免重名覆盖：`derive` 对 `src/**` 全部真实模块路径是**单射**的（已用脚本跑过：`src` 下每个文件都过一遍 `derive`，得到 417 个互不相同的名字、0 冲突），而每个 chunk 只有一个 `facadeModuleId`，所以同一批产物内不会撞名；即使将来出现 `src/a.ts` 与 `src/a/index.ts` 这种折叠，rollup 会静默把后者改成 `chunks/a2.js`（已用小样例实测：不报错、不覆盖、引用路径同步更新），因此也不需要为了去重而加 hash。
+  - 顺带的好处：更新时入口与 chunk 名字稳定，不会再出现「只复制到部分新文件 → 入口引用的旧 hash 文件缺失」这种半更新状态。
+- **改法二（回收存量）**：新增内联插件 `pruneStaleChunks`（`apply: "build"`，`writeBundle` 阶段）。它拿本次 bundle 的 chunk 文件名集合，删除 `<outDir>/chunks/` 里**不在集合内的 `.js`**（只碰这一个目录、只碰 `.js`，audio/image/dynamicSkin 一律不动；先写后删）。执行时机在写盘之后，所以新产物已经就位。`WW_KEEP_OLD_CHUNKS=1` 可临时关掉（做新旧产物对比时用）。
+- **两处注释同步更正**：`emptyOutDir: false` 的理由原来写的是「产物 JS 都带 hash，旧的残留不会被引用，所以不清空是安全的」——这句正是问题所在，已改为「靠固定文件名 + prune 插件保证不膨胀，而不是靠 hash」。
+- **需要知道的代价**：chunk 名不再随内容变化 ⇒ 更新后浏览器若命中 HTTP 缓存，可能仍旧拿到旧内容。这一点**并非新增风险**：入口 `extension.js` 与 `css/viteAutoCreateStyle.css` 从来就是固定名，本扩展一直是靠覆盖同名文件发布的；真遇到顽固缓存，正确做法是在 import 处加查询串，而不是把 hash 加回文件名。
+- **注意**：`packages/extension/WhichWay/AGENTS.md` 第 35 行仍写着「产物 JS 都带 hash…因此构建前不必、也不要手动清空输出目录」，本次未改（项目指令文件需你确认），下一句应改为「chunk 名固定 + 构建后自动清理过期 chunk」。
+- 校验：`pnpm eslint packages/extension/WhichWay/vite.config.ts` 0 报错；derive 单射性与 rollup 撞名行为分别用脚本和最小 rollup 样例实测（临时目录，未写入本仓库）。**未跑 `pnpm build`**（按约定构建由你执行；且首次构建会在 `apps/core/extension/WhichWay/chunks/` 删除约 38 个旧 hash 文件，建议先关掉游戏再构建，避免正在跑的页面去取已被删掉的旧 chunk）。手动清单：①构建后 `chunks/` 只剩本次产物（控制台逐条打印「删除过期 chunk」）；②连续构建两次，`chunks/` 文件数与文件名**完全不变**（只覆盖内容）；③游戏内打开武将卡、干员面板、瑰丽理想等动态模块照常（动态 import 路径已随名字更新）；④`css/viteAutoCreateStyle.css` 与 audio/image 目录不受影响。
+
+## 2026-10-11
+
+### 修复：虎狼丸【荒咬】不按描述结算（`src/packs/character/hulangwanmrfz.ts`）
+
+对照 `huangyaomrfz_info` / `huangyaomrfz_rewirte_info` 排查，定位到 4 处偏差。
+
+- **「同色」判定必抛异常（主因）**：`filter` 里写的是 `card.cards.length > 0`，但实体牌 `Card` 类**根本没有 `cards` 属性**（`cards` 只存在于 `VCard`/`get.copy`，见 `library/element/vcard.js:52,131`）。而 `get.autoViewAs` 造出的纯虚拟牌一定带 `cards: []`。结果就是：上一张是纯虚拟牌 ⇒ `length > 0` 为假 ⇒ 不触发；上一张是**实体牌**（正是描述要的情形）⇒ 读 `undefined.length` 抛 `TypeError`。该异常发生在 `lib.filter.filterTrigger`（`library/index.js:11135`，无 try 包裹）里，被 `arrangeTrigger` 的 content 抛出 ⇒ 该次触发整体失败。净效果：【荒咬】原版几乎从不正常发动。
+  - 改为 `hasPhysicalCard()`：`get.itemtype(card) === "card" || Array.isArray(card.cards) && card.cards.length > 0`，即「实体牌本身，或由实体牌转化/消耗而来的虚拟牌」，与描述「有对应实体牌的牌」一致。
+- **「上一张」取错对象**：原 `getLastUsed` 直接取 `getAllGlobalHistory("useCard")` 的倒数第二条，不会跳过纯虚拟的使用。【荒咬】自己视为使用的那张【杀】（无实体牌、颜色为 `none`）会占住「上一张」，把后续同色链切断。
+  - 改为**以当前事件为锚点向前回溯**（`histories.lastIndexOf(event)`），取最近一张有实体牌的使用牌；当前事件尚未入历史时退化为从表尾开始。
+- **伤害归属判定不可靠**：原判定用 `evt.getParent("huangyaomrfz")` 取到父事件后比较 `huangyaomrfz_triggered !== true`。`getParent(name)` 在未命中时返回的是 `{}`（`gameEvent.ts:152-170`，`forced` 为假值时），`!!evt2` 恒真，实际只靠 `storage.huangyaomrfz` 兜住。
+  - 改为直接比对身份 `evt.getParent("huangyaomrfz") === event`（内容事件确实以技能名创建，见 `content.ts:4281` `game.createEvent(event.skill)`），并去掉多余的 `event.huangyaomrfz_triggered` 标记；同时删掉一段重复扫描 + 遗留的 `console.log` 调试输出。
+- **AI 在「无法使用【杀】」时强行出杀**：`cost` 的 `ai` 原写法为「友好且能出杀 ⇒ 选项二，否则 ⇒ 选项一」，因此当 `controls` 里没有「选项一」（`canUse` 判过不了，多为距离不够）时仍返回 `"选项一"`。`chooseControl` 会把该值当作结果（`content.ts:8342-8350`，`indexOf` 得 -1 也不拦），content 于是照常 `chooseUseTarget` ⇒ AI 托管下会视为使用一张**本不该用**的【杀】，且此路径不检距离。
+  - 改为先判 `controls.includes("选项一")`，不可用则一律「选项二」。
+- **未改动（待你确认口径）**：
+  - 「修改【荒咬】直到下次使用【荒咬】」目前实现为「下次【荒咬】发动**并结算完 `huangyaomrfzEnd`** 时才恢复」，即下一次发动仍按修改版结算。若要「下次发动即用原版」，需把失效时机挪到 `huangyaomrfzBefore/Begin`。
+  - 【荒咬】没有写 `locked: true`（描述是锁定技）。因引擎在 `typeof info.cost === "function"` 时直接进 cost（`content.ts:4150`），不会弹「是否发动」，行为上是锁定的，只差描述配色/锁图标这类观感，故未动。
+  - 选项二那条 `disableSkill(`${event.name}_effect`, "huangyaomrfz")` 参数方向是对的：`disabledSkills` 的 **key 是被禁用的技能、value 是禁用来源**（`player.js:11575` + `game.filterSkills` 按 key 剔除），官方觉醒同此用法。
+- 校验：`pnpm eslint packages/extension/WhichWay/src/packs/character/hulangwanmrfz.ts` 无报错。**未构建、未游戏内实测**（browser MCP 起不了 dev app）。改前备份在 `packages/extension/WhichWay/hulangwanmrfz.ts.bak-20261011`。
+- 手动验证清单：①两名其他角色连续使用同色**实体牌**后，虎狼丸应弹「选项一/选项二」（控制台不再有 TypeError）；②选项一的【杀】未造成伤害 ⇒ 失去 1 点体力并出现「荒咬·修改」标记；③修改后无视颜色，且造成伤害后摸「已损失体力值」张牌；④选项二摸 1 张牌且本轮【荒咬】真正失效，下一轮恢复；⑤AI 托管 + 目标不在距离内 ⇒ 只能选「选项二」，不再强行出杀；⑥虎狼丸自己用牌不触发【荒咬】。
+
+### 扩展介绍页美化 + 作者头像 / LLM logo（`src/config/extIntro.vue`）
+
+原页面是「一张大图 + 纯文本列表」，过于简陋。重写为卡片式版面，并补上作者头像与协力 LLM 的 logo（素材均在 `image/decoration/`，名单与 `src/package/author.vue` 对齐）。
+
+- **封面**：`SJZX.jpg` 改为圆角 hero 图，底部叠渐变遮罩，左下角放 `SJZXStar6.png` 星标条 + 一行 tagline（封面自带的金色标题与二维码不再被裁切）。
+- **作者 / 协力 LLM 卡片**：作者（TheLeaderOne→`1.jpg`、圣晴天空→`0.jpg`）为金环圆形头像 + 姓名 + 分工；LLM（DeepSeek-v4.1-Flash→`deepseek.png`、Qwen3.8-Flash→`qwen.png`）为白底圆形 chip + 名称胶囊（GitHub 标是纯黑透明底，深色面板上必须垫白底才看得见，故 chip 统一白底）；另加一枚「访问扩展仓库」胶囊（`github.png`，点击 `window.open` 仓库地址）。
+- **感谢名单**：由 `<ul>` 改为胶囊标签流（设计者金色、特别感谢灰白），`whichWayConfigData.thanks` 数据源不变。
+- **资料来源**：列表改为金色 ◆ 自定义符号 + 二级缩进列表，去掉浏览器默认圆点。
+- **资源与反馈**：QQ 群 / 百度网盘改为两张并排二维码卡片（白底容器保证扫码识别、`loading="lazy"`），复制入口从「下划线文字」改成圆角按钮，复制逻辑（Clipboard API + execCommand 降级）原样保留。
+- **版式**：根节点改 `flex column + gap`、`max-width: 760px` 居中；各区块为半透明深色卡片 + 金色描边；标题用扩展自带 `lishu` 字体 + 两侧渐隐分割线，替换原来的「←← →→」文本箭头。所有栅格用 `auto-fit minmax(...)`，在引擎设置弹窗与游戏内快速设置（`configUI/main.vue` 的 `.displayArea`，85% 宽滚动区、深色背景图）两种宿主下都能自适应；`main.vue` 里对 `.whichWay-intro` 的宽度 `!important` 覆盖继续生效。
+- 校验：`vue/compiler-sfc` parse + compileScript + compileTemplate 通过，`pnpm eslint src/config/extIntro.vue` 无报错。**未构建、未游戏内实测**（browser MCP 起不了 dev app）。
+- 手动验证清单：①引擎「设置 → 扩展信息（点击后展开）」展开后封面/头像/LLM chip/二维码卡片均正常显示且无横向溢出；②游戏内快速设置「扩展介绍」面板滚动浏览同上，窄窗口下二维码卡片自动折行；③「复制群号 / 复制链接」按钮点击后弹「✅ 已复制」；④「访问扩展仓库」点击打开 GitHub；⑤深色背景下金色标题与白色文字对比清晰。
+- 备注：`configUI/main.vue` 里 `.qr-code, .baidu-icon` 两条 `!important` 覆盖因旧类名已删除而失效（无副作用，未动该文件）。
+
+### 修复：扩展介绍页所有 DOM 元素重叠（`src/config/extIntro.vue`）
+
+美化后实测所有元素叠在原点。根因是引擎全局样式 `apps/core/layout/default/layout.css:31` 的裸元素选择器 `div { display: inline-block; position: absolute; transition: all 0.5s; }`——它命中每一个未自行声明 `position` 的 `<div>`。本次改版里根节点 `.whichWay-intro` 及 `.people-grid / .person / .person-name / .person-role / .llm-row / .llm / .tag-grid / .qr-grid / .qr-card / .qr-box / .qr-caption / .qr-value` 全是只设了 `display`、没设 `position` 的 div，被全局规则打成 `position: absolute` 后集体脱离文档流叠在一起（`<section>/<header>/<img>/<span>/<p>` 等非 div 不受影响，故 `.card` 区块本身没塌）。
+
+- 修复：给上述每个 div 类补显式 `position: relative`（`.hero-shade / .hero-foot` 保持原本有意的 `absolute`），`.qr-box` 顺带补 `display: block`。scoped 类选择器带 `[data-v-*]` 特异度 (0,2,0)，稳压全局 `div` 的 (0,0,1)，`display: flex/grid` 也不再被全局 `inline-block` 干扰。
+- 校验：`vue/compiler-sfc` 编译通过、`pnpm eslint src/config/extIntro.vue` 无报错；已断言编译后 scoped CSS 中各 div 类解析为 `position: relative`、遮罩/页脚为 `absolute`。**仍未游戏内实测**（browser MCP 起不了 dev app）。
+- 复核清单：①游戏内快速设置「扩展介绍」面板与引擎设置弹窗两处，各卡片自上而下正常排列、不再重叠；②封面遮罩只盖 hero 图、星标条压在封面底部；③作者头像/LLM chip 在各自卡片内横排；④两张二维码卡片并排、白底可扫。
+
+### 调整：「访问扩展仓库」从「协力 LLM」中拆出（`src/config/extIntro.vue`）
+
+原先仓库入口是混在 `.llm-row` 里的一枚 `.llm.llm-link` 胶囊，与 DeepSeek / Qwen 并列，语义上被当成一类 LLM。按反馈把它单独成块：
+
+- 模板：`协力 LLM` 行只保留 `agents` 遍历；新增 `扩展仓库` 的 `section-title` + `.repo-row > .repo-link`（GitHub chip + 两行文案：`访问扩展仓库` 标题与仓库 URL）。点击行为不变（`openUrl(repoUrl)`）。
+- 样式：新增 `.repo-row / .repo-link / .repo-text / .repo-name / .repo-url`（`.repo-row / .repo-link` 为 div，已补 `position: relative` 防前述全局 `div{position:absolute}` 塌陷；`.repo-link` 用 `inline-flex` + 悬停金色高亮）。移除已不再使用的 `.llm-link / .llm-link:hover`。`.llm-chip` 复用不变。
+- 校验：`vue/compiler-sfc` 编译通过、`pnpm eslint src/config/extIntro.vue` 无报错，已断言 `.repo-row / .repo-link` 编译后为 `position: relative`、`.llm-link` 已从产物移除。**仍未游戏内实测**。
+
+

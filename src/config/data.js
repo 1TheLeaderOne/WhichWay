@@ -32,7 +32,7 @@ export const whichWayConfigData = {
 		MonumentalMelodyTracey:"特蕾西娅-熠曲丰碑",
 	},
 	thanks:{
-		designer:["涵涵","今天整点什么/光阴","落尘星河","TheLeaderOne","圣晴天空","培嵩"],
-		special:["容若（动皮指导）","果敢心（提供意见）","灭蚁强小风儿（测试）","零羽白瑠（测试、额外皮肤包作者）","Flandre（动皮参数和皮肤提供）","豆姜（测试）"],
+		designer:["涵涵","今天整点什么/光阴","落尘星河","TheLeaderOne","圣晴天空","培嵩","Flandre"],
+		special:["容若（动皮指导）","果敢心（提供意见）","灭蚁强小风儿（测试）","零羽白瑠（测试、额外皮肤包作者）","Flandre（动皮参数和皮肤提供、测试）","豆姜（测试）"],
 	},
 }

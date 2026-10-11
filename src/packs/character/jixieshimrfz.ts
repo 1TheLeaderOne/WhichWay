@@ -25,6 +25,7 @@ character(NAME, {
 	pack: "legendSJZX",
 	skills: ["xiefangmrfz", "juleimrfz"],
 	designer: ["Flandre"],
+	llm:"DeepSeek-4.1-Flash"
 });
 
 characterIntro(NAME, "机械师，罗德岛精英干员，主导罗德岛的武器装备、工程设施及实验器材的研发、制造及维护工作，为罗德岛各部门干员提供必要的硬件支持。");

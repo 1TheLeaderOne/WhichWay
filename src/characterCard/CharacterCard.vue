@@ -12,13 +12,7 @@
 			<div class="btn-back" @click="close">
 				<div class="imageBox"><img :src="uiUrl('back.png')" alt="" /></div>
 			</div>
-			<div
-				v-for="btn in menuButtons"
-				:key="btn.key"
-				class="btn-background"
-				:class="{ 'btn-selected-SJZX': panel === btn.key }"
-				@click="panel = btn.key"
-			>
+			<div v-for="btn in menuButtons" :key="btn.key" class="btn-background" :class="{ 'btn-selected-SJZX': panel === btn.key }" @click="panel = btn.key">
 				<div class="btn-enSJZX">{{ btn.en }}</div>
 				<div class="btn-cnSJZX">{{ btn.cn }}</div>
 				<div class="btnImage-wrapper"><img class="btn-img" :src="uiUrl(btn.image)" alt="" /></div>
@@ -99,6 +93,17 @@
 			<BackgroundPanel v-else-if="panel === 'background'" :value="background" @select="onBackgroundSelect" />
 			<ResumePanel v-else :name="name" />
 		</div>
+
+		<!-- 使用AI提示 -->
+		<div v-if="llm" class="UseLLMTips-wrapper">
+			<div class="LLM-wrapper">
+				<div class="LLM-Icon">
+					<img :src="LLM_icon" alt="" class="imageLimit" />
+				</div>
+				<div class="LLM-Text">{{ LLM_name }}</div>
+			</div>
+			<div class="LLM-Content">技能代码由AI生成</div>
+		</div>
 	</div>
 </template>
 
@@ -122,7 +127,7 @@ import { whichWayToast } from "../toast/index.ts";
 import { whichWayArknight } from "../arknight/index.ts";
 import { spineWorker } from "../skin/spineWork.js";
 import { whichWayCharacterModules } from "../modules/index.js";
-import { getDesigner, getCamp } from "../packs/base/index.js";
+import { getDesigner, getCamp, getLLM } from "../packs/base/index.js";
 import { getGroupData } from "../packs/base/groups.js";
 import SkillPanel from "./panels/SkillPanel.vue";
 import SkinPanel from "./panels/SkinPanel.vue";
@@ -137,16 +142,27 @@ const props = defineProps({
 	onClose: { type: Function, default: null },
 });
 
-/** 武将卡背景（存 `extension_WhichWay_characterCardBackground`，值为 `<scheme>:<file>`） */
+/**
+ * 武将卡背景（存 `extension_WhichWay_characterCardBackground`，值为 `<scheme>:<file>`）。
+ *
+ * `background` 是**选中值**（背景面板的高亮跟着它走，点一下立刻变），
+ * `shownBackground` 是**已解码完成、真正画出来的那张**：直接改 `backgroundImage` 时，
+ * 浏览器要等新图解码完才会上色，而 `image/background` 里的图动辄两三兆，中间会有一段纯白/纯黑的空窗
+ * （而且同一时刻只有一张图在解码，点了别的还得再排队）。所以先把新图取到解码完再一次性换上去。
+ */
 const DEFAULT_BACKGROUND = "ui:background/default.png";
 const background = ref(whichWayUtil.config("characterCardBackground") || DEFAULT_BACKGROUND);
-const backgroundUrl = computed(() => whichWayFile.compilePath(background.value));
+const shownBackground = ref(background.value);
+const backgroundUrl = computed(() => whichWayFile.compilePath(shownBackground.value));
 
 /** 当前右侧面板：skill / skin / mode / background / resume */
 const panel = ref("skill");
 
 /** `image/ui/` 下的静态图 */
 const uiUrl = file => whichWayFile.compilePath(`ui:${file}`);
+
+/** image\decoration 下的静态图 */
+const decUrl = file => whichWayFile.compilePath(`logo:${file}`);
 
 /** 势力 logo / 反色 / 势力文字（原 createCampLogo 的逻辑） */
 const camp = computed(() => {
@@ -234,10 +250,23 @@ async function onSkinChange({ skinName: name, path }) {
 	whichWaySkin.refreshSkin();
 }
 
-/** 更换武将卡背景（背景面板发出） */
+/**
+ * 更换武将卡背景（背景面板发出）：配置与高亮立即写入，画面等新图解码完再切。
+ * `background.value === value` 的判断是为了连点：只有最后一次选择才允许往画面上盖，
+ * 否则先解码完的那张会把后选的那张顶掉。
+ */
 function onBackgroundSelect(value) {
+	if (value === background.value) return;
 	background.value = value;
 	whichWayUtil.saveConfig("characterCardBackground", value);
+	const image = new Image();
+	image.decoding = "async";
+	image.src = whichWayFile.compilePath(value);
+	const apply = () => {
+		if (background.value === value) shownBackground.value = value;
+	};
+	//decode() 在图片损坏/不支持时会 reject，此时照样切过去（不能让界面永远停在旧背景）
+	image.decode().then(apply, apply);
 }
 
 /** 开关动皮 */
@@ -259,6 +288,14 @@ onMounted(async () => {
 	refreshDynamicSkin();
 	await spineWorker.updateDyc(props.name, charImageEl.value);
 });
+
+/** AI提示 */
+const llm = computed(() => getLLM(props.name))
+const LLM_name = computed(() => llm.value ?? '占位符')
+const LLM_icon = computed(() => {
+  const name = llm.value?.split('-')[0]
+  return decUrl((name || 'deepseek') + ".png");
+})
 </script>
 
 <style scoped>
@@ -275,6 +312,55 @@ onMounted(async () => {
 .container-CC-SJZX .imageLimit {
 	max-width: 100%;
 	max-height: 100%;
+}
+
+.UseLLMTips-wrapper {
+	display: flex;
+	align-items: center;
+	position: absolute;
+	width: 18%;
+	right: -0.5%;
+	top: 7.5%;
+	height: 8%;
+	background-size: 100% 100%;
+	padding: 1%;
+	background-image: url("../../image/ui/characterCard/use_ai_bg.png");
+	background-size: 100% 100%;
+}
+
+.UseLLMTips-wrapper .LLM-wrapper {
+	position: relative;
+	height: 96%;
+	width: 33%;
+	margin: 2%;
+}
+
+.UseLLMTips-wrapper .LLM-wrapper .LLM-Icon {
+	position: relative;
+	width: 100%;
+	height: 60%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.UseLLMTips-wrapper .LLM-wrapper .LLM-Text {
+	position: relative;
+	width: 100%;
+	font-size: 9px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.UseLLMTips-wrapper .LLM-Content {
+	position: relative;
+	height: 96%;
+	width: 66%;
+	font-size: 15px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 .camplogo-wrapper {
@@ -530,7 +616,11 @@ onMounted(async () => {
 	line-height: 60px;
 	font-family: dy_sjzx;
 	color: #fff;
-	text-shadow: -2px -2px 0 rgba(0, 0, 0, 0.3), 2px -2px 0 rgba(0, 0, 0, 0.3), -2px 2px 0 rgba(0, 0, 0, 0.3), 2px 2px 0 rgba(0, 0, 0, 0.3);
+	text-shadow:
+		-2px -2px 0 rgba(0, 0, 0, 0.3),
+		2px -2px 0 rgba(0, 0, 0, 0.3),
+		-2px 2px 0 rgba(0, 0, 0, 0.3),
+		2px 2px 0 rgba(0, 0, 0, 0.3);
 	transition: all 0.3s ease-in-out;
 	white-space: nowrap;
 }
@@ -727,8 +817,14 @@ onMounted(async () => {
 	transition: all 0.3s ease-in-out;
 }
 
+/* 图标框 50×50，但按钮本身只有 38px 高：方形图标（back_switch.png 36×36）按 50px 宽渲染会长成 50×50 溢出按钮，
+   而非方形的图标（skill/skin/mode/resume.png 60×45）按 50px 宽渲染出来是 50×37.5。
+   夹住高度后两者观感一致：60×45 的仍是 50×37.5，方形的被压到 38×38；scale-down 保证不把小图放大糊掉。 */
 .topMenu-wrapper > .btn-background > .btnImage-wrapper > .btn-img {
 	width: 50px;
+	max-height: 38px;
+	object-fit: scale-down;
+	object-position: center;
 	filter: drop-shadow(0 0 3px #000);
 	z-index: 1;
 }

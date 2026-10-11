@@ -247,7 +247,7 @@ skill({
 		trigger: { target: "useCardToTargeted" },
 		filter(event, player) {
 			const source = event.player;
-			return event.card.name == "sha" && source.getHistory("sourceDamage", evt => evt.players.includes(player)).length < 1 && source.group !== player.group;
+			return event.card.name == "sha" && source.getHistory("sourceDamage", evt => evt.player === player).length < 1 && source.group !== player.group;
 		},
 		async content(event, trigger, player) {
 			const card = get.autoViewAs({ name: "sha", isCard: true });
