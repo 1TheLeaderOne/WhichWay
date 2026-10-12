@@ -105,7 +105,7 @@ function fallbackItems(info, type, group) {
  * @param {string} text 单行 / 单段文本
  * @returns {string} HTML 片段
  */
-function renderInline(text) {
+export function renderInline(text) {
 	/** @type {string[]} */
 	const codes = [];
 	let html = String(text ?? "").replace(/`([^`\n]+)`/g, (match, code) => `\u0000${codes.push(code) - 1}\u0000`);

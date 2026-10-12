@@ -19,7 +19,7 @@ const resigter = (name: string) => {
 		[name]: "克莱门莎",
 
 		zhenchaomrfz: "镇潮",
-		zhenchaomrfz_info: "每回合每项限一次，[①当你成为【杀】的目标后;②当你使用【杀】指定目标后]，你可以和[①【杀】的使用者;②【杀】的目标之一]拼点，若你赢，此【杀】[①对你无效;②无视防具]，然后你获得其一张牌并对其造成一点伤害。",
+		zhenchaomrfz_info: "每回合每项限一次，[①当你成为【杀】的目标后;②当你使用【杀】指定目标后]，你可以摸一张牌并和[①【杀】的使用者;②【杀】的目标之一]拼点，若你赢，此【杀】[①对你无效;②无视防具]，然后你获得其一张牌并对其造成一点伤害。",
 		xiulingmrfz: "修邻",
 		xiulingmrfz_info: `当你每回合首次获得牌后，你可以令至多X名角色摸一张牌，然后所有除你以外的被选择的角色可以令你下次拼点牌点数+X。（X=此次你获得牌的数量，X至多为5）`,
 	});
@@ -45,10 +45,10 @@ const resigter = (name: string) => {
 				// console.log(event,event.target);
 				if (event.target === player) {
 					// console.log(getUsage("be", player),player.canCompare(event.target))
-					return getUsage("be", player) === false && player.canCompare(event.player);
+					return getUsage("be", player) === false && player.canCompare(event.player,true);
 				}
 				//指定目标
-				return getUsage("to", player) === false && event.targets.some(char => player.canCompare(char)) && event.getParent()!.triggeredTargets3.length == 1;
+				return getUsage("to", player) === false && event.targets.some(char => player.canCompare(char,true)) && event.getParent()!.triggeredTargets3.length == 1;
 			},
 			async cost(event, trigger, player) {
 				//成为目标
@@ -90,7 +90,7 @@ const resigter = (name: string) => {
 							prompt: get.prompt("zhenchaomrfz"),
 							prompt2: `选择和${targets}中的一名角色拼点，若你赢，若你赢，此【杀】无视防具，然后你弃置其一张牌并对其造成一点伤害。`,
 							filterTarget(card, player, target) {
-								return player.canCompare(target) && targets.includes(target);
+								return player.canCompare(target,true) && targets.includes(target);
 							},
 							ai(target) {
 								let val = ai_val(get.event(), get.player(), target);
@@ -118,6 +118,7 @@ const resigter = (name: string) => {
 				}
 			},
 			async content(event, trigger, player) {
+				await player.draw();
 				//成为目标
 				if (trigger.target === player) {
 					player.storage["zhenchaomrfz"].be = true;

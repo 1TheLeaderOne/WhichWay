@@ -17,7 +17,7 @@
 
 			<!-- 版本列表 -->
 			<div class="version-list">
-				<div v-for="(version, index) in filteredVersions" :key="version.id" class="version-card" :class="{ collapsed: version.collapsed }">
+				<div v-for="version in filteredVersions" :key="version.id" class="version-card" :class="{ collapsed: version.collapsed }">
 					<!-- 版本标题 -->
 					<div class="version-header" @click="toggleVersion(version)">
 						<div class="version-info">
@@ -51,6 +51,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { whichWayUpdateLog } from "../../updateLog/index.js";
+import { renderInline } from "../../updateLog/markdown.js";
 import { whichWayFile } from "../../file.js";
 
 // Props 和 Emits
@@ -180,28 +181,48 @@ function parseUpdateLog(logText) {
 	}
 }
 
-// 格式化更新项
+// 关键词高亮规则（渲染成 HTML 之后，仅对标签之外的纯文本片段生效）
+const HIGHLIGHT_PATTERNS = [
+	{ pattern: /新增(干员|皮肤|动态皮肤|背景|成就|模组|功能|模式)/g, className: "keyword-add" },
+	{ pattern: /调整(技能|武将)/g, className: "keyword-modify" },
+	{ pattern: /修复.*?的bug/g, className: "keyword-fix" },
+	{ pattern: /优化.*?/g, className: "keyword-optimize" },
+	{ pattern: /删除.*?/g, className: "keyword-remove" },
+];
+
+/**
+ * 只在标签之外的文本里做替换，避免把 <strong>/<code> 等标签夹进 <span> 里造成标签错位。
+ * @param {string} html 已渲染的 HTML 片段
+ * @param {RegExp} pattern 带 g 的正则
+ * @param {string} className 高亮 span 的类名
+ */
+function highlightPlainText(html, pattern, className) {
+	return html
+		.split(/(<[^>]+>)/)
+		.map(segment => (segment.startsWith("<") ? segment : segment.replace(pattern, match => `<span class="${className}">${match}</span>`)))
+		.join("");
+}
+
+// 格式化更新项：同时兼容「"引号条目"」老格式与「- **md**：`code`」新格式
 function formatUpdateItem(item) {
-	// 处理 HTML 标签
-	item = item.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+	let text = item;
 
-	// 高亮关键词
-	const highlightPatterns = [
-		{ pattern: /新增(干员|皮肤|动态皮肤|背景|成就|模组|功能|模式)/g, class: "keyword-add" },
-		{ pattern: /调整(技能|武将)/g, class: "keyword-modify" },
-		{ pattern: /修复.*?的bug/g, class: "keyword-fix" },
-		{ pattern: /优化.*?/g, class: "keyword-optimize" },
-		{ pattern: /删除.*?/g, class: "keyword-remove" },
-	];
+	// 1) 新版条目把行内代码写成转义反引号 \`code\`，先还原成 `code`
+	text = text.replace(/\\`/g, "`");
+	// 2) 条目本身已是 <li>，去掉 Markdown 无序列表前缀 "- " / "* " / "+ "
+	text = text.replace(/^[-*+]\s+/, "");
+	// 3) 还原历史遗留的实体写法（<br>、<s> 等仍希望按原样渲染）
+	text = text.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
 
-	let result = item;
-	highlightPatterns.forEach(({ pattern, class: className }) => {
-		result = result.replace(pattern, match => {
-			return `<span class="${className}">${match}</span>`;
-		});
-	});
+	// 4) 用与更新公告一致的 Markdown 行内渲染：**粗体** / `代码` / ~~删除线~~ / [链接]()
+	let html = renderInline(text);
 
-	return result;
+	// 5) 关键词高亮（仅文本片段内进行，保证 HTML 结构合法）
+	for (const { pattern, className } of HIGHLIGHT_PATTERNS) {
+		html = highlightPlainText(html, pattern, className);
+	}
+
+	return html;
 }
 
 // 切换版本展开/折叠
@@ -440,6 +461,30 @@ onUnmounted(() => {
 	background: rgba(64, 158, 255, 0.1);
 	border-left-color: #409eff;
 	transform: translateX(4px);
+}
+
+/* Markdown 行内元素（v-html 内容不带 scoped 属性，样式必须走 :deep） */
+.update-item :deep(code.md-code) {
+	background: rgba(0, 0, 0, 0.35);
+	color: #ffd7a1;
+	padding: 1px 6px;
+	border-radius: 4px;
+	font-family: Consolas, Monaco, monospace;
+	font-size: 0.92em;
+}
+
+.update-item :deep(strong) {
+	color: #ffd7a1;
+	font-weight: bold;
+}
+
+.update-item :deep(a.md-a) {
+	color: #409eff;
+	text-decoration: underline;
+}
+
+.update-item :deep(del) {
+	color: rgba(230, 230, 230, 0.5);
 }
 
 /* 关键词高亮 */

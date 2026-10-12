@@ -20,7 +20,10 @@ const _wwTimings = [];
 const _wwFlushTimings = total => {
 	const lines = _wwTimings.map(([label, ms]) => `  ${label.padEnd(26)} ${ms.toFixed(0).padStart(5)} ms`);
 	//找出前 3 大耗时（除总计外），方便定位后续优化目标
-	const top = [..._wwTimings].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([l]) => l);
+	const top = [..._wwTimings]
+		.sort((a, b) => b[1] - a[1])
+		.slice(0, 3)
+		.map(([l]) => l);
 	console.groupCollapsed(`%c[WhichWay] 加载完成 · 总计 ${total.toFixed(0)}ms`, "color:#4a9eff;font-weight:bold;");
 	console.log(`%c阶段耗时（无依赖的阶段并发执行，各行之和 ≥ 总计）`, "color:#888;font-weight:bold;");
 	console.log(lines.join("\n"));
@@ -82,11 +85,12 @@ export const whichWayInit = async () => {
 		},
 
 		//————————————模式：特蕾西娅与瑰丽理想————————————//
-		// 还处于测试阶段,暂时不进行添加
 		{
-			name: "gloriousIdeal(新模式)",
+			name: "gloriousIdeal",
 			optional: true,
 			load: async () => {
+				//仅开发服务器加载
+				if(isViteDevServer() !== true ) return;
 				const { registerGloriousIdealMode } = await import("./GloriousIdeal/index.js");
 				registerGloriousIdealMode();
 			},
@@ -151,3 +155,9 @@ export const whichWayInit = async () => {
 
 	_wwFlushTimings(performance.now() - begunAt);
 };
+
+/**
+ * 是否是ViteServer开发环境
+ * @returns {boolean}
+ */
+export const isViteDevServer = () => document.querySelectorAll('script[type="module"][src*="/@vite/"]').length > 0;

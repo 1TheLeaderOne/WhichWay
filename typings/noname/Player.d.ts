@@ -1,5 +1,5 @@
 import { Player } from "@/library/element";
-import type { CardFilter, EventChooseCardParams, EventChooseTargetParams } from "@/library/element/Player/type.d";
+import type { CardFilter, EventChooseCardParams, EventChooseTargetParams, EventChooseCardTargetParams } from "@/library/element/Player/type.d";
 
 declare global {
 	/**
@@ -56,6 +56,56 @@ declare global {
 		cards?: Card[];
 		/** 上面的假牌所对应的真实值：调用方传入的 Card / VCard 原对象 */
 		links?: Array<Card | VCard>;
+	};
+
+	/**
+	 * `player.chooseFakeCardTarget()` 的参数对象：字段与本体 `chooseCardTarget` 的
+	 * `EventChooseCardTargetParams` 一致（`filterCard` / `selectCard` / `filterTarget` / `selectTarget` /
+	 * `ai1` / `ai2` / `filterOk` / `forced` / `prompt` / `prompt2` / `hsskill` / `deadTarget` / `includeOut` /
+	 * `complexSelect` / `allowChooseAll` 等），另外多一个必填的 `cards`。
+	 */
+	type ChooseFakeCardTargetParams = Omit<EventChooseCardTargetParams, "cards" | "filterCard" | "position"> & {
+		/** 供玩家选择的牌（Card 或 VCard 原对象）；会被复制成假牌后展示 */
+		cards: Array<Card | VCard>;
+		/** 可选牌过滤（函数 / `get.filter` 用的对象 / `true`），默认 `lib.filter.all`；只会作用在本次创建的假牌上 */
+		filterCard?: boolean | CardFilter | ((card: Card, player: Player, event?: string) => boolean);
+		/** 会被忽略：内部固定用 `"s"`（假牌所在的特殊区），以免误选真手牌 */
+		position?: string;
+		/**
+		 * 假牌 gaintag 的显示名：临时写进 `lib.translate`（引擎会把 gaintag 的翻译渲染在牌面上），
+		 * 选择结束后还原。默认取事件名（即 `"chooseFakeCardTarget"`）；常传技能名，这样牌面上显示技能的中文名
+		 */
+		tagName?: string;
+		/** 选完后高亮结果；本函数高亮的是 `result.links` 里的原牌（假牌选完即被删除） */
+		glow_result?: boolean;
+	};
+
+	/**
+	 * `player.chooseFakeCardTarget()` 的结果。
+	 *
+	 * 形态与 `chooseCardTarget` 的 result 一致（cards / targets / links / confirm / bool）：
+	 * - `cards`：玩家选中的**假牌**（与本体语义相同，选完即被删除）；
+	 * - `links`：上面的假牌对应的真实值（调用方传入的 Card / VCard 原对象）；
+	 * - `targets`：本体选目标阶段选出的角色（不受假牌删除影响，原样保留）。
+	 *
+	 * 玩家没有做出选择时 `bool` 为 false，`cards` / `links` / `targets` 都是空数组。
+	 *
+	 * @example
+	 * ```ts
+	 * const result: ChooseFakeCardTargetResult = await player
+	 * 	.chooseFakeCardTarget({ cards: vcards, selectCard: 1, selectTarget: -1 })
+	 * 	.forResult();
+	 * const chosen = result.links?.[0]; // 选中的原牌（Card / VCard）
+	 * const targets = result.targets; // 选中的目标
+	 * ```
+	 */
+	type ChooseFakeCardTargetResult = Omit<Partial<Result>, "cards" | "links" | "targets"> & {
+		/** 玩家选中的假牌（与本体 `chooseCardTarget` 的 `cards` 语义一致，选完即被删除） */
+		cards?: Card[];
+		/** 上面的假牌所对应的真实值：调用方传入的 Card / VCard 原对象 */
+		links?: Array<Card | VCard>;
+		/** 本体选目标阶段选出的角色 */
+		targets?: Player[];
 	};
 
 	/**
@@ -152,6 +202,39 @@ declare module "@/library/element" {
 		 * ```
 		 */
 		chooseFakeCard(params: ChooseFakeCardParams): GameEvent;
+
+		/**
+		 * 从传入的牌中选牌并选目标（假牌版）。
+		 *
+		 * 效果基于本体 `chooseCardTarget`：一次交互里既选牌又选目标，区别只在于**供选择的牌是假牌**。
+		 * 假牌机制与 {@link Player.chooseFakeCard} 完全一致 —— 把 `cards` 里每张牌复制成假牌直接置入特殊区
+		 * （`directgains`，不触发获得事件），选择期间真手牌分组折叠、点折叠组切换视图，选完删除假牌并复原；
+		 * 底层委托的是本体 `chooseCardTarget`，因此目标侧的 `filterTarget` / `selectTarget` / `ai2` 全部沿用本体语义。
+		 *
+		 * 结果形态与 `chooseCardTarget` 一致：`result.cards` 是选中的假牌（选完即删除），其对应的原牌放在
+		 * `result.links`，`result.targets` 是本体选出的目标，详见 {@link ChooseFakeCardTargetResult}。
+		 *
+		 * 注意：
+		 * - 临时假牌归入「特殊区」（不参与手牌数 / 手牌上限 / 弃牌结算）；
+		 * - 目标侧 `filterTarget(card, player, target)` 收到的 `card` 是选中的**假牌**（与其原牌同名，
+		 *   `get.info` / `card.name` 一致），因此本体语义下无差别；
+		 * - 只有本地玩家（`game.me`）会折叠手牌，其它客户端只同步假牌本身。
+		 *
+		 * @param params 字段与本体 `chooseCardTarget` 一致，另需一个必填的 `cards`；`position` 会被忽略（内部固定 `"s"`）。详见 {@link ChooseFakeCardTargetParams}
+		 * @returns 可链式 `.set(...)`、可 `.forResult()` 的事件；`forResult()` 的返回值见 {@link ChooseFakeCardTargetResult}
+		 *
+		 * @example
+		 * ```ts
+		 * const vcards = tricks.map(name => new lib.element.VCard({ name }));
+		 * const result = await player
+		 * 	.chooseFakeCardTarget({ cards: vcards, selectCard: 1, selectTarget: -1, prompt: "选择一张牌并选择目标" })
+		 * 	.forResult();
+		 * if (result.bool) {
+		 * 	// result.links[0] 是选中的原牌，result.targets 是选中的目标
+		 * }
+		 * ```
+		 */
+		chooseFakeCardTarget(params: ChooseFakeCardTargetParams): GameEvent;
 
 		/**
 		 * 同时选择角色（目标）与选项（`chooseTarget` + `chooseControl` 的结合）。

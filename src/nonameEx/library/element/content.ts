@@ -11,6 +11,34 @@ const FAKE_CARD_TAG = "whichWayFakeCard";
 const PASSTHROUGH_KEYS = ["prompt", "prompt2", "promptx", "selectCard", "filterOk", "ai", "forced", "complexCard", "complexSelect", "allowChooseAll", "hsskill", "type"];
 
 /**
+ * 从 chooseFakeCardTarget 的事件对象透传给内层 chooseCardTarget 的参数名，
+ * 与本体 chooseCardTarget 的参数集（CheckCardTargetParams / EventChooseCardTargetParams）保持一致。
+ * position 固定为 "s"、filterCard 需要额外包裹（只允许本次假牌）、glow_result 由本函数自己处理，
+ * cards / tagName 是假牌专用参数，均不在此列表中；目标侧的 filterTarget 原样透传（收到的就是选中的假牌，
+ * 与其原牌同名，本体语义下无差别）。
+ */
+const TARGET_PASSTHROUGH_KEYS = [
+	"prompt",
+	"prompt2",
+	"promptx",
+	"selectCard",
+	"selectTarget",
+	"filterTarget",
+	"filterOk",
+	"ai1",
+	"ai2",
+	"forced",
+	"hsskill",
+	"deadTarget",
+	"includeOut",
+	"complexCard",
+	"complexSelect",
+	"allowChooseAll",
+	"type",
+	"animate",
+];
+
+/**
  * 选择期间重排本地玩家的手牌：**一组折成细条、另一组按引擎自己的折叠展示**（只改本地 UI，不动游戏状态）。
  *
  * 分工（`foldedGroup` 决定当前折的是哪一组，默认折**真牌**）：
@@ -348,6 +376,102 @@ export const ContentExt = {
 					links: chosen,
 				};
 				//引擎的 glow_result 只会照亮假牌（马上就被删掉），所以改成照亮它们对应的真实牌
+				if (event.glow_result) {
+					chosen.forEach(card => card?.classList?.add("glow"));
+				}
+			} finally {
+				if (restore) restore();
+				//引擎自带：本地 delete + updatehl，在线时 send 给持有者删除
+				if (fakes.length) game.deleteFakeCards(fakes);
+				//还原 lib.translate：临时显示名只在这段选择期间有效
+				if (hadTagTranslate) lib.translate[FAKE_CARD_TAG] = prevTagTranslate;
+				else delete lib.translate[FAKE_CARD_TAG];
+			}
+		},
+	],
+
+	/**
+	 * 假牌选牌并选目标（`player.chooseFakeCardTarget()` 的 content）。
+	 *
+	 * 结构与 `chooseFakeCard` 完全一致：造牌 → 置入特殊区 → 折叠真手牌 → 委托本体 `chooseCardTarget`
+	 * 完成「选牌 + 选目标」→ 把选中的假牌回映射成原牌放进 `result.links`（`result.targets` 原样保留）→
+	 * finally 复原手牌布局并删除假牌。
+	 *
+	 * 为什么委托给本体 chooseCardTarget：cardChooseAll、提示计数、selectCard / selectTarget 范围门控、
+	 * `filterTarget(card, player, target)` 的目标侧语义、AI 选牌选目标（ai1 / ai2）、在线 / 多端、
+	 * 目标动画等全部白拿，且天然与 chooseCardTarget 保持一致；折叠的接管与复原同样放进同一个 try / finally。
+	 *
+	 * 与 chooseFakeCard 的唯一区别：这里的目标侧 `filterTarget` **原样透传**，收到的 `card` 就是玩家
+	 * 选中的那张假牌（与其原牌同名，`get.info` / `card.name` 一致），因此本体语义下无差别。
+	 *
+	 * @type { ContentFuncByAll[] }
+	 */
+	chooseFakeCardTarget: [
+		async function (event, trigger, player) {
+			//兜底：任何提前返回 / 异常路径下 result 都是合法的空结果
+			event.result = { bool: false, cards: [], targets: [], links: [], confirm: "ok" };
+			const originals = Array.isArray(event.cards) ? event.cards.slice() : [];
+			if (!originals.length) return;
+
+			/** @type { Card[] } */
+			const fakes = [];
+			/** @type { (() => void) | null } */
+			let restore = null;
+			//临时给假牌的 gaintag 一个显示名（引擎会把 gaintag 的翻译渲染在牌面上）：
+			//默认取事件名，调用方可用 params.tagName 指定（常传技能名，显示成技能的中文名）
+			const tagName = event.tagName ?? event.name;
+			const hadTagTranslate = FAKE_CARD_TAG in lib.translate;
+			const prevTagTranslate = lib.translate[FAKE_CARD_TAG];
+			if (tagName) lib.translate[FAKE_CARD_TAG] = get.translation(tagName);
+			//造牌、置入手牌、折叠真手牌、委托选择、结果回映射整段都放进 try：
+			//任何一步抛错都由 finally 统一复原手牌布局、还原翻译并清掉假牌
+			try {
+				fakes.push(...game.createFakeCards(originals));
+				fakes.forEach((fake, index) => {
+					//createFakeCards 用源牌的 cardid 作为 _cardid，而 deleteFakeCards 只认 _cardid 为真的假牌；
+					//VCard 可能没有 cardid（由 { name } 这类普通对象构造而来），这里补一个合成 id，
+					//否则本地与在线都不会删除这张假牌（会残留在手牌里）
+					if (!fake._cardid) fake._cardid = `whichWayFake_${index}_${get.id()}`;
+				});
+				/** @type { Map<Card, Card|VCard> } 假牌 → 原牌（比依赖 _cardid 更精确，且天然支持 VCard） */
+				const fakeToOriginal = new Map(fakes.map((fake, index) => [fake, originals[index]]));
+				const fakeSet = new Set(fakes);
+
+				//directgains 会 addGaintag 并给牌加 glows：假牌归入「特殊区」（s），
+				//既不触发任何获得事件，也不会被 countCards("h") / 手牌上限 / 弃牌结算算作真手牌
+				player.directgains(fakes, null, FAKE_CARD_TAG);
+
+				//折叠真手牌（只改本地 UI）
+				if (player == game.me) restore = foldRealHand(player, fakes);
+
+				/** @type { Record<string, any> } */
+				const params = {
+					//position 固定为 "s"：Check.card 只迭代「特殊区」。配合 filterCard 限定，
+					//既不会误选真手牌，也不会误选木牛流马等其它既有的特殊区牌
+					position: "s",
+					//filterCard 需要额外包裹：只允许选中本次创建的假牌
+					filterCard: (card, current, currentEvent) => fakeSet.has(card) && event.filterCard(card, current, currentEvent),
+				};
+				//调用方传进来的其余 chooseCardTarget 参数（含目标侧的 filterTarget / selectTarget / ai2）原样透传
+				for (const key of TARGET_PASSTHROUGH_KEYS) {
+					if (event[key] != null) params[key] = event[key];
+				}
+
+				const inner = (await player.chooseCardTarget(params).forResult()) || {};
+				//选中的假牌 → 调用方传入的原牌（Card / VCard）。假牌选完即被删除，
+				//所以调用方真正能用的是这份映射，它放在 result.links 里；targets 是角色，不受删除影响。
+				const chosen = (inner.cards || []).map(card => fakeToOriginal.get(card) || card);
+				event.result = {
+					...inner,
+					bool: inner.bool ?? false,
+					//cards 与本体 result 保持一致：就是玩家选中的那几张假牌
+					cards: inner.cards || [],
+					//targets 原样保留（本体选目标阶段的产物）
+					targets: inner.targets || [],
+					//links 携带上面的假牌对应的真实值
+					links: chosen,
+				};
+				//引擎只会照亮假牌（马上就被删掉），所以改成照亮它们对应的真实牌
 				if (event.glow_result) {
 					chosen.forEach(card => card?.classList?.add("glow"));
 				}

@@ -1,5 +1,47 @@
 # 瑰丽理想 WhichWay 更新日志
 
+## 2026-10-12
+
+### 岳羽由加莉 · 完善【明镜】mingjinmrfz
+
+原 `mingjinmrfz` 只有 `audio` 空壳，现按描述实现（`src/packs/character/yueyuyoujialimrfz.ts`）：
+
+- **触发**：`trigger.global = "changeHpAfter"`（任意角色体力值变动，覆盖 damage / recover / loseHp / gainHp）。
+- **filter 自触发防护**：用 `event.getParent("mingjinmrfz_sh"|"mingjinmrfz_hf", true)` 排除【明镜】自身标记造成的体力变动（`getParent(name, true)` 未命中返回 `undefined`，命中才真值）；并检查两项是否本回合都用过（都用过则不再提示）。
+- **每项每回合限一次**：用 `player.getStat("skill").mingjinmrfz_sh` / `_hf` 记次（`player.stat` 在你下个回合开始时自动重置，即"每回合限一次"），无需手动清理。
+- **cost**：`chooseControl` 在可用项里选 ①/② 或 `cancel2`；`X = 发动时 player.hp` 冻结进 `cost_data`。
+- **content**：`chooseTarget` 选 `[1, X]` 名存活角色（含自己），对每人 `addTempSkill("mingjinmrfz_" + key, "roundEnd")`。
+- **两个标记做成独立技能**（非 subSkill，否则会常驻挂在岳羽自己身上）`mingjinmrfz_sh` / `mingjinmrfz_hf`：`charlotte + mark + intro`，`trigger.player = "damageEnd"`、`forced`，content 里先 `removeSkill` 自己（故只作用于"下次"）再 `damage({num:1})`（无来源）/ `recover({num:1})`；`roundEnd` 未触发也会自动失效（本轮）。
+- 补 `mingjinmrfz_sh` / `mingjinmrfz_hf` 的 translate 名与 `_info`。
+
+⚠️ 遗留（未改，待确认）：本角色 `character.skills` 仍写成 `["huangyaomrfz", "liequanmrfz"]`（是荒咬/猎犬，属 `hulangwanmrfz`），并未包含本文件定义的 `longjuanmrfz`/`mingjinmrfz` —— 故这两个技能当前不会出现在岳羽身上。若要生效需把技能列表改为 `["longjuanmrfz", "mingjinmrfz"]`。
+
+构建与 `pnpm eslint` 通过（未做游戏内实测）。
+
+## 2026-10-01
+
+### 新增 API：`player.chooseFakeCardTarget`（假牌版选牌+选目标）
+
+仿照本体 `chooseCardTarget` 新增一个假牌交互 API：一次交互里既选牌又选目标，区别只在于供选择的牌是**假牌**。机制完全复用 `chooseFakeCard` 的假牌生命周期（`createFakeCards` → `directgains` 置入特殊区 `"s"` → `foldRealHand` 折叠真手牌 → 委托 → `result.links` 回映射 → finally 删除假牌并复原），只是底层把委托对象从 `chooseCard` 换成本体 `chooseCardTarget`，因此目标侧 `filterTarget` / `selectTarget` / `ai1` / `ai2` 全部沿用本体语义。
+
+- `nonameEx/library/element/player.js`
+  - 新增 `chooseFakeCardTarget(params)` 工厂：参数处理对齐本体 `chooseCardTarget`（`filterTarget` 走 `get.filter(...,2)`、`selectCard`/`selectTarget` number→range、`get.evtprompt`），默认 `filterCard`/`filterTarget`=`lib.filter.all`、`ai1`=`get.unuseful2`、`ai2`=`get.attitude2`；`setContent("chooseFakeCardTarget")`。经 `patchPrototypeWhichWay` 自动注入（方法名不在本体原型上）。
+- `nonameEx/library/element/content.ts`
+  - 新增 `TARGET_PASSTHROUGH_KEYS`（选牌侧 + 目标侧透传键）。
+  - 新增 `chooseFakeCardTarget` content：`position` 固定 `"s"`、`filterCard` 包裹为「仅本次假牌」，其余透传给 `player.chooseCardTarget`；结果保留 `inner.targets`，`result.cards` 为选中假牌、`result.links` 为其对应原牌。
+- `typings/noname/Player.d.ts`
+  - 新增 `ChooseFakeCardTargetParams` / `ChooseFakeCardTargetResult` 类型与 `chooseFakeCardTarget(...)` 声明（含 JSDoc + 示例）。
+
+### 旅骨 · 奋身「视为你使用一张多目标锦囊牌」改用 `chooseFakeCardTarget`
+
+选项二的流程从「`chooseControl` 选锦囊名 → `chooseUseTarget` 选目标」改为一次 `chooseFakeCardTarget`：把候选多目标锦囊做成假牌 `get.autoViewAs({ name })`，`selectTarget: -1` 自动选中全部合法目标、`filterTarget` 用 `player.canUse(选中的假牌, 目标)` 判定，选完对 `result.links[0]` + `result.targets` 调 `player.useCard(...)` 完成视为使用；AI 偏好保留（桃园/万箭/南蛮按敌我分布打分）。
+
+### 旅骨 · 背水重置座浅改用 `player.refreshSkill`
+
+`delete player.getStat("skill").zuoqianmrfz` 只清了 `stat.skill` 计数，会漏掉 `_roundcount`/`temp_ban`/`_used`/`_round`/`_block` 覆盖等状态。改用引擎官方的批量重置方法 `player.refreshSkill("zuoqianmrfz")`（`apps/core/noname/library/element/player.js:11486`，core 内 `shiming`/`jimie` 等重置技能均用此法）。
+
+构建（`pnpm -F ./packages/extension/WhichWay build`）与 `pnpm eslint` 相关文件均通过（未做游戏内实测）。
+
 ## 2026-10-01
 
 ### 瑰丽理想 · Phase C：装备效果在战斗开局真正施加
@@ -511,7 +553,43 @@
   - 已知：本地 `output` 包内含注入的 `.github/workflows/release.yml`（导出的是打了 tag 的整棵树），比 CI 产物多一份 CI 配置，无害。
 - 校验：脚本纯静态检查——`release.bat` 改后仍 ASCII-only、580 行全 CRLF 无裸 LF；`pack-local.bat` 同样 ASCII+CRLF。**未实跑批处理**（cmd 交互 + 需真实 git 仓库状态），请你择机验证：① `release.bat v1.x.y` 跑完 `release\output`、`release\output-core` 目录确有内容；② `git status` 仍干净（`release/` 被忽略）；③ `pack-local.bat`（及分别传 `output`/`core`）在 `scripts\` 生成对应 zip，解压后为扩展内容根目录。
 
+### 适配：更新历史页识别 v1.5.6 的 Markdown 条目（`src/configUI/component/updateLog.vue`）
+
+历史日志 `updateContent.txt` 里，v1.5.6 之前的版本条目都是「`"新增干员：xxx",`」这种带引号/逗号的写法，而本版 `2026.10.12 v1.5.6` 改用了 Markdown：`- **新增皮肤**: xxx`、行内代码写成转义反引号 `` \`code\` ``。`updateLog.vue` 的 `formatUpdateItem` 只做了旧格式的关键词高亮，没处理 `- `、`**`、`` \` ``，于是新版条目在「更新历史」页原样显示一堆 `**`/反斜杠、读不出来（版本号 `2026.10.12 v1.5.6` 本身能被 `parseUpdateLog` 的正则识别，问题出在条目正文渲染）。
+
+- `src/updateLog/markdown.js`：把内部助手 `renderInline` 改为 `export`（行为不变），供历史页复用同一套行内 Markdown 渲染（`**粗体**`/`` `代码` ``/`~~删除~~`/`[链接]()`），与更新公告口径一致。
+- `src/configUI/component/updateLog.vue`：重写 `formatUpdateItem`，五步顺序固定——①还原转义反引号 `` \` ``→`` ` ``；②去掉行首 Markdown 列表标记 `- `/`* `/`+ `（条目本身已是 `<li>`）；③还原历史实体的 `&lt;/&gt;`（`<br>`、`<s>` 等仍按原样渲染，老格式不受影响）；④`renderInline(text)` 渲染行内 Markdown；⑤关键词高亮。
+  - 关键坑：原实现直接在整串上跑 `修复.*?的bug` 这类可跨标记的正则做 `<span>` 包裹；改成先渲染 HTML 再高亮后，若仍整串替换，`<span>` 会把 `<strong>`/`<code>` 夹在中间 → 标签错位、整卡片染色。故新增 `highlightPlainText()`：用 `/(<[^>]+>)/` 切分，**只在标签之外的文本片段**做高亮替换，保证 HTML 结构合法。
+  - 已知降级：像 `**修复**：\`x\`…的bug` 这种「修复」与「的bug」被 `<code>` 隔开的情形，跨标签的高亮不再命中（粗体标签本身已表意，可接受）。
+  - 顺带清理：`updateLog.vue` 模板里 `v-for="(version, index)"` 的 `index` 未使用（`vue/no-unused-vars`），删为 `v-for="version in ..."`。
+  - 样式：`.update-item` 内新增 `:deep(code.md-code)/:deep(strong)/:deep(a.md-a)/:deep(del)` 规则（`v-html` 内容不带 scoped 属性，必须 `:deep`），深色面板上代码块用金色底、粗体金色。
+- 校验：`vue/compiler-sfc` parse+script+template+style 全通过、`pnpm eslint src/configUI/component/updateLog.vue` 无报错；已用真实 v1.5.6 各条目 + 老格式条目 + 含 `<s>`/`<br>`/通配 `/*` 的条目跑 `renderInline`+`formatUpdateItem`，逐条断言**标签平衡（无错配）**、`**`/`` \` ``/`- ` 均消失、`/*` 安全留在 `<code>` 内。**未游戏内实测**（browser MCP 起不了 dev app）。`markdown.js` 仍有一条**改动前既有**的 `no-control-regex`（第 121 行 `\u0000` 占位符，非本次引入，未触碰）。
+- 手动验证清单：①「设置 → 更新历史」v1.5.6 卡片条目显示为「**新增皮肤**：…」（粗体生效、无星号/反斜杠/短横），代码项如 `override.ts` 呈代码样式；②v1.5.1 及更早的引号型条目照常显示、关键词仍着色；③`GALLUS²`、`/*` 等不被误当强调；④含 `<s>沟槽的</s>`、`<br>` 的老条目渲染与改造前一致。
+
+### 实现：旅骨（`lvgumrfz`）技能「奋身」（`fenshenmrfz`）
+
+按 `fenshenmrfz_info` 描述把原先只有 `audio` 的空壳技能补全为「当有角色勾玉颜色变化后，你可以…」的三选一触发技。`src/packs/character/lvgumrfz.ts`。
+
+- **触发映射**：描述里的「勾玉颜色变化」按引擎语义映射为 `trigger:{ global: "changeHp" }`（体力实际增减时触发；`loseMaxHp` 不走 `changeHp`，故背水减上限不会自触发）。「目标角色」取 `trigger.player`（本次体力变化的角色，含旅骨自己）。
+- **三选一交互**：`player.chooseControl({controls:list})` + `prompt2` 展示技能全文 + `cancel2` 放弃；list 按当前可选项动态拼（体力≥2 才有选项1、有手牌才有选项2、体力上限≥2 才有背水），全不可用则 `filter` 直接返回 false 不打扰。
+- **选项1「失去体力」**：`Math.ceil(hp/2)` 向上取整流失体力（要求 `hp≥2`，避免自入濒死），随后你与目标各摸 1 张（`player.draw()` / `target.draw()`，目标为旅骨自身则共摸 2 张）。
+- **选项2「弃牌用锦囊」**：弃一半手牌 `Math.max(1, floor(h/2))`（向下取整、至少 1，与选项1的向上取整刻意不对称）。用 `player.chooseToDiscard({position:"h",selectCard:num,forced})`——经查 content 尾部（`content.ts:6104`）`chooseToDiscard` 未设 `chooseonly` 时会自动 `player.discard`，故**不再重复弃置**。再 `chooseControl` 选一张多目标锦囊（池= `nanman/wanjian/taoyuan/wugu`，皆 `selectTarget:-1` 群体牌；`shandian` 单体故排除），用 `get.autoViewAs({name})` + `chooseUseTarget({card}).set("viewAs",true)` 视为使用。
+- **背水**：`loseMaxHp(1)` → 摸（新）体力上限张牌 → `addTempSkill("fenshenmrfz_beishui","roundEnd")` → `delete player.getStat("skill").zuoqianmrfz` 重置「座浅」的 `usable:1`。背水增益做成 `subSkill.beishui`（`mark`+`intro`+`mod.cardUsableTarget`）：`cardUsableTarget(card,player,target,result)` 命中 `target.getDamagedHp()>0` 返回 `true`、否则透传 `result`，正是 `cardUsable` 次数用尽后按目标放行的钩子（`index.js:11512/11664`），实现「本轮对已受伤角色使用牌无次数限制」。临时 subskill 仅在 `addTempSkill` 后进入 `getModableSkills`（对齐 `dekesasimrfz` 的 `jianyumrfz_debuff` 先例），平时不常驻。
+- **递归锁**：选项1自身 `loseHp` 会再次触发 `changeHp`，用 `player.storage.fenshenmrfz_lock` 仅在 `loseHp` 前后加解锁拦截自我连锁（try/finally 保证释放）；选项2 锦囊造成的对他角色伤害**仍会合法连锁**触发奋身（资源单调收敛，不会无限）。AI：`get.attitude2` 判敌友，倾向背水爆发→群体锦囊→摸牌，其余 `cancel2`；锦囊选择同理偏好。
+- 校验：`pnpm eslint packages/extension/WhichWay/src/packs/character/lvgumrfz.ts` 通过（EXIT=0）。**未游戏内实测**（browser MCP 起不了 dev app）；构建由你自行执行。多目标锦囊池取标准四群体牌，若设计上还想纳入其它群体锦囊（如 `huogong`/`leifu` 等扩展牌）可再调整。
 
 
 
 
+
+
+### 重构：旅骨「奋身」（`fenshenmrfz`）按评审意见 v2（`src/packs/character/lvgumrfz.ts`）
+
+上一版实现被判定不符合要求，按 5 条评审意见重写（触发/背水/多目标判断/自我来源/选项归属全部改指到既有参考技能）。
+
+- **① 勾玉颜色变化触发 → 参考 `olzhuohun`**：`trigger` 由 `{global:"changeHp"}` 改为 `{global:["changeHpAfter","loseMaxHpAfter","gainMaxHpAfter"]}`；`filter` 采用 `get.hpColor(changed)` 与 `get.hpColor({hp:originalHp,maxHp:originalMaxHp})` 比较，并复刻 `olzhuohun` 的 `_status.globalHistory[last]["everything"]` 去重循环，使一次颜色跃迁只在「结算后定格」的那次变化事件上触发一次（`loseMaxHp` 也计入，故背水减上限同样是合法触发时机）。
+- **④「不因【奋身】」判断 → 参考 `zishu`**：`filter` 首行 `if (event.getParent("fenshenmrfz", true)) return false;`（`forced=true` 才会在找不到时返回 `undefined` 而非 `{}`）。技能 content 事件名即 `fenshenmrfz`，其内 `loseHp`/视用锦囊/`loseMaxHp` 引发的再次变化，父链命中即被排除。据此**删除了 v1 的 `player.storage.fenshenmrfz_lock` 递归锁**，并同步把 `fenshenmrfz_info` 描述订正为「当有角色勾玉颜色**不因【奋身】**而变化后…」。
+- **⑤ 选项归属 → 参考 `mbhanyong`**：三选一的 `chooseControl` 从 `content` 迁入 `async cost(...)`，返回 `event.result={bool:true,cost_data:{key}}`；`content` 只 `event.cost_data.key` 分支执行（选项按当前可行动态生成，全不可用则 cost 空返回、不弹框）。
+- **③ 多目标锦囊判断 → 参考 `tyxunshi`**：不再硬编码 `nanman/wanjian/taoyuan/wugu`，改为 `getMultitargetTricks()` 扫描 `lib.card`，以 `info.multitarget || info.ai?.tag?.multitarget` 判定（`tyxunshi`/引擎的 multitarget 标记；标准群体牌该标记在 `ai.tag`，故一并纳入），随本体/扩展群体锦囊自动扩展。
+- **② 背水机制 → 参考 `mbhanyong`**：`loseMaxHp(1)` → 摸（新）体力上限张 → `addTempSkill("fenshenmrfz_beishui","roundEnd")` → 重置【座浅】`usable`；增益仍为 `subSkill.beishui.mod.cardUsableTarget`（命中已受伤目标放行次数限制）。
+- 校验：`pnpm eslint packages/extension/WhichWay/src/packs/character/lvgumrfz.ts` 通过。**未游戏内实测**（browser MCP 起不了 dev app），构建由你自行执行。

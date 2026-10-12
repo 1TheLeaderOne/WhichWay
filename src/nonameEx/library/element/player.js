@@ -5,28 +5,28 @@ export class PlayerExt extends lib.element.Player {
 	 * 移除手牌中所有的（驶舰之向）提示
 	 * @param { string } id 删除指定id的描述，不填删除所有
 	 */
-	removePromptSJZX(id){
+	removePromptSJZX(id) {
 		let cards = this.getCards("h");
-		cards.forEach(card=>card.removePromptSJZX(id));
+		cards.forEach(card => card.removePromptSJZX(id));
 	}
 
 	/**
 	 * 设置某一个技能的使用次数
 	 * @param { number } num 清除次数
-	 * @param { string } skill 技能名  
+	 * @param { string } skill 技能名
 	 */
-	setSkillCount(skill,num){
-		if(!this.getSkills().includes(skill)){
-			console.warn(`${get.translation(this)}(${this.name}) 没有技能 ${skill}`)
+	setSkillCount(skill, num) {
+		if (!this.getSkills().includes(skill)) {
+			console.warn(`${get.translation(this)}(${this.name}) 没有技能 ${skill}`);
 		}
 
-		if(this.getStat("skill")?.[skill]){ 
+		if (this.getStat("skill")?.[skill]) {
 			this.getStat("skill")[skill] += num;
 			//@ts-ignore
-			if(typeof this.stat.allSkills === "number") this.stat.allSkills += num;
+			if (typeof this.stat.allSkills === "number") this.stat.allSkills += num;
 		}
 
-		if(typeof this.storage?.counttrigger?.[skill] === "number"){
+		if (typeof this.storage?.counttrigger?.[skill] === "number") {
 			this.storage.counttrigger[skill] += num;
 		}
 	}
@@ -104,6 +104,87 @@ export class PlayerExt extends lib.element.Player {
 			next.ai = get.unuseful3;
 		}
 		next.setContent("chooseFakeCard");
+		next._args = [params];
+		return next;
+	}
+
+	/**
+	 * 从传入的牌中选牌并选目标（假牌版）。
+	 *
+	 * 效果基于本体 `chooseCardTarget`：一次交互里既选牌又选目标，区别只在于**供选择的牌是假牌**。
+	 * 机制与 `chooseFakeCard` 完全一致 —— 把 `params.cards` 里的每张牌复制成假牌直接置入特殊区
+	 * （`directgains`，不触发获得事件），选择期间真手牌分组折叠、点折叠组切换视图，选完删除假牌并复原；
+	 * 不同之处在于底层委托的是本体 `chooseCardTarget`（而非 `chooseCard`），因此目标侧的
+	 * `filterTarget` / `selectTarget` / `ai2` 等全部沿用本体语义。
+	 *
+	 * 参数（对象式）= 本体 `chooseCardTarget` 的参数集（`EventChooseCardTargetParams`：`filterCard` /
+	 * `selectCard` / `filterTarget` / `selectTarget` / `ai1` / `ai2` / `filterOk` / `forced` / `prompt` /
+	 * `prompt2` / `hsskill` / `deadTarget` / `includeOut` / `complexSelect` / `allowChooseAll` 等），
+	 * 另多一个必填的 `cards`；`position` 会被忽略（内部固定 `"s"`，以免误选真手牌）；
+	 * `tagName` 与 `glow_result` 见 `chooseFakeCard` 同名字段。
+	 *
+	 * 结果：形态与本体 `chooseCardTarget` 一致（`cards` / `targets` / `bool` / `confirm`）。
+	 * 其中 `result.cards` 是玩家选中的**假牌**（选完即删除），它们对应的原牌（Card / VCard）放在
+	 * `result.links` 里；`result.targets` 就是本体选出的目标（不受假牌删除影响）。
+	 * 未做出选择时 `result.bool` 为 false，`cards` / `links` / `targets` 都是空数组。
+	 *
+	 * @param { import("@/library/element/Player/type.d").EventChooseCardTargetParams & { cards: Array<Card|VCard> } } params 参数对象，见上方说明
+	 * @returns { GameEvent } 可链式 `.set(...)`、可 `.forResult()` 的事件；`forResult()` 的返回值见 typings
+	 *
+	 * @example
+	 * ```js
+	 * const vcards = tricks.map(name => new lib.element.VCard({ name }));
+	 * const result = await player
+	 * 	.chooseFakeCardTarget({ cards: vcards, selectCard: 1, selectTarget: -1, prompt: "选择一张牌并选择目标" })
+	 * 	.forResult();
+	 * if (result.bool) {
+	 * 	// result.links[0] 是选中的原牌，result.targets 是选中的目标
+	 * }
+	 * ```
+	 */
+	chooseFakeCardTarget(params) {
+		const next = game.createEvent("chooseFakeCardTarget");
+		next.player = this;
+
+		//参数处理与本体 chooseCardTarget 一致
+		Object.assign(next, params);
+		if (next.filterCard != null && typeof next.filterCard === "object") {
+			next.filterCard = get.filter(next.filterCard);
+		}
+		if (next.filterTarget != null && typeof next.filterTarget === "object") {
+			next.filterTarget = get.filter(next.filterTarget, 2);
+		}
+		if (typeof next.selectCard === "number") {
+			next.selectCard = [next.selectCard, next.selectCard];
+		}
+		if (typeof next.selectTarget === "number") {
+			next.selectTarget = [next.selectTarget, next.selectTarget];
+		}
+		if (params != null && params.prompt != null) {
+			delete next.prompt;
+			get.evtprompt(next, params.prompt);
+		}
+		//cards 必须是一组牌；顺手复制一份，避免调用方之后改动原数组
+		next.cards = Array.isArray(next.cards) ? next.cards.slice(0) : [];
+		if (next.filterCard == undefined) {
+			next.filterCard = lib.filter.all;
+		}
+		if (next.filterTarget == undefined) {
+			next.filterTarget = lib.filter.all;
+		}
+		if (next.selectCard == undefined) {
+			next.selectCard = [1, 1];
+		}
+		if (next.selectTarget == undefined) {
+			next.selectTarget = [1, 1];
+		}
+		if (next.ai1 == undefined) {
+			next.ai1 = get.unuseful2;
+		}
+		if (next.ai2 == undefined) {
+			next.ai2 = get.attitude2;
+		}
+		next.setContent("chooseFakeCardTarget");
 		next._args = [params];
 		return next;
 	}
@@ -196,13 +277,13 @@ export class PlayerExt extends lib.element.Player {
 	 */
 	showPrompt(str, nature, clear = false) {
 		let node;
-		if(clear === true) {
-			if(this.node.prompt){
+		if (clear === true) {
+			if (this.node.prompt) {
 				this.node.prompt.remove();
 				delete this.node.prompt;
 			}
 		}
-		
+
 		if (this.node.prompt) {
 			node = this.node.prompt;
 			node.innerHTML = node.innerHTML;
@@ -368,8 +449,14 @@ export class PlayerExt extends lib.element.Player {
 	adjustHandCardTo(num) {
 		if (typeof num !== "number") return console.error("ERROR:num must be number!");
 		let differ = this.countCards("h") - num;
-		if (differ > 0) this.chooseToDiscard(true, `请弃置${get.cnNumber(this.countCards("h") - num)}张牌`, differ);
-		else if (differ < 0) this.draw(Math.abs(differ));
+		if (differ > 0) {
+			this.chooseToDiscard({
+				forced: true,
+				prompt: `请弃置${get.cnNumber(this.countCards("h") - num)}张牌`,
+				selectCard: differ,
+				filterCard: () => true,
+			});
+		} else if (differ < 0) this.draw(Math.abs(differ));
 	}
 
 	canUseCardAtt(card, isfriend, distance) {
@@ -516,4 +603,4 @@ export class PlayerExt extends lib.element.Player {
 		}
 		return list;
 	}
-};
+}

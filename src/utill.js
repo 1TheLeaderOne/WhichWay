@@ -1,5 +1,6 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { onSetDev, onExtension, whichWayHooksApi } from "./hooks/index.js";
+import { isViteDevServer } from "./init.js";
 
 class WhichWayUtil {
 	/**
@@ -326,13 +327,24 @@ class WhichWayUtil {
 			o: "orange",
 			s: "#696969",
 		};
-		return str.replace(/#([a-zA-Z])([^#]*)#/g, (match, letter, content) => {
+
+		// 新方案：#COLOR#文本#  →  <font color =COLOR>文本</font>
+		//    COLOR 可以是颜色关键字(red/blue/...)或十六进制色(写作 ##ff0000#文本#)
+		// 旧方案：#x文本#      →  <span style="color: xxx;">文本</span>
+		const re = /#((?:[a-zA-Z]+)|(?:#[0-9a-fA-F]{3,8}))#([^#]*)#|#([a-zA-Z])([^#]*)#/g;
+
+		return str.replace(re, (match, fullColor, fullText, letter, shortText) => {
+			// 命中新方案
+			if (fullColor !== undefined) {
+				return `<font color =${fullColor}>${fullText}</font>`;
+			}
+
+			// 命中旧方案
 			const color = colorMap[letter.toLowerCase()];
 			if (color) {
-				return `<span style="color: ${color};">${content}</span>`;
-			} else {
-				return content;
+				return `<span style="color: ${color};">${shortText}</span>`;
 			}
+			return shortText;
 		});
 	};
 
@@ -468,7 +480,7 @@ class WhichWayUtil {
 	 * 是否是ViteServer开发环境
 	 * @returns {boolean}
 	 */
-	isViteDevServer = () => document.querySelectorAll('script[type="module"][src*="/@vite/"]').length > 0;
+	isViteDevServer = isViteDevServer;
 
 	/**
 	 * 开启开发者模式相关设置,默认会自动检查是否开启了开发者模式,如果没开启则不会生效
