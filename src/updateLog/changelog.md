@@ -2,6 +2,35 @@
 
 ## 2026-10-13
 
+### 任务一：`whichWayArknight` 新增干员id 清单与归属判断
+
+`src/arknight/index.ts`（按需求原样拼写标识符）：
+- `vaildArkId: string[]`：**全部**明日方舟干员uid 清单，`init()` 里在 `loadArknightData()` 之后由 `buildVaildArkId()` 构造，数据源是 `character_table` + `char_patch_table.patchChars`（第三张表没有干员主体，故不取），只收 `isCharacter()` 判真的条目。
+- `isArknght(id)`：id 是否落在 `vaildArkId` 里。
+- `addVaildArk(id)`：往 `vaildArkId` 追加（内部先去重）。
+- `exsitArk: string[]`：扩展**已经做出干员**的明日方舟id，由 `addExsitArk(id)` 登记；登记点挂在武将包构造路径上（`addShcema()` 的三个成功分支，被 `src/packs/index.ts` 的 `registerExecute("character")` 调用），并且只登记 `isArknght()` 为真的id，保证 `exsitArk ⊆ vaildArkId`。
+纯新增，不改任何既有行为。
+
+### 任务二：干员id 全套改名为明日方舟uid（253 个）
+
+新增 `scripts/rename-to-arkid.mjs`，模式：`--gen-map`（扫干员包+gamedata 出映射表）→ 检查 → `--apply` → `--revert`（按 journal 回滚）｜`--derived`（只补派生翻译键）｜`--gen-migration`（出迁移表）。
+- **改名范围（全套同步）**：`src/packs/character` 文件名+文件内干员id；引擎按「名字+后缀」派生的 `{id}_prefix` / `{id}_ab` / `{id}_info`；立绘 `image/character`、皮肤 `image/skin/{id}/`、证章 `image/modules`、动皮 `dynamicSkin/illust`、死亡配音 `audio/{语言}/die`、`audio/{语言}/{技能}_{干员}{n}.mp3`、`image/skill/{技能}/{id}.png`、卡id 由 `${NAME}` 拼出时的 `image/card/{卡}_{干员}.png`；跨文件引用 `dynamicConfig.js`、`characterDesigner.js`、`packs/card`、`modules/data.ts`、`GloriousIdeal`、`css/skills.css`。
+- **254 条映射里实改 253 条**，`wangmrfz` 跳过：它自身文件里有 `wangmrfz_${key}` 模板拼接键，改名会让派生键失配。`plot_keluxiermrfz` 按约定保留原名（uid 与主凯尔希冲突），21 个无对应uid 的干员也保留原名 ⇒ `character/` 现存 275 个模块，253 个 `char_*` + 22 个旧式命名。
+- **刻意不动**：技能id / 卡牌id / 势力id；以干员id 为前缀的技能id（`fengxumrfz_youyimrfz` 这类注册与引用是同一串字面量，保持原样即自洽）；`shcema.js`、`groups.js`（有干员与势力同名，如 `hongmrfz`）；`*.md` 历史日志。
+- 落盘 1182 次资源改名（`file=253 img=253 skin=202 dieAudio=369 skillAudio=40 dycIllust=56 cardImg=4 otherImg=5`）+ 263 个文本文件 + 派生键 34 文件/38 键；回滚只靠 `scripts/arkid-rename-journal.json` 与 `_backup_before_arkid_rename_src/`（`packages/extension` 被外层 gitignore）。
+- `src/packs/index.ts` 的干员 glob 由 `*mrfz.ts` 改为 `*.ts` / `*/index.ts`（新id 不再以 mrfz 结尾），并核对当前 275 个条目全部命中新 glob，模块集合无增减。
+- 静态资源里唯一按旧id 索引的运行时文件是 `json/cache/skin.json`（皮肤索引），已由改名脚本删除，下次启动因文件缺失自动重建。
+- 验证：全量残留扫描（src 文本文件 0 处旧id，仅 `NEVER` 两个文件里的势力id `hongmrfz` 与文档注释里的 `wangmrfz` 为有意保留）；注册/立绘/皮肤齐备性对账 0 缺失；`root tsconfig` 的 `tsc --noEmit` 里新增文件 0 报错（仅 `packs/index.ts:197` 一处 `filter` 报错，改名前的备份里同样存在，属既有问题）。
+
+### 一次性旧干员id 存档迁移 `src/arknight/arkidMigration.ts`
+
+改名前的玩家存档里键还是旧id，不改写就会出现皮肤丢失、配音语言回退、模组失效、战役进度查不到干员。新增迁移模块，在 `whichWayInit()` 里**任何阶段模块求值之前**同步调用（`globalSave` 在入口就抓取了配置对象引用，所以全部**原地改写**不换对象），完成后写标记位 `extension_WhichWay_arkidMigrated` 不再重复执行（与 `characterPackDefaulted` 同一套一次性开关写法）。
+- 覆盖：`extension_WhichWay_skinConfig`、本体 `skin`（键 + `[名, 路径]` 里的 `image/skin/{旧id}/` 段）、`qhly_skinset`（skin/skinAudioList/audioReplace/djtoggle）、`banSkinSJZX`、`extension_WhichWay_audioConfig.custom`（键 + 其 `skills` 列表）、`modulesSet`、`whichWay_ConfictedSkin_selectedSkins`、瑰丽理想 `localStorage` 战役存档（递归换键与等于旧id 的字符串值）。
+- 映射表 `src/arknight/legacyCharIds.ts`（253 条）由 `--gen-migration` 从映射表生成，勿手改。落库一律沿用各子系统既有调用形态（含 `saveConfig("skin", …, undefined)` 会被默认参数变成 `extension_WhichWay_skin` 的既有行为），不趁机改语义。
+- 瑰丽理想 `SAVE_KEY` 写字面量而不 import `campaign.ts`：那个模块只在开发服务器下加载，迁移要在所有环境跑。
+- 单项失败只 `console.error` 跳过，其余继续；整体异常则不写标记位，下次启动重试。
+- 验证：`esbuild` 把模块连 stub 依赖打成临时脚本离线跑 18 项断言（键换、对象引用不变、路径换、战役递归、新旧键并存时保留新值、二次调用不再存盘）全绿；过程中抓出并修掉两个真缺陷——`deepRemap` 原先不换「对象属性值正好是id」（`roster[].id`）、`remapKeys` 的 `delete` 漏在 else 分支导致新旧键并存。实机未验证（浏览器 MCP 加载不了 dev app），`pnpm eslint` 与 `WW_SKIP_STATIC_COPY=1` 构建通过。
+
 ### 新增立绘分离脚本 `scripts/split-illustration.mjs`
 
 把 `image/illustration/source`（501 张明日方舟原始立绘，文件名 = `portraitId + "b" + 扩展名`）按 gamedata `json/arknight/skin_table.json` 分离：
@@ -26,6 +55,15 @@
 - 安全默认：不覆盖原图，产物写到 `<目录名>_compressed/`；`--inplace` 才就地替换，且首次覆盖前把原件备份到 `<目录名>_backup_original/`（按源扩展名存）；换格式时删旧扩展名文件；单张若没变小则丢弃产物保留原图。
 - 选项：`--dir --max --quality --bg --format(png|jpg|keep) --colors(默认 256，0=真彩) --dither --jobs --dry-run --inplace`。
 - 未跑全量（批量改资源不可逆，交由用户执行）。
+
+### 新增干员id 查询工具 `scripts/find-arkid.bat` + `scripts/find-arkid.mjs`
+
+输入明日方舟角色中文名，输出对应干员id（如 `温米` → `char_4081_warmy`），方便改名后查id。
+- **`bat` 只是薄壳**（ASCII-only + CRLF，`where node` 预检后直接调 `node find-arkid.mjs`），全部解析/匹配逻辑在 `.mjs`：批处理读不动 8MB 的 JSON，且只有 node 能稳态处理 UTF-8 收发。
+- **数据源**：`json/arknight/character_table.json` + `char_patch_table.json` 的 `patchChars`（异格/升变形态与本体同名但id 不同，只查前者会漏阿米娅三形态）；按 `src/arknight/index.ts` 的 `isCharacter()` 同一口径过滤（`subProfessionId` 存在且非 `notchar*`），否则 `trap_627_xb2amy 阿米娅` 这类陷阱会混进结果。
+- **匹配**：名字精确命中优先，否则模糊（名字或id 片段包含），多条全部列出并给条数；异格形态标注「（异格/升变形态）」。
+- **UTF-8 代码页切换放在 `.mjs` 里而不是 bat**：bat 里只要出现 `for /f ... in ('chcp')` 探测旧代码页，派生的子 cmd 会继承并抽干重定向/管道的 stdin，node 立刻读到 EOF、交互模式一行结果都不出（实测复现）。改在 node 侧用 `spawnSync("chcp", { stdio: ["ignore", ...] })`（子进程拿 NUL 句柄，不碰父进程 stdin），进入时切 65001、`process.on("exit")` 还原原代码页，仅 win32 生效、非控制台环境自动跳过。
+- 三种用法实测通过：交互循环（`q`/空行退出）、命令行给名（`find-arkid.bat 温米` → `char_4081_warmy`）、管道喂名单（`find-arkid.bat < 名单.txt`）。`scripts/*.mjs` 与同目录既有脚本一样不在 lint 范围内（同样只报 `no-undef` 的 process/console，属仓库既有状态），未改动构建产物。
 
 ### 配音设置详情区扩展：立绘 + 技能试听 + 死亡配音
 

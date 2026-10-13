@@ -33,7 +33,7 @@ onMounted(() => {
 const handleClick = (item: [string, string, string]) => {
 	const key = item[0];
 
-	console.log("点击了:", key);
+	// console.log("点击了:", key);
 
 	dataManager.set("selected", key);
 

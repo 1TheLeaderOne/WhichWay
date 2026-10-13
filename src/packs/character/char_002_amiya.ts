@@ -1,11 +1,11 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
 
-character("amiyamrfz", { pack: "epicSJZX", sex: "female", group: "luomrfz", hp: 3, skills: ["newtongganmrfz", "shijiemrfz", "qinghemrfz"], isZhugong: true });
+character("char_002_amiya", { pack: "epicSJZX", sex: "female", group: "luomrfz", hp: 3, skills: ["newtongganmrfz", "shijiemrfz", "qinghemrfz"], isZhugong: true });
 
 skill({
 	qinghemrfz: {
-		audio: 2,
+		audio: ["作战中2","完成高难行动"],
 		zhuSkill: true,
 		trigger: {
 			player: "loseAfter",
@@ -55,7 +55,7 @@ skill({
 		},
 	},
 	newtongganmrfz: {
-		audio: "tongganmrfz",
+		audio: ["任命队长","作战中1"],
 		trigger: {
 			global: "phaseEnd",
 		},
@@ -93,7 +93,7 @@ skill({
 				if (get.position(card) === "h" && player.countCards("h") <= 5) return false;
 			},
 		},
-		audio: 2,
+		audio: ["编入队伍","晋升后交谈2"],
 		trigger: {
 			player: ["gainBegin", "loseBegin"],
 		},
@@ -104,6 +104,7 @@ skill({
 		async content(event, trigger, player) {
 			if (event.name === "gain") {
 				let cards = trigger.getParent()!.result;
+				//@ts-ignore
 				game.cardsDiscard(cards);
 				game.log(player, "取消了此次摸牌");
 			} else {
@@ -113,57 +114,57 @@ skill({
 		},
 	},
 	//牢阿米娅
-	tongganmrfz: {
-		audio: 2,
-		trigger: {
-			global: "drawAfter",
-		},
-		usable: 3,
-		forced: true,
-		filter: function (event, player) {
-			return event.player !== player;
-		},
-		async content(event, trigger, player) {
-			player.draw();
-		},
-		group: "tonggan_discardmrfz",
-		ai: {
-			threaten: 2,
-		},
-	},
-	tonggan_discardmrfz: {
-		audio: 2,
-		trigger: {
-			global: "loseAfter",
-		},
-		usable: 3,
-		filter: function (event, player) {
-			if (event.type != "discard") return false;
-			return event.player !== player;
-		},
-		forced: true,
-		async content(event, trigger, player) {
-			player.chooseToDiscard({
-				position: "he",
-				forced: true,
-			});
-		},
-	},
+	// tongganmrfz: {
+	// 	audio: 2,
+	// 	trigger: {
+	// 		global: "drawAfter",
+	// 	},
+	// 	usable: 3,
+	// 	forced: true,
+	// 	filter: function (event, player) {
+	// 		return event.player !== player;
+	// 	},
+	// 	async content(event, trigger, player) {
+	// 		player.draw();
+	// 	},
+	// 	group: "tonggan_discardmrfz",
+	// 	ai: {
+	// 		threaten: 2,
+	// 	},
+	// },
+	// tonggan_discardmrfz: {
+	// 	audio: 2,
+	// 	trigger: {
+	// 		global: "loseAfter",
+	// 	},
+	// 	usable: 3,
+	// 	filter: function (event, player) {
+	// 		if (event.type != "discard") return false;
+	// 		return event.player !== player;
+	// 	},
+	// 	forced: true,
+	// 	async content(event, trigger, player) {
+	// 		player.chooseToDiscard({
+	// 			position: "he",
+	// 			forced: true,
+	// 		});
+	// 	},
+	// },
 });
 
 translate({
-	amiyamrfz: "阿米娅",
+	char_002_amiya: "阿米娅",
 	qinghemrfz: "亲和",
 	qinghemrfz_info: "主公技，每回合限一次，当你于回合外因弃置而失去牌时，当前回合角色可以让你获得你弃置的牌中的一张牌。",
 	newtongganmrfz: "同感",
 	newtongganmrfz_info: "锁定技，其他角色回合结束时，你摸X张牌且弃置Y张牌。（X=本回合获得过牌的角色数，Y=本回合因弃置而失去牌的角色数）",
 	shijiemrfz: "十戒",
 	shijiemrfz_info: "锁定技。<br>①当你手牌数不小于10时，你不能从牌堆中获得牌;<br>➁当你手牌数不大于5时，你不能因弃置而失去手牌。",
-	tongganmrfz: "同感",
-	tongganmrfz_info: "锁定技，每回合每项限三次：①当其他角色从牌堆摸牌后，你摸一张牌；②当其他角色有牌进入弃牌堆后，你弃置一张牌。",
-	tonggan_discardmrfz: "同感",
+	// tongganmrfz: "同感",
+	// tongganmrfz_info: "锁定技，每回合每项限三次：①当其他角色从牌堆摸牌后，你摸一张牌；②当其他角色有牌进入弃牌堆后，你弃置一张牌。",
+	// tonggan_discardmrfz: "同感",
 });
 
-characterTitle("amiyamrfz", "<font color=#00868B>魔王</font>");
+characterTitle("char_002_amiya", "<font color=#00868B>魔王</font>");
 
-characterIntro("amiyamrfz", "阿米娅，罗德岛的公开领袖，在内部拥有最高执行权。虽然，从外表上看起来仅仅是个不成熟的少女，实际上，她却是深受大家信任的合格的领袖。现在，阿米娅正带领着罗德岛，为了感染者的未来，为了让这片大地挣脱矿石病的阴霾而不懈努力。");
+characterIntro("char_002_amiya", "阿米娅，罗德岛的公开领袖，在内部拥有最高执行权。虽然，从外表上看起来仅仅是个不成熟的少女，实际上，她却是深受大家信任的合格的领袖。现在，阿米娅正带领着罗德岛，为了感染者的未来，为了让这片大地挣脱矿石病的阴霾而不懈努力。");

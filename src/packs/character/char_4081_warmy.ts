@@ -13,10 +13,10 @@ skill({
 			mark: true,
 			intro: {
 				content: function (event, player) {
-					var storage = player.storage.baiweimrfz,
+					let storage = player.storage.baiweimrfz,
 						text;
 					if (Object.keys(player.storage.baiweimrfz).length < 1) return "没有记录的牌";
-					for (var key in storage) {
+					for (let key in storage) {
 						text = (text === undefined ? "" : text) + get.translation(key) + ":" + storage[key] + "</br>";
 					}
 					return text;
@@ -29,8 +29,8 @@ skill({
 			enable: ["chooseToUse", "chooseToRespond"],
 			filter: function (event, player) {
 				if (player.countCards("h") < 1 || Object.keys(player.storage.baiweimrfz).length < 1) return false;
-				for (var i of lib.inpile) {
-					var type = get.type(i);
+				for (let i of lib.inpile) {
+					let type = get.type(i);
 					if ((type == "basic" || type == "trick") && event.filterCard({ name: i }, player, event) && player.storage.baiweimrfz[i])
 						return true;
 				}
@@ -38,20 +38,20 @@ skill({
 			},
 			chooseButton: {
 				dialog: function (event, player) {
-					var number = {};
-					for (var i = 1; i <= lib.inpile.length; i++) {
+					let number = {};
+					for (let i = 1; i <= lib.inpile.length; i++) {
 						number[i] = [];
 					}
-					for (var i = 1; i <= lib.inpile.length; i++) {
-						for (var j = 0; j < lib.inpile.length; j++) {
-							var name = lib.inpile[j];
+					for (let i = 1; i <= lib.inpile.length; i++) {
+						for (let j = 0; j < lib.inpile.length; j++) {
+							let name = lib.inpile[j];
 							if (get.type(name) == "delay" || get.type(name) == "equip") continue;
 							if (!event.filterCard({ name: name }, player, event)) continue;
 							if (!player.storage.baiweimrfz[name]) continue;
 							if (get.cardNameLength(name) == i) {
 								if (name == "sha") {
 									if (event.filterCard({ name: name }, player, event)) number[i].push(["基本", "", "sha"]);
-									for (var k of ["fire", "thunder", "ice", "stab"]) {
+									for (let k of ["fire", "thunder", "ice", "stab"]) {
 										if (event.filterCard({ name: name, nature: k }, player, event)) number[i].push(["基本", "", "sha", k]);
 									}
 								} else if (get.type(name) == "trick" && event.filterCard({ name: name }, player, event))
@@ -61,30 +61,22 @@ skill({
 							}
 						}
 					}
-					/**
-					 * @type {Dialog}
-					 */
-					//@ts-ignore
-					var dialog = ui.create.dialog;
-					//@ts-ignore
-					dialog = ["百味：请选择一张牌"];
-					for (var i = 1; i < Object.keys(number).length; i++) {
+					let dialog:any[] = ["百味：请选择一张牌"];
+					for (let i = 1; i < Object.keys(number).length; i++) {
 						if (!number[i].length) continue;
-						//@ts-ignore
 						dialog.push('<div class="text center">' + get.cnNumber(i) + "字</div>");
-						//@ts-ignore
 						dialog.push([number[i], "vcard"]);
 					}
-					return dialog;
+					return ui.create.dialog(dialog);
 				},
 				backup: function (links, player) {
 					return {
 						filterCard: function (card) {
-							var selected = ui.selected.cards,
+							let selected = ui.selected.cards,
 								num = get.cardNameLength(links[0][2]);
 							if (selected.length) {
-								var num2 = 0;
-								for (var i = 0; i < selected.length; i++) {
+								let num2 = 0;
+								for (let i = 0; i < selected.length; i++) {
 									num2 += get.cardNameLength(selected[i]);
 								}
 								num -= num2;
@@ -92,12 +84,12 @@ skill({
 							} else return get.cardNameLength(card) <= num;
 						},
 						selectCard: function () {
-							var num = Infinity,
+							let num = Infinity,
 								selected = ui.selected.cards,
 								num2 = get.cardNameLength(links[0][2]);
 							if (selected.length) {
-								var num3 = 0;
-								for (var i = 0; i < selected.length; i++) {
+								let num3 = 0;
+								for (let i = 0; i < selected.length; i++) {
 									num3 += get.cardNameLength(selected[i]);
 								}
 								if ((num = Infinity)) num = 1;
@@ -133,7 +125,7 @@ skill({
 			},
 			hiddenCard: function (player, name) {
 				if (!lib.inpile.includes(name)) return false;
-				var type = get.type(name);
+				let type = get.type(name);
 				return (type == "basic" || type == "trick") && player.storage.baiweimrfz[name] && player.countCards("h") > 0;
 			},
 			ai: {
@@ -165,7 +157,7 @@ skill({
 						return get.type(event.card) == "trick" || get.type(event.card) == "basic";
 					},
 					async content(event, trigger, player) {
-						var name = trigger.card.name;
+						let name = trigger.card.name;
 						if (!player.storage.baiweimrfz) player.storage.baiweimrfz = {};
 						if (player.storage.baiweimrfz[name]) {
 							player.storage.baiweimrfz[name]++;
@@ -191,14 +183,23 @@ skill({
 				const num = trigger.card.cards.length;
 				player.addTempSkill("nuanxiangmrfz_ban", { global: "phaseEnd" });
 				const result = await player
-					.chooseTarget(true, [1, num], "【暖香】:请选择至多" + get.cnNumber(num) + "名角色")
+					.chooseTarget({
+						/**
+						 * true, [1, num], "【暖香】:请选择至多" + get.cnNumber(num) + "名角色"
+						 */
+						forced:true,
+						selectTarget() {
+							return [1, num]
+						},
+						prompt:"【暖香】:请选择至多" + get.cnNumber(num) + "名角色"
+					})
 					.set("ai", target => get.attitude(player, target) > 0)
 					.forResult();
 
 				if (result.targets) {
 					//@ts-ignore
 					player.logSkill("nuanxiangmrfz");
-					for (var i of result.targets) {
+					for (let i of result.targets) {
 						player.line(i);
 						i.draw();
 					}

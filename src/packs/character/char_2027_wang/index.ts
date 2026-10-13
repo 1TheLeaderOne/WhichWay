@@ -5,7 +5,7 @@ import control from "./control.vue";
 import { createApp } from "vue";
 import { dataManager } from "../../../dataManager/index.ts";
 
-character("wangmrfz", {
+character("char_2027_wang", {
 	sex: "male",
 	group: "suimrfz",
 	skills: ["qushimrfz", "dingshengmrfz"],
@@ -13,7 +13,7 @@ character("wangmrfz", {
 	pack: "legendSJZX",
 });
 
-characterTitle("wangmrfz", "<font color = #2263b766>胜天半子</font>");
+characterTitle("char_2027_wang", "<font color = #2263b766>胜天半子</font>");
 
 const yearsTrans = {
 	shuomrfz: "朔",
@@ -43,9 +43,9 @@ const yearsTrans = {
 };
 
 translate({
-	...Object.fromEntries(Object.entries(yearsTrans).map(([key, value]) => [`wangmrfz_${key}`, value])),
+	...Object.fromEntries(Object.entries(yearsTrans).map(([key, value]) => [`char_2027_wang_${key}`, value])),
 
-	wangmrfz: "望",
+	char_2027_wang: "望",
 
 	qushimrfz: "取势",
 	qushimrfz_info: `锁定技,当你首次使用一种牌名的普通锦囊牌时，你为该种牌名的牌选择一个效果，你对应的牌获得对应的效果：<br>朔：对此牌的一名目标角色造成一点伤害;<br>望：视为使用一张刺【杀】（无距离次数限制）;<br>令：结算完毕后视为使用一张【酒】;<br>均：无法被其他角色响应;<br>颉：视为使用一张你本回合使用过的基本牌（无次数限制）;<br>黍：下次摸牌数翻倍;<br>绩：将手牌补至手牌上限（至多为5）;<br>易：${get.poptip("sjzx_zhiheng")}3;<br>年：随机获得一个武器牌的技能直到回合结束;<br>夕：额外结算一次;<br>方：回复体力至体力上限;<br>余：选择从牌堆中获得任意类型的一张牌。`,
@@ -107,7 +107,7 @@ const years: Record<string, ExtendedSkill> = {
 		},
 		async content(event, trigger, player) {
 			await player
-				.chooseUseTarget(get.autoViewAs("jiu"))
+				.chooseUseTarget({card:get.autoViewAs({name:"jiu"})})
 				.set("prompt", `令：视为使用一张【酒】`)
 				.set("prompt2", whichWayUtil.colorize("#r直抒胸臆，酣畅淋漓。#"));
 		},
@@ -302,7 +302,7 @@ for (const key in years) {
 	// info.popup = false;
 	const originalFilter = info.filter;
 	info.filter = (event, player, name, target) => {
-		if (!event.card || yearsMap[`wangmrfz_${key}`] !== event.card.name) return false;
+		if (!event.card || yearsMap[`char_2027_wang_${key}`] !== event.card.name) return false;
 		return originalFilter ? originalFilter.bind(this)(event, player, name, target) : true;
 	};
 }
@@ -324,8 +324,8 @@ skill({
 		},
 		async content(event, trigger, player) {
 			const list = Object.keys(years)
-				.filter(year => !yearsMap[`wangmrfz_${year}`])
-				.map(year => [`wangmrfz_${year}`, get.skillInfoTranslation(`wangmrfz_${year}`)]);
+				.filter(year => !yearsMap[`char_2027_wang_${year}`])
+				.map(year => [`char_2027_wang_${year}`, get.skillInfoTranslation(`char_2027_wang_${year}`)]);
 
 			if (event.isMine()) {
 				game.pause2();
@@ -428,11 +428,11 @@ skill({
 			},
 		},
 	},
-	...Object.fromEntries(Object.entries(years).map(([key, value]) => [`wangmrfz_${key}`, value])),
+	...Object.fromEntries(Object.entries(years).map(([key, value]) => [`char_2027_wang_${key}`, value])),
 });
 
 characterIntro(
-	"wangmrfz",
+	"char_2027_wang",
 	"望，曾担任炎国军事顾问，现为无业棋手。年、夕、令等人的兄长，重岳的弟弟。经重岳先生介绍来到罗德岛养病，偶尔会为作战任务提供建议。"
 );
 

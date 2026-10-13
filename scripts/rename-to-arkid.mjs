@@ -6,6 +6,8 @@
  *   node scripts/rename-to-arkid.mjs              # 检查模式：只打印将要做什么，不落盘
  *   node scripts/rename-to-arkid.mjs --apply      # 执行改名（代码 + 资源 + 跨文件引用）
  *   node scripts/rename-to-arkid.mjs --revert     # 按 journal 回滚（需先跑过 --apply）
+ *   node scripts/rename-to-arkid.mjs --derived    # 补救：只补 {旧id}_prefix/_ab/_info 派生翻译键
+ *   node scripts/rename-to-arkid.mjs --gen-migration  # 生成 src/arknight/legacyCharIds.ts（旧id→新id 存档迁移表）
  *
  * 覆盖范围（缺一都会导致立绘/皮肤/配音失配，所以是「全套同步改」）：
  *   1. src/packs/character/{old}.ts 文件名（目录形态则改目录名）
@@ -35,7 +37,8 @@ const MAP_FILE = path.join(HERE, "arkid-rename-map.json");
 const JOURNAL = path.join(HERE, "arkid-rename-journal.json");
 
 const argv = process.argv.slice(2);
-const MODE = argv.includes("--apply") ? "apply" : argv.includes("--revert") ? "revert" : argv.includes("--gen-map") ? "genmap" : argv.includes("--derived") ? "derived" : "check";
+const MODE =
+	argv.includes("--apply") ? "apply" : argv.includes("--revert") ? "revert" : argv.includes("--gen-map") ? "genmap" : argv.includes("--derived") ? "derived" : argv.includes("--gen-migration") ? "migration" : "check";
 
 const read = f => fs.readFileSync(f, "utf8");
 const readJson = f => JSON.parse(read(path.join(ROOT, "json", "arknight", `${f}.json`)));
@@ -267,6 +270,34 @@ if (MODE === "derived") {
 		fs.writeFileSync(file, after);
 	}
 	console.log(`派生键补齐：改 ${files} 个文件，${keys} 处 {旧id}_prefix/_ab/_info`);
+	process.exit(0);
+}
+
+// ===================================================================
+// --gen-migration：把「旧id → 新id」表写进源码，供一次性存档迁移读取
+// ===================================================================
+if (MODE === "migration") {
+	const rows = [...todo].sort((a, b) => a.id.localeCompare(b.id));
+	const body = rows.map(r => `\t${JSON.stringify(r.id)}: ${JSON.stringify(r.ark)},`).join("\n");
+	const out = path.join(ROOT, "src", "arknight", "legacyCharIds.ts");
+	fs.writeFileSync(
+		out,
+		`/**
+ * 旧干员id → 明日方舟uid 映射表
+ *
+ * 由 \`node scripts/rename-to-arkid.mjs --gen-migration\` 从 scripts/arkid-rename-map.json 生成，
+ * 请勿手工编辑。改名前的玩家存档（皮肤/配音/模组/冲突皮肤/战役进度）里的键仍是旧id，
+ * 由 src/arknight/arkidMigration.ts 在启动时按此表一次性改写。
+ *
+ * 表里只有**实际改过名**的干员：保留原名的干员（无对应uid、或因 \`{id}_\${key}\` 动态键而跳过）
+ * 不在表内，迁移时自然跳过。
+ */
+export const legacyCharIds: Record<string, string> = {
+${body}
+};
+`,
+	);
+	console.log(`迁移表已写入 ${rel(out)}（${rows.length} 条）`);
 	process.exit(0);
 }
 

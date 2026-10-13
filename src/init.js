@@ -2,6 +2,7 @@ import { lib } from "noname";
 import { whichWayHooksApi } from "./hooks/index.js";
 import { whichWayVersion } from "./version.js";
 import { runStages } from "./stageLoader.js";
+import { migrateLegacyCharIds } from "./arknight/arkidMigration.ts";
 
 /**
  * 驶舰之向初始化
@@ -42,6 +43,10 @@ export const whichWayInit = async () => {
 
 	//检查版本
 	whichWayVersion.checkVersionCompatible();
+
+	//旧干员id 存档迁移：必须赶在任何阶段模块求值之前，globalSave/skin/audio/modules 都在
+	//模块顶层抓取配置对象，晚了抓到的就是迁移前的旧键。
+	migrateLegacyCharIds();
 
 	const stages = [
 		//导入toast组件

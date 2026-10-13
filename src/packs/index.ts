@@ -145,7 +145,8 @@ class WhichWayPackManager {
 			if (Array.isArray(char)) char = get.convertedCharacter(char);
 
 			//————初始化武将图片————//
-			char.img = whichWayFile.compilePath(`img:character/${name}.jpg`);
+			//whichWayFile.compilePath(`img:illustration/character/${name}.jpg`);
+			char.img = whichWayFile.compilePath(`img:illustration/character/${name}.jpg`);
 
 			//————初始化WhichWay配置————//
 			//声明态 → 初始化态：补全 whichWay / pack，**声明过的字段（含 whichWay 里的）一律保留**，
@@ -194,7 +195,7 @@ class WhichWayPackManager {
 			}
 			if (data.whichWay.designer?.length) {
 				designer[name] ??= [];
-				designer[name].push(...data.whichWay.designer.filter(designerx => !designer[name].includes(designerx)));
+				designer[name].push(...(data.whichWay.designer as string[]).filter(designerx => !designer[name].includes(designerx)));
 			}
 
 			if (!whichWayUtil.config("unityGroup")) {
