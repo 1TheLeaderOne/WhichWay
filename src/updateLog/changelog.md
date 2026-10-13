@@ -1,5 +1,20 @@
 # 瑰丽理想 WhichWay 更新日志
 
+## 2026-10-14
+
+### 新增：头像立绘透明图层处理 `src/skin/avatarBackground.ts`
+
+明日方舟立绘带透明区域时，透出来的是引擎贴的**本体默认武将图**：`HTMLDivElement.setBackground(name,"character")` 走的是 `setBackgroundImage([立绘, lib.characterDefaultPicturePath + sex])`（`apps/core/noname/init/polyfill.ts:226-232`），即 `url(立绘),url(保底图)` 两层背景。新增模块用 `whichWayAPIOverride.appendHook` 劫持 `lib.element.player.$init` / `$reinit`，把驶舰之向角色的立绘改画进 `.avatar` 里的两层子 div（`sjzxAvtBgWrapper` 铺 `ui:background/default.png` + `overflow:hidden`，`sjzxAvtBgImage` 只贴立绘，贴完用 `firstLayer()` 把保底图层削掉）；**其余角色一律走引擎原流程，头像上连子节点都不会多**。由 `src/skin/index.ts` 静态 import 带入（skin 阶段），钩子在 content 阶段注册。
+
+- **落点选 `src/skin/avatarBackground.ts` 而不是需求里写的 `src/skin.ts`**：`src/skin/` 目录已存在，`src/skin.ts` 曾作为重复文件删除（见 `updateContent.txt:31`），再加一个同名文件会让今后的 `from "./skin.js"` 解析到 `skin.ts` 而不是 `skin/index.ts`。
+- **重定向而非一次性改写**：`$init` 时给 `node.avatar` / `node.avatar2` 装上自有属性 `setBackground` / `setBackgroundImage`，「是不是干员」在每次调用时判断。因为除 `$init`/`$reinit` 外还有 `changeSkin`(player.js:3761,3800,3822)、`$reinit12/21`(3963-3978)、`setAvatar`(4523-4528)、皮肤菜单 avatarSetter、本扩展 `refreshSkin()`、以及干员技能里直接改头像的 `setBackgroundImage`（`char_416_zumama`、`shuangwangmrfz`）都会再画一次，不重定向就会被我们加的子 div 盖住，表现为「换皮肤没反应」。装一次即可覆盖全部路径：引擎从不重建 `player.node.avatar`（全仓只有 `game.logv` 的战报卡节点与 `card.js:481` 赋过 `node.avatar`）。
+- **头像节点自身保留一份「只贴立绘」的影子副本**（不带保底图层）。这是给读不到子节点的三处用的：`game.logv` 的战报卡头像是 `player.node.avatar.cloneNode()` **浅克隆**（game/index.js:9239/9265/9303/9321，只带属性与内联样式）、`smoothAvatar` 的淡出层抄 `getComputedStyle(.avatar).background`（player.js:4209）、`ui.fakeme` 抄 `.avatar` 的内联 `background-image`（3971/3984/4100/4531）。立绘只画在子 div 上的话这三处全空白。影子副本不会露馅：不透明处被内层（同图、同尺寸、同 `cover`+水平居中定位）完全盖住，透明处节点自己也是透明的，所以半透明的 `default.png`（1024×576，alpha 最低 0.769）透出来的仍只有卡面。
+- **因此没有钩 `game.logv`**：`logv` 内部 `game.broadcast(game.logv, …)`（9220）会把**当时属性上的函数**反编译成源码文本发给远端（`client.js:52-69` → `get.funcInfoOL`），`appendHook` 的 wrapper 闭包引用了 `original/before/after`，在客户端是未定义变量 ⇒ 主机正常、远端战报栏全空。影子副本让浅克隆天然可用，不必冒这个险。（注：`game.trySkillAudio`/`tryDieAudio` 早已被本扩展以同样方式钩住且同样自广播，属既有隐患，本次未动。）
+- 层级：两层 div `prepend` 到最前，`smoothAvatar` 的 `.fullsize`、阵亡卡的 `.avatarbg grayscale1` 都是后加的兄弟节点，按树序仍画在我们上面；动皮容器 `.sjzxDycWrapper` 自带 `z-index:2` 不受影响。外层 `pointer-events:none` 保证 `ui.click.avatar` 照常可点。
+- `setBackground` 的 `db:` 分支是异步的（polyfill.ts:211-213），此刻内联样式还没写，故 `firstLayer()` 取到空值时直接 return，不动影子副本，免得把上一张好图冲掉。
+- 已知观感差异（非缺陷）：战报卡头像与 `ui.fakeme` 只有立绘、没有 `default.png` 背板——影子副本刻意只贴立绘，否则背板会被节点与外层各画一次（0.769 → 约 0.947 不透明度），与需求的「外层背景为 default.png」不符。
+- 验证：`pnpm eslint` 两文件 0 报错；`firstLayer()` 正则用 node-repl 跑了 6 组用例（含带空格文件名 `夏卉 FA017.png`、带括号文件名、单层、空串、`none`）全部符合预期；构建产物 `chunks/skin-avatarBackground-shared.js` 内含 `whichWaySkinAvatarBackground` 与两个 class 名、无 `logv` 残留、无反向 `from "./extension.js"`。**实机未验证**（浏览器 MCP 加载不了 dev app），观感需人工进游戏确认。
+
 ## 2026-10-13
 
 ### 任务一：`whichWayArknight` 新增干员id 清单与归属判断

@@ -10,6 +10,9 @@ import { spineWorker } from "./spineWork.js";
 import ConfOverride from "./confOverride.vue";
 import { confictedSkin } from "./confictedSkin.ts";
 
+//立绘透明图层的两层背景结构（劫持 $init / $reinit）
+import "./avatarBackground.ts";
+
 /** v1.6 清缓存的标记位（与 arkidMigrated 同一套一次性开关写法，落库为 extension_WhichWay_ 前缀） */
 const SKIN_CACHE_CLEARED_KEY = "skinCacheClearedV16";
 
