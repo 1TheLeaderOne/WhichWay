@@ -32,6 +32,8 @@ import UpdateCurrent from "./component/updateCurrent.vue";
 import ExtIntro from "../config/extIntro.vue";
 import BackgroundSet from "./component/backgroundSet.vue";
 import UpdateLog from "./component/updateLog.vue";
+import AudioSetting from "./component/audioSetting.vue";
+import ModuleSetting from "./component/moduleSetting.vue";
 
 let imgTitleSrc = "./extension/WhichWay/image/ui/painter.png";
 
@@ -41,6 +43,8 @@ const panels = [
 	{ name: "更新日志", component: UpdateLog },
 	{ name: "扩展介绍", component: ExtIntro },
 	{ name: "背景设置", component: BackgroundSet },
+	{ name: "配音设置", component: AudioSetting },
+	{ name: "模组切换", component: ModuleSetting },
 ];
 
 //当前面板

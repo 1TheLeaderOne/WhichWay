@@ -10,6 +10,8 @@ export const upDataContentCurrent = {
 - **新增 API**：\`Player.chooseFakeCardTarget\`
 ### 进行中
 - **优化**: 优化势力显示，现在联动角色会正确显示其势力
+- **修复**: 修复黍、信仰搅拌机因AI批量迁移导致的bug
+- **修复**: 修复嵯峨、普瑞赛斯模组技能丢失的bug
 - **修复**：仍处于开发中的模式\`GloriousIdeal\`在非开发环境下会加载的bug
 - **修复**：跃跃因 AI 批量修改导致代码错误的 bug
 `,

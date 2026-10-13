@@ -213,7 +213,7 @@ class WhichWayArknight {
 		const translations: (string | undefined)[] = characters.map(i => get.translation(i));
 		const transToId = new Map<string, string>();
 		characters.forEach((i, idx) => {
-			const t = this.redirect.transfer(translations[idx]);
+			const t = this.redirect.transfer(translations[idx]!);
 			if (t !== undefined && !transToId.has(t)) transToId.set(t, i);
 		});
 
@@ -370,14 +370,14 @@ class WhichWayArknight {
 		const arkuid: string | undefined = char.arkuid;
 
 		//明日方舟uid：声明（含 arkuid）优先，缺省时按角色id反查
-		arknight.charId ??= arkuid || (this.shcema.transfer(config.charId, "character", "whichWayUID") as string) || "";
+		arknight.charId ??= arkuid || (this.shcema.transfer(config.charId!, "character", "whichWayUID") as string) || "";
 
 		//阵营：缺省时按真实势力（reallyGroup）映射
 		arknight.camp ??= (this.getCamp(char) as string) ?? "";
 
 		//可用语音语言 / tag：声明了就完全采用声明的列表
-		arknight.avaiableLangs ??= this.getAviableLangs(config.charId) || [];
-		arknight.tags ??= this.getTags(config.charId) || [];
+		arknight.avaiableLangs ??= this.getAviableLangs(config.charId!) || [];
+		arknight.tags ??= this.getTags(config.charId!) || [];
 
 		//这两项同样是"缺省才推导"：显式写 false 也以声明为准
 		config.supportingEquipment ??= arknight.tags.includes("支援机器");

@@ -1,5 +1,82 @@
 # 瑰丽理想 WhichWay 更新日志
 
+## 2026-10-13
+
+### 新增立绘分离脚本 `scripts/split-illustration.mjs`
+
+把 `image/illustration/source`（501 张明日方舟原始立绘，文件名 = `portraitId + "b" + 扩展名`）按 gamedata `json/arknight/skin_table.json` 分离：
+- **角色 id 口径**：用 `skinId` 里 `@`/`#` 之前的「形态 id」（普通干员即 charId，如 `char_002_amiya`），能自然区分阿米娅三形态（`char_002_amiya` / `char_1001_amiya2` / `char_1037_amiya3`）——它们 `charId` 相同但形态 id 不同，不会在 `character/` 撞名。
+- **分类规则**：
+  - 精二（`skinGroupId === "ILLUST_2"`）→ `character/[形态id].png`
+  - 真实皮肤（有 `displaySkin.skinName`）→ `skin/[形态id]/[皮肤中文名].png`
+  - 初始/精一（`ILLUST_0`/`ILLUST_1`，gamedata 无中文名）→ `skin/[形态id]/初始立绘.png`｜`精一立绘.png`
+  - `_sp` 变体（文件 `{portraitId}_spb.png`，对应 gamedata `spPortraitId = "sp_"+portraitId`，是**同一皮肤的异格立绘**而非独立干员）→ 与母皮肤同目录，命名 `[母皮肤中文名][皮肤序号].png`（序号取自 skinId 的 `#N`，如 kalts 皮肤「时遗」的异格 → `时遗14.png`）
+- 反查用「`portraitId+"b"`」「`portraitId+"_spb"`」两键，不从文件名硬拆角色 id；皮肤中文名做 Windows 非法字符清洗。
+- 默认执行**剪切(move)**；`--copy` 改复制、`--dry-run` 只预览。目标已存在或计划内撞名一律跳过不覆盖。
+- `--dry-run` 实测：501 张全部命中、0 未匹配、0 冲突（精二 137 / 皮肤 203 / 皮肤·异格 4 / 初始 156 / 精一 1）。
+- 已用 **`--copy` 复制模式执行**：`character/` 137 张、`skin/` 364 张（159 个形态子目录）、`source/` 原件 501 张保留未动。阿米娅三形态精二分别落 `char_002_amiya.png`/`char_1001_amiya2.png`/`char_1037_amiya3.png`。
+
+### 新增皮肤压缩脚本 `scripts/compress-skin.mjs`
+
+`test/skin` 里 1394 张立绘约 7.9GB、普遍 1300–2400px，远超游戏内显示需求。用 ImageMagick 7（`magick`）批量降体积：
+- 策略：`-auto-orient -strip -colorspace sRGB -resize <MAX>x<MAX>>`（只缩不放）。默认长边上限 1280（`--max` 可调）。
+- **默认输出 PNG（保留逐像素 alpha）+ 调色板量化**：`-colors 256` 把真彩降为 ≤256 色调色板 PNG，是进一步压缩的主力；再叠 `-define png:compression-level=9 -define png:compression-strategy=0`。
+  - **刻意不加抖动**：实测 FloydSteinberg 抖动产生的噪声会让 PNG 体积反弹数倍（同图 418KB→1.38MB）。渐变色带明显时才用 `--dither` 换取平滑（体积变大），或 `--colors 0` 退回真彩 PNG（体积最大、无量化痕迹）。
+- 实测（3 张透明 RGBA 样本，默认参数）：合计省 **82%**（4.12MB→757KB），单张 -58%~-86%；量化后 **alpha 几乎无损**（透明均值 0.4880→0.4878、0~1 全量程保留），颜色 RMSE 仅 1.3%。对照：`--colors 0` 真彩 PNG 省约 58%；`--format jpg` 省约 96% 但会把透明区拍平烙上底色。
+- 安全默认：不覆盖原图，产物写到 `<目录名>_compressed/`；`--inplace` 才就地替换，且首次覆盖前把原件备份到 `<目录名>_backup_original/`（按源扩展名存）；换格式时删旧扩展名文件；单张若没变小则丢弃产物保留原图。
+- 选项：`--dir --max --quality --bg --format(png|jpg|keep) --colors(默认 256，0=真彩) --dither --jobs --dry-run --inplace`。
+- 未跑全量（批量改资源不可逆，交由用户执行）。
+
+### 配音设置详情区扩展：立绘 + 技能试听 + 死亡配音
+
+`configUI/component/audioSetting.vue`：选中干员后，`detail-col` 不再只列配音语言，改为展示——
+- **干员立绘**：与武将卡同源，取 `whichWaySkin.getCurrentSkinPath(name)` 作背景图。
+- **配音语言切换**：保留原有列表（`setCustomAudio` + `version` 强制重算）。
+- **技能试听**：列出 `get.character(name).skills` 每个技能（`get.translation` 译名）+ 一个播放按钮，点击调 `whichWayAudio.playSkillAudio(skill, name)`（在线/本地由扩展自动分流），与 `characterCard/panels/SkillPanel.vue` 的试听按钮一致。
+- **死亡配音试听**：按钮调引擎 `game.tryDieAudio(name)`，扩展的 `game.tryDieAudio` 钩子按在线/本地分流。
+新增布局 div 均显式 `position: relative`（规避全局 `div{position:absolute}` 塌陷）；播放按钮复用 `image/ui/Play.png`。`pnpm eslint` 与 `WW_SKIP_STATIC_COPY=1` 构建均通过；未在实机验证（浏览器 MCP 无法加载 dev app）。
+
+### ConfigUI 新增「配音设置」「模组切换」两个面板
+
+在扩展设置界面（`驶舰之向` 系统菜单 → ConfigUI）左侧菜单新增两个功能，均可搜索并单独调整对应干员。
+
+- `configUI/component/charPicker.vue`（新增，两面板共用）
+  - 搜索框 + 干员列表；匹配串由「干员中文名 + 干员 id(拼音) + 中文名拼音(pinyin-pro) + 各技能中文名/技能 id」拼成，支持中文、拼音（罗马拼音/英文）、技能三种搜法，空格与非空格拼音都能命中。
+  - 通过 `v-model` 双向绑定选中干员，本身只负责“选谁”，选中后展示什么由调用方决定。
+- `configUI/component/audioSetting.vue`（新增，功能一：配音设置）
+  - 候选=全部驶舰之向干员（`window.whichWaySave.allCharacters`）；右侧列出该干员可用配音语言（`whichWayAudio.getCharacterAvailableLang`）、高亮当前语言（`whichWayAudio.getCharacterLang`）。
+  - 切换方式参考 `characterCard/CharacterCard.vue` 的配音选择：点选调 `whichWayAudio.setCustomAudio(char, lang)` 落库，配 `version` ref 强制重算（配音配置为非响应式）；非驶舰之向干员弹 toast 拦截。
+- `configUI/component/moduleSetting.vue`（新增，功能二：模组切换）
+  - 候选=真正配置了模组的干员（`Object.keys(whichWayCharacterModules.modules)`，当前为普瑞赛斯、嵯峨）；右侧直接复用武将卡的 `characterCard/panels/ModulePanel.vue`（`getCharModules`/`setCharModules` + 换模组重启提示），`<ModulePanel :key="selected">` 随所选干员重建。
+- `configUI/main.vue`
+  - `panels` 数组追加「配音设置」「模组切换」两项并 import 对应组件（新增标签页只需这一步）。
+
+说明：配音面板的语言列表与武将卡一致，取干员的 `avaiableLangs`；无明日方舟配音数据的干员显示“暂无可切换的配音语言”。构建（`WW_SKIP_STATIC_COPY=1 pnpm -F ./packages/extension/WhichWay build`）与 `pnpm eslint` 均通过。
+
+### 重构：模组系统 `getCharModules` 返回值类型精确化（不改运行时逻辑）
+
+`src/modules/index.ts`、`typings/modules.d.ts`。原 `getCharModules(name, current)` 声明为 `characterModulesUIConfig | undefined`，但实际按 `current` 与 `name` 语义返回**三种形态**（单个模组 / 以模组 ID 为键的字典 / `undefined`），调用方（`ModulePanel.vue` 用 `getCharModules(name,false)` 取字典再 `Object.keys`、`getCharModules(name)?.id` 取单个；`setCharModules` 用字典索引 `modules[moduleName]`）都在依赖这个隐式约定，返回值含义混乱。
+
+- `typings/modules.d.ts`：抽出 `characterModuleEffect`，给 `characterModulesUIConfig` 补可选 `effect?`（`initCharModules` 会读 `module.effect`，原类型没声明）；保留 `characterModulesUIConfigs`（字典）别名并注明语义。
+- `src/modules/index.ts`：
+  - 用 **TypeScript 函数重载**把三态写成精确契约——`getCharModules(name, current?: true)` 返回 `characterModulesUIConfig | undefined`，`getCharModules(name, current: false)` 返回 `characterModulesUIConfigs | undefined`，实现签名返回三者并集。运行时分支/守卫（`id==="default"`、`hasChar`、`modulesList.includes`、递归解析 `modulesSet[id]`）逐一保持不变。
+  - 抽出私有 `buildDefaultModule(charName)` 复用基础证章构造；`current===false` 的字典改用显式 `characterModulesUIConfigs` 逐键构建（仍是引用原 `modules[name]` 对象并补 `url/id`，副作用与原实现一致）。
+  - 去掉冗余 `(name as string as string)` 双重断言；局部改名（`id`/`charModules`/`allModules`）避免与类字段 `modules` 同名遮蔽；修正 `initCharModules` 里 `for` 循环 `}}` 的错乱缩进（纯排版，`module.name==="default"` 与循环内 `return` 等逻辑原样保留）。
+- 兼容性：外部调用方无需改动即从隐式约定变为编译期精确类型（`.vue` 为 JS 不做类型检查，行为一致）。
+
+遗留观察（未改，属既有逻辑）：`modulesList` 存的是模组**中文名**而非 ID，故按 ID 解析分支 6 依赖名称命中；`initCharModules` 判据用 `module.name==="default"`（而默认模组 `name` 是“基础证章”、`id` 才是 `default`）且 `for...of` 内用 `return` 提前退出整轮。这些保持原样，仅在此标注，是否修正待确认。
+
+### 修正：上述两处既有逻辑（经确认后修复）
+
+- `src/modules/data.ts`：`modulesList` 改为收集模组 **ID**（`Object.values(modules).flatMap(sub => Object.keys(sub))`），与 `getCharModules` 里按 ID 解析模组、以及角色/模组重名校验的语义一致（原实现取的是模组中文名，导致 ID 解析分支几乎命中不了）。
+- `src/modules/index.ts` `initCharModules`：默认模组判据由 `module.name === "default"` 改为 `module.id === "default"`（默认模组 `name` 为“基础证章”、`id` 才是 `default`）；块内 `return` 改为 `continue`——原为 `forEach` 的 `return`（等价 continue），迁到 `for...of` 后若仍用 `return` 会在处理完美队后跳过其余干员。
+
+#### 修复：新面板的 div 被全局样式强制成绝对定位导致布局塌陷
+
+无名杀核心有一条全局规则 `apps/core/layout/default/layout.css:31` —— `div { display: inline-block; position: absolute; transition: all 0.5s; }`：任何没写 `position` 的 `<div>` 都会被强制绝对定位、脱离 flex/normal-flow，使左右分栏与干员列表叠成一团（这也是 CharacterCard/backgroundSet/ModulePanel 里几乎每个盒子都手写 `position: relative` 的原因）。
+
+- `charPicker.vue` / `audioSetting.vue` / `moduleSetting.vue`：给所有参与布局的容器与 flex 子项（面板根、`picker-col`、`detail-col`、`detail-title`、`current-line`、`hint`、`lang-list`、`search-box`、`char-grid`、`char-item`、`empty-tip`）显式加 `position: relative`；仅配音语言项里刻意覆盖用的 `.choice/.nochoice/*.selectText` 保持 `absolute`。eslint + build 通过。
+
 ## 2026-10-12
 
 ### 岳羽由加莉 · 完善【明镜】mingjinmrfz
