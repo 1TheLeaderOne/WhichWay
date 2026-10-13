@@ -197,22 +197,7 @@ class WhichWayArknight {
 		const characters = window.whichWaySave.allCharacters;
 		const arkData: Record<string, ArknightCharacterSlim> = this.arknightData.character_table;
 
-		//以下中间量与具体 key 无关，提前算好。
-		//原先它们在循环体内构建，每个 key 都对全部干员重算一遍 filter/map
-		const hasArkCharacters = characters.filter(i => {
-			const char = get.character(i) as WhichWayCharacter;
-			return !!char && typeof char.arkuid === "string";
-		});
-		//显式声明了 arkuid 的干员按 arkuid 建索引：原实现是
-		//「每个明日方舟 key 都遍历一遍全部干员」的二重循环
-		//（表大小 × 干员数），建索引后整段降为线性。
-		const arkUidToNames = new Map<string, string[]>();
-		for (const name of hasArkCharacters) {
-			const arkuid = (get.character(name) as WhichWayCharacter).arkuid!;
-			let names = arkUidToNames.get(arkuid);
-			if (!names) arkUidToNames.set(arkuid, (names = []));
-			names.push(name);
-		}
+		//译名 → 干员id 的反查表与具体 key 无关，循环外算好（原先每个 key 都对全部干员重算一遍 map）
 		const translations: (string | undefined)[] = characters.map(i => get.translation(i));
 		const transToId = new Map<string, string>();
 		characters.forEach((i, idx) => {
@@ -224,16 +209,16 @@ class WhichWayArknight {
 			const info = arkData[key];
 			if (!this.isCharacter(info)) continue;
 
-			//先判断对应的Character是否有arkuid（索引命中顺序与原内层循环一致）
-			const declaredNames = arkUidToNames.get(key);
-			if (declaredNames) {
-				for (const name of declaredNames) {
-					extUID[name] = key;
-					arkUID[key] = name;
-					cn.set([key, name], get.translation(name));
-				}
+			//干员id 已与明日方舟 uid 统一：同名的 key 自己就是那个干员，恒等映射即可
+			//（旧实现靠干员逐个声明 arkuid 来补这一环，id 统一后声明值恒等于注册名，已无信息量）
+			if (window.whichWaySave.hasChar(key)) {
+				extUID[key] = key;
+				arkUID[key] = key;
+				cn.set([key, key], info.name);
+				continue;
 			}
 
+			//旧式命名干员（id 不是明日方舟 uid）仍按译名反查
 			const whichWayUID = transToId.get(info.name);
 			if (whichWayUID !== undefined) {
 				extUID[whichWayUID] = key;
@@ -332,52 +317,34 @@ class WhichWayArknight {
 
 	/**
 	 * 添加到映射表
-	 * @param { string } id 驶舰之向干员id（或明日方舟uid）
-	 * @param { WhichWayCharacter } [char] 干员数据对象；传入后可识别干员显式声明的 arkuid
+	 * @param { string } id 驶舰之向干员id（已与明日方舟 uid 统一）
 	 */
-	async addShcema(id: string, char?: WhichWayCharacter) {
+	async addShcema(id: string) {
 		const {
 			character: { whichWayUID: extUID, chineseName: cn, arknightUID: arkUID },
 		} = this.shcema;
 		const arkData: Record<string, ArknightCharacterSlim> = this.arknightData.character_table;
-		const characters = window.whichWaySave.allCharacters;
 
-		if (window.whichWaySave.hasChar(id)) {
-			//显式声明了 arkuid 的干员直接按声明映射
-			//（原先该分支扫的是"已写入 characterPack 的其他干员"，当前干员自身要等后续调用才被间接映射，
-			//  且一旦命中就提前 return，会吞掉后续干员的按名映射）
-			const declaredArkuid = (char as { arkuid?: string } | undefined)?.arkuid;
-			if (typeof declaredArkuid === "string" && declaredArkuid in arkData) {
-				extUID[id] = declaredArkuid;
-				arkUID[declaredArkuid] = id;
-				cn.set([declaredArkuid, id], get.translation(id));
-				this.addExsitArk(declaredArkuid);
-				return;
-			}
-
-			//按译名 O(1) 反查（原先在此处对整张表逐 key 做全量 filter/map）
-			const key = this._getArkNameIndex().get(this.redirect.transfer(get.translation(id)));
-			if (key !== undefined) {
-				extUID[id] = key;
-				arkUID[key] = id;
-				cn.set([key, id], arkData[key].name);
-				this.addExsitArk(key);
-				return;
-			}
-			console.warn(`角色${id}不存在`);
-		} else if (id in arkData) {
-			const info = arkData[id];
-			if (this.isCharacter(info)) {
-				const whichWayName = window.whichWaySave.allCharacters.find(i => this.redirect.transfer(get.translation(i)) === info.name)!;
-				extUID[whichWayName] = id;
-				arkUID[id] = id;
-				cn.set([id, whichWayName], info.name);
-				this.addExsitArk(id);
-				return;
-			} else {
-				console.warn(`角色${id}不存在`);
-			}
+		//干员id 已与明日方舟 uid 统一：id 本身就在表里（含并入主表的升变形态）就是它自己，恒等映射。
+		//旧实现靠干员逐个声明 arkuid 走这一步，声明值恒等于注册名，已无信息量。
+		if (this.isCharacter(id)) {
+			extUID[id] = id;
+			arkUID[id] = id;
+			cn.set([id, id], arkData[id].name);
+			this.addExsitArk(id);
+			return;
 		}
+
+		//旧式命名干员（id 不是明日方舟 uid，如 wangmrfz / plot_*）仍按译名 O(1) 反查
+		const key = this._getArkNameIndex().get(this.redirect.transfer(get.translation(id)));
+		if (key !== undefined) {
+			extUID[id] = key;
+			arkUID[key] = id;
+			cn.set([key, id], arkData[key].name);
+			this.addExsitArk(key);
+			return;
+		}
+		console.warn(`角色${id}不存在`);
 	}
 
 	/**
@@ -419,11 +386,9 @@ class WhichWayArknight {
 	initCharArknight(char: WhichWayCharacterInitialized) {
 		const config = char.whichWay;
 		const arknight = (config.arknight ??= {});
-		//@ts-ignore arkuid 为武将包声明字段（不在 WhichWayCharacterPrototype 内）
-		const arkuid: string | undefined = char.arkuid;
 
-		//明日方舟uid：声明（含 arkuid）优先，缺省时按角色id反查
-		arknight.charId ??= arkuid || (this.shcema.transfer(config.charId!, "character", "whichWayUID") as string) || "";
+		//明日方舟uid：声明优先，缺省时按角色id反查（id 已与明日方舟统一，恒等映射即自身）
+		arknight.charId ??= (this.shcema.transfer(config.charId!, "character", "whichWayUID") as string) || "";
 
 		//阵营：缺省时按真实势力（reallyGroup）映射
 		arknight.camp ??= (this.getCamp(char) as string) ?? "";

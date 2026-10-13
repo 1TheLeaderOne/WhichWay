@@ -6,7 +6,6 @@ character("char_1001_amiya2", { pack: "epicSJZX",
 			group: "luomrfz",
 			hp: 4,
 			skills: ["chenxianmrfz","benyemrfz","newjueyingmrfz"],
-			arkuid:"char_1001_amiya2",
 		});
 
 skill({

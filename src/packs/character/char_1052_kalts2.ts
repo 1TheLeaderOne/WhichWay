@@ -7,7 +7,6 @@ character("char_1052_kalts2", {
 	hp: 3,
 	skills: ["pianzhenmrfz","xingmiemrfz"],
 	pack: "legendSJZX",
-	arkuid: "char_1052_kalts2",
 });
 
 characterIntro("char_1052_kalts2", "凯尔希，罗德岛制药公司的创立者之一，同时担任医疗部负责人。曾多次主导罗德岛的大型战略行动，并负责罗德岛的对外沟通工作，为罗德岛的运营发展以及矿石病研究做出了重要贡献。现主要以医疗专家的身份参与罗德岛的矿石病药物研发项目。");

@@ -65,7 +65,7 @@ declare type WhichWayCharConfig = {
 		/**
 		 * 角色id(明日方舟)
 		 *
-		 * 缺省时优先取角色声明的 `arkuid`，再按角色id反查
+		 * 缺省时按角色id反查（干员id 已与明日方舟 uid 统一，同 id 者即自身）
 		 */
 		charId?: string;
 		/**
@@ -295,11 +295,6 @@ declare interface WhichWayCharacter extends WhichWayCharacterPrototype {
 	 * 所属将包(会自动添加到对应将包)；缺省归入 `specialSJZX`
 	 */
 	pack?: WhichWayCharacterPackNames;
-
-	/**
-	 * 明日方舟角色uid（显式指定可跳过按名字反查）
-	 */
-	arkuid?: string;
 
 	/**
 	 * 技能代码是否由AI生成,当此项不存在时默认为不是由AI生成的

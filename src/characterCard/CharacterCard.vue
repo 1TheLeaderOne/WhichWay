@@ -1,8 +1,8 @@
 <template>
-	<div class="container-CC-SJZX" :style="{ backgroundImage: `url(${backgroundUrl})` }">
+	<div class="container-CC-SJZX" :style="{ backgroundImage: `url('${backgroundUrl}')` }">
 		<!-- 势力 logo（明日方舟图标反色；没有图标就显示势力文字） -->
 		<div class="camplogo-wrapper">
-			<div class="img-def" :class="{ arknightCamp: camp.useFilter }" :style="camp.logoUrl ? { backgroundImage: `url(${camp.logoUrl})` } : null">
+			<div class="img-def" :class="{ arknightCamp: camp.useFilter }" :style="camp.logoUrl ? { backgroundImage: `url('${camp.logoUrl}')` } : null">
 				<div v-if="!camp.logoUrl && camp.text" class="group-text">{{ camp.text }}</div>
 			</div>
 		</div>
@@ -210,8 +210,9 @@ const charImageEl = ref(null);
  */
 const skinPath = ref(whichWaySkin.getCurrentSkinPath(props.name));
 const charImageStyle = computed(() => {
+	//必须给 url() 加引号：皮肤名可以带空格（如「夏卉 FA075.png」），未加引号的 url() 是非法 CSS，整条声明会被丢掉（立绘显示不出来）
 	const url = skinPath.value;
-	return { backgroundImage: url.startsWith("url") ? url : `url(${url})` };
+	return { backgroundImage: url.startsWith("url") ? url : `url("${url}")` };
 });
 
 /** 动皮：该皮肤有没有动皮数据、以及是否已开启 */

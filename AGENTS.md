@@ -202,7 +202,7 @@ skill({ huozhimrfz: { /* lib.skill 标准技能对象 */ } });
 
 > ⚠️ 性能红线：干员/卡牌模块的**顶层只允许调用 packHooks 的注册函数（`character()` / `skill()` / `translate()` / `characterTitle()` / `characterIntro()` / `card()` 等）做缓冲**，不得调用其它有副作用的 API、也不要读 `window.whichWaySave` 里由武将包填充的内容（如 `allCharacters`）——它们在 `register()` 之前就可能被执行。落库统一由 `onBeforeInit`（`pendingRun` 刷新）完成。
 
-`character()` 注册的角色会自动：补全立绘路径（`img:character/{name}.jpg`）、初始化 `char.whichWay` 配置、按 `pack` 字段放入对应星级包、登记进 `allCharacters`、绑定明日方舟数据（阵营/语音/tag）、处理势力与设计者。
+`character()` 注册的角色会自动：补全立绘路径（`illu:character/{name}`，png 优先、无 png 用 jpg，由 `whichWayFile.initCharacterPortraitIndex()` 启动期扫目录建索引）、初始化 `char.whichWay` 配置、按 `pack` 字段放入对应星级包、登记进 `allCharacters`、绑定明日方舟数据（阵营/语音/tag）、处理势力与设计者。
 
 ### 旧式（src/character/packs/）
 
@@ -228,15 +228,16 @@ skill({ huozhimrfz: { /* lib.skill 标准技能对象 */ } });
 - 技能 id：`{拼音}mrfz` 结尾，如 `huozhimrfz`、`qingsuanmrfz`；子技能按引擎规则 `技能名_子技能名`。
 - 势力 id：`{拼音}mrfz` 结尾（`src/packs/base/groups.js` 的 `groupData`），如 `suimrfz`（岁）、`luomrfz`（罗德岛）；可通过配置"统一势力"把所有干员并入 `sjzx_group`（泰拉）。`groupData` 的每一项还要写 `reallyGroup`（该势力在明日方舟里的真实势力 id，用于映射阵营）与 `logo`（图标名，取 `image/camplogo/arknight/<logo>.png`，**默认就是真实势力名**）；`CharacterCard` 取势力图标时默认用这里的配置，`getGroupData(group, reallyGroup)` 负责查表（"统一势力"下 group 已变成 `sjzx_group`，靠 reallyGroup 兜底）。还可写 `filter`（图标是否反色，对应 `.arknightCamp` 的 `filter: invert(1)`）：配了就按它，不配才沿用原流程（明日方舟图标反色、`noname/name_*.png` 不反色）。
 - 卡牌 id：`{拼音}mrfz` 或 `{拼音}mrfzCard` 结尾，图片放 `image/card/`。
-- 干员立绘：`image/character/{干员id}.jpg`；皮肤图片在 `image/skin/{干员id}/`。
+- 干员立绘：`image/illustration/character/{干员id}.png`（同 id 有 jpg 时 png 优先）；皮肤图片在 `image/illustration/skin/{干员id}/`。旧目录 `image/character`、`image/skin` 里的文件保留但不再被代码索引。⚠️ 引擎的 `get.skinPath()` 是按 `char.img` 的**上上级目录**推导皮肤目录的（`apps/core/noname/get/index.js` 的 `…/skin/{name}/`），所以立绘路径一挪，引擎侧的皮肤查找会跟着走。
 
 ## 路径 scheme（src/file.js）
 
 `whichWayFile.compilePath()` 支持扩展内路径前缀，写代码时优先使用：
 
 - `src:` → 扩展根 `src/`
-- `img:` → `image/`（干员立绘 `img:character/{id}.jpg`）
-- `skin:` → `image/skin/`
+- `img:` → `image/`
+- `illu:` → `image/illustration/`（干员立绘 `illu:character/{id}.png|jpg`，取图统一走 `whichWayFile.getCharacterPortraitPath(id)`）
+- `skin:` → `image/illustration/skin/`
 - `bg:` → `image/background/`、`dec:` → `image/decoration/`
 - `json:` → `json/`（明日方舟数据 `json:arknight/`）
 - `audio:` → `audio/`、`video:` → `vedio/`
@@ -262,7 +263,7 @@ skill({ huozhimrfz: { /* lib.skill 标准技能对象 */ } });
 - ⛔ **不要移除 `game.playAudio` 的 onError 熔断钩子**（`src/audio/index.ts` 的 `override()` 末尾）：引擎 `game.tryAudio` 里 `refresh` 只由 `onCanPlay` 置真且**永不复位**，一旦某条音频成功加载过，之后**任何一次** `onError` 都会让它把候选列表重新填满再随机播一条 ⇒ 「一句配音播完又随机播另一句、永不停止」，且**候选只剩一条也会循环**（单条反复失败同样成立）。唯一出口就是 `game.playAudio` 的 `onError`，所以扩展在那里把错误回调换成 `wrapSkillAudioError`（默认 0 次重试：失败即静默并打印一次详情）。`skillAudioErrorRetry` 保留为可调常量，改 1 即"失败后允许重试一次"。
 - 该熔断只作用于**扩展自己的语音**：`isOwnAudioPath()` 会归一化 `ext:WhichWay/…`、`extension/WhichWay/…`、`../extension/WhichWay/…` 与带资源前缀的形态后再判定；背景乐、本体音效、其它扩展的音频一律透传。**该钩子必须是同步函数**（`appendHook` 的同步包装层用 `beforeResult === false` / 数组替换参数，async 会让两种语义同时失效）。
 - 交回引擎的本地候选由 `filterExistingAudio()` 收成**一条**（优先挑磁盘存在项），阵亡语音的 `char.dieAudios` 必须写成 `ext:WhichWay/audio/{语言}/die/{干员}.mp3` 形态——`game.playAudio` 只认 `blob:/data:/ext:/db:`，其它写法会被前置 `audio/` 导致必然 404。
-- 皮肤（`src/skin/`）：静态皮肤存 `image/skin/`，动态皮肤走 `dynamicSkin/` + spine（`lib/spine-player.js`）；有皮肤冲突检测与皮肤数据自动更新。
+- 皮肤（`src/skin/`）：静态皮肤存 `image/illustration/skin/`，动态皮肤走 `dynamicSkin/` + spine（`lib/spine-player.js`）；有皮肤冲突检测与皮肤数据自动更新（磁盘扫描缓存到 `json/cache/skin.json`，按扩展版本号失效——立绘/皮肤目录迁移不会自动让旧缓存重建，需要重扫磁盘时删除该文件）。
 - 干员模组（`src/modules/`）：数据在 `src/modules/data.js`，对应 `image/modules/` 下的证章图片。
 
 ## 技能 / 卡牌语法
@@ -348,8 +349,8 @@ if (result.bool) {
 2. 用 `character()` 注册基础属性（hp/group/pack/skills/sex），`pack` 决定星级。
 3. 用 `skill()` 注册技能（lib.skill 标准对象），用 `translate()` 注册角色名/技能名与 `_info` 描述。
 4. 用 `characterTitle()` / `characterIntro()` 补称号与介绍。
-5. 在 `image/character/` 放立绘 `{id}.jpg`；语音放 `audio/` 或依赖在线播放。
-6. 若需要：在 `src/character/groups.js` 补势力、`src/character/characterDesigner.js` 补设计者、`src/modules/data.js` 补模组、`image/skin/{id}/` 补皮肤。
+5. 在 `image/illustration/character/` 放立绘 `{id}.png`（有 png 就用 png，否则用同名 `.jpg`）；语音放 `audio/` 或依赖在线播放。
+6. 若需要：在 `src/character/groups.js` 补势力、`src/character/characterDesigner.js` 补设计者、`src/modules/data.js` 补模组、`image/illustration/skin/{id}/` 补皮肤。
 7. 构建并验证：`pnpm -F ./packages/extension/WhichWay build`。
 
 ### 检查是否成功导入

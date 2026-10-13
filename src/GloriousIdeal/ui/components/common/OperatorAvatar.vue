@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * common/OperatorAvatar.vue —— 干员头像（真实立绘，失败回退首字）
- * 全 UI 通用：给出 id 即渲染 image/character/{id}.jpg，加载失败自动回退到名字首字渐变块。
+ * 全 UI 通用：给出 id 即渲染 image/illustration/character/{id}（png 优先，无 png 用 jpg），加载失败自动回退到名字首字渐变块。
  * 尺寸由外层用 width/height（或 --gi-av-size）控制；本组件只负责裁切与回退。
  */
 import { ref, computed } from "vue";
@@ -14,7 +14,7 @@ const props = withDefaults(
 		shape?: "circle" | "rounded";
 		/** 阵亡态：灰度 + 暗化 */
 		dead?: boolean;
-		/** 皮肤态：立绘走皮肤系统（getCurrentSkinPath），缺省用本体 image/character/{id}.jpg */
+		/** 皮肤态：立绘走皮肤系统（getCurrentSkinPath），缺省用本体 image/illustration/character/{id}（png 优先） */
 		skin?: boolean;
 	}>(),
 	{ shape: "circle", dead: false, skin: false }

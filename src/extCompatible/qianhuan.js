@@ -16,9 +16,9 @@ const config = {
 	characterNameTranslate:function(name){
 		return get.translation(name);
 	},
-	prefix:'extension/WhichWay/image/character/',
+	prefix:'extension/WhichWay/image/illustration/character/',
 	skin:{
-		standard:'extension/WhichWay/image/skin/',
+		standard:'extension/WhichWay/image/illustration/skin/',
 	},
 }
 

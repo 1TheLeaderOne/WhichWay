@@ -5,8 +5,7 @@ character("char_1037_amiya3", { pack: "epicSJZX",
 			sex: "female",
 			group: "luomrfz",
 			hp: 3,
-			skills: ["tongqingmrfz","cibeimrfz"],
-			arkuid:"char_1037_amiya3"
+			skills: ["tongqingmrfz","cibeimrfz"]
 		});
 
 skill({

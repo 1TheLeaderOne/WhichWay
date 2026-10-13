@@ -2,7 +2,7 @@ import { lib, game, ui, get, ai, _status } from "noname";
 import { card as cardHook, cardSkill, cardTranslate } from "../hooks.js";
 
 cardHook("cuoe_huanyoumrfzCard", {
-	image: `ext:WhichWay/image/character/char_362_saga.jpg`,
+	image: `ext:WhichWay/image/illustration/character/char_362_saga.png`,
 	audio: false,
 	type: "basic",
 	enable: true,

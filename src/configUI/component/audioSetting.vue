@@ -86,7 +86,8 @@ const avatarStyle = computed(() => {
 	version.value;
 	if (!selected.value) return {};
 	const url = whichWaySkin.getCurrentSkinPath(selected.value) || "";
-	return { backgroundImage: url.startsWith("url") ? url : `url(${url})` };
+	//url() 必须加引号：皮肤名可以带空格（如「夏卉 FA075.png」），不加引号整条声明会被当作非法 CSS 丢掉
+	return { backgroundImage: url.startsWith("url") ? url : `url("${url}")` };
 });
 
 /** 该干员可选的配音语言 */

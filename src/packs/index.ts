@@ -145,8 +145,8 @@ class WhichWayPackManager {
 			if (Array.isArray(char)) char = get.convertedCharacter(char);
 
 			//————初始化武将图片————//
-			//whichWayFile.compilePath(`img:illustration/character/${name}.jpg`);
-			char.img = whichWayFile.compilePath(`img:illustration/character/${name}.jpg`);
+			//立绘在 image/illustration/character/，png 与 jpg 双格式并存，由 whichWayFile 的目录索引择优
+			char.img = whichWayFile.getCharacterPortraitPath(name);
 
 			//————初始化WhichWay配置————//
 			//声明态 → 初始化态：补全 whichWay / pack，**声明过的字段（含 whichWay 里的）一律保留**，
@@ -215,7 +215,7 @@ class WhichWayPackManager {
 			}
 
 			//————设置Arknight配置————//
-			whichWayArknight.addShcema(name, char);
+			whichWayArknight.addShcema(name);
 
 			//补全明日方舟数据（同样只补缺省字段，逐个字段都可用 whichWay.arknight 自定义）
 			whichWayArknight.initCharArknight(data);

@@ -7,11 +7,11 @@ import { whichWayFile } from "../../../../file.js";
 import type { OperatorState, DeathInfo } from "../../state/campaign.js";
 import { getDungeon } from "../../../data/dungeons.js";
 
-/** 扩展内图片资源 URL（相对 image/ 目录，如 "character/amiyamrfz.jpg"、"background/ideal.jpg"） */
+/** 扩展内图片资源 URL（相对 image/ 目录，如 "illustration/character/xxx.png"、"background/ideal.jpg"） */
 export const giImg = (rel: string): string => whichWayFile.compilePath(`img:${rel}`);
 
-/** 干员立绘 URL：image/character/{id}.jpg（部分干员可能缺图，配合 <img @error> 回退到首字头像） */
-export const opPortrait = (id: string): string => giImg(`character/${id}.jpg`);
+/** 干员立绘 URL：image/illustration/character/{id}（png 优先，无 png 用 jpg；部分干员可能缺图，配合 <img @error> 回退到首字头像） */
+export const opPortrait = (id: string): string => whichWayFile.getCharacterPortraitPath(id);
 
 /**
  * 干员「当前皮肤」立绘 URL：优先走驶舰之向皮肤系统（whichWay.skin.getCurrentSkinPath），

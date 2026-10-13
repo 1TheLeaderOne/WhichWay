@@ -9,7 +9,7 @@
 		>
 			<div class="modulesTitle">{{ mod.name }}</div>
 			<div class="modulesInfoWrapper">
-				<div class="modulesImage" :style="{ backgroundImage: `url(${mod.url})` }"></div>
+				<div class="modulesImage" :style="{ backgroundImage: `url('${mod.url}')` }"></div>
 				<div class="modulesInfo">
 					<div v-for="(text, index) in mod.intro" :key="index" class="infoText" v-html="text"></div>
 				</div>

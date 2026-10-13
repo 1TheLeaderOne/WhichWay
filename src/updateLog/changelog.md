@@ -65,6 +65,49 @@
 - **UTF-8 代码页切换放在 `.mjs` 里而不是 bat**：bat 里只要出现 `for /f ... in ('chcp')` 探测旧代码页，派生的子 cmd 会继承并抽干重定向/管道的 stdin，node 立刻读到 EOF、交互模式一行结果都不出（实测复现）。改在 node 侧用 `spawnSync("chcp", { stdio: ["ignore", ...] })`（子进程拿 NUL 句柄，不碰父进程 stdin），进入时切 65001、`process.on("exit")` 还原原代码页，仅 win32 生效、非控制台环境自动跳过。
 - 三种用法实测通过：交互循环（`q`/空行退出）、命令行给名（`find-arkid.bat 温米` → `char_4081_warmy`）、管道喂名单（`find-arkid.bat < 名单.txt`）。`scripts/*.mjs` 与同目录既有脚本一样不在 lint 范围内（同样只报 `no-undef` 的 process/console，属仓库既有状态），未改动构建产物。
 
+### 清理：id 统一后无用的转化代码（`arkuid` 机制）
+
+干员id 已全部换成明日方舟uid，「本扩展id → 明日方舟uid」的显式声明转化层失去意义，删除 `arkuid` 全套：
+- 删除 3 处干员声明（`char_1001_amiya2` / `char_1037_amiya3` / `char_1052_kalts2`，声明值与注册名完全相同）、`typings/characterPack.d.ts` 的 `arkuid?: string` 字段，以及 `initCharArknight()` 里的 `arkuid ||` 短路。
+- `loadShcema()`：去掉 `hasArkCharacters` 过滤与 `arkUidToNames` 索引及主循环里的 `declaredNames` 分支，改为「ark 表 key 本身就是已注册干员 ⇒ 恒等映射」（`window.whichWaySave.hasChar(key)`）。
+- `addShcema()`：同一条恒等规则替代 `declaredArkuid` 分支（`isCharacter(id)` 为真即 `extUID[id]=id`、`arkUID[id]=id`），顺带删掉只服务于旧命名时代的 `allCharacters.find(译名===info.name)` 兜底分支；签名去掉没人使用的 `char` 形参（`src/packs/index.ts` 调用点同步）。
+- 效果比对：`char_1052_kalts2` 在主表（名「凯尔希·思衡托」，`redirect.js` 里对应别名注释已停用）、`char_1001_amiya2`/`char_1037_amiya3` 只在 `patchChars`——`loadShcema()` 把 patch 形态并入 `character_table` 之后恒等分支同样命中，比原先「表内查不到就退化成按译名反查并 `角色不存在` 警告」更准。
+- **保留**：`shcema.character` 双向映射、按译名反查、`redirect.js`（含 `normal` 译名别名表）。`src/packs/character` 里仍有 20 个 `char_*` 之外的旧式命名干员（`wangmrfz`、`plot_keluxiermrfz`、`teleixisimrfz` 等，无对应uid 或按约定保留原名），这条反查路径仍在服役；`legacyCharIds.ts` + `arkidMigration.ts` 是一次性**存档**迁移（旧键写在玩家配置里，与运行时id 无关），也保留。
+
+### 清理：`scripts/` 下的无用脚本
+
+逐个核对引用与可运行性后删除两个：
+- `split-card.mjs`：入口 `scripts/card-index.template.js` 已不存在（`src/packs/card` 现为 16 个扁平模块，由 `packs/index.ts` 的 `import.meta.glob` 直接收集），脚本第一步 `readFileSync` 就必抛。
+- `flatten-character.mjs`：把 `{id}/index.ts` 提升为 `{id}.ts` 的一次性工具，已跑完；目录里只剩 `char_2027_wang/`（`index.ts` + `control.vue`，两个文件本就不满足它的「单 index.ts」前提），再跑只会输出「跳过」。
+- 保留并确认仍有用：`make-core-index.cjs`（`release.bat` 引用）、`release.bat` / `release-dev.bat` / `pack-local.bat` / `update-arknight-data.bat`、`rename-to-arkid.mjs` + `arkid-rename-journal.json` + `arkid-rename-map.json`（`packages/extension` 被 gitignore，这三件是唯一回滚路径）、`split-illustration.mjs`（立绘流水线，见下条）、`compress-skin.mjs`（默认目录 `test/skin` 已失效，但它接受 `--dir`，未改动默认值）、`find-arkid.*`。
+
+### 立绘/皮肤目录迁移到 `image/illustration/`（png 优先 + jpg 兜底）
+
+图片取值目录整体从 `image/character`、`image/skin` 换到 `image/illustration/character`、`image/illustration/skin`，**旧目录文件一律保留未动**：
+- `src/file.js`：`skin:` scheme 改指 `image/illustration/skin/`，新增 `illu:` → `image/illustration/`。
+- 格式探测：新增 `whichWayFile.initCharacterPortraitIndex()`（启动期扫一次 `illustration/character`，同 id 有 png 记 png、否则记 jpg）、`getCharacterPortraitFile(id)`、`getCharacterPortraitPath(id)`；规则即「存在 png 则用 png，否则用 jpg，不做 jpg 缺失兜底」。
+- 调用点全部换成上述方法：`src/packs/index.ts` 的 `char.img`、`src/skin/index.ts` 的「经典形象」条目（`name` 也跟随真实扩展名，供 UI 与皮肤系统对齐）、`src/GloriousIdeal/ui/components/common/format.ts` 的 `opPortrait`。
+- 索引在 `src/init.js` 的 `file` 阶段建立（所有取图点都在 `onBeforeInit` 的同步路径上，必须先把目录清单备好）；无 fs 后端时 `getFileTree` 返回空清单，索引为空 ⇒ 一律按 jpg 取值，不会抛错。
+- 引擎侧连带生效：`get.skinPath()` 是按 `char.img` 的上上级目录推导皮肤目录，`char.img` 换到 `illustration/character` 后，引擎的皮肤查找自动落到 `illustration/skin/{id}/`。
+- `syncAllSkinConfig()` 读本体 `lib.config.skin` 的 `[皮肤名, 路径]` 时改为**按皮肤名重新解析路径**（解析不到才沿用存档原值），否则目录整体迁移后存档里烙着的旧 `image/skin/...` 路径会永远压住新位置。
+- `src/extCompatible/qianhuan.js`（千幻聆音/随笔录兼容层）的 `prefix` 与 `skin.standard` 同步指向 illustration 两个目录。
+- `AGENTS.md` 里的立绘/皮肤约定与 scheme 清单同步更新。
+- **当时未改**：`src/packs/card/cuoe_huanyoumrfzCard.ts` 仍指 `image/character/char_362_saga.jpg`——那时 `char_362_saga` 在 illustration 目录下 png/jpg 都没有，而卡牌 `image` 是静态字符串没有探测机会，改了就 404。补齐全量后该立绘已到位，这条引用已在下一条改成 `illustration/character/char_362_saga.png`。
+- ⚠ 当时的磁盘覆盖率缺口（167 个干员无立绘、120 个干员皮肤仍只在 `image/skin/`）已由下一条「补齐全量 illustration 立绘」关闭。
+- 验证：`pnpm eslint` 七个改动文件 0 报错；`WW_SKIP_STATIC_COPY=1 pnpm build` 通过，产物中 `getCharacterPortraitPath` 出现在 `packs.js` / `skin-*` / `GloriousIdeal-battleOverlay-*` 三个 chunk；`tsc --noEmit` 无新增报错（`file.js` / `init.js` / `packs/index.ts` / `arknight/index.ts` / `qianhuan.js` 全部 0 条，`skin/index.ts`、`format.ts` 只剩既有的 `.vue`/路径别名解析报错）。实机未验证（浏览器 MCP 加载不了 dev app）。
+
+### 补齐全量 illustration 立绘与皮肤（重跑分离 + 压缩 + 旧图兜底）
+
+上一条的覆盖率缺口根因是**素材源目录当时放漏了**：`test/skin` 只有 501 张（gamedata 全量为 1390 张，另有 4 张查无记录），分离自然只覆盖一半。补齐后重跑：
+- **分离**：`node scripts/split-illustration.mjs --dir test/skin --copy`。源目录现为 1394 张，分类命中 1390（精二 400 / 皮肤 520 / 初始 465 / 异格 4 / 精一 1）、未匹配 4 张留在源目录（`char_281_popka_sale#17`、`token_10002_kalts_mon3tr` 三个形态）。脚本对「目标已存在」一律跳过不覆盖，501 张老图原样保留，实际新进 889 张。用 `--copy` 而不是默认的 move：**`test/skin` 留作未压缩原件的唯一备份**，压缩步骤就不必再造 `_backup_original/`。
+- **压缩**：对本次新增的 889 张按 `compress-skin.mjs` 同款配方就地处理（`-resize 1280x1280>` + PNG 量化 256 色、无抖动、`png:compression-level=9`；jpg 走 q82 + 4:2:0 + 透明拍平），**1.93GB → 326MB，省 83%**，0 张失败、0 张无收益。逐张「无收益就保留原样」的判定照抄脚本，避免越压越大。
+- **兜底**：分离后仍缺精二立绘的 10 个干员（`char_122_beagle`、`char_285_medic2`、`char_286_cast3`、`char_376_therex`、`char_4093_frston`、`char_4136_phonor`、`char_4220_kormr`、`char_4227_gallus`、`char_4231_clemnt`、`char_4232_hbound`）在 gamedata 里没有 `ILLUST_2` 记录，把旧 `image/character/{id}.jpg` 复制进 `illustration/character/` 并过同一套压缩（7 张有收益、3 张无收益原样保留，663KB→639KB）。
+- **清掉本次带进来的非角色图**：`illustration/skin/` 下的 `trap_024_npcsld`、`trap_035_emperor`、`trap_304_izdoc`、`trap_305_izwsdl`、`trap_306_izklst`、`trap_307_izsvas`、`token_10002_kalts_mon3tr` 七个目录（陷阱/召唤物，不是干员）已删；`character/` 与 `skin/` 里其余「未注册干员」的形态（如 `char_120_hibisc`、`char_1011_lava2`）是真实明日方舟角色，留着备用。
+- **最终覆盖率**：274 个注册干员里 **273 个有立绘（99.6%）**，唯一没有的是 `extratranslatemrfz`（「额外翻译」伪角色，三个目录都无图，也不需要）；**252 个有皮肤目录**，缺的 22 个全部是 gamedata 里就没有皮肤记录的自创/测试干员（`acemrfz`、`ceshimrfz`、`plot_keluxiermrfz` 等）与 `char_4231_clemnt`、`char_4232_hbound`，即「本来就没皮肤」。目录现共 1416 张（`character` 402 png + 31 jpg，`skin` 460 个目录 983 张）、516MB；同一干员不会既 png 又 jpg（已核对无重复基名），png 优先逻辑因此不会被旧 jpg 干扰。
+- ⚠ **皮肤索引需重建**：`json/cache/skin.json` 只按扩展版本号失效，新增 983 张皮肤不会被自动扫到，已删除已装产物里的 `apps/core/extension/WhichWay/json/cache/skin.json`（下次启动自动重扫；`arknight.json` 那份不能删、也没删）。**发给玩家时同理**——不bump 版本就得让旧缓存失效，否则更新后皮肤列表仍是空的。
+- 旧目录 `image/character`（32MB）、`image/skin`（76MB）仍一律保留未动。旧 `image/skin` 里另有 8 个已有 illustration 目录的干员存在 illustration 没有的文件名，其中 6 个是错别字重名（`触及星晨`↔`触及星辰`、`上任达伟镇`↔`《上任达维镇》`、`清风`↔`轻风 LB01`、`飞跃甜蜜之城`↔`飞越甜蜜之城`、`登如昼`↔`灯如昼`、`自由`↔`自由··失效`），搬过去会让皮肤列表出现重复条目，故**没动**；真正独有的只有 `char_194_leto/来日欢歌.jpg`、`char_4204_mantra/万籁俱寂.jpg` 两张（gamedata 无记录），需要的话单独搬这两张即可。
+- 验证：全量 `pnpm build`（含静态资源复制）✓ built in 10.26s，`chunks/` 无反向 `./extension.js` 引用，产物侧 `image/illustration` 与源码同为 1416 张、516MB，`char_4079_haini.png`（1280x1133）与 `char_4232_hbound.jpg` 均已落位，产物里 0 个 trap_/token_ 目录。实机未验证（浏览器 MCP 加载不了 dev app）。
+
 ### 配音设置详情区扩展：立绘 + 技能试听 + 死亡配音
 
 `configUI/component/audioSetting.vue`：选中干员后，`detail-col` 不再只列配音语言，改为展示——
@@ -114,6 +157,34 @@
 无名杀核心有一条全局规则 `apps/core/layout/default/layout.css:31` —— `div { display: inline-block; position: absolute; transition: all 0.5s; }`：任何没写 `position` 的 `<div>` 都会被强制绝对定位、脱离 flex/normal-flow，使左右分栏与干员列表叠成一团（这也是 CharacterCard/backgroundSet/ModulePanel 里几乎每个盒子都手写 `position: relative` 的原因）。
 
 - `charPicker.vue` / `audioSetting.vue` / `moduleSetting.vue`：给所有参与布局的容器与 flex 子项（面板根、`picker-col`、`detail-col`、`detail-title`、`current-line`、`hint`、`lang-list`、`search-box`、`char-grid`、`char-item`、`empty-tip`）显式加 `position: relative`；仅配音语言项里刻意覆盖用的 `.choice/.nochoice/*.selectText` 保持 `absolute`。eslint + build 通过。
+
+### 修复：皮肤名带空格时立绘读不出来（`url()` 未加引号）
+
+「夏卉 FA017.png」这类皮肤名（明日方舟皮肤本身就有空格）走的是 CSS 背景图路径，而 CSS 的**无引号 `url()` 里不允许出现空格**——`url(extension/…/夏卉 FA017.png)` 是非法声明，浏览器会把**整条 `background-image` 丢掉**，表现出来就是选了带空格的皮肤后立绘空白。带空格的资源名共 61 个，且扩展内没有任何文件名含引号，所以加引号零风险。
+
+排查范围核对：引擎侧本来就空格安全（`HTMLDivElement.prototype.setBackgroundImage` 已经输出 `url("${lib.assetURL}${img}")`，`setBackground` 直接取 `lib.config.skin[name][1]`；fs 后端 `assertValidPath` 只拦 `\0`，`requestBackend` 走 `URLSearchParams` 编码），需要改的只有扩展自己拼 `url()` 的地方。`new Image().src` 之类的赋值由 URL 解析器自动把空格转成 `%20`，不受影响。
+
+- `src/characterCard/CharacterCard.vue`：模板两处改 `url('${…}')`（卡面背景、势力 logo）；脚本 `charImageStyle` 改 `url("${url}")`（立绘，主因）。
+- `src/characterCard/panels/SkinPanel.vue`：皮肤缩略图 `url('${skin.path}')`。
+- `src/characterCard/panels/ModulePanel.vue`：模组图 `url('${mod.url}')`。
+- `src/configUI/component/audioSetting.vue`：配音设置面板立绘 `url("${url}")`。
+- `src/skin/spineWork.js`：动皮背景层 `url("${bgUrl}")`。
+- 取值前的 `url.startsWith("url")` 分支保留：兼容配置里已经写成完整 `url(...)` 的历史值。
+- 验证：全 `src` 复扫动态拼 `url(` 的位置只剩带引号形态（静态 CSS 里是写死的字面量，无空格）；六个文件 `pnpm eslint` 0 报错；`WW_SKIP_STATIC_COPY=1` 构建通过，产物 `chunks/` 内可见 `url('` / `url("` 形态且无反向 `from "./extension.js"`。真机未验证（浏览器 MCP 加载不了 dev app）。
+- 顺带记录（未改，属本体逻辑）：`apps/core/noname/library/index.js:369`、`init/index.ts:383-428` 的卡背/血量图也是无引号 `url(${…})`，用户自定义卡背文件名带空格会同样失效。
+
+### 新增：v1.6 一次性删除皮肤缓存 `clearSkinCacheOnce()`（`src/skin/index.ts`）
+
+皮肤索引缓存 `json/cache/skin.json` 里烙的是**扫描当时的图片路径**，而 `autoUpdateSkinData()` 只要「缓存版本号 == 当前扩展版本」就直接复用（`version === whichWayVersion.ext`）——目录迁移并不改版本号，坏路径会一路活到 1.6.x 的每个小版本。故按要求加一次性清理：
+
+- 新增 `WhichWaySkin.clearSkinCacheOnce()`，在 `autoUpdateSkinData(forced)` **最前面**调用（必须早于读缓存的分支，否则本轮启动仍会用旧数据）。
+- 版本门控：`whichWayVersion.ext.startsWith("1.6")`，非 1.6 直接返回 `false`。
+- 一次性门控：标记位 `skinCacheClearedV16` → 落库 `extension_WhichWay_skinCacheClearedV16`，与 `arkidMigrated`/`characterPackDefaulted` 同一套写法（`whichWayUtil.config` 读、`saveConfig(key, true)` 写）。
+- 删除前先 `exsitFile` 判定：本体的 `game.removeFile` 对不存在的路径是 **reject**（`library/fs/legacy.ts:79`）而不是静默成功，不能裸调；实际删除走 `game.promises.removeFile(whichWayFile.compilePath("json:cache/skin.json"))`（`whichWayFile` 自身没有删除方法）。
+- 删除失败只 `console.error` 并**不写标记位**，下次启动重试；文件本就不存在视为已清理，照常写标记。
+- 返回 `boolean`（本次是否执行了清理），便于开发者模式手动调用后确认。
+- 已知冗余（按需求原样实现）：`version.js` 目前 `ext: "1.5.6"`，把版本升到 1.6 本身就会让版本门失配并触发重建，所以「升到 1.6 的首次启动」这次删除是重复的；它的实际价值在 1.6.x 后续小版本仍能强制重建一次。缓存清理与版本升级的先后由 `version.js` 决定，本次未擅自改动版本号。
+- 验证：`pnpm eslint src/skin/index.ts` 0 报错；`WW_SKIP_STATIC_COPY=1` 构建通过，产物 `chunks/skin-confOverride-shared.js` 含 `clearSkinCacheOnce`。当前 `apps/core/extension/WhichWay/json/cache/skin.json` 已是迁移后重建的干净缓存（460 个干员、0 条 `image/character|image/skin` 旧路径），无需再手工删。
 
 ## 2026-10-12
 

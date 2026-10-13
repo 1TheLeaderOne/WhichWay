@@ -9,6 +9,10 @@ import { whichWayVersion } from "../version.js";
 import { spineWorker } from "./spineWork.js";
 import ConfOverride from "./confOverride.vue";
 import { confictedSkin } from "./confictedSkin.ts";
+
+/** v1.6 清缓存的标记位（与 arkidMigrated 同一套一次性开关写法，落库为 extension_WhichWay_ 前缀） */
+const SKIN_CACHE_CLEARED_KEY = "skinCacheClearedV16";
+
 class WhichWaySkin {
 	/**
 	 * 皮肤组件初始化
@@ -45,8 +49,8 @@ class WhichWaySkin {
 					//为了让经典形象在皮肤列表的最前面
 					this.skinData[name].skins = {
 						经典形象: {
-							name: "经典形象.jpg",
-							path: whichWayFile.compilePath(`img:character/${name}.jpg`),
+							name: whichWayFile.getCharacterPortraitFile(name),
+							path: whichWayFile.getCharacterPortraitPath(name),
 						},
 						...this.skinData[name].skins,
 					};
@@ -251,10 +255,39 @@ class WhichWaySkin {
 	}
 
 	/**
+	 * v1.6 一次性删除皮肤缓存文件。
+	 *
+	 * 缓存里烙的是扫描当时的图片路径，立绘/皮肤目录迁移后这些路径就是坏的；
+	 * 而 autoUpdateSkinData 只要看到缓存版本号和当前扩展版本一致就直接复用，
+	 * 坏路径会一路活到 1.6.x 的每个小版本。所以 1.6 首次启动时强制删一次，
+	 * 让它按新目录重建；标记位保证只删一次。
+	 * @returns 本次是否执行了清理（版本不是 1.6、已清理过、或删除失败时返回 false）
+	 */
+	async clearSkinCacheOnce(): Promise<boolean> {
+		if (!whichWayVersion.ext.startsWith("1.6")) return false;
+		if (whichWayUtil.config(SKIN_CACHE_CLEARED_KEY)) return false;
+
+		try {
+			//先判存在再删：引擎的 removeFile 对不存在的路径是 reject，不是静默成功
+			if (await whichWayFile.exsitFile("json:cache/skin.json", "file")) {
+				await game.promises.removeFile(whichWayFile.compilePath("json:cache/skin.json"));
+			}
+		} catch (error) {
+			//删不掉（例如没有 fs 后端）就不写标记位，下次启动重试
+			console.error("[whichWaySkin] 删除皮肤缓存失败，将在下次启动重试", error);
+			return false;
+		}
+
+		whichWayUtil.saveConfig(SKIN_CACHE_CLEARED_KEY, true);
+		return true;
+	}
+
+	/**
 	 * 自动更新皮肤数据
 	 * @param forced 是否强制更新
 	 */
 	async autoUpdateSkinData(forced = false) {
+		await this.clearSkinCacheOnce();
 		if ((await whichWayFile.exsitFile("json:cache/skin.json", "file")) && forced === false) {
 			const { version, data } = await whichWayFile.readFile("json:cache/skin.json");
 			if (version === whichWayVersion.ext) {
@@ -347,7 +380,7 @@ class WhichWaySkin {
 	getCurrentSkinPath(name: string): string {
 		let skin = this._skinStore?.[name]?.[1];
 		if (!skin) {
-			if (window.whichWaySave.hasChar(name)) skin = whichWayFile.compilePath(`img:character/${name}.jpg`);
+			if (window.whichWaySave.hasChar(name)) skin = whichWayFile.getCharacterPortraitPath(name);
 			else {
 				const char = get.character(name);
 				if (char.img !== undefined) return char.img;
@@ -420,7 +453,10 @@ class WhichWaySkin {
 					}
 				} else {
 					if (Array.isArray(val) && val.length >= 1 && typeof val[0] === "string") {
-						self._skinStore[key] = [val[0], val[1]];
+						//路径按皮肤名重新解析：皮肤目录整体迁移后，存档里烙着的旧路径要让位给
+						//本次扫描到的真实路径；解析不到（如本体/其它扩展的皮肤）才沿用原值。
+						const path = self.getCharacterSkin(key, whichWayFile.removeExt(val[0]))?.path ?? val[1];
+						self._skinStore[key] = [val[0], path];
 					} else if (typeof val === "string") {
 						self._skinStore[key] = [val, undefined];
 					}

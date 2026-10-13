@@ -263,7 +263,7 @@ class SpineWorker {
 			dycSave.startFit.container = container;
 
 			const bg = ui.create.div(".bg", container);
-			bg.style.backgroundImage = `url(${bgUrl})`;
+			bg.style.backgroundImage = `url("${bgUrl}")`;
 			if (options.name) {
 				if (options.json) urlSkel = this.getUrl(charName, skinName, options.name.split("/").pop(), "j");
 				else urlSkel = this.getUrl(charName, skinName, options.name.split("/").pop(), "s");

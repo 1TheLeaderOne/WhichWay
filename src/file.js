@@ -22,9 +22,10 @@ class WhichWayFile {
 		"json:": `${this.extDir}json/`,
 		"audio:": `${this.extDir}audio/`,
 		"css:": `${this.extDir}css/`,
-		"skin:": `${this.extDir}image/skin/`,
+		"skin:": `${this.extDir}image/illustration/skin/`,
 		"ui:": `${this.extDir}image/ui/`,
 		"img:": `${this.extDir}image/`,
+		"illu:": `${this.extDir}image/illustration/`,
 		"dyc:": `${this.extDir}dynamicSkin/illust/`,
 		"dybg:": `${this.extDir}dynamicSkin/background/`,
 		"mod:": `${this.extDir}image/modules/`,
@@ -43,6 +44,59 @@ class WhichWayFile {
 			if (path.startsWith(key)) path = path.replace(key, this.pathShceme[key]);
 		}
 		return path;
+	}
+
+	/**
+	 * 干员立绘（`image/illustration/character/`）实际存在的扩展名索引：干员id → `"png" | "jpg"`。
+	 *
+	 * 立绘同时提供 png（立绘分离脚本产出）与 jpg 两种格式，取值规则「有 png 用 png，否则用 jpg」；
+	 * jpg 视为必定存在，不做 jpg 缺失的兜底。
+	 * 之所以要启动期扫一次目录建索引：取图点（武将注册、皮肤「经典形象」补条目）都落在同步路径上，
+	 * 而逐个 checkFile 要为几百个干员发几百次 IPC。
+	 * @type {Record<string, string>}
+	 */
+	characterPortraitExt = {};
+
+	/**
+	 * 扫描 `illustration/character` 建立立绘扩展名索引（png 优先）。
+	 * 当前环境没有 fs 后端时 getFileTree 返回空清单，索引为空 ⇒ 一律按 jpg 取值。
+	 *
+	 * @returns {Promise<Record<string, string>>}
+	 */
+	async initCharacterPortraitIndex() {
+		const { files } = await this.getFileTree("illu:character/", 0);
+		/** @type {Record<string, string>} */
+		const index = {};
+		for (const file of files) {
+			const ext = this.getFileExtension(file.name).toLowerCase();
+			if (ext !== "png" && ext !== "jpg" && ext !== "jpeg") continue;
+			const name = this.removeExt(file.name);
+			//png 优先：已经记到 png 就不会被 jpg 覆盖
+			if (index[name] === "png") continue;
+			index[name] = ext;
+		}
+		this.characterPortraitExt = index;
+		return index;
+	}
+
+	/**
+	 * 获取干员立绘文件名（png 优先，无 png 用 jpg）
+	 * @param { string } name 干员id
+	 *
+	 * @returns { string }
+	 */
+	getCharacterPortraitFile(name) {
+		return `${name}.${this.characterPortraitExt[name] ?? "jpg"}`;
+	}
+
+	/**
+	 * 获取干员立绘完整路径（png 优先，无 png 用 jpg）
+	 * @param { string } name 干员id
+	 *
+	 * @returns { string }
+	 */
+	getCharacterPortraitPath(name) {
+		return this.compilePath(`illu:character/${this.getCharacterPortraitFile(name)}`);
 	}
 
 	/**

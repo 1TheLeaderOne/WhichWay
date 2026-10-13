@@ -8,7 +8,8 @@
 			@click="select(skin)"
 		>
 			<div class="skinAvatorWrapper">
-				<div class="imageSkin" :style="{ backgroundImage: `url(${skin.path})` }"></div>
+				<!-- 皮肤名可以带空格（如「夏卉 FA075.png」），url() 必须加引号，否则整条声明被当作非法 CSS 丢掉 -->
+				<div class="imageSkin" :style="{ backgroundImage: `url('${skin.path}')` }"></div>
 			</div>
 			<div class="skinTextWrapper"><div class="skinText">{{ skin.name }}</div></div>
 			<div v-if="skin.name === current" class="skinSelectedSJZX"></div>

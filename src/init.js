@@ -53,7 +53,15 @@ export const whichWayInit = async () => {
 		{ name: "toast", load: () => import("./toast/index.ts") },
 
 		//导入文件管理组件
-		{ name: "file", load: () => import("./file.js") },
+		//load 里额外建立立绘 png/jpg 索引：所有取图点（武将注册、皮肤「经典形象」）都在同步路径上，
+		//必须在 onBeforeInit 之前把 illustration/character 的目录清单扫好备查。
+		{
+			name: "file",
+			load: async () => {
+				const { whichWayFile } = await import("./file.js");
+				await whichWayFile.initCharacterPortraitIndex();
+			},
+		},
 
 		//@ts-ignore 加载css（要等 file 阶段把实例注册到 window.whichWay.file 上）
 		{
