@@ -115,7 +115,7 @@ skill({
 					player.addSkill("clanzhongliu");
 					let info = get.info("clanzhongliu");
 					if (!info.audioname2) info.audioname2 = {};
-					info.audioname2["keluxiermrfz"] = "clanzhongliu_keluxiermrfz";
+					info.audioname2["char_4228_closur"] = "clanzhongliu_keluxiermrfz";
 					player.addSkill("kuorongmrfz_reset");
 				}
 			},

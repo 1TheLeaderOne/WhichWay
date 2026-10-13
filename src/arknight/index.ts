@@ -26,6 +26,9 @@ class WhichWayArknight {
 		await this.loadShcema();
 		const tShcema = performance.now() - t2;
 
+		//构造全量明日方舟干员id清单（数据源是 arknightData，必须在 loadArknightData 之后）
+		this.buildVaildArkId();
+
 		//arknight 三段总耗时 > 500ms 时才展开折叠明细
 		const total = tUpd + tLoad + tShcema;
 		if (total > 500) {
@@ -260,6 +263,53 @@ class WhichWayArknight {
 	}
 
 	/**
+	 * 构造 vaildArkId：全量明日方舟干员uid清单。
+	 *
+	 * 数据源为 `json/arknight/` 下的角色表（经精简缓存加载后的 arknightData）：
+	 * - character_table：游戏内正式干员主表
+	 * - char_patch_table.patchChars：不在主表里的升变形态（如升变阿米娅）
+	 *
+	 * 两者都按 isCharacter 过滤（subProfessionId 以 notchar 开头的是敌方/ NPC 占位，
+	 * 不是可选干员），并与 addVaildArk 一样保持去重。
+	 */
+	buildVaildArkId(): void {
+		this.vaildArkId = [];
+		const tables = [this.arknightData?.character_table, this.arknightData?.char_patch_table?.patchChars];
+		for (const table of tables) {
+			if (!table) continue;
+			for (const uid in table) {
+				if (this.isCharacter(table[uid])) this.addVaildArk(uid);
+			}
+		}
+	}
+
+	/**
+	 * 是否是明日方舟干员
+	 * @param {string} id 明日方舟干员uid
+	 * @returns {boolean} id 是否在 vaildArkId 之中
+	 */
+	isArknght(id: string): boolean {
+		return this.vaildArkId.includes(id);
+	}
+
+	/**
+	 * 添加一个明日方舟干员uid到 vaildArkId（已存在则忽略）
+	 * @param {string} id 明日方舟干员uid
+	 */
+	addVaildArk(id: string): void {
+		if (!this.isArknght(id)) this.vaildArkId.push(id);
+	}
+
+	/**
+	 * 登记「扩展里已经存在」的明日方舟干员uid（由武将包构造流程 addShcema 调用）
+	 * @param {string} id 明日方舟干员uid
+	 */
+	addExsitArk(id: string): void {
+		//只登记真正的明日方舟干员，保证 exsitArk ⊆ vaildArkId
+		if (this.isArknght(id) && !this.exsitArk.includes(id)) this.exsitArk.push(id);
+	}
+
+	/**
 	 * 明日方舟干员名 → 明日方舟uid 的反查索引（懒构建，仅构建一次）
 	 *
 	 * 原先 addShcema 对每个干员都遍历整张 character_table，且循环体内还对全部干员
@@ -301,6 +351,7 @@ class WhichWayArknight {
 				extUID[id] = declaredArkuid;
 				arkUID[declaredArkuid] = id;
 				cn.set([declaredArkuid, id], get.translation(id));
+				this.addExsitArk(declaredArkuid);
 				return;
 			}
 
@@ -310,6 +361,7 @@ class WhichWayArknight {
 				extUID[id] = key;
 				arkUID[key] = id;
 				cn.set([key, id], arkData[key].name);
+				this.addExsitArk(key);
 				return;
 			}
 			console.warn(`角色${id}不存在`);
@@ -320,6 +372,7 @@ class WhichWayArknight {
 				extUID[whichWayName] = id;
 				arkUID[id] = id;
 				cn.set([id, whichWayName], info.name);
+				this.addExsitArk(id);
 				return;
 			} else {
 				console.warn(`角色${id}不存在`);
@@ -527,6 +580,19 @@ class WhichWayArknight {
 	 * 不是 json/arknight/ 下的全量原始 JSON）
 	 */
 	arknightData: ArknightSlimData;
+
+	/**
+	 * 全量明日方舟干员uid清单（由 buildVaildArkId 在初始化时用 json/arknight 的角色表构造，
+	 * 含 char_patch_table 的升变形态，已按 isCharacter 过滤）
+	 */
+	vaildArkId: string[] = [];
+
+	/**
+	 * 扩展里已经存在的明日方舟干员uid（武将包构造时由 addShcema 逐个登记，恒为 vaildArkId 的子集）。
+	 *
+	 * 用途：`vaildArkId` 与 `exsitArk` 的差集即「明日方舟有、扩展还没做」的干员。
+	 */
+	exsitArk: string[] = [];
 
 	/**
 	 * 精简缓存文件（相对 json: 的路径），与 json/cache/skin.json 同目录、同读写方式

@@ -1,0 +1,1526 @@
+[
+ {
+  "file": "aibulanamrfz.ts",
+  "id": "aibulanamrfz",
+  "ark": "char_450_necras",
+  "cn": "爱布拉娜"
+ },
+ {
+  "file": "aiguisimrfz.ts",
+  "id": "aiguisimrfz",
+  "ark": "char_4218_aigis",
+  "cn": "埃癸斯"
+ },
+ {
+  "file": "ailinimrfz.ts",
+  "id": "ailinimrfz",
+  "ark": "char_4009_irene",
+  "cn": "艾丽妮"
+ },
+ {
+  "file": "ailisimrfz.ts",
+  "id": "ailisimrfz",
+  "ark": "char_338_iris",
+  "cn": "爱丽丝"
+ },
+ {
+  "file": "alannamrfz.ts",
+  "id": "alannamrfz",
+  "ark": "char_4178_alanna",
+  "cn": "阿兰娜"
+ },
+ {
+  "file": "amrfz.ts",
+  "id": "amrfz",
+  "ark": "char_225_haak",
+  "cn": "阿"
+ },
+ {
+  "file": "anjielinamrfz.ts",
+  "id": "anjielinamrfz",
+  "ark": "char_291_aglina",
+  "cn": "安洁莉娜"
+ },
+ {
+  "file": "anzhelamrfz.ts",
+  "id": "anzhelamrfz",
+  "ark": "char_218_cuttle",
+  "cn": "安哲拉"
+ },
+ {
+  "file": "ashmrfz.ts",
+  "id": "ashmrfz",
+  "ark": "char_456_ash",
+  "cn": "ASH"
+ },
+ {
+  "file": "asikalunmrfz.ts",
+  "id": "asikalunmrfz",
+  "ark": "char_4132_ascln",
+  "cn": "阿斯卡纶"
+ },
+ {
+  "file": "bafanhailingmrfz.ts",
+  "id": "bafanhailingmrfz",
+  "ark": "char_4186_tmoris",
+  "cn": "八幡海铃"
+ },
+ {
+  "file": "baidurenmrfz.ts",
+  "id": "baidurenmrfz",
+  "ark": "char_4166_varkis",
+  "cn": "摆渡人"
+ },
+ {
+  "file": "baijinmrfz.ts",
+  "id": "baijinmrfz",
+  "ark": "char_204_platnm",
+  "cn": "白金"
+ },
+ {
+  "file": "baimianxiaomrfz.ts",
+  "id": "baimianxiaomrfz",
+  "ark": "char_128_plosis",
+  "cn": "白面鸮"
+ },
+ {
+  "file": "baitiemrfz.ts",
+  "id": "baitiemrfz",
+  "ark": "char_4072_ironmn",
+  "cn": "白铁"
+ },
+ {
+  "file": "beiluoneimrfz.ts",
+  "id": "beiluoneimrfz",
+  "ark": "char_4037_demetr",
+  "cn": "贝洛内"
+ },
+ {
+  "file": "bobumrfz.ts",
+  "id": "bobumrfz",
+  "ark": "char_487_bobb",
+  "cn": "波卜"
+ },
+ {
+  "file": "bohuimrfz.ts",
+  "id": "bohuimrfz",
+  "ark": "char_252_bibeak",
+  "cn": "柏喙"
+ },
+ {
+  "file": "botanimrfz.ts",
+  "id": "botanimrfz",
+  "ark": "char_4223_botany",
+  "cn": "伯塔尼"
+ },
+ {
+  "file": "caidumrfz.ts",
+  "id": "caidumrfz",
+  "ark": "char_4155_talr",
+  "cn": "裁度"
+ },
+ {
+  "file": "Castle3mrfz.ts",
+  "id": "Castle3mrfz",
+  "ark": "char_286_cast3",
+  "cn": "Castle-3"
+ },
+ {
+  "file": "chengfengmrfz.ts",
+  "id": "chengfengmrfz",
+  "ark": "char_445_wscoot",
+  "cn": "骋风"
+ },
+ {
+  "file": "chengshanmrfz.ts",
+  "id": "chengshanmrfz",
+  "ark": "char_377_gdglow",
+  "cn": "澄闪"
+ },
+ {
+  "file": "chenmrfz.ts",
+  "id": "chenmrfz",
+  "ark": "char_010_chen",
+  "cn": "陈"
+ },
+ {
+  "file": "chizuimrfz.ts",
+  "id": "chizuimrfz",
+  "ark": "char_4065_judge",
+  "cn": "斥罪"
+ },
+ {
+  "file": "chongyuemrfz.ts",
+  "id": "chongyuemrfz",
+  "ark": "char_2024_chyue",
+  "cn": "重岳"
+ },
+ {
+  "file": "Christinemrfz.ts",
+  "id": "Christinemrfz",
+  "ark": "char_4198_christ",
+  "cn": "Christine"
+ },
+ {
+  "file": "chuxuemrfz.ts",
+  "id": "chuxuemrfz",
+  "ark": "char_174_slbell",
+  "cn": "初雪"
+ },
+ {
+  "file": "cimeimrfz.ts",
+  "id": "cimeimrfz",
+  "ark": "char_494_vendla",
+  "cn": "刺玫"
+ },
+ {
+  "file": "cuoemrfz.ts",
+  "id": "cuoemrfz",
+  "ark": "char_362_saga",
+  "cn": "嵯峨"
+ },
+ {
+  "file": "daifeienmrfz.ts",
+  "id": "daifeienmrfz",
+  "ark": "char_4110_delphn",
+  "cn": "戴菲恩"
+ },
+ {
+  "file": "dekesasimrfz.ts",
+  "id": "dekesasimrfz",
+  "ark": "char_102_texas",
+  "cn": "德克萨斯"
+ },
+ {
+  "file": "dianhumrfz.ts",
+  "id": "dianhumrfz",
+  "ark": "char_4195_radian",
+  "cn": "电弧"
+ },
+ {
+  "file": "dibimrfz.ts",
+  "id": "dibimrfz",
+  "ark": "char_4191_tippi",
+  "cn": "蒂比"
+ },
+ {
+  "file": "docmrfz.ts",
+  "id": "docmrfz",
+  "ark": "char_4125_rdoc",
+  "cn": "医生"
+ },
+ {
+  "file": "dongshimrfz.ts",
+  "id": "dongshimrfz",
+  "ark": "char_4208_wintim",
+  "cn": "冬时"
+ },
+ {
+  "file": "duoluoximrfz.ts",
+  "id": "duoluoximrfz",
+  "ark": "char_4048_doroth",
+  "cn": "多萝西"
+ },
+ {
+  "file": "elamrfz.ts",
+  "id": "elamrfz",
+  "ark": "char_4123_ela",
+  "cn": "艾拉"
+ },
+ {
+  "file": "feilaimrfz.ts",
+  "id": "feilaimrfz",
+  "ark": "char_4148_philae",
+  "cn": "菲莱"
+ },
+ {
+  "file": "feiyameitamrfz.ts",
+  "id": "feiyameitamrfz",
+  "ark": "char_300_phenxi",
+  "cn": "菲亚梅塔"
+ },
+ {
+  "file": "fengchuanxiangzimrfz.ts",
+  "id": "fengchuanxiangzimrfz",
+  "ark": "char_4182_oblvns",
+  "cn": "丰川祥子"
+ },
+ {
+  "file": "fengdimrfz.ts",
+  "id": "fengdimrfz",
+  "ark": "char_222_bpipe",
+  "cn": "风笛"
+ },
+ {
+  "file": "fengwanmrfz.ts",
+  "id": "fengwanmrfz",
+  "ark": "char_4016_kazema",
+  "cn": "风丸"
+ },
+ {
+  "file": "fengxumrfz.ts",
+  "id": "fengxumrfz",
+  "ark": "char_4222_taraxa",
+  "cn": "风絮"
+ },
+ {
+  "file": "friston3mrfz.ts",
+  "id": "friston3mrfz",
+  "ark": "char_4093_frston",
+  "cn": "弗里斯腾"
+ },
+ {
+  "file": "fulankamrfz.ts",
+  "id": "fulankamrfz",
+  "ark": "char_106_franka",
+  "cn": "芙兰卡"
+ },
+ {
+  "file": "fuzoumrfz.ts",
+  "id": "fuzoumrfz",
+  "ark": "char_4031_liesel",
+  "cn": "复奏"
+ },
+ {
+  "file": "gallusmrfz.ts",
+  "id": "gallusmrfz",
+  "ark": "char_4227_gallus",
+  "cn": "GALLUS²"
+ },
+ {
+  "file": "gelainimrfz.ts",
+  "id": "gelanimrfz",
+  "ark": "char_220_grani",
+  "cn": "格拉尼"
+ },
+ {
+  "file": "gelaokesimrfz.ts",
+  "id": "gelaokesimrfz",
+  "ark": "char_326_glacus",
+  "cn": "格劳克斯"
+ },
+ {
+  "file": "geleidiyamrfz.ts",
+  "id": "geleidiyamrfz",
+  "ark": "char_474_glady",
+  "cn": "歌蕾蒂娅"
+ },
+ {
+  "file": "guiyanmrfz.ts",
+  "id": "guiyanmrfz",
+  "ark": "char_4163_rosesa",
+  "cn": "瑰盐"
+ },
+ {
+  "file": "hadiyamrfz.ts",
+  "id": "hadiyamrfz",
+  "ark": "char_394_hadiya",
+  "cn": "哈蒂娅"
+ },
+ {
+  "file": "haidimrfz.ts",
+  "id": "haidimrfz",
+  "ark": "char_4045_heidi",
+  "cn": "海蒂"
+ },
+ {
+  "file": "haimomrfz.ts",
+  "id": "haimomrfz",
+  "ark": "char_4066_highmo",
+  "cn": "海沫"
+ },
+ {
+  "file": "hainimrfz.ts",
+  "id": "hainimrfz",
+  "ark": "char_4079_haini",
+  "cn": "海霓"
+ },
+ {
+  "file": "haojiaomrfz.ts",
+  "id": "haojiaomrfz",
+  "ark": "char_4039_horn",
+  "cn": "号角"
+ },
+ {
+  "file": "hedeleimrfz.ts",
+  "id": "hedeleimrfz",
+  "ark": "char_4088_hodrer",
+  "cn": "赫德雷"
+ },
+ {
+  "file": "heijianmrfz.ts",
+  "id": "heijianmrfz",
+  "ark": "char_4046_ebnhlz",
+  "cn": "黑键"
+ },
+ {
+  "file": "heimrfz.ts",
+  "id": "heimrfz",
+  "ark": "char_340_shwaz",
+  "cn": "黑"
+ },
+ {
+  "file": "helagemrfz.ts",
+  "id": "helagemrfz",
+  "ark": "char_188_helage",
+  "cn": "赫拉格"
+ },
+ {
+  "file": "hongmrfz.ts",
+  "id": "hongmrfz",
+  "ark": "char_144_red",
+  "cn": "红"
+ },
+ {
+  "file": "hongsunmrfz.ts",
+  "id": "hongsunmrfz",
+  "ark": "char_4023_rfalcn",
+  "cn": "红隼"
+ },
+ {
+  "file": "hongxuemrfz.ts",
+  "id": "hongxuemrfz",
+  "ark": "char_4055_bgsnow",
+  "cn": "鸿雪"
+ },
+ {
+  "file": "huangmrfz.ts",
+  "id": "huangmrfz",
+  "ark": "char_017_huang",
+  "cn": "煌"
+ },
+ {
+  "file": "hulangwanmrfz.ts",
+  "id": "hulangwanmrfz",
+  "ark": "char_4220_kormr",
+  "cn": "虎狼丸"
+ },
+ {
+  "file": "huoerhaiyamrfz.ts",
+  "id": "huoerhaiyamrfz",
+  "ark": "char_4027_heyak",
+  "cn": "霍尔海雅"
+ },
+ {
+  "file": "innamrfz.ts",
+  "id": "innamrfz",
+  "ark": "char_4124_iana",
+  "cn": "双月"
+ },
+ {
+  "file": "jianmrfz.ts",
+  "id": "jianmrfz",
+  "ark": "char_4116_blkkgt",
+  "cn": "锏"
+ },
+ {
+  "file": "jiaxintamrfz.ts",
+  "id": "jiaxintamrfz",
+  "ark": "char_4237_jcinta",
+  "cn": "嘉辛塔"
+ },
+ {
+  "file": "jicimrfz.ts",
+  "id": "jicimrfz",
+  "ark": "char_293_thorns",
+  "cn": "棘刺"
+ },
+ {
+  "file": "jingzhemrfz.ts",
+  "id": "jingzhemrfz",
+  "ark": "char_306_leizi",
+  "cn": "惊蛰"
+ },
+ {
+  "file": "jiushenmrfz.ts",
+  "id": "jiushenmrfz",
+  "ark": "char_1042_phatm2",
+  "cn": "酒神"
+ },
+ {
+  "file": "jixieshimrfz.ts",
+  "id": "jixieshimrfz",
+  "ark": "char_4230_mcnist",
+  "cn": "机械师"
+ },
+ {
+  "file": "jixingmrfz.ts",
+  "id": "jixingmrfz",
+  "ark": "char_4203_kichi",
+  "cn": "吉星"
+ },
+ {
+  "file": "jumrfz.ts",
+  "id": "jumrfz",
+  "ark": "char_4221_ju",
+  "cn": "矩"
+ },
+ {
+  "file": "kaierximrfz.ts",
+  "id": "kaierximrfz",
+  "ark": "char_003_kalts",
+  "cn": "凯尔希"
+ },
+ {
+  "file": "kaiselinmrfz.ts",
+  "id": "kaiselinmrfz",
+  "ark": "char_4162_cathy",
+  "cn": "凯瑟琳"
+ },
+ {
+  "file": "kamimrfz.ts",
+  "id": "kamimrfz",
+  "ark": "char_472_pasngr",
+  "cn": "异客"
+ },
+ {
+  "file": "kanielianmrfz.ts",
+  "id": "kanielianmrfz",
+  "ark": "char_426_billro",
+  "cn": "卡涅利安"
+ },
+ {
+  "file": "keebomrfz.ts",
+  "id": "keebomrfz",
+  "ark": "char_2013_cerber",
+  "cn": "刻俄柏"
+ },
+ {
+  "file": "kelaimenshamrfz.ts",
+  "id": "kelaimenshamrfz",
+  "ark": "char_4231_clemnt",
+  "cn": "克莱门莎"
+ },
+ {
+  "file": "keluxiermrfz.ts",
+  "id": "keluxiermrfz",
+  "ark": "char_4228_closur",
+  "cn": "可露希尔"
+ },
+ {
+  "file": "kongxianmrfz.ts",
+  "id": "kongxianmrfz",
+  "ark": "char_332_archet",
+  "cn": "空弦"
+ },
+ {
+  "file": "kuiyingmrfz.ts",
+  "id": "kuiyingmrfz",
+  "ark": "char_250_phatom",
+  "cn": "傀影"
+ },
+ {
+  "file": "laiousimrfz.ts",
+  "id": "laiousimrfz",
+  "ark": "char_4142_laios",
+  "cn": "莱欧斯"
+ },
+ {
+  "file": "laiyimrfz.ts",
+  "id": "laiyimrfz",
+  "ark": "char_4117_ray",
+  "cn": "莱伊"
+ },
+ {
+  "file": "Lancet2mrfz.ts",
+  "id": "Lancet2mrfz",
+  "ark": "char_285_medic2",
+  "cn": "Lancet-2"
+ },
+ {
+  "file": "landumrfz.ts",
+  "id": "landumrfz",
+  "ark": "char_129_bluep",
+  "cn": "蓝毒"
+ },
+ {
+  "file": "laolimrfz.ts",
+  "id": "laolimrfz",
+  "ark": "char_322_lmlee",
+  "cn": "老鲤"
+ },
+ {
+  "file": "leimiuanmrfz.ts",
+  "id": "leimiuanmrfz",
+  "ark": "char_4193_lemuen",
+  "cn": "蕾缪安"
+ },
+ {
+  "file": "liexiamrfz.ts",
+  "id": "liexiamrfz",
+  "ark": "char_194_leto",
+  "cn": "烈夏"
+ },
+ {
+  "file": "liexiangmrfz.ts",
+  "id": "liexiangmrfz",
+  "ark": "char_4225_tanya",
+  "cn": "裂响"
+ },
+ {
+  "file": "lindongmrfz.ts",
+  "id": "lindongmrfz",
+  "ark": "char_115_headbr",
+  "cn": "凛冬"
+ },
+ {
+  "file": "linglanmrfz.ts",
+  "id": "linglanmrfz",
+  "ark": "char_358_lisa",
+  "cn": "铃兰"
+ },
+ {
+  "file": "lingmrfz.ts",
+  "id": "lingmrfz",
+  "ark": "char_2023_ling",
+  "cn": "令"
+ },
+ {
+  "file": "linguangmrfz.ts",
+  "id": "linguangmrfz",
+  "ark": "char_148_nearl",
+  "cn": "临光"
+ },
+ {
+  "file": "lingyinmrfz.ts",
+  "id": "lingyinmrfz",
+  "ark": "char_4187_graceb",
+  "cn": "聆音"
+ },
+ {
+  "file": "lingzhimrfz.ts",
+  "id": "lingzhimrfz",
+  "ark": "char_206_gnosis",
+  "cn": "灵知"
+ },
+ {
+  "file": "linmrfz.ts",
+  "id": "linmrfz",
+  "ark": "char_4080_lin",
+  "cn": "林"
+ },
+ {
+  "file": "linshimrfz.ts",
+  "id": "linshimrfz",
+  "ark": "char_4102_threye",
+  "cn": "凛视"
+ },
+ {
+  "file": "liumingmrfz.ts",
+  "id": "liumingmrfz",
+  "ark": "char_4042_lumen",
+  "cn": "流明"
+ },
+ {
+  "file": "longshelanmrfz.ts",
+  "id": "longshelanmrfz",
+  "ark": "char_486_takila",
+  "cn": "龙舌兰"
+ },
+ {
+  "file": "luogesimrfz.ts",
+  "id": "luogesimrfz",
+  "ark": "char_4133_logos",
+  "cn": "逻格斯"
+ },
+ {
+  "file": "lutuomrfz.ts",
+  "id": "lutuomrfz",
+  "ark": "char_4130_luton",
+  "cn": "露托"
+ },
+ {
+  "file": "lvgumrfz.ts",
+  "id": "lvgumrfz",
+  "ark": "char_4232_hbound",
+  "cn": "旅骨"
+ },
+ {
+  "file": "maennamrfz.ts",
+  "id": "maennamrfz",
+  "ark": "char_4064_mlynar",
+  "cn": "玛恩纳"
+ },
+ {
+  "file": "maizhelunmrfz.ts",
+  "id": "maizhelunmrfz",
+  "ark": "char_248_mgllan",
+  "cn": "麦哲伦"
+ },
+ {
+  "file": "maluxiermrfz.ts",
+  "id": "maluxiermrfz",
+  "ark": "char_4141_marcil",
+  "cn": "玛露希尔"
+ },
+ {
+  "file": "medical_amiyamrfz.ts",
+  "id": "medical_amiyamrfz",
+  "ark": "char_1037_amiya3",
+  "cn": "医疗阿米娅"
+ },
+ {
+  "file": "meiermrfz.ts",
+  "id": "meiermrfz",
+  "ark": "char_242_otter",
+  "cn": "梅尔"
+ },
+ {
+  "file": "midiexiangmrfz.ts",
+  "id": "midiexiangmrfz",
+  "ark": "char_391_rosmon",
+  "cn": "迷迭香"
+ },
+ {
+  "file": "migelumrfz.ts",
+  "id": "migelumrfz",
+  "ark": "char_122_beagle",
+  "cn": "米格鲁"
+ },
+ {
+  "file": "mingjiaomrfz.ts",
+  "id": "mingjiaomrfz",
+  "ark": "char_4071_peper",
+  "cn": "明椒"
+ },
+ {
+  "file": "miumiumrfz.ts",
+  "id": "miumiumrfz",
+  "ark": "char_249_mlyss",
+  "cn": "缪尔赛思"
+ },
+ {
+  "file": "miuyinmrfz.ts",
+  "id": "miuyinmrfz",
+  "ark": "char_4229_aphris",
+  "cn": "谬因"
+ },
+ {
+  "file": "mon3trmrfz.ts",
+  "id": "mon3trmrfz",
+  "ark": "char_4179_monstr",
+  "cn": "mon3tr"
+ },
+ {
+  "file": "mositimamrfz.ts",
+  "id": "mositimamrfz",
+  "ark": "char_213_mostma",
+  "cn": "莫斯提马"
+ },
+ {
+  "file": "mowangmrfz.ts",
+  "id": "mowangmrfz",
+  "ark": "char_4134_cetsyr",
+  "cn": "魔王"
+ },
+ {
+  "file": "muqianmrfz.ts",
+  "id": "muqianmrfz",
+  "ark": "char_4171_wulfen",
+  "cn": "钼铅"
+ },
+ {
+  "file": "narentuyamrfz.ts",
+  "id": "narentuyamrfz",
+  "ark": "char_4138_narant",
+  "cn": "娜仁图亚"
+ },
+ {
+  "file": "nasitimrfz.ts",
+  "id": "nasitimrfz",
+  "ark": "char_4212_nasti",
+  "cn": "娜斯提"
+ },
+ {
+  "file": "nengtianshimrfz.ts",
+  "id": "nengtianshimrfz",
+  "ark": "char_103_angel",
+  "cn": "能天使"
+ },
+ {
+  "file": "nianmrfz.ts",
+  "id": "nianmrfz",
+  "ark": "char_2014_nian",
+  "cn": "年"
+ },
+ {
+  "file": "nifumrfz.ts",
+  "id": "nifumrfz",
+  "ark": "char_4146_nymph",
+  "cn": "妮芙"
+ },
+ {
+  "file": "niyanmrfz.ts",
+  "id": "niyanmrfz",
+  "ark": "char_311_mudrok",
+  "cn": "泥岩"
+ },
+ {
+  "file": "nuoweiermrfz.ts",
+  "id": "nuoweiermrfz",
+  "ark": "char_4173_nowell",
+  "cn": "诺威尔"
+ },
+ {
+  "file": "palasimrfz.ts",
+  "id": "palasimrfz",
+  "ark": "char_485_pallas",
+  "cn": "帕拉斯"
+ },
+ {
+  "file": "peideluomrfz.ts",
+  "id": "peideluomrfz",
+  "ark": "char_4234_pedro",
+  "cn": "佩德洛"
+ },
+ {
+  "file": "peipeimrfz.ts",
+  "id": "peipeimrfz",
+  "ark": "char_4058_pepe",
+  "cn": "佩佩"
+ },
+ {
+  "file": "PhonoR0mrfz.ts",
+  "id": "PhonoR0mrfz",
+  "ark": "char_4136_phonor",
+  "cn": "PhonoR-0"
+ },
+ {
+  "file": "qierchakemrfz.ts",
+  "id": "qierchakemrfz",
+  "ark": "char_4144_chilc",
+  "cn": "奇尔查克"
+ },
+ {
+  "file": "qinliumrfz.ts",
+  "id": "qinliumrfz",
+  "ark": "char_479_sleach",
+  "cn": "琴柳"
+ },
+ {
+  "file": "qiubaimrfz.ts",
+  "id": "qiubaimrfz",
+  "ark": "char_4082_qiubai",
+  "cn": "仇白"
+ },
+ {
+  "file": "rendongmrfz.ts",
+  "id": "rendongmrfz",
+  "ark": "char_4026_vulpis",
+  "cn": "忍冬"
+ },
+ {
+  "file": "ruoyemumrfz.ts",
+  "id": "ruoyemumrfz",
+  "ark": "char_4183_mortis",
+  "cn": "若叶睦"
+ },
+ {
+  "file": "saileiyamrfz.ts",
+  "id": "saileiyamrfz",
+  "ark": "char_202_demkni",
+  "cn": "塞雷娅"
+ },
+ {
+  "file": "sanjiaochuhuamrfz.ts",
+  "id": "sanjiaochuhuamrfz",
+  "ark": "char_4184_dolris",
+  "cn": "三角初华"
+ },
+ {
+  "file": "sbchenmrfz.ts",
+  "id": "sbchenmrfz",
+  "ark": "char_1050_chen3",
+  "cn": "赤刃明霄陈"
+ },
+ {
+  "file": "semrfz.ts",
+  "id": "semrfz",
+  "ark": "char_350_surtr",
+  "cn": "史尔特尔"
+ },
+ {
+  "file": "senranmrfz.ts",
+  "id": "senranmrfz",
+  "ark": "char_416_zumama",
+  "cn": "森蚺"
+ },
+ {
+  "file": "senximrfz.ts",
+  "id": "senximrfz",
+  "ark": "char_4143_sensi",
+  "cn": "森西"
+ },
+ {
+  "file": "shanbimrfz.ts",
+  "id": "shanbimrfz",
+  "ark": "char_4235_thumpy",
+  "cn": "珊比"
+ },
+ {
+  "file": "shanjimrfz.ts",
+  "id": "shanjimrfz",
+  "ark": "char_457_blitz",
+  "cn": "闪击"
+ },
+ {
+  "file": "shanlingmrfz.ts",
+  "id": "shanlingmrfz",
+  "ark": "char_147_shining",
+  "cn": "闪灵"
+ },
+ {
+  "file": "shanmrfz.ts",
+  "id": "shanmrfz",
+  "ark": "char_264_f12yin",
+  "cn": "山"
+ },
+ {
+  "file": "shendianmrfz.ts",
+  "id": "shendianmrfz",
+  "ark": "char_469_indigo",
+  "cn": "深靛"
+ },
+ {
+  "file": "shenxunmrfz.ts",
+  "id": "shenxunmrfz",
+  "ark": "char_4137_udflow",
+  "cn": "深巡"
+ },
+ {
+  "file": "shijunzhemrfz.ts",
+  "id": "shijunzhemrfz",
+  "ark": "char_1502_crosly",
+  "cn": "弑君者"
+ },
+ {
+  "file": "shixiemrfz.ts",
+  "id": "shixiemrfz",
+  "ark": "char_215_mantic",
+  "cn": "狮蝎"
+ },
+ {
+  "file": "shiximrfz.ts",
+  "id": "shiximrfz",
+  "ark": "char_4236_tmslot",
+  "cn": "时隙"
+ },
+ {
+  "file": "shuanghuamrfz.ts",
+  "id": "shuanghuamrfz",
+  "ark": "char_458_rfrost",
+  "cn": "霜华"
+ },
+ {
+  "file": "shuangyemrfz.ts",
+  "id": "shuangyemrfz",
+  "ark": "char_193_frostl",
+  "cn": "霜叶"
+ },
+ {
+  "file": "shuidengxinmrfz.ts",
+  "id": "shuidengxinmrfz",
+  "ark": "char_4177_brigid",
+  "cn": "水灯心"
+ },
+ {
+  "file": "shuiyuemrfz.ts",
+  "id": "shuiyuemrfz",
+  "ark": "char_437_mizuki",
+  "cn": "水月"
+ },
+ {
+  "file": "shumrfz.ts",
+  "id": "shumrfz",
+  "ark": "char_2025_shu",
+  "cn": "黍"
+ },
+ {
+  "file": "sikadimrfz.ts",
+  "id": "sikadimrfz",
+  "ark": "char_263_skadi",
+  "cn": "斯卡蒂"
+ },
+ {
+  "file": "siyemrfz.ts",
+  "id": "siyemrfz",
+  "ark": "char_427_vigil",
+  "cn": "伺夜"
+ },
+ {
+  "file": "songtongmrfz.ts",
+  "id": "songtongmrfz",
+  "ark": "char_4199_makiri",
+  "cn": "松桐"
+ },
+ {
+  "file": "spamiyamrfz.ts",
+  "id": "spamiyamrfz",
+  "ark": "char_1001_amiya2",
+  "cn": "近卫阿米娅"
+ },
+ {
+  "file": "spanjielinamrfz.ts",
+  "id": "spanjielinamrfz",
+  "ark": "char_1015_aglna2",
+  "cn": "予愿安洁莉娜"
+ },
+ {
+  "file": "spchuxuemrfz.ts",
+  "id": "spchuxuemrfz",
+  "ark": "char_1046_sbell2",
+  "cn": "圣聆初雪"
+ },
+ {
+  "file": "spdegoumrfz.ts",
+  "id": "spdegoumrfz",
+  "ark": "char_1028_texas2",
+  "cn": "缄默德克萨斯"
+ },
+ {
+  "file": "spfenmrfz.ts",
+  "id": "spfenmrfz",
+  "ark": "char_1036_fang2",
+  "cn": "历阵锐枪芬"
+ },
+ {
+  "file": "spfurongmrfz.ts",
+  "id": "spfurongmrfz",
+  "ark": "char_1024_hbisc2",
+  "cn": "濯尘芙蓉"
+ },
+ {
+  "file": "spheijiaomrfz.ts",
+  "id": "spheijiaomrfz",
+  "ark": "char_1030_noirc2",
+  "cn": "太刀侠火龙S黑角"
+ },
+ {
+  "file": "sphemomrfz.ts",
+  "id": "sphemomrfz",
+  "ark": "char_1031_slent2",
+  "cn": "淬羽赫默"
+ },
+ {
+  "file": "spjiaweiermrfz.ts",
+  "id": "spjiaweiermrfz",
+  "ark": "char_1026_gvial2",
+  "cn": "百炼嘉维尔"
+ },
+ {
+  "file": "spjicimrfz.ts",
+  "id": "spjicimrfz",
+  "ark": "char_1039_thorn2",
+  "cn": "引星棘刺"
+ },
+ {
+  "file": "spjiexikamrfz.ts",
+  "id": "spjiexikamrfz",
+  "ark": "char_1034_jesca2",
+  "cn": "涤火杰西卡"
+ },
+ {
+  "file": "spjingzhemrfz.ts",
+  "id": "spjingzhemrfz",
+  "ark": "char_1043_leizi2",
+  "cn": "司霆惊蛰"
+ },
+ {
+  "file": "spkaierximrfz.ts",
+  "id": "spkaierximrfz",
+  "ark": "char_1052_kalts2",
+  "cn": "守望者凯尔希"
+ },
+ {
+  "file": "spkongbaomrfz.ts",
+  "id": "spkongbaomrfz",
+  "ark": "char_1049_catap2",
+  "cn": "雷狼龙S空爆"
+ },
+ {
+  "file": "splapulandemrfz.ts",
+  "id": "splapulandemrfz",
+  "ark": "char_1038_whitw2",
+  "cn": "荒芜拉普兰德"
+ },
+ {
+  "file": "splingdongmrfz.ts",
+  "id": "splingdongmrfz",
+  "ark": "char_1051_headb2",
+  "cn": "怒潮凛冬"
+ },
+ {
+  "file": "splinguangmrfz.ts",
+  "id": "splinguangmrfz",
+  "ark": "char_1014_nearl2",
+  "cn": "耀骑士临光"
+ },
+ {
+  "file": "spnengtianshimrfz.ts",
+  "id": "spnengtianshimrfz",
+  "ark": "char_1041_angel2",
+  "cn": "新约能天使"
+ },
+ {
+  "file": "spshihuaiyamrfz.ts",
+  "id": "spshihuaiyamrfz",
+  "ark": "char_1033_swire2",
+  "cn": "琳琅诗怀雅"
+ },
+ {
+  "file": "spsikadimrfz.ts",
+  "id": "spsikadimrfz",
+  "ark": "char_1012_skadi2",
+  "cn": "浊心斯卡蒂"
+ },
+ {
+  "file": "spsongzangrenmrfz.ts",
+  "id": "spsongzangrenmrfz",
+  "ark": "char_1032_excu2",
+  "cn": "圣约送葬人"
+ },
+ {
+  "file": "sptiaoxiangshimrfz.ts",
+  "id": "sptiaoxiangshimrfz",
+  "ark": "char_1022_flwr2",
+  "cn": "撷英调香师"
+ },
+ {
+  "file": "spweicaomrfz.ts",
+  "id": "spweicaomrfz",
+  "ark": "char_1020_reed2",
+  "cn": "焰影苇草"
+ },
+ {
+  "file": "spweinamrfz.ts",
+  "id": "spweinamrfz",
+  "ark": "char_1019_siege2",
+  "cn": "维娜·维多利亚"
+ },
+ {
+  "file": "spxiaoyangmrfz.ts",
+  "id": "spxiaoyangmrfz",
+  "ark": "char_1016_agoat2",
+  "cn": "纯烬艾雅法拉"
+ },
+ {
+  "file": "spxingxiongmrfz.ts",
+  "id": "spxingxiongmrfz",
+  "ark": "char_1044_hsgma2",
+  "cn": "斩业星熊"
+ },
+ {
+  "file": "spxingyuanmrfz.ts",
+  "id": "spxingyuanmrfz",
+  "ark": "char_1047_halo2",
+  "cn": "溯光星源"
+ },
+ {
+  "file": "spyedaomrfz.ts",
+  "id": "spyedaomrfz",
+  "ark": "char_1029_yato2",
+  "cn": "麒麟R夜刀"
+ },
+ {
+  "file": "spyinhuimrfz.ts",
+  "id": "spyinhuimrfz",
+  "ark": "char_1045_svash2",
+  "cn": "凛御银灰"
+ },
+ {
+  "file": "spyoulingshamrfz.ts",
+  "id": "spyoulingshamrfz",
+  "ark": "char_1023_ghost2",
+  "cn": "归溟幽灵鲨"
+ },
+ {
+  "file": "spzilanmrfz.ts",
+  "id": "spzilanmrfz",
+  "ark": "char_1048_orchd2",
+  "cn": "焰狐龙梓兰"
+ },
+ {
+  "file": "spzzxpmrfz.ts",
+  "id": "spzzxpmrfz",
+  "ark": "char_1013_chen2",
+  "cn": "假日威龙陈"
+ },
+ {
+  "file": "suocaomrfz.ts",
+  "id": "suocaomrfz",
+  "ark": "char_4139_papyrs",
+  "cn": "莎草"
+ },
+ {
+  "file": "suxinmrfz.ts",
+  "id": "suxinmrfz",
+  "ark": "char_245_cello",
+  "cn": "塑心"
+ },
+ {
+  "file": "taojinniangmrfz.ts",
+  "id": "taojinniangmrfz",
+  "ark": "char_151_myrtle",
+  "cn": "桃金娘"
+ },
+ {
+  "file": "tekenuomrfz.ts",
+  "id": "tekenuomrfz",
+  "ark": "char_4164_tecno",
+  "cn": "特克诺"
+ },
+ {
+  "file": "THRMEXmrfz.ts",
+  "id": "THRMEXmrfz",
+  "ark": "char_376_therex",
+  "cn": "THRM-EX"
+ },
+ {
+  "file": "tianhuomrfz.ts",
+  "id": "tianhuomrfz",
+  "ark": "char_166_skfire",
+  "cn": "天火"
+ },
+ {
+  "file": "tiankonghemrfz.ts",
+  "id": "tiankonghemrfz",
+  "ark": "char_4213_skybx",
+  "cn": "天空盒"
+ },
+ {
+  "file": "tifengmrfz.ts",
+  "id": "tifengmrfz",
+  "ark": "char_2012_typhon",
+  "cn": "提丰"
+ },
+ {
+  "file": "titimrfz.ts",
+  "id": "titimrfz",
+  "ark": "char_4056_titi",
+  "cn": "缇缇"
+ },
+ {
+  "file": "wangmrfz/index.ts",
+  "id": "wangmrfz",
+  "ark": "char_2027_wang",
+  "cn": "望"
+ },
+ {
+  "file": "wanqingmrfz.ts",
+  "id": "wanqingmrfz",
+  "ark": "char_4119_wanqin",
+  "cn": "万顷"
+ },
+ {
+  "file": "weinamrfz.ts",
+  "id": "weinamrfz",
+  "ark": "char_112_siege",
+  "cn": "推进之王"
+ },
+ {
+  "file": "weishidaiermrfz.ts",
+  "id": "weishidaiermrfz",
+  "ark": "char_1035_wisdel",
+  "cn": "维什戴尔"
+ },
+ {
+  "file": "weiweiannamrfz.ts",
+  "id": "weiweiannamrfz",
+  "ark": "char_4098_vvana",
+  "cn": "薇薇安娜"
+ },
+ {
+  "file": "weiyimrfz.ts",
+  "id": "weiyimrfz",
+  "ark": "char_4226_veen",
+  "cn": "维伊"
+ },
+ {
+  "file": "wendimrfz.ts",
+  "id": "wendimrfz",
+  "ark": "char_400_weedy",
+  "cn": "温蒂"
+ },
+ {
+  "file": "wenmimrfz.ts",
+  "id": "wenmimrfz",
+  "ark": "char_4081_warmy",
+  "cn": "温米"
+ },
+ {
+  "file": "wmrfz.ts",
+  "id": "wmrfz",
+  "ark": "char_113_cqbw",
+  "cn": "W"
+ },
+ {
+  "file": "wuerbianmrfz.ts",
+  "id": "wuerbianmrfz",
+  "ark": "char_4145_ulpia",
+  "cn": "乌尔比安"
+ },
+ {
+  "file": "wujiumrfz.ts",
+  "id": "wujiumrfz",
+  "ark": "char_4224_turdus",
+  "cn": "乌啾"
+ },
+ {
+  "file": "xiaguangmrfz.ts",
+  "id": "xiaguangmrfz",
+  "ark": "char_423_blemsh",
+  "cn": "瑕光"
+ },
+ {
+  "file": "xiangshimrfz.ts",
+  "id": "xiangshimrfz",
+  "ark": "char_4214_cairn",
+  "cn": "响石"
+ },
+ {
+  "file": "xiaogemrfz.ts",
+  "id": "xiaogemrfz",
+  "ark": "char_497_ctable",
+  "cn": "晓歌"
+ },
+ {
+  "file": "xiaomanmrfz.ts",
+  "id": "xiaomanmrfz",
+  "ark": "char_4122_grabds",
+  "cn": "小满"
+ },
+ {
+  "file": "xiaoyangmrfz.ts",
+  "id": "xiaoyangmrfz",
+  "ark": "char_180_amgoat",
+  "cn": "艾雅法拉"
+ },
+ {
+  "file": "xielvmrfz.ts",
+  "id": "xielvmrfz",
+  "ark": "char_4051_akkord",
+  "cn": "协律"
+ },
+ {
+  "file": "xigymrfz.ts",
+  "id": "xigymrfz",
+  "ark": "char_2015_dusk",
+  "cn": "夕"
+ },
+ {
+  "file": "xingjimrfz.ts",
+  "id": "xingjimrfz",
+  "ark": "char_274_astesi",
+  "cn": "星极"
+ },
+ {
+  "file": "xingxiongmrfz.ts",
+  "id": "xingxiongmrfz",
+  "ark": "char_136_hsguma",
+  "cn": "星熊"
+ },
+ {
+  "file": "xingyuanmrfz.ts",
+  "id": "xingyuanmrfz",
+  "ark": "char_135_halo",
+  "cn": "星源"
+ },
+ {
+  "file": "xingzhumrfz.ts",
+  "id": "xingzhumrfz",
+  "ark": "char_4172_xingzh",
+  "cn": "行著"
+ },
+ {
+  "file": "xinyangjiaobanjimrfz.ts",
+  "id": "xinyangjiaobanjimrfz",
+  "ark": "char_4194_rmixer",
+  "cn": "信仰搅拌机"
+ },
+ {
+  "file": "xirenmrfz.ts",
+  "id": "xirenmrfz",
+  "ark": "char_4151_tinman",
+  "cn": "锡人"
+ },
+ {
+  "file": "xiyinmrfz.ts",
+  "id": "xiyinmrfz",
+  "ark": "char_336_folivo",
+  "cn": "稀音"
+ },
+ {
+  "file": "xueliemrfz.ts",
+  "id": "xueliemrfz",
+  "ark": "char_4211_snhunt",
+  "cn": "雪猎"
+ },
+ {
+  "file": "xunlanmrfz.ts",
+  "id": "xunlanmrfz",
+  "ark": "char_4052_surfer",
+  "cn": "寻澜"
+ },
+ {
+  "file": "yanweimrfz.ts",
+  "id": "yanweimrfz",
+  "ark": "char_420_flamtl",
+  "cn": "焰尾"
+ },
+ {
+  "file": "yaxinmrfz.ts",
+  "id": "yaxinmrfz",
+  "ark": "char_173_slchan",
+  "cn": "崖心"
+ },
+ {
+  "file": "yelamrfz.ts",
+  "id": "yelamrfz",
+  "ark": "char_4013_kjera",
+  "cn": "耶拉"
+ },
+ {
+  "file": "yemomrfz.ts",
+  "id": "yemomrfz",
+  "ark": "char_164_nightm",
+  "cn": "夜魔"
+ },
+ {
+  "file": "yeyingmrfz.ts",
+  "id": "yeyingmrfz",
+  "ark": "char_179_cgbird",
+  "cn": "夜莺"
+ },
+ {
+  "file": "yifulitemrfz.ts",
+  "id": "yifulitemrfz",
+  "ark": "char_134_ifrit",
+  "cn": "伊芙利特"
+ },
+ {
+  "file": "yindelaiximrfz.ts",
+  "id": "yindelaiximrfz",
+  "ark": "char_4010_etlchi",
+  "cn": "隐德莱希"
+ },
+ {
+  "file": "yineisimrfz.ts",
+  "id": "yineisimrfz",
+  "ark": "char_4087_ines",
+  "cn": "伊内丝"
+ },
+ {
+  "file": "yinhuimrfz.ts",
+  "id": "yinhuimrfz",
+  "ark": "char_172_svrash",
+  "cn": "银灰"
+ },
+ {
+  "file": "yintuoluomrfz.ts",
+  "id": "yintuoluomrfz",
+  "ark": "char_155_tiger",
+  "cn": "因陀罗"
+ },
+ {
+  "file": "youtiansiruomaimrfz.ts",
+  "id": "youtiansiruomaimrfz",
+  "ark": "char_4185_amoris",
+  "cn": "祐天寺若麦"
+ },
+ {
+  "file": "yuanyamrfz.ts",
+  "id": "yuanyamrfz",
+  "ark": "char_430_fartth",
+  "cn": "远牙"
+ },
+ {
+  "file": "yueyuemrfz.ts",
+  "id": "yueyuemrfz",
+  "ark": "char_4100_caper",
+  "cn": "跃跃"
+ },
+ {
+  "file": "yueyuyoujialimrfz.ts",
+  "id": "yueyuyoujialimrfz",
+  "ark": "char_4219_yukari",
+  "cn": "岳羽由加莉"
+ },
+ {
+  "file": "yumaobimrfz.ts",
+  "id": "yumaobimrfz",
+  "ark": "char_421_crow",
+  "cn": "羽毛笔"
+ },
+ {
+  "file": "yumrfz.ts",
+  "id": "yumrfz",
+  "ark": "char_2026_yu",
+  "cn": "余"
+ },
+ {
+  "file": "yunjimrfz.ts",
+  "id": "yunjimrfz",
+  "ark": "char_4165_ctrail",
+  "cn": "云迹"
+ },
+ {
+  "file": "yunqingpingmrfz.ts",
+  "id": "yunqingpingmrfz",
+  "ark": "char_4196_reckpr",
+  "cn": "云青萍"
+ },
+ {
+  "file": "yunxingmrfz.ts",
+  "id": "yunxingmrfz",
+  "ark": "char_219_meteo",
+  "cn": "陨星"
+ },
+ {
+  "file": "zaolumrfz.ts",
+  "id": "zaolumrfz",
+  "ark": "char_197_poca",
+  "cn": "早露"
+ },
+ {
+  "file": "zhanchemrfz.ts",
+  "id": "zhanchemrfz",
+  "ark": "char_459_tachak",
+  "cn": "战车"
+ },
+ {
+  "file": "zhenyanmrfz.ts",
+  "id": "zhenyanmrfz",
+  "ark": "char_4204_mantra",
+  "cn": "真言"
+ },
+ {
+  "file": "zheyamrfz.ts",
+  "id": "zheyamrfz",
+  "ark": "char_4207_branch",
+  "cn": "折桠"
+ },
+ {
+  "file": "zhisongmrfz.ts",
+  "id": "zhisongmrfz",
+  "ark": "char_4011_lessng",
+  "cn": "止颂"
+ },
+ {
+  "file": "zhuhuangmrfz.ts",
+  "id": "zhuhuangmrfz",
+  "ark": "char_1040_blaze2",
+  "cn": "烛煌"
+ },
+ {
+  "file": "ziyeyaomrfz.ts",
+  "id": "ziyeyaomrfz",
+  "ark": "char_4202_haruka",
+  "cn": "紫野遥"
+ },
+ {
+  "file": "zuolemrfz.ts",
+  "id": "zuolemrfz",
+  "ark": "char_4121_zuole",
+  "cn": "左乐"
+ }
+]

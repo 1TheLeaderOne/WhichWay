@@ -1,0 +1,7707 @@
+{
+ "at": "2026-10-13T08:50:10.972Z",
+ "mode": "apply",
+ "map": [
+  {
+   "file": "aibulanamrfz.ts",
+   "id": "aibulanamrfz",
+   "ark": "char_450_necras",
+   "cn": "爱布拉娜"
+  },
+  {
+   "file": "aiguisimrfz.ts",
+   "id": "aiguisimrfz",
+   "ark": "char_4218_aigis",
+   "cn": "埃癸斯"
+  },
+  {
+   "file": "ailinimrfz.ts",
+   "id": "ailinimrfz",
+   "ark": "char_4009_irene",
+   "cn": "艾丽妮"
+  },
+  {
+   "file": "ailisimrfz.ts",
+   "id": "ailisimrfz",
+   "ark": "char_338_iris",
+   "cn": "爱丽丝"
+  },
+  {
+   "file": "alannamrfz.ts",
+   "id": "alannamrfz",
+   "ark": "char_4178_alanna",
+   "cn": "阿兰娜"
+  },
+  {
+   "file": "amrfz.ts",
+   "id": "amrfz",
+   "ark": "char_225_haak",
+   "cn": "阿"
+  },
+  {
+   "file": "anjielinamrfz.ts",
+   "id": "anjielinamrfz",
+   "ark": "char_291_aglina",
+   "cn": "安洁莉娜"
+  },
+  {
+   "file": "anzhelamrfz.ts",
+   "id": "anzhelamrfz",
+   "ark": "char_218_cuttle",
+   "cn": "安哲拉"
+  },
+  {
+   "file": "ashmrfz.ts",
+   "id": "ashmrfz",
+   "ark": "char_456_ash",
+   "cn": "ASH"
+  },
+  {
+   "file": "asikalunmrfz.ts",
+   "id": "asikalunmrfz",
+   "ark": "char_4132_ascln",
+   "cn": "阿斯卡纶"
+  },
+  {
+   "file": "bafanhailingmrfz.ts",
+   "id": "bafanhailingmrfz",
+   "ark": "char_4186_tmoris",
+   "cn": "八幡海铃"
+  },
+  {
+   "file": "baidurenmrfz.ts",
+   "id": "baidurenmrfz",
+   "ark": "char_4166_varkis",
+   "cn": "摆渡人"
+  },
+  {
+   "file": "baijinmrfz.ts",
+   "id": "baijinmrfz",
+   "ark": "char_204_platnm",
+   "cn": "白金"
+  },
+  {
+   "file": "baimianxiaomrfz.ts",
+   "id": "baimianxiaomrfz",
+   "ark": "char_128_plosis",
+   "cn": "白面鸮"
+  },
+  {
+   "file": "baitiemrfz.ts",
+   "id": "baitiemrfz",
+   "ark": "char_4072_ironmn",
+   "cn": "白铁"
+  },
+  {
+   "file": "beiluoneimrfz.ts",
+   "id": "beiluoneimrfz",
+   "ark": "char_4037_demetr",
+   "cn": "贝洛内"
+  },
+  {
+   "file": "bobumrfz.ts",
+   "id": "bobumrfz",
+   "ark": "char_487_bobb",
+   "cn": "波卜"
+  },
+  {
+   "file": "bohuimrfz.ts",
+   "id": "bohuimrfz",
+   "ark": "char_252_bibeak",
+   "cn": "柏喙"
+  },
+  {
+   "file": "botanimrfz.ts",
+   "id": "botanimrfz",
+   "ark": "char_4223_botany",
+   "cn": "伯塔尼"
+  },
+  {
+   "file": "caidumrfz.ts",
+   "id": "caidumrfz",
+   "ark": "char_4155_talr",
+   "cn": "裁度"
+  },
+  {
+   "file": "Castle3mrfz.ts",
+   "id": "Castle3mrfz",
+   "ark": "char_286_cast3",
+   "cn": "Castle-3"
+  },
+  {
+   "file": "chengfengmrfz.ts",
+   "id": "chengfengmrfz",
+   "ark": "char_445_wscoot",
+   "cn": "骋风"
+  },
+  {
+   "file": "chengshanmrfz.ts",
+   "id": "chengshanmrfz",
+   "ark": "char_377_gdglow",
+   "cn": "澄闪"
+  },
+  {
+   "file": "chenmrfz.ts",
+   "id": "chenmrfz",
+   "ark": "char_010_chen",
+   "cn": "陈"
+  },
+  {
+   "file": "chizuimrfz.ts",
+   "id": "chizuimrfz",
+   "ark": "char_4065_judge",
+   "cn": "斥罪"
+  },
+  {
+   "file": "chongyuemrfz.ts",
+   "id": "chongyuemrfz",
+   "ark": "char_2024_chyue",
+   "cn": "重岳"
+  },
+  {
+   "file": "Christinemrfz.ts",
+   "id": "Christinemrfz",
+   "ark": "char_4198_christ",
+   "cn": "Christine"
+  },
+  {
+   "file": "chuxuemrfz.ts",
+   "id": "chuxuemrfz",
+   "ark": "char_174_slbell",
+   "cn": "初雪"
+  },
+  {
+   "file": "cimeimrfz.ts",
+   "id": "cimeimrfz",
+   "ark": "char_494_vendla",
+   "cn": "刺玫"
+  },
+  {
+   "file": "cuoemrfz.ts",
+   "id": "cuoemrfz",
+   "ark": "char_362_saga",
+   "cn": "嵯峨"
+  },
+  {
+   "file": "daifeienmrfz.ts",
+   "id": "daifeienmrfz",
+   "ark": "char_4110_delphn",
+   "cn": "戴菲恩"
+  },
+  {
+   "file": "dekesasimrfz.ts",
+   "id": "dekesasimrfz",
+   "ark": "char_102_texas",
+   "cn": "德克萨斯"
+  },
+  {
+   "file": "dianhumrfz.ts",
+   "id": "dianhumrfz",
+   "ark": "char_4195_radian",
+   "cn": "电弧"
+  },
+  {
+   "file": "dibimrfz.ts",
+   "id": "dibimrfz",
+   "ark": "char_4191_tippi",
+   "cn": "蒂比"
+  },
+  {
+   "file": "docmrfz.ts",
+   "id": "docmrfz",
+   "ark": "char_4125_rdoc",
+   "cn": "医生"
+  },
+  {
+   "file": "dongshimrfz.ts",
+   "id": "dongshimrfz",
+   "ark": "char_4208_wintim",
+   "cn": "冬时"
+  },
+  {
+   "file": "duoluoximrfz.ts",
+   "id": "duoluoximrfz",
+   "ark": "char_4048_doroth",
+   "cn": "多萝西"
+  },
+  {
+   "file": "elamrfz.ts",
+   "id": "elamrfz",
+   "ark": "char_4123_ela",
+   "cn": "艾拉"
+  },
+  {
+   "file": "feilaimrfz.ts",
+   "id": "feilaimrfz",
+   "ark": "char_4148_philae",
+   "cn": "菲莱"
+  },
+  {
+   "file": "feiyameitamrfz.ts",
+   "id": "feiyameitamrfz",
+   "ark": "char_300_phenxi",
+   "cn": "菲亚梅塔"
+  },
+  {
+   "file": "fengchuanxiangzimrfz.ts",
+   "id": "fengchuanxiangzimrfz",
+   "ark": "char_4182_oblvns",
+   "cn": "丰川祥子"
+  },
+  {
+   "file": "fengdimrfz.ts",
+   "id": "fengdimrfz",
+   "ark": "char_222_bpipe",
+   "cn": "风笛"
+  },
+  {
+   "file": "fengwanmrfz.ts",
+   "id": "fengwanmrfz",
+   "ark": "char_4016_kazema",
+   "cn": "风丸"
+  },
+  {
+   "file": "fengxumrfz.ts",
+   "id": "fengxumrfz",
+   "ark": "char_4222_taraxa",
+   "cn": "风絮"
+  },
+  {
+   "file": "friston3mrfz.ts",
+   "id": "friston3mrfz",
+   "ark": "char_4093_frston",
+   "cn": "弗里斯腾"
+  },
+  {
+   "file": "fulankamrfz.ts",
+   "id": "fulankamrfz",
+   "ark": "char_106_franka",
+   "cn": "芙兰卡"
+  },
+  {
+   "file": "fuzoumrfz.ts",
+   "id": "fuzoumrfz",
+   "ark": "char_4031_liesel",
+   "cn": "复奏"
+  },
+  {
+   "file": "gallusmrfz.ts",
+   "id": "gallusmrfz",
+   "ark": "char_4227_gallus",
+   "cn": "GALLUS²"
+  },
+  {
+   "file": "gelainimrfz.ts",
+   "id": "gelanimrfz",
+   "ark": "char_220_grani",
+   "cn": "格拉尼"
+  },
+  {
+   "file": "gelaokesimrfz.ts",
+   "id": "gelaokesimrfz",
+   "ark": "char_326_glacus",
+   "cn": "格劳克斯"
+  },
+  {
+   "file": "geleidiyamrfz.ts",
+   "id": "geleidiyamrfz",
+   "ark": "char_474_glady",
+   "cn": "歌蕾蒂娅"
+  },
+  {
+   "file": "guiyanmrfz.ts",
+   "id": "guiyanmrfz",
+   "ark": "char_4163_rosesa",
+   "cn": "瑰盐"
+  },
+  {
+   "file": "hadiyamrfz.ts",
+   "id": "hadiyamrfz",
+   "ark": "char_394_hadiya",
+   "cn": "哈蒂娅"
+  },
+  {
+   "file": "haidimrfz.ts",
+   "id": "haidimrfz",
+   "ark": "char_4045_heidi",
+   "cn": "海蒂"
+  },
+  {
+   "file": "haimomrfz.ts",
+   "id": "haimomrfz",
+   "ark": "char_4066_highmo",
+   "cn": "海沫"
+  },
+  {
+   "file": "hainimrfz.ts",
+   "id": "hainimrfz",
+   "ark": "char_4079_haini",
+   "cn": "海霓"
+  },
+  {
+   "file": "haojiaomrfz.ts",
+   "id": "haojiaomrfz",
+   "ark": "char_4039_horn",
+   "cn": "号角"
+  },
+  {
+   "file": "hedeleimrfz.ts",
+   "id": "hedeleimrfz",
+   "ark": "char_4088_hodrer",
+   "cn": "赫德雷"
+  },
+  {
+   "file": "heijianmrfz.ts",
+   "id": "heijianmrfz",
+   "ark": "char_4046_ebnhlz",
+   "cn": "黑键"
+  },
+  {
+   "file": "heimrfz.ts",
+   "id": "heimrfz",
+   "ark": "char_340_shwaz",
+   "cn": "黑"
+  },
+  {
+   "file": "helagemrfz.ts",
+   "id": "helagemrfz",
+   "ark": "char_188_helage",
+   "cn": "赫拉格"
+  },
+  {
+   "file": "hongmrfz.ts",
+   "id": "hongmrfz",
+   "ark": "char_144_red",
+   "cn": "红"
+  },
+  {
+   "file": "hongsunmrfz.ts",
+   "id": "hongsunmrfz",
+   "ark": "char_4023_rfalcn",
+   "cn": "红隼"
+  },
+  {
+   "file": "hongxuemrfz.ts",
+   "id": "hongxuemrfz",
+   "ark": "char_4055_bgsnow",
+   "cn": "鸿雪"
+  },
+  {
+   "file": "huangmrfz.ts",
+   "id": "huangmrfz",
+   "ark": "char_017_huang",
+   "cn": "煌"
+  },
+  {
+   "file": "hulangwanmrfz.ts",
+   "id": "hulangwanmrfz",
+   "ark": "char_4220_kormr",
+   "cn": "虎狼丸"
+  },
+  {
+   "file": "huoerhaiyamrfz.ts",
+   "id": "huoerhaiyamrfz",
+   "ark": "char_4027_heyak",
+   "cn": "霍尔海雅"
+  },
+  {
+   "file": "innamrfz.ts",
+   "id": "innamrfz",
+   "ark": "char_4124_iana",
+   "cn": "双月"
+  },
+  {
+   "file": "jianmrfz.ts",
+   "id": "jianmrfz",
+   "ark": "char_4116_blkkgt",
+   "cn": "锏"
+  },
+  {
+   "file": "jiaxintamrfz.ts",
+   "id": "jiaxintamrfz",
+   "ark": "char_4237_jcinta",
+   "cn": "嘉辛塔"
+  },
+  {
+   "file": "jicimrfz.ts",
+   "id": "jicimrfz",
+   "ark": "char_293_thorns",
+   "cn": "棘刺"
+  },
+  {
+   "file": "jingzhemrfz.ts",
+   "id": "jingzhemrfz",
+   "ark": "char_306_leizi",
+   "cn": "惊蛰"
+  },
+  {
+   "file": "jiushenmrfz.ts",
+   "id": "jiushenmrfz",
+   "ark": "char_1042_phatm2",
+   "cn": "酒神"
+  },
+  {
+   "file": "jixieshimrfz.ts",
+   "id": "jixieshimrfz",
+   "ark": "char_4230_mcnist",
+   "cn": "机械师"
+  },
+  {
+   "file": "jixingmrfz.ts",
+   "id": "jixingmrfz",
+   "ark": "char_4203_kichi",
+   "cn": "吉星"
+  },
+  {
+   "file": "jumrfz.ts",
+   "id": "jumrfz",
+   "ark": "char_4221_ju",
+   "cn": "矩"
+  },
+  {
+   "file": "kaierximrfz.ts",
+   "id": "kaierximrfz",
+   "ark": "char_003_kalts",
+   "cn": "凯尔希"
+  },
+  {
+   "file": "kaiselinmrfz.ts",
+   "id": "kaiselinmrfz",
+   "ark": "char_4162_cathy",
+   "cn": "凯瑟琳"
+  },
+  {
+   "file": "kamimrfz.ts",
+   "id": "kamimrfz",
+   "ark": "char_472_pasngr",
+   "cn": "异客"
+  },
+  {
+   "file": "kanielianmrfz.ts",
+   "id": "kanielianmrfz",
+   "ark": "char_426_billro",
+   "cn": "卡涅利安"
+  },
+  {
+   "file": "keebomrfz.ts",
+   "id": "keebomrfz",
+   "ark": "char_2013_cerber",
+   "cn": "刻俄柏"
+  },
+  {
+   "file": "kelaimenshamrfz.ts",
+   "id": "kelaimenshamrfz",
+   "ark": "char_4231_clemnt",
+   "cn": "克莱门莎"
+  },
+  {
+   "file": "keluxiermrfz.ts",
+   "id": "keluxiermrfz",
+   "ark": "char_4228_closur",
+   "cn": "可露希尔"
+  },
+  {
+   "file": "kongxianmrfz.ts",
+   "id": "kongxianmrfz",
+   "ark": "char_332_archet",
+   "cn": "空弦"
+  },
+  {
+   "file": "kuiyingmrfz.ts",
+   "id": "kuiyingmrfz",
+   "ark": "char_250_phatom",
+   "cn": "傀影"
+  },
+  {
+   "file": "laiousimrfz.ts",
+   "id": "laiousimrfz",
+   "ark": "char_4142_laios",
+   "cn": "莱欧斯"
+  },
+  {
+   "file": "laiyimrfz.ts",
+   "id": "laiyimrfz",
+   "ark": "char_4117_ray",
+   "cn": "莱伊"
+  },
+  {
+   "file": "Lancet2mrfz.ts",
+   "id": "Lancet2mrfz",
+   "ark": "char_285_medic2",
+   "cn": "Lancet-2"
+  },
+  {
+   "file": "landumrfz.ts",
+   "id": "landumrfz",
+   "ark": "char_129_bluep",
+   "cn": "蓝毒"
+  },
+  {
+   "file": "laolimrfz.ts",
+   "id": "laolimrfz",
+   "ark": "char_322_lmlee",
+   "cn": "老鲤"
+  },
+  {
+   "file": "leimiuanmrfz.ts",
+   "id": "leimiuanmrfz",
+   "ark": "char_4193_lemuen",
+   "cn": "蕾缪安"
+  },
+  {
+   "file": "liexiamrfz.ts",
+   "id": "liexiamrfz",
+   "ark": "char_194_leto",
+   "cn": "烈夏"
+  },
+  {
+   "file": "liexiangmrfz.ts",
+   "id": "liexiangmrfz",
+   "ark": "char_4225_tanya",
+   "cn": "裂响"
+  },
+  {
+   "file": "lindongmrfz.ts",
+   "id": "lindongmrfz",
+   "ark": "char_115_headbr",
+   "cn": "凛冬"
+  },
+  {
+   "file": "linglanmrfz.ts",
+   "id": "linglanmrfz",
+   "ark": "char_358_lisa",
+   "cn": "铃兰"
+  },
+  {
+   "file": "lingmrfz.ts",
+   "id": "lingmrfz",
+   "ark": "char_2023_ling",
+   "cn": "令"
+  },
+  {
+   "file": "linguangmrfz.ts",
+   "id": "linguangmrfz",
+   "ark": "char_148_nearl",
+   "cn": "临光"
+  },
+  {
+   "file": "lingyinmrfz.ts",
+   "id": "lingyinmrfz",
+   "ark": "char_4187_graceb",
+   "cn": "聆音"
+  },
+  {
+   "file": "lingzhimrfz.ts",
+   "id": "lingzhimrfz",
+   "ark": "char_206_gnosis",
+   "cn": "灵知"
+  },
+  {
+   "file": "linmrfz.ts",
+   "id": "linmrfz",
+   "ark": "char_4080_lin",
+   "cn": "林"
+  },
+  {
+   "file": "linshimrfz.ts",
+   "id": "linshimrfz",
+   "ark": "char_4102_threye",
+   "cn": "凛视"
+  },
+  {
+   "file": "liumingmrfz.ts",
+   "id": "liumingmrfz",
+   "ark": "char_4042_lumen",
+   "cn": "流明"
+  },
+  {
+   "file": "longshelanmrfz.ts",
+   "id": "longshelanmrfz",
+   "ark": "char_486_takila",
+   "cn": "龙舌兰"
+  },
+  {
+   "file": "luogesimrfz.ts",
+   "id": "luogesimrfz",
+   "ark": "char_4133_logos",
+   "cn": "逻格斯"
+  },
+  {
+   "file": "lutuomrfz.ts",
+   "id": "lutuomrfz",
+   "ark": "char_4130_luton",
+   "cn": "露托"
+  },
+  {
+   "file": "lvgumrfz.ts",
+   "id": "lvgumrfz",
+   "ark": "char_4232_hbound",
+   "cn": "旅骨"
+  },
+  {
+   "file": "maennamrfz.ts",
+   "id": "maennamrfz",
+   "ark": "char_4064_mlynar",
+   "cn": "玛恩纳"
+  },
+  {
+   "file": "maizhelunmrfz.ts",
+   "id": "maizhelunmrfz",
+   "ark": "char_248_mgllan",
+   "cn": "麦哲伦"
+  },
+  {
+   "file": "maluxiermrfz.ts",
+   "id": "maluxiermrfz",
+   "ark": "char_4141_marcil",
+   "cn": "玛露希尔"
+  },
+  {
+   "file": "medical_amiyamrfz.ts",
+   "id": "medical_amiyamrfz",
+   "ark": "char_1037_amiya3",
+   "cn": "医疗阿米娅"
+  },
+  {
+   "file": "meiermrfz.ts",
+   "id": "meiermrfz",
+   "ark": "char_242_otter",
+   "cn": "梅尔"
+  },
+  {
+   "file": "midiexiangmrfz.ts",
+   "id": "midiexiangmrfz",
+   "ark": "char_391_rosmon",
+   "cn": "迷迭香"
+  },
+  {
+   "file": "migelumrfz.ts",
+   "id": "migelumrfz",
+   "ark": "char_122_beagle",
+   "cn": "米格鲁"
+  },
+  {
+   "file": "mingjiaomrfz.ts",
+   "id": "mingjiaomrfz",
+   "ark": "char_4071_peper",
+   "cn": "明椒"
+  },
+  {
+   "file": "miumiumrfz.ts",
+   "id": "miumiumrfz",
+   "ark": "char_249_mlyss",
+   "cn": "缪尔赛思"
+  },
+  {
+   "file": "miuyinmrfz.ts",
+   "id": "miuyinmrfz",
+   "ark": "char_4229_aphris",
+   "cn": "谬因"
+  },
+  {
+   "file": "mon3trmrfz.ts",
+   "id": "mon3trmrfz",
+   "ark": "char_4179_monstr",
+   "cn": "mon3tr"
+  },
+  {
+   "file": "mositimamrfz.ts",
+   "id": "mositimamrfz",
+   "ark": "char_213_mostma",
+   "cn": "莫斯提马"
+  },
+  {
+   "file": "mowangmrfz.ts",
+   "id": "mowangmrfz",
+   "ark": "char_4134_cetsyr",
+   "cn": "魔王"
+  },
+  {
+   "file": "muqianmrfz.ts",
+   "id": "muqianmrfz",
+   "ark": "char_4171_wulfen",
+   "cn": "钼铅"
+  },
+  {
+   "file": "narentuyamrfz.ts",
+   "id": "narentuyamrfz",
+   "ark": "char_4138_narant",
+   "cn": "娜仁图亚"
+  },
+  {
+   "file": "nasitimrfz.ts",
+   "id": "nasitimrfz",
+   "ark": "char_4212_nasti",
+   "cn": "娜斯提"
+  },
+  {
+   "file": "nengtianshimrfz.ts",
+   "id": "nengtianshimrfz",
+   "ark": "char_103_angel",
+   "cn": "能天使"
+  },
+  {
+   "file": "nianmrfz.ts",
+   "id": "nianmrfz",
+   "ark": "char_2014_nian",
+   "cn": "年"
+  },
+  {
+   "file": "nifumrfz.ts",
+   "id": "nifumrfz",
+   "ark": "char_4146_nymph",
+   "cn": "妮芙"
+  },
+  {
+   "file": "niyanmrfz.ts",
+   "id": "niyanmrfz",
+   "ark": "char_311_mudrok",
+   "cn": "泥岩"
+  },
+  {
+   "file": "nuoweiermrfz.ts",
+   "id": "nuoweiermrfz",
+   "ark": "char_4173_nowell",
+   "cn": "诺威尔"
+  },
+  {
+   "file": "palasimrfz.ts",
+   "id": "palasimrfz",
+   "ark": "char_485_pallas",
+   "cn": "帕拉斯"
+  },
+  {
+   "file": "peideluomrfz.ts",
+   "id": "peideluomrfz",
+   "ark": "char_4234_pedro",
+   "cn": "佩德洛"
+  },
+  {
+   "file": "peipeimrfz.ts",
+   "id": "peipeimrfz",
+   "ark": "char_4058_pepe",
+   "cn": "佩佩"
+  },
+  {
+   "file": "PhonoR0mrfz.ts",
+   "id": "PhonoR0mrfz",
+   "ark": "char_4136_phonor",
+   "cn": "PhonoR-0"
+  },
+  {
+   "file": "qierchakemrfz.ts",
+   "id": "qierchakemrfz",
+   "ark": "char_4144_chilc",
+   "cn": "奇尔查克"
+  },
+  {
+   "file": "qinliumrfz.ts",
+   "id": "qinliumrfz",
+   "ark": "char_479_sleach",
+   "cn": "琴柳"
+  },
+  {
+   "file": "qiubaimrfz.ts",
+   "id": "qiubaimrfz",
+   "ark": "char_4082_qiubai",
+   "cn": "仇白"
+  },
+  {
+   "file": "rendongmrfz.ts",
+   "id": "rendongmrfz",
+   "ark": "char_4026_vulpis",
+   "cn": "忍冬"
+  },
+  {
+   "file": "ruoyemumrfz.ts",
+   "id": "ruoyemumrfz",
+   "ark": "char_4183_mortis",
+   "cn": "若叶睦"
+  },
+  {
+   "file": "saileiyamrfz.ts",
+   "id": "saileiyamrfz",
+   "ark": "char_202_demkni",
+   "cn": "塞雷娅"
+  },
+  {
+   "file": "sanjiaochuhuamrfz.ts",
+   "id": "sanjiaochuhuamrfz",
+   "ark": "char_4184_dolris",
+   "cn": "三角初华"
+  },
+  {
+   "file": "sbchenmrfz.ts",
+   "id": "sbchenmrfz",
+   "ark": "char_1050_chen3",
+   "cn": "赤刃明霄陈"
+  },
+  {
+   "file": "semrfz.ts",
+   "id": "semrfz",
+   "ark": "char_350_surtr",
+   "cn": "史尔特尔"
+  },
+  {
+   "file": "senranmrfz.ts",
+   "id": "senranmrfz",
+   "ark": "char_416_zumama",
+   "cn": "森蚺"
+  },
+  {
+   "file": "senximrfz.ts",
+   "id": "senximrfz",
+   "ark": "char_4143_sensi",
+   "cn": "森西"
+  },
+  {
+   "file": "shanbimrfz.ts",
+   "id": "shanbimrfz",
+   "ark": "char_4235_thumpy",
+   "cn": "珊比"
+  },
+  {
+   "file": "shanjimrfz.ts",
+   "id": "shanjimrfz",
+   "ark": "char_457_blitz",
+   "cn": "闪击"
+  },
+  {
+   "file": "shanlingmrfz.ts",
+   "id": "shanlingmrfz",
+   "ark": "char_147_shining",
+   "cn": "闪灵"
+  },
+  {
+   "file": "shanmrfz.ts",
+   "id": "shanmrfz",
+   "ark": "char_264_f12yin",
+   "cn": "山"
+  },
+  {
+   "file": "shendianmrfz.ts",
+   "id": "shendianmrfz",
+   "ark": "char_469_indigo",
+   "cn": "深靛"
+  },
+  {
+   "file": "shenxunmrfz.ts",
+   "id": "shenxunmrfz",
+   "ark": "char_4137_udflow",
+   "cn": "深巡"
+  },
+  {
+   "file": "shijunzhemrfz.ts",
+   "id": "shijunzhemrfz",
+   "ark": "char_1502_crosly",
+   "cn": "弑君者"
+  },
+  {
+   "file": "shixiemrfz.ts",
+   "id": "shixiemrfz",
+   "ark": "char_215_mantic",
+   "cn": "狮蝎"
+  },
+  {
+   "file": "shiximrfz.ts",
+   "id": "shiximrfz",
+   "ark": "char_4236_tmslot",
+   "cn": "时隙"
+  },
+  {
+   "file": "shuanghuamrfz.ts",
+   "id": "shuanghuamrfz",
+   "ark": "char_458_rfrost",
+   "cn": "霜华"
+  },
+  {
+   "file": "shuangyemrfz.ts",
+   "id": "shuangyemrfz",
+   "ark": "char_193_frostl",
+   "cn": "霜叶"
+  },
+  {
+   "file": "shuidengxinmrfz.ts",
+   "id": "shuidengxinmrfz",
+   "ark": "char_4177_brigid",
+   "cn": "水灯心"
+  },
+  {
+   "file": "shuiyuemrfz.ts",
+   "id": "shuiyuemrfz",
+   "ark": "char_437_mizuki",
+   "cn": "水月"
+  },
+  {
+   "file": "shumrfz.ts",
+   "id": "shumrfz",
+   "ark": "char_2025_shu",
+   "cn": "黍"
+  },
+  {
+   "file": "sikadimrfz.ts",
+   "id": "sikadimrfz",
+   "ark": "char_263_skadi",
+   "cn": "斯卡蒂"
+  },
+  {
+   "file": "siyemrfz.ts",
+   "id": "siyemrfz",
+   "ark": "char_427_vigil",
+   "cn": "伺夜"
+  },
+  {
+   "file": "songtongmrfz.ts",
+   "id": "songtongmrfz",
+   "ark": "char_4199_makiri",
+   "cn": "松桐"
+  },
+  {
+   "file": "spamiyamrfz.ts",
+   "id": "spamiyamrfz",
+   "ark": "char_1001_amiya2",
+   "cn": "近卫阿米娅"
+  },
+  {
+   "file": "spanjielinamrfz.ts",
+   "id": "spanjielinamrfz",
+   "ark": "char_1015_aglna2",
+   "cn": "予愿安洁莉娜"
+  },
+  {
+   "file": "spchuxuemrfz.ts",
+   "id": "spchuxuemrfz",
+   "ark": "char_1046_sbell2",
+   "cn": "圣聆初雪"
+  },
+  {
+   "file": "spdegoumrfz.ts",
+   "id": "spdegoumrfz",
+   "ark": "char_1028_texas2",
+   "cn": "缄默德克萨斯"
+  },
+  {
+   "file": "spfenmrfz.ts",
+   "id": "spfenmrfz",
+   "ark": "char_1036_fang2",
+   "cn": "历阵锐枪芬"
+  },
+  {
+   "file": "spfurongmrfz.ts",
+   "id": "spfurongmrfz",
+   "ark": "char_1024_hbisc2",
+   "cn": "濯尘芙蓉"
+  },
+  {
+   "file": "spheijiaomrfz.ts",
+   "id": "spheijiaomrfz",
+   "ark": "char_1030_noirc2",
+   "cn": "太刀侠火龙S黑角"
+  },
+  {
+   "file": "sphemomrfz.ts",
+   "id": "sphemomrfz",
+   "ark": "char_1031_slent2",
+   "cn": "淬羽赫默"
+  },
+  {
+   "file": "spjiaweiermrfz.ts",
+   "id": "spjiaweiermrfz",
+   "ark": "char_1026_gvial2",
+   "cn": "百炼嘉维尔"
+  },
+  {
+   "file": "spjicimrfz.ts",
+   "id": "spjicimrfz",
+   "ark": "char_1039_thorn2",
+   "cn": "引星棘刺"
+  },
+  {
+   "file": "spjiexikamrfz.ts",
+   "id": "spjiexikamrfz",
+   "ark": "char_1034_jesca2",
+   "cn": "涤火杰西卡"
+  },
+  {
+   "file": "spjingzhemrfz.ts",
+   "id": "spjingzhemrfz",
+   "ark": "char_1043_leizi2",
+   "cn": "司霆惊蛰"
+  },
+  {
+   "file": "spkaierximrfz.ts",
+   "id": "spkaierximrfz",
+   "ark": "char_1052_kalts2",
+   "cn": "守望者凯尔希"
+  },
+  {
+   "file": "spkongbaomrfz.ts",
+   "id": "spkongbaomrfz",
+   "ark": "char_1049_catap2",
+   "cn": "雷狼龙S空爆"
+  },
+  {
+   "file": "splapulandemrfz.ts",
+   "id": "splapulandemrfz",
+   "ark": "char_1038_whitw2",
+   "cn": "荒芜拉普兰德"
+  },
+  {
+   "file": "splingdongmrfz.ts",
+   "id": "splingdongmrfz",
+   "ark": "char_1051_headb2",
+   "cn": "怒潮凛冬"
+  },
+  {
+   "file": "splinguangmrfz.ts",
+   "id": "splinguangmrfz",
+   "ark": "char_1014_nearl2",
+   "cn": "耀骑士临光"
+  },
+  {
+   "file": "spnengtianshimrfz.ts",
+   "id": "spnengtianshimrfz",
+   "ark": "char_1041_angel2",
+   "cn": "新约能天使"
+  },
+  {
+   "file": "spshihuaiyamrfz.ts",
+   "id": "spshihuaiyamrfz",
+   "ark": "char_1033_swire2",
+   "cn": "琳琅诗怀雅"
+  },
+  {
+   "file": "spsikadimrfz.ts",
+   "id": "spsikadimrfz",
+   "ark": "char_1012_skadi2",
+   "cn": "浊心斯卡蒂"
+  },
+  {
+   "file": "spsongzangrenmrfz.ts",
+   "id": "spsongzangrenmrfz",
+   "ark": "char_1032_excu2",
+   "cn": "圣约送葬人"
+  },
+  {
+   "file": "sptiaoxiangshimrfz.ts",
+   "id": "sptiaoxiangshimrfz",
+   "ark": "char_1022_flwr2",
+   "cn": "撷英调香师"
+  },
+  {
+   "file": "spweicaomrfz.ts",
+   "id": "spweicaomrfz",
+   "ark": "char_1020_reed2",
+   "cn": "焰影苇草"
+  },
+  {
+   "file": "spweinamrfz.ts",
+   "id": "spweinamrfz",
+   "ark": "char_1019_siege2",
+   "cn": "维娜·维多利亚"
+  },
+  {
+   "file": "spxiaoyangmrfz.ts",
+   "id": "spxiaoyangmrfz",
+   "ark": "char_1016_agoat2",
+   "cn": "纯烬艾雅法拉"
+  },
+  {
+   "file": "spxingxiongmrfz.ts",
+   "id": "spxingxiongmrfz",
+   "ark": "char_1044_hsgma2",
+   "cn": "斩业星熊"
+  },
+  {
+   "file": "spxingyuanmrfz.ts",
+   "id": "spxingyuanmrfz",
+   "ark": "char_1047_halo2",
+   "cn": "溯光星源"
+  },
+  {
+   "file": "spyedaomrfz.ts",
+   "id": "spyedaomrfz",
+   "ark": "char_1029_yato2",
+   "cn": "麒麟R夜刀"
+  },
+  {
+   "file": "spyinhuimrfz.ts",
+   "id": "spyinhuimrfz",
+   "ark": "char_1045_svash2",
+   "cn": "凛御银灰"
+  },
+  {
+   "file": "spyoulingshamrfz.ts",
+   "id": "spyoulingshamrfz",
+   "ark": "char_1023_ghost2",
+   "cn": "归溟幽灵鲨"
+  },
+  {
+   "file": "spzilanmrfz.ts",
+   "id": "spzilanmrfz",
+   "ark": "char_1048_orchd2",
+   "cn": "焰狐龙梓兰"
+  },
+  {
+   "file": "spzzxpmrfz.ts",
+   "id": "spzzxpmrfz",
+   "ark": "char_1013_chen2",
+   "cn": "假日威龙陈"
+  },
+  {
+   "file": "suocaomrfz.ts",
+   "id": "suocaomrfz",
+   "ark": "char_4139_papyrs",
+   "cn": "莎草"
+  },
+  {
+   "file": "suxinmrfz.ts",
+   "id": "suxinmrfz",
+   "ark": "char_245_cello",
+   "cn": "塑心"
+  },
+  {
+   "file": "taojinniangmrfz.ts",
+   "id": "taojinniangmrfz",
+   "ark": "char_151_myrtle",
+   "cn": "桃金娘"
+  },
+  {
+   "file": "tekenuomrfz.ts",
+   "id": "tekenuomrfz",
+   "ark": "char_4164_tecno",
+   "cn": "特克诺"
+  },
+  {
+   "file": "THRMEXmrfz.ts",
+   "id": "THRMEXmrfz",
+   "ark": "char_376_therex",
+   "cn": "THRM-EX"
+  },
+  {
+   "file": "tianhuomrfz.ts",
+   "id": "tianhuomrfz",
+   "ark": "char_166_skfire",
+   "cn": "天火"
+  },
+  {
+   "file": "tiankonghemrfz.ts",
+   "id": "tiankonghemrfz",
+   "ark": "char_4213_skybx",
+   "cn": "天空盒"
+  },
+  {
+   "file": "tifengmrfz.ts",
+   "id": "tifengmrfz",
+   "ark": "char_2012_typhon",
+   "cn": "提丰"
+  },
+  {
+   "file": "titimrfz.ts",
+   "id": "titimrfz",
+   "ark": "char_4056_titi",
+   "cn": "缇缇"
+  },
+  {
+   "file": "wangmrfz/index.ts",
+   "id": "wangmrfz",
+   "ark": "char_2027_wang",
+   "cn": "望"
+  },
+  {
+   "file": "wanqingmrfz.ts",
+   "id": "wanqingmrfz",
+   "ark": "char_4119_wanqin",
+   "cn": "万顷"
+  },
+  {
+   "file": "weinamrfz.ts",
+   "id": "weinamrfz",
+   "ark": "char_112_siege",
+   "cn": "推进之王"
+  },
+  {
+   "file": "weishidaiermrfz.ts",
+   "id": "weishidaiermrfz",
+   "ark": "char_1035_wisdel",
+   "cn": "维什戴尔"
+  },
+  {
+   "file": "weiweiannamrfz.ts",
+   "id": "weiweiannamrfz",
+   "ark": "char_4098_vvana",
+   "cn": "薇薇安娜"
+  },
+  {
+   "file": "weiyimrfz.ts",
+   "id": "weiyimrfz",
+   "ark": "char_4226_veen",
+   "cn": "维伊"
+  },
+  {
+   "file": "wendimrfz.ts",
+   "id": "wendimrfz",
+   "ark": "char_400_weedy",
+   "cn": "温蒂"
+  },
+  {
+   "file": "wenmimrfz.ts",
+   "id": "wenmimrfz",
+   "ark": "char_4081_warmy",
+   "cn": "温米"
+  },
+  {
+   "file": "wmrfz.ts",
+   "id": "wmrfz",
+   "ark": "char_113_cqbw",
+   "cn": "W"
+  },
+  {
+   "file": "wuerbianmrfz.ts",
+   "id": "wuerbianmrfz",
+   "ark": "char_4145_ulpia",
+   "cn": "乌尔比安"
+  },
+  {
+   "file": "wujiumrfz.ts",
+   "id": "wujiumrfz",
+   "ark": "char_4224_turdus",
+   "cn": "乌啾"
+  },
+  {
+   "file": "xiaguangmrfz.ts",
+   "id": "xiaguangmrfz",
+   "ark": "char_423_blemsh",
+   "cn": "瑕光"
+  },
+  {
+   "file": "xiangshimrfz.ts",
+   "id": "xiangshimrfz",
+   "ark": "char_4214_cairn",
+   "cn": "响石"
+  },
+  {
+   "file": "xiaogemrfz.ts",
+   "id": "xiaogemrfz",
+   "ark": "char_497_ctable",
+   "cn": "晓歌"
+  },
+  {
+   "file": "xiaomanmrfz.ts",
+   "id": "xiaomanmrfz",
+   "ark": "char_4122_grabds",
+   "cn": "小满"
+  },
+  {
+   "file": "xiaoyangmrfz.ts",
+   "id": "xiaoyangmrfz",
+   "ark": "char_180_amgoat",
+   "cn": "艾雅法拉"
+  },
+  {
+   "file": "xielvmrfz.ts",
+   "id": "xielvmrfz",
+   "ark": "char_4051_akkord",
+   "cn": "协律"
+  },
+  {
+   "file": "xigymrfz.ts",
+   "id": "xigymrfz",
+   "ark": "char_2015_dusk",
+   "cn": "夕"
+  },
+  {
+   "file": "xingjimrfz.ts",
+   "id": "xingjimrfz",
+   "ark": "char_274_astesi",
+   "cn": "星极"
+  },
+  {
+   "file": "xingxiongmrfz.ts",
+   "id": "xingxiongmrfz",
+   "ark": "char_136_hsguma",
+   "cn": "星熊"
+  },
+  {
+   "file": "xingyuanmrfz.ts",
+   "id": "xingyuanmrfz",
+   "ark": "char_135_halo",
+   "cn": "星源"
+  },
+  {
+   "file": "xingzhumrfz.ts",
+   "id": "xingzhumrfz",
+   "ark": "char_4172_xingzh",
+   "cn": "行著"
+  },
+  {
+   "file": "xinyangjiaobanjimrfz.ts",
+   "id": "xinyangjiaobanjimrfz",
+   "ark": "char_4194_rmixer",
+   "cn": "信仰搅拌机"
+  },
+  {
+   "file": "xirenmrfz.ts",
+   "id": "xirenmrfz",
+   "ark": "char_4151_tinman",
+   "cn": "锡人"
+  },
+  {
+   "file": "xiyinmrfz.ts",
+   "id": "xiyinmrfz",
+   "ark": "char_336_folivo",
+   "cn": "稀音"
+  },
+  {
+   "file": "xueliemrfz.ts",
+   "id": "xueliemrfz",
+   "ark": "char_4211_snhunt",
+   "cn": "雪猎"
+  },
+  {
+   "file": "xunlanmrfz.ts",
+   "id": "xunlanmrfz",
+   "ark": "char_4052_surfer",
+   "cn": "寻澜"
+  },
+  {
+   "file": "yanweimrfz.ts",
+   "id": "yanweimrfz",
+   "ark": "char_420_flamtl",
+   "cn": "焰尾"
+  },
+  {
+   "file": "yaxinmrfz.ts",
+   "id": "yaxinmrfz",
+   "ark": "char_173_slchan",
+   "cn": "崖心"
+  },
+  {
+   "file": "yelamrfz.ts",
+   "id": "yelamrfz",
+   "ark": "char_4013_kjera",
+   "cn": "耶拉"
+  },
+  {
+   "file": "yemomrfz.ts",
+   "id": "yemomrfz",
+   "ark": "char_164_nightm",
+   "cn": "夜魔"
+  },
+  {
+   "file": "yeyingmrfz.ts",
+   "id": "yeyingmrfz",
+   "ark": "char_179_cgbird",
+   "cn": "夜莺"
+  },
+  {
+   "file": "yifulitemrfz.ts",
+   "id": "yifulitemrfz",
+   "ark": "char_134_ifrit",
+   "cn": "伊芙利特"
+  },
+  {
+   "file": "yindelaiximrfz.ts",
+   "id": "yindelaiximrfz",
+   "ark": "char_4010_etlchi",
+   "cn": "隐德莱希"
+  },
+  {
+   "file": "yineisimrfz.ts",
+   "id": "yineisimrfz",
+   "ark": "char_4087_ines",
+   "cn": "伊内丝"
+  },
+  {
+   "file": "yinhuimrfz.ts",
+   "id": "yinhuimrfz",
+   "ark": "char_172_svrash",
+   "cn": "银灰"
+  },
+  {
+   "file": "yintuoluomrfz.ts",
+   "id": "yintuoluomrfz",
+   "ark": "char_155_tiger",
+   "cn": "因陀罗"
+  },
+  {
+   "file": "youtiansiruomaimrfz.ts",
+   "id": "youtiansiruomaimrfz",
+   "ark": "char_4185_amoris",
+   "cn": "祐天寺若麦"
+  },
+  {
+   "file": "yuanyamrfz.ts",
+   "id": "yuanyamrfz",
+   "ark": "char_430_fartth",
+   "cn": "远牙"
+  },
+  {
+   "file": "yueyuemrfz.ts",
+   "id": "yueyuemrfz",
+   "ark": "char_4100_caper",
+   "cn": "跃跃"
+  },
+  {
+   "file": "yueyuyoujialimrfz.ts",
+   "id": "yueyuyoujialimrfz",
+   "ark": "char_4219_yukari",
+   "cn": "岳羽由加莉"
+  },
+  {
+   "file": "yumaobimrfz.ts",
+   "id": "yumaobimrfz",
+   "ark": "char_421_crow",
+   "cn": "羽毛笔"
+  },
+  {
+   "file": "yumrfz.ts",
+   "id": "yumrfz",
+   "ark": "char_2026_yu",
+   "cn": "余"
+  },
+  {
+   "file": "yunjimrfz.ts",
+   "id": "yunjimrfz",
+   "ark": "char_4165_ctrail",
+   "cn": "云迹"
+  },
+  {
+   "file": "yunqingpingmrfz.ts",
+   "id": "yunqingpingmrfz",
+   "ark": "char_4196_reckpr",
+   "cn": "云青萍"
+  },
+  {
+   "file": "yunxingmrfz.ts",
+   "id": "yunxingmrfz",
+   "ark": "char_219_meteo",
+   "cn": "陨星"
+  },
+  {
+   "file": "zaolumrfz.ts",
+   "id": "zaolumrfz",
+   "ark": "char_197_poca",
+   "cn": "早露"
+  },
+  {
+   "file": "zhanchemrfz.ts",
+   "id": "zhanchemrfz",
+   "ark": "char_459_tachak",
+   "cn": "战车"
+  },
+  {
+   "file": "zhenyanmrfz.ts",
+   "id": "zhenyanmrfz",
+   "ark": "char_4204_mantra",
+   "cn": "真言"
+  },
+  {
+   "file": "zheyamrfz.ts",
+   "id": "zheyamrfz",
+   "ark": "char_4207_branch",
+   "cn": "折桠"
+  },
+  {
+   "file": "zhisongmrfz.ts",
+   "id": "zhisongmrfz",
+   "ark": "char_4011_lessng",
+   "cn": "止颂"
+  },
+  {
+   "file": "zhuhuangmrfz.ts",
+   "id": "zhuhuangmrfz",
+   "ark": "char_1040_blaze2",
+   "cn": "烛煌"
+  },
+  {
+   "file": "ziyeyaomrfz.ts",
+   "id": "ziyeyaomrfz",
+   "ark": "char_4202_haruka",
+   "cn": "紫野遥"
+  },
+  {
+   "file": "zuolemrfz.ts",
+   "id": "zuolemrfz",
+   "ark": "char_4121_zuole",
+   "cn": "左乐"
+  }
+ ],
+ "actions": [
+  {
+   "kind": "file",
+   "from": "src/packs/character/aibulanamrfz.ts",
+   "to": "src/packs/character/char_450_necras.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/aiguisimrfz.ts",
+   "to": "src/packs/character/char_4218_aigis.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/ailinimrfz.ts",
+   "to": "src/packs/character/char_4009_irene.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/ailisimrfz.ts",
+   "to": "src/packs/character/char_338_iris.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/alannamrfz.ts",
+   "to": "src/packs/character/char_4178_alanna.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/amrfz.ts",
+   "to": "src/packs/character/char_225_haak.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/anjielinamrfz.ts",
+   "to": "src/packs/character/char_291_aglina.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/anzhelamrfz.ts",
+   "to": "src/packs/character/char_218_cuttle.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/ashmrfz.ts",
+   "to": "src/packs/character/char_456_ash.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/asikalunmrfz.ts",
+   "to": "src/packs/character/char_4132_ascln.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/bafanhailingmrfz.ts",
+   "to": "src/packs/character/char_4186_tmoris.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/baidurenmrfz.ts",
+   "to": "src/packs/character/char_4166_varkis.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/baijinmrfz.ts",
+   "to": "src/packs/character/char_204_platnm.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/baimianxiaomrfz.ts",
+   "to": "src/packs/character/char_128_plosis.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/baitiemrfz.ts",
+   "to": "src/packs/character/char_4072_ironmn.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/beiluoneimrfz.ts",
+   "to": "src/packs/character/char_4037_demetr.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/bobumrfz.ts",
+   "to": "src/packs/character/char_487_bobb.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/bohuimrfz.ts",
+   "to": "src/packs/character/char_252_bibeak.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/botanimrfz.ts",
+   "to": "src/packs/character/char_4223_botany.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/caidumrfz.ts",
+   "to": "src/packs/character/char_4155_talr.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/Castle3mrfz.ts",
+   "to": "src/packs/character/char_286_cast3.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/chengfengmrfz.ts",
+   "to": "src/packs/character/char_445_wscoot.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/chengshanmrfz.ts",
+   "to": "src/packs/character/char_377_gdglow.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/chenmrfz.ts",
+   "to": "src/packs/character/char_010_chen.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/chizuimrfz.ts",
+   "to": "src/packs/character/char_4065_judge.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/chongyuemrfz.ts",
+   "to": "src/packs/character/char_2024_chyue.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/Christinemrfz.ts",
+   "to": "src/packs/character/char_4198_christ.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/chuxuemrfz.ts",
+   "to": "src/packs/character/char_174_slbell.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/cimeimrfz.ts",
+   "to": "src/packs/character/char_494_vendla.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/cuoemrfz.ts",
+   "to": "src/packs/character/char_362_saga.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/daifeienmrfz.ts",
+   "to": "src/packs/character/char_4110_delphn.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/dekesasimrfz.ts",
+   "to": "src/packs/character/char_102_texas.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/dianhumrfz.ts",
+   "to": "src/packs/character/char_4195_radian.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/dibimrfz.ts",
+   "to": "src/packs/character/char_4191_tippi.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/docmrfz.ts",
+   "to": "src/packs/character/char_4125_rdoc.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/dongshimrfz.ts",
+   "to": "src/packs/character/char_4208_wintim.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/duoluoximrfz.ts",
+   "to": "src/packs/character/char_4048_doroth.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/elamrfz.ts",
+   "to": "src/packs/character/char_4123_ela.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/feilaimrfz.ts",
+   "to": "src/packs/character/char_4148_philae.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/feiyameitamrfz.ts",
+   "to": "src/packs/character/char_300_phenxi.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/fengchuanxiangzimrfz.ts",
+   "to": "src/packs/character/char_4182_oblvns.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/fengdimrfz.ts",
+   "to": "src/packs/character/char_222_bpipe.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/fengwanmrfz.ts",
+   "to": "src/packs/character/char_4016_kazema.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/fengxumrfz.ts",
+   "to": "src/packs/character/char_4222_taraxa.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/friston3mrfz.ts",
+   "to": "src/packs/character/char_4093_frston.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/fulankamrfz.ts",
+   "to": "src/packs/character/char_106_franka.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/fuzoumrfz.ts",
+   "to": "src/packs/character/char_4031_liesel.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/gallusmrfz.ts",
+   "to": "src/packs/character/char_4227_gallus.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/gelainimrfz.ts",
+   "to": "src/packs/character/char_220_grani.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/gelaokesimrfz.ts",
+   "to": "src/packs/character/char_326_glacus.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/geleidiyamrfz.ts",
+   "to": "src/packs/character/char_474_glady.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/guiyanmrfz.ts",
+   "to": "src/packs/character/char_4163_rosesa.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/hadiyamrfz.ts",
+   "to": "src/packs/character/char_394_hadiya.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/haidimrfz.ts",
+   "to": "src/packs/character/char_4045_heidi.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/haimomrfz.ts",
+   "to": "src/packs/character/char_4066_highmo.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/hainimrfz.ts",
+   "to": "src/packs/character/char_4079_haini.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/haojiaomrfz.ts",
+   "to": "src/packs/character/char_4039_horn.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/hedeleimrfz.ts",
+   "to": "src/packs/character/char_4088_hodrer.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/heijianmrfz.ts",
+   "to": "src/packs/character/char_4046_ebnhlz.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/heimrfz.ts",
+   "to": "src/packs/character/char_340_shwaz.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/helagemrfz.ts",
+   "to": "src/packs/character/char_188_helage.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/hongmrfz.ts",
+   "to": "src/packs/character/char_144_red.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/hongsunmrfz.ts",
+   "to": "src/packs/character/char_4023_rfalcn.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/hongxuemrfz.ts",
+   "to": "src/packs/character/char_4055_bgsnow.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/huangmrfz.ts",
+   "to": "src/packs/character/char_017_huang.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/hulangwanmrfz.ts",
+   "to": "src/packs/character/char_4220_kormr.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/huoerhaiyamrfz.ts",
+   "to": "src/packs/character/char_4027_heyak.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/innamrfz.ts",
+   "to": "src/packs/character/char_4124_iana.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/jianmrfz.ts",
+   "to": "src/packs/character/char_4116_blkkgt.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/jiaxintamrfz.ts",
+   "to": "src/packs/character/char_4237_jcinta.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/jicimrfz.ts",
+   "to": "src/packs/character/char_293_thorns.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/jingzhemrfz.ts",
+   "to": "src/packs/character/char_306_leizi.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/jiushenmrfz.ts",
+   "to": "src/packs/character/char_1042_phatm2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/jixieshimrfz.ts",
+   "to": "src/packs/character/char_4230_mcnist.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/jixingmrfz.ts",
+   "to": "src/packs/character/char_4203_kichi.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/jumrfz.ts",
+   "to": "src/packs/character/char_4221_ju.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/kaierximrfz.ts",
+   "to": "src/packs/character/char_003_kalts.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/kaiselinmrfz.ts",
+   "to": "src/packs/character/char_4162_cathy.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/kamimrfz.ts",
+   "to": "src/packs/character/char_472_pasngr.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/kanielianmrfz.ts",
+   "to": "src/packs/character/char_426_billro.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/keebomrfz.ts",
+   "to": "src/packs/character/char_2013_cerber.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/kelaimenshamrfz.ts",
+   "to": "src/packs/character/char_4231_clemnt.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/keluxiermrfz.ts",
+   "to": "src/packs/character/char_4228_closur.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/kongxianmrfz.ts",
+   "to": "src/packs/character/char_332_archet.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/kuiyingmrfz.ts",
+   "to": "src/packs/character/char_250_phatom.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/laiousimrfz.ts",
+   "to": "src/packs/character/char_4142_laios.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/laiyimrfz.ts",
+   "to": "src/packs/character/char_4117_ray.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/Lancet2mrfz.ts",
+   "to": "src/packs/character/char_285_medic2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/landumrfz.ts",
+   "to": "src/packs/character/char_129_bluep.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/laolimrfz.ts",
+   "to": "src/packs/character/char_322_lmlee.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/leimiuanmrfz.ts",
+   "to": "src/packs/character/char_4193_lemuen.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/liexiamrfz.ts",
+   "to": "src/packs/character/char_194_leto.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/liexiangmrfz.ts",
+   "to": "src/packs/character/char_4225_tanya.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/lindongmrfz.ts",
+   "to": "src/packs/character/char_115_headbr.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/linglanmrfz.ts",
+   "to": "src/packs/character/char_358_lisa.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/lingmrfz.ts",
+   "to": "src/packs/character/char_2023_ling.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/linguangmrfz.ts",
+   "to": "src/packs/character/char_148_nearl.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/lingyinmrfz.ts",
+   "to": "src/packs/character/char_4187_graceb.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/lingzhimrfz.ts",
+   "to": "src/packs/character/char_206_gnosis.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/linmrfz.ts",
+   "to": "src/packs/character/char_4080_lin.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/linshimrfz.ts",
+   "to": "src/packs/character/char_4102_threye.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/liumingmrfz.ts",
+   "to": "src/packs/character/char_4042_lumen.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/longshelanmrfz.ts",
+   "to": "src/packs/character/char_486_takila.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/luogesimrfz.ts",
+   "to": "src/packs/character/char_4133_logos.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/lutuomrfz.ts",
+   "to": "src/packs/character/char_4130_luton.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/lvgumrfz.ts",
+   "to": "src/packs/character/char_4232_hbound.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/maennamrfz.ts",
+   "to": "src/packs/character/char_4064_mlynar.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/maizhelunmrfz.ts",
+   "to": "src/packs/character/char_248_mgllan.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/maluxiermrfz.ts",
+   "to": "src/packs/character/char_4141_marcil.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/medical_amiyamrfz.ts",
+   "to": "src/packs/character/char_1037_amiya3.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/meiermrfz.ts",
+   "to": "src/packs/character/char_242_otter.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/midiexiangmrfz.ts",
+   "to": "src/packs/character/char_391_rosmon.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/migelumrfz.ts",
+   "to": "src/packs/character/char_122_beagle.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/mingjiaomrfz.ts",
+   "to": "src/packs/character/char_4071_peper.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/miumiumrfz.ts",
+   "to": "src/packs/character/char_249_mlyss.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/miuyinmrfz.ts",
+   "to": "src/packs/character/char_4229_aphris.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/mon3trmrfz.ts",
+   "to": "src/packs/character/char_4179_monstr.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/mositimamrfz.ts",
+   "to": "src/packs/character/char_213_mostma.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/mowangmrfz.ts",
+   "to": "src/packs/character/char_4134_cetsyr.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/muqianmrfz.ts",
+   "to": "src/packs/character/char_4171_wulfen.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/narentuyamrfz.ts",
+   "to": "src/packs/character/char_4138_narant.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/nasitimrfz.ts",
+   "to": "src/packs/character/char_4212_nasti.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/nengtianshimrfz.ts",
+   "to": "src/packs/character/char_103_angel.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/nianmrfz.ts",
+   "to": "src/packs/character/char_2014_nian.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/nifumrfz.ts",
+   "to": "src/packs/character/char_4146_nymph.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/niyanmrfz.ts",
+   "to": "src/packs/character/char_311_mudrok.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/nuoweiermrfz.ts",
+   "to": "src/packs/character/char_4173_nowell.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/palasimrfz.ts",
+   "to": "src/packs/character/char_485_pallas.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/peideluomrfz.ts",
+   "to": "src/packs/character/char_4234_pedro.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/peipeimrfz.ts",
+   "to": "src/packs/character/char_4058_pepe.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/PhonoR0mrfz.ts",
+   "to": "src/packs/character/char_4136_phonor.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/qierchakemrfz.ts",
+   "to": "src/packs/character/char_4144_chilc.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/qinliumrfz.ts",
+   "to": "src/packs/character/char_479_sleach.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/qiubaimrfz.ts",
+   "to": "src/packs/character/char_4082_qiubai.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/rendongmrfz.ts",
+   "to": "src/packs/character/char_4026_vulpis.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/ruoyemumrfz.ts",
+   "to": "src/packs/character/char_4183_mortis.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/saileiyamrfz.ts",
+   "to": "src/packs/character/char_202_demkni.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/sanjiaochuhuamrfz.ts",
+   "to": "src/packs/character/char_4184_dolris.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/sbchenmrfz.ts",
+   "to": "src/packs/character/char_1050_chen3.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/semrfz.ts",
+   "to": "src/packs/character/char_350_surtr.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/senranmrfz.ts",
+   "to": "src/packs/character/char_416_zumama.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/senximrfz.ts",
+   "to": "src/packs/character/char_4143_sensi.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/shanbimrfz.ts",
+   "to": "src/packs/character/char_4235_thumpy.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/shanjimrfz.ts",
+   "to": "src/packs/character/char_457_blitz.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/shanlingmrfz.ts",
+   "to": "src/packs/character/char_147_shining.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/shanmrfz.ts",
+   "to": "src/packs/character/char_264_f12yin.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/shendianmrfz.ts",
+   "to": "src/packs/character/char_469_indigo.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/shenxunmrfz.ts",
+   "to": "src/packs/character/char_4137_udflow.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/shijunzhemrfz.ts",
+   "to": "src/packs/character/char_1502_crosly.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/shixiemrfz.ts",
+   "to": "src/packs/character/char_215_mantic.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/shiximrfz.ts",
+   "to": "src/packs/character/char_4236_tmslot.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/shuanghuamrfz.ts",
+   "to": "src/packs/character/char_458_rfrost.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/shuangyemrfz.ts",
+   "to": "src/packs/character/char_193_frostl.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/shuidengxinmrfz.ts",
+   "to": "src/packs/character/char_4177_brigid.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/shuiyuemrfz.ts",
+   "to": "src/packs/character/char_437_mizuki.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/shumrfz.ts",
+   "to": "src/packs/character/char_2025_shu.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/sikadimrfz.ts",
+   "to": "src/packs/character/char_263_skadi.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/siyemrfz.ts",
+   "to": "src/packs/character/char_427_vigil.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/songtongmrfz.ts",
+   "to": "src/packs/character/char_4199_makiri.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spamiyamrfz.ts",
+   "to": "src/packs/character/char_1001_amiya2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spanjielinamrfz.ts",
+   "to": "src/packs/character/char_1015_aglna2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spchuxuemrfz.ts",
+   "to": "src/packs/character/char_1046_sbell2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spdegoumrfz.ts",
+   "to": "src/packs/character/char_1028_texas2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spfenmrfz.ts",
+   "to": "src/packs/character/char_1036_fang2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spfurongmrfz.ts",
+   "to": "src/packs/character/char_1024_hbisc2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spheijiaomrfz.ts",
+   "to": "src/packs/character/char_1030_noirc2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/sphemomrfz.ts",
+   "to": "src/packs/character/char_1031_slent2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spjiaweiermrfz.ts",
+   "to": "src/packs/character/char_1026_gvial2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spjicimrfz.ts",
+   "to": "src/packs/character/char_1039_thorn2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spjiexikamrfz.ts",
+   "to": "src/packs/character/char_1034_jesca2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spjingzhemrfz.ts",
+   "to": "src/packs/character/char_1043_leizi2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spkaierximrfz.ts",
+   "to": "src/packs/character/char_1052_kalts2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spkongbaomrfz.ts",
+   "to": "src/packs/character/char_1049_catap2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/splapulandemrfz.ts",
+   "to": "src/packs/character/char_1038_whitw2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/splingdongmrfz.ts",
+   "to": "src/packs/character/char_1051_headb2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/splinguangmrfz.ts",
+   "to": "src/packs/character/char_1014_nearl2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spnengtianshimrfz.ts",
+   "to": "src/packs/character/char_1041_angel2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spshihuaiyamrfz.ts",
+   "to": "src/packs/character/char_1033_swire2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spsikadimrfz.ts",
+   "to": "src/packs/character/char_1012_skadi2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spsongzangrenmrfz.ts",
+   "to": "src/packs/character/char_1032_excu2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/sptiaoxiangshimrfz.ts",
+   "to": "src/packs/character/char_1022_flwr2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spweicaomrfz.ts",
+   "to": "src/packs/character/char_1020_reed2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spweinamrfz.ts",
+   "to": "src/packs/character/char_1019_siege2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spxiaoyangmrfz.ts",
+   "to": "src/packs/character/char_1016_agoat2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spxingxiongmrfz.ts",
+   "to": "src/packs/character/char_1044_hsgma2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spxingyuanmrfz.ts",
+   "to": "src/packs/character/char_1047_halo2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spyedaomrfz.ts",
+   "to": "src/packs/character/char_1029_yato2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spyinhuimrfz.ts",
+   "to": "src/packs/character/char_1045_svash2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spyoulingshamrfz.ts",
+   "to": "src/packs/character/char_1023_ghost2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spzilanmrfz.ts",
+   "to": "src/packs/character/char_1048_orchd2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/spzzxpmrfz.ts",
+   "to": "src/packs/character/char_1013_chen2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/suocaomrfz.ts",
+   "to": "src/packs/character/char_4139_papyrs.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/suxinmrfz.ts",
+   "to": "src/packs/character/char_245_cello.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/taojinniangmrfz.ts",
+   "to": "src/packs/character/char_151_myrtle.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/tekenuomrfz.ts",
+   "to": "src/packs/character/char_4164_tecno.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/THRMEXmrfz.ts",
+   "to": "src/packs/character/char_376_therex.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/tianhuomrfz.ts",
+   "to": "src/packs/character/char_166_skfire.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/tiankonghemrfz.ts",
+   "to": "src/packs/character/char_4213_skybx.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/tifengmrfz.ts",
+   "to": "src/packs/character/char_2012_typhon.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/titimrfz.ts",
+   "to": "src/packs/character/char_4056_titi.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/wanqingmrfz.ts",
+   "to": "src/packs/character/char_4119_wanqin.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/weinamrfz.ts",
+   "to": "src/packs/character/char_112_siege.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/weishidaiermrfz.ts",
+   "to": "src/packs/character/char_1035_wisdel.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/weiweiannamrfz.ts",
+   "to": "src/packs/character/char_4098_vvana.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/weiyimrfz.ts",
+   "to": "src/packs/character/char_4226_veen.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/wendimrfz.ts",
+   "to": "src/packs/character/char_400_weedy.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/wenmimrfz.ts",
+   "to": "src/packs/character/char_4081_warmy.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/wmrfz.ts",
+   "to": "src/packs/character/char_113_cqbw.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/wuerbianmrfz.ts",
+   "to": "src/packs/character/char_4145_ulpia.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/wujiumrfz.ts",
+   "to": "src/packs/character/char_4224_turdus.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/xiaguangmrfz.ts",
+   "to": "src/packs/character/char_423_blemsh.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/xiangshimrfz.ts",
+   "to": "src/packs/character/char_4214_cairn.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/xiaogemrfz.ts",
+   "to": "src/packs/character/char_497_ctable.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/xiaomanmrfz.ts",
+   "to": "src/packs/character/char_4122_grabds.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/xiaoyangmrfz.ts",
+   "to": "src/packs/character/char_180_amgoat.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/xielvmrfz.ts",
+   "to": "src/packs/character/char_4051_akkord.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/xigymrfz.ts",
+   "to": "src/packs/character/char_2015_dusk.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/xingjimrfz.ts",
+   "to": "src/packs/character/char_274_astesi.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/xingxiongmrfz.ts",
+   "to": "src/packs/character/char_136_hsguma.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/xingyuanmrfz.ts",
+   "to": "src/packs/character/char_135_halo.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/xingzhumrfz.ts",
+   "to": "src/packs/character/char_4172_xingzh.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/xinyangjiaobanjimrfz.ts",
+   "to": "src/packs/character/char_4194_rmixer.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/xirenmrfz.ts",
+   "to": "src/packs/character/char_4151_tinman.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/xiyinmrfz.ts",
+   "to": "src/packs/character/char_336_folivo.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/xueliemrfz.ts",
+   "to": "src/packs/character/char_4211_snhunt.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/xunlanmrfz.ts",
+   "to": "src/packs/character/char_4052_surfer.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/yanweimrfz.ts",
+   "to": "src/packs/character/char_420_flamtl.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/yaxinmrfz.ts",
+   "to": "src/packs/character/char_173_slchan.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/yelamrfz.ts",
+   "to": "src/packs/character/char_4013_kjera.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/yemomrfz.ts",
+   "to": "src/packs/character/char_164_nightm.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/yeyingmrfz.ts",
+   "to": "src/packs/character/char_179_cgbird.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/yifulitemrfz.ts",
+   "to": "src/packs/character/char_134_ifrit.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/yindelaiximrfz.ts",
+   "to": "src/packs/character/char_4010_etlchi.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/yineisimrfz.ts",
+   "to": "src/packs/character/char_4087_ines.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/yinhuimrfz.ts",
+   "to": "src/packs/character/char_172_svrash.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/yintuoluomrfz.ts",
+   "to": "src/packs/character/char_155_tiger.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/youtiansiruomaimrfz.ts",
+   "to": "src/packs/character/char_4185_amoris.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/yuanyamrfz.ts",
+   "to": "src/packs/character/char_430_fartth.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/yueyuemrfz.ts",
+   "to": "src/packs/character/char_4100_caper.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/yueyuyoujialimrfz.ts",
+   "to": "src/packs/character/char_4219_yukari.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/yumaobimrfz.ts",
+   "to": "src/packs/character/char_421_crow.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/yumrfz.ts",
+   "to": "src/packs/character/char_2026_yu.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/yunjimrfz.ts",
+   "to": "src/packs/character/char_4165_ctrail.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/yunqingpingmrfz.ts",
+   "to": "src/packs/character/char_4196_reckpr.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/yunxingmrfz.ts",
+   "to": "src/packs/character/char_219_meteo.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/zaolumrfz.ts",
+   "to": "src/packs/character/char_197_poca.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/zhanchemrfz.ts",
+   "to": "src/packs/character/char_459_tachak.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/zhenyanmrfz.ts",
+   "to": "src/packs/character/char_4204_mantra.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/zheyamrfz.ts",
+   "to": "src/packs/character/char_4207_branch.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/zhisongmrfz.ts",
+   "to": "src/packs/character/char_4011_lessng.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/zhuhuangmrfz.ts",
+   "to": "src/packs/character/char_1040_blaze2.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/ziyeyaomrfz.ts",
+   "to": "src/packs/character/char_4202_haruka.ts"
+  },
+  {
+   "kind": "file",
+   "from": "src/packs/character/zuolemrfz.ts",
+   "to": "src/packs/character/char_4121_zuole.ts"
+  },
+  {
+   "kind": "cardImg",
+   "from": "image/card/BlackBess_gelanimrfz.png",
+   "to": "image/card/BlackBess_char_220_grani.png"
+  },
+  {
+   "kind": "cardImg",
+   "from": "image/card/Copenhagen_gelanimrfz.png",
+   "to": "image/card/Copenhagen_char_220_grani.png"
+  },
+  {
+   "kind": "cardImg",
+   "from": "image/card/DarleyArabian_gelanimrfz.png",
+   "to": "image/card/DarleyArabian_char_220_grani.png"
+  },
+  {
+   "kind": "cardImg",
+   "from": "image/card/Eclipse_gelanimrfz.png",
+   "to": "image/card/Eclipse_char_220_grani.png"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/aibulanamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_450_necras.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/ailisimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_338_iris.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/alannamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4178_alanna.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/amrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_225_haak.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/anjielinamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_291_aglina.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/anzhelamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_218_cuttle.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/ashmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_456_ash.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/asikalunmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4132_ascln.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/bafanhailingmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4186_tmoris.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/baijinmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_204_platnm.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/baimianxiaomrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_128_plosis.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/baitiemrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4072_ironmn.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/bobumrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_487_bobb.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/bohuimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_252_bibeak.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/caidumrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4155_talr.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/chengfengmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_445_wscoot.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/chengshanmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_377_gdglow.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/chenmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_010_chen.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/chizuimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4065_judge.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/chongyuemrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_2024_chyue.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/Christinemrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4198_christ.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/chuxuemrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_174_slbell.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/cimeimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_494_vendla.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/cuoemrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_362_saga.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/daifeienmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4110_delphn.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/dekesasimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_102_texas.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/dianhumrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4195_radian.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/dibimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4191_tippi.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/docmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4125_rdoc.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/duoluoximrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4048_doroth.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/elamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4123_ela.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/feilaimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4148_philae.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/feiyameitamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_300_phenxi.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/fengchuanxiangzimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4182_oblvns.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/fengdimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_222_bpipe.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/friston3mrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4093_frston.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/fulankamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_106_franka.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/gelaokesimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_326_glacus.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/geleidiyamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_474_glady.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/guiyanmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4163_rosesa.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/haidimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4045_heidi.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/haimomrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4066_highmo.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/hainimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4079_haini.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/haojiaomrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4039_horn.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/hedeleimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4088_hodrer.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/heijianmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4046_ebnhlz.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/heimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_340_shwaz.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/helagemrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_188_helage.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/hongmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_144_red.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/hongsunmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4023_rfalcn.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/hongxuemrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4055_bgsnow.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/huangmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_017_huang.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/huoerhaiyamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4027_heyak.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/innamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4124_iana.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/jianmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4116_blkkgt.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/jicimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_293_thorns.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/jingzhemrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_306_leizi.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/jiushenmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1042_phatm2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/jixingmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4203_kichi.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/kaierximrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_003_kalts.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/kaiselinmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4162_cathy.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/keebomrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_2013_cerber.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/keluxiermrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4228_closur.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/kongxianmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_332_archet.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/kuiyingmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_250_phatom.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/laiousimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4142_laios.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/laiyimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4117_ray.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/landumrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_129_bluep.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/laolimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_322_lmlee.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/leimiuanmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4193_lemuen.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/lindongmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_115_headbr.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/linglanmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_358_lisa.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/lingmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_2023_ling.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/linguangmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_148_nearl.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/lingyinmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4187_graceb.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/lingzhimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_206_gnosis.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/linmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4080_lin.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/linshimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4102_threye.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/longshelanmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_486_takila.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/luogesimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4133_logos.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/lutuomrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4130_luton.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/maennamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4064_mlynar.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/maizhelunmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_248_mgllan.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/maluxiermrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4141_marcil.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/medical_amiyamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1037_amiya3.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/meiermrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_242_otter.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/midiexiangmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_391_rosmon.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/mingjiaomrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4071_peper.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/miumiumrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_249_mlyss.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/mon3trmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4179_monstr.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/mositimamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_213_mostma.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/mowangmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4134_cetsyr.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/muqianmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4171_wulfen.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/narentuyamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4138_narant.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/nengtianshimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_103_angel.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/nianmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_2014_nian.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/nifumrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4146_nymph.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/niyanmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_311_mudrok.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/palasimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_485_pallas.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/peipeimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4058_pepe.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/qierchakemrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4144_chilc.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/qinliumrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_479_sleach.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/qiubaimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4082_qiubai.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/rendongmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4026_vulpis.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/ruoyemumrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4183_mortis.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/saileiyamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_202_demkni.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/sanjiaochuhuamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4184_dolris.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/semrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_350_surtr.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/senranmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_416_zumama.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/senximrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4143_sensi.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/shanjimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_457_blitz.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/shanlingmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_147_shining.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/shanmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_264_f12yin.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/shendianmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_469_indigo.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/shenxunmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4137_udflow.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/shijunzhemrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1502_crosly.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/shixiemrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_215_mantic.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/shuanghuamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_458_rfrost.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/shuangyemrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_193_frostl.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/shuidengxinmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4177_brigid.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/shuiyuemrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_437_mizuki.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/shumrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_2025_shu.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/sikadimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_263_skadi.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/siyemrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_427_vigil.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/songtongmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4199_makiri.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/spamiyamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1001_amiya2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/spdegoumrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1028_texas2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/spfenmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1036_fang2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/spfurongmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1024_hbisc2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/spheijiaomrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1030_noirc2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/sphemomrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1031_slent2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/spjiaweiermrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1026_gvial2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/spjicimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1039_thorn2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/spjiexikamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1034_jesca2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/spjingzhemrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1043_leizi2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/splinguangmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1014_nearl2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/spnengtianshimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1041_angel2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/spshihuaiyamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1033_swire2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/spsikadimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1012_skadi2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/spsongzangrenmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1032_excu2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/spweicaomrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1020_reed2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/spweinamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1019_siege2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/spxiaoyangmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1016_agoat2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/spxingxiongmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1044_hsgma2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/spyedaomrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1029_yato2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/spyoulingshamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1023_ghost2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/spzzxpmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1013_chen2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/suocaomrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4139_papyrs.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/suxinmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_245_cello.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/tekenuomrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4164_tecno.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/tianhuomrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_166_skfire.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/tifengmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_2012_typhon.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/wanqingmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4119_wanqin.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/weinamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_112_siege.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/weishidaiermrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1035_wisdel.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/weiweiannamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4098_vvana.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/wendimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_400_weedy.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/wenmimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4081_warmy.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/wmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_113_cqbw.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/wuerbianmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4145_ulpia.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/xiaguangmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_423_blemsh.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/xiaomanmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4122_grabds.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/xiaoyangmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_180_amgoat.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/xigymrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_2015_dusk.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/xingjimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_274_astesi.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/xingxiongmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_136_hsguma.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/xingyuanmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_135_halo.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/xingzhumrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4172_xingzh.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/xinyangjiaobanjimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4194_rmixer.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/xirenmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4151_tinman.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/xiyinmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_336_folivo.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/xunlanmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4052_surfer.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/yanweimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_420_flamtl.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/yaxinmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_173_slchan.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/yemomrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_164_nightm.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/yeyingmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_179_cgbird.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/yifulitemrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_134_ifrit.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/yineisimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4087_ines.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/yinhuimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_172_svrash.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/yintuoluomrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_155_tiger.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/youtiansiruomaimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4185_amoris.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/yuanyamrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_430_fartth.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/yueyuemrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4100_caper.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/yumaobimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_421_crow.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/yumrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_2026_yu.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/yunjimrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4165_ctrail.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/yunqingpingmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4196_reckpr.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/yunxingmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_219_meteo.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/zhanchemrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_459_tachak.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/zhisongmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4011_lessng.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/zhuhuangmrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_1040_blaze2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/ziyeyaomrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4202_haruka.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CN_MANDARIN/die/zuolemrfz.mp3",
+   "to": "audio/CN_MANDARIN/die/char_4121_zuole.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/CUSTOM/die/keluxiermrfz.mp3",
+   "to": "audio/CUSTOM/die/char_4228_closur.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/aibulanamrfz.mp3",
+   "to": "audio/JP/die/char_450_necras.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/ailinimrfz.mp3",
+   "to": "audio/JP/die/char_4009_irene.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/ailisimrfz.mp3",
+   "to": "audio/JP/die/char_338_iris.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/alannamrfz.mp3",
+   "to": "audio/JP/die/char_4178_alanna.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/amrfz.mp3",
+   "to": "audio/JP/die/char_225_haak.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/anjielinamrfz.mp3",
+   "to": "audio/JP/die/char_291_aglina.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/anzhelamrfz.mp3",
+   "to": "audio/JP/die/char_218_cuttle.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/asikalunmrfz.mp3",
+   "to": "audio/JP/die/char_4132_ascln.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/baijinmrfz.mp3",
+   "to": "audio/JP/die/char_204_platnm.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/baimianxiaomrfz.mp3",
+   "to": "audio/JP/die/char_128_plosis.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/baitiemrfz.mp3",
+   "to": "audio/JP/die/char_4072_ironmn.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/bobumrfz.mp3",
+   "to": "audio/JP/die/char_487_bobb.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/bohuimrfz.mp3",
+   "to": "audio/JP/die/char_252_bibeak.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/caidumrfz.mp3",
+   "to": "audio/JP/die/char_4155_talr.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/chengfengmrfz.mp3",
+   "to": "audio/JP/die/char_445_wscoot.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/chenmrfz.mp3",
+   "to": "audio/JP/die/char_010_chen.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/chizuimrfz.mp3",
+   "to": "audio/JP/die/char_4065_judge.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/chongyuemrfz.mp3",
+   "to": "audio/JP/die/char_2024_chyue.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/chuxuemrfz.mp3",
+   "to": "audio/JP/die/char_174_slbell.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/cimeimrfz.mp3",
+   "to": "audio/JP/die/char_494_vendla.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/cuoemrfz.mp3",
+   "to": "audio/JP/die/char_362_saga.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/daifeienmrfz.mp3",
+   "to": "audio/JP/die/char_4110_delphn.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/dekesasimrfz.mp3",
+   "to": "audio/JP/die/char_102_texas.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/dianhumrfz.mp3",
+   "to": "audio/JP/die/char_4195_radian.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/dibimrfz.mp3",
+   "to": "audio/JP/die/char_4191_tippi.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/duoluoximrfz.mp3",
+   "to": "audio/JP/die/char_4048_doroth.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/feilaimrfz.mp3",
+   "to": "audio/JP/die/char_4148_philae.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/feiyameitamrfz.mp3",
+   "to": "audio/JP/die/char_300_phenxi.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/fengdimrfz.mp3",
+   "to": "audio/JP/die/char_222_bpipe.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/friston3mrfz.mp3",
+   "to": "audio/JP/die/char_4093_frston.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/fulankamrfz.mp3",
+   "to": "audio/JP/die/char_106_franka.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/gelaokesimrfz.mp3",
+   "to": "audio/JP/die/char_326_glacus.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/geleidiyamrfz.mp3",
+   "to": "audio/JP/die/char_474_glady.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/guiyanmrfz.mp3",
+   "to": "audio/JP/die/char_4163_rosesa.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/haidimrfz.mp3",
+   "to": "audio/JP/die/char_4045_heidi.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/haimomrfz.mp3",
+   "to": "audio/JP/die/char_4066_highmo.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/hainimrfz.mp3",
+   "to": "audio/JP/die/char_4079_haini.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/haojiaomrfz.mp3",
+   "to": "audio/JP/die/char_4039_horn.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/hedeleimrfz.mp3",
+   "to": "audio/JP/die/char_4088_hodrer.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/heijianmrfz.mp3",
+   "to": "audio/JP/die/char_4046_ebnhlz.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/heimrfz.mp3",
+   "to": "audio/JP/die/char_340_shwaz.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/helagemrfz.mp3",
+   "to": "audio/JP/die/char_188_helage.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/hongmrfz.mp3",
+   "to": "audio/JP/die/char_144_red.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/hongsunmrfz.mp3",
+   "to": "audio/JP/die/char_4023_rfalcn.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/hongxuemrfz.mp3",
+   "to": "audio/JP/die/char_4055_bgsnow.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/huangmrfz.mp3",
+   "to": "audio/JP/die/char_017_huang.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/huoerhaiyamrfz.mp3",
+   "to": "audio/JP/die/char_4027_heyak.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/jianmrfz.mp3",
+   "to": "audio/JP/die/char_4116_blkkgt.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/jicimrfz.mp3",
+   "to": "audio/JP/die/char_293_thorns.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/jingzhemrfz.mp3",
+   "to": "audio/JP/die/char_306_leizi.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/jiushenmrfz.mp3",
+   "to": "audio/JP/die/char_1042_phatm2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/jixingmrfz.mp3",
+   "to": "audio/JP/die/char_4203_kichi.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/kaierximrfz.mp3",
+   "to": "audio/JP/die/char_003_kalts.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/kaiselinmrfz.mp3",
+   "to": "audio/JP/die/char_4162_cathy.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/kamimrfz.mp3",
+   "to": "audio/JP/die/char_472_pasngr.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/kanielianmrfz.mp3",
+   "to": "audio/JP/die/char_426_billro.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/keebomrfz.mp3",
+   "to": "audio/JP/die/char_2013_cerber.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/kongxianmrfz.mp3",
+   "to": "audio/JP/die/char_332_archet.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/kuiyingmrfz.mp3",
+   "to": "audio/JP/die/char_250_phatom.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/laiyimrfz.mp3",
+   "to": "audio/JP/die/char_4117_ray.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/landumrfz.mp3",
+   "to": "audio/JP/die/char_129_bluep.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/laolimrfz.mp3",
+   "to": "audio/JP/die/char_322_lmlee.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/leimiuanmrfz.mp3",
+   "to": "audio/JP/die/char_4193_lemuen.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/lindongmrfz.mp3",
+   "to": "audio/JP/die/char_115_headbr.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/linglanmrfz.mp3",
+   "to": "audio/JP/die/char_358_lisa.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/lingmrfz.mp3",
+   "to": "audio/JP/die/char_2023_ling.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/linguangmrfz.mp3",
+   "to": "audio/JP/die/char_148_nearl.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/lingyinmrfz.mp3",
+   "to": "audio/JP/die/char_4187_graceb.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/lingzhimrfz.mp3",
+   "to": "audio/JP/die/char_206_gnosis.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/linmrfz.mp3",
+   "to": "audio/JP/die/char_4080_lin.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/linshimrfz.mp3",
+   "to": "audio/JP/die/char_4102_threye.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/longshelanmrfz.mp3",
+   "to": "audio/JP/die/char_486_takila.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/luogesimrfz.mp3",
+   "to": "audio/JP/die/char_4133_logos.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/lutuomrfz.mp3",
+   "to": "audio/JP/die/char_4130_luton.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/maennamrfz.mp3",
+   "to": "audio/JP/die/char_4064_mlynar.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/maizhelunmrfz.mp3",
+   "to": "audio/JP/die/char_248_mgllan.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/medical_amiyamrfz.mp3",
+   "to": "audio/JP/die/char_1037_amiya3.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/meiermrfz.mp3",
+   "to": "audio/JP/die/char_242_otter.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/midiexiangmrfz.mp3",
+   "to": "audio/JP/die/char_391_rosmon.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/mingjiaomrfz.mp3",
+   "to": "audio/JP/die/char_4071_peper.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/miumiumrfz.mp3",
+   "to": "audio/JP/die/char_249_mlyss.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/mon3trmrfz.mp3",
+   "to": "audio/JP/die/char_4179_monstr.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/mositimamrfz.mp3",
+   "to": "audio/JP/die/char_213_mostma.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/mowangmrfz.mp3",
+   "to": "audio/JP/die/char_4134_cetsyr.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/muqianmrfz.mp3",
+   "to": "audio/JP/die/char_4171_wulfen.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/narentuyamrfz.mp3",
+   "to": "audio/JP/die/char_4138_narant.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/nengtianshimrfz.mp3",
+   "to": "audio/JP/die/char_103_angel.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/nianmrfz.mp3",
+   "to": "audio/JP/die/char_2014_nian.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/nifumrfz.mp3",
+   "to": "audio/JP/die/char_4146_nymph.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/niyanmrfz.mp3",
+   "to": "audio/JP/die/char_311_mudrok.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/palasimrfz.mp3",
+   "to": "audio/JP/die/char_485_pallas.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/peipeimrfz.mp3",
+   "to": "audio/JP/die/char_4058_pepe.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/qinliumrfz.mp3",
+   "to": "audio/JP/die/char_479_sleach.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/qiubaimrfz.mp3",
+   "to": "audio/JP/die/char_4082_qiubai.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/rendongmrfz.mp3",
+   "to": "audio/JP/die/char_4026_vulpis.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/saileiyamrfz.mp3",
+   "to": "audio/JP/die/char_202_demkni.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/semrfz.mp3",
+   "to": "audio/JP/die/char_350_surtr.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/senranmrfz.mp3",
+   "to": "audio/JP/die/char_416_zumama.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/shanlingmrfz.mp3",
+   "to": "audio/JP/die/char_147_shining.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/shanmrfz.mp3",
+   "to": "audio/JP/die/char_264_f12yin.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/shendianmrfz.mp3",
+   "to": "audio/JP/die/char_469_indigo.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/shenxunmrfz.mp3",
+   "to": "audio/JP/die/char_4137_udflow.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/shijunzhemrfz.mp3",
+   "to": "audio/JP/die/char_1502_crosly.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/shixiemrfz.mp3",
+   "to": "audio/JP/die/char_215_mantic.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/shuangyemrfz.mp3",
+   "to": "audio/JP/die/char_193_frostl.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/shuidengxinmrfz.mp3",
+   "to": "audio/JP/die/char_4177_brigid.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/shuiyuemrfz.mp3",
+   "to": "audio/JP/die/char_437_mizuki.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/shumrfz.mp3",
+   "to": "audio/JP/die/char_2025_shu.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/sikadimrfz.mp3",
+   "to": "audio/JP/die/char_263_skadi.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/siyemrfz.mp3",
+   "to": "audio/JP/die/char_427_vigil.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/songtongmrfz.mp3",
+   "to": "audio/JP/die/char_4199_makiri.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/spamiyamrfz.mp3",
+   "to": "audio/JP/die/char_1001_amiya2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/spdegoumrfz.mp3",
+   "to": "audio/JP/die/char_1028_texas2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/spfurongmrfz.mp3",
+   "to": "audio/JP/die/char_1024_hbisc2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/spheijiaomrfz.mp3",
+   "to": "audio/JP/die/char_1030_noirc2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/sphemomrfz.mp3",
+   "to": "audio/JP/die/char_1031_slent2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/spjiaweiermrfz.mp3",
+   "to": "audio/JP/die/char_1026_gvial2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/spjicimrfz.mp3",
+   "to": "audio/JP/die/char_1039_thorn2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/spjiexikamrfz.mp3",
+   "to": "audio/JP/die/char_1034_jesca2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/spjingzhemrfz.mp3",
+   "to": "audio/JP/die/char_1043_leizi2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/splapulandemrfz.mp3",
+   "to": "audio/JP/die/char_1038_whitw2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/splinguangmrfz.mp3",
+   "to": "audio/JP/die/char_1014_nearl2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/spnengtianshimrfz.mp3",
+   "to": "audio/JP/die/char_1041_angel2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/spshihuaiyamrfz.mp3",
+   "to": "audio/JP/die/char_1033_swire2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/spsikadimrfz.mp3",
+   "to": "audio/JP/die/char_1012_skadi2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/spsongzangrenmrfz.mp3",
+   "to": "audio/JP/die/char_1032_excu2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/spweicaomrfz.mp3",
+   "to": "audio/JP/die/char_1020_reed2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/spweinamrfz.mp3",
+   "to": "audio/JP/die/char_1019_siege2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/spxiaoyangmrfz.mp3",
+   "to": "audio/JP/die/char_1016_agoat2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/spxingxiongmrfz.mp3",
+   "to": "audio/JP/die/char_1044_hsgma2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/spyedaomrfz.mp3",
+   "to": "audio/JP/die/char_1029_yato2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/spyoulingshamrfz.mp3",
+   "to": "audio/JP/die/char_1023_ghost2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/spzzxpmrfz.mp3",
+   "to": "audio/JP/die/char_1013_chen2.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/suocaomrfz.mp3",
+   "to": "audio/JP/die/char_4139_papyrs.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/suxinmrfz.mp3",
+   "to": "audio/JP/die/char_245_cello.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/tekenuomrfz.mp3",
+   "to": "audio/JP/die/char_4164_tecno.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/tianhuomrfz.mp3",
+   "to": "audio/JP/die/char_166_skfire.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/tifengmrfz.mp3",
+   "to": "audio/JP/die/char_2012_typhon.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/wanqingmrfz.mp3",
+   "to": "audio/JP/die/char_4119_wanqin.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/weinamrfz.mp3",
+   "to": "audio/JP/die/char_112_siege.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/weishidaiermrfz.mp3",
+   "to": "audio/JP/die/char_1035_wisdel.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/weiweiannamrfz.mp3",
+   "to": "audio/JP/die/char_4098_vvana.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/wendimrfz.mp3",
+   "to": "audio/JP/die/char_400_weedy.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/wenmimrfz.mp3",
+   "to": "audio/JP/die/char_4081_warmy.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/wmrfz.mp3",
+   "to": "audio/JP/die/char_113_cqbw.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/wuerbianmrfz.mp3",
+   "to": "audio/JP/die/char_4145_ulpia.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/xiaguangmrfz.mp3",
+   "to": "audio/JP/die/char_423_blemsh.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/xiaomanmrfz.mp3",
+   "to": "audio/JP/die/char_4122_grabds.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/xiaoyangmrfz.mp3",
+   "to": "audio/JP/die/char_180_amgoat.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/xigymrfz.mp3",
+   "to": "audio/JP/die/char_2015_dusk.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/xingjimrfz.mp3",
+   "to": "audio/JP/die/char_274_astesi.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/xingxiongmrfz.mp3",
+   "to": "audio/JP/die/char_136_hsguma.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/xingyuanmrfz.mp3",
+   "to": "audio/JP/die/char_135_halo.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/xingzhumrfz.mp3",
+   "to": "audio/JP/die/char_4172_xingzh.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/xinyangjiaobanjimrfz.mp3",
+   "to": "audio/JP/die/char_4194_rmixer.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/xirenmrfz.mp3",
+   "to": "audio/JP/die/char_4151_tinman.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/xiyinmrfz.mp3",
+   "to": "audio/JP/die/char_336_folivo.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/xunlanmrfz.mp3",
+   "to": "audio/JP/die/char_4052_surfer.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/yanweimrfz.mp3",
+   "to": "audio/JP/die/char_420_flamtl.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/yaxinmrfz.mp3",
+   "to": "audio/JP/die/char_173_slchan.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/yemomrfz.mp3",
+   "to": "audio/JP/die/char_164_nightm.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/yeyingmrfz.mp3",
+   "to": "audio/JP/die/char_179_cgbird.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/yifulitemrfz.mp3",
+   "to": "audio/JP/die/char_134_ifrit.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/yineisimrfz.mp3",
+   "to": "audio/JP/die/char_4087_ines.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/yinhuimrfz.mp3",
+   "to": "audio/JP/die/char_172_svrash.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/yintuoluomrfz.mp3",
+   "to": "audio/JP/die/char_155_tiger.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/yuanyamrfz.mp3",
+   "to": "audio/JP/die/char_430_fartth.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/yueyuemrfz.mp3",
+   "to": "audio/JP/die/char_4100_caper.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/yumaobimrfz.mp3",
+   "to": "audio/JP/die/char_421_crow.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/yumrfz.mp3",
+   "to": "audio/JP/die/char_2026_yu.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/yunjimrfz.mp3",
+   "to": "audio/JP/die/char_4165_ctrail.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/yunqingpingmrfz.mp3",
+   "to": "audio/JP/die/char_4196_reckpr.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/yunxingmrfz.mp3",
+   "to": "audio/JP/die/char_219_meteo.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/ziyeyaomrfz.mp3",
+   "to": "audio/JP/die/char_4202_haruka.mp3"
+  },
+  {
+   "kind": "dieAudio",
+   "from": "audio/JP/die/zuolemrfz.mp3",
+   "to": "audio/JP/die/char_4121_zuole.mp3"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/aibulanamrfz",
+   "to": "dynamicSkin/illust/char_450_necras"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/asikalunmrfz",
+   "to": "dynamicSkin/illust/char_4132_ascln"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/chengshanmrfz",
+   "to": "dynamicSkin/illust/char_377_gdglow"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/chongyuemrfz",
+   "to": "dynamicSkin/illust/char_2024_chyue"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/hongxuemrfz",
+   "to": "dynamicSkin/illust/char_4055_bgsnow"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/jianmrfz",
+   "to": "dynamicSkin/illust/char_4116_blkkgt"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/kaierximrfz",
+   "to": "dynamicSkin/illust/char_003_kalts"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/kamimrfz",
+   "to": "dynamicSkin/illust/char_472_pasngr"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/kongxianmrfz",
+   "to": "dynamicSkin/illust/char_332_archet"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/kuiyingmrfz",
+   "to": "dynamicSkin/illust/char_250_phatom"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/laolimrfz",
+   "to": "dynamicSkin/illust/char_322_lmlee"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/lingmrfz",
+   "to": "dynamicSkin/illust/char_2023_ling"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/linmrfz",
+   "to": "dynamicSkin/illust/char_4080_lin"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/luogesimrfz",
+   "to": "dynamicSkin/illust/char_4133_logos"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/maennamrfz",
+   "to": "dynamicSkin/illust/char_4064_mlynar"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/medical_amiyamrfz",
+   "to": "dynamicSkin/illust/char_1037_amiya3"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/midiexiangmrfz",
+   "to": "dynamicSkin/illust/char_391_rosmon"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/miumiumrfz",
+   "to": "dynamicSkin/illust/char_249_mlyss"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/mon3trmrfz",
+   "to": "dynamicSkin/illust/char_4179_monstr"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/mowangmrfz",
+   "to": "dynamicSkin/illust/char_4134_cetsyr"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/nianmrfz",
+   "to": "dynamicSkin/illust/char_2014_nian"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/peipeimrfz",
+   "to": "dynamicSkin/illust/char_4058_pepe"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/saileiyamrfz",
+   "to": "dynamicSkin/illust/char_202_demkni"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/semrfz",
+   "to": "dynamicSkin/illust/char_350_surtr"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/shuiyuemrfz",
+   "to": "dynamicSkin/illust/char_437_mizuki"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/shumrfz",
+   "to": "dynamicSkin/illust/char_2025_shu"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/spamiyamrfz",
+   "to": "dynamicSkin/illust/char_1001_amiya2"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/spanjielinamrfz",
+   "to": "dynamicSkin/illust/char_1015_aglna2"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/spchuxuemrfz",
+   "to": "dynamicSkin/illust/char_1046_sbell2"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/spdegoumrfz",
+   "to": "dynamicSkin/illust/char_1028_texas2"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/spjiaweiermrfz",
+   "to": "dynamicSkin/illust/char_1026_gvial2"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/spjicimrfz",
+   "to": "dynamicSkin/illust/char_1039_thorn2"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/spkaierximrfz",
+   "to": "dynamicSkin/illust/char_1052_kalts2"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/splapulandemrfz",
+   "to": "dynamicSkin/illust/char_1038_whitw2"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/splinguangmrfz",
+   "to": "dynamicSkin/illust/char_1014_nearl2"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/spnengtianshimrfz",
+   "to": "dynamicSkin/illust/char_1041_angel2"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/spsikadimrfz",
+   "to": "dynamicSkin/illust/char_1012_skadi2"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/spsongzangrenmrfz",
+   "to": "dynamicSkin/illust/char_1032_excu2"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/spweicaomrfz",
+   "to": "dynamicSkin/illust/char_1020_reed2"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/spweinamrfz",
+   "to": "dynamicSkin/illust/char_1019_siege2"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/spxiaoyangmrfz",
+   "to": "dynamicSkin/illust/char_1016_agoat2"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/spxingxiongmrfz",
+   "to": "dynamicSkin/illust/char_1044_hsgma2"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/spyinhuimrfz",
+   "to": "dynamicSkin/illust/char_1045_svash2"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/spyoulingshamrfz",
+   "to": "dynamicSkin/illust/char_1023_ghost2"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/spzzxpmrfz",
+   "to": "dynamicSkin/illust/char_1013_chen2"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/suxinmrfz",
+   "to": "dynamicSkin/illust/char_245_cello"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/weishidaiermrfz",
+   "to": "dynamicSkin/illust/char_1035_wisdel"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/wmrfz",
+   "to": "dynamicSkin/illust/char_113_cqbw"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/xigymrfz",
+   "to": "dynamicSkin/illust/char_2015_dusk"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/yeyingmrfz",
+   "to": "dynamicSkin/illust/char_179_cgbird"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/yindelaiximrfz",
+   "to": "dynamicSkin/illust/char_4010_etlchi"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/yineisimrfz",
+   "to": "dynamicSkin/illust/char_4087_ines"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/yinhuimrfz",
+   "to": "dynamicSkin/illust/char_172_svrash"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/yumrfz",
+   "to": "dynamicSkin/illust/char_2026_yu"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/ziyeyaomrfz",
+   "to": "dynamicSkin/illust/char_4202_haruka"
+  },
+  {
+   "kind": "dycIllust",
+   "from": "dynamicSkin/illust/zuolemrfz",
+   "to": "dynamicSkin/illust/char_4121_zuole"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/aibulanamrfz.jpg",
+   "to": "image/character/char_450_necras.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/aiguisimrfz.jpg",
+   "to": "image/character/char_4218_aigis.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/ailinimrfz.jpg",
+   "to": "image/character/char_4009_irene.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/ailisimrfz.jpg",
+   "to": "image/character/char_338_iris.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/alannamrfz.jpg",
+   "to": "image/character/char_4178_alanna.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/amrfz.jpg",
+   "to": "image/character/char_225_haak.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/anjielinamrfz.jpg",
+   "to": "image/character/char_291_aglina.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/anzhelamrfz.jpg",
+   "to": "image/character/char_218_cuttle.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/ashmrfz.jpg",
+   "to": "image/character/char_456_ash.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/asikalunmrfz.jpg",
+   "to": "image/character/char_4132_ascln.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/bafanhailingmrfz.jpg",
+   "to": "image/character/char_4186_tmoris.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/baidurenmrfz.jpg",
+   "to": "image/character/char_4166_varkis.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/baijinmrfz.jpg",
+   "to": "image/character/char_204_platnm.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/baimianxiaomrfz.jpg",
+   "to": "image/character/char_128_plosis.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/baitiemrfz.jpg",
+   "to": "image/character/char_4072_ironmn.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/beiluoneimrfz.jpg",
+   "to": "image/character/char_4037_demetr.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/bobumrfz.jpg",
+   "to": "image/character/char_487_bobb.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/bohuimrfz.jpg",
+   "to": "image/character/char_252_bibeak.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/botanimrfz.jpg",
+   "to": "image/character/char_4223_botany.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/caidumrfz.jpg",
+   "to": "image/character/char_4155_talr.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/Castle3mrfz.jpg",
+   "to": "image/character/char_286_cast3.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/chengfengmrfz.jpg",
+   "to": "image/character/char_445_wscoot.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/chengshanmrfz.jpg",
+   "to": "image/character/char_377_gdglow.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/chenmrfz.jpg",
+   "to": "image/character/char_010_chen.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/chizuimrfz.jpg",
+   "to": "image/character/char_4065_judge.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/chongyuemrfz.jpg",
+   "to": "image/character/char_2024_chyue.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/Christinemrfz.jpg",
+   "to": "image/character/char_4198_christ.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/chuxuemrfz.jpg",
+   "to": "image/character/char_174_slbell.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/cimeimrfz.jpg",
+   "to": "image/character/char_494_vendla.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/cuoemrfz.jpg",
+   "to": "image/character/char_362_saga.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/daifeienmrfz.jpg",
+   "to": "image/character/char_4110_delphn.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/dekesasimrfz.jpg",
+   "to": "image/character/char_102_texas.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/dianhumrfz.jpg",
+   "to": "image/character/char_4195_radian.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/dibimrfz.jpg",
+   "to": "image/character/char_4191_tippi.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/docmrfz.jpg",
+   "to": "image/character/char_4125_rdoc.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/dongshimrfz.jpg",
+   "to": "image/character/char_4208_wintim.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/duoluoximrfz.jpg",
+   "to": "image/character/char_4048_doroth.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/elamrfz.jpg",
+   "to": "image/character/char_4123_ela.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/feilaimrfz.jpg",
+   "to": "image/character/char_4148_philae.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/feiyameitamrfz.jpg",
+   "to": "image/character/char_300_phenxi.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/fengchuanxiangzimrfz.jpg",
+   "to": "image/character/char_4182_oblvns.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/fengdimrfz.jpg",
+   "to": "image/character/char_222_bpipe.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/fengwanmrfz.jpg",
+   "to": "image/character/char_4016_kazema.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/fengxumrfz.jpg",
+   "to": "image/character/char_4222_taraxa.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/friston3mrfz.jpg",
+   "to": "image/character/char_4093_frston.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/fulankamrfz.jpg",
+   "to": "image/character/char_106_franka.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/fuzoumrfz.jpg",
+   "to": "image/character/char_4031_liesel.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/gallusmrfz.jpg",
+   "to": "image/character/char_4227_gallus.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/gelanimrfz.jpg",
+   "to": "image/character/char_220_grani.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/gelaokesimrfz.jpg",
+   "to": "image/character/char_326_glacus.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/geleidiyamrfz.jpg",
+   "to": "image/character/char_474_glady.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/guiyanmrfz.jpg",
+   "to": "image/character/char_4163_rosesa.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/hadiyamrfz.jpg",
+   "to": "image/character/char_394_hadiya.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/haidimrfz.jpg",
+   "to": "image/character/char_4045_heidi.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/haimomrfz.jpg",
+   "to": "image/character/char_4066_highmo.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/hainimrfz.jpg",
+   "to": "image/character/char_4079_haini.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/haojiaomrfz.jpg",
+   "to": "image/character/char_4039_horn.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/hedeleimrfz.jpg",
+   "to": "image/character/char_4088_hodrer.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/heijianmrfz.jpg",
+   "to": "image/character/char_4046_ebnhlz.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/heimrfz.jpg",
+   "to": "image/character/char_340_shwaz.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/helagemrfz.jpg",
+   "to": "image/character/char_188_helage.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/hongmrfz.jpg",
+   "to": "image/character/char_144_red.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/hongsunmrfz.jpg",
+   "to": "image/character/char_4023_rfalcn.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/hongxuemrfz.jpg",
+   "to": "image/character/char_4055_bgsnow.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/huangmrfz.jpg",
+   "to": "image/character/char_017_huang.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/hulangwanmrfz.jpg",
+   "to": "image/character/char_4220_kormr.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/huoerhaiyamrfz.jpg",
+   "to": "image/character/char_4027_heyak.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/innamrfz.jpg",
+   "to": "image/character/char_4124_iana.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/jianmrfz.jpg",
+   "to": "image/character/char_4116_blkkgt.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/jiaxintamrfz.jpg",
+   "to": "image/character/char_4237_jcinta.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/jicimrfz.jpg",
+   "to": "image/character/char_293_thorns.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/jingzhemrfz.jpg",
+   "to": "image/character/char_306_leizi.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/jiushenmrfz.jpg",
+   "to": "image/character/char_1042_phatm2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/jixieshimrfz.jpg",
+   "to": "image/character/char_4230_mcnist.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/jixingmrfz.jpg",
+   "to": "image/character/char_4203_kichi.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/jumrfz.jpg",
+   "to": "image/character/char_4221_ju.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/kaierximrfz.jpg",
+   "to": "image/character/char_003_kalts.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/kaiselinmrfz.jpg",
+   "to": "image/character/char_4162_cathy.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/kamimrfz.jpg",
+   "to": "image/character/char_472_pasngr.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/kanielianmrfz.jpg",
+   "to": "image/character/char_426_billro.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/keebomrfz.jpg",
+   "to": "image/character/char_2013_cerber.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/kelaimenshamrfz.jpg",
+   "to": "image/character/char_4231_clemnt.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/keluxiermrfz.jpg",
+   "to": "image/character/char_4228_closur.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/kongxianmrfz.jpg",
+   "to": "image/character/char_332_archet.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/kuiyingmrfz.jpg",
+   "to": "image/character/char_250_phatom.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/laiousimrfz.jpg",
+   "to": "image/character/char_4142_laios.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/laiyimrfz.jpg",
+   "to": "image/character/char_4117_ray.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/Lancet2mrfz.jpg",
+   "to": "image/character/char_285_medic2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/landumrfz.jpg",
+   "to": "image/character/char_129_bluep.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/laolimrfz.jpg",
+   "to": "image/character/char_322_lmlee.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/leimiuanmrfz.jpg",
+   "to": "image/character/char_4193_lemuen.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/liexiamrfz.jpg",
+   "to": "image/character/char_194_leto.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/liexiangmrfz.jpg",
+   "to": "image/character/char_4225_tanya.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/lindongmrfz.jpg",
+   "to": "image/character/char_115_headbr.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/linglanmrfz.jpg",
+   "to": "image/character/char_358_lisa.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/lingmrfz.jpg",
+   "to": "image/character/char_2023_ling.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/linguangmrfz.jpg",
+   "to": "image/character/char_148_nearl.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/lingyinmrfz.jpg",
+   "to": "image/character/char_4187_graceb.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/lingzhimrfz.jpg",
+   "to": "image/character/char_206_gnosis.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/linmrfz.jpg",
+   "to": "image/character/char_4080_lin.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/linshimrfz.jpg",
+   "to": "image/character/char_4102_threye.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/liumingmrfz.jpg",
+   "to": "image/character/char_4042_lumen.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/longshelanmrfz.jpg",
+   "to": "image/character/char_486_takila.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/luogesimrfz.jpg",
+   "to": "image/character/char_4133_logos.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/lutuomrfz.jpg",
+   "to": "image/character/char_4130_luton.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/lvgumrfz.jpg",
+   "to": "image/character/char_4232_hbound.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/maennamrfz.jpg",
+   "to": "image/character/char_4064_mlynar.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/maizhelunmrfz.jpg",
+   "to": "image/character/char_248_mgllan.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/maluxiermrfz.jpg",
+   "to": "image/character/char_4141_marcil.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/medical_amiyamrfz.jpg",
+   "to": "image/character/char_1037_amiya3.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/meiermrfz.jpg",
+   "to": "image/character/char_242_otter.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/midiexiangmrfz.jpg",
+   "to": "image/character/char_391_rosmon.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/migelumrfz.jpg",
+   "to": "image/character/char_122_beagle.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/mingjiaomrfz.jpg",
+   "to": "image/character/char_4071_peper.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/miumiumrfz.jpg",
+   "to": "image/character/char_249_mlyss.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/miuyinmrfz.jpg",
+   "to": "image/character/char_4229_aphris.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/mon3trmrfz.jpg",
+   "to": "image/character/char_4179_monstr.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/mositimamrfz.jpg",
+   "to": "image/character/char_213_mostma.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/mowangmrfz.jpg",
+   "to": "image/character/char_4134_cetsyr.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/muqianmrfz.jpg",
+   "to": "image/character/char_4171_wulfen.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/narentuyamrfz.jpg",
+   "to": "image/character/char_4138_narant.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/nasitimrfz.jpg",
+   "to": "image/character/char_4212_nasti.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/nengtianshimrfz.jpg",
+   "to": "image/character/char_103_angel.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/nianmrfz.jpg",
+   "to": "image/character/char_2014_nian.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/nifumrfz.jpg",
+   "to": "image/character/char_4146_nymph.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/niyanmrfz.jpg",
+   "to": "image/character/char_311_mudrok.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/nuoweiermrfz.jpg",
+   "to": "image/character/char_4173_nowell.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/palasimrfz.jpg",
+   "to": "image/character/char_485_pallas.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/peideluomrfz.jpg",
+   "to": "image/character/char_4234_pedro.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/peipeimrfz.jpg",
+   "to": "image/character/char_4058_pepe.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/PhonoR0mrfz.jpg",
+   "to": "image/character/char_4136_phonor.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/qierchakemrfz.jpg",
+   "to": "image/character/char_4144_chilc.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/qinliumrfz.jpg",
+   "to": "image/character/char_479_sleach.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/qiubaimrfz.jpg",
+   "to": "image/character/char_4082_qiubai.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/rendongmrfz.jpg",
+   "to": "image/character/char_4026_vulpis.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/ruoyemumrfz.jpg",
+   "to": "image/character/char_4183_mortis.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/saileiyamrfz.jpg",
+   "to": "image/character/char_202_demkni.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/sanjiaochuhuamrfz.jpg",
+   "to": "image/character/char_4184_dolris.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/sbchenmrfz.jpg",
+   "to": "image/character/char_1050_chen3.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/semrfz.jpg",
+   "to": "image/character/char_350_surtr.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/senranmrfz.jpg",
+   "to": "image/character/char_416_zumama.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/senximrfz.jpg",
+   "to": "image/character/char_4143_sensi.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/shanbimrfz.jpg",
+   "to": "image/character/char_4235_thumpy.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/shanjimrfz.jpg",
+   "to": "image/character/char_457_blitz.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/shanlingmrfz.jpg",
+   "to": "image/character/char_147_shining.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/shanmrfz.jpg",
+   "to": "image/character/char_264_f12yin.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/shendianmrfz.jpg",
+   "to": "image/character/char_469_indigo.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/shenxunmrfz.jpg",
+   "to": "image/character/char_4137_udflow.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/shijunzhemrfz.jpg",
+   "to": "image/character/char_1502_crosly.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/shixiemrfz.jpg",
+   "to": "image/character/char_215_mantic.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/shiximrfz.jpg",
+   "to": "image/character/char_4236_tmslot.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/shuanghuamrfz.jpg",
+   "to": "image/character/char_458_rfrost.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/shuangyemrfz.jpg",
+   "to": "image/character/char_193_frostl.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/shuidengxinmrfz.jpg",
+   "to": "image/character/char_4177_brigid.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/shuiyuemrfz.jpg",
+   "to": "image/character/char_437_mizuki.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/shumrfz.jpg",
+   "to": "image/character/char_2025_shu.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/sikadimrfz.jpg",
+   "to": "image/character/char_263_skadi.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/siyemrfz.jpg",
+   "to": "image/character/char_427_vigil.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/songtongmrfz.jpg",
+   "to": "image/character/char_4199_makiri.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spamiyamrfz.jpg",
+   "to": "image/character/char_1001_amiya2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spanjielinamrfz.jpg",
+   "to": "image/character/char_1015_aglna2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spchuxuemrfz.jpg",
+   "to": "image/character/char_1046_sbell2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spdegoumrfz.jpg",
+   "to": "image/character/char_1028_texas2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spfenmrfz.jpg",
+   "to": "image/character/char_1036_fang2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spfurongmrfz.jpg",
+   "to": "image/character/char_1024_hbisc2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spheijiaomrfz.jpg",
+   "to": "image/character/char_1030_noirc2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/sphemomrfz.jpg",
+   "to": "image/character/char_1031_slent2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spjiaweiermrfz.jpg",
+   "to": "image/character/char_1026_gvial2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spjicimrfz.jpg",
+   "to": "image/character/char_1039_thorn2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spjiexikamrfz.jpg",
+   "to": "image/character/char_1034_jesca2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spjingzhemrfz.jpg",
+   "to": "image/character/char_1043_leizi2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spkaierximrfz.jpg",
+   "to": "image/character/char_1052_kalts2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spkongbaomrfz.jpg",
+   "to": "image/character/char_1049_catap2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/splapulandemrfz.jpg",
+   "to": "image/character/char_1038_whitw2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/splingdongmrfz.jpg",
+   "to": "image/character/char_1051_headb2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/splinguangmrfz.jpg",
+   "to": "image/character/char_1014_nearl2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spnengtianshimrfz.jpg",
+   "to": "image/character/char_1041_angel2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spshihuaiyamrfz.jpg",
+   "to": "image/character/char_1033_swire2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spsikadimrfz.jpg",
+   "to": "image/character/char_1012_skadi2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spsongzangrenmrfz.jpg",
+   "to": "image/character/char_1032_excu2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/sptiaoxiangshimrfz.jpg",
+   "to": "image/character/char_1022_flwr2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spweicaomrfz.jpg",
+   "to": "image/character/char_1020_reed2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spweinamrfz.jpg",
+   "to": "image/character/char_1019_siege2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spxiaoyangmrfz.jpg",
+   "to": "image/character/char_1016_agoat2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spxingxiongmrfz.jpg",
+   "to": "image/character/char_1044_hsgma2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spxingyuanmrfz.jpg",
+   "to": "image/character/char_1047_halo2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spyedaomrfz.jpg",
+   "to": "image/character/char_1029_yato2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spyinhuimrfz.jpg",
+   "to": "image/character/char_1045_svash2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spyoulingshamrfz.jpg",
+   "to": "image/character/char_1023_ghost2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spzilanmrfz.jpg",
+   "to": "image/character/char_1048_orchd2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/spzzxpmrfz.jpg",
+   "to": "image/character/char_1013_chen2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/suocaomrfz.jpg",
+   "to": "image/character/char_4139_papyrs.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/suxinmrfz.jpg",
+   "to": "image/character/char_245_cello.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/taojinniangmrfz.jpg",
+   "to": "image/character/char_151_myrtle.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/tekenuomrfz.jpg",
+   "to": "image/character/char_4164_tecno.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/THRMEXmrfz.jpg",
+   "to": "image/character/char_376_therex.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/tianhuomrfz.jpg",
+   "to": "image/character/char_166_skfire.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/tiankonghemrfz.jpg",
+   "to": "image/character/char_4213_skybx.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/tifengmrfz.jpg",
+   "to": "image/character/char_2012_typhon.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/titimrfz.jpg",
+   "to": "image/character/char_4056_titi.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/wanqingmrfz.jpg",
+   "to": "image/character/char_4119_wanqin.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/weinamrfz.jpg",
+   "to": "image/character/char_112_siege.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/weishidaiermrfz.jpg",
+   "to": "image/character/char_1035_wisdel.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/weiweiannamrfz.jpg",
+   "to": "image/character/char_4098_vvana.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/weiyimrfz.jpg",
+   "to": "image/character/char_4226_veen.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/wendimrfz.jpg",
+   "to": "image/character/char_400_weedy.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/wenmimrfz.jpg",
+   "to": "image/character/char_4081_warmy.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/wmrfz.jpg",
+   "to": "image/character/char_113_cqbw.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/wuerbianmrfz.jpg",
+   "to": "image/character/char_4145_ulpia.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/wujiumrfz.jpg",
+   "to": "image/character/char_4224_turdus.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/xiaguangmrfz.jpg",
+   "to": "image/character/char_423_blemsh.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/xiangshimrfz.jpg",
+   "to": "image/character/char_4214_cairn.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/xiaogemrfz.jpg",
+   "to": "image/character/char_497_ctable.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/xiaomanmrfz.jpg",
+   "to": "image/character/char_4122_grabds.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/xiaoyangmrfz.jpg",
+   "to": "image/character/char_180_amgoat.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/xielvmrfz.jpg",
+   "to": "image/character/char_4051_akkord.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/xigymrfz.jpg",
+   "to": "image/character/char_2015_dusk.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/xingjimrfz.jpg",
+   "to": "image/character/char_274_astesi.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/xingxiongmrfz.jpg",
+   "to": "image/character/char_136_hsguma.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/xingyuanmrfz.jpg",
+   "to": "image/character/char_135_halo.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/xingzhumrfz.jpg",
+   "to": "image/character/char_4172_xingzh.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/xinyangjiaobanjimrfz.jpg",
+   "to": "image/character/char_4194_rmixer.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/xirenmrfz.jpg",
+   "to": "image/character/char_4151_tinman.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/xiyinmrfz.jpg",
+   "to": "image/character/char_336_folivo.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/xueliemrfz.jpg",
+   "to": "image/character/char_4211_snhunt.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/xunlanmrfz.jpg",
+   "to": "image/character/char_4052_surfer.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/yanweimrfz.jpg",
+   "to": "image/character/char_420_flamtl.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/yaxinmrfz.jpg",
+   "to": "image/character/char_173_slchan.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/yelamrfz.jpg",
+   "to": "image/character/char_4013_kjera.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/yemomrfz.jpg",
+   "to": "image/character/char_164_nightm.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/yeyingmrfz.jpg",
+   "to": "image/character/char_179_cgbird.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/yifulitemrfz.jpg",
+   "to": "image/character/char_134_ifrit.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/yindelaiximrfz.jpg",
+   "to": "image/character/char_4010_etlchi.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/yineisimrfz.jpg",
+   "to": "image/character/char_4087_ines.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/yinhuimrfz.jpg",
+   "to": "image/character/char_172_svrash.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/yintuoluomrfz.jpg",
+   "to": "image/character/char_155_tiger.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/youtiansiruomaimrfz.jpg",
+   "to": "image/character/char_4185_amoris.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/yuanyamrfz.jpg",
+   "to": "image/character/char_430_fartth.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/yueyuemrfz.jpg",
+   "to": "image/character/char_4100_caper.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/yueyuyoujialimrfz.jpg",
+   "to": "image/character/char_4219_yukari.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/yumaobimrfz.jpg",
+   "to": "image/character/char_421_crow.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/yumrfz.jpg",
+   "to": "image/character/char_2026_yu.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/yunjimrfz.jpg",
+   "to": "image/character/char_4165_ctrail.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/yunqingpingmrfz.jpg",
+   "to": "image/character/char_4196_reckpr.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/yunxingmrfz.jpg",
+   "to": "image/character/char_219_meteo.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/zaolumrfz.jpg",
+   "to": "image/character/char_197_poca.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/zhanchemrfz.jpg",
+   "to": "image/character/char_459_tachak.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/zhenyanmrfz.jpg",
+   "to": "image/character/char_4204_mantra.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/zheyamrfz.jpg",
+   "to": "image/character/char_4207_branch.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/zhisongmrfz.jpg",
+   "to": "image/character/char_4011_lessng.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/zhuhuangmrfz.jpg",
+   "to": "image/character/char_1040_blaze2.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/ziyeyaomrfz.jpg",
+   "to": "image/character/char_4202_haruka.jpg"
+  },
+  {
+   "kind": "img",
+   "from": "image/character/zuolemrfz.jpg",
+   "to": "image/character/char_4121_zuole.jpg"
+  },
+  {
+   "kind": "otherImg",
+   "from": "image/modules/cuoemrfz",
+   "to": "image/modules/char_362_saga"
+  },
+  {
+   "kind": "otherImg",
+   "from": "image/skill/qushimrfz/lingmrfz.png",
+   "to": "image/skill/qushimrfz/char_2023_ling.png"
+  },
+  {
+   "kind": "otherImg",
+   "from": "image/skill/qushimrfz/nianmrfz.png",
+   "to": "image/skill/qushimrfz/char_2014_nian.png"
+  },
+  {
+   "kind": "otherImg",
+   "from": "image/skill/qushimrfz/shumrfz.png",
+   "to": "image/skill/qushimrfz/char_2025_shu.png"
+  },
+  {
+   "kind": "otherImg",
+   "from": "image/skill/qushimrfz/yumrfz.png",
+   "to": "image/skill/qushimrfz/char_2026_yu.png"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/aibulanamrfz",
+   "to": "image/skin/char_450_necras"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/aiguisimrfz",
+   "to": "image/skin/char_4218_aigis"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/ailinimrfz",
+   "to": "image/skin/char_4009_irene"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/ailisimrfz",
+   "to": "image/skin/char_338_iris"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/amrfz",
+   "to": "image/skin/char_225_haak"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/anjielinamrfz",
+   "to": "image/skin/char_291_aglina"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/anzhelamrfz",
+   "to": "image/skin/char_218_cuttle"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/ashmrfz",
+   "to": "image/skin/char_456_ash"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/asikalunmrfz",
+   "to": "image/skin/char_4132_ascln"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/bafanhailingmrfz",
+   "to": "image/skin/char_4186_tmoris"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/baijinmrfz",
+   "to": "image/skin/char_204_platnm"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/baimianxiaomrfz",
+   "to": "image/skin/char_128_plosis"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/baitiemrfz",
+   "to": "image/skin/char_4072_ironmn"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/bobumrfz",
+   "to": "image/skin/char_487_bobb"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/bohuimrfz",
+   "to": "image/skin/char_252_bibeak"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/caidumrfz",
+   "to": "image/skin/char_4155_talr"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/Castle3mrfz",
+   "to": "image/skin/char_286_cast3"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/chengfengmrfz",
+   "to": "image/skin/char_445_wscoot"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/chengshanmrfz",
+   "to": "image/skin/char_377_gdglow"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/chenmrfz",
+   "to": "image/skin/char_010_chen"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/chizuimrfz",
+   "to": "image/skin/char_4065_judge"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/chongyuemrfz",
+   "to": "image/skin/char_2024_chyue"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/Christinemrfz",
+   "to": "image/skin/char_4198_christ"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/chuxuemrfz",
+   "to": "image/skin/char_174_slbell"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/cimeimrfz",
+   "to": "image/skin/char_494_vendla"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/cuoemrfz",
+   "to": "image/skin/char_362_saga"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/dekesasimrfz",
+   "to": "image/skin/char_102_texas"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/dianhumrfz",
+   "to": "image/skin/char_4195_radian"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/dibimrfz",
+   "to": "image/skin/char_4191_tippi"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/docmrfz",
+   "to": "image/skin/char_4125_rdoc"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/duoluoximrfz",
+   "to": "image/skin/char_4048_doroth"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/elamrfz",
+   "to": "image/skin/char_4123_ela"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/feilaimrfz",
+   "to": "image/skin/char_4148_philae"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/feiyameitamrfz",
+   "to": "image/skin/char_300_phenxi"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/fengchuanxiangzimrfz",
+   "to": "image/skin/char_4182_oblvns"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/fengdimrfz",
+   "to": "image/skin/char_222_bpipe"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/fengwanmrfz",
+   "to": "image/skin/char_4016_kazema"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/fulankamrfz",
+   "to": "image/skin/char_106_franka"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/gelanimrfz",
+   "to": "image/skin/char_220_grani"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/gelaokesimrfz",
+   "to": "image/skin/char_326_glacus"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/geleidiyamrfz",
+   "to": "image/skin/char_474_glady"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/guiyanmrfz",
+   "to": "image/skin/char_4163_rosesa"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/haidimrfz",
+   "to": "image/skin/char_4045_heidi"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/haimomrfz",
+   "to": "image/skin/char_4066_highmo"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/hainimrfz",
+   "to": "image/skin/char_4079_haini"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/haojiaomrfz",
+   "to": "image/skin/char_4039_horn"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/hedeleimrfz",
+   "to": "image/skin/char_4088_hodrer"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/heijianmrfz",
+   "to": "image/skin/char_4046_ebnhlz"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/heimrfz",
+   "to": "image/skin/char_340_shwaz"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/helagemrfz",
+   "to": "image/skin/char_188_helage"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/hongmrfz",
+   "to": "image/skin/char_144_red"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/hongsunmrfz",
+   "to": "image/skin/char_4023_rfalcn"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/hongxuemrfz",
+   "to": "image/skin/char_4055_bgsnow"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/huangmrfz",
+   "to": "image/skin/char_017_huang"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/hulangwanmrfz",
+   "to": "image/skin/char_4220_kormr"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/huoerhaiyamrfz",
+   "to": "image/skin/char_4027_heyak"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/innamrfz",
+   "to": "image/skin/char_4124_iana"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/jianmrfz",
+   "to": "image/skin/char_4116_blkkgt"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/jicimrfz",
+   "to": "image/skin/char_293_thorns"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/jingzhemrfz",
+   "to": "image/skin/char_306_leizi"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/kaierximrfz",
+   "to": "image/skin/char_003_kalts"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/kamimrfz",
+   "to": "image/skin/char_472_pasngr"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/kanielianmrfz",
+   "to": "image/skin/char_426_billro"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/keebomrfz",
+   "to": "image/skin/char_2013_cerber"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/kongxianmrfz",
+   "to": "image/skin/char_332_archet"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/kuiyingmrfz",
+   "to": "image/skin/char_250_phatom"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/laiyimrfz",
+   "to": "image/skin/char_4117_ray"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/Lancet2mrfz",
+   "to": "image/skin/char_285_medic2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/landumrfz",
+   "to": "image/skin/char_129_bluep"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/laolimrfz",
+   "to": "image/skin/char_322_lmlee"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/leimiuanmrfz",
+   "to": "image/skin/char_4193_lemuen"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/liexiamrfz",
+   "to": "image/skin/char_194_leto"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/lindongmrfz",
+   "to": "image/skin/char_115_headbr"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/linglanmrfz",
+   "to": "image/skin/char_358_lisa"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/lingmrfz",
+   "to": "image/skin/char_2023_ling"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/linguangmrfz",
+   "to": "image/skin/char_148_nearl"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/lingyinmrfz",
+   "to": "image/skin/char_4187_graceb"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/lingzhimrfz",
+   "to": "image/skin/char_206_gnosis"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/linmrfz",
+   "to": "image/skin/char_4080_lin"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/linshimrfz",
+   "to": "image/skin/char_4102_threye"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/liumingmrfz",
+   "to": "image/skin/char_4042_lumen"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/longshelanmrfz",
+   "to": "image/skin/char_486_takila"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/luogesimrfz",
+   "to": "image/skin/char_4133_logos"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/lutuomrfz",
+   "to": "image/skin/char_4130_luton"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/maennamrfz",
+   "to": "image/skin/char_4064_mlynar"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/maizhelunmrfz",
+   "to": "image/skin/char_248_mgllan"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/maluxiermrfz",
+   "to": "image/skin/char_4141_marcil"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/medical_amiyamrfz",
+   "to": "image/skin/char_1037_amiya3"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/meiermrfz",
+   "to": "image/skin/char_242_otter"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/midiexiangmrfz",
+   "to": "image/skin/char_391_rosmon"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/migelumrfz",
+   "to": "image/skin/char_122_beagle"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/mingjiaomrfz",
+   "to": "image/skin/char_4071_peper"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/miumiumrfz",
+   "to": "image/skin/char_249_mlyss"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/mon3trmrfz",
+   "to": "image/skin/char_4179_monstr"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/mositimamrfz",
+   "to": "image/skin/char_213_mostma"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/mowangmrfz",
+   "to": "image/skin/char_4134_cetsyr"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/muqianmrfz",
+   "to": "image/skin/char_4171_wulfen"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/narentuyamrfz",
+   "to": "image/skin/char_4138_narant"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/nengtianshimrfz",
+   "to": "image/skin/char_103_angel"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/nianmrfz",
+   "to": "image/skin/char_2014_nian"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/nifumrfz",
+   "to": "image/skin/char_4146_nymph"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/niyanmrfz",
+   "to": "image/skin/char_311_mudrok"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/nuoweiermrfz",
+   "to": "image/skin/char_4173_nowell"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/palasimrfz",
+   "to": "image/skin/char_485_pallas"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/peipeimrfz",
+   "to": "image/skin/char_4058_pepe"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/PhonoR0mrfz",
+   "to": "image/skin/char_4136_phonor"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/qinliumrfz",
+   "to": "image/skin/char_479_sleach"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/qiubaimrfz",
+   "to": "image/skin/char_4082_qiubai"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/rendongmrfz",
+   "to": "image/skin/char_4026_vulpis"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/ruoyemumrfz",
+   "to": "image/skin/char_4183_mortis"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/saileiyamrfz",
+   "to": "image/skin/char_202_demkni"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/sanjiaochuhuamrfz",
+   "to": "image/skin/char_4184_dolris"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/semrfz",
+   "to": "image/skin/char_350_surtr"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/senranmrfz",
+   "to": "image/skin/char_416_zumama"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/shanlingmrfz",
+   "to": "image/skin/char_147_shining"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/shanmrfz",
+   "to": "image/skin/char_264_f12yin"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/shendianmrfz",
+   "to": "image/skin/char_469_indigo"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/shenxunmrfz",
+   "to": "image/skin/char_4137_udflow"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/shijunzhemrfz",
+   "to": "image/skin/char_1502_crosly"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/shixiemrfz",
+   "to": "image/skin/char_215_mantic"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/shuangyemrfz",
+   "to": "image/skin/char_193_frostl"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/shuidengxinmrfz",
+   "to": "image/skin/char_4177_brigid"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/shuiyuemrfz",
+   "to": "image/skin/char_437_mizuki"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/shumrfz",
+   "to": "image/skin/char_2025_shu"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/sikadimrfz",
+   "to": "image/skin/char_263_skadi"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/siyemrfz",
+   "to": "image/skin/char_427_vigil"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/songtongmrfz",
+   "to": "image/skin/char_4199_makiri"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/spamiyamrfz",
+   "to": "image/skin/char_1001_amiya2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/spchuxuemrfz",
+   "to": "image/skin/char_1046_sbell2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/spdegoumrfz",
+   "to": "image/skin/char_1028_texas2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/spfenmrfz",
+   "to": "image/skin/char_1036_fang2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/spfurongmrfz",
+   "to": "image/skin/char_1024_hbisc2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/sphemomrfz",
+   "to": "image/skin/char_1031_slent2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/spjiaweiermrfz",
+   "to": "image/skin/char_1026_gvial2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/spjicimrfz",
+   "to": "image/skin/char_1039_thorn2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/spjiexikamrfz",
+   "to": "image/skin/char_1034_jesca2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/spjingzhemrfz",
+   "to": "image/skin/char_1043_leizi2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/splapulandemrfz",
+   "to": "image/skin/char_1038_whitw2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/splinguangmrfz",
+   "to": "image/skin/char_1014_nearl2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/spnengtianshimrfz",
+   "to": "image/skin/char_1041_angel2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/spshihuaiyamrfz",
+   "to": "image/skin/char_1033_swire2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/spsikadimrfz",
+   "to": "image/skin/char_1012_skadi2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/spsongzangrenmrfz",
+   "to": "image/skin/char_1032_excu2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/spweicaomrfz",
+   "to": "image/skin/char_1020_reed2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/spweinamrfz",
+   "to": "image/skin/char_1019_siege2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/spxiaoyangmrfz",
+   "to": "image/skin/char_1016_agoat2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/spxingxiongmrfz",
+   "to": "image/skin/char_1044_hsgma2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/spyoulingshamrfz",
+   "to": "image/skin/char_1023_ghost2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/spzzxpmrfz",
+   "to": "image/skin/char_1013_chen2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/suocaomrfz",
+   "to": "image/skin/char_4139_papyrs"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/suxinmrfz",
+   "to": "image/skin/char_245_cello"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/taojinniangmrfz",
+   "to": "image/skin/char_151_myrtle"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/THRMEXmrfz",
+   "to": "image/skin/char_376_therex"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/tianhuomrfz",
+   "to": "image/skin/char_166_skfire"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/tifengmrfz",
+   "to": "image/skin/char_2012_typhon"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/wanqingmrfz",
+   "to": "image/skin/char_4119_wanqin"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/weinamrfz",
+   "to": "image/skin/char_112_siege"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/weishidaiermrfz",
+   "to": "image/skin/char_1035_wisdel"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/weiweiannamrfz",
+   "to": "image/skin/char_4098_vvana"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/wendimrfz",
+   "to": "image/skin/char_400_weedy"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/wenmimrfz",
+   "to": "image/skin/char_4081_warmy"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/wmrfz",
+   "to": "image/skin/char_113_cqbw"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/wuerbianmrfz",
+   "to": "image/skin/char_4145_ulpia"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/xiaguangmrfz",
+   "to": "image/skin/char_423_blemsh"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/xiaogemrfz",
+   "to": "image/skin/char_497_ctable"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/xiaomanmrfz",
+   "to": "image/skin/char_4122_grabds"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/xiaoyangmrfz",
+   "to": "image/skin/char_180_amgoat"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/xielvmrfz",
+   "to": "image/skin/char_4051_akkord"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/xigymrfz",
+   "to": "image/skin/char_2015_dusk"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/xingjimrfz",
+   "to": "image/skin/char_274_astesi"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/xingxiongmrfz",
+   "to": "image/skin/char_136_hsguma"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/xingyuanmrfz",
+   "to": "image/skin/char_135_halo"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/xingzhumrfz",
+   "to": "image/skin/char_4172_xingzh"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/xinyangjiaobanjimrfz",
+   "to": "image/skin/char_4194_rmixer"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/xiyinmrfz",
+   "to": "image/skin/char_336_folivo"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/xunlanmrfz",
+   "to": "image/skin/char_4052_surfer"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/yanweimrfz",
+   "to": "image/skin/char_420_flamtl"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/yaxinmrfz",
+   "to": "image/skin/char_173_slchan"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/yelamrfz",
+   "to": "image/skin/char_4013_kjera"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/yemomrfz",
+   "to": "image/skin/char_164_nightm"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/yeyingmrfz",
+   "to": "image/skin/char_179_cgbird"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/yifulitemrfz",
+   "to": "image/skin/char_134_ifrit"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/yindelaiximrfz",
+   "to": "image/skin/char_4010_etlchi"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/yineisimrfz",
+   "to": "image/skin/char_4087_ines"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/yinhuimrfz",
+   "to": "image/skin/char_172_svrash"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/yintuoluomrfz",
+   "to": "image/skin/char_155_tiger"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/youtiansiruomaimrfz",
+   "to": "image/skin/char_4185_amoris"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/yuanyamrfz",
+   "to": "image/skin/char_430_fartth"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/yueyuemrfz",
+   "to": "image/skin/char_4100_caper"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/yueyuyoujialimrfz",
+   "to": "image/skin/char_4219_yukari"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/yumaobimrfz",
+   "to": "image/skin/char_421_crow"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/yumrfz",
+   "to": "image/skin/char_2026_yu"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/yunjimrfz",
+   "to": "image/skin/char_4165_ctrail"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/yunxingmrfz",
+   "to": "image/skin/char_219_meteo"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/zaolumrfz",
+   "to": "image/skin/char_197_poca"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/zhanchemrfz",
+   "to": "image/skin/char_459_tachak"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/zhenyanmrfz",
+   "to": "image/skin/char_4204_mantra"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/zheyamrfz",
+   "to": "image/skin/char_4207_branch"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/zhisongmrfz",
+   "to": "image/skin/char_4011_lessng"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/zhuhuangmrfz",
+   "to": "image/skin/char_1040_blaze2"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/ziyeyaomrfz",
+   "to": "image/skin/char_4202_haruka"
+  },
+  {
+   "kind": "skin",
+   "from": "image/skin/zuolemrfz",
+   "to": "image/skin/char_4121_zuole"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/tongmaimrfz_anzhelamrfz1.mp3",
+   "to": "audio/CN_MANDARIN/tongmaimrfz_char_218_cuttle1.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/tongmaimrfz_anzhelamrfz2.mp3",
+   "to": "audio/CN_MANDARIN/tongmaimrfz_char_218_cuttle2.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/JP/tongmaimrfz_anzhelamrfz1.mp3",
+   "to": "audio/JP/tongmaimrfz_char_218_cuttle1.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/JP/tongmaimrfz_anzhelamrfz2.mp3",
+   "to": "audio/JP/tongmaimrfz_char_218_cuttle2.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/wuweimrfz_bafanhailingmrfz1.mp3",
+   "to": "audio/CN_MANDARIN/wuweimrfz_char_4186_tmoris1.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/wuweimrfz_bafanhailingmrfz2.mp3",
+   "to": "audio/CN_MANDARIN/wuweimrfz_char_4186_tmoris2.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/tongmaimrfz_geleidiyamrfz1.mp3",
+   "to": "audio/CN_MANDARIN/tongmaimrfz_char_474_glady1.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/tongmaimrfz_geleidiyamrfz2.mp3",
+   "to": "audio/CN_MANDARIN/tongmaimrfz_char_474_glady2.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/clanzhongliu_keluxiermrfz1.mp3",
+   "to": "audio/CN_MANDARIN/clanzhongliu_char_4228_closur1.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/clanzhongliu_keluxiermrfz2.mp3",
+   "to": "audio/CN_MANDARIN/clanzhongliu_char_4228_closur2.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/zhuguangmrfz_linguangmrfz1.mp3",
+   "to": "audio/CN_MANDARIN/zhuguangmrfz_char_148_nearl1.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/zhuguangmrfz_linguangmrfz2.mp3",
+   "to": "audio/CN_MANDARIN/zhuguangmrfz_char_148_nearl2.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/JP/zhuguangmrfz_linguangmrfz1.mp3",
+   "to": "audio/JP/zhuguangmrfz_char_148_nearl1.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/JP/zhuguangmrfz_linguangmrfz2.mp3",
+   "to": "audio/JP/zhuguangmrfz_char_148_nearl2.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/tiaojiumrfz_longshelanmrfz1.mp3",
+   "to": "audio/CN_MANDARIN/tiaojiumrfz_char_486_takila1.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/tiaojiumrfz_longshelanmrfz2.mp3",
+   "to": "audio/CN_MANDARIN/tiaojiumrfz_char_486_takila2.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/JP/tiaojiumrfz_longshelanmrfz1.mp3",
+   "to": "audio/JP/tiaojiumrfz_char_486_takila1.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/JP/tiaojiumrfz_longshelanmrfz2.mp3",
+   "to": "audio/JP/tiaojiumrfz_char_486_takila2.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/wuweimrfz_ruoyemumrfz1.mp3",
+   "to": "audio/CN_MANDARIN/wuweimrfz_char_4183_mortis1.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/wuweimrfz_ruoyemumrfz2.mp3",
+   "to": "audio/CN_MANDARIN/wuweimrfz_char_4183_mortis2.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/wuweimrfz_sanjiaochuhuamrfz1.mp3",
+   "to": "audio/CN_MANDARIN/wuweimrfz_char_4184_dolris1.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/wuweimrfz_sanjiaochuhuamrfz2.mp3",
+   "to": "audio/CN_MANDARIN/wuweimrfz_char_4184_dolris2.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/tongmaimrfz_sikadimrfz1.mp3",
+   "to": "audio/CN_MANDARIN/tongmaimrfz_char_263_skadi1.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/tongmaimrfz_sikadimrfz2.mp3",
+   "to": "audio/CN_MANDARIN/tongmaimrfz_char_263_skadi2.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/JP/tongmaimrfz_sikadimrfz1.mp3",
+   "to": "audio/JP/tongmaimrfz_char_263_skadi1.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/JP/tongmaimrfz_sikadimrfz2.mp3",
+   "to": "audio/JP/tongmaimrfz_char_263_skadi2.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/tongmaimrfz_spyoulingshamrfz1.mp3",
+   "to": "audio/CN_MANDARIN/tongmaimrfz_char_1023_ghost21.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/tongmaimrfz_spyoulingshamrfz2.mp3",
+   "to": "audio/CN_MANDARIN/tongmaimrfz_char_1023_ghost22.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/JP/tongmaimrfz_spyoulingshamrfz1.mp3",
+   "to": "audio/JP/tongmaimrfz_char_1023_ghost21.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/JP/tongmaimrfz_spyoulingshamrfz2.mp3",
+   "to": "audio/JP/tongmaimrfz_char_1023_ghost22.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/tongmaimrfz_wuerbianmrfz1.mp3",
+   "to": "audio/CN_MANDARIN/tongmaimrfz_char_4145_ulpia1.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/tongmaimrfz_wuerbianmrfz2.mp3",
+   "to": "audio/CN_MANDARIN/tongmaimrfz_char_4145_ulpia2.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/JP/tongmaimrfz_wuerbianmrfz1.mp3",
+   "to": "audio/JP/tongmaimrfz_char_4145_ulpia1.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/JP/tongmaimrfz_wuerbianmrfz2.mp3",
+   "to": "audio/JP/tongmaimrfz_char_4145_ulpia2.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/xiangle_xinyangjiaobanjimrfz1.mp3",
+   "to": "audio/CN_MANDARIN/xiangle_char_4194_rmixer1.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/xiangle_xinyangjiaobanjimrfz2.mp3",
+   "to": "audio/CN_MANDARIN/xiangle_char_4194_rmixer2.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/JP/xiangle_xinyangjiaobanjimrfz1.mp3",
+   "to": "audio/JP/xiangle_char_4194_rmixer1.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/JP/xiangle_xinyangjiaobanjimrfz2.mp3",
+   "to": "audio/JP/xiangle_char_4194_rmixer2.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/wuweimrfz_youtiansiruomaimrfz1.mp3",
+   "to": "audio/CN_MANDARIN/wuweimrfz_char_4185_amoris1.mp3"
+  },
+  {
+   "kind": "skillAudio",
+   "from": "audio/CN_MANDARIN/wuweimrfz_youtiansiruomaimrfz2.mp3",
+   "to": "audio/CN_MANDARIN/wuweimrfz_char_4185_amoris2.mp3"
+  }
+ ],
+ "textEdits": [
+  "src/packs/character/aibulanamrfz.ts",
+  "src/packs/character/aiguisimrfz.ts",
+  "src/packs/character/ailinimrfz.ts",
+  "src/packs/character/ailisimrfz.ts",
+  "src/packs/character/alannamrfz.ts",
+  "src/packs/character/amrfz.ts",
+  "src/packs/character/anjielinamrfz.ts",
+  "src/packs/character/anzhelamrfz.ts",
+  "src/packs/character/ashmrfz.ts",
+  "src/packs/character/asikalunmrfz.ts",
+  "src/packs/character/bafanhailingmrfz.ts",
+  "src/packs/character/baidurenmrfz.ts",
+  "src/packs/character/baijinmrfz.ts",
+  "src/packs/character/baimianxiaomrfz.ts",
+  "src/packs/character/baitiemrfz.ts",
+  "src/packs/character/beiluoneimrfz.ts",
+  "src/packs/character/bobumrfz.ts",
+  "src/packs/character/bohuimrfz.ts",
+  "src/packs/character/botanimrfz.ts",
+  "src/packs/character/caidumrfz.ts",
+  "src/packs/character/Castle3mrfz.ts",
+  "src/packs/character/chengfengmrfz.ts",
+  "src/packs/character/chengshanmrfz.ts",
+  "src/packs/character/chenmrfz.ts",
+  "src/packs/character/chizuimrfz.ts",
+  "src/packs/character/chongyuemrfz.ts",
+  "src/packs/character/Christinemrfz.ts",
+  "src/packs/character/chuxuemrfz.ts",
+  "src/packs/character/cimeimrfz.ts",
+  "src/packs/character/cuoemrfz.ts",
+  "src/packs/character/daifeienmrfz.ts",
+  "src/packs/character/dekesasimrfz.ts",
+  "src/packs/character/dianhumrfz.ts",
+  "src/packs/character/dibimrfz.ts",
+  "src/packs/character/docmrfz.ts",
+  "src/packs/character/dongshimrfz.ts",
+  "src/packs/character/duoluoximrfz.ts",
+  "src/packs/character/elamrfz.ts",
+  "src/packs/character/feilaimrfz.ts",
+  "src/packs/character/feiyameitamrfz.ts",
+  "src/packs/character/fengchuanxiangzimrfz.ts",
+  "src/packs/character/fengdimrfz.ts",
+  "src/packs/character/fengwanmrfz.ts",
+  "src/packs/character/fengxumrfz.ts",
+  "src/packs/character/friston3mrfz.ts",
+  "src/packs/character/fulankamrfz.ts",
+  "src/packs/character/fuzoumrfz.ts",
+  "src/packs/character/gallusmrfz.ts",
+  "src/packs/character/gelainimrfz.ts",
+  "src/packs/character/gelaokesimrfz.ts",
+  "src/packs/character/geleidiyamrfz.ts",
+  "src/packs/character/guiyanmrfz.ts",
+  "src/packs/character/hadiyamrfz.ts",
+  "src/packs/character/haidimrfz.ts",
+  "src/packs/character/haimomrfz.ts",
+  "src/packs/character/hainimrfz.ts",
+  "src/packs/character/haojiaomrfz.ts",
+  "src/packs/character/hedeleimrfz.ts",
+  "src/packs/character/heijianmrfz.ts",
+  "src/packs/character/heimrfz.ts",
+  "src/packs/character/helagemrfz.ts",
+  "src/packs/character/hongmrfz.ts",
+  "src/packs/character/hongsunmrfz.ts",
+  "src/packs/character/hongxuemrfz.ts",
+  "src/packs/character/huangmrfz.ts",
+  "src/packs/character/hulangwanmrfz.ts",
+  "src/packs/character/huoerhaiyamrfz.ts",
+  "src/packs/character/innamrfz.ts",
+  "src/packs/character/jianmrfz.ts",
+  "src/packs/character/jiaxintamrfz.ts",
+  "src/packs/character/jicimrfz.ts",
+  "src/packs/character/jingzhemrfz.ts",
+  "src/packs/character/jiushenmrfz.ts",
+  "src/packs/character/jixieshimrfz.ts",
+  "src/packs/character/jixingmrfz.ts",
+  "src/packs/character/jumrfz.ts",
+  "src/packs/character/kaierximrfz.ts",
+  "src/packs/character/kaiselinmrfz.ts",
+  "src/packs/character/kamimrfz.ts",
+  "src/packs/character/kanielianmrfz.ts",
+  "src/packs/character/keebomrfz.ts",
+  "src/packs/character/kelaimenshamrfz.ts",
+  "src/packs/character/keluxiermrfz.ts",
+  "src/packs/character/kongxianmrfz.ts",
+  "src/packs/character/kuiyingmrfz.ts",
+  "src/packs/character/laiousimrfz.ts",
+  "src/packs/character/laiyimrfz.ts",
+  "src/packs/character/Lancet2mrfz.ts",
+  "src/packs/character/landumrfz.ts",
+  "src/packs/character/laolimrfz.ts",
+  "src/packs/character/leimiuanmrfz.ts",
+  "src/packs/character/liexiamrfz.ts",
+  "src/packs/character/liexiangmrfz.ts",
+  "src/packs/character/lindongmrfz.ts",
+  "src/packs/character/linglanmrfz.ts",
+  "src/packs/character/lingmrfz.ts",
+  "src/packs/character/linguangmrfz.ts",
+  "src/packs/character/lingyinmrfz.ts",
+  "src/packs/character/lingzhimrfz.ts",
+  "src/packs/character/linmrfz.ts",
+  "src/packs/character/linshimrfz.ts",
+  "src/packs/character/liumingmrfz.ts",
+  "src/packs/character/longshelanmrfz.ts",
+  "src/packs/character/luogesimrfz.ts",
+  "src/packs/character/lutuomrfz.ts",
+  "src/packs/character/lvgumrfz.ts",
+  "src/packs/character/maennamrfz.ts",
+  "src/packs/character/maizhelunmrfz.ts",
+  "src/packs/character/maluxiermrfz.ts",
+  "src/packs/character/medical_amiyamrfz.ts",
+  "src/packs/character/meiermrfz.ts",
+  "src/packs/character/midiexiangmrfz.ts",
+  "src/packs/character/migelumrfz.ts",
+  "src/packs/character/mingjiaomrfz.ts",
+  "src/packs/character/miumiumrfz.ts",
+  "src/packs/character/miuyinmrfz.ts",
+  "src/packs/character/mon3trmrfz.ts",
+  "src/packs/character/mositimamrfz.ts",
+  "src/packs/character/mowangmrfz.ts",
+  "src/packs/character/muqianmrfz.ts",
+  "src/packs/character/narentuyamrfz.ts",
+  "src/packs/character/nasitimrfz.ts",
+  "src/packs/character/nengtianshimrfz.ts",
+  "src/packs/character/nianmrfz.ts",
+  "src/packs/character/nifumrfz.ts",
+  "src/packs/character/niyanmrfz.ts",
+  "src/packs/character/nuoweiermrfz.ts",
+  "src/packs/character/palasimrfz.ts",
+  "src/packs/character/peideluomrfz.ts",
+  "src/packs/character/peipeimrfz.ts",
+  "src/packs/character/PhonoR0mrfz.ts",
+  "src/packs/character/plot_keluxiermrfz.ts",
+  "src/packs/character/qierchakemrfz.ts",
+  "src/packs/character/qinliumrfz.ts",
+  "src/packs/character/qiubaimrfz.ts",
+  "src/packs/character/rendongmrfz.ts",
+  "src/packs/character/ruoyemumrfz.ts",
+  "src/packs/character/saileiyamrfz.ts",
+  "src/packs/character/sanjiaochuhuamrfz.ts",
+  "src/packs/character/sbchenmrfz.ts",
+  "src/packs/character/semrfz.ts",
+  "src/packs/character/senranmrfz.ts",
+  "src/packs/character/senximrfz.ts",
+  "src/packs/character/shanbimrfz.ts",
+  "src/packs/character/shanjimrfz.ts",
+  "src/packs/character/shanlingmrfz.ts",
+  "src/packs/character/shanmrfz.ts",
+  "src/packs/character/shendianmrfz.ts",
+  "src/packs/character/shenxunmrfz.ts",
+  "src/packs/character/shijunzhemrfz.ts",
+  "src/packs/character/shixiemrfz.ts",
+  "src/packs/character/shiximrfz.ts",
+  "src/packs/character/shuanghuamrfz.ts",
+  "src/packs/character/shuangyemrfz.ts",
+  "src/packs/character/shuidengxinmrfz.ts",
+  "src/packs/character/shuiyuemrfz.ts",
+  "src/packs/character/shumrfz.ts",
+  "src/packs/character/sikadimrfz.ts",
+  "src/packs/character/siyemrfz.ts",
+  "src/packs/character/songtongmrfz.ts",
+  "src/packs/character/spamiyamrfz.ts",
+  "src/packs/character/spanjielinamrfz.ts",
+  "src/packs/character/spchuxuemrfz.ts",
+  "src/packs/character/spdegoumrfz.ts",
+  "src/packs/character/spfenmrfz.ts",
+  "src/packs/character/spfurongmrfz.ts",
+  "src/packs/character/spheijiaomrfz.ts",
+  "src/packs/character/sphemomrfz.ts",
+  "src/packs/character/spjiaweiermrfz.ts",
+  "src/packs/character/spjicimrfz.ts",
+  "src/packs/character/spjiexikamrfz.ts",
+  "src/packs/character/spjingzhemrfz.ts",
+  "src/packs/character/spkaierximrfz.ts",
+  "src/packs/character/spkongbaomrfz.ts",
+  "src/packs/character/splapulandemrfz.ts",
+  "src/packs/character/splingdongmrfz.ts",
+  "src/packs/character/splinguangmrfz.ts",
+  "src/packs/character/spnengtianshimrfz.ts",
+  "src/packs/character/spshihuaiyamrfz.ts",
+  "src/packs/character/spsikadimrfz.ts",
+  "src/packs/character/spsongzangrenmrfz.ts",
+  "src/packs/character/sptiaoxiangshimrfz.ts",
+  "src/packs/character/spweicaomrfz.ts",
+  "src/packs/character/spweinamrfz.ts",
+  "src/packs/character/spxiaoyangmrfz.ts",
+  "src/packs/character/spxingxiongmrfz.ts",
+  "src/packs/character/spxingyuanmrfz.ts",
+  "src/packs/character/spyedaomrfz.ts",
+  "src/packs/character/spyinhuimrfz.ts",
+  "src/packs/character/spyoulingshamrfz.ts",
+  "src/packs/character/spzilanmrfz.ts",
+  "src/packs/character/spzzxpmrfz.ts",
+  "src/packs/character/suocaomrfz.ts",
+  "src/packs/character/suxinmrfz.ts",
+  "src/packs/character/taojinniangmrfz.ts",
+  "src/packs/character/tekenuomrfz.ts",
+  "src/packs/character/THRMEXmrfz.ts",
+  "src/packs/character/tianhuomrfz.ts",
+  "src/packs/character/tiankonghemrfz.ts",
+  "src/packs/character/tifengmrfz.ts",
+  "src/packs/character/titimrfz.ts",
+  "src/packs/character/wangmrfz/index.ts",
+  "src/packs/character/wanqingmrfz.ts",
+  "src/packs/character/weinamrfz.ts",
+  "src/packs/character/weishidaiermrfz.ts",
+  "src/packs/character/weiweiannamrfz.ts",
+  "src/packs/character/weiyimrfz.ts",
+  "src/packs/character/wendimrfz.ts",
+  "src/packs/character/wenmimrfz.ts",
+  "src/packs/character/wmrfz.ts",
+  "src/packs/character/wuerbianmrfz.ts",
+  "src/packs/character/wujiumrfz.ts",
+  "src/packs/character/xiaguangmrfz.ts",
+  "src/packs/character/xiangshimrfz.ts",
+  "src/packs/character/xiaogemrfz.ts",
+  "src/packs/character/xiaomanmrfz.ts",
+  "src/packs/character/xiaoyangmrfz.ts",
+  "src/packs/character/xielvmrfz.ts",
+  "src/packs/character/xigymrfz.ts",
+  "src/packs/character/xingjimrfz.ts",
+  "src/packs/character/xingxiongmrfz.ts",
+  "src/packs/character/xingyuanmrfz.ts",
+  "src/packs/character/xingzhumrfz.ts",
+  "src/packs/character/xinyangjiaobanjimrfz.ts",
+  "src/packs/character/xirenmrfz.ts",
+  "src/packs/character/xiyinmrfz.ts",
+  "src/packs/character/xueliemrfz.ts",
+  "src/packs/character/xunlanmrfz.ts",
+  "src/packs/character/yanweimrfz.ts",
+  "src/packs/character/yaxinmrfz.ts",
+  "src/packs/character/yelamrfz.ts",
+  "src/packs/character/yemomrfz.ts",
+  "src/packs/character/yeyingmrfz.ts",
+  "src/packs/character/yifulitemrfz.ts",
+  "src/packs/character/yindelaiximrfz.ts",
+  "src/packs/character/yineisimrfz.ts",
+  "src/packs/character/yinhuimrfz.ts",
+  "src/packs/character/yintuoluomrfz.ts",
+  "src/packs/character/youtiansiruomaimrfz.ts",
+  "src/packs/character/yuanyamrfz.ts",
+  "src/packs/character/yueyuemrfz.ts",
+  "src/packs/character/yueyuyoujialimrfz.ts",
+  "src/packs/character/yumaobimrfz.ts",
+  "src/packs/character/yumrfz.ts",
+  "src/packs/character/yunjimrfz.ts",
+  "src/packs/character/yunqingpingmrfz.ts",
+  "src/packs/character/yunxingmrfz.ts",
+  "src/packs/character/zaolumrfz.ts",
+  "src/packs/character/zhanchemrfz.ts",
+  "src/packs/character/zhenyanmrfz.ts",
+  "src/packs/character/zheyamrfz.ts",
+  "src/packs/character/zhisongmrfz.ts",
+  "src/packs/character/zhuhuangmrfz.ts",
+  "src/packs/character/ziyeyaomrfz.ts",
+  "src/packs/character/zuolemrfz.ts",
+  "src/skin/dynamicConfig.js",
+  "src/packs/base/characterDesigner.js",
+  "src/modules/data.ts",
+  "src/updateLog/updateContentCurrent.js",
+  "src/packs/card/cuoe_huanyoumrfzCard.ts",
+  "src/packs/card/dazijimrfz.ts",
+  "src/packs/card/DP27mrfz.ts",
+  "src/packs/card/jianzhumrfz.ts"
+ ]
+}

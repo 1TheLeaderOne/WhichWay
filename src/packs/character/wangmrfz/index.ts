@@ -20,26 +20,26 @@ const yearsTrans = {
 	shuomrfz_info: "对此牌的一名目标角色造成一点伤害。",
 	wangmrfz: "望",
 	wangmrfz_info: "视为使用一张刺【杀】（无距离次数限制）",
-	lingmrfz: "令",
-	lingmrfz_info: "视为使用一张【酒】。",
+	char_2023_ling: "令",
+	char_2023_ling_info: "视为使用一张【酒】。",
 	junmrfz: "均",
 	junmrfz_info: "无法被其他角色响应。",
 	jiemrfz: "颉",
 	jiemrfz_info: "视为使用一张你本回合使用过的基本牌（无次数限制）。",
-	shumrfz: "黍",
-	shumrfz_info: "下次摸牌数翻倍。",
+	char_2025_shu: "黍",
+	char_2025_shu_info: "下次摸牌数翻倍。",
 	jimrfz: "绩",
 	jimrfz_info: "将手牌补至手牌上限（至多为5）。",
 	yimrfz: "易",
 	yimrfz_info: `${get.poptip("sjzx_zhiheng")}3`,
-	nianmrfz: "年",
-	nianmrfz_info: "随机获得一个武器牌的技能直到回合结束。",
+	char_2014_nian: "年",
+	char_2014_nian_info: "随机获得一个武器牌的技能直到回合结束。",
 	ximrfz: "夕",
 	ximrfz_info: "额外结算一次。",
 	fangmrfz: "方",
 	fangmrfz_info: "回复体力至体力上限。",
-	yumrfz: "余",
-	yumrfz_info: "从牌堆中获得任意类型的一张牌。",
+	char_2026_yu: "余",
+	char_2026_yu_info: "从牌堆中获得任意类型的一张牌。",
 };
 
 translate({
@@ -97,7 +97,7 @@ const years: Record<string, ExtendedSkill> = {
 				.set("nodistance", true);
 		},
 	},
-	lingmrfz: {
+	char_2023_ling: {
 		audio: "shixingmrfz",
 		trigger: {
 			player: "useCardAfter",
@@ -175,7 +175,7 @@ const years: Record<string, ExtendedSkill> = {
 				.set("nodistance", true);
 		},
 	},
-	shumrfz: {
+	char_2025_shu: {
 		marktext: "黍",
 		intro: {
 			name: "黍",
@@ -234,7 +234,7 @@ const years: Record<string, ExtendedSkill> = {
 			}
 		},
 	},
-	nianmrfz: {
+	char_2014_nian: {
 		filter(event, player) {
 			const skills = getVaildEquipSkills(player);
 			return skills.length > 0;
@@ -257,7 +257,7 @@ const years: Record<string, ExtendedSkill> = {
 			player.recoverTo(player.maxHp);
 		},
 	},
-	yumrfz: {
+	char_2026_yu: {
 		audio: "qizaomrfz",
 		async content(event, trigger, player) {
 			const result = await player

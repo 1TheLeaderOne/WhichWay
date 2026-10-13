@@ -27,16 +27,20 @@ class WhichWayPackManager {
 	 * 求值（语义变化）。eager 静态依赖则严格保证「本模块被 import 时才求值」。
 	 *
 	 * 新增干员依旧是「丢文件即可」：在 src/packs/character/ 下新建
-	 * {名}mrfz.ts（或 {名}mrfz/index.ts）后重新构建即生效，无需改动任何代码。
+	 * {干员id}.ts（或 {干员id}/index.ts）后重新构建即生效，无需改动任何代码。
+	 *
+	 * 通配符不用 `*mrfz.*`：干员id 已统一换成明日方舟 uid（char_291_aglina 这种），
+	 * 文件名随之不再以 mrfz 结尾，只有旧干员叫得出这个名字。目录里除干员文件外没有
+	 * 别的模块，所以直接收全部 .ts/.js 与全部 {名}/index.*。
 	 *
 	 * 注意合并顺序即优先级（同名时先出现者胜出）：扁平 .ts > 扁平 .js >
 	 * 目录 index.ts > 目录 index.js。
 	 */
 	private readonly characterModules: Record<string, unknown> = {
-		...import.meta.glob("./character/*mrfz.ts", { eager: true }),
-		...import.meta.glob("./character/*mrfz.js", { eager: true }),
-		...import.meta.glob("./character/*mrfz/index.ts", { eager: true }),
-		...import.meta.glob("./character/*mrfz/index.js", { eager: true }),
+		...import.meta.glob("./character/*.ts", { eager: true }),
+		...import.meta.glob("./character/*.js", { eager: true }),
+		...import.meta.glob("./character/*/index.ts", { eager: true }),
+		...import.meta.glob("./character/*/index.js", { eager: true }),
 	};
 
 	/**
@@ -319,7 +323,7 @@ class WhichWayPackManager {
 
 	/**
 	 * 从模块路径推导干员名：
-	 * - 扁平形态 "./character/beiluoneimrfz.ts" → "beiluoneimrfz"
+	 * - 扁平形态 "./character/char_4037_demetr.ts" → "char_4037_demetr"
 	 * - 目录形态 "./character/wangmrfz/index.ts" → "wangmrfz"
 	 */
 	getCharacterModuleName(path: string): string {

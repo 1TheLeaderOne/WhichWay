@@ -6,7 +6,7 @@ cardHook("dazijimrfz", {
 	type: "equip",
 	subtype: "equip1",
 	destroy: true,
-	derivation: "hongxuemrfz",
+	derivation: "char_4055_bgsnow",
 	distance: {
 		attackFrom: -2,
 	},

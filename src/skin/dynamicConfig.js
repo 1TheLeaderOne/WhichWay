@@ -68,7 +68,7 @@ function sjzxDycInit(dyc) {
 }
 let data = {
 	//近卫阿米娅
-	spamiyamrfz: {
+	char_1001_amiya2: {
 		于万千宇宙之中: {
 			name: "dyn_illust_char_1001_amiya2_sale16",
 			x: [0, 0.235],
@@ -94,7 +94,7 @@ let data = {
 		},
 	},
 	//异客
-	kamimrfz: {
+	char_472_pasngr: {
 		今昔须臾之梦: {
 			name: "dyn_illust_char_472_pasngr_epoque17",
 			x: [0, 0.287],
@@ -107,7 +107,7 @@ let data = {
 		},
 	},
 	//凯尔希
-	kaierximrfz: {
+	char_003_kalts: {
 		残余: {
 			name: "dyn_illust_char_003_kalts_boc6",
 			x: [0, 0.551],
@@ -143,7 +143,7 @@ let data = {
 		},
 	},
 	// 纯烬艾雅法拉
-	spxiaoyangmrfz: {
+	char_1016_agoat2: {
 		经典形象: {
 			name: "dyn_illust_char_1016_agoat2",
 			x: [0, 0.426],
@@ -181,7 +181,7 @@ let data = {
 		},
 	},
 	// 缪尔赛思
-	miumiumrfz: {
+	char_249_mlyss: {
 		经典形象: {
 			name: "dyn_illust_char_249_mlyss",
 			x: [0, -0.03],
@@ -216,7 +216,7 @@ let data = {
 		},
 	},
 	//老鲤
-	laolimrfz: {
+	char_322_lmlee: {
 		手到牌来: {
 			name: "dyn_illust_char_322_lmlee_witch3",
 			x: [0, 0.43],
@@ -229,7 +229,7 @@ let data = {
 		},
 	},
 	//空弦
-	kongxianmrfz: {
+	char_332_archet: {
 		至虔者荣光: {
 			name: "dyn_illust_char_332_archet_sale14",
 			x: [0, 0.59],
@@ -242,7 +242,7 @@ let data = {
 		},
 	},
 	//傀影
-	kuiyingmrfz: {
+	char_250_phatom: {
 		焦点: {
 			name: "dyn_illust_char_250_phatom_sale4",
 			x: [0, 0.53],
@@ -255,7 +255,7 @@ let data = {
 		},
 	},
 	//水月
-	shuiyuemrfz: {
+	char_437_mizuki: {
 		夏日餮宴: {
 			name: "dyn_illust_char_437_mizuki_sale7",
 			x: [0, 0.57],
@@ -268,7 +268,7 @@ let data = {
 		},
 	},
 	// 迷迭香
-	midiexiangmrfz: {
+	char_391_rosmon: {
 		经典形象: {
 			name: "dyn_illust_char_391_rosmon",
 			x: [0, 0.78],
@@ -303,7 +303,7 @@ let data = {
 		},
 	},
 	// 黍
-	shumrfz: {
+	char_2025_shu: {
 		经典形象: {
 			name: "dyn_illust_char_2025_shu",
 			x: [0, 0.48],
@@ -328,7 +328,7 @@ let data = {
 		},
 	},
 	// W w
-	wmrfz: {
+	char_113_cqbw: {
 		经典形象: {
 			name: "dyn_illust_char_113_cqbw",
 			x: [0, 0.59],
@@ -353,7 +353,7 @@ let data = {
 		},
 	},
 	// 塑心
-	suxinmrfz: {
+	char_245_cello: {
 		经典形象: {
 			name: "dyn_illust_char_245_cello",
 			x: [0, 0.58],
@@ -377,7 +377,7 @@ let data = {
 		},
 	},
 	// 浊心斯卡蒂
-	spsikadimrfz: {
+	char_1012_skadi2: {
 		经典形象: {
 			name: "dyn_illust_char_1012_skadi2",
 			x: [0, 0.48],
@@ -411,7 +411,7 @@ let data = {
 		},
 	},
 	//焰影苇草
-	spweicaomrfz: {
+	char_1020_reed2: {
 		博物: {
 			name: "dyn_illust_char_1020_reed2_epoque30",
 			x: [0, 0.36],
@@ -435,7 +435,7 @@ let data = {
 		},
 	},
 	// 耀骑士临光
-	splinguangmrfz: {
+	char_1014_nearl2: {
 		经典形象: {
 			name: "dyn_illust_char_1014_nearl2",
 			x: [0, 0.93],
@@ -459,7 +459,7 @@ let data = {
 		},
 	},
 	// 归溟幽灵鲨
-	spyoulingshamrfz: {
+	char_1023_ghost2: {
 		经典形象: {
 			name: "dyn_illust_char_1023_ghost2",
 			x: [0, 0.48],
@@ -483,7 +483,7 @@ let data = {
 		},
 	},
 	// 百炼嘉维尔
-	spjiaweiermrfz: {
+	char_1026_gvial2: {
 		经典形象: {
 			name: "dyn_illust_char_1026_gvial2",
 			x: [0, 0.78],
@@ -507,7 +507,7 @@ let data = {
 		},
 	},
 	//银灰
-	yinhuimrfz: {
+	char_172_svrash: {
 		不融冰: {
 			name: "dyn_illust_char_172_svrash_ambienceSynesthesia4",
 			x: [0, 0.41],
@@ -521,7 +521,7 @@ let data = {
 		},
 	},
 	//夜莺
-	yeyingmrfz: {
+	char_179_cgbird: {
 		流辉: {
 			name: "dyn_illust_char_179_cgbird_sightseer1",
 			x: [0, 0.94],
@@ -535,7 +535,7 @@ let data = {
 		},
 	},
 	// 缄默德克萨斯 德狗
-	spdegoumrfz: {
+	char_1028_texas2: {
 		经典形象: {
 			name: "dyn_illust_char_1028_texas2",
 			x: [0, 0.51],
@@ -569,7 +569,7 @@ let data = {
 		},
 	},
 	// 维什戴尔
-	weishidaiermrfz: {
+	char_1035_wisdel: {
 		经典形象: {
 			name: "dyn_illust_char_1035_wisdel",
 			x: [0, 0.49],
@@ -594,7 +594,7 @@ let data = {
 		},
 	},
 	// 年
-	nianmrfz: {
+	char_2014_nian: {
 		经典形象: {
 			name: "dyn_illust_char_2014_nian2",
 			x: [0, 0.48],
@@ -630,7 +630,7 @@ let data = {
 		},
 	},
 	// 夕
-	xigymrfz: {
+	char_2015_dusk: {
 		经典形象: {
 			name: "dyn_illust_char_2015_dusk",
 			x: [0, 0.56],
@@ -666,7 +666,7 @@ let data = {
 		},
 	},
 	// 令
-	lingmrfz: {
+	char_2023_ling: {
 		经典形象: {
 			name: "dyn_illust_char_2023_ling",
 			x: [0, 0.58],
@@ -713,7 +713,7 @@ let data = {
 		},
 	},
 	// 重岳
-	chongyuemrfz: {
+	char_2024_chyue: {
 		经典形象: {
 			name: "dyn_illust_char_2024_chyue",
 			x: [0, 0.5],
@@ -749,7 +749,7 @@ let data = {
 		},
 	},
 	// 荒芜拉普兰德
-	splapulandemrfz: {
+	char_1038_whitw2: {
 		经典形象: {
 			name: "dyn_illust_char_1038_whitw2",
 			x: [0, 0.51],
@@ -774,7 +774,7 @@ let data = {
 		},
 	},
 	//维多利亚 维纳
-	spweinamrfz: {
+	char_1019_siege2: {
 		光耀之途: {
 			name: "dyn_illust_char_1019_siege2_epoque50",
 			x: [0, 0.58],
@@ -788,7 +788,7 @@ let data = {
 		},
 	},
 	//凛御银灰
-	spyinhuimrfz: {
+	char_1045_svash2: {
 		经典形象: {
 			name: "dyn_illust_char_1045_svash2",
 			x: [0, 0.55],
@@ -802,7 +802,7 @@ let data = {
 		},
 	},
 	//魔王
-	mowangmrfz: {
+	char_4134_cetsyr: {
 		追悼: {
 			name: "dyn_illust_char_4134_cetsyr_epoque50",
 			x: [0, 0.33],
@@ -816,7 +816,7 @@ let data = {
 		},
 	},
 	// 新约能天使
-	spnengtianshimrfz: {
+	char_1041_angel2: {
 		经典形象: {
 			name: "dyn_illust_char_1041_angel2",
 			x: [0, 0.35],
@@ -841,7 +841,7 @@ let data = {
 		},
 	},
 	// 佩佩
-	peipeimrfz: {
+	char_4058_pepe: {
 		经典形象: {
 			name: "dyn_illust_char_4058_pepe",
 			x: [0, 0.46],
@@ -868,7 +868,7 @@ let data = {
 		},
 	},
 	//死芒 爱布拉娜
-	aibulanamrfz: {
+	char_450_necras: {
 		夏卉: {
 			name: "necras_xiahui",
 			x: [0, 0.57],
@@ -882,7 +882,7 @@ let data = {
 		},
 	},
 	//引星棘刺 异格棘刺
-	spjicimrfz: {
+	char_1039_thorn2: {
 		无际之帆: {
 			name: "spjici_wujizhifan",
 			x: [0, 0.46],
@@ -896,7 +896,7 @@ let data = {
 		},
 	},
 	//斩业星熊
-	spxingxiongmrfz: {
+	char_1044_hsgma2: {
 		经典形象: {
 			name: "spxingxiong_default",
 			x: [0, 0.618],
@@ -921,7 +921,7 @@ let data = {
 		},
 	},
 	//林
-	linmrfz: {
+	char_4080_lin: {
 		夏卉: {
 			name: "linSummer",
 			x: [0, -0.16],
@@ -946,7 +946,7 @@ let data = {
 		},
 	},
 	//锏
-	jianmrfz: {
+	char_4116_blkkgt: {
 		暗月的影子: {
 			name: "dyn_illust_char_4116_blkkgt_witch5",
 			x: [0, 0.47],
@@ -960,7 +960,7 @@ let data = {
 		},
 	},
 	//伊内丝
-	yineisimrfz: {
+	char_4087_ines: {
 		蝶舞华章: {
 			name: "dyn_illust_char_4087_ines_ambienceSynesthesia",
 			x: [0, 0.6],
@@ -985,7 +985,7 @@ let data = {
 		},
 	},
 	// 余
-	yumrfz: {
+	char_2026_yu: {
 		经典形象: {
 			name: "dyn_illust_char_2026_yu",
 			x: [0, 0.46],
@@ -1010,7 +1010,7 @@ let data = {
 		},
 	},
 	// 史尔特尔
-	semrfz: {
+	char_350_surtr: {
 		缤纷奇境: {
 			name: "dyn_illust_char_350_surtr_summer9",
 			x: [0, 0.29],
@@ -1035,7 +1035,7 @@ let data = {
 		},
 	},
 	// 澄闪
-	chengshanmrfz: {
+	char_377_gdglow: {
 		夏卉: {
 			name: "dyn_illust_char_377_gdglow_summer12",
 			x: [0, 0.63],
@@ -1049,7 +1049,7 @@ let data = {
 		},
 	},
 	// 水陈 假日威龙陈
-	spzzxpmrfz: {
+	char_1013_chen2: {
 		万重山: {
 			name: "dyn_illust_char_1013_chen2_boc6",
 			x: [0, 0.62],
@@ -1085,7 +1085,7 @@ let data = {
 		},
 	},
 	// 医疗阿米娅
-	medical_amiyamrfz: {
+	char_1037_amiya3: {
 		寰宇独奏: {
 			name: "dyn_illust_char_1037_amiya3_sale13",
 			x: [0, 0.28],
@@ -1099,7 +1099,7 @@ let data = {
 		},
 	},
 	// 左乐
-	zuolemrfz: {
+	char_4121_zuole: {
 		少年游: {
 			name: "dyn_illust_char_4121_zuole_nian11",
 			x: [0, 0.77],
@@ -1113,7 +1113,7 @@ let data = {
 		},
 	},
 	//阿斯卡纶
-	asikalunmrfz: {
+	char_4132_ascln: {
 		趋光之暗: {
 			name: "asklFixed",
 			x: [0, 0.45],
@@ -1127,7 +1127,7 @@ let data = {
 		},
 	},
 	//逻格斯 logos
-	luogesimrfz: {
+	char_4133_logos: {
 		辉煌的静谧: {
 			name: "logos",
 			x: [0, 0.19],
@@ -1141,7 +1141,7 @@ let data = {
 		},
 	},
 	// 玛恩纳 叔叔
-	maennamrfz: {
+	char_4064_mlynar: {
 		远路: {
 			name: "dyn_illust_char_4064_mlynar_epoque28",
 			x: [0, 0.28],
@@ -1155,7 +1155,7 @@ let data = {
 		},
 	},
 	// 圣约送葬人
-	spsongzangrenmrfz: {
+	char_1032_excu2: {
 		众志归一: {
 			name: "dyn_illust_char_1032_excu2_sale12",
 			x: [0, 0.55],
@@ -1169,7 +1169,7 @@ let data = {
 		},
 	},
 	// 鸿雪
-	hongxuemrfz: {
+	char_4055_bgsnow: {
 		字句中的雪原: {
 			name: "hongxue",
 			x: [0, 0.58],
@@ -1183,7 +1183,7 @@ let data = {
 		},
 	},
 	//隐德来希
-	yindelaiximrfz: {
+	char_4010_etlchi: {
 		耀目之蓝: {
 			name: "dyn_illust_char_4010_etlchi_winter5",
 			x: [0, 0.593],
@@ -1211,7 +1211,7 @@ let data = {
 		},
 	},
 	// 塞雷娅
-	saileiyamrfz: {
+	char_202_demkni: {
 		黑白冷峻: {
 			name: "dyn_illust_char_202_demkni_ambienceSynesthesia7",
 			x: [0, 0.65],
@@ -1225,7 +1225,7 @@ let data = {
 		},
 	},
 	// 遥
-	ziyeyaomrfz: {
+	char_4202_haruka: {
 		常世之幻: {
 			name: "dyn_illust_char_4202_haruka_iteration6",
 			x: [0, 0.724],
@@ -1239,7 +1239,7 @@ let data = {
 		},
 	},
 	// mon3tr
-	mon3trmrfz: {
+	char_4179_monstr: {
 		锋锐: {
 			name: "dyn_illust_char_4179_monstr_boc11",
 			x: [0, 0.494],
@@ -1253,7 +1253,7 @@ let data = {
 		},
 	},
 	//凯尔希·思衡托
-	spkaierximrfz: {
+	char_1052_kalts2: {
 		经典形象: {
 			name: "dyn_illust_char_1052_kalts2",
 			x: [0, 0.324],
@@ -1267,7 +1267,7 @@ let data = {
 		},
 	},
 	// 圣聆初雪
-	spchuxuemrfz: {
+	char_1046_sbell2: {
 		曙光祝颂: {
 			name: "dyn_illust_char_1046_sbell2_ambienceSynesthesia8",
 			x: [0, 0.862],
@@ -1281,7 +1281,7 @@ let data = {
 		},
 	},
 	// 予愿安洁丽娜
-	spanjielinamrfz: {
+	char_1015_aglna2: {
 		经典形象: {
 			name: "dyn_illust_char_1015_aglna2",
 			x: [0, 0.469],

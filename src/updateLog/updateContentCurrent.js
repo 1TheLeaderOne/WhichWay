@@ -22,7 +22,7 @@ export const upDataContentCurrent = {
 	 */
 	player: {
 		/** 本版新增的干员 */
-		add: ["lvgumrfz","yueyuyoujialimrfz"],
+		add: ["char_4232_hbound","char_4219_yukari"],
 		/** 本版调整过技能 / 数据的干员 */
 		adjust: [],
 	},
@@ -41,6 +41,6 @@ export const upDataContentCurrent = {
 
 /**
  * 1.5.6更新的武将,等1.6正式版需要加上去
- * add: ["xiaogemrfz","aiguisimrfz","gelanimrfz","liexiamrfz","hulangwanmrfz","kelaimenshamrfz"],
- * adjust: ["baimianxiaomrfz", "chongyuemrfz", "palasimrfz","gallusmrfz"],
+ * add: ["char_497_ctable","char_4218_aigis","char_220_grani","char_194_leto","char_4220_kormr","char_4231_clemnt"],
+ * adjust: ["char_128_plosis", "char_2024_chyue", "char_485_pallas","char_4227_gallus"],
  */

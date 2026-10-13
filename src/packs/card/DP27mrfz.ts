@@ -6,7 +6,7 @@ cardHook("DP27mrfz", {
 	type: "equip",
 	subtype: "equip1",
 	destroy: true,
-	derivation: "zhanchemrfz",
+	derivation: "char_459_tachak",
 	distance: {
 		attackFrom: -3,
 	},
