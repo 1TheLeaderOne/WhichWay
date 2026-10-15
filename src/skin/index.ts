@@ -11,7 +11,9 @@ import ConfOverride from "./confOverride.vue";
 import { confictedSkin } from "./confictedSkin.ts";
 
 //立绘透明图层的两层背景结构（劫持 $init / $reinit）
-import "./avatarBackground.ts";
+import { mountPortrait } from "./avatarBackground.ts";
+import { DEFAULT_SKIN_NAME, flushSave, getPos, getPosData, loadPos, type PortraitPos } from "./portraitPos.js";
+import { togglePortraitDragging } from "./portraitDrag.js";
 
 /** v1.6 清缓存的标记位（与 arkidMigrated 同一套一次性开关写法，落库为 extension_WhichWay_ 前缀） */
 const SKIN_CACHE_CLEARED_KEY = "skinCacheClearedV16";
@@ -23,6 +25,8 @@ class WhichWaySkin {
 	async init() {
 		await whichWayUtil
 			.measureExecutionTime(async () => {
+				//立绘位置设定要先于任何一次绘制就位，否则首帧会按默认值画一遍再跳一次
+				await loadPos();
 				await this.autoUpdateSkinData();
 				this.syncAllSkinConfig();
 			})
@@ -142,6 +146,15 @@ class WhichWaySkin {
 						true
 					);
 				}
+			},
+		});
+
+		onArenaReady({
+			name: "whichWayInitPortraitDragging",
+			fn() {
+				//皮肤拖拽：玩家自助调整干员立绘/皮肤的位置与大小（仅本扩展绘制的方舟立绘可拖）。
+				//和上面「动皮拖拽」的区别是它不锁开发模式 —— 位置设定是给玩家用的功能。
+				ui.create.system("皮肤拖拽", togglePortraitDragging, true);
 			},
 		});
 
@@ -323,6 +336,47 @@ class WhichWaySkin {
 	}
 
 	/**
+	 * 把干员的图片/皮肤**添加**到任意节点上（走 `avatarBackground.ts` 的两层背景，而不是引擎的单层背景）
+	 *
+	 * 存在的理由：场上头像的立绘由劫持入口自动画，但「主动贴一张干员图」的场景（投稿预览、
+	 * 自定义面板、对话框卡片）没有劫持可用，直接用 `style.backgroundImage` 就会踩回老问题 ——
+	 * 立绘的透明区域透出底下的东西。这里统一走 `mountPortrait`，保证和场上头像同一套结构、
+	 * 同一份位置设定（`pos.json`）。
+	 * @param node 目标节点：必须是 div，且自身有尺寸（两层背景是 `position:absolute; inset:0`）
+	 * @param name 干员id
+	 * @param skin 皮肤名；留空则用该干员当前生效的皮肤
+	 * @returns 是否画上：解析不到图片或非 div 时返回 false，节点保持原样
+	 */
+	addPortrait(node: HTMLElement, name: string, skin?: string): boolean {
+		const path = skin ? this.getCharacterSkin(name, skin)?.path : this.getCurrentSkinPath(name);
+		if (!path) {
+			console.warn(`[whichWaySkin] 找不到图片（角色：${name}${skin ? `，皮肤：${skin}` : ""}），未添加`);
+			return false;
+		}
+		return mountPortrait(node, path);
+	}
+
+	/**
+	 * 立绘位置/缩放设定（`json/pos.json` 的内存形态）：干员id → 皮肤名 → `{ x, y, scale }`。
+	 *
+	 * 返回的是**活引用**，改它就是在改当前生效的设定（要重绘才看得见，且不会自动落盘）；
+	 * 想直接落盘调 `flushPortraitPos()`。暴露的用途：控制台查配置、外部面板批量重置。
+	 */
+	get posData(): Record<string, Record<string, PortraitPos>> {
+		return getPosData();
+	}
+
+	/** 把内存里的立绘设定立刻写进 `json/pos.json`（拖拽松手/退出拖拽时已会自动调，这里给手动兜底） */
+	flushPortraitPos(): void {
+		flushSave();
+	}
+
+	/** 读某干员某皮肤当前生效的立绘设定；没有配置时返回缺省值，不会返回 undefined */
+	getPortraitPos(name: string, skin = DEFAULT_SKIN_NAME): PortraitPos {
+		return getPos(name, skin);
+	}
+
+	/**
 	 * 设置角色皮肤
 	 * @returns 是否写入成功：找不到该皮肤时为 false（调用方据此决定要不要更新界面，避免"界面切了但配置没变"）
 	 */
@@ -341,7 +395,7 @@ class WhichWaySkin {
 		return true;
 	}
 
-	syncSkin({key, value,del}: {key:string,value?:[string,string|undefined],del?:boolean}){
+	syncSkin({key, value,del}: {key:string,value?:[string,string],del?:boolean}){
 		if(del === true){
 			delete this._skinStore[key];
 			delete window.whichWaySave.skinConfig[key];
@@ -444,24 +498,41 @@ class WhichWaySkin {
 
 		const self = this;
 
+		/**
+		 * 写入一条皮肤配置；**路径解析不出来时删键，绝不留下 `undefined`**。
+		 *
+		 * 引擎的 `setBackground` 只看 `lib.config.skin[name]` 这个键在不在（`init/polyfill.ts:205-206`），
+		 * 键在就无条件取 `[1]`，不再回落到武将数据上的 `img`；`setBackgroundImage` 又是字符串拼接
+		 * （`polyfill.ts:250-262`），于是 `[皮肤名, undefined]` 会被贴成 `url("<assetURL>undefined")` ——
+		 * 立绘画空，还把本来有效的 `char.img`（即本扩展注册时写好的「经典形象」立绘）挤掉。
+		 * 删键后引擎走 `nameinfo.img` 那条分支；下面的 `lib.config.skin = full` 与各处 `saveConfig`
+		 * 会把这条失效存档一并清掉，重启后不会复现。
+		 */
+		const store = (key: string, skinName: string, path: unknown) => {
+			if (typeof path === "string" && path.length > 0) {
+				self._skinStore[key] = [skinName, path];
+				return;
+			}
+			console.warn(`[whichWaySkin] 皮肤「${skinName}」（角色：${key}）解析不到图片路径，本条配置已丢弃，回落到经典形象`);
+			delete self._skinStore[key];
+		};
+
 		const loadFrom = (obj: Record<string, any>, isTransformed: boolean) => {
 			for (const key in obj) {
 				const val = obj[key];
 				if (isTransformed) {
 					if (typeof val === "string") {
-						const existing = self._skinStore[key];
 						//@ts-ignore
-						const path = self.getCharacterSkin(key, whichWayFile.removeExt(val))?.path ?? existing?.[1];
-						self._skinStore[key] = [val, path];
+						store(key, val, self.getCharacterSkin(key, whichWayFile.removeExt(val))?.path ?? self._skinStore[key]?.[1]);
 					}
 				} else {
 					if (Array.isArray(val) && val.length >= 1 && typeof val[0] === "string") {
 						//路径按皮肤名重新解析：皮肤目录整体迁移后，存档里烙着的旧路径要让位给
 						//本次扫描到的真实路径；解析不到（如本体/其它扩展的皮肤）才沿用原值。
-						const path = self.getCharacterSkin(key, whichWayFile.removeExt(val[0]))?.path ?? val[1];
-						self._skinStore[key] = [val[0], path];
+						store(key, val[0], self.getCharacterSkin(key, whichWayFile.removeExt(val[0]))?.path ?? val[1]);
 					} else if (typeof val === "string") {
-						self._skinStore[key] = [val, undefined];
+						//@ts-ignore
+						store(key, val, self.getCharacterSkin(key, whichWayFile.removeExt(val))?.path);
 					}
 				}
 			}
@@ -571,8 +642,11 @@ class WhichWaySkin {
 
 	/**
 	 * 共享的皮肤配置对象
+	 *
+	 * 路径一定是非空字符串：`[皮肤名, undefined]` 会被引擎贴成 `url(undefined)` 并挤掉有效的 `char.img`，
+	 * 写入口（`syncAllSkinConfig` 的 `store()` 与 `setCharacterSkin`）都保证解析不到就不写键。
 	 */
-	private _skinStore: Record<string, [string, string | undefined]> = {};
+	private _skinStore: Record<string, [string, string]> = {};
 
 	private _isSyncing = false;
 

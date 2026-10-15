@@ -1,19 +1,321 @@
 # 瑰丽理想 WhichWay 更新日志
 
+## 2026-10-15
+
+### 修复：立绘补齐脚本「远端明明有 `char_4231_clemnt` 却报不出来」，并把缓存 json 挪进 `scripts/cache/`
+
+用户报告两点：①`scripts/update-portraits.mjs` 漏掉了远端存在的 `char_4231_clemnt`；②缓存 json 别放系统临时目录，改放 `scripts/cache`。
+
+**根因有两层，都不在「下载/压缩」那一段**：
+
+1. **形态全集取自 `skin_table`，而本地 `json/arknight/skin_table.json` 是过期的，且没有任何脚本会刷新它**。`scripts/update-arknight-data.bat:54` 的 `FILES` 与 `src/arknight/index.ts:618` 的 `updateFile` 都是同一份四张表清单（character / charword / handbook_team / char_patch），里面没有 skin_table。旧代码 `const forms = IDS.length ? IDS : [...byForm.keys()]` 直接以 skin_table 的形态为全集 ⇒ clemnt 这类「`character_table` 里有、skin_table 里一条皮肤都没有」的新干员**连进入分类循环的资格都没有**，`unknown`（只收 `--ids` 里查不到的 id）和 `noRemote` 都不会提到它——表现为「脚本执行时却没有这个角色」，且不报错。
+   修法：形态全集改成 `skin_table 的形态 ∪ 干员表里 isCharacter 的形态`，并新增 `noSkin` 这一类（干员表里有、本地皮肤表没有条目 = 表过期，`portraitId` 根本无从得知），单列报告并指明「重跑加 `--update-tables`」。顺带把 `have.has(form)` 提到循环最前面：本地已有图的形态一律算 `done`，不再因为表里查不到而被误报成 `unknown`。
+2. **补最新的 skin_table 后，站点的 `char_arts` 依然没有这三个人的全身立绘**（`char_4231_clemnt` / `char_393_toledo` / `char_4232_hbound` 三个，`--update-tables --dry-run` 实测 `远端未收录 3`）。但 `raw/char_portrait`（半身像）三个人的 `_1`/`_2` 都在，`raw/char_avatar`（头像）也有。也就是说剩下的缺口是站点收录范围问题，不是脚本 bug。
+   实测两目录的性质差异：`char_arts` 1935 个文件、0.8~3.5MB，就是本仓库 `character/` 放的东西（现有 453 张长边 1280）；`char_portrait` 1413 个文件、约 120KB、**180x360**（走完整下载+压缩链路验证过：`char_4231_clemnt_2.png` 119KB → 37KB，`magick identify` = 180x360）。分辨率差一个数量级，混进同一目录会让武将卡明显发虚 ⇒ **半身像只做成显式可选，不作默认回落**。
+
+**新增 `--sources`（逗号分隔，顺序即优先级，默认 `char_arts`）**：可选值限定为 `char_arts`(全身立绘) / `char_portrait`(半身像)，传别的（含 `char_avatar`，它命名规则是 `char_<形态>`/`char_<形态>_2`，跟 `portraitId` 对不上）就地报错退出 1。`pickArt` 改成按目录顺序逐个试、目录内仍「精二优先→初始替代」，计划的 kind 对非默认来源加前缀（`半身像·精二`），落盘位置不变。每个来源目录各抓/各缓存一份清单（`<目录>_index.json`），加一个来源只是多一次清单请求。**默认行为与改动前完全一致**：不带 `--sources` 时不会多打一个请求、也不会多出任何半身像计划。
+
+**缓存目录（第 2 点要求）**：`CACHE` 默认值从 `os.tmpdir()/whichway-portraits` 改成 `path.join(HERE, "cache")` = `scripts/cache/`，`import os` 随之删除。清单 `<目录>_index.json`、原始图 `arts/<目录>/*.png`、`--update-tables` 的两张临时表现在都在 `scripts/cache/` 下，`.gitignore` 补了 `scripts/cache/`（清单就 400KB+，原图更大，绝不能进版本库）。原始图**按来源目录分子文件夹**存放：两个目录有 1100+ 个同名文件（半身像与全身立绘只差体积），平铺会把缓存互相顶掉、断点续传会复用错图。旧的 `os.tmpdir()` 缓存没做迁移（新位置第一次跑会自动重抓清单；那是 7 天缓存，不是数据资产）。日志与文档头里「临时目录」的措辞一并改成「缓存目录」，`--cache` 参数说明补上默认值。
+
+**顺带**：清单条数改按「去掉子目录后的条目数」报（`children` 里夹着目录项，`char_portrait` 报 1414 实际可比对 1413）；文档头补「为什么形态全集不能只看 skin_table」「两个图片目录的差别」两段，并把已经过期的「当前缺 24 张」改成「先看 `--dry-run`」。上一节里那句「`--update-tables` 只写到临时目录（`os.tmpdir()/whichway-portraits）」保留原文不改（历史记录），以本节为准。
+
+**验证**：`prettier --check` 通过、`node --check` 通过、文件仍是 LF（428 行尾全 LF、0 CRLF）。行为实测：①默认 `--dry-run --offline` → 新增的 `皮肤表缺条目 3` 一行点出 toledo/clemnt/hbound 并给出 `--update-tables` 指引（改前这三个字都不出现）；②`--update-tables --dry-run --ids` 三人 → `远端未收录 3`，证明「表补齐后仍缺图」是站点范围问题；③`--sources char_arts,char_portrait` 同一批 → 三条 `[半身像·精二]` 计划；④真实下载链路用 `--out` 指向系统临时目录跑通（落点没碰仓库资源），⑤`--sources char_avatar` / `--sources nope` 均退出 1。**未做的事**：没有把任何半身像写进 `image/illustration/character/`（默认路径不收，要收请显式加 `--sources`）；没有改 `update-arknight-data.bat` 去刷新 skin_table（那会牵动它的文件清单与校验规则，且 skin_table 运行时并不加载，属另一个决定）；`scripts/cache/char_avatar_index.json` 是排查时抓的，脚本不认它，已删。
+
+### 整理 `scripts/`：三份发布脚本合并成 `release.bat` 的三个子命令，并新增 `index.bat` 编号菜单启动器
+
+用户要求两件事：①合并功能重复的 `release.bat` / `release-dev.bat` / `pack-local.bat`；②写一个 `index.bat`，列出 `scripts/` 下的脚本、输入编号即进入该脚本的执行界面并弹出它的使用说明。
+
+**①合并（`scripts/release.bat` 整体重写，另外两份已删）**——三条流水线共用同一批子过程，命令分派在文件头：
+
+- `release.bat release <version> [baseline] [--push-only]` = 原 `release.bat`：构建 → dev-output 提交 → `commit-tree -p output -p dev-output` 打标签 → `node make-core-index.cjs` + 临时 index 生成 output-core → `git push --atomic`（推前 `git ls-remote` 预检远端同名标签：同 hash 就从 reflist 剔除，异 hash 直接中止并给两条出路），最后把 output / output-core 导出到 `release\`。
+- `release.bat dev [--no-zip] [--push-only]` = 原 `release-dev.bat`：构建 → dev-output 提交 → 本地 `WhichWay-dev-<sha7>.zip` → 只推 dev-output。
+- `release.bat pack [output|core|all]` = 原 `pack-local.bat`：把 `release\output`、`release\output-core` 压成 `scripts\WhichWay-<version>.zip` / `-core.zip`。
+- 抽出来的共享子过程：`:do_build`、`:make_dev_output`（temp `GIT_INDEX_FILE` + `--work-tree` + `write-tree`/`commit-tree`/`update-ref`，并注入 `.github/workflows/release.yml` 的 blob）、`:zip_wrapped`、`:zip_flat`、`:export_tree`（`git archive` 绕开中文路径）、`:describe_output_tag`、`:require_clean_tree`、`:require_branches`、`:require_vite`、`:remember_head`/`:report_head`、`:normalize_version`、`:network_hints`、`:refs_ready`（push-only 从 ref 回读，不重建提交）。全程仍是 plumbing，不切分支、不动工作树。
+- **刻意保留的差异**：`pack` 出来的包根就是扩展内容（没有 `WhichWay/` 顶层，沿用 `Compress-Archive`，不依赖 tar），`dev` 出来的包带 `WhichWay/` 顶层（drop-in 安装包，tar 优先、PowerShell 兜底）。统一布局会悄悄改变产物形态，所以只共用代码、不共用格式。
+- **顺带修掉一个一直存在的历史缺陷**：旧 `pack-local.bat` 把 `git describe --tags --abbrev=0 --exclude=*-core` 写在 `for /f ('…')` 里，而 cmd 的 `for /f` 会把 `=` 当分隔符拆掉 ⇒ 那条 describe 从来没成功过，zip 名里的版本号恒回退成 `local`。现在统一走 `:describe_output_tag`（先重定向到 `%TEMP%` 的临时文件，再用 `for /f "usebackq"` 读回）。实测 `release.bat pack` 现在能拿到 `v1.5.6`。
+- 暂存文件全部挪到 `%TEMP%\whichway-release`（原来散在仓库里），失败或中断不会留下半成品。
+
+**②`scripts/index.bat` + `scripts/index-menu.mjs`**——`index.bat` 是 ASCII+CRLF 薄壳（只做 `where node` 检查后转 `node index-menu.mjs %*`），菜单、中文标签与说明全部在 mjs 侧：切 UTF-8 代码页这件事按 `find-arkid.mjs` 的做法只能在 node 里做（bat 里 `for /f` 探测 chcp 会派生子 cmd 抽干管道 stdin）。
+
+- 列表 = 扫描 `scripts/` 的 `.bat/.cmd/.mjs/.cjs`，排除启动器自身（`index.bat`、`index-menu.mjs`），按分类分组连续编号（`发布 / 打包`、`游戏数据`、`立绘 / 图片`、`一次性迁移`、`内部`，未登记的落「其他」且摘要取文档头首行，所以新增脚本不会漏）。
+- 「弹出使用说明」不另写一份文案：`.bat` 抠文件开头连续的 `REM` 块、`.mjs/.cjs` 抠开头的 JSDoc 块，取出 `Usage:`/`用法：` 下面缩进的那一段显示，并把带 `⚠`/「不可逆」的**整段**（含换行续写的那几行——`split-illustration` 的「先加 --dry-run」就写在第二行）提到前面。改脚本的文档头，菜单自动跟着变。bat 里为躲 cmd 转义写的 `^<version^>` / `[output^|core]` 显示时还原成尖括号和竖线。
+- 选中 → 显示说明 → 问参数 → 回显整条命令 → `[Y/n]` 确认 → 执行。确认**只认 `y`/`yes`/空回车**，其它输入一律取消：写成「非 `n` 即同意」时，一次笔误（实测把 `q` 当成参数喂进去）就直接执行了脚本本身。子进程 `stdio: "inherit"`、`cwd` = 扩展包根，所以脚本自己的交互（`release.bat` 推送前的 `pause`、`find-arkid` 的循环查询）在菜单里和直接双击一样；跑子进程前 `menu.pause()`、跑完 `resume()`，让子进程独占键盘。
+- 免交互用法：`index.bat <编号> [参数…]` 直接执行（不确认），`index.bat --list` 只打印编号表，`--help` 打印用法。退出码会透传（实测 `9`→1、`99`→2、`--list`→0）。
+- **启动器不软化任何脚本**：`split-illustration`（默认剪切）、`rename-to-arkid`（默认只检查）、`compress-skin --inplace` 仍然要自己写 `--dry-run`/`--apply`，说明栏会把它们的 ⚠ 行顶在前面。
+
+**踩到并记录的两个批处理/Node 事实**（本轮实测，非推断）：
+
+- `REM` 行里的裸 `<`、`>`、`|` 在这台机器（cmd 10.0.26200）**不会再被当重定向解析**：顶层、`if ()` 块内、`for %%x in () do ()` 块内三种位置都试过，既不报错也不生成文件。`find-arkid.bat` 头顶记的「REM 里的尖括号会变成真重定向」这条在本次实测中没有复现；`release.bat` 的用法行仍写成 `^<version^>`（无害且向后兼容旧 cmd），菜单负责把脱义符还原回来。
+- 从 node 启动 `.bat` 必须显式走 cmd（Node 直接 spawn `.bat` 会 EINVAL），且引号要**整条再包一层**：`cmd /d /s /c ""<绝对路径>" pack "two words""` 配 `windowsVerbatimArguments: true` 才正确分成 `%~1=pack`、`%~2=two words`；不包外层引号时 cmd 会把首尾引号吃掉一部分并报「不是内部或外部命令」。
+- 菜单原先用 `async/await` + `rl.question`：readline 会在同一个数据块里同步抛出多行，await 的续体是微任务，等它跑起来时后面几行已经没人接 ⇒ 管道/重定向喂进来的「编号+参数+确认」整段丢失，还会以退出码 13（unsettled top-level await）收场。改成 `find-arkid.mjs` 那种递归 `rl.question` 回调链后，A/B/C 三种管道脚本（取消、带参数执行、无效编号）全部走通。
+
+**删除与同步**：`scripts/release-dev.bat`、`scripts/pack-local.bat` 已删（两份都被包内嵌套 git 跟踪，`git checkout -- scripts/<name>` 即可恢复）；`.gitignore` 里 `release/` 的注释从 `(release.bat -> pack-local.bat)` 改成 `(release.bat release -> release.bat pack)`；`release.bat` 内一处指向 `pack-local.bat` 的注释改为不带文件名的描述。
+
+**验证**：静态与只读路径实跑通过——无参数/未知命令/缺版本/版本号非法（`1.5.9`、`v`）四条 usage 与校验分支；`pack`（无 `release\` 时两条 `[WARN]` 跳过、版本取到 `v1.5.6`）；`dev` 与 `release v9.9.9` 都在「工作树必须干净」预检处中止，**没进构建、没进推送**；`release.bat` 仍是 ASCII-only + 全 CRLF 无裸 LF。**未实跑的路径（需要你择机验证）**：`release`/`dev` 的构建+提交+`git push`、`--push-only` 从 ref 回读、`:export_tree` 与两种 zip 布局的实际内容、以及远端标签预检的两条分支——这些要么推共享分支、要么改分支头，我没有执行。菜单侧已验 `--list` / 直接执行 / 三种管道输入流程，**真实键盘的 TTY 交互未实测**（本机无法在受控终端里扮演用户），请你双击 `index.bat` 确认列表对齐、`q` 退出、以及进 `release.bat dev` 后 `pause` 是否还接得住按键。
+另外本轮只动 `scripts/` 与 `.gitignore`，没碰扩展运行时代码 ⇒ 无需构建。
+
+### 修复：皮肤路径解析不到时写出 `[皮肤名, undefined]`，导致立绘两层背景画成 `url(undefined)`（烈夏）
+
+用户报告：烈夏（`char_194_leto`）在 `src/skin/avatarBackground.ts` 的两层遮罩里 background 的 url 是 `undefined`，但 `get.character("char_194_leto")` 明明有 `img`。
+
+**根因不在 `avatarBackground.ts`，而在皮肤配置数据**：`paintPortrait()` 是借引擎的 `setBackground` 离屏算 url 的，所以问题必然出在引擎那条 `src` 赋值链上。`apps/core/noname/init/polyfill.ts:205-206` 是 `if (type === "character" && lib.config.skin[name] && !noskin) src = lib.config.skin[name][1];`——**只判断键在不在，键在就无条件取 `[1]`，完全不看 `[1]` 是不是有效路径**，于是排在它后面的 `else if (imgPrefixUrl)`（即 `nameinfo.img`，polyfill.ts:182/207）这条有效分支被一条空路径配置挤掉。接着 `setBackgroundImage`（polyfill.ts:250-262）按 `url("${lib.assetURL}${v}")` 字符串拼接，`undefined` 被拼成字面量 `url("…undefined")`。两层遮罩拿到的就是这个，表现为「武将数据有 img，画出来却是 undefined」。
+
+**写进 `lib.config.skin` 的那条 undefined 来自 `syncAllSkinConfig()`**（`src/skin/index.ts`）：`loadFrom` 的三条存档源里，字符串形态（`whichWaySave.skinConfig` / `qhly_skinset.skin`）走 `getCharacterSkin(key, removeExt(val))?.path ?? existing?.[1]`，两者都取不到时**照样写** `self._skinStore[key] = [val, path]`；数组形态（本体 `lib.config.skin`）的 `?? val[1]` 同理，且存档经 JSON 往返后 `undefined` 会变成 `null`；最露骨的是 `else if (typeof val === "string") { self._skinStore[key] = [val, undefined]; }` 直接显式写 undefined。三条都会流到末尾的 `lib.config.skin = full`。
+
+**烈夏为什么必然命中**：`initSkinData()` 只扫 `skin:`（= `image/illustration/skin/`），而烈夏的皮肤 `来日欢歌.jpg` **只在旧目录 `image/skin/char_194_leto/` 里**——目录迁移时就 deliberately 没搬（本次会话核对：`image/skin/` 里未被 `illustration/skin/` 覆盖的只剩 `char_194_leto/来日欢歌.jpg`、`char_4204_mantra/万籁俱寂.jpg`、`amiyamrfz/`、`spkeluosi/`、`aikuisimrfz/` 五项，且 1.5.6 缓存 `json/cache/skin.json` 的 369 个角色里既没有 `char_194_leto` 键、也没有任何「经典形象」条目）。所以 `getCharacterSkin("char_194_leto", *)` 恒为 `undefined`，而存档里那条选择（改名迁移 `arkidMigration.ts:144` 换键不换值，选择会一路保留）就把 `[来日欢歌.jpg, undefined]` 顶进了 `lib.config.skin`。
+另外「经典形象」条目是 `onInit` 钩子注入的，而 `syncAllSkinConfig()` 在 `init()` 的那个 `await` 里就跑完了 ⇒ **同步期间 `skinData` 里根本没有任何角色的「经典形象」**，所以存档里等于「经典形象」的选择同样会解析失败——这条以后要动注入时机时得记住。
+
+**修法（只动数据源头，不改引擎、不给渲染层加兜底）**：`loadFrom` 的三个写入点统一走新加的 `store(key, skinName, path)`——路径是非空字符串才写，否则 `delete this._skinStore[key]` 并 `console.warn`。删键后引擎自然落到 `nameinfo.img`（= `src/packs/index.ts:149` 注册的 `whichWayFile.getCharacterPortraitPath(name)`，即「经典形象」立绘），观感上等于「回落到经典形象」；又因为末尾的 `lib.config.skin = full` / `transformSkinData(full)` 会同时重存 `skin` 与 `skinConfig`，这条失效存档**下次启动就自愈、不会再复现**。顺序语义保持不变：`skinOverride` 的优先级仍是「后写的源赢」，只是源与源之间的兜底（`?? existing?.[1]` / `?? val[1]`）现在只在拿到的是字符串时才成立。顺带把 `_skinStore` 与 `syncSkin` 的 value 类型从 `[string, string | undefined]` 收紧成 `[string, string]`，把这个不变量写进类型；`setCharacterSkin` 本来就有 `if (!skinData) return false` 的前置检查，是唯一另一个写入点，不需要改。
+
+**没动的相关问题（等确认，属资源操作）**：
+- 要让烈夏的「来日欢歌」重新可用，只需把 `image/skin/char_194_leto/来日欢歌.jpg` **复制**一份到 `image/illustration/skin/char_194_leto/`（旧目录按惯例保留未动），搬完还得让皮肤缓存重建（配置面板的「更新皮肤数据」按钮，或删 `json/cache/skin.json`），否则 `autoUpdateSkinData()` 仍读 1.5.6 的旧缓存。`char_4204_mantra/万籁俱寂.jpg` 同理。本次未擅自搬文件。
+- `amiyamrfz`（只有旧 `image/character/amiyamrfz.jpg`）、`spkeluosi`、`aikuisimrfz` 三个自定义 id 在 `illustration/character/` 下**完全没有立绘** ⇒ `char.img` 指向不存在的 `illustration/character/*.jpg`，回落到经典形象也是一张空图；这是立绘覆盖缺口，与本 bug 无关，未处理。
+
+**验证**：`prettier --check` 与 `pnpm eslint src/skin/index.ts` 均 0 问题；完整构建（不带 `WW_SKIP_STATIC_COPY`，9.30s，`vite-plugin-static-copy` Copied 12 items）通过，产物 `chunks/skin-PortraitLayers-shared.js:7531` 里已是 `console.warn(...) , delete e._skinStore[n]`，且整个 chunk 中不再出现写 `undefined` 的形态。`store()/loadFrom()` 用 node 离线按真实目录形态跑了 5 组：①烈夏（只在旧目录，字符串源）→ 键被丢弃、无 undefined；②本体数组源带着仍存在的旧 `image/skin/...` 路径 → 保留该路径；③存档被 JSON 压成 `[名, null]` → 丢弃；④阿米娅「报童.jpg」→ 解析到 `illustration/skin/char_002_amiya/报童.png` 并保留；⑤本体在前+驶舰字符串在后（名字解析不到但已有有效路径）→ 沿用已有路径。**实机未验证**（浏览器 MCP 加载不了 dev app）：烈夏进场/换肤/选将卡是否显示经典形象、控制台是否打出的那条 warn、以及失效选择被清理后皮肤面板的回显，都要人工进游戏确认。
+
+### 结城理两个人格面具技能补「当前转换技状态」可见（`intro.content` + `dynamicTranslate`）
+
+`thanatos_mrfz`/`orpheus_mrfz` 此前只在选目标的 `prompt2` 里说一次当前分支，平时看不出 ☯ 切到了①还是②。本次给两个技能各加 `intro`（标记角标 + 悬停内容）和一条 `dynamicTranslate` 动态翻译，全部改在 `src/packs/character/char_4217_makoto.ts`。
+
+- **`dynamicTranslate` 走扩展自有钩子**：`char_4217_makoto.ts:2` 的 import 补上它（`src/packs/hooks.ts:20` 的 `_FUNCTION_HOOKS`，条目在 `pendingRun` 时由 `_runHooks` 写进 `lib.dynamicTranslate[key]`）。顺序安全：`src/packs/base/index.ts:66` 的 `lib.dynamicTranslate = dynamicTranslate`（整表赋值）是模块求值期跑的，早于 `onBeforeInit` 里的 pendingRun，所以钩子条目不会被盖掉；`src/packs/base/translate/dynamicTranslate.js` 里也没有同名键，不会撞上 `_runHooks` 的重复键抛错。
+- **动态翻译是「整体替换」而不是追加**：`get.skillInfoTranslation`（`get/index.js:4021-4031`）只要 `lib.dynamicTranslate[name]` 存在就不再读 `_info`，所以描述必须返回完整文案。做法是把两段静态描述提成 `THANATOS_INFO`/`ORPHEUS_INFO` 常量，`translate({...})` 与 `dynamicTranslate({...})` 共用同一份，动态版把描述里的 `[①…;②…]` 分支段按当前状态上色（在用的红、没在用的灰），末尾再拼一行已经算好数值的当前分支注脚。上色与注脚都自己调 `whichWayUtil.colorize("#r…#")`——`dynamicTranslate` 没有像 `translate` 那样注册 `registerExecute` 预处理（`src/packs/index.ts:68-77` 只注册了 translate），不自己 colorize 就会把 `#r` 原样显示。悬停技能名的对话框走 `ui/click/index.js:3083-3084`（直接拼 HTML，`<br>` 与 poptip 标签都活着）。
+- **角标用 `intro.markcount` 返回字符串**：`updateMark` 取角标数值时 `typeof intro.markcount == "function"` 排第一优先级，且最终是 `markcount.innerHTML = num`（`player.js:4883-4903`），所以直接返回 `①`/`②` 就能显示，不必用容易被读成「有几个标记」的 1/2。悬停内容走 `get.storageintro` 的 default 分支 `type(content, player, skill)`（`get/index.js:5096-5098`），签名与同文件 `bujimrfz_handcard`、佩德洛 `funanmrfz` 一致。
+- **推翻上一节「不加 ☯」的判断**：那条说 ☯ 初始角度对 number storage 取 `countMark(name) % limit`（`player.js:10704-10705`），①会显示成 180°、②显示成 0°，与布尔约定相反——这点属实，但结论错了。因为 `changeZhuanhuanji` 广播的 `$changeZhuanhuanji` 做的是**相对**旋转 `mark.firstChild.reversed += 360 / limit`（`player.js:2397-2406`）而不是按 storage 重算，切一次就翻一次奇偶，和 `countMark % 2` 的奇偶完全一致（①：180→360→540…，②：0→180→…），朝向始终自洽；而 `marktext` 只在导入期由 `game.finishSkill` 写死成 `lib.translate[id+"_bg"]`（`game/index.js:8830`），本来就没法按状态换字形。所以 ☯ 照加（它就是「本技能是转换技」的记号），**真正分辨①/②靠角标和悬停内容**。
+- **`zhuanhuanji` 函数里补 `player.syncStorage(skill)`**：默认广播只转 ☯、不重算角标；`syncStorage` → `game.addVideo("storage", …)` 在非联机非录像路径里会顺手 `player.updateMarks()`（`game/index.js:5010-5026`），角标与悬停内容就跟着刷新。⚠️ 联机下 `addVideo` 直接 return，且函数式 `zhuanhuanji` 本来就不广播 storage（`player.js:2349-2355`，只有 `zhuanhuanji == "number"` 走 `addMark` 才同步）⇒ 远端的 ☯ 朝向靠相对旋转仍是对的，但角标/悬停要等下一次任意 storage 同步才更新。这是引擎对函数式转换技的既有限制，本扩展所有 ☯ 技能（佩德洛、黛丝山等）同样如此，本次未处理。
+- **顺手统一的两处**：① `personaValue(player, mark)`——原来塔纳托斯和俄尔普斯各写了一份一模一样的 `mark === 1 ? player.hp : player.getDamagedHp()`，现在合并，显示与结算共用；② 新增 `personaState(player, skill)` 读状态（只有 `storage === 2` 才算②，未初始化等一律按①），`filter`/`cost`/`content` 里裸读 `player.storage[...]` 的地方全部改走它，避免 `init` 没跑时 `undefined` 混进显示。塔纳托斯的 `prompt2` 也不再重复 `prompt: get.prompt()` 已经渲染的技能名，并去掉原先②分支把「本技能的状态切换条件……」直接拼接、没有 `<br>` 的残句。
+- 验证：`prettier --check` 通过、`npx eslint` 0 报错、`WW_SKIP_STATIC_COPY=1 vite build` 3.52s 通过（本次只改 JS，无新增静态资源，故不再跑完整构建）；产物核对 `chunks/packs.js`：两个技能对象都有 `mark: !0, marktext: "☯"`、`intro.markcount`/`intro.content` 在、`zhuanhuanji` 里带 `syncStorage`、`dynamicTranslate` 注册已压缩成 `ae({thanatos_mrfz(g){…},orpheus_mrfz(g){…}})`；注脚字符串在 node 里模拟 `colorize` 跑过，含 poptip 标签也不会残留 `#`。**实机未验证**（浏览器 MCP 加载不了 dev app）：`.markcount` 里塞全角 `①/②` 的排版、☯ 朝向与分支的实际对应、切状态后角标与悬停内容的刷新时机，都要进游戏确认。
+- **（同日追加）描述本身改成「当前分支红、另一支灰」**：上一版的可见性全靠末尾那行注脚，正文里 `[①…;②…]` 两段仍是同一种颜色，读的人得自己比对。现在 `dynamicTranslate` 先把正文上色再拼注脚——新增 `colorBranches(text, mark)`，用 `/\[①([^;\]]*);②([^\]]*)\]/g` 把 `[①甲;②乙]` 就地换成 `#r①甲#;#s②乙#`（状态②时反过来），色码沿用扩展既有约定：`#r`=red、`#s`=`#696969` 灰（见 `whichWayUtil.colorize` 的 `colorMap`），写法与 `dynamicTranslate.js` 里的 `titimrfz_mingshimrfz`、`lvmaimrfz` 一致。
+  - 为什么是「正则改写静态文案」而不是像 `lvmaimrfz` 那样每个状态重写一句长句：塔纳托斯有 2 处分支段、俄尔普斯有 3 处，`THANATOS_INFO`/`ORPHEUS_INFO` 同时又喂给 `translate()` 当图鉴描述，写两份迟早各自漂移；改写静态串则天然同源，且**上色只发生在 `dynamicTranslate` 里**，图鉴/无主视角看到的仍是完整未上色的两个分支。
+  - `get.poptip("shandian")` 生成的是 `<noname-poptip poptip = shandian></noname-poptip>`（`apps/core/noname/library/poptip.js:152-161`），不含 `;`、`]`、`#`，所以既不会被这条正则误切成两段，也不会打断 `colorize` 的 `#x…#` 匹配；塔纳托斯第二处分支段末尾那个半角 `)`（原文 `[…])`）保持原样没动。
+  - 注脚暂时保留没有删：正文上色后仍缺「X/Y 到底等于几」，注脚给的是算好的数值（`#r①X=体力值=三：…#`），`intro.content`（标记悬停）和 `prompt2`（选目标提示）也共用同一份文案。若觉得和红色正文重复，删掉 `dynamicTranslate` 里那句 `+ "<br>" + xxxNote(player)` 即可，另外两处不受影响。
+  - 验证：`npx eslint` 0 报错；在 node 里照抄 `colorize` 的实现跑两技能 × 两状态共 4 组，红/灰 span 数量与分支段数一致、`[①` 残留 0、除 `#696969` 自身外无残留 `#`。**实机未验证**：灰字（`#696969`）在默认字体/背景下的可读性、以及注脚与红字并排的观感，要进游戏确认。
+
+
+### 修复：结城理 `Uncaught (in promise) TypeError: o.targets is not iterable`
+
+实机崩在 `orpheus_mrfz.content` 的目标循环（产物 `apps/core/extension/WhichWay/chunks/packs.js:32301` 的 `for (let g of o.targets)`，栈里 `content.ts:4307` 正是 `createTrigger` 的 `await next`）。根因**不在选目标本身**，而在技能上的 `forced: true`：
+
+- `content.ts:4125` 是 `if (event.revealed || info.forced) { result = { bool: true }; }`，这个 `if` 把下面整个 `else` 分支（`info.direct` / `typeof info.cost === "function"` / `chooseBool`）**全部跳过**。所以 forced 技能的 `cost` 根本不会执行，目标一个都没选。
+- 而 `createTrigger` 只在 `result.targets` 非空时才把目标写进 content 事件（`content.ts:4259-4260` 取 `result.targets.slice(0)`，`4295-4297` 用 `get.itemtype(targets) == "players"` 才 `next.targets = …`），空值路径下 `event.targets` 压根不会被赋值 ⇒ content 一上手就是 `undefined`。`{bool:true}` 恰好又满足了 `4236` 的门禁，于是必然进 content、必然抛错。
+- 表现与用户报告一致：**回合结束时弹都不弹就直接报错**。修法是把 `forced` 去掉，让 `cost` 真正跑起来；`cost` 里 `chooseTarget` 的取消按钮本身就是「不发动」，语义与「回合结束时你令……」相符。
+- **`thanatos_mrfz` 同步去掉 `forced`**：它是同一条引擎规则的必然受害者（`forced: true` + `cost` 选目标 + content 里 `const targets = event.targets`），只要脱离濒死后 `filter` 通过就会一样抛错。这属于用户已存在的代码，但不是「顺手改」——是同一个 bug 的第二次出现，改法与俄尔普斯一致，只删一个属性；如果原作者本意是「强制发动且必须选满」，那就得把选目标从 `cost` 挪进 `content`（本扩展 `char_4219_yukari.ts:261-289` 的 `if (result.bool && result.targets)` 写法），本次没往那个方向改。
+- 排查过程中被否证的两个猜测（记下来免得下次重走）：`ui.click.ok` 确实无条件写 `{bool:true, targets:ui.selected.targets.slice()}`（`ui/click/index.js:3098-3105`），但手动路径的空目标点确定进不来——`game.Check.processSelection` 在 `uiSelected.length < range[0] && (!event.forced || selectableItems || complexSelect)` 时会把 `ok` 判假（`game/check.js:89`），`ok` 假则不生成「确定」按钮（`check.js:200` → `game.check` 的 `confirm += "o"` 只在 `ok` 时加），框选松手那处也先过 `if (game.check())`（`ui/click/index.js:1800`）；AI 路径同理，`ai.basic.chooseTarget` 在没有可选目标时 `return range[0] == 0 || ok`（`ai/basic.js:206`）返回假，且它读的 `event.forced` 是 chooseTarget 事件的属性，`GameEvent` 构造器不继承父事件属性（`gameEvent.ts:20-35`）。
+- 全仓审计：`src/packs` 下按「同一技能对象里既有 `forced: true` 又有 `cost:` 且 content 读 `event.targets`」扫了一遍，除这两个外没有其他命中。
+- 验证：`prettier --check` 通过、`npx eslint` 0 报错、`WW_SKIP_STATIC_COPY=1 vite build` 2.78s 通过，并在产物里确认两个技能对象上 `forced` 已消失（`packs.js:32188`/`32268` 起的 `thanatos_mrfz`/`orpheus_mrfz` 只剩 `audio`/`charlotte`）。**实机仍待用户复测**：这次报错本身就是上一节「实机未验证」漏掉的真实缺陷，目标框弹出与两段回复/摸牌的结算仍需人工确认。
+- 顺带把上一节欠的完整构建补跑了（不带 `WW_SKIP_STATIC_COPY`，9.30s，`vite-plugin-static-copy` Copied 12 items），源目录与 `apps/core` 产物两侧的静态资源重新对齐。
+
+### 补完结城理的两个技能：`orpheus_mrfz`（俄尔普斯）与 `fuanmrfz`（赴暗）
+
+`src/packs/character/char_4217_makoto.ts` 里这两个技能此前只有 `audio`（空壳），按 `translate` 已有的描述补完实现。
+
+- **俄尔普斯整体照搬同角色已实现的塔纳托斯**：`storage[skill]` 取 1/2、`zhuanhuanji` 写成函数形式自己翻转、切换时机靠 `subSkill.change` 在 `player:"dying"` 上调 `player.changeZhuanhuanji()`。必须自己写切换是因为**引擎从不自动转换**：`changeZhuanhuanji`（`apps/core/noname/library/element/player.js:2346`）在 noname 里除了定义之外零调用点，本体武将全是自己在 content 里调；而「失去此技能不重置状态」也天然成立——`removeSkill` 只在 `info.onremove` 为 `"storage"`/`true`/数组时才删 `storage`（`player.js:11854-11881`），`init` 又只在该角色**首次**获得技能时跑（`initedSkills` 去重，`player.js:11092`）。
+- **两分支的语义**：状态①令至多 Y（=体力值）名角色**各**回复 1 点；状态②令 1 名角色回复 Y（=已损失体力值）点。即 `maxTarget = mark===1 ? y : 1`、`numPerTarget = mark===1 ? 1 : y`。`filter` 用 `y >= 1` 早退（状态②在满血时 Y=0，发动无意义），写法与塔纳托斯一致。
+- **「溢出的体力值改为摸等量张牌」= 自己算，不等引擎回报**：`content.recover` 会把 `num` 夹到 `maxHp - hp`（`content.ts:12345-12347`），所以按 `recoverNum = Math.max(0, Math.min(num, target.getDamagedHp()))`、`overflow = num - recoverNum` 分两段结算，`recover({num, source: player})` + `draw(overflow)`。**`Math.max(0, …)` 不是多余的**：体力上限被压低时 `getDamagedHp()` 返回负数（`player.js:3280-3285`），不夹零会让 overflow 反而多摸牌。
+- **满血角色也必须可选**（回复不掉的会变成摸牌），但 `chooseTarget` 省略 `filterTarget` 时默认值是 `lib.filter.all`（`player.js:6753`）——那连阵亡角色都能点，所以显式写 `target.isIn()`。AI 与塔纳托斯相反：收益技优先友方，`get.attitude2(target) < 0 ? -1 : 1`。
+- **没有给俄尔普斯加 ☯ 转换技标记**（塔纳托斯同样没有）：`marktext:"☯"` 的初始角度在 `storage` 为 number 时取的是 `countMark(name) % limit`（`player.js:10698-10712`），而这两个技能从不 `addMark`，加了标记会显示成与 `storage` 相反的分支。当前状态仍照塔纳托斯的做法写在 `prompt2` 里。
+- **赴暗用「创」式实现**（引擎 `buqu` 同款）：`addToExpansion(get.cards(3-Z), "gain2")` + `gaintag.add("fuanmrfz")`，牌由 `getExpansions("fuanmrfz")` 取回；`marktext/intro:{content:"expansion",markcount:"expansion"}` 让坚在武将牌上可见可数，`onremove` 把坚扫进弃牌堆免得技能被拆后留孤儿牌。
+- **触发时机的关键差别**：赴暗挂 `trigger:{player:"dying"}` + `firstDo` + `priority:20`，而引擎周泰的 `buqu` 挂 `chooseToUseBefore`。因为 `content.dying` 第一步就是 `await event.trigger("dying")`（`content.ts:12409`），它跑在求桃（`_save`）之前；`dyingAfter` 则是事件循环按 `name+"After"` 自动补发的（`gameEvent.ts:253/284`，全仓无手写触发点），所以塔纳托斯的「脱离濒死后」照常工作。同理**不需要 `trigger.cancel()`**：`recoverTo(1)` 走到 `content.changeHp` 时会把角色移出 `_status.dying` 并 `finish()` 掉 dying/`_save` 事件（`content.ts:12356-12368`），dying 流程第二步的 `player.hp > 0` 判据随即成立。
+- **「相同点数的牌」按「点数不唯一的坚全部弃掉」实现**（含新置的几张彼此重复），而不是只弃新牌：这样留存的坚始终点数互不相同，下一次发动的判据才有确定含义。无重复才把体力调到 1（`recoverTo(1)` = `recover(1 - getHp(true))`，与 buqu 的 `recover(1 - hp)` 等价）。
+- **Z 的口径**：`PERSONAS = ["thanatos_mrfz","orpheus_mrfz"]`（`src/poptip/poptip.js` 的「人格面具」条目明确只有这两个），Z = 当前持有数 ⇒ 坚的张数为 3/2/1。`filter` 里额外要 `fuanCount(player) > 0`：将来若真加第三个面具，0 张牌会让「无重复」白送一次回复至 1，宁可技能不放。
+- **文案两处同步**：`orpheus_mrfz_info` 结尾原来挂着从塔纳托斯复制来的残句 `（Y = 你的[①体力值;②已损失体力值])名角色[①摸一张牌;②回复一点体力]`，改成与实现一致的 `…各回复[①一;②Y]点体力…（Y = 你的[①体力值;②已损失体力值]）`，`src/poptip/poptip.js:75` 里同一份文本一并改掉；赴暗的「至于武将牌上」补正为「置于」。
+- **没动的相邻问题**：`bujimrfz.derivation` 写的是 `["thanatos","orpheus"]`，缺 `mrfz` 后缀，而 poptip 的衍生技反查靠 `lib.translate[<id>]`（`src/poptip/index.js:30-56`）⇒ 该列表当前不生效。它属于不羁，本次未擅自修改。
+- 验证：`prettier --check` 两文件通过、`pnpm eslint` 两文件 0 报错、`WW_SKIP_STATIC_COPY=1 vite build` 3.44s 通过且 `chunks/packs.js` 内 `orpheus_mrfz` 命中 11 次、`fuanmrfz` 命中 7 次、`gaintag.add("fuanmrfz")` 在；重复点数与溢出折算的算术用 node 离线跑了 6 组用例（三张同点、空坚、满血目标、上限被压的目标、满血时的状态②）结果均符合预期。**实机未验证**（浏览器 MCP 加载不了 dev app）：坚的置牌动画与 mark 计数、状态②一次回复多点+补牌的顺序、回合结束时目标框的可选范围、以及濒死时赴暗与塔纳托斯/俄尔普斯两个 `change` 子技能的触发先后，都要人工进游戏确认。本次跳过了静态资源复制，下次仍应跑一次完整构建。
+
 ## 2026-10-14
 
-### 新增：头像立绘透明图层处理 `src/skin/avatarBackground.ts`
+### 新增：立绘透明图层处理 `src/skin/avatarBackground.ts` + `src/skin/PortraitLayers.vue`
 
-明日方舟立绘带透明区域时，透出来的是引擎贴的**本体默认武将图**：`HTMLDivElement.setBackground(name,"character")` 走的是 `setBackgroundImage([立绘, lib.characterDefaultPicturePath + sex])`（`apps/core/noname/init/polyfill.ts:226-232`），即 `url(立绘),url(保底图)` 两层背景。新增模块用 `whichWayAPIOverride.appendHook` 劫持 `lib.element.player.$init` / `$reinit`，把驶舰之向角色的立绘改画进 `.avatar` 里的两层子 div（`sjzxAvtBgWrapper` 铺 `ui:background/default.png` + `overflow:hidden`，`sjzxAvtBgImage` 只贴立绘，贴完用 `firstLayer()` 把保底图层削掉）；**其余角色一律走引擎原流程，头像上连子节点都不会多**。由 `src/skin/index.ts` 静态 import 带入（skin 阶段），钩子在 content 阶段注册。
+明日方舟立绘带透明区域时，透出来的是引擎贴的**本体默认武将图**：`HTMLDivElement.setBackground(name,"character")` 走的是 `setBackgroundImage([立绘, lib.characterDefaultPicturePath + sex])`（`apps/core/noname/init/polyfill.ts:226-232`），即 `url(立绘),url(保底图)` 两层背景。新增模块用 `whichWayAPIOverride.appendHook` 劫持三处绘制入口，把驶舰之向角色的立绘改画进 `PortraitLayers.vue` 的两层子元素（`.sjzxPortraitWrapper` 铺 `ui:background/default.png` + `overflow:hidden`，`.sjzxPortraitImage` 只贴立绘，贴完用 `firstLayer()` 把保底图层削掉）；**其余角色一律走引擎原流程，节点上连子元素都不会多**。由 `src/skin/index.ts` 静态 import 带入（skin 阶段），钩子在 content 阶段注册。
 
 - **落点选 `src/skin/avatarBackground.ts` 而不是需求里写的 `src/skin.ts`**：`src/skin/` 目录已存在，`src/skin.ts` 曾作为重复文件删除（见 `updateContent.txt:31`），再加一个同名文件会让今后的 `from "./skin.js"` 解析到 `skin.ts` 而不是 `skin/index.ts`。
-- **重定向而非一次性改写**：`$init` 时给 `node.avatar` / `node.avatar2` 装上自有属性 `setBackground` / `setBackgroundImage`，「是不是干员」在每次调用时判断。因为除 `$init`/`$reinit` 外还有 `changeSkin`(player.js:3761,3800,3822)、`$reinit12/21`(3963-3978)、`setAvatar`(4523-4528)、皮肤菜单 avatarSetter、本扩展 `refreshSkin()`、以及干员技能里直接改头像的 `setBackgroundImage`（`char_416_zumama`、`shuangwangmrfz`）都会再画一次，不重定向就会被我们加的子 div 盖住，表现为「换皮肤没反应」。装一次即可覆盖全部路径：引擎从不重建 `player.node.avatar`（全仓只有 `game.logv` 的战报卡节点与 `card.js:481` 赋过 `node.avatar`）。
-- **头像节点自身保留一份「只贴立绘」的影子副本**（不带保底图层）。这是给读不到子节点的三处用的：`game.logv` 的战报卡头像是 `player.node.avatar.cloneNode()` **浅克隆**（game/index.js:9239/9265/9303/9321，只带属性与内联样式）、`smoothAvatar` 的淡出层抄 `getComputedStyle(.avatar).background`（player.js:4209）、`ui.fakeme` 抄 `.avatar` 的内联 `background-image`（3971/3984/4100/4531）。立绘只画在子 div 上的话这三处全空白。影子副本不会露馅：不透明处被内层（同图、同尺寸、同 `cover`+水平居中定位）完全盖住，透明处节点自己也是透明的，所以半透明的 `default.png`（1024×576，alpha 最低 0.769）透出来的仍只有卡面。
+- 劫持点：`lib.element.player.$init` / `$reinit`（主将 `node.avatar`、副将 `node.avatar2`）、`ui.create.buttonPresets.character`（对话框里的武将卡按钮：选将、观战、`characterx` 都走它，`ui/create/index.js:3508-3510`）。**武将卡按钮刻意用 `after` 而不是 `before`**：按钮节点是在预设内部建的（`:3353`），`before` 拿不到；判角色用 `result.link` 而不是入参 `item`，因为 `characterx` 会在内部把 `item` 换成 `lib.characterReplace` 里的随机一个（`:3360-3362`）。代价是引擎会先按原样画一次、我们再覆盖一次（多一次无用绘制，观感无差）。`after` 每条分支都返回 `undefined`，不会顶掉 `appendHook` 的返回值替换语义。
+- **`ui.create.buttonPresets.player` 没有动**：它同样有保底图层问题（`ui/create/index.js:3533/3536`），但本次需求只点名了 `character`，不扩范围。
+- **两层 DOM 抽成 `PortraitLayers.vue`**，既被 `avatarBackground.ts` 用底层 `render(createVNode(PortraitLayers, { image }), host)` 挂进引擎节点，也能当普通组件直接 `<PortraitLayers image="…" />` 用。
+  - 选 `createVNode`+`render` 而不是 `createApp().mount()`：`render()` 是**同步**挂载与打补丁（响应式更新才是异步的），且 `render(null, host)` 就是卸载，换皮肤时不必等一个 tick。
+  - 必须垫一个空的宿主 div：`render()` 会接管容器的全部子节点，直接拿引擎的 `.avatar` / `.button.character` 当容器会把 `.name`/`.hp`/`.identity`/`.avatarbg` 一起清掉。
+  - 立绘 URL 走**离屏 scratch div** 让引擎自己算（`resolveBackgroundImage()`）：贴图路径的解析（皮肤配置、`ext:`/`mode:`/`img:` 前缀、国战 `gz_`、扩展名兜底）全在 `setBackground` 里，重写一遍必然走偏。算完只把 `url(...)` 交给 Vue 的 `image` prop，避免命令式写的内联样式被下一次 patch 抹掉。
+  - `scoped` 样式照常生效（`__scopeId` 不依赖 app context），构建后进 `css/viteAutoCreateStyle.css`（`assetFileNames` 固定 + `autoLoadCSS()` 扫全目录）。
+- **重定向而非一次性改写**：`$init` 时给 `node.avatar` / `node.avatar2` 装上自有属性 `setBackground` / `setBackgroundImage`，「是不是干员」在每次调用时判断。因为除 `$init`/`$reinit` 外还有 `changeSkin`(player.js:3761,3800,3822)、`$reinit12/21`(3963-3978)、`setAvatar`(4523-4528)、皮肤菜单 avatarSetter、本扩展 `refreshSkin()`、以及干员技能里直接改头像的 `setBackgroundImage`（`char_416_zumama`、`shuangwangmrfz`）都会再画一次，不重定向就会被我们加的子元素盖住，表现为「换皮肤没反应」。装一次即可覆盖全部路径：引擎从不重建 `player.node.avatar`（全仓只有 `game.logv` 的战报卡节点与 `card.js:481` 赋过 `node.avatar`）。换回普通角色时 `dispose()` 撤掉两层，否则引擎画在节点自身的图会被子元素盖住。
+- **节点自身保留一份「只贴立绘」的影子副本**（不带保底图层）。这是给读不到子节点的四处用的：`game.logv` 的战报卡头像是 `player.node.avatar.cloneNode()` **浅克隆**（game/index.js:9239/9265/9303/9321，只带属性与内联样式）、`smoothAvatar` 的淡出层抄 `getComputedStyle(.avatar).background`（player.js:4209）、`ui.fakeme` 抄 `.avatar` 的内联 `background-image`（3971/3984/4100/4531）、以及 `game.damage` 的全屏属性动画抄 `avatar.style.backgroundImage`（player.js:16337）。立绘只画在子元素上的话这几处全是空白。影子副本不会露馅：不透明处被内层（同图、同尺寸、同 `cover`+水平居中定位）完全盖住，透明处节点自己也是透明的，所以半透明的 `default.png`（1024×576，alpha 最低 0.769）透出来的仍只有卡面。为此 `ensureLayers()` 会把节点自身的 `background-size`/`background-position-x` 钉成与内层一致。
 - **因此没有钩 `game.logv`**：`logv` 内部 `game.broadcast(game.logv, …)`（9220）会把**当时属性上的函数**反编译成源码文本发给远端（`client.js:52-69` → `get.funcInfoOL`），`appendHook` 的 wrapper 闭包引用了 `original/before/after`，在客户端是未定义变量 ⇒ 主机正常、远端战报栏全空。影子副本让浅克隆天然可用，不必冒这个险。（注：`game.trySkillAudio`/`tryDieAudio` 早已被本扩展以同样方式钩住且同样自广播，属既有隐患，本次未动。）
-- 层级：两层 div `prepend` 到最前，`smoothAvatar` 的 `.fullsize`、阵亡卡的 `.avatarbg grayscale1` 都是后加的兄弟节点，按树序仍画在我们上面；动皮容器 `.sjzxDycWrapper` 自带 `z-index:2` 不受影响。外层 `pointer-events:none` 保证 `ui.click.avatar` 照常可点。
-- `setBackground` 的 `db:` 分支是异步的（polyfill.ts:211-213），此刻内联样式还没写，故 `firstLayer()` 取到空值时直接 return，不动影子副本，免得把上一张好图冲掉。
-- 已知观感差异（非缺陷）：战报卡头像与 `ui.fakeme` 只有立绘、没有 `default.png` 背板——影子副本刻意只贴立绘，否则背板会被节点与外层各画一次（0.769 → 约 0.947 不透明度），与需求的「外层背景为 default.png」不符。
-- 验证：`pnpm eslint` 两文件 0 报错；`firstLayer()` 正则用 node-repl 跑了 6 组用例（含带空格文件名 `夏卉 FA017.png`、带括号文件名、单层、空串、`none`）全部符合预期；构建产物 `chunks/skin-avatarBackground-shared.js` 内含 `whichWaySkinAvatarBackground` 与两个 class 名、无 `logv` 残留、无反向 `from "./extension.js"`。**实机未验证**（浏览器 MCP 加载不了 dev app），观感需人工进游戏确认。
+- 层级：两层元素 `prepend` 到最前，`smoothAvatar` 的 `.fullsize`、阵亡卡的 `.avatarbg grayscale1`、武将卡的 `.name`/`.hp`/`.identity`、`ui/create/index.js:3475` 的 `.button.replaceButton` 都是后加的兄弟节点，按树序仍画在我们上面；动皮容器 `.sjzxDycWrapper` 自带 `z-index:2` 不受影响。宿主与外层都 `pointer-events:none`，`ui.click.avatar` / `ui.click.button` 照常可点。
+- **CSS 审计**（注入的宿主 div 会不会被元素级子选择器打中）：全仓扫 `.avatar`/`.button`/`.player` 的 `> div` 规则，只有 `layout.css:620 #historybar > div > .avatar > div` 与 `chess.css:152/161 .fakeme.player > div > div` 是元素级的，两处都打不中——战报栏的 `.avatar` 是浅克隆、从不含宿主 div；`.fakeme.player`（`ui.chessinfo`，chess.js:416 / tafang.js:202）的 `> div > div` 是棋子格本身，宿主 div 要再深一层。其余 `.button.character > .name/.hp/.intro/.identity`、`.button.replaceButton > div` 全是类选择器，不匹配 `.sjzxPortrait*`。全局 `div{position:absolute;transition:all .5s}`（layout.css:31）里 `transition` 对 `background-image` 无效，无副作用。
+- `setBackground` 的 `db:` 分支是异步的（polyfill.ts:211-213），此刻内联样式还没写，故 `firstLayer()` 取到空值时直接 return，不动影子副本，免得把上一张好图冲掉。驶舰之向干员的立绘一律走 `lib.config.skin`，到不了那个分支。
+- 已知观感差异（非缺陷）：战报卡头像、`ui.fakeme`、全屏属性动画只有立绘、没有 `default.png` 背板——影子副本刻意只贴立绘，否则背板会被节点与外层各画一次（0.769 → 约 0.947 不透明度），与需求的「外层背景为 default.png」不符。
+- 验证：`pnpm eslint` 两文件 0 报错；`firstLayer()` 正则用 node-repl 跑了 6 组用例（含带空格文件名 `夏卉 FA017.png`、带括号文件名、单层、空串、`none`）全部符合预期；构建产物 `chunks/skin-PortraitLayers-shared.js` 内含 `whichWaySkinAvatarBackground`、编译后的组件（`props:{image:{}}` + `__scopeId`）与三个 `appendHook`，`css/viteAutoCreateStyle.css` 含两条 scoped 规则，`_export_sfc` 独立在 `chunks/_plugin-vue_export-helper.js`、`chunks/` 内无反向 `from "./extension.js"`（顶层 await 死锁红线自查通过）。**实机未验证**（浏览器 MCP 加载不了 dev app），观感需人工进游戏确认；仓库也没有任何 headless DOM 依赖，无法离线跑 DOM 断言。
+
+### 收窄：立绘两层背景只对明日方舟干员生效
+
+`src/skin/avatarBackground.ts` 的判据从 `whichWaySave.hasChar(name)` 换成 `whichWayArknight.isArknght(name)`（两处：`installRedirect()` 装上去的 `node.setBackground` 重定向、`ui.create.buttonPresets.character` 的 `after` 钩子读 `result.link`）。
+
+- 两个判据的实际差别只在「**是方舟干员但本扩展没做**」这一档：`hasChar` 查 `allCharacters`（扩展已实装的 258 个），`isArknght` 查 `vaildArkId`（`character_table` + `char_patch_table.patchChars` 过滤 `isCharacter` 后的全量约 1400 个）。本体武将与其它扩展的角色两边都判假，仍走引擎原流程、节点上不多子元素。
+- 判据只需要「这是个方舟干员」：干员id 已与方舟 uid 统一、立绘也按 uid 落盘，透明图层问题来自方舟立绘本身，与「扩展有没有实装」无关。用 `exsitArk`（已实装干员）会把未实装但被别的扩展/自定包引进来的方舟立绘漏掉。
+- 阶段顺序有保障：`isArknght` 依赖 `vaildArkId`，由 `arknight.init()` 里的 `buildVaildArkId()` 在 **arknight 阶段（init.js:129）** 构造，`avatarBackground.ts` 由 **skin 阶段（init.js:135）** 静态 import 带入；且钩子是在 content 阶段才注册的，判定时数据必然已就位。
+- `vaildArkId` 是数组、`isArknght` 是线性 `includes`（约 1400 项）。这里没有换成 Set：调用点只在「画一次头像 / 建一个武将卡按钮」时各触发一次，不在每帧或每干员×每技能的循环里，量级与引擎自己的 `lib.config.characters.includes` 相当。
+
+### 删除 `image/illustration/skin/` 下全部「初始立绘」「精一立绘」
+
+`scripts/split-illustration.mjs` 的产物分三档：`ILLUST_2`（精二）→ `character/[形态id].png`，`ILLUST_1` → `skin/[形态id]/精一立绘.png`，`ILLUST_0` → `skin/[形态id]/初始立绘.png`。游戏内只用精二与具名皮肤，这两档 459 个文件属于死资产，已从 **源目录与构建产物两侧同时删除**：
+
+- `packages/extension/WhichWay/image/illustration/skin/`：460 目录 / 983 文件 → **369 目录 / 524 文件**（删 459 文件，顺带清掉 91 个空目录）。
+- `apps/core/extension/WhichWay/image/illustration/skin/`：同样 369 / 524。**必须手工同步**：`vite.config.ts` 里 `emptyOutDir:false`，构建不会清理产物目录，只删源目录的话 dev/构建产物里旧文件仍在。
+- 另删 `apps/core/extension/WhichWay/json/cache/skin.json`：`autoUpdateSkinData(false)` 在缓存 `version === whichWayVersion.ext` 时直接 return，而缓存里写的就是 `1.5.6`（当前 `src/version.js` 的 `ext`），不删的话游戏内皮肤清单仍会列出已删除的两档。`clearSkinCacheOnce()` 帮不上忙——它的开关是 `whichWayVersion.ext.startsWith("1.6")`，在 1.5.6 下是休眠的。
+- **可回滚**：`packages/extension/WhichWay/` 自带一个嵌套 git 仓库（外层 `F:/无名杀` 的 `.gitignore:34` 忽略了 `packages/extension/`，但嵌套仓库追踪这些图片），459 个文件删除前状态干净，`git restore` 即可取回。本次**未提交**。查这类中文路径要用 `git -c core.quotepath=false ls-files`，默认的 `git ls-files` 会把非 ASCII 转义成 `\345\210\235...` 导致 grep 全部落空。
+- **已知遗留**：已经装了旧版、且 `json/cache/skin.json` 里 `version` 已是 `1.5.6` 的玩家，皮肤清单会继续显示这两档，直到扩展版本号变动或手动点「更新皮肤数据」。
+
+### 明日方舟干员名反查索引：排除升变形态、同名取首个
+
+`src/arknight/index.ts` 的 `_getArkNameIndex()`（`addShcema` 的旧式命名干员反查用）原先按 gamedata 的 `name` 建索引且**后写覆盖前写**。而 `loadShcema()` 会把 `char_patch_table.patchChars` 并进 `character_table`，阿米娅三形态的 `name` 全是「阿米娅」，于是 `"阿米娅"` 反查到 `char_1037_amiya3`（医疗阿米娅）。改为：跳过 `patchChars` 里的键 + 同名只保留首个命中者。
+
+- 用真实缓存数据（`json/cache/arknight.json`，schema 1 / version 1.5.6）跑了前后对照：全表 454 个名字里 **10 条映射被修正**，除阿米娅外还有 9 条同名预备干员/罗德岛精英（如 `郁金香 char_608_acpion → char_513_apionr`、`Sharp char_609_acguad → char_508_aguard`）——原先一律落到 `_6xx_` 那批「敌方/NPC 占位形态」上。
+- 索引规模不变（454），只是取值变了；`patchChars` 只有 `char_1001_amiya2` / `char_1037_amiya3` 两个键，本体形态走 `addShcema` 的恒等分支，不依赖这张反查表。
+
+### 未定位：阿米娅【同感】播放成医疗阿米娅的配音
+
+**没能复现，也没能定位到成因，此项未修复。** 按现有源码逐层追下来，`char_002_amiya` 的 `newtongganmrfz`（`audio: ["任命队长","作战中1"]`）必然拼出正确地址，已排除的路径与证据：
+
+- `extUID["char_002_amiya"]`：`compileVoicePath` 只读 `shcema.transfer(uid,"character","whichWayUID")`，即这张表。用真实缓存 + 274 个干员模块的译名，把 `loadShcema` 两个循环与 `addShcema`（258 个已注册干员，按注册序）完整模拟一遍，结果恒为 `char_002_amiya`；`char_1037_amiya3` 亦为自身。上一条修的索引缺陷**够不到这里**——反查分支只对「id 不是方舟 uid」的干员生效，全仓 20 个这类 id（`acemrfz` / `plot_keluxiermrfz` 等）没有一个译名是「阿米娅」。
+- 构建产物与源码一致：`chunks/packs.js` 里 `newtongganmrfz` 的 `audio` 仍是 `["任命队长","作战中1"]`，`char_1037_amiya3` 的技能是 `["tongqingmrfz","cibeimrfz"]`（`audio: 2`），两者无交集；全仓 grep `newtongganmrfz` 只命中 `char_002_amiya.ts`，`modules/` 里没有任何 amiya/tonggan 条目，所以 `_webPlayMap.get("newtongganmrfz")` 只可能有 `char_002_amiya` 一个键。
+- 不是本地文件串味：`apps/core/extension/WhichWay/audio/` 下 `find -iname "*newtonggan*"` 为空，在线配音是唯一来源（只有 `tongganmrfz*.mp3` / `tonggan_discardmrfz*.mp3` 这批旧技能的遗留文件，引擎解析不到）。
+- 不是 PRTS 侧同名：`char_002_amiya/cn_018.wav`（129698B）与 `char_1037_amiya3/cn_018.wav`（164394B）实测 md5 不同，gamedata 的 `voiceAsset` 与台词也不同（「我不会辜负大家的。」vs「我感受到了那么多的悲伤……」），所以地址里的 uid 一旦是 `char_002_amiya`，听到的就不可能是医疗阿米娅。
+- 标题→序号没错位：`shcema.audio` 的 `name[15]="任命队长"↔index[15]="018"`、`name[22]="作战中1"↔index[22]="025"`，与 gamedata 里 `char_002_amiya_CN_018/CN_025` 的 `voiceTitle` 一致。
+- `getReferSkill` 不参与：`audio` 是数组不是字符串，`_resolveReferSkill` 直接返回自身；被改写成 `"ext:WhichWay/audio/CN_MANDARIN:2"` 之后再查也因 `lib.skill["ext:…"]` 不存在而回落到 `lastName`。
+
+要在实机定位，请在游戏里开控制台跑这一行，它会把「谁在播、播的什么地址」一次性打出来：
+
+```js
+const w = whichWay.audio.getWebPlay("newtongganmrfz", "char_002_amiya");
+console.log("extUID:", whichWay.arknight.shcema.transfer("char_002_amiya", "character", "whichWayUID"),
+	"webPlay.char:", w?.char, "titles:", w?.voicesTitle, "urls:", w?.voiceUrl,
+	"_webPlayMap keys:", [...(whichWay.audio._webPlayMap.get("newtongganmrfz")?.keys() ?? [])]);
+```
+
+若 `urls` 里是 `char_002_amiya` 而听到的仍是医疗阿米娅，问题就在扩展之外（千幻聆音等配音替换类扩展、或浏览器/客户端的音频缓存）；若 `urls` 里是 `char_1037_amiya3`，把上面这行的输出贴回来即可继续查。
+
+- 顺带记录两个**本次未动**的既有问题：`legacyCharIds.ts` 没有 `amiyamrfz` 条目（旧版阿米娅的阵亡配音 `audio/{CN_MANDARIN,JP}/die/amiyamrfz.mp3` 因此没被改名，而 `die/char_002_amiya.mp3` 不存在 ⇒ 阿米娅没有本地阵亡配音，只能走在线）；`modules/index.ts` 的开局前分支把**模块名**传给了 `getCharModules(char)`（该方法要的是干员名）。
+
+### 修复：旧 id → uid 对照表补录阿米娅与望，并把表外置成 `json/legacyCharIds.json`
+
+对照表 = `src/arknight/legacyCharIds.ts`（改名前玩家存档里的旧干员id → 明日方舟uid，只被 `arkidMigration.ts` 消费）。缺两条：
+
+- **`amiyamrfz → char_002_amiya`**：`scripts/arkid-rename-map.json` 里根本没有这条（254 条映射中不存在 `amiyamrfz`），因为 `--gen-map` 是**扫描当时的干员文件**产映射的，而阿米娅是手工改成 uid 的 ⇒ 旧 id 从文件名上消失，脚本再也扫不出来。
+- **`wangmrfz → char_2027_wang`**：映射表里有这条，但 `--apply` 因 `{id}_${key}` 动态键把它跳过了（changelog 任务二一节记过），干员文件后来仍被整体改成 `char_2027_wang/index.ts`（内部的 `wangmrfz_${key}` 也已同步改成 `char_2027_wang_${key}`，见该文件 46/305/322/327/431 行）⇒ 注册的是 uid、存档里的旧键没人认领。
+
+改动：
+
+- **表体落到 `json/legacyCharIds.json`（255 条，tab 缩进）**，`legacyCharIds.ts` 退化成读取入口。**用静态 `import json` 而不是 `whichWayFile.readFile`**：迁移必须赶在任何阶段模块求值之前跑完（`init.js:47-49` 的注释），改成异步读文件等于把一次性迁移压在 `game.promises` 上，环境不支持或读失败就是**静默丢配置**；静态 import 由 vite 的 json 插件编进 `chunks/arknight-arkidMigration-shared.js`（已核对产物含 `amiyamrfz:`/`wangmrfz:` 两个键），同时 `viteStaticCopy` 的 `{ src: "json" }` 会把原文件一并带到产物的 `json/` 下，人读/外部工具复用都还在。
+- **`--gen-migration` 现在写两个文件**（JSON + 读取入口），并补了两条收录规则，否则重新生成会把上面两条再丢掉：① 被 `skipped` 但「旧 id 已不在注册表、新 uid 已在注册表」的干员照样进表（自动捞回 `wangmrfz`）；② 新增 `MANUAL_MIGRATIONS` 手工补录表（`amiyamrfz`），旧 id 仍注册在表时只告警不写入。
+- **迁移标记位从布尔改成「表条目数」**（`arkidMigrated`）：老值 `true ≠ 255` ⇒ 已经迁移过的存档会**再跑一次**，新条目才可能生效（不这么改，这次补录对任何已有存档都是空操作）。重跑是安全的：`remapKeys` 命中新键就丢弃旧键、`remapIdsInString` 只在整段标识符匹配时动手，全部幂等；且表里没有任何 value 同时是另一个 key，不存在二次改写。
+- 写入 JSON 用 `JSON.stringify(…, null, "\t")` 而不是照搬 TS 对象字面量的写法：**JSON 不允许可尾逗号**，第一版直接拼 `,` 收尾导致 `vite:json` 构建失败（`Failed to parse JSON file … 256:32`）。
+- 排查过的碰撞风险：`wangmrfz` 现在只是「旧干员id」，不是技能id——`char_2027_wang` 的派生技能是 `char_2027_wang_wangmrfz`（`years`/`yearsTrans` 的内层键 `wangmrfz` 只是拼键用的字面量），所以 `migrateAudioConfig` 里「跟着干员id 换 `custom[*].skills`」不会误伤技能名。
+- 验证：`--gen-migration` 跑两遍产物字节一致（幂等）；`pnpm eslint` 两文件 0 报错；`WW_SKIP_STATIC_COPY=1 vite build` 通过。**实机未验证**。
+- **本次未动的遗留**（都是**资源文件名**还是旧 id，与对照表无关，要动得改名资源，等确认）：`audio/{CN_MANDARIN,JP}/die/amiyamrfz.mp3`（⇒ 阿米娅仍无本地阵亡配音）、`image/character/amiyamrfz.jpg`、`image/skin/amiyamrfz/`、`image/character/wangmrfz.jpg`、`dynamicSkin/illust/wangmrfz/经典形象`；另外 `src/skin/dynamicConfig.js:1200` 的键还写着 `wangmrfz` ⇒ 望的动皮配置从改名那天起就是死条目（`--apply` 跳过它时漏改的跨文件引用，`CROSS_FILES` 名单里是有这个文件的）。
+
+### 新增：皮肤拖拽调位缩放 `src/skin/portraitPos.ts` + `src/skin/portraitDrag.ts` + `json/pos.json`
+
+给玩家一个自助调整干员立绘/皮肤**位置与大小**的入口：场上系统栏按钮「皮肤拖拽」→ 拖动改位置、滚轮/双指改大小，结果落盘 `json/pos.json`，之后每次加载立绘都按这份设定画。三层分工：`portraitPos.ts` 只管数据（读/写/查），`avatarBackground.ts` 管画（`Layers.setImage(url, pos)`），`portraitDrag.ts` 管交互（Pointer Events）。
+
+- **只有明日方舟干员能拖，是结构决定的而不是判据**：可拖的前提是节点上挂着 `PortraitLayers` 的两层背景（`hasPortraitLayers(node)`），而背景本身只在 `isArknght` 为真时才建（见上一条「收窄」）。本体武将/其它扩展角色的节点没有子元素，拖了没有东西可动。
+- **默认缩放 1.5 从 `PortraitLayers.vue` 的硬编码 `transform: scale(1.5)` 变成组件缺省值**（`DEFAULT_PORTRAIT_SCALE`）：原来写死在 `<style>` 里就被 scoped 样式锁住，行内 style 覆盖不掉，也就没法调。改成 `withDefaults` 后「没有配置 = 1.5 倍、不偏移」，老用户观感零变化。
+- **存档单位是比例而不是像素**（`x/y` = 偏移量 ÷ 立绘框尺寸，`scale` = 绝对倍率）：这样一份配置与窗口分辨率、与无名杀自带缩放都无关。`translate(…%, …%)` 的百分比按元素自身尺寸换算，而内层就是 `inset:0` 的框（等于节点尺寸），还原是线性的。
+- **无名杀自带缩水的处理**：`ui_zoom` 的实现是 `document.body.style.transform = scale(zoom)`（`apps/core/noname/ui/index.js:601-614`，比值存在 `game.documentZoom`），于是 `PointerEvent.clientX` 的**屏幕像素**与 CSS 的**布局像素**差一个倍数。所有位移先 `delta / (game.documentZoom || 1)` 换算成布局像素再除以 `node.clientWidth/Height`（`clientWidth` 是不含 transform 的布局尺寸，正好是分母）。不除的话 150% 缩放下拖动会超出实际距离一半。
+- **配置键从 `background-image` 的 url 反解**（`resolvePortraitKey`：`…/skin/{干员id}/{皮肤名}.png` ⇒ 干员+皮肤；`…/character/{干员id}.png` ⇒ 「经典形象」），而不是直接取角色名：绘制入口之一（`installRedirect` 里的 `setBackgroundImage` 重定向）只有图片路径没有角色名，两条入口必须能还原出同一个键。**要 `decodeURIComponent`**：浏览器序列化 `style.backgroundImage` 时会把空格与中文转成 `%20`/`%E4%B8%AD`，而 `mountPortrait` 是自己拼的原始路径，不解码同一个皮肤会有两个键。
+- **不用 interactjs**：仓库里已有这个依赖（MIT），但只有 `GloriousIdeal/battleOverlay.ts` 用它，拖进来等于给 `chunks/skin-PortraitLayers-shared.js`（已 405kB）再叠 ~140kB 只为一个 div 的拖拽。改用 Pointer Events 一套 API 同时覆盖鼠标/单指，双指 `pointermove` 按间距比值缩放，`setPointerCapture` 保证拖出头像不断。
+- **拖拽模式吃掉 `click`**：引擎的点击查看绑在 `player` 节点（头像的父级）上，不拦的话每拖一次弹一次玩家菜单。代价是拖拽模式期间点立绘不会打开玩家菜单——这个模式本来就是用来调图的。
+- **落盘节奏**：`setPos` 只写内存 + 300ms 合并写盘（每个 move 都发 IPC 会打爆），松手与退出拖拽时 `flushSave()` 立刻补一次，避免「调完立刻关游戏」丢掉最后一次调整。
+- **进模式先 `snapshotPos()`，浮动条给「重置本次调整」**：调坏了能当场回滚，不用去翻 `json/pos.json`。
+- **HUD 的 toast id 自己记账**（`hudToastIds`）而不是像动皮那样遍历 `whichWayToast.toastRegistry`：id 是按干员动态生成的，而 `toastRegistry` 带自定义 `get` 方法、键类型不规整，遍历它既难写也容易被后续改动打中。
+- **已知取舍 —— 节点上的影子副本不跟随 `transform`**：影子副本（`node.style.backgroundImage`，供战报浅克隆/`smoothAvatar`/`ui.fakeme` 读）要是也位移就得写 `node.style.transform`，而 `.avatar` 的 transform 会连带动到 `.name`/`.hp` 等兄弟层。它本来也从不带内层那个默认 1.5 倍缩放，所以只是维持原状。
+- **开发仓库里 `json/pos.json` 会被下一次构建覆写**：`viteStaticCopy` 的 `{ src: "json" }` 把源目录的空白 `pos.json` 拷进产物，而运行时写的也是同一个文件（`extDir` 就是 `apps/core/extension/WhichWay`）⇒ 在 dev 里调好位置、再跑一次 `vite build` 就回到默认。打包给玩家不受影响（玩家目录没有构建过程），但**调试时别把「构建后位置没了」当成 bug**。
+- 拖拽对象取 `game.players.concat(game.dead)` 的 `node.avatar`/`node.avatar2`（与 `refreshSkin()` 同源），阵亡角色也留着，方便一并调构图。
+- 验证：`pnpm eslint` 全部改动文件 0 报错；`WW_SKIP_STATIC_COPY=1 vite build` 通过；`resolvePortraitKey` 的 url 解析用 node 跑了 6 组形态（编码/未编码、皮肤目录/立绘目录、裸路径、空串）符合预期；**完整 `vite build`（不带 `WW_SKIP_STATIC_COPY`）已通过**，`viteStaticCopy` 报「Copied 12 items」，产物里确实有 `css/portraitDrag.css` 与 `json/pos.json`（缺了这两个：浮动条没样式、`loadPos` 读空文件，属于静默降级，所以必须跑一次不带跳过的构建）。**实机未验证**（浏览器 MCP 加载不了 dev app）：拖拽手感、`documentZoom` 换算是否真的对齐、双指捏合在移动端的表现都需人工进游戏确认。
+
+### 改动：武将卡立绘改为直接展示原始图片
+
+`src/characterCard/CharacterCard.vue` 的 `.charImageWrapper > .charImage` 去掉径向 `mask-image` 渐隐，`background-size` 从 `cover` 改 `contain`（配 `no-repeat`），`aspect-ratio: 2/3` 与 `width: 100%` 保留（`spineWorker.updateDyc` 挂的就是这个元素，尺寸锚点不能动）。武将卡要的是「看清这张图原本长什么样」，所以不裁剪、不渐隐；场上头像是另一套观感（`PortraitLayers.vue` 的 `cover` + `pos.json` 调位），**卡面刻意不读那份配置**，避免「在场上调过位置之后卡面跟着跑」。
+
+### 新增：主动贴干员图 `whichWaySkin.addPortrait()` / `mountPortrait()`
+
+本模块原有的绘制入口全是被动的（引擎 `setBackground` 时改道），主动往一个节点上贴干员立绘/皮肤的场景（投稿预览、自定义面板、对话框卡片）没有劫持可用，直接写 `style.backgroundImage` 会踩回「透明区域透出底下的东西」的老问题。
+
+- `avatarBackground.ts` 导出 `mountPortrait(node, image, pos?)`：`installRedirect` + `ensureLayers` + `setImage`，与劫持路径**同一套组件、同一份位置设定、同一份影子副本**，保证同一张图在两处观感一致。`image` 接受 scheme 路径（`illu:`/`skin:` 等，走 `whichWayFile.compilePath`）或已写好的 `url(...)`；`pos` 留空则按路径反解 `pos.json`。节点必须是 div 且有尺寸（两层背景是 `position:absolute; inset:0`）。
+- `WhichWaySkin.addPortrait(node, name, skin?)`：把「干员名 + 皮肤名」解析成图片路径再转交上面那个函数——指定皮肤走 `getCharacterSkin`，留空走 `getCurrentSkinPath`（即该干员当前生效的皮肤）。解析不到就返回 `false` 且不动节点。
+- 不校验干员身份：`mountPortrait` 是底层能力，调用方既然指定了图就该由它决定贴谁；带干员名的那层校验在 `addPortrait` 的查表失败里已经体现了。
+
+### 新增：ConfigUI「征稿在前」面板 `src/configUI/component/solicitForth.vue`
+
+列出**明日方舟有、驶舰之向还没做**的干员，卡牌为「立绘 + 中文名 + 干员id」，右上角打「未实装」角标；同时提供搜索框，可按干员id、中文名、拼音检索。已在 `main.vue` 的 `panels` 末尾注册为「征稿在前」。
+
+- 数据源就是 `vaildArkId` 与 `exsitArk` 的差集（`exsitArk` 由武将包构造流程 `addShcema` 逐个登记，恒为其子集）——**不需要另维护一份「待做清单」**，实装一个就自动从这页消失。名字取 `arknightData.character_table[id].name`（`loadShcema` 已把 `char_patch_table.patchChars` 并进主表，升变形态也有名）。
+- 图片走 `<img loading="lazy" decoding="async" fetchpriority="low">` 而不是 `background-image`：未实装名单约 200 条（全量 463 名干员 − 已实装 258 个注册id），背景图会一次性全部解码，原生懒加载只滚到附近才要图；`fetchpriority=low` 沿用 `BackgroundPanel.vue` 处理几十兆大图的同一套写法。
+- **有没有图不靠猜**：用启动期扫目录建的 `whichWayFile.characterPortraitExt` 索引判存在（没条目就是本地真没这张图，渲染「暂无立绘」占位），避免 463 个干员里没做过的那批全发一次 404。
+- 搜索串 = `干员id + 中文名 + 全拼（带空格与不带空格两种写法）`，`pinyin-pro` 用法与 `charPicker.vue`/`backgroundSet.vue` 一致；索引在 `onMounted` 一次算好，输入时只做字符串匹配。
+- 搜索语义区分三种情况，免得玩家以为搜索坏了：命中未实装 → 进结果列表；命中的是**已实装**干员 → 明确告知「明日方舟里有，驶舰之向也已实装」；表里根本没有 → 「没有找到这个id／名字／拼音」。
+- 卡牌图片用 `object-fit: contain` + `object-position: center top`：这页要的是看清鹰角画了什么，不裁剪也不套 `pos.json` 的调位。
+- 验证：`pnpm eslint` 新文件 0 报错、`WW_SKIP_STATIC_COPY=1 vite build` 通过（`chunks/configUI.js` 29.58 → 33.85 kB）。**实机未验证**：这一页依赖运行期的 `vaildArkId`/`exsitArk`，离线只能验数据源与构建，列表数量与懒加载表现需进游戏确认。
+
+### 修复：两层背景把武将卡/头像的圆角盖成直角
+
+`ui.create.buttonPresets.character`（以及场上的 `.avatar`）本身是**带圆角**的：主题样式表给 `.avatar`/`.avatar2`/`.button`/`.card`/`.player` 写了 `border-radius: 8px`（`apps/core/theme/woodden/style.css:6-23`、`theme/simple/style.css` 同构），玩家还能用「圆角大小」设置改成 4px / 0 / 16px（`layout/default/layout.css` 的 `#window[data-radius_size=…] .avatar, … .button`，配置项见 `library/index.js:3750`，默认 `default` 即 8px）。
+
+劫持之后两层背景是**实心方块**，把宿主这圈圆角整个盖住 ⇒ 观感上「圆角属性没了」。修法是让两层跟着宿主走，两处各加一条：
+
+- `avatarBackground.ts` 的中间宿主 div（`ensureLayers()` 里防 `render()` 抢子节点而垫的那层）：内联样式补 `border-radius:inherit;overflow:hidden`。
+- `PortraitLayers.vue` 的 `.sjzxPortraitWrapper`：补 `border-radius: inherit`（它自己已有 `overflow:hidden`，所以内层 `transform` 放大/偏移后照样被圆角裁掉）。
+
+用 `inherit` 而不是抄一个 8px：`border-radius` 不是继承属性，但 `inherit` 关键字显式取**父元素的计算值**，于是宿主是 4/8/16px、甚至 `long` 布局的 `8px 8px 0 0` 都能对上，换主题与改设置都不用回这里改数字。`mountPortrait()` 走同一个 `ensureLayers()`，主动贴图的节点一并修好。**实机未验证**（只看得到代码层：圆角是运行时按宿主计算值裁的）。
+
+### 修复/改动：`pos.json` 落盘可见性 + `posData` 暴露到 `whichWaySkin`
+
+排查结论：**数据一直在写**，只是写的不是仓库里那份。落盘路径是运行时的扩展目录（`extDir = lib.assetURL + extension/WhichWay/` ⇒ 开发时是 `apps/core/extension/WhichWay/json/pos.json`），而 `packages/extension/WhichWay/json/pos.json` 只是随包发布的空白模板，所以「拖完去看源目录的 pos.json 是空的」是必然现象，不是没存。本次改动：
+
+- **删掉源目录的空白模板 `json/pos.json`**：`viteStaticCopy` 的 `{ src: "json" }` 会把整个 `json/` 覆盖复制到产物，于是**每次完整构建都会把玩家（开发时就是玩家本人）调好的位置抹回空白**——实测确实抹过一回（14:18 产物里还有 `char_4051_akkord` 的一条，之后被 12:41 那次构建的复制盖掉）。而 `loadPos()` 本来就容忍文件缺失（先 `exsitFile` 再读），`writeFileAsJson` 会 `createDir` + 建文件，所以模板没有存在的必要：删了以后重建不再动运行时数据。插件只复制、不删除目标侧的多余文件（`json/cache/skin.json` 一直活得好好的），因此产物里已有的 pos.json 也不受这次删除影响。
+- **`portraitPos.ts` 抽出 `writePosFile()`**（原来 `scheduleSave`/`flushSave` 各写一遍同样的调用），开发模式下每次成功写盘打一行 `[whichWayPortraitPos] 已写入 <绝对路径> 共 N 名干员`：位置到底进了哪个文件，看日志就行，不必猜。
+- **`getPosData()` 导出活引用**，`WhichWaySkin` 上加 `posData` getter（+ `getPortraitPos(name, skin)` 与 `flushPortraitPos()`）：控制台 `whichWaySkin.posData` 直接看当前生效的配置。给的是**同一个对象**而不是拷贝——调试要的就是内存现状；改了它不会自动落盘，所以要落盘用 `flushPortraitPos()`。
+- 顺带清掉 `portraitPos.ts` 里没用上的 `game` import。
+- 验证：`pnpm eslint` 全绿；`WW_SKIP_STATIC_COPY=1 vite build` 通过（本次刻意用跳过复制的构建，避免又抹一次数据）；离线核对 `writeFileAsJson(obj, path, name)` 与 `game.promises.writeFile(data, path, name)` 签名一致（`src/file.js:421`、`apps/core/noname/game/promises.js:84`）。**实机未验证**。
+
+### 改动：「征稿在前」排除游戏内无法获取的角色
+
+需求：明日方舟里有一批「有完整干员数据、有立绘，但玩家拿不到」的角色（预备干员系列、Sharp/Pith/Touch/Stormeye/Raidian/Misery/Mechanist/暮落/郁金香、盟约·辅助干员），不该出现在征稿名单里。
+
+- **判据是角色表的 `isNotObtainable`**（`json/arknight/character_table.json`）。离线核对：全表 1382 条**每条都有这个布尔**，`true` 恰好 29 条，逐条对上了需求点名的所有例子 —— 14 条预备干员（`char_5xx_r*` 5 条 + `char_6xx_c*` 9 条）、Sharp×3（含 `char_617_sharp2` 领主·Sharp）、Pith×2、Touch×2、Stormeye×2、郁金香×2、Raidian、Misery、Mechanist、暮落(`char_512_aprot`)、盟约·辅助干员(`char_616_pithst`)；而阿消(`char_277_sqrrel`)、洛洛(`char_4040_rockr`)、罗宾(`char_451_robin`)、迷迭香(`char_391_rosmon`) 全是 `false`。
+  **不要换成别的判据**：`rarity` 这类拿不到的也有 TIER_5/6；`itemObtainApproach` 只是 `null`，而剧情赠送的阿米娅是「主题曲剧情」、罗宾是「活动获得」，靠它会把可获取的也排除掉；id 前缀（`char_5xx`/`char_6xx`）同理不成立 —— 4xx/5xx 段里就有黑角 `char_500_noirc`、杜林 `char_501_durin`、夜刀 `char_502_nblade`、巡林者 `char_503_rang` 四名可获取干员（整个 5xx~6xx 段的可获取项只有这四条，其余全是预备干员与 NPC）。`char_patch_table.patchChars` 只有升变阿米娅 2 条，也都是 `false`。
+- **三处同步**（改精简缓存白名单的老规矩）：`slimArknightData()` 两个循环都带上 `isNotObtainable`、`typings/arknight.d.ts` 的 `ArknightCharacterSlim` 补 `isNotObtainable?: boolean`、`slimCacheSchema` 1 → **2**。⚠️ 下次启动会走慢路径重建精简缓存（读 16MB 全量，一次性几百毫秒），这是设计好的失效机制，不是变慢的 bug。
+- **新增 `WhichWayArknight.isObtainable(id)`**：查 `character_table[id] ?? patchChars[id]`，**字段缺失一律按可获取**（宁可多列一条待征稿，也不要把正常干员悄悄藏起来）。没有动 `vaildArkId`/`isArknght` —— 那些角色在场上/配音侧仍然是方舟干员，只是不进征稿名单。
+- `solicitForth.vue`：条目加 `obtainable` 字段，`solicitable = 未实装 && 可获取` 作为列表与计数的唯一来源（计数文案改成「未实装 N / 共 M 名可获取干员」，离线核对 465 名干员 − 29 = **436** 名可获取，名单会相应少 29 条）；搜索命中无法获取的角色时不再报「表里没找到」，而是明确说「明日方舟里有，但游戏内无法获取（预备干员／活动 NPC 一类），不列入征稿名单」—— 否则搜「郁金香」会得到一个假话。
+- 验证：`pnpm eslint` 全绿、`WW_SKIP_STATIC_COPY=1 vite build` 通过（`chunks/configUI.js` 33.85 → 34.65 kB）、`node` 离线核对计数与 29 条明细。**实机未验证**：29 条里没有任何一条被本扩展实装（逐个查过 `src/packs/character/` 目录），所以差集直接少 29，逻辑上不会有「已实装却消失」的情况，但列表数字与搜索提示仍需进游戏确认。
+
+### 改动：「征稿在前」改为左右两栏 + 投稿渠道与规则
+
+需求：版面从一列改成左右两栏，左栏（60%）放 `.submit-poster`／`search-box`／`card-grid`，右栏新增「群二维码 + 展示/复制群号」与四条投稿规则（其中 `ol费祎` 要能点开武将卡当强度参照）。
+
+- **左栏 `flex: 0 0 60%`，右栏 `flex: 1 1 0`（不是 `40%`）**：`60% + 40% + gap` 已经大于容器宽度，写成 40% 会让右栏被压缩、左栏反而超出六成；让右栏「吃剩下的全部」才保住左栏精确的 60%。两栏都补 `min-width: 0; min-height: 0` —— flex 子项的 `min-height` 默认是 `auto`，不压成 0 的话 `.card-grid` 与 `.right-pane` 的 `overflow: auto` 会被内容顶开、根本不滚。搜索状态行跟着搜索框留在左栏（它是对这次搜索的反馈，属于名单那一侧）。
+- **右栏一（投稿渠道）**：二维码 `image/decoration/qq1.jpg`（⚠️ 需求写的是 `qq1.png`，**仓库里实际只有 `qq1.jpg`**，且文件内容本来就是 PNG 编码、只有扩展名是 jpg，459×448）+ 群号 **104537053**。群号**直接显示**（不做隐藏/显示切换），下面两个按钮：「加入群聊」`window.open` QQ 的加群链接（`GROUP_JOIN_URL`，与 `config/index.js:61`、`package/index.ts:60` 的开外链方式一致；这条链接和二维码是**同一个来源**，里面的 `_wv`/`authKey`/`noverify` 由 QQ 生成、会过期，换二维码必须同时换它），「复制群号」把结果写在按钮文案上（1.5s 后恢复，`onBeforeUnmount` 清计时器）。
+  - 复制先走 `navigator.clipboard.writeText`，不可用或拒绝时退回隐藏 textarea + `document.execCommand("copy")` —— 客户端的 `file:` 与局域网 http 都不是安全上下文，Clipboard API 在那里直接缺席。textarea 用 `position: fixed` 而不是 `absolute`：无名杀给 `body` 写了 `position:absolute; overflow:hidden`，绝对定位的偏移元素可能被裁掉而选不中。
+- **右栏二（投稿规则）**：四条规则用 `<ol>`（编号由列表自己给，不再手写在文本里）。`ol费祎` 渲染成醒目链接（`#1ac2fd` + 加粗 + 下划线 + hover 发光 + `cursor:pointer`），点击调 `ui.click.charactercard("ol_feiyi", null, true)`。
+  - id 存在性离线核对过：`apps/core/character/sp/character.js:396` 有 `ol_feiyi`、`sp/translate.js:1151` 译名「费祎」。它不是驶舰之向角色 ⇒ `whichWayCharacterCard.shouldUseStyle` 在默认配置（「扩展角色」）下不接管 ⇒ 走引擎原版卡。
+  - **z-index 冲突与解法**：原版卡挂在 `.popup-container`（`layout/default/menu.css:17` 的 `z-index: 10`，`:62` 给它 `position:absolute` 铺满），而本设置面板的容器 `.whichWayConfigUIApp` 挂在 `document.body` 上是 `z-index: 19`（`configUI/index.js:46`）。`#window` 只是 `ui.create.div("#window.hidden", document.body)`（`ui/create/index.js:2291`），CSS 里的 `#window`（`layout.css:42-49`）**不带 `position`** ⇒ 不构成层叠上下文 ⇒ 两层在根层叠上下文里直接比大小 ⇒ 卡被面板整个盖住。解法：`ui.click.charactercard` 是同步函数、最后一句就是 `ui.window.appendChild(layer)`（`ui/click/index.js:4301`），所以调用完立刻把 `ui.window.lastElementChild` 提到 `z-index: 20`（与本扩展武将卡的容器同值，`characterCard/index.ts:134`）。判据同时要求 `.popup-container` **和** 内部有 `.menubg.charactercard`：配置改成「所有角色」时扩展的劫持会 `return false`、由本扩展自己的卡接管（容器进 `body`、已经是 `z-index:20`），那种情况下 `lastElementChild` 不是这层，不该去动它。
+  - 第三参 `noedit=true` 让「收藏」「禁用」变灰（`ui/click/index.js:3467/3492`）：这是给人看的参照卡，不该顺手改玩家的配置。**刻意没有传 `resume`** —— 引擎的 `clicklayer` 只在 `resume` 为真时才 `game.resume2()`，而本面板 `show()` 已经 `game.pause2()`（`game/index.js:7276`，只管 `_status.paused2`）；传了 `resume` 会变成「关掉卡片后设置界面还开着，但游戏已经不再暂停」。
+  - `feiyiAvailable = !!lib.character["ol_feiyi"]`：SP 内容包被关掉时规则文字保留、降级成普通文本，避免给出一个点了没反应的链接。
+- **图片地址从 CSS 的相对 `url()` 换成脚本里的 `compilePath()` + 内联 `:style`/`:src`**（`.poster` 与二维码两处）。两个理由：相对 `url()` 在产物里解析不到扩展目录（自动样式表里那些 `./../../../image/…` 从 `css/` 出发指向的是 `apps/core/image/…`），且 1.5MB 的 `poster.png` 会被内联成 base64 —— 去掉这四条相对 url 后 `css/viteAutoCreateStyle.css` 从 **2.69MB 降到 251KB**。顺带删掉了 template 里没有任何元素用到的 `.submit-box/.submit-group/.count-box/.QRCode-*` 草稿样式。⚠️ `countText` 这个 computed 到今天仍然没有任何元素渲染它，本次没有动它、也没有顺手把它显示出来。
+- 验证：`pnpm eslint`、`prettier --check` 全绿，`WW_SKIP_STATIC_COPY=1 vite build` 通过（`chunks/configUI.js` 34.65 → 38.13 kB，加群链接原样进了 chunk（`&` 没被转义丢弃）），产物 CSS 里已无相对 url 也无 qq/poster 的 base64。**实机未验证**：60/40 分栏的实际高度传递、二维码在右栏的缩放观感、「加入群聊」能不能真的拉起外部浏览器、复制按钮的反馈、以及点 `ol费祎` 时卡片是否真浮在设置面板之上，都必须进游戏看。本次没新增资源（`qq1.jpg`/`poster.png` 早就随包复制过去了），所以跳过复制的构建不影响可运行性，但下次仍应跑一次完整构建。
+
+### 新增：`scripts/update-portraits.mjs` 补齐缺失的干员立绘
+
+需求是「查缺 → 下载 → 压缩 → 归位」，并允许我换掉「先下 `character_table.json` + `skin_table.json` 再比对」的原方案。**实际方案：零大表下载，一次目录清单**。
+
+- **站点接口（逆向自前端，改版时先看这几条）**：
+  - 接口清单在 `https://torappu.prts.wiki/api/v1/openapi.json`（服务名 `ak-asset-storage`，MIT）。取资源文件用 `GET /api/v1/files/{path}` 列目录——**路径里的斜杠必须编码成 `%2F`**（`/api/v1/files/raw%2Fchar_arts`），且**必须带 `accept: application/json`**，否则网关把它当前端路由、200 返回 SPA 的 HTML。一次请求 408KB 就拿到 `raw/char_arts` 全部 1935 个文件的 `name/path/size`。
+  - 取图 URL 抄前端 `AssetContent` 的拼法：`raw/…` 段换成 `assets/…`、只对最后一段做 `encodeURIComponent` ⇒ `https://torappu.prts.wiki/assets/char_arts/{portraitId}b.png`。
+  - ⚠️ **未知路径不返回 404，而是 200 + 前端 HTML**，所以每份响应都先校验（清单校验能解析出 `children`、图片校验 PNG 签名 `89504e470d0a1a0a`）再落盘；清单里的 `size` 只用来判断临时缓存能否复用（CDN 若重新编码过 PNG，签名对就收下并只打一行警告，别让整批图卡死）。
+- **为什么清单比两张大表好**：缺哪张图本地就算得出来（`json/arknight/skin_table.json` 给 portraitId，`image/illustration/character/` 给已有项），要问服务器的只有「远端到底有没有、叫什么名」。12MB 的两张表换成 408KB 的一次清单，还避免按猜测打 404：1377 个形态里远端只收录了 396 个基础立绘（其余是皮肤图，token/召唤物一个都没有）。`--update-tables` 仍保留原方案，但只写到临时目录（`os.tmpdir()/whichway-portraits`），**不动仓库的 `json/arknight/`**；要把新数据固化还是跑 `update-arknight-data.bat`。
+- **命名与分类沿用 `split-illustration.mjs`**：先查 `{portraitId}b.png`、没有再查 `{portraitId}.png`（低星干员只有不带 b 的版本，如 `char_123_fang_1.png`）；落盘一律 `character/[形态id].png`。取 `ILLUST_2`（精二），**取不到就用 `ILLUST_0`（初始）替代** —— 即需求的「四星以下没有精二立绘」，判据用「skin_table 里有没有 ILLUST_2 条目」而不是 `rarity`：rarity 只说明该不该有，条目才说明拿得到哪张图，顺带覆盖了「有精二但站点未收录」。
+- **范围口径与游戏侧一致**（抄 `src/arknight/index.ts`）：`isCharacter` = `subProfessionId` 存在且不以 `notchar` 开头；`isObtainable` = `isNotObtainable !== true`。`--scope obtainable`（默认）/ `char` / `any`，或 `--ids` 指定。
+- **对公益服务器的负担**（需求第 3 条）：默认范围当前只缺 24 张 ⇒ 24 次图片请求 + 至多 1 次清单；串行（`--jobs` 上限 3）、每张间隔默认 400ms、清单缓存 7 天（`--max-age`/`--refresh-index`/`--offline`）、原始图落临时目录且**字节数与远端一致就复用**（中断重跑不重复下载）、`--limit` 限单次量。范围放大时报告里会直接印出「待下载 N / 原始合计 X MB」再决定。
+- **压缩参数与 `compress-skin.mjs` 同构**（`-auto-orient -strip -colorspace sRGB -resize 1280x1280> -colors 256 -quality 9 -define png:compression-level=9`，不加抖动），magick 先写同目录 `.tmp.png` 再 `rename`（同目录 rename 原子，游戏读不到半张图）；**即使「压缩无收益」也照样落盘**——这一步的目的是让干员有图，不是省体积。⚠️ 只新增、从不覆盖：目标已有 png/jpg 就跳过，本地资源永不被改写。
+- 实测：默认范围 24 张全部成功，原始 16.45MB → 落盘 4.47MB（约 3.7×，平均 251 色），`character/` 从 408 个形态补到 432；`--dry-run` 复跑「待下载 0」幂等。剩余缺口：4 个形态站点确实没有图（`char_4188_confes`、`char_4215_buddy`、`token_10007_phatom_twin`、`trap_079_allydonq`），`--scope char` 还有 26 张（预备干员与活动 NPC）、`any` 再多 2 张——**本次刻意没下**，它们不进征稿名单，要补再跑一次。
+- 验证：`prettier --check` 通过；`pnpm eslint` 报 44 条 `no-undef (console/process)`——**与既有脚本同病**（`split-illustration.mjs` 同样报 17 条），根 eslint 配置只给 `src/**` 配了浏览器 globals，`scripts/*.mjs` 不在任何 lint script 的范围内，故未为此改配置。图像正确性用 `magick identify` + 人眼看抽查（`char_120_hibisc.png` 1280×1280 带 alpha、透明背景正常）。**实机未验证**：新增的是资源文件，运行目录 `apps/core/extension/WhichWay/image/illustration/character/` 要靠一次**不带** `WW_SKIP_STATIC_COPY` 的完整构建才会拿到（下次构建顺带完成，届时 24 张新图会进包）。
 
 ## 2026-10-13
 

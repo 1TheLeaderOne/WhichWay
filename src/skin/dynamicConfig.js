@@ -1197,7 +1197,7 @@ let data = {
 		},
 	},
 	//望
-	wangmrfz: {
+	char_2027_wang: {
 		经典形象: {
 			name: "dyn_illust_char_2027_wang",
 			x: [0, 0.559],

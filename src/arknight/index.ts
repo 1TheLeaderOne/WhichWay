@@ -140,8 +140,8 @@ class WhichWayArknight {
 	 * （3）把 slimCacheSchema +1 让老缓存失效——否则精简缓存会静默缺字段。
 	 *
 	 * 白名单依据（全仓核实：除本文件外没有任何位置读取这三张表）：
-	 * - character_table[uid]：name（译名匹配）、subProfessionId（isCharacter）、tagList（getTags）、键存在性
-	 * - char_patch_table.patchChars[uid]：name、subProfessionId、tagList
+	 * - character_table[uid]：name（译名匹配）、subProfessionId（isCharacter）、tagList（getTags）、isNotObtainable（isObtainable）、键存在性
+	 * - char_patch_table.patchChars[uid]：name、subProfessionId、tagList、isNotObtainable
 	 * - charword_table.charDefaultTypeDict：仅 Object.keys().length
 	 * - charword_table.voiceLangTypeDict：Object.keys() 与 [lang].name
 	 * - charword_table.voiceLangDict[uid].dict：仅真值判断与 Object.keys()
@@ -151,14 +151,14 @@ class WhichWayArknight {
 		const character_table: Record<string, ArknightCharacterSlim> = {};
 		for (const uid in rawCharacters) {
 			const info = rawCharacters[uid];
-			character_table[uid] = { name: info.name, subProfessionId: info.subProfessionId, tagList: info.tagList };
+			character_table[uid] = { name: info.name, subProfessionId: info.subProfessionId, tagList: info.tagList, isNotObtainable: info.isNotObtainable };
 		}
 
 		const rawPatchChars: Record<string, ArknightCharacter> | undefined = raw.char_patch_table?.patchChars;
 		const patchChars: Record<string, ArknightCharacterSlim> = {};
 		for (const uid in rawPatchChars ?? {}) {
 			const info = rawPatchChars![uid];
-			patchChars[uid] = { name: info.name, subProfessionId: info.subProfessionId, tagList: info.tagList };
+			patchChars[uid] = { name: info.name, subProfessionId: info.subProfessionId, tagList: info.tagList, isNotObtainable: info.isNotObtainable };
 		}
 
 		const rawVoice: Partial<ArknightVoice> = raw.charword_table ?? {};
@@ -299,6 +299,11 @@ class WhichWayArknight {
 	 *
 	 * 原先 addShcema 对每个干员都遍历整张 character_table，且循环体内还对全部干员
 	 * 反复做 filter/map，规模为 干员数 × 全表大小 × 干员数，是扩展加载的最大热点。
+	 *
+	 * 全表有 98 组同名干员，其中「阿米娅」三名共用：char_002_amiya 在主表，
+	 * char_1001_amiya2 / char_1037_amiya3 由 loadShcema 从 char_patch_table 并进主表。
+	 * 反查只服务于旧式命名干员（本体形态一律走 addShcema 的恒等分支），
+	 * 因此排除升变形态并保留首个命中者——否则「阿米娅」会被后写入的 char_1037_amiya3 顶掉。
 	 */
 	private _arkNameIndex: Map<string, string> | null = null;
 
@@ -306,9 +311,12 @@ class WhichWayArknight {
 		if (!this._arkNameIndex) {
 			const index = new Map<string, string>();
 			const arkData: Record<string, ArknightCharacterSlim> = this.arknightData.character_table;
+			const patchChars = this.arknightData.char_patch_table?.patchChars;
 			for (const key in arkData) {
+				if (patchChars?.[key]) continue;
 				if (!this.isCharacter(arkData[key])) continue;
-				index.set(arkData[key].name, key);
+				const name = arkData[key].name;
+				if (name !== undefined && !index.has(name)) index.set(name, key);
 			}
 			this._arkNameIndex = index;
 		}
@@ -358,6 +366,24 @@ class WhichWayArknight {
 		//这里返回 false 而不是抛错，避免一个缓存问题直接崩掉启动
 		if (!info?.subProfessionId) return false;
 		return !info.subProfessionId.startsWith("notchar");
+	}
+
+	/**
+	 * 是否是明日方舟**游戏内可获取**的干员
+	 *
+	 * 判据是角色表的 `isNotObtainable`（全量 1382 条都带这个布尔，无需推测）。为 `true` 的是
+	 * 「有完整干员数据但玩家拿不到」的角色：预备干员系列（`char_5xx_r*` / `char_6xx_c*`）、
+	 * 集成战略/活动 NPC（Sharp、Pith、Touch、Stormeye、Raidian、Misery、Mechanist、暮落、郁金香）、
+	 * 盟约·辅助干员等，共 29 条。它们与「阿消／洛洛／罗宾／迷迭香」这类正常可获取干员（`false`）
+	 * 在数据上仅此一处区别，所以不能靠 `rarity`、`itemObtainApproach`（只是 null）或 id 前缀去猜。
+	 *
+	 * 字段缺失（读到了旧版精简缓存）一律按**可获取**处理：宁可多列一条待征稿，
+	 * 也不要把正常干员悄悄排除在名单外。
+	 * @param id 明日方舟干员uid
+	 */
+	isObtainable(id: string): boolean {
+		const info = this.arknightData?.character_table?.[id] ?? this.arknightData?.char_patch_table?.patchChars?.[id];
+		return info?.isNotObtainable !== true;
 	}
 
 	/**
@@ -568,7 +594,7 @@ class WhichWayArknight {
 	 * 精简缓存的结构版本：白名单字段发生变化时必须 +1，否则老缓存不会被重建
 	 * （只靠扩展版本号覆盖不了「改了白名单但没升版本」的情况）
 	 */
-	private readonly slimCacheSchema = 1;
+	private readonly slimCacheSchema = 2;
 
 	/**
 	 * 本次启动是否重新下载过明日方舟数据。

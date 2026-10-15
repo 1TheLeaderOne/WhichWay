@@ -350,6 +350,11 @@ declare interface ArknightCharacterSlim {
 	name: string;
 	subProfessionId: string;
 	tagList?: string[];
+	/**
+	 * 游戏内无法获取（预备干员系列、集成战略/活动 NPC、盟约·辅助干员等）。
+	 * 老版精简缓存（schema 1）没这个字段，读取方（`isObtainable`）按「缺省=可获取」处理。
+	 */
+	isNotObtainable?: boolean;
 }
 
 /** char_patch_table 只保留 patchChars（字段同 character_table 的瘦身子集） */

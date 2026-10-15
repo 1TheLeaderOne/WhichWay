@@ -15,7 +15,13 @@ import { legacyCharIds } from "./legacyCharIds.js";
  * 换对象会让这些已经存在的引用继续指向旧数据。
  */
 
-/** 迁移标记位（与 extension_WhichWay_characterPackDefaulted 同一套一次性开关写法） */
+/**
+ * 迁移标记位（与 extension_WhichWay_characterPackDefaulted 同一套一次性开关写法）。
+ *
+ * 存的是**迁移表的条目数**而不是布尔值：往表里补录旧id 之后必须再跑一遍，否则新条目对
+ * 早已迁移过的存档永远不生效（`amiyamrfz`、`wangmrfz` 就是这么漏掉的）。
+ * 改写全部是幂等的（命中新键就丢弃旧键、字符串替换只在整段标识符匹配时才动手），重跑无副作用。
+ */
 const MIGRATED_KEY = "arkidMigrated";
 
 /**
@@ -115,10 +121,11 @@ function migrateAudioConfig(save: any): number {
 }
 
 /**
- * 执行迁移；无论是否有改动都写标记位，只跑这一次。
+ * 执行迁移；跑完写标记位（标记位记的是表条目数，表补录了新条目就会再跑一次）。
  */
 export function migrateLegacyCharIds(): void {
-	if (whichWayUtil.config(MIGRATED_KEY) === true) return;
+	const migratedTo = Object.keys(legacyCharIds).length;
+	if (whichWayUtil.config(MIGRATED_KEY) === migratedTo) return;
 
 	const detail: string[] = [];
 	const step = (label: string, run: () => number) => {
@@ -195,6 +202,6 @@ export function migrateLegacyCharIds(): void {
 
 	step("瑰丽理想", migrateGloriousIdeal);
 
-	game.saveConfig(`extension_WhichWay_${MIGRATED_KEY}`, true);
+	game.saveConfig(`extension_WhichWay_${MIGRATED_KEY}`, migratedTo);
 	if (detail.length) console.log(`%c[WhichWay] 旧干员id 存档迁移完成：${detail.join("，")}`, "color:#4a9eff;");
 }

@@ -34,17 +34,20 @@ import BackgroundSet from "./component/backgroundSet.vue";
 import UpdateLog from "./component/updateLog.vue";
 import AudioSetting from "./component/audioSetting.vue";
 import ModuleSetting from "./component/moduleSetting.vue";
+import SolicitForth from "./component/solicitForth.vue";
 
 let imgTitleSrc = "./extension/WhichWay/image/ui/painter.png";
 
 //实现不同面板的切换
 const panels = [
-	{ name: "更新公告", component: UpdateCurrent, autoLoad: true },
+	{ name: "更新公告", component: UpdateCurrent, autoLoad: false },
 	{ name: "更新日志", component: UpdateLog },
 	{ name: "扩展介绍", component: ExtIntro },
 	{ name: "背景设置", component: BackgroundSet },
 	{ name: "配音设置", component: AudioSetting },
 	{ name: "模组切换", component: ModuleSetting },
+	//默认界面,祈求能有更多稿件
+	{ name: "征稿在前", component: SolicitForth , autoLoad: true},
 ];
 
 //当前面板

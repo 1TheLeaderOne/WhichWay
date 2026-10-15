@@ -657,16 +657,15 @@ const LLM_icon = computed(() => {
 }
 
 .charImageWrapper > .charImage {
-	mask-image: radial-gradient(circle at center, rgba(255, 255, 255, 1) 60%, rgba(255, 255, 255, 0) 80%);
-	mask-repeat: no-repeat;
-	mask-size: 100% 100%;
-	-webkit-mask-image: radial-gradient(circle at center, rgba(255, 255, 255, 1) 60%, rgba(255, 255, 255, 0) 80%);
-	-webkit-mask-repeat: no-repeat;
-	-webkit-mask-size: 100% 100%;
 	width: 100%;
 	aspect-ratio: 2/3;
-	background-size: cover;
+	/* 武将卡直接展示干员的原始图片：contain 保完整构图（不裁切），也不做遮罩渐隐。
+	   场上头像走的是 `PortraitLayers.vue` 的 cover + pos.json 调位，这里是另一套观感，
+	   刻意不读那份配置 —— 卡面要看的是「这张图长什么样」，调位要看的是「场上不挡 UI」。
+	   动皮由 spineWorker 挂在这个元素上，所以尺寸锚点（2/3 + 100% 宽）保持稳定。 */
+	background-size: contain;
 	background-position: center center;
+	background-repeat: no-repeat;
 }
 
 .charImageWrapper > .charSkinBottomUIWrapper {

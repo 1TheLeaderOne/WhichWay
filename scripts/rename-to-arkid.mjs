@@ -274,30 +274,73 @@ if (MODE === "derived") {
 }
 
 // ===================================================================
-// --gen-migration：把「旧id → 新id」表写进源码，供一次性存档迁移读取
+// --gen-migration：把「旧id → 新id」表写进 json/legacyCharIds.json，供一次性存档迁移读取
 // ===================================================================
+
+/**
+ * 手工补录的「旧id → uid」。
+ *
+ * `--gen-map` 是**扫描当前干员文件**产出映射的，所以「文件早就改成 uid、旧id 从此扫不出来」的
+ * 干员永远不会再出现在映射表里，可玩家存档中的旧键仍然在——迁移表认不得它就等于皮肤/配音/模组
+ * 全部对不上。`amiyamrfz` 属于这一类（改名时没进 arkid-rename-map.json，resources 里还留着
+ * image/character/amiyamrfz.jpg、audio/{语言}/die/amiyamrfz.mp3 这些旧名文件）。
+ *
+ * 加了新条目就要同步 `json/legacyCharIds.json`，别只改这一处。
+ */
+const MANUAL_MIGRATIONS = {
+	amiyamrfz: "char_002_amiya",
+};
+
 if (MODE === "migration") {
-	const rows = [...todo].sort((a, b) => a.id.localeCompare(b.id));
-	const body = rows.map(r => `\t${JSON.stringify(r.id)}: ${JSON.stringify(r.ark)},`).join("\n");
-	const out = path.join(ROOT, "src", "arknight", "legacyCharIds.ts");
+	//当前仍注册的干员id：用来分辨「保留原名」和「其实已经改名了」
+	const registered = new Set();
+	for (const f of charFiles()) {
+		for (const id of extractIds(texts.get(f) ?? read(f), moduleBase(f)).ids) registered.add(id);
+	}
+
+	const rows = new Map(todo.map(r => [r.id, r.ark]));
+	//因 `{id}_${key}` 动态键被跳过、但事后仍被改成 uid 的干员（wangmrfz → char_2027_wang）：
+	//旧id 已不在注册表里 ⇒ 存档里的旧键必须迁移，否则皮肤/动皮目录全查不到
+	for (const r of map) {
+		if (skipped.has(r.id) && !registered.has(r.id) && registered.has(r.ark)) rows.set(r.id, r.ark);
+	}
+	for (const [id, ark] of Object.entries(MANUAL_MIGRATIONS)) {
+		if (registered.has(id)) {
+			console.warn(`MANUAL_MIGRATIONS 里的 ${id} 仍在注册表中（还没改名？），不写进迁移表`);
+			continue;
+		}
+		rows.set(id, ark);
+	}
+
+	const sorted = [...rows.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+	const outJson = path.join(ROOT, "json", "legacyCharIds.json");
+	const outTs = path.join(ROOT, "src", "arknight", "legacyCharIds.ts");
+	//JSON 不允许可尾逗号（TS 对象字面量允许，所以旧的 .ts 写法不能照搬）
+	fs.writeFileSync(outJson, `${JSON.stringify(Object.fromEntries(sorted), null, "\t")}\n`);
 	fs.writeFileSync(
-		out,
-		`/**
+		outTs,
+		`import legacyCharIdsJson from "../../json/legacyCharIds.json";
+
+/**
  * 旧干员id → 明日方舟uid 映射表
  *
+ * 表体是纯数据，落在 \`json/legacyCharIds.json\`（构建时由 viteStaticCopy 原样带进产物的 \`json/\`，
+ * 也方便脱离 TS 阅读、比对与外部工具复用）。这里用**静态 import** 而不是 \`whichWayFile.readFile\`：
+ * \`arkidMigration\` 必须赶在任何阶段模块求值之前把存档改写完（见其文件注释），
+ * 换成异步读文件等于把一次性迁移压在 \`game.promises\` 上——环境不支持或读失败就是静默丢配置。
+ *
  * 由 \`node scripts/rename-to-arkid.mjs --gen-migration\` 从 scripts/arkid-rename-map.json 生成，
- * 请勿手工编辑。改名前的玩家存档（皮肤/配音/模组/冲突皮肤/战役进度）里的键仍是旧id，
+ * 请勿手工编辑 JSON。改名前的玩家存档（皮肤/配音/模组/冲突皮肤/战役进度）里的键仍是旧id，
  * 由 src/arknight/arkidMigration.ts 在启动时按此表一次性改写。
  *
- * 表里只有**实际改过名**的干员：保留原名的干员（无对应uid、或因 \`{id}_\${key}\` 动态键而跳过）
- * 不在表内，迁移时自然跳过。
+ * 表里只有**实际改过名**的干员：仍保留原名的干员不在表内，迁移时自然跳过。
+ * 例外是 \`MANUAL_MIGRATIONS\`（脚本 \`--gen-map\` 扫的是当前干员文件，旧id 已经不在文件名里的
+ * 干员永远扫不出来，但玩家存档里的旧键仍在，所以必须手工补录）。
  */
-export const legacyCharIds: Record<string, string> = {
-${body}
-};
+export const legacyCharIds: Record<string, string> = legacyCharIdsJson;
 `,
 	);
-	console.log(`迁移表已写入 ${rel(out)}（${rows.length} 条）`);
+	console.log(`迁移表已写入 ${rel(outJson)}（${sorted.length} 条）+ 读取入口 ${rel(outTs)}`);
 	process.exit(0);
 }
 
