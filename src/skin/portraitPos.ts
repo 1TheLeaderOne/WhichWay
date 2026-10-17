@@ -1,7 +1,6 @@
 import { whichWayArknight } from "../arknight/index.js";
 import { whichWayFile } from "../file.js";
 import { whichWayUtil } from "../utill.js";
-import { whichWayUtil } from "../utill.js";
 
 /**
  * 干员立绘的「位置/大小」设定（皮肤拖拽功能的数据层）
@@ -24,7 +23,12 @@ export type PortraitPos = {
 	x: number;
 	/** 垂直偏移，单位是「框高」的比例，可为负 */
 	y: number;
-	/** 缩放倍率，绝对值（不是相对比例） */
+	/**
+	 * 缩放倍率，绝对值（不是相对比例）。
+	 *
+	 * 画布就是「`scale` 倍框」的 cover 贴合矩形（见 `getCover`）：贴合的那一轴恰好是 `scale` 倍框边长，
+	 * 溢出那一轴是 `scale × 两边宽高比之比` 倍。所以倍率越大立绘越大、可拖的范围也越大。
+	 */
 	scale: number;
 };
 
@@ -39,11 +43,57 @@ export const DEFAULT_PORTRAIT_SCALE = 1.5;
 /** 没有配置时的缺省设定：不偏移 + 默认缩放 */
 const DEFAULT_POS: PortraitPos = { x: 0, y: 0, scale: DEFAULT_PORTRAIT_SCALE };
 
+/**
+ * 画布相对框的覆盖倍数（画布尺寸 ÷ 框尺寸，两个轴都 ≥ 1）。
+ *
+ * 内层是一张**装着完整原图**的画布：宽高比取原图的、尺寸是「`scale` 倍框」的 cover 贴合结果，
+ * 所以它在裁掉的那一轴上比框宽出 `cover − 1`，另一轴正好贴合。参见 `PortraitLayers.vue`。
+ */
+export type PortraitCover = { x: number; y: number };
+
+/**
+ * cover 贴合倍数。
+ *
+ * `imgAspect` = 图宽/图高，`frameAspect` = 框宽/框高，画布 = `scale` 倍框的 cover 贴合矩形：
+ * - 横图（`imgAspect > frameAspect`，比如 2000×1200 的皮肤塞进 114×174 的武将卡）：宽度方向溢出，
+ *   `cover.x` 可以到 2.5 倍以上 —— 那部分正是旧 `cover` 写法**裁掉没画出来**的内容，现在它就在画布里，拖过去就能看到；
+ * - 竖图放进方框同理，溢出行在 `cover.y`；
+ * - 两者宽高比相同（或取不到图片尺寸而按 `imgAspect = frameAspect` 兜底）时两轴都恰好等于 `scale`，
+ *   即「框 × scale」的画布 —— 与改动前 `transform: scale` 的画面逐像素一致。
+ */
+export function getCover(imgAspect: number, frameAspect: number, scale: number): PortraitCover {
+	return {
+		x: scale * Math.max(1, imgAspect / frameAspect),
+		y: scale * Math.max(1, frameAspect / imgAspect),
+	};
+}
+
+/**
+ * 把偏移夹到「画布边缘不超过框边缘」：`|x| ≤ |cover.x − 1| / 2`、`|y| ≤ |cover.y − 1| / 2`。
+ *
+ * 两个轴的界限都是「画布与框的差值的一半」，取绝对值是为了兼顾两侧：
+ * - `cover ≥ 1`（立绘比框大，绝大多数情况）：上限就是**原图自己的边缘**与框边齐平的位置。
+ *   再往外拖就只有背板，所以硬停在图边缘 —— 框外那部分原图本来就在画布里，拖过去就能看到；
+ * - `cover < 1`（滚轮把立绘缩得比框小）：同一条界限变成「画布整张留在框内」，能挪但不能探出框外。
+ * 中心点相对框中心偏移 `x·框宽`，与 `PortraitPos.x` 的单位一致。
+ */
+export function clampOffset(pos: PortraitPos, cover: PortraitCover): PortraitPos {
+	const limitX = Math.abs(cover.x - 1) / 2;
+	const limitY = Math.abs(cover.y - 1) / 2;
+	return {
+		x: Math.min(Math.max(pos.x, -limitX), limitX),
+		y: Math.min(Math.max(pos.y, -limitY), limitY),
+		scale: pos.scale,
+	};
+}
+
 /** 「经典形象」皮肤名——立绘直接从 `illustration/character/{id}.png` 取图，没有皮肤目录 */
 export const DEFAULT_SKIN_NAME = "经典形象";
 
 const POS_FILE = "json:pos.json";
 const POS_NAME = "pos.json";
+/** `pos.json` 的文件结构版本 */
+const POS_SCHEMA = 1;
 
 /** 干员id → 皮肤名 → 设定 */
 let posData: Record<string, Record<string, PortraitPos>> = {};
@@ -116,6 +166,14 @@ export function getPosData(): Record<string, Record<string, PortraitPos>> {
 	return posData;
 }
 
+/**
+ * 按 `pos.json` 的**文件形态**序列化当前设定（`{ schema, data }`），供开发面板一键复制。
+ * 与落盘那份逐字一致（同一段 `JSON.stringify` 参数），复制出来可直接粘回文件里。
+ */
+export function serializePosFile(): string {
+	return JSON.stringify({ schema: POS_SCHEMA, data: posData }, null, "\t");
+}
+
 /** 按 url 取设定；url 解析不出干员时返回缺省值 */
 export function getPosByUrl(url: string): PortraitPos {
 	const key = resolvePortraitKey(url);
@@ -183,7 +241,7 @@ let saveTimer: any;
  */
 function writePosFile() {
 	whichWayFile
-		.writeFileAsJson({ schema: 1, data: posData }, "json:", POS_NAME)
+		.writeFileAsJson({ schema: POS_SCHEMA, data: posData }, "json:", POS_NAME)
 		.then(() => {
 			if (whichWayUtil.isDeveloperMode()) console.log("[whichWayPortraitPos] 已写入", whichWayFile.compilePath(POS_FILE), "共", Object.keys(posData).length, "名干员");
 		})

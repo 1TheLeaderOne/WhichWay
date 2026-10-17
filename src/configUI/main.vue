@@ -35,6 +35,8 @@ import UpdateLog from "./component/updateLog.vue";
 import AudioSetting from "./component/audioSetting.vue";
 import ModuleSetting from "./component/moduleSetting.vue";
 import SolicitForth from "./component/solicitForth.vue";
+import PortraitPosSetting from "./component/portraitPosSetting.vue";
+import { whichWayUtil } from "../utill.js";
 
 let imgTitleSrc = "./extension/WhichWay/image/ui/painter.png";
 
@@ -46,6 +48,8 @@ const panels = [
 	{ name: "背景设置", component: BackgroundSet },
 	{ name: "配音设置", component: AudioSetting },
 	{ name: "模组切换", component: ModuleSetting },
+	//皮肤位置调整是开发者工具：普通玩家没有调 pos.json 的需求，误拖还会改坏别人的构图设定
+	...(whichWayUtil.isDeveloperMode() ? [{ name: "皮肤位置调整", component: PortraitPosSetting }] : []),
 	//默认界面,祈求能有更多稿件
 	{ name: "征稿在前", component: SolicitForth , autoLoad: true},
 ];

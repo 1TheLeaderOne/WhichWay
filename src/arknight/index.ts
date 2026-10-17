@@ -607,15 +607,23 @@ class WhichWayArknight {
 	/**
 	 * 启动期不读入内存的数据文件名（仍保留在 updateFile 清单里，自动更新/下载不受影响）。
 	 *
-	 * handbook_team_table 全扩展零运行时读取（只出现在本文件的 updateFile 清单中），
-	 * 也不在精简缓存的裁剪范围内——裁剪只保留 ArknightSlimData 声明的三张表。
+	 * - handbook_team_table：全扩展零运行时读取（只出现在本文件的 updateFile 清单中）
+	 * - skin_table：皮肤形态表（3.8MB），只有 scripts 下的开发脚本读磁盘上的那份
+	 *   （update-portraits / split-illustration 按 portraitId 反查形态），运行时的皮肤数据来自
+	 *   json/cache/skin.json，跟这张表没有关系
+	 *
+	 * 两者都不在精简缓存的裁剪范围内——裁剪只保留 ArknightSlimData 声明的三张表，
+	 * 所以往这里加文件名不需要动 slimCacheSchema。
 	 */
-	private readonly loadSkipFiles: Array<string> = ["handbook_team_table"];
+	private readonly loadSkipFiles: Array<string> = ["handbook_team_table", "skin_table"];
 
 	/**
 	 * 需要更新的JSON文件名
+	 *
+	 * ⚠️ 与 scripts/update-arknight-data.bat 的 FILES 清单是一对镜像，改一边就要改另一边
+	 * （那边的头部注释写明了这条约束）。
 	 */
-	updateFile: Array<string> = ["character_table", "charword_table", "handbook_team_table", "char_patch_table"];
+	updateFile: Array<string> = ["character_table", "charword_table", "handbook_team_table", "char_patch_table", "skin_table"];
 
 	/**
 	 * 更新的JSON文件地址

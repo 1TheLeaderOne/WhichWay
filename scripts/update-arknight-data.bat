@@ -7,10 +7,17 @@ REM
 REM  Files (json/arknight/, tracked by git):
 REM    character_table.json     charword_table.json
 REM    handbook_team_table.json char_patch_table.json
+REM    skin_table.json
 REM
 REM  Mirrors WhichWayArknight.updateArknigtData() in
 REM  src/arknight/index.ts -- keep the file list and the base url
 REM  in sync with that function.
+REM
+REM  skin_table.json is the exception of that list: it is only read by
+REM  the dev scripts (update-portraits / split-illustration), never at
+REM  runtime, so src/arknight/index.ts keeps it out of the boot load
+REM  through loadSkipFiles. Being in updateFile means the in-game
+REM  one-key updater fetches it too (~2.7 MB, once per install).
 REM
 REM  Pipeline: download to %TEMP% -> validate -> compare -> install.
 REM  The repo is not written until every file passed validation, so a
@@ -51,7 +58,7 @@ set "BUILDDIR=%EXTDIR%\json\arknight"
 set "TMPDIR=%TEMP%\whichway-arknight"
 
 REM ---- must match updateFile / updateUrl in src/arknight/index.ts ----
-set "FILES=character_table charword_table handbook_team_table char_patch_table"
+set "FILES=character_table charword_table handbook_team_table char_patch_table skin_table"
 set "URL=https://torappu.prts.wiki/gamedata/latest/excel/"
 
 set "CHECKONLY="
@@ -152,7 +159,7 @@ if defined NONODE (
 	)
 	echo [WARN] node is missing, only the size check ran
 ) else (
-	node -e "const fs=require('fs'),path=require('path');const dir=process.argv[1];const voiceKeys=['voiceLangDict','voiceLangTypeDict','charDefaultTypeDict'];const rules={character_table:d=>Object.keys(d).length>200,charword_table:d=>voiceKeys.every(k=>k in d),handbook_team_table:d=>Object.keys(d).length>0,char_patch_table:d=>'patchChars' in d};let bad=0;for(const name in rules){const f=path.join(dir,name+'.json');let d=null;try{d=JSON.parse(fs.readFileSync(f,'utf8').replace(/^\uFEFF/,''));}catch(e){console.log('[ERROR] '+name+'.json is not valid JSON: '+e.message);bad++;continue;}if(rules[name](d)){console.log('[ OK ] '+name+'.json '+fs.statSync(f).size+' bytes');}else{console.log('[ERROR] '+name+'.json has an unexpected structure');bad++;}}process.exit(bad?1:0);" "%TMPDIR%"
+	node -e "const fs=require('fs'),path=require('path');const dir=process.argv[1];const voiceKeys=['voiceLangDict','voiceLangTypeDict','charDefaultTypeDict'];const rules={character_table:d=>Object.keys(d).length>200,charword_table:d=>voiceKeys.every(k=>k in d),handbook_team_table:d=>Object.keys(d).length>0,char_patch_table:d=>'patchChars' in d,skin_table:d=>Object.keys(d.charSkins).length>1000};let bad=0;for(const name in rules){const f=path.join(dir,name+'.json');let d=null;try{d=JSON.parse(fs.readFileSync(f,'utf8').replace(/^\uFEFF/,''));}catch(e){console.log('[ERROR] '+name+'.json is not valid JSON: '+e.message);bad++;continue;}if(rules[name](d)){console.log('[ OK ] '+name+'.json '+fs.statSync(f).size+' bytes');}else{console.log('[ERROR] '+name+'.json has an unexpected structure');bad++;}}process.exit(bad?1:0);" "%TMPDIR%"
 	if errorlevel 1 (
 		set "KEEPTMP=1"
 		goto :fail_invalid

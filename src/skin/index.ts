@@ -214,6 +214,19 @@ class WhichWaySkin {
 		});
 
 		onConfig({
+			name: "whichwaySkinConfigAdd_portraitUseCover",
+			priority: 757,
+			obj: {
+				name: "portraitUseCover",
+				options: {
+					name: "立绘/皮肤直接用cover铺满",
+					intro: "开启后干员的立绘与皮肤只按 background-size:cover 铺满，忽略自定义的位置与缩放设定（pos.json）；关闭则沿用自定义的pos。改完需要换肤或重开一局才生效",
+					init: false,
+				},
+			},
+		});
+
+		onConfig({
 			name: "whichwaySkinConfigAdd_skinOverride",
 			priority: 754,
 			obj: {

@@ -1,7 +1,7 @@
 import { game } from "noname";
 import { whichWayToast } from "../toast/index.js";
-import { getPortraitKey, hasPortraitLayers, repaintPortrait } from "./avatarBackground.js";
-import { flushSave, getPos, restorePos, setPos, snapshotPos, type PortraitPos } from "./portraitPos.js";
+import { getPortraitCover, getPortraitKey, hasPortraitLayers, repaintPortrait } from "./avatarBackground.js";
+import { clampOffset, flushSave, getPos, restorePos, setPos, snapshotPos, type PortraitPos } from "./portraitPos.js";
 
 /**
  * 皮肤拖拽：用鼠标/手指直接调整干员立绘（含皮肤）的位置与大小
@@ -10,8 +10,12 @@ import { flushSave, getPos, restorePos, setPos, snapshotPos, type PortraitPos } 
  * 的两层背景绘制）。本体武将与其它扩展的角色走引擎原流程，节点上没有我们的子元素，也就没有可移动的东西，
  * 所以「仅对明日方舟干员有效」不需要额外判断角色表，天然成立。
  *
+ * 改的是 `pos.json` 里的偏移比例与倍率（`PortraitPos`），不是某个 CSS 属性：写完之后由
+ * `repaintPortrait` 重绘内层那张完整原图画布。拖到边界时 `clampOffset` 会把值停在**原图自己的边缘**
+ * （再往外就只剩背板），所以拖过头时读数会停住，而不是失灵。
+ *
  * 与动皮拖拽（`spineWork.draggingDyc`）的差别：
- * - 动皮改的是 spine 骨骼坐标，本模块改的是 CSS `transform`，落盘在 `json/pos.json`；
+ * - 动皮改的是 spine 骨骼坐标，本模块改的是 `json/pos.json` 里的立绘位置设定；
  * - 动皮是开发模式专属，本功能是给玩家用的（普通模式也开放）；
  * - 这里用 Pointer Events（一套代码同时覆盖鼠标与触摸）而不是拆成 mouse/touch 两套，
  *   也不用 interactjs：为这点交互再引一份 ~140kB 依赖进 skin 分块不划算。
@@ -65,10 +69,10 @@ function forEachPortraitNode(fn: (node: HTMLDivElement) => void) {
 }
 
 /**
- * 给单个节点装拖拽交互
+ * 给单个立绘节点装拖拽交互（场上头像与开发面板的预览节点共用这一份）。
  * @returns 还原函数；解析不出该立绘属于哪个干员时返回 undefined（不装）
  */
-function enableNode(node: HTMLDivElement): (() => void) | undefined {
+export function enablePortraitDrag(node: HTMLDivElement): (() => void) | undefined {
 	const key = getPortraitKey(node);
 	if (!key) return;
 
@@ -90,11 +94,17 @@ function enableNode(node: HTMLDivElement): (() => void) | undefined {
 	let lastHudTime = 0;
 
 	const currentPos = (): PortraitPos => getPos(key.charId, key.skin);
+	/** 本节点的 HUD toast 键（`duration: true` 不会自己消失，拆监听时必须撤） */
+	const hudId = `dragging_portrait_${key.charId}_${key.skin}`;
 
 	const apply = (next: PortraitPos) => {
-		//先写数据再重绘：重绘会读 layers.url，而引擎可能在重绘途中又画一次（读到的是同一条设定）
-		setPos(key.charId, key.skin, next);
-		repaintPortrait(node, next);
+		//先按当前画布把偏移夹到原图边缘，再写数据、再重绘：
+		//重绘会读 layers.url，而引擎可能在重绘途中又画一次（读到的是同一条设定）；
+		//夹在这一步做是为了让**存的东西与画面上的一致**（绘制侧还会夹一次兜底，但那样 HUD 会显示越界值）。
+		const cover = getPortraitCover(node, next.scale);
+		const clamped = cover ? clampOffset(next, cover) : next;
+		setPos(key.charId, key.skin, clamped);
+		repaintPortrait(node, clamped);
 	};
 
 	const showHud = (force = false) => {
@@ -102,13 +112,12 @@ function enableNode(node: HTMLDivElement): (() => void) | undefined {
 		if (!force && now - lastHudTime < HUD_INTERVAL) return;
 		lastHudTime = now;
 		const pos = currentPos();
-		const id = `dragging_portrait_${key.charId}_${key.skin}`;
-		hudToastIds.add(id);
+		hudToastIds.add(hudId);
 		whichWayToast.showToast(
 			`[${key.charId} · ${key.skin}] x=${pos.x.toFixed(3)} y=${pos.y.toFixed(3)} scale=${pos.scale.toFixed(2)}`,
 			true,
 			"topLeft",
-			id
+			hudId
 		);
 	};
 
@@ -205,6 +214,11 @@ function enableNode(node: HTMLDivElement): (() => void) | undefined {
 		node.style.pointerEvents = previousStyle.pointerEvents;
 		node.style.cursor = previousStyle.cursor;
 		node.style.touchAction = previousStyle.touchAction;
+		//HUD 是 `duration: true` 的持久 toast：游戏内退出拖拽模式由 `stopPortraitDragging` 统一撤，
+		//而开发面板换干员/皮肤只走这个还原函数（不退出模式，拖拽开关还开着），所以这里必须把自己那条撤掉，
+		//否则上一条读数会一直挂在左上角。集合里同步摘掉，免得 `stopPortraitDragging` 重复遍历。
+		whichWayToast.removeToastById(hudId);
+		hudToastIds.delete(hudId);
 	};
 }
 
@@ -263,7 +277,7 @@ function startPortraitDragging() {
 	snapshot = snapshotPos();
 	teardownMap = new Map();
 	for (const node of nodes) {
-		const teardown = enableNode(node);
+		const teardown = enablePortraitDrag(node);
 		if (teardown) teardownMap.set(node, teardown);
 	}
 

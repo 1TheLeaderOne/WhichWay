@@ -1,5 +1,162 @@
 # 瑰丽理想 WhichWay 更新日志
 
+## 2026-10-16
+
+### 撤回：立绘「放大画布 + 夹取」方案（方向错了，已完整回滚）
+
+上一条记录的 A″ 方案（内层换成 Z 倍画布 + `left/top` 定位 + `|x|,|y| ≤ |Z−1|/2` 夹取）**用户判定不符合预期，已全部撤回**，代码回到改动前状态（`PortraitLayers.vue` 从嵌套 git 工作树恢复，`avatarBackground.ts`/`portraitPos.ts`/`portraitDrag.ts`/`portraitPosSetting.vue` 逐处改回原文，本轮未提交任何东西，所以撤回就是改回文本而不是 `git checkout` —— 这几个文件里还有此前会话的未提交内容）。
+
+- **为什么错**：用户点出「有些立绘本来比框大得多，只是因为大小关系其余部分被截掉了；到了边界应该把被截掉的部分露出来，而不是把移动限制住」。这条批评成立，而且指出了我方案的根本缺陷：截断发生在 `cover` 的**绘制阶段**（贴合系数按框的宽高比裁掉原图，横图塞进竖框能裁掉 60% 的宽度），画布无论多大、怎么夹，`cover` 出来的内容与裁掉的量都不变 ⇒ 夹取只是把「空白」换成「拖不动」，被裁掉的画面依然看不到。正确的方向是**让内层承载完整原图**（按原图自身宽高比铺），框只是取景窗，平移就是在这张完整的图里取景，边界由原图自己的边缘决定。
+- 保留下来的**有效副产品**（重做方案时要一并带上，别丢）：① 引擎全局 `div { transition: all 0.5s }`（`apps/core/layout/default/layout.css:31`）一直在给内层的 `transform` 加 0.5s 缓动 ⇒ 拖动慢半拍、松手后画面还在追，绘制层必须显式 `transition: none`；② 用「内层元素自身尺寸」代替 `transform` 来承载缩放，比重绘走一遍 `createVNode + render()` 更省（每次重绘只剩几次样式写入）。
+- 下一步（待用户审阅方案后再执行）：内层改为**永不自裁**的完整原图画布，`pos.json` 的 `x/y/scale` 单位与含义不变，可拖范围由「原图边缘」而非「框边缘」决定。
+
+
+### 改动：立绘内层改成「装着完整原图的 `<img>` 画布」，拖到边界显示被裁掉的部分（方案 B1）
+
+按上一条的批评重做。用户确认的两个选择：**B1（内层用 `<img>` 承载完整原图）** + **硬停在原图边缘（永不露白）**。
+
+- **几何（`src/skin/portraitPos.ts` 新增 `getCover` / `clampOffset` / `PortraitCover`）**：内层画布的宽高比取**原图**的，尺寸取「`scale` 倍框」的 cover 贴合矩形 —— `cover.x = scale·max(1, 原图比/框比)`、`cover.y = scale·max(1, 框比/原图比)`。贴合那一轴恰好 `scale` 倍框边长（所以默认 1.5 的画面与改动前 `transform: scale(1.5)` 逐像素一致），溢出那一轴则是 `scale × 两边宽高比之比` —— 那一截正是旧 `cover` **从来没画出来**的内容，现在它实实在在在 DOM 里，拖过去就能看到（实测一张 2000×1200 的皮肤进 114×174 的武将卡：`cover.x = 3.82`，也就是可拖范围从旧写法的 ±0.25 变成 ±1.41，老存档里 `x=0.79` 这种过去被判为「越界」的值现在落在合法范围内、显示的是真正的原图像素）。
+  - 定位不用 `transform`：`width/height = cover·100%`、`left/top = (50 + v·100 − cover·50)%`，四个值全是相对框的百分比 ⇒ `pos.json` 的 `x/y` 单位（偏移 ÷ 框尺寸）直接线性还原，与分辨率、与 `ui_zoom` 都无关，`portraitDrag.ts` 的换算一行都不用改。
+  - 夹取 `|x| ≤ |cover.x − 1| / 2`（`y` 同理）：`cover ≥ 1` 时上限就是**原图自己的边缘**与框边齐平的位置，再往外只剩背板 ⇒ 硬停在图边缘；取绝对值是为了兼顾滚轮缩到 `cover < 1`（立绘比框小）的情况，那时同一条界限变成「整张画布留在框内」，能挪但不能探出框外。旧写法在 `cover < 1` 时会把界限算成负数、把 `x=0` 拖成非零，`Math.abs` 顺带堵掉了这个坑。
+- **绘制侧 `src/skin/PortraitLayers.vue`**：内层由 `div` + `background` 换成 `<img>`，props 契约（`image`/`offsetX`/`offsetY`/`scale`）不变，`avatarBackground.ts` 的挂载与 `render()` 调用点一字未动。
+  - **原图比例怎么来**：`img.naturalWidth/naturalHeight`（读解码尺寸，**不碰布局**，不像 `offsetWidth` 会强制重排）在 `load` 时取；框比例取外层（= 宿主节点尺寸）的 `clientWidth/clientHeight`。量不到任何一个时退回 `{x: scale, y: scale}`，配 `object-fit: cover` 就正好是旧画面 ⇒ 首帧绝不会是空白，图加载完只是让画布在溢出轴变大、多显示内容。
+  - **为什么要 `ResizeObserver`**：`paintPortrait` 常常在节点还没进文档时就跑完（`$init` 途中），那一刻 `clientWidth` 是 0、框比例量不到，画布会永远停在兜底的「框 × scale」，完整原图白装。观察者负责元素真正有尺寸时补测一次；回调只写一个 ref、不改观察目标尺寸，不会出现回环告警，`onBeforeUnmount` 里 `disconnect`。
+  - `imgSrc` 从 `url("…")` 里拆裸路径，空串 / `none` / `url(undefined)` 一律当没图（`v-if` 直接不渲染）并带 `@error` 兜底 —— 否则会去请求一个必然 404 的地址，在卡面正中挂出一枚碎图图标。另加 `draggable="false"`、`pointer-events: none`、`user-select: none`，`object-position: center top` 与引擎给立绘的 `background-position` 对齐。
+  - 两层都显式 `transition: none`（撤回说明里的副产品①：`layout.css:31` 的全局 `div { transition: all .5s }`）；`portraitUseCover`（「立绘/皮肤直接用 cover 铺满」）改在这里现取（函数而不是 `computed`，理由不变：`lib.config` 不是响应式数据），开启时按 `{x:0, y:0, scale:1}` 画 ⇒ 画布正好等于框的 cover 贴合矩形，与引擎原生 cover 一致。
+- **`src/skin/avatarBackground.ts`**：新增 `getPortraitCover(node, scale)` —— 从 `layers.host` 里取 `<img>` 的 `naturalWidth/Height` 与承载层 `clientWidth/Height` 算出当前画布的覆盖倍数，读不到（图未解码、节点未入文档）返回 `undefined`。对外契约（`mountPortrait`/`hasPortraitLayers`/`repaintPortrait`/`getPortraitKey`）不变，影子副本照旧是「未调位的原样」，三处读不到子元素的地方（战报浅克隆、`smoothAvatar`、`ui.fakeme`）行为不变。
+- **拖拽侧 `src/skin/portraitDrag.ts`**：`apply()` 先 `getPortraitCover(node, next.scale)` 再 `clampOffset` 才写 `setPos`/`repaintPortrait` ⇒ **存的东西与画面一致**（绘制侧还会再夹一次兜底，但那样 HUD 会显示越界值、且下一次 `moveBy` 是从越界值起算，等于「死区」）。模块头原来写着「本模块改的是 CSS `transform`」，改为「改的是 `pos.json` 的偏移比例与倍率」，并说明拖过头会停在原图边缘。
+- **文案**：`PortraitPos.scale` 补「画布 = `scale` 倍框的 cover 贴合矩形，倍率越大可拖范围越大」；开发面板 `portraitPosSetting.vue` 的模块头与读数旁提示改成「内层是完整原图的画布，框只是取景窗」「可拖范围 = 原图比框多出来的那一截，拖到图边读数停住 ≠ 拖拽失灵」。
+- 校验：`pnpm eslint` 五个改动文件全通过；`WW_SKIP_STATIC_COPY=1` 构建通过，产物 `chunks/skin-PortraitLayers-shared.js` 里 `translate(`/`transform:` 均 0 命中，能看到 `<img>` 分支（`v-if="imgSrc && !imgBroken"`、`onLoad`/`onError`）、百分比样式数学 `left: ${50 + x·100 − cover.x·50}%`、`querySelector("img")` 版 `getPortraitCover`，以及夹取函数 `Math.abs(cover − 1) / 2`；`css/viteAutoCreateStyle.css` 的 `.sjzxPortraitImage` 已变成 `object-fit:cover;object-position:center top;transition:none;pointer-events:none`，`.sjzxPortraitWrapper` 带 `transition:none`。几何用 node 遍历 13 种原图比例 × 5 种框比例 × `scale∈{0.2…5}` × 11 个偏移（35,035 组）演算：`cover ≥ 1` 的轴上画布**恒包住框**、`cover < 1` 的轴**恒在框内**，0 例违例；画布中心与 `0.5 + x` 误差 0；`clampOffset` 幂等。引擎侧确认 `layout.css` 与各主题 `style.css` **没有任何 `img` 选择器**，所以 `<img>` 不会被全局规则改尺寸。**未游戏内实测**：需要人工看三处 —— 场上头像（主将/副将，尤其横图皮肤能拖出被裁的左右两侧）、选将/对话框武将卡、开发面板预览与拖拽手感（这次应当明显更跟手）；另外首帧「先按框 × scale 画、图加载完再补全」理论上有一次极短的比例跳变，需现场确认是否可接受。
+
+
+### 改动：把 `skin_table.json` 加进明日方舟数据的更新队列（bat + 游戏内镜像 + 启动不解析）
+
+用户要求 `update-arknight-data` 把 `skin_table.json` 一起下载。这张表此前是「四张表清单里没有的那个孤儿」——`scripts/update-portraits.mjs` 的头部注释就写着**没有任何脚本刷新它**，于是本地那份停在 9/29，新干员在 `character_table` 里有、在 `skin_table` 里一条皮肤都没有（`char_4231_clemnt`/`char_393_toledo`/`char_4232_hbound` 都是这么漏的）。
+
+- `scripts/update-arknight-data.bat`：`FILES` 追加 `skin_table`（第 4 步的安装与第 3 步的比对都是遍历 `%FILES%`，所以清单加一项就够了）；`[2/4]` 的校验规则加 `skin_table:d=>Object.keys(d.charSkins).length>1000`（内联 node 脚本按文件头的约束继续保持不含 `!` 与 `&`；上游真改了字段名就让 TypeError 非零退出 ⇒ 走 `:fail_invalid`，什么都不写）；头部文件清单补 `skin_table.json`，并写明它是这份清单的**例外**——运行时不读，只是开发脚本要按 `portraitId` 反查形态。
+- `src/arknight/index.ts`：`updateFile` 同步加 `skin_table`（bat 头部规定两边是镜像，改动顺带给 `updateFile` 补了这条约束的注释）。**关键配套**：`loadSkipFiles` 也加 `skin_table`——启动期 `loadArknightData` 是「扫目录里所有不在 skip 清单里的 json 全读进内存」（`index.ts:99`），不加这一条就等于每次开游戏白解析 2.7MB 且**没有任何运行时代码用它**（运行时的皮肤数据来自 `json/cache/skin.json`）。注释里同时说明：往 skip 清单加文件名**不需要**动 `slimCacheSchema`，因为裁剪只产出 `ArknightSlimData` 那三张表，`skin_table` 从来进不了缓存。
+- 连带文案：`scripts/index-menu.mjs` 的菜单摘要「四张表」→「五张表」；`scripts/update-portraits.mjs` 头部「没有任何脚本刷新它」与 `--update-tables` 那行用法说明改成「现在已经会刷新，但新鲜程度取决于最近谁跑过更新脚本」——所以那张「形态全集 = skin_table ∪ 干员表」的并集兜底**照旧保留**，别当成可以删的冗余。
+- 校验：把 bat 的内联校验脚本原样拿去跑本地 `json/arknight/` ⇒ 五张表全 `[ OK ]`；`cmd //c update-arknight-data.bat --check --source-only --no-pause` 真实跑通（远端 `skin_table.json` HTTP 200、2,684,928 bytes，比对报 `changed`）；再去掉 `--check` 真装一次 ⇒ 源树与 `apps/core/extension/WhichWay/json/arknight/` 两处都更新，`json/cache/arknight.json` 已删（下次启动重建精简缓存）。新表 `charSkins` 2386→2410 条、顶层键与 `portraitId` 结构不变，且 clemnt/toledo/hbound **三人现在都在表里**（这条改动的直接收益）。`pnpm eslint src/arknight/index.ts` 通过、构建通过，产物 `chunks/arknight.js` 里 `updateFile` 与 `loadSkipFiles` 两个数组都带 `skin_table`。`node --check` 两个改过的 mjs 通过（注：`scripts/*.mjs` 不在任何 lint 目标里，直接 `pnpm eslint` 它们会报成片既有的 `no-undef`，与本次改动无关）。**未游戏内实测**：新装机首次 `autoUpdate` 会多下 2.7MB 这件事只做了逻辑推演。
+
+### 改动：右侧预览区布局回到第一版（左列的干员卡保留）
+
+用户要求把右侧恢复成「修完 `.stageSide` 重叠与 HUD/双经典形象两个 bug 之后的那一版」，所以只撤回右列，左列的武将卡清单是最近这条需求本身，留着：
+
+- 右列恢复 `toolRow → skinRow → stage( previewCard + stageSide )`：`.picker-col` 回到 34%、`.stage-col` 66%；`.toolHint` 恢复 `margin-left:auto`（不再独占一行），长按提示也回到开着拖拽时自动隐去的那句 `右键{{ dragOn ? "" : " / 长按两秒" }}切到下一个干员`；皮肤行 `.skinRow/.skinBtn/.skinBtnActive` 与舞台 `.stage/.stageDragging`（整块背景提亮，而不是只描一圈边）照抄；`.previewCard` 回到 200px 宽、`aspect-ratio:114/174`、`overflow:hidden`，读数列 `.stageSide`（干员名/id/当前皮肤/`x/y/scale` + `.sideTip`）回到它右边。上一版临时加的 `.portrait/.portraitEditing/.previewCard` 组合卡（自带皮肤行 + 读数的那种）整体删除。
+- 长按/右键的监听回到 `.stage`（`onStagePointerDown/onStagePointerUp`，`pointerleave/cancel` 一并复位计时器），`.previewCard` 上只留 `@pointerup`/`@wheel` 两个 `posVersion++` 的刷新点——与第一版一致。
+- 逻辑侧不动：`skinsOf()`、`chooseSkin()`、`watch(selected)` 的按需复位、选中卡 `scrollIntoView`、以及「右列 `.skinRow` 只渲染按钮、不再自带已调整标记」——标记的唯一出处是左列卡里的 `.skinFlag`。`.sideTip` 多留了一句「预览与场上同一套画法，框外不显示」，那是前几次纠正的结论，跟布局无关。
+- 校验：`pnpm eslint` 通过、构建通过；产物 `css/viteAutoCreateStyle.css` 里 `.skinRow/.stageDragging/.stageSide/.sideLine` 全部回来且都带 `position:relative`，`.previewCard[data-v-acbac973]` 为 `width:200px;…;overflow:hidden`，`portraitEditing/cardEditing` 在 CSS 与 `chunks/configUI.js` 中均 0 命中，`.listCard` 仍在。**未游戏内实测**：右侧舞台在 66% 宽、左边还塞得下 210px 卡片列的情况下会不会挤压读数列，需要人眼看。
+
+
+### 改动：干员列表的每个条目改成武将卡（`charPicker.vue` 开 `#item` 插槽）
+
+用户再次澄清：「改为一个武将卡」指的是 **`char-grid` 下的所有条目**，不是把右下的预览搬到左列 ⇒ 上一节的左右互换撤回（回到「左列搜索+列表 / 右列工具+预览」），条目形态改造落在列表上。
+
+- **`charPicker.vue` 加具名插槽 `#item`**：模板里 `v-for` 的每一项改成 `v-if="$slots.item"` 走 `<slot name="item" :char :active :pick />`、否则维持原来的文字标签，所以配音设置与模组切换两个调用方**一行没动**、观感不变；搜索/过滤/`filtered` 事件仍旧只在本组件里，插槽只负责「长什么样」与「怎么选中」。作用域里的干员id 叫 `char` 而不是 `name`：`name` 会和插槽自身的 `name="item"` 撞成同名属性（`vue/no-duplicate-attributes` 直接报错）。
+- **「皮肤位置调整」的条目卡**（`.listCard`）：卡头 = 中文名 + 干员id，卡身 = 该干员**全部**皮肤行（`经典形象` 也在内，沿用「数据里有就不重复兜」的写法），每行右侧「已调整 / 未调整」= `posData[干员id]` 里有没有这个皮肤键。点卡头选人，点皮肤行选皮肤（`@click.stop`，否则冒泡到卡片本体白选一次人）。
+  - 取清单从「只算选中项的 `computed`」改成函数 `skinsOf(charId)`：左列要一次渲染所有干员的卡。函数里读 `posVersion`，模板渲染时这条依赖就进了本组件的渲染 effect，所以拖完松手整列的「已调整」一起翻。
+  - 配套改的复位逻辑：原来 `watch(selected)` 无条件把 `currentSkin` 打回「经典形象」，会把「点某张皮肤顺带选人」这条路刚选定的皮肤抹掉。改成 `chooseSkin` 先落 `currentSkin` 再落 `selected`，`watch(selected)` 只在「这张皮肤在新干员名下不存在」时才复位（复位本身仍然必要：拿上一个干员的皮肤名去查新的会查不到、画不出）。另外换人后把 `.listCardActive` 用 `scrollIntoView({block:"nearest"})` 滚进可视区——皮肤只能在左列那张卡上选，卡滚出视野就得手翻。
+  - ~~右列因此不再自带皮肤清单~~（已被上一节撤回：右列恢复成第一版的 `toolRow + skinRow + stage/stageSide`，左列的卡保持不变）。
+- **预览的画法仍旧一动不动**：`.portrait` 保持 `overflow:hidden` 的框内裁切，拖拽态只加一圈 `box-shadow` 亮边，不出现 `contain`/放开 overflow 之类的近似渲染（见上一节的教训）。
+- 校验：`pnpm eslint` 两文件通过、构建通过；产物 `css/viteAutoCreateStyle.css` 有 `.listCard/.listSkin/.skinFlag[data-v-350cb50f]`（均带 `position:relative`），`chunks/configUI.js` 里 `$slots.item` 分支存在，另两个调用方（`audioSetting.vue`/`moduleSetting.vue`）未传插槽 ⇒ 仍走默认标签。**未游戏内实测**：一屏几十张卡 × 每张数行皮肤的排版与滚动开销需要人眼确认。
+
+
+### 修复：撤销「拖拽中显示完整立绘」的渲染改动 + 武将卡从左列改起（`portraitPosSetting.vue`）
+
+> ⚠️ 本节第二条「武将卡搬到左列」已被上一节撤回：要改的一直是 `char-grid` 的**条目形态**，左右位置已恢复成「左列搜索+列表 / 右列预览」。撤销渲染改动那部分仍然有效。
+
+用户实测上一节后给出两条纠正，都成立：
+
+- **展开态那套改动整体撤销**（`.cardEditing` 的 `overflow:visible` / `:deep(div){overflow:visible!important}` / `:deep(.sjzxPortraitImage){background-size:contain}` / 缩小到 150px + `margin-bottom:60px` / 关掉影子副本的 `background-image:none!important` 全删）。原因正如反馈所指：**「把整张图露出来」与「所见即游戏内效果」是同一枚硬币的两面，不可能同时成立**。偏移与缩放是按框的尺寸换算的，`cover → contain` 一改，图的贴合基准就从「按长边铺满」变成「按短边贴合」，同一份 pos 在面板里落在完全不同的位置（严重偏差）；被裁掉的那部分本来就在框外，放开 overflow 只是让它糊到卡片下面的文字与其它层上，加上影子副本/背板层，看起来就成了「多份立绘」。
+  - 现在面板只做一件事：**跟场上逐像素同构**。`.previewCard` 恢复 `overflow:hidden` 的那圈裁切，拖拽态只给 `.opCard` 描一圈亮边（`border-color` + `box-shadow`）当模式指示，**不碰立绘的任何画法**。提示语也改成「框外的部分不显示（游戏里也不显示）——拖拽是把想露出的部分拖进框里，不是预览整张原图」。
+  - 组件顶注补了这条取舍的理由，防止以后又被当成「忘了做完整预览」重新加回去。
+- **武将卡搬到左列**：`.card-col`（36%，含工具行 + 武将卡 + 提示）在左，`.picker-col`（64%，搜索 + 干员列表）在右。工具行的 `.toolHint` 改成 `flex: 1 1 100%` 独占一行——这一列只有三成宽，跟两个按钮横排会把按钮顶出面板。原来包卡片的 `.stage` 舞台层整个删掉（卡片有自己的边框，不需要第二层框），`contextmenu` 换人改绑到 `.opCard`。
+- 校验：`pnpm eslint` 通过、构建通过；产物 `css/viteAutoCreateStyle.css` 中 `contain`/`overflow:visible` 相关规则 **0 命中**，`.previewCard[data-v-790bfb0a]` 带 `overflow:hidden`，`.cardEditing[data-v-790bfb0a]` 只剩 `border-color:#1ac2fd;box-shadow:0 0 6px #1ac2fd99`；`chunks/configUI.js` 里 `stageEditing/stage-col` 0 命中、`card-col/cardEditing/已调整/未调整` 均在。**未游戏内实测**：需要确认展开/收起拖拽时立绘位置不再漂移、无重复影像，且左列卡片与右列列表的比例观感正常。
+
+
+### 改动：开发面板改为「一张武将卡」+ 拖拽中显示完整立绘 + 候选只列方舟实装干员
+
+> ⚠️ 本节第一条「拖拽中显示完整立绘」已被上一节整体撤销（渲染方案会破坏位置一致性），只有「一张武将卡」的数据部分（皮肤清单 + 已调整标记 + 候选过滤）保留下来；卡片现在位于**左列**。
+
+用户提的两条，都落在 `src/configUI/component/portraitPosSetting.vue`（外加 `avatarBackground.ts` 的一行导出）：
+
+- **拖拽时被裁掉的立绘要能看全**。裁切其实有三层，缺一层都露不出来：① 本面板 `.previewCard` 自己的 `overflow: hidden`；② `ensureLayers()` 建的宿主 div，它的 `overflow: hidden` 是**内联样式**，只能 `!important` 盖；③ `PortraitLayers.vue` 外层 `.sjzxPortraitWrapper` 的 `overflow: hidden`（子组件的 scoped 类，要 `:deep`）。而且**光放开 overflow 不够**：背景的绘制区域永远是元素自己的盒子，`cover` 裁掉的像素不会因为你允许溢出就冒出来 ⇒ 内层同时换 `background-size: contain`（按短边贴合，整张必然完整），外层那条 `.cardEditing :deep(div){overflow:visible!important}` 负责 ②③。顺带关掉宿主节点自身的**影子副本**（`mountPortrait` 写在节点上的内联 `background-image`，给战报浅克隆/smoothAvatar/fakeme 用的）：它按 cover 裁切且不带内层位移，留着会在框里叠一份错位的同图，所以 `background-image: none !important`。
+  - 缩放（默认 1.5 倍）后立绘必然溢出卡框，所以拖拽中把预览从 220px 缩到 150px 并留 `margin-bottom: 60px` 空白：位置设定存的是**框宽/框高的比例**（见 `PortraitLayers.vue`），与盒子像素无关，缩小不改变构图，只是让溢出的部分落在空白而不是压在皮肤清单上。`.stage` 明确**不写** `overflow: auto/hidden`，否则等于又把「完整图」切回去。
+  - 代价写进卡下的提示了：拖拽中的显示与游戏内的裁切效果不一致；不开拖拽时仍是所见即游戏内效果。
+- **右侧改成一张武将卡**：`.opCard` 竖排包含 立绘预览 → 中文名 + 干员id → 皮肤清单 → `x/y/scale` 读数，原先的 `.stageSide` 文字列与独立 `.skinRow` 一并删掉。皮肤清单每项右侧挂「已调整 / 未调整」：判据是 `posData[干员id]` 里**有没有这个皮肤键**（`isAdjusted()` 用 `hasOwnProperty`），不能拿 `getPos` 的返回值判断——它对缺失条目是「返回默认值、不写库」，照值读会把每个干员的经典形象都显示成已调整。清单 `computed` 里读 `posVersion`，所以拖完松手就当场亮起来，不必切皮肤。「经典形象」沿用上一节的修法：只在皮肤数据里缺这条时才兜一张，不无条件前置。长按两秒的监听从 `.stage` 挪到卡片本身（`.stage` 现在还要承接溢出，绑在那儿会拖一下就想换人）。
+- **隐藏无法调整的干员**：`avatarBackground.ts` 把 `isArkOperator` 导出，面板的候选列表改成 `allCharacters.filter(isArkOperator)`——与「套两层背景」用的是**同一个判据**，不会出现列出来一个选了画不出/调了没效果的角色。非方舟角色（本体武将、其它扩展）本来就走引擎原流程，`pos.json` 对他们没有意义。
+- 校验：`pnpm eslint`（`avatarBackground.ts` + 面板）通过、构建通过；产物核对 `css/viteAutoCreateStyle.css` 三条展开态规则齐（`.cardEditing[data-v-3b3da893]{width:150px;margin-bottom:60px;overflow:visible;background-image:none!important}`、`.cardEditing…div{overflow:visible!important}`、`.cardEditing….sjzxPortraitImage{background-size:contain}`，且 `.cardEditing` 在 `.previewCard` **之后**，同权重靠顺序胜出），`chunks/configUI.js` 有「已调整/未调整/该干员没有可显示的皮肤」与 `allCharacters?.filter(…)`，`stageSide/skinRow/stageDragging` 在 CSS 与 chunk 里均为 0 命中。**未游戏内实测**：溢出后压在哪些元素上、`contain` 下拖拽手感如何，需要人眼看。
+
+
+### 修复：开发面板换干员后 HUD 读数不消失 + 皮肤行出现两个「经典形象」
+
+用户实测反馈两个 bug（都是上一节新增的「皮肤位置调整」面板带出来的）：
+
+- **`toastSJZX` 残留**：拖拽 HUD 用的是 `showToast(msg, true, "topLeft", id)`——`duration: true` 就是**永不自动消失**，全靠人撤。而撤它的代码只在 `stopPortraitDragging()`（游戏内退出拖拽模式）里遍历 `hudToastIds` 做，`enablePortraitDrag()` 返回的还原函数只拆监听、还原内联样式，**不碰 toast**。开发面板切干员/切皮肤/关拖拽走的恰恰只有这个还原函数（模式开关还开着，不会去退模式），于是上一条 `[干员 · 皮肤] x=… y=… scale=…` 就一直挂在左上角。修法：把 id 从 `showHud` 里提到 `enablePortraitDrag` 作用域成 `hudId`（闭包本来就按 `key` 定死，换皮肤时新旧各持自己的 id），还原函数末尾 `removeToastById(hudId)` + `hudToastIds.delete(hudId)`——幂等，游戏内 `stopPortraitDragging` 再遍历一遍也只是空转。
+- **两个「经典形象」按钮**：`skinList` 自己前置了一张 `经典形象`，而 `whichWaySkin.getCharacterSkin(name)` 返回的表里**本来就有**同名条目（`skin/index.ts` 的 `onInit` 给每个干员 `skins = { 经典形象: {...}, ...原表 }`，路径同样是 `getCharacterPortraitPath`）⇒ 重复。改成先查 `skins[DEFAULT_SKIN_NAME]`，没有才兜一张（皮肤数据尚未建好时仍能预览立绘），有就直接用表里那条、也顺带保住它在最前的顺序。
+- 校验：`pnpm eslint` 两处通过、构建通过；产物核对 `chunks/skin-PortraitLayers-shared.js` 里还原函数已是 `…style.touchAction = p.touchAction, rt.removeToastById(n), Bt.delete(n)`。**未游戏内实测**：需确认切干员/切皮肤/关拖拽三条路径下读数都及时消失、皮肤行只剩一个「经典形象」。
+
+### 修复：「皮肤位置调整」面板右侧读数叠成一团（`portraitPosSetting.vue` 漏写 `position` / `display`）
+
+用户报告 `.stageSide` 下的元素重叠。根因不是面板自己的样式，而是引擎全局那条 `div { display: inline-block; position: absolute; transition: all 0.5s }`（`apps/core/layout/default/layout.css:31`）：**任何没自行声明 `position` 的 `<div>` 都被强制绝对定位**，脱离 flex/normal flow 后又因为没有 `left/top` 而各自落回「静态位置」，于是一排 `.sideLine` 全叠在同一坐标。同一条规则还带 `display:inline-block`，所以光补 `position` 只解决重叠、文字仍会横排挤成一行。
+
+- 漏写 `position` 的其实是五个类：`.sideLine`、`.sideTip`、`.toolBtn`、`.toolHint`、`.skinBtn`（上一版只给容器级元素写了 `position: relative`，条目级全漏）⇒ 逐条补上。
+- `.stageSide` 额外改成 `display: flex; flex-direction: column`：flex 子项会被 blockify，才压掉全局的 `inline-block`，读数才能一行一条。工具行/皮肤行本来就是 flex 容器，条目自动免疫，所以那里只需补 `position`。
+- 样式块开头补了一段注释写明「每个 div 都必须显式写 `position`」的原因，免得下次又当成冗余样式删掉。
+- 校验：`pnpm eslint` 通过、构建通过；产物 `css/viteAutoCreateStyle.css` 内 `.toolBtn/.toolHint/.skinBtn/.sideLine/.sideTip` 均以 `position:relative` 开头，`.stageSide` 有 `display:flex;flex-direction:column`（scope id 随改动变为 `data-v-3d35441a`）。**仍未游戏内实测**。
+
+### 修复 + 补遗漏：动皮开关按钮被动皮层盖住（`z-index`）、动皮容器缺回边缘模糊（`src/characterCard/CharacterCard.vue`）
+
+上一节把动皮搬进独立容器后留下的两个问题，用户一并指出：
+
+- **开关按钮 `.charSkinBottomUIWrapper` 补 `z-index: 3`**。动皮容器由 `spineWork.js:258-259` 建成 `.sjzxDycWrapper` 并挂 `id="sjzxDycWrapper-animation"`，`css/spine.css:70` 给这条 id 规则写了 `z-index: var(--SJZX-dyc-index)`（`css/variable.css:2` 值为 **2**），另有 `pointer-events: none`。而 `.charDycWrapper` 是 `position:absolute` + `z-index:auto`，**不构成层叠上下文**，所以那个 2 是直接参与卡面根上下文比较的；上一节把按钮提到根容器后它自己没有层级（auto），于是被动皮层压在下面——看不见也点不到。给 3 只要求「高于 2」，不与卡面上更高的层抢（再往上只有 `promptSJZX` 那类 92/114514 的提示层）。
+- **`.charDycWrapper > .charDyc` 加回 radial-gradient 遮罩**（`mask-image: radial-gradient(circle at center,#fff 60%,#fff0 80%)` + `-webkit-` 前缀，`mask-size: 100% 100%` 保证只糊边、不改变构图）。这段遮罩是嵌套 git 里 `d5be05e3 干员归一化step 6` 从 `.charImage` 上删掉的（`git log -S"mask-image"` 找到的原始写法），静态立绘现在没有它，动皮作为「画在立绘位置上的一层」缺了就会边缘硬切、和背板对不上。**位置取挂载元素而不是外层 wrapper**：`mask` 会连同子树一起裁，动皮容器是 `.charDyc` 的子元素，所以遮罩写在本元素上就能把 canvas 与 `.bg` 一并裁掉；而本元素的盒子（`width:100%` + `aspect-ratio:2/3`）正是原来 `.charImage` 那个盒子，遮罩的圆心与半径才能落回改动前的位置（外层 wrapper 是 90% 高、带 `bottom/right` 定位，几何不一样）。
+- 校验：`pnpm eslint` 通过、构建通过，产物 `css/viteAutoCreateStyle.css` 里 `.charDycWrapper>.charDyc[data-v-f6da6488]` 带完整 `mask-*`/`-webkit-mask-*`，`.charSkinBottomUIWrapper[data-v-f6da6488]` 末尾有 `z-index:3`。**未游戏内实测**（browser MCP 起不了 dev app）。
+
+### 新增：干员搜索通用工具 `src/configUI/charSearch.ts`
+
+搜索规则原先抄在 `charPicker.vue` 里（中文名 + 干员id + 中文名拼音 + 各技能中文名/技能id，`pinyin-pro` 转拼音并 try/catch 兜底），新面板还要再来一份 ⇒ 抽成模块：
+
+- `charDisplayName(name)`：`get.translation` 后剥掉 `<font>` 之类标签，展示与索引用同一个纯文本。
+- `createCharSearchIndex(names)` → `Map<干员id, 已小写待匹配串>`；拼音每个干员都要转一遍，列表大时不便宜，调用方务必放在 `computed` 里复用。
+- `filterCharsByQuery(names, query, index)`：空关键词原样返回；除了原文匹配，再去掉空格比一次（`amiya` 要能命中拼音 `a mi ya`）。
+- 展示层不抽：各面板的列表/下拉/轮切长得不一样，这里只管「搜不搜得到」。`charPicker.vue` 改为调用这三个函数（模板与样式没动），顺带**新增 `filtered` 事件**把过滤结果透出——轮切「下一个干员」必须按当前搜索结果走，不然搜完还是在全量表里跳。
+
+### 新增：configUI「皮肤位置调整」开发面板（`src/configUI/component/portraitPosSetting.vue`，仅开发者模式注册）
+
+用户要求四项：可搜索选人、轮切展示真实双层 DOM、一个开拖拽的按钮、一个复制 `pos.json` 的按钮；并且**只在开发者模式下启用**。
+
+- **注册点带开关**（`main.vue`）：`...(whichWayUtil.isDeveloperMode() ? [{ name: "皮肤位置调整", component: PortraitPosSetting }] : [])` 插在「模组切换」与「征稿在前」之间。`panels` 是 setup 里的普通数组，所以取的是**打开界面那一刻**的 `devMode`；普通玩家根本不会构建出这个组件实例。
+- **预览就是场上那套两层 DOM**，不是仿制品：`whichWaySkin.addPortrait` 的底层 `mountPortrait(node, path)`（装重定向 + 两层背景 + 影子副本），位置设定读的是同一份 `pos.json`。用户此前确认过形态选「两层背景真实结构」，所以在这里调好的构图，进游戏所见即所得。预览节点 `.previewCard` 用引擎头像的比例 `114/174`，两层背景是 `inset:0` 绝对定位，因此它必须有 `position:relative` + 自身尺寸。
+- **拖拽复用游戏内那一份实现**：`portraitDrag.ts` 里的 `enableNode` 导出成 `enablePortraitDrag(node)`（返回还原函数）。它按 `getPortraitKey(node)` 从节点当前 `background-image` 反解「干员id+皮肤名」，所以 `mountPortrait` 过的预览节点天然能拖——`illustration/character/<id>.png` 归到「经典形象」，`illustration/skin/<id>/<文件>` 归到该皮肤名。开关拖拽**只拆/装监听、不重画**（重画会把用户正在看的东西闪掉一次）；装不上（返回 undefined）就 toast 并把按钮退回关闭态。切换干员/皮肤时 `repaint()` 先拆旧监听再画，`dragOn` 为真则画完重装 ⇒ 满足「切换下一个角色也会自动开启拖拽」。
+- **轮切**：右键（`@contextmenu.prevent`）或长按左键两秒取 `candidates`（= 当前搜索结果，为空退回全量表）里的下一个，到底回绕；`selected` 不在列表里（刚搜过关键字）时 `indexOf` 为 -1 ⇒ 从第一个开始。长按计时只在 `dragOn` 为假且左键时挂，松手/移出/取消都 `clearTimeout`（开着拖拽时长按是要拖的）。
+- **复制按钮**：新增 `serializePosFile()`（`portraitPos.ts`），键序与 `JSON.stringify(…, null, "\t")` 参数都跟落盘那条同形，复制出来可直接粘回文件；按下先 `flushPortraitPos()` 再取文本，保证剪贴板内容与磁盘一致。`navigator.clipboard` 在非安全上下文会 reject，退回临时 `textarea` + `execCommand("copy")`，再失败就打印控制台。
+- **HUD 数字**：`pos.json` 的内存表不是响应式数据，靠预览节点上的 `pointerup` / `wheel` 自增 `posVersion` 来重读（拖拽模块只 `stopPropagation`，不 `stopImmediatePropagation`，同元素上 Vue 的监听照常触发）。
+- 退出面板 `onBeforeUnmount` 拆监听并 `flushPortraitPos()`。顺带清掉 `portraitPos.ts` 里重复的 `whichWayUtil` import、把落盘的 `schema` 提为常量 `POS_SCHEMA`（原来两处字面量 `1` 一个都没名字）。
+- ⚠ 与「调位」无关但会踩的点：落盘位置是**运行时**扩展目录（dev 下即 `apps/core/extension/WhichWay/json/pos.json`），不是 `packages/.../json/pos.json`（那份是随包发布的空白模板，完整构建还会被 `viteStaticCopy` 覆盖）。
+
+### 新增：设置项「立绘/皮肤直接用cover铺满」（`portraitUseCover`，默认关）
+
+用户要求：开启后皮肤与立绘按 `background-size:cover` 铺，忽略自定义 pos；默认仍用自定义 pos。确认的范围是**场上头像 + 武将卡按钮**，即两层 DOM 那一套（CharacterCard 的 `.charImage` 用的是 `contain`，本次不动；拖拽入口也不因开启而屏蔽）。
+
+- `skin/index.ts` 注册 `onConfig`（`priority: 757`，与 754/755/756 不重号）：`extension_WhichWay_portraitUseCover`，`init: false`。
+- `PortraitLayers.vue` 的 `imageStyle` 在该设置下**不写 `transform`**（内层 CSS 本来就是 `cover` + `center top`），于是「cover 模式」= 只剩背板与 cover，`pos.json` 的偏移与默认 1.5 倍缩放全部忽略。
+- **为什么是函数而不是 `computed`**：`whichWayUtil.config` 读的是 `lib.config`，不是响应式数据；一个无响应式依赖的 `computed` 只会算一次并永久缓存，而两层 DOM 的组件实例在换肤时是被 `render()` **patch 复用**的（`ensureLayers().setImage` 每次 `render(createVNode(...))`，同容器第二次调用走 patch 而不是重建），那样改完设置永远读不到新值。改成在 `imageStyle` 里调用 `coverOnly()`，就跟着每次重绘（换肤 / `$reinit` / 拖拽刷新）重新读一次——配置项的 `intro` 里「改完需要换肤或重开一局才生效」据此写的。
+- 注意 cover 模式下**拖拽仍在写 `pos.json`**（本次没动拖拽入口）：表现是「拖了没反应」，回到自定义 pos 模式后那些值又生效。
+- 校验：`pnpm eslint` 全部改动文件通过（零输出）、`WW_SKIP_STATIC_COPY=1 vite build` 通过；产物核对 `chunks/configUI.js` 有 `皮肤位置调整` / `portraitPosSetting` / `复制 pos.json` / `无法拖拽` / `writeText`，`css/viteAutoCreateStyle.css` 有 `.pos-setting`/`.previewCard`/`.stageDragging`（同一 `data-v-a02ad03a`），`chunks/skin-PortraitLayers-shared.js` 有 `portraitUseCover`×3 且已无 `useCoverOnly`。**未游戏内实测**：面板的轮切手感、拖拽落点与 cover 开关的观感都要人工确认。
+
+### 改动：武将卡动皮独立容器 `charDycWrapper`，与静态立绘 `charImageWrapper` 互斥渲染（`src/characterCard/CharacterCard.vue`）
+
+用户要求：动皮原本挂在 `charImageWrapper` 里，现在复制一个等大的容器专门挂动皮（挂载元素类名改为 `charDyc`），**有动皮时只渲染 `charDycWrapper`、不渲染 `charImageWrapper`，反之亦然**。
+
+- **互斥条件 `dycShown = hasDynamicSkin && dynamicEnabled && spineWorker.needEnable()`**（即「动皮此刻真的会画出来」）。按「有没有动皮数据」来分叉是不够的：`hasDynamicSkin` 为真但动皮被关掉时，`charDycWrapper` 会空着而静态立绘又没渲染 ⇒ 卡面一片空白。`needEnable()` 是 `whichWayUtil.config` 的同步读值、不是响应式数据，所以它只在上面两个 ref 变化时重算，够用。
+- **挂载点从 `charImage` 换成 `charDyc`**，三处 `spineWorker.updateDyc(props.name, charImageEl.value)`（`onMounted` / 换肤 `onSkinChange` / 开关 `toggleDynamicSkin`）统一改调新的 `mountDyc()`：`await nextTick()` 后再把 `dycMountEl`（`dycShown ? charDycEl : charImageEl`）交给 `updateDyc`。`nextTick` 是必需的——`onMounted` 里 `refreshDynamicSkin()` 才把 `dycShown` 翻真，`charDycWrapper` 要等这一次渲染才存在；给 `charImageEl` 的那次调用也不会挂错东西，因为 `updateDyc` 在 `banSkin[name][skin] === true`（动皮已关）时就 return，只剩清理。场上玩家的循环（`updateDyc(props.name, player)`）保持不变。
+- **动皮开关按钮 `.charSkinBottomUIWrapper` 提到根容器下，和两个容器平级**（原来嵌在 `charImageWrapper` 内）。留在里面会被 `v-if` 一起卸载——关掉动皮的那一刻按钮自己也消失，就再也打不开了。提到根容器后百分比基准变了，尺寸按「原容器 30% 宽 / 90% 高，按钮区占它 100% 宽 / 10% 高」换算回根容器：`width:30%; height:9%; bottom:0; right:42%`，落点与改动前一致。
+- **卸载即回收，靠的是 `loadDyc` 里已有的 `target.onRemoved(...)`**：它对 Player 和普通元素都注册，回调 `spineWorker.dispose()` 停渲染循环、丢 GL 上下文并把 `spineCache` 里按 `className`（现在是 `"charDyc"`）记的那项删掉。Vue 造的普通 `<div>` 之所以有 `onRemoved`，是 `src/nonameEx/index.js:34` 的 `patchPrototypeWhichWay(HTMLDivElementExt, HTMLDivElement.prototype)` 把方法直接装到了 `HTMLDivElement.prototype` 上（core 自己不提供）。挂载元素类名换成 `charDyc` 还顺带把 `spineCache` 的键与静态立绘分开（非 Player 目标按 `className` 记账）。
+- ⚠ 已知的一处极端竞态（未处理，属于刻意不做）：极快连点「开→关→开」时，`onRemoved` 的 dispose 有 10ms 延迟，第二次「开」可能命中还没删掉的 `"charDyc"` 缓存项、把 `display` 恢复到一个已经脱离文档的旧容器上，表现为这一次要点一下别处才会重新挂上。常规单击切换不受影响。
+- 顺带记录（**没有改**）：`.charSkinBottomUIWrapper > .buttonText` 这条规则从改动前就一直匹配不上（`buttonText` 实际嵌在 `buttonWrapper` 里，选择器要求它是 `charSkinBottomUIWrapper` 的直接子元素），即按钮文字从来没吃到 `dy_sjzx / 20px / bolder`。本次只是把选择器前缀去掉，保持了同样的层级关系 ⇒ 观感与改动前完全一致；要让它生效属于另一处观感决定。
+- 校验：`pnpm eslint` 该文件通过、`WW_SKIP_STATIC_COPY=1 vite build` 通过；产物核对 `css/viteAutoCreateStyle.css` 有 `.charImageWrapper,.charDycWrapper` 合并规则、`.charDycWrapper>.charDyc`、重锚定后的 `.charSkinBottomUIWrapper{width:30%;height:9%;right:42%}`，`chunks/characterCard-CharacterCard-shared.js` 里 `K = computed(hasDynamicSkin && dynamicEnabled && needEnable())`、`v-if/v-else` 两个容器与平级按钮均如预期，组件内只剩 `mountDyc` 与玩家循环两处 `updateDyc`。**未游戏内实测**（browser MCP 起不了 dev app），互斥渲染的实际观感需人工确认。
+
 ## 2026-10-15
 
 ### 修复：立绘补齐脚本「远端明明有 `char_4231_clemnt` 却报不出来」，并把缓存 json 挪进 `scripts/cache/`
@@ -1096,3 +1253,18 @@ console.log("extUID:", whichWay.arknight.shcema.transfer("char_002_amiya", "char
 - **③ 多目标锦囊判断 → 参考 `tyxunshi`**：不再硬编码 `nanman/wanjian/taoyuan/wugu`，改为 `getMultitargetTricks()` 扫描 `lib.card`，以 `info.multitarget || info.ai?.tag?.multitarget` 判定（`tyxunshi`/引擎的 multitarget 标记；标准群体牌该标记在 `ai.tag`，故一并纳入），随本体/扩展群体锦囊自动扩展。
 - **② 背水机制 → 参考 `mbhanyong`**：`loseMaxHp(1)` → 摸（新）体力上限张 → `addTempSkill("fenshenmrfz_beishui","roundEnd")` → 重置【座浅】`usable`；增益仍为 `subSkill.beishui.mod.cardUsableTarget`（命中已受伤目标放行次数限制）。
 - 校验：`pnpm eslint packages/extension/WhichWay/src/packs/character/lvgumrfz.ts` 通过。**未游戏内实测**（browser MCP 起不了 dev app），构建由你自行执行。
+
+### 实现：托莱多（`char_393_toledo`）「贵胄 / 危言 / 伪裔」
+
+把三个只有 `audio` 的空壳技能按卡面描述实现完（`src/packs/character/char_393_toledo.ts`）。
+
+- **贵胄（`guizhoumrfz`）**：**游戏开始时**（`trigger: { global: "phaseBefore", player: "enterGame" }` + `filter` 判 `event.name != "phase" || game.phaseNumber == 0`，与 core 自带武将包 extra 的**七星 `qixing`** 同款写法；`content.ts` 里 `phaseBefore` 特意先于 `roundStart` 触发，注释即「处理“游戏开始时”的时机」），按**游戏内的全部势力 `lib.group`**（不是场上角色实际出现的势力）各随机授予 2 个主公技（判据只有 `lib.skill[x].zhuSkill === true`；势力↔技能对应关系扫 `lib.character` 全量武将牌），账本记在 `storage.guizhoumrfz`。授予走 `player.addSkill()` 而不是 `addSkillList`/`initSkills`——引擎只在「获得技能」那几处按 `zhuSkill && !isZhu2()` 丢弃主公技，`addSkill` 本身不过滤。
+- **「无视身份与势力限制」**：发动/结算阶段引擎不再复查身份，限制全在共享的 `info.filter` 里，故用 `game.broadcastAll` 就地包一层：判定托莱多本人时临时 `isZhu = true`、临时把 `group` 换成该主公技的原势力，`try/finally` 还原。需要的值一律当参数传进广播体（广播体不能引用模块作用域自由变量），`guizhouWrapped` 保证同一技能只包一次。
+- **失去主公技的补偿**：引擎没有「失去技能」时机，改由常驻子技能 `guizhoumrfz_check`（`global:roundStart` + `silent`/`direct`/`charlotte`）巡检账本，发现某项已不在身上就补发补偿（令一名角色选摸两张/回一点，非本人则托莱多再执行一次），档数同步重算；`onremove` 里批量清场时不计补偿。
+- ⚠ **坑：`lib.character` 不是数组**。它是个 Proxy，`set` 时一律 `get.convertedCharacter()` 转成 `Character` 实例（`library/index.js:12309`）；数字下标（`data[1]`/`data[3]`）只是实例上保留的兼容 getter（`element/character.js:327/354`），所以 `Array.isArray(data)` 恒为假。`getZhuSkillPools` 最初按数组校验并取 `[1]/[3]`，结果池子整个为空、贵胄一个主公技都发不出。已改为直接读字段 `data.group` / `data.skills`（写新代码请照此用对象形式，别用数组下标）。
+- ⚠ **坑：group 展开让 `hasSkill` 恒真**。触发技的收集只认 `lib.hook`（`addSkill` 时由 `addSkillTrigger` 写入），`game.expandSkills` 不参与触发收集；而父技能 `group` 里列了子技能，`hasSkill(子)` 会因为 group 展开直接返回真。所以判重必须用 `player.skills.includes(x)`（`addSkill` 自己也是这个口径），否则触发型子技能永远不会真正装上。
+- **危言（`weiyanmrfz`）**：`player:phaseUseBegin` 锁定触发，`chooseControlList` 选「失去一个主公技 / 失去1点体力上限」（只有 1 项时不弹框；结果取 `result.index`，不是 `control`），然后对一名其他角色造成 1 点伤害。主公技列表用 `getSkills()`（不经 group 展开）现算，并**排除 `weiyimrfz` 自身**——伪裔既是档数来源又是分档开关，若允许把它消耗掉，档数会连同开关一起归零、整套分档效果永久失效。
+- **伪裔（`weiyimrfz`）**：`zhuSkill: true`，非主公时开局会被引擎丢弃，故由贵胄补发一次。档数 = 持有主公技数（不含自身），每轮开始与每次增减后 `updateWeiyiCount` 重算。一档 `subSkill.handcard.mod.maxHandcard +1`；二档 `subSkill.draw` 在 `phaseDrawBegin2` 且 `!numFixed` 时 `trigger.num++`（对齐本体 `zf_phaseDraw`）。
+- **三/四档 = 借「江山如故」的现成技能**：卡面写「八荒 / 火中」，而 `get.poptip("jsrgbahu")`、`get.poptip("jsrghuozhong")` 指向的是 core 自带武将包 jsrg 的 **跋扈**（准备阶段摸一张 + 杀次数上限+1）与 **惑众**（黑色非锦囊当兵粮寸断，令惑众持有者摸两张）——即同音误写，按 id 取用才是原意。因此三/四档不自己写 mod，直接按档数 `addSkill`/`removeSkill` 这两个技能；发放记录存 `storage.weiyimrfz_granted`，只回收自己发出去的，避免把【神宠】之类别人给的跋扈一并撤走。jsrg 未导入时 `lib.skill` 查不到，静默不生效。`get.poptip(skillId)` 是「技能 id 型词条」（`lib.poptip` 的 skill 类 idList 就是 `Object.keys(lib.skill)`），依赖该包已导入。
+- ~~「游戏开始时」没有可靠时机，用第一轮 `roundStart` 等价~~ —— **已纠正**：`gameStart` 由各模式（`single/identity/versus/...`）在开局 `event.trigger("gameStart")` 发出，而 core 武将牌上写「游戏开始时」的技能（`qixing`、`identity_mingcha` 等）统一用 `global:phaseBefore` + `player:enterGame` + `game.phaseNumber == 0`，贵胄改成与它们一致；`weiyimrfz` 的「每轮开始时」仍留在 `roundStart`（卡面就是每轮），且 `phaseBefore` 先于 `roundStart`，开局授技会先算好档数再触发伪裔。
+- 校验：`pnpm eslint` 两文件通过、`vite build` 通过，产物 `chunks/packs.js` 已 grep 核对（`skills.includes` 判重、`jsrgbahu`/`jsrghuozhong` 引用、`global: "phaseBefore", player: "enterGame"`、`lib.group.filter` 取势力全集均在）。**未游戏内实测**（browser MCP 起不了 dev app）。

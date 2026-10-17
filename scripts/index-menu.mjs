@@ -39,7 +39,7 @@ let closed = false;
  */
 const CATALOG = {
 	"release.bat": { group: "发布 / 打包", summary: "构建并发布：release 全流程 / dev 同步 dev-output / pack 本地压包" },
-	"update-arknight-data.bat": { group: "游戏数据", summary: "一键更新 json/arknight 的四张明日方舟数据表" },
+	"update-arknight-data.bat": { group: "游戏数据", summary: "一键更新 json/arknight 的五张明日方舟数据表" },
 	"find-arkid.bat": { group: "游戏数据", summary: "干员中文名 / id 片段 → 干员id 查询" },
 	"find-arkid.mjs": { group: "游戏数据", summary: "同 find-arkid.bat（它是实现体，可脱离 bat 直接用 node 跑）" },
 	"update-portraits.mjs": { group: "立绘 / 图片", summary: "从 torappu 补齐缺失干员立绘（只新增，不覆盖已有文件）" },

@@ -148,7 +148,7 @@ class SpineWorker {
 				return assets[name][assetsSkinName];
 			}
 		}
-		if (whichWayUtil.isDeveloperMode()) console.warn(`【驶舰之向】:未找到角色 ${charName} 的皮肤 ${skinName} !`);
+		if (whichWayUtil.isDeveloperMode()) console.warn(`[WhichWaySpineWork]未找到角色 ${charName} 的皮肤 ${skinName} !`);
 		return undefined;
 	}
 

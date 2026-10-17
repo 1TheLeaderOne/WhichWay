@@ -75,13 +75,22 @@
 			</div>
 		</div>
 
-		<!-- 立绘（动皮由 spineWorker 挂载到这个元素上，所以它必须保持稳定） -->
-		<div class="charImageWrapper">
+		<!--
+			立绘与动皮互斥渲染，二者各占一个等大的容器：
+			- 有动皮（且已开启、动皮总开关开着）→ 只渲染 .charDycWrapper，动皮由 spineWorker 挂在 .charDyc 上，静态立绘不再叠在下面；
+			- 否则 → 只渲染 .charImageWrapper，画静态立绘。
+			动皮挂载点换成 .charDyc 也让 spineCache 的键（非 Player 目标按 className 记）与静态立绘分开。
+		-->
+		<div v-if="dycShown" class="charDycWrapper">
+			<div ref="charDycEl" class="charDyc"></div>
+		</div>
+		<div v-else class="charImageWrapper">
 			<div ref="charImageEl" class="charImage" :style="charImageStyle"></div>
-			<div class="charSkinBottomUIWrapper" :style="{ display: hasDynamicSkin ? '' : 'none' }">
-				<div class="buttonWrapper" :class="{ 'buttonWrapper-enableSkinBG': dynamicEnabled }" @click="toggleDynamicSkin">
-					<div class="buttonText">{{ dynamicEnabled ? "关闭动皮" : "开启动皮" }}</div>
-				</div>
+		</div>
+		<!-- 动皮开关：与两个容器平级。放进 charDycWrapper 里会在关闭动皮时随它一起被卸载，按钮就没机会再打开了 -->
+		<div class="charSkinBottomUIWrapper" :style="{ display: hasDynamicSkin ? '' : 'none' }">
+			<div class="buttonWrapper" :class="{ 'buttonWrapper-enableSkinBG': dynamicEnabled }" @click="toggleDynamicSkin">
+				<div class="buttonText">{{ dynamicEnabled ? "关闭动皮" : "开启动皮" }}</div>
 			</div>
 		</div>
 
@@ -117,7 +126,7 @@
  * - 关闭（返回键）时调用 `onClose`，由外部卸载 Vue 应用、复原界面并 `game.resume2()`；
  * - 默认展示「技能」面板（与原实现打开后调用 `click.skill()` 一致）。
  */
-import { computed, onMounted, ref } from "vue";
+import { computed, nextTick, onMounted, ref } from "vue";
 import { lib, game, get } from "noname";
 import { whichWayFile } from "../file.js";
 import { whichWayUtil } from "../utill.js";
@@ -202,6 +211,8 @@ const menuButtons = computed(() => {
 const skinName = ref(whichWaySkin.getCurentSkin(props.name));
 const designers = computed(() => getDesigner(props.name).join("、"));
 const charImageEl = ref(null);
+/** 动皮挂载元素（在 charDycWrapper 内，只渲染动皮时存在） */
+const charDycEl = ref(null);
 /**
  * 立绘路径。皮肤配置存在扩展侧的普通对象里（不是响应式数据），
  * 所以用 ref 存路径、换肤后由 onSkinChange 手动同步：
@@ -222,6 +233,20 @@ function refreshDynamicSkin() {
 	const skin = whichWaySkin.getCurentSkin(props.name);
 	hasDynamicSkin.value = !!spineWorker.getSkinData(props.name, skin);
 	dynamicEnabled.value = spineWorker.isEnabledSkin(props.name, skin);
+}
+
+/**
+ * 动皮此刻是否真的会画出来：有动皮数据、这张皮肤没被单独关掉、且动皮总开关是开的。
+ * 为真时只渲染 charDycWrapper（静态立绘容器随之卸载），为假时反过来只渲染 charImageWrapper。
+ */
+const dycShown = computed(() => hasDynamicSkin.value && dynamicEnabled.value && spineWorker.needEnable());
+/** 动皮的挂载点：动皮渲染时是 charDyc，否则是静态立绘元素（此时 updateDyc 只做清理，不会再挂新的动皮） */
+const dycMountEl = computed(() => (dycShown.value ? charDycEl.value : charImageEl.value));
+/** 把动皮挂到当前该显示的那个容器上；v-if 切换后要等 Vue 把 DOM 补出来才能拿到元素 */
+async function mountDyc() {
+	await nextTick();
+	if (!dycMountEl.value) return;
+	await spineWorker.updateDyc(props.name, dycMountEl.value);
 }
 
 /** 配音：当前语言 / 可选语言 / 折叠状态 */
@@ -247,7 +272,7 @@ async function onSkinChange({ skinName: name, path }) {
 	//立绘路径随选中的皮肤一起手动同步（见 skinPath 处的注释）
 	skinPath.value = whichWaySkin.getCurrentSkinPath(props.name);
 	refreshDynamicSkin();
-	await spineWorker.updateDyc(props.name, charImageEl.value);
+	await mountDyc();
 	whichWaySkin.refreshSkin();
 }
 
@@ -275,7 +300,7 @@ async function toggleDynamicSkin() {
 	const skin = whichWaySkin.getCurentSkin(props.name);
 	await spineWorker.toggleDycSkin(props.name, skin);
 	refreshDynamicSkin();
-	await spineWorker.updateDyc(props.name, charImageEl.value);
+	await mountDyc();
 	for (const player of game.players) {
 		if (get.name(player) === props.name) await spineWorker.updateDyc(props.name, player);
 	}
@@ -287,7 +312,7 @@ function close() {
 
 onMounted(async () => {
 	refreshDynamicSkin();
-	await spineWorker.updateDyc(props.name, charImageEl.value);
+	await mountDyc();
 });
 
 /** AI提示 */
@@ -649,6 +674,18 @@ const LLM_icon = computed(() => {
 
 .charImageWrapper {
 	position: absolute;
+    height: 90%;
+    bottom: 0;
+    width: 50%;
+    right: 32%;
+    display: inline-block;
+	z-index: -1;
+}
+
+/* 动皮容器：与 .charImageWrapper 等位等大的副本，二者由 v-if 互斥渲染。
+   这里不放静态立绘 —— 有动皮时只画动皮。 */
+.charDycWrapper {
+	position: absolute;
 	height: 90%;
 	bottom: 0;
 	width: 30%;
@@ -656,29 +693,49 @@ const LLM_icon = computed(() => {
 	display: inline-block;
 }
 
-.charImageWrapper > .charImage {
+/* 动皮挂载元素：尺寸锚点与 .charImage 一致（2/3 比例 + 铺满宽），
+   spineWorker 的 fit() 把动皮容器贴成这个元素的实际大小。
+   边缘模糊：立绘原先靠 radial-gradient 遮罩把四边渐隐（`mask-size:100%` 保证只糊边、不改变构图），
+   动皮是「画在立绘位置上的一层」，没有这层遮罩就会出现动皮边缘硬切、与背板对不上。
+   遮罩挂在本元素上，动皮容器是它的子元素，会连同 canvas 与 .bg 一起被裁掉边缘。 */
+.charDycWrapper > .charDyc {
 	width: 100%;
 	aspect-ratio: 2/3;
-	/* 武将卡直接展示干员的原始图片：contain 保完整构图（不裁切），也不做遮罩渐隐。
-	   场上头像走的是 `PortraitLayers.vue` 的 cover + pos.json 调位，这里是另一套观感，
-	   刻意不读那份配置 —— 卡面要看的是「这张图长什么样」，调位要看的是「场上不挡 UI」。
-	   动皮由 spineWorker 挂在这个元素上，所以尺寸锚点（2/3 + 100% 宽）保持稳定。 */
+	mask-image: radial-gradient(circle at center, rgba(255, 255, 255, 1) 60%, rgba(255, 255, 255, 0) 80%);
+	mask-repeat: no-repeat;
+	mask-size: 100% 100%;
+	-webkit-mask-image: radial-gradient(circle at center, rgba(255, 255, 255, 1) 60%, rgba(255, 255, 255, 0) 80%);
+	-webkit-mask-repeat: no-repeat;
+	-webkit-mask-size: 100% 100%;
+}
+
+.charImageWrapper > .charImage {
+	width: 100%;
+	height: 100%;
 	background-size: contain;
 	background-position: center center;
 	background-repeat: no-repeat;
 }
 
-.charImageWrapper > .charSkinBottomUIWrapper {
+/* 动皮开关：从 charImageWrapper 里提到根容器下（与两个立绘/动皮容器平级），
+   否则关闭动皮时 charImageWrapper 被 v-if 卸掉，按钮会跟着消失、再也打不开。
+   尺寸换算回根容器：原来在 30% 宽 / 90% 高的 charImageWrapper 里占 100% 宽 10% 高，
+   即根容器的 30% 宽、9% 高，bottom/right 落点不变。
+   z-index 必须高于动皮层（`css/variable.css` 的 `--SJZX-dyc-index: 2`）：动皮容器是绝对定位 + 那个层级，
+   不给按钮更高的层，开启动皮后按钮就被动皮那层盖住、点不到也看不见。 */
+.charSkinBottomUIWrapper {
 	position: absolute;
-	width: 100%;
-	height: 10%;
+	width: 30%;
+	height: 9%;
 	bottom: 0;
+	right: 42%;
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	z-index: 3;
 }
 
-.charImageWrapper > .charSkinBottomUIWrapper > .buttonWrapper {
+.charSkinBottomUIWrapper > .buttonWrapper {
 	width: 200px;
 	height: 38px;
 	background-color: rgba(0, 0, 0, 0.6);
@@ -693,11 +750,11 @@ const LLM_icon = computed(() => {
 	align-items: center;
 }
 
-.charImageWrapper > .charSkinBottomUIWrapper > .buttonWrapper-enableSkinBG {
+.charSkinBottomUIWrapper > .buttonWrapper-enableSkinBG {
 	background-color: rgba(26, 194, 253, 0.6) !important;
 }
 
-.charImageWrapper > .charSkinBottomUIWrapper > .buttonText {
+.charSkinBottomUIWrapper > .buttonText {
 	display: flex;
 	justify-content: center;
 	align-items: center;

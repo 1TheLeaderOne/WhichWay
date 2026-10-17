@@ -10,9 +10,14 @@
 
 		<!-- 干员列表 -->
 		<div class="char-grid">
-			<div v-for="name in filtered" :key="name" class="char-item" :class="{ 'char-item-active': name === modelValue }" @click="pick(name)">
-				{{ displayName(name) }}
-			</div>
+			<template v-for="name in filtered" :key="name">
+				<!-- `item` 插槽：调用方要自己决定条目长什么样时用（如「皮肤位置调整」要把每条做成含皮肤清单的武将卡）。
+				     插槽里只提供「选谁 / 是否选中 / 怎么选中」，搜索与过滤逻辑仍然只在这里。 -->
+				<slot v-if="$slots.item" name="item" :char="name" :active="name === modelValue" :pick="pick" />
+				<div v-else class="char-item" :class="{ 'char-item-active': name === modelValue }" @click="pick(name)">
+					{{ displayName(name) }}
+				</div>
+			</template>
 			<div v-if="!filtered.length" class="empty-tip">{{ emptyText }}</div>
 		</div>
 	</div>
@@ -20,17 +25,20 @@
 
 <script setup>
 /**
- * 干员搜索选择器：配音设置 / 模组切换两个面板共用。
+ * 干员搜索选择器：配音设置 / 模组切换 / 皮肤位置调整等面板共用。
  *
- * 搜索按「中文 + 英文(罗马拼音) + 技能」匹配：把干员中文名、干员 id(拼音串)、
- * 中文名的拼音、以及其技能的中文名与技能 id 汇成一个待匹配串，命中任一即可。
+ * 搜索按「中文 + 英文(罗马拼音) + id + 技能」匹配，规则在 `../charSearch.js` 里（那里还导出了
+ * 独立的索引与过滤函数，面板不想用这套列表 UI 时可以直接调它）。
  * 选中项通过 `v-model`(modelValue/update:modelValue) 双向绑定，本身只负责「选谁」，
- * 选中之后展示什么由调用方决定。
+ * 选中之后展示什么由调用方决定；过滤后的名单同时以 `filtered` 事件透出，
+ * 供「轮切下一个干员」这类需要知道当前搜索结果的功能使用。
+ * 默认的条目只是一枚文字标签；要换成别的形态（如带皮肤清单的武将卡）用 `#item` 具名插槽，
+ * 插槽作用域给 `char`（干员id）、`active`（是否当前选中）、`pick`（点击选中的处理函数）。
+ * 作用域里的干员id 之所以叫 `char` 不叫 `name`：`name` 要和插槽自己的 `name="item"` 撞属性名（`vue/no-duplicate-attributes`）。
  */
-import { ref, computed } from "vue";
-import * as pinyinPro from "pinyin-pro";
-import { get } from "noname";
+import { ref, computed, watch } from "vue";
 import { whichWayFile } from "../../file.js";
+import { charDisplayName, createCharSearchIndex, filterCharsByQuery } from "../charSearch.js";
 
 const props = defineProps({
 	/** 候选干员 id 列表 */
@@ -40,60 +48,23 @@ const props = defineProps({
 	placeholder: { type: String, default: "支持中文、拼音和技能搜索~" },
 	emptyText: { type: String, default: "没有匹配的干员" },
 });
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(["update:modelValue", "filtered"]);
 
 const searchQuery = ref("");
 const watchImageUrl = whichWayFile.compilePath("ui:watch.png");
 
-const displayName = name => {
-	const text = get.translation(name) || name;
-	//干员名可能带 <font> 等标签，这里只用于纯文本展示，去掉标签
-	return String(text).replace(/<[^>]+>/g, "");
-};
+const displayName = name => charDisplayName(name);
 
 /** 每个干员的搜索串：中文名 + 干员id + 中文名拼音 + 各技能(中文名/技能id) */
-const searchMap = computed(() => {
-	const map = new Map();
-	for (const name of props.names) {
-		const cn = displayName(name);
-		const parts = [cn, name];
+const searchMap = computed(() => createCharSearchIndex(props.names));
 
-		try {
-			if (typeof pinyinPro !== "undefined") {
-				const py = pinyinPro
-					.pinyin(cn, {
-						type: "array",
-						toneType: "none",
-					})
-					.join(" ")
-					.toLowerCase();
-				parts.push(py, py.replace(/\s/g, ""));
-			}
-		} catch (e) {
-			console.warn("[charPicker] 拼音转换失败:", e);
-		}
+const filtered = computed(() => filterCharsByQuery(props.names, searchQuery.value, searchMap.value));
 
-		for (const skill of get.character(name)?.skills || []) {
-			parts.push(skill);
-			parts.push(String(get.translation(skill) || "").replace(/<[^>]+>/g, ""));
-		}
-
-		map.set(name, parts.join(" ").toLowerCase());
-	}
-	return map;
-});
-
-const filtered = computed(() => {
-	const query = searchQuery.value.trim().toLowerCase();
-	if (!query) return props.names;
-	const compact = query.replace(/\s/g, "");
-	const list = [];
-	for (const name of props.names) {
-		const hay = searchMap.value.get(name) || "";
-		if (hay.includes(query) || hay.replace(/\s/g, "").includes(compact)) list.push(name);
-	}
-	return list;
-});
+watch(
+	filtered,
+	list => emit("filtered", list),
+	{ immediate: true }
+);
 
 function pick(name) {
 	emit("update:modelValue", name);
@@ -170,6 +141,7 @@ function pick(name) {
 	padding: 4px;
 	width: 100%;
 	box-sizing: border-box;
+	container-type: inline-size;
 }
 
 .char-item {

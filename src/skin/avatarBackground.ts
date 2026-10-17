@@ -4,7 +4,7 @@ import { whichWayFile } from "../file.js";
 import { onContent } from "../hooks/index.js";
 import { whichWayAPIOverride } from "../override/index.js";
 import PortraitLayers from "./PortraitLayers.vue";
-import { getPosByUrl, resolvePortraitKey, type PortraitPos } from "./portraitPos.ts";
+import { getCover, getPosByUrl, resolvePortraitKey, type PortraitCover, type PortraitPos } from "./portraitPos.ts";
 
 /**
  * 立绘的透明图层处理
@@ -14,7 +14,7 @@ import { getPosByUrl, resolvePortraitKey, type PortraitPos } from "./portraitPos
  * 明日方舟立绘带透明区域时，透出来的就是本体那张默认武将图。
  *
  * 这里劫持三处绘制入口，把明日方舟干员的立绘改画进 `PortraitLayers.vue` 的两层子元素里
- * （外层默认背板 + 裁溢出，内层只贴立绘）；其余角色一律走引擎原流程，节点上连子元素都不会多。
+ * （外层默认背板 + 裁溢出，内层是一张装着**完整原图**的画布）；其余角色一律走引擎原流程，节点上连子元素都不会多。
  * - `lib.element.player.$init` / `$reinit`：主将 `node.avatar`、副将 `node.avatar2`
  * - `ui.create.buttonPresets.character`：对话框里的武将卡按钮（选将、观战、`characterx` 也走它）
  */
@@ -40,8 +40,11 @@ const redirectedNodes = new WeakSet<HTMLDivElement>();
  * `isArknght` 查的是 `vaildArkId`（明日方舟全量干员uid，来自 character_table + patchChars），
  * 而不是「本扩展已实现」的 `exsitArk`：干员id 已与方舟 uid 统一，立绘也按 uid 落盘，
  * 因此判据只需要「这是个方舟干员」。本体武将与其它扩展的角色没有透明图层问题，一律走引擎原流程。
+ *
+ * 导出给「皮肤位置调整」开发面板复用：那里要按**同一个判据**过滤候选干员，
+ * 否则列出来的非方舟角色画不进两层 DOM、也就无从拖拽调位。
  */
-const isArkOperator = (name: any): name is string => typeof name === "string" && whichWayArknight.isArknght(name);
+export const isArkOperator = (name: any): name is string => typeof name === "string" && whichWayArknight.isArknght(name);
 
 const layersOf = (node: HTMLDivElement) => {
 	const layers = layersMap.get(node);
@@ -72,14 +75,37 @@ export function getPortraitKey(node: HTMLDivElement) {
 /**
  * 用给定设定重绘节点立绘 —— 拖拽期间的实时预览走这里。
  *
- * 只重绘子元素，**不动节点上的影子副本**：影子副本要是也跟着 `transform`，就得把位移写进
+ * 只重绘子元素，**不动节点上的影子副本**：影子副本要是也跟着偏移，就得把位移写进
  * `node.style.transform`，而 `.avatar` 的 transform 会连带动到同节点上的 `.name`/`.hp` 等兄弟层。
- * 影子副本本来就一直是「未缩放的原始比例」（它连既有的 `scale(1.5)` 都没应用），保持一致即可。
+ * 影子副本本来就一直是「未调位的原样」（它连内层那套位置设定都没应用），保持一致即可。
  */
 export function repaintPortrait(node: HTMLDivElement, pos: PortraitPos) {
 	const layers = layersOf(node);
 	if (!layers) return;
 	layers.setImage(layers.url, pos);
+}
+
+/**
+ * 这个节点当前立绘的画布覆盖倍数（画布尺寸 ÷ 框尺寸），供拖拽把偏移夹到「原图边缘」。
+ *
+ * 比例是从 DOM 现读的：`<img>` 的 `naturalWidth/Height` 是解码出来的原图尺寸，框尺寸取承载层
+ * （`inset:0` 的绝对定位 div，等于宿主节点）的 `clientWidth/Height`。读不到（图还没加载完、
+ * 节点还没进文档）时返回 undefined，调用方按「不夹」处理即可 —— 绘制侧自己还会再过一次 `clampOffset`，
+ * 所以最坏情况只是 HUD 多显示一点，不会露出背板。
+ * @param scale 要算的那个倍率（拖拽传正在写入的实时值，而不是 pos.json 里的旧值）
+ */
+export function getPortraitCover(node: HTMLDivElement, scale: number): PortraitCover | undefined {
+	const layers = layersOf(node);
+	if (!layers) return;
+	const img = layers.host.querySelector("img");
+	if (!img) return;
+	const width = layers.host.clientWidth;
+	const height = layers.host.clientHeight;
+	if (!(width > 0) || !(height > 0)) return;
+	const frameAspect = width / height;
+	//图还没解码完就按「框 × scale」算，与绘制侧的兜底同一条，两边结果一致
+	if (!(img.naturalWidth > 0) || !(img.naturalHeight > 0)) return { x: scale, y: scale };
+	return getCover(img.naturalWidth / img.naturalHeight, frameAspect, scale);
 }
 
 /** 节点当前立绘的 `background-image`（拖拽要按它反解配置键） */
@@ -113,7 +139,7 @@ function ensureLayers(node: HTMLDivElement): Layers {
 	if (existing) return existing;
 
 	//影子副本（见 paintPortrait）的贴合方式与引擎给立绘用的一致：cover + 水平居中。
-	//注意它不带内层的 `transform`（默认 1.5 倍缩放 + pos.json 的调位），所以只是「大致重合」：
+	//注意它不带内层那张画布的位置与倍率（默认 1.5 倍 + pos.json 的调位），所以只是「大致重合」：
 	//副本服务的是读不到子元素的三处（战报浅克隆、smoothAvatar 淡出层、fakeme），
 	//那几处只要有个正确的立绘在就行，没人拿它们和场上像素比对。
 	node.style.backgroundSize = "cover";
@@ -158,8 +184,8 @@ function ensureLayers(node: HTMLDivElement): Layers {
  * `getComputedStyle(.avatar).background`，`ui.fakeme` 抄的是 `.avatar` 的内联 background-image ——
  * 立绘只画在子元素上的话，这三处全是空白。
  *
- * 副本是**未调位的原样**：`transform`（默认 1.5 倍缩放 + pos.json 的位置设定）只加在内层子元素上，
- * 加到节点自身就会连带动到 `.name`/`.hp` 等兄弟层。所以内层一旦偏移，透出来的副本就不完全重合 ——
+ * 副本是**未调位的原样**：画布的放大与偏移只加在内层子元素上，加到节点自身就会连带动到
+ * `.name`/`.hp` 等兄弟层。所以内层一旦偏移，透出来的副本就不完全重合 ——
  * 这是既有取舍（改动之前副本也从来不带内层那个默认缩放），换来的是上面三处不空白。
  */
 function paintPortrait(node: HTMLDivElement, name: string) {

@@ -8,11 +8,12 @@
  *   还能避免按猜测打出一串 404：1377 个形态里远端只收录了 396 个基础立绘，其余（含全部 token/召唤物）根本不存在。
  *   `--update-tables` 保留了「先更新表再比对」的路子，但只写到缓存目录，不动仓库里的 `json/arknight/`。
  *
- * ⚠ 形态全集不能只看 skin_table：本地 `json/arknight/skin_table.json` 是过期的，而且**没有任何脚本刷新它**
- *   （`update-arknight-data.bat` 与 `src/arknight/index.ts` 的 `updateArknigtData()` 维护的是 character/charword/handbook_team/char_patch 四张表，里面没有 skin_table）。
- *   于是新干员会「在 `character_table` 里有、在 skin_table 里一条皮肤都没有」——只遍历 skin_table 的话连「这个干员存在」都看不见，
+ * ⚠ 形态全集不能只看 skin_table：新干员会「在 `character_table` 里有、在 skin_table 里一条皮肤都没有」——只遍历 skin_table 的话连「这个干员存在」都看不见，
  *   这就是 `char_4231_clemnt` 一类角色被无声漏掉的原因。现在形态全集 = skin_table 的形态 ∪ 干员表里的干员，
  *   皮肤表缺条目的干员单列一行报告，并提示用 `--update-tables` 拿远端最新的两张表。
+ *   （`update-arknight-data.bat` 与 `src/arknight/index.ts` 的 `updateArknigtData()` 现在已经会把 skin_table 一起刷新，
+ *   所以这张表不再是「没人管的孤儿」；但它运行时不读（在 `loadSkipFiles` 里），本地那份新到什么程度取决于最近一次有人跑更新脚本
+ *   ⇒ 上面那条并集兜底与 `--update-tables` 都照旧保留。）
  *
  * 命名与分类规则与 scripts/split-illustration.mjs 严格一致：
  *   - 形态 id = skinId 里 `@`/`#` 之前的部分；远端立绘文件名 = `portraitId + "b" + 扩展名`，
@@ -46,7 +47,7 @@
  *   node scripts/update-portraits.mjs                      # 补齐「可获取干员」
  *   node scripts/update-portraits.mjs --scope char --limit 20   # 连预备干员/NPC 干员一起，本次最多 20 张
  *   node scripts/update-portraits.mjs --ids char_123_fang,char_208_melan
- *   node scripts/update-portraits.mjs --update-tables      # 先把远端两张表拉到缓存目录再比对（表过期时用；本地 skin_table 无人刷新，新干员基本都要靠它）
+ *   node scripts/update-portraits.mjs --update-tables      # 先把远端两张表拉到缓存目录再比对（表过期时用；本地那份 skin_table 只在有人跑过更新脚本时才刷新，新干员常常还是得靠它）
  *   node scripts/update-portraits.mjs --sources char_arts,char_portrait --ids char_4231_clemnt   # 只收半身像兜底（默认不收）
  *   node scripts/update-portraits.mjs --refresh-index      # 强制重取远端目录清单
  *   node scripts/update-portraits.mjs --delay 800 --max 1024 --colors 128 --keep-raw

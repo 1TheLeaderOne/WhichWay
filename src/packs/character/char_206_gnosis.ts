@@ -1,14 +1,53 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { whichWayUtil } from "../../utill.js";
 
 character("char_206_gnosis", { pack: "legendSJZX",
 			sex: "male",
 			group: "xiemrfz",
 			hp: 4,
-			skills: ["siyongmrfz"],
+			skills: ["newsiyongmrfz"],
 		});
 
 skill({
+	newsiyongmrfz:{
+		audio:["作战中1","部署1"],
+		frequent(event, player) {
+			const number = get.number(event.card);
+			if(typeof number !== "number") return false;
+			return true;
+		},
+		trigger:{
+			player:"useCardAfter"
+		},
+		filter(event, player, name, target) {
+			return player.isPhaseUsing() && !getSuits(player,event).includes(get.suit(event.card)!);
+		},
+		ai:()=>true,
+		mark:true,
+		intro:{
+			content(storage, player, skill) {
+				if(!player.isPhaseUsing()) return `·不是你的出牌阶段`;
+				return `·本回合已使用的花色：${get.translation(getSuits(player,get.event()))}`
+			},
+		},
+		prompt2(event, player) {
+			return `你可以从牌堆中随机获得一张点数为${get.number(event.card)}的牌`
+		},
+		async content(event,trigger,player){
+			const number = get.number(trigger.card);
+			const card = get.cardPile(x=>get.number(x) === number);
+			if(card){
+				player.gain({
+					cards:[card],
+					animate:"gain2"
+				});
+			} else{
+				player.chat(`牌堆中没有点数为${number}的牌！`);
+			}
+		},
+	},
+	//旧灵知
 	"siyongmrfz": {
 			audio: 2,
 			trigger: {
@@ -16,15 +55,15 @@ skill({
 			},
 			filter: function (event, player) {
 				if (event.getParent()?.name != "useCard" || player != _status.currentPhase) return false;
-				var list = player.getStorage("siyongmrfz2");
-				for (var i of event.cards) {
+				let list = player.getStorage("siyongmrfz2");
+				for (let i of event.cards) {
 					if (!list.includes(get.suit(i, player))) return true;
 				}
 				return false;
 			},
 			async content(event, trigger, player) {
 				if (!player.storage.siyongmrfz2) player.storage.siyongmrfz2 = [];
-				for (var i of trigger.cards) player.storage.siyongmrfz2.add(get.suit(i, player));
+				for (let i of trigger.cards) player.storage.siyongmrfz2.add(get.suit(i, player));
 				player.storage.siyongmrfz2.sort();
 				player.addTempSkill("siyongmrfz2");
 				player.markSkill("siyongmrfz2");
@@ -35,11 +74,20 @@ skill({
 					})
 				) {
 					const result = await player
-						.chooseTarget("请选择一名其他角色获得其一张牌", true, function (card, player, target) {
+						.chooseTarget({
+							/**
+							 * "请选择一名其他角色获得其一张牌", true, function (card, player, target) {
 							return target != player && target.countCards("he") > 0;
+						}
+							 */
+							prompt:"请选择一名其他角色获得其一张牌",
+							forced:true,
+							filterTarget(card, player, target) {
+								return target != player && target.countCards("he") > 0;
+							},
 						})
 						.set("ai", function (target) {
-							var att = get.attitude(player, target);
+							let att = get.attitude(player, target);
 							if (att >= 0) return 0;
 							if (
 								target.countCards("he", function (card) {
@@ -51,8 +99,14 @@ skill({
 						})
 						.forResult();
 					if (result.targets) {
-						var target = result.targets[0];
-						player.gainPlayerCard(1, target, "he", true);
+						let target = result.targets[0];
+						player.gainPlayerCard({
+							//1, target, "he", true
+							selectButton:1,
+							position:"he",
+							target,
+							forced:true
+						});
 					}
 				} else {
 					player.draw();
@@ -60,20 +114,30 @@ skill({
 			},
 			forced: true,
 		},
-	"siyongmrfz2": {
-			onremove: true,
-			intro: {
-				content: "当前已使用花色：$"
-			}
-		},
 });
+
+characterTitle("char_206_gnosis",whichWayUtil.colorize("#gray#俯瞰风雪#"))
+
+function getSuits(player:Player,event:GameEvent):string[]{
+	const histories = player.getHistory("useCard",evt=>evt!==event && !!evt.card);
+	const suits:string[] = [];
+
+	for(let evt of histories){
+		const suit = get.suit(evt.card);
+		if(suit && !suits.includes(suit)){
+			suits.push(suit);
+		}
+	}
+
+	return suits;
+}
 
 translate({
 	"char_206_gnosis": "灵知",
 	"siyongmrfz": "思涌",
-	"siyongmrfz_info": "锁定技，出牌阶段，当你首次使用某种花色的牌时，你可以获得一名其他角色的一张牌（若除你以外的角色均没有牌，改为你摸一张牌）。",
-	"siyongmrfz2": "思涌",
-	"siyongmrfz2_info": "",
+	"siyongmrfz_info": "锁定技，出牌阶段，当你首次使用一种花色的牌时，你获得其他角色的一张牌（若全场除你以外没有牌，改为你摸一张牌）。",
+	"newsiyongmrfz": "思涌",
+	"newsiyongmrfz_info": "当你于出牌阶段首次使用的一种花色的牌结算完成后，你可以从牌堆中随机获得一张与此牌点数相同的牌。",
 });
 
 characterIntro("char_206_gnosis", "灵知，前喀兰贸易首席技术执行官。通过喀兰贸易与罗德岛的特别协议，作为干员加入罗德岛。主导了喀兰贸易众多核心技术的开发以及工业设施的设计，同时在喀兰贸易时期就已对源石有相当深入的研究。现作为罗德岛主要研究室的一员，活跃于科研一线。");
