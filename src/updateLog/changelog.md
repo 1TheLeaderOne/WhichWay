@@ -1,5 +1,57 @@
 # 瑰丽理想 WhichWay 更新日志
 
+## 2026-10-18
+
+### 调整：设置界面默认显示 `autoLoad: true` 的面板（无标记时退回第一个）
+
+- **现象与根因**：`configUI/main.vue` 的 `onMounted` 总是把 `currentPanel` 设为 `panels[0]`（更新公告），`autoLoad` 只用来触发 `onLoad` 回调、不影响选中项；因此「征稿在前」虽然标了 `autoLoad: true`，打开设置界面时默认显示的仍是「更新公告」。
+- **修复**：`onMounted` 改为 `const defaultPanel = panels.find(p => p.autoLoad) || panels[0];`，选中该项并在有 `onLoad` 时调用；`panels` 为空则直接返回。用户手动点选面板的逻辑（`selectPanel`）保持不变。
+- 校验：`pnpm eslint` 该文件通过；构建通过，产物 `chunks/configUI.js` 为 `c.find(t => t.autoLoad) || c[0]` 且随后 `g.value = s.name`。**未游戏内实测**：打开设置界面应默认停在「征稿在前」并高亮菜单按钮。
+
+### 修复：扩展内绕过引擎、直接 `new Audio` 播放的配音/音效不受无名杀「游戏音量」控制
+
+- **现象与根因**：网络配音（PRTS，`whichWayWebPlay` / `whichWayWebPlayDie`）是扩展自己 `new Audio(url)` 播的，没设 `volume` ⇒ 浏览器默认满音量；而引擎自己的音频在 `game.playAudio` / `playSkillAudio` 里统一设 `audio.volume = lib.config.volumn_audio / 8`（`game/index.js:2505`、`:2725`，`volumn_audio` 取值 0~8、默认 8）。所以调低「游戏音量」后本体音效会变小、这些配音仍是满音量。本地配音多数走引擎 `game.playAudio` 是正常的，但代码里还有三处同样直接 `new Audio` 的漏网：`whichWayUtil.playSound`（克洛丝技能）、`char_4162_cathy` 的变身/还原音效、`kelisitengmrfz` 的菜单语音。
+- **修复**：上述 6 个 `new Audio` 站点全部在 `play()` 之前补 `audio.volume = lib.config.volumn_audio / 8;`（换算与引擎逐字一致，创建时读取，行为等同引擎「每次播放新建 audio 时应用当前音量」）：`audio/webPlay.ts`、`audio/webPlayDie.ts`（各补 `import { lib } from "noname";`）、`utill.js` 的 `playSound`、`char_4162_cathy.ts` 两处、`kelisitengmrfz.ts` 一处（后三者已有 `lib` 导入）。
+- 校验：`pnpm eslint` 六个文件在改动行上无新增报错（`char_4162_cathy.ts` / `kelisitengmrfz.ts` 共 19 条 `no-var` 是这两份文件里既有的 `var` 书写，与本次改动行无关）；构建通过，产物里六处都落地：`chunks/audio.js` 2 处、`chunks/utill.js` 1 处、`chunks/packs.js` 3 处，均为 `*.volume = *.config.volumn_audio / 8`。**未游戏内实测**：需人工把「游戏音量」调到一半，分别触发一次在线技能配音、一次「行动失败」阵亡配音、克洛丝技能音效、断铁变身/还原音效与凯尔希菜单语音，确认响度与本体一致。
+
+## 2026-10-17
+
+### 修复：把「审计出的高/中/低已复核问题」逐条落到源码（card / character / nonameEx / skin / extCompatible / 注册链 / GloriousIdeal）
+
+用户要求「修复高、中、低三个已复核问题，其余问题请忽略」。**开工前提（诚实说明）**：上一轮的审计报告原文没有落盘（临时目录只剩中间产物），所以下面每一条都是重新读代码、并去引擎实现（`apps/core/noname/**`）核对契约之后**二次证实**才动手的；证实不了的宁可不动，全部列在末尾「只报告、未动手」。第四节（已推翻）与第五节（存疑）按要求整体跳过。
+
+- **`packs/card/sjzx_zhuihuomrfz.ts`（A-2，火焰伤害打两次 + 来源写错）**：`.damage({ nature: "fire" }).set("source", "nosource")` 是把字符串 `"nosource"` 当成 source 事件属性写进去（引擎读的是 `event.nosource` 布尔），而且没写 `num`；两个分支还都缺 `return`，第一个分支打完会继续落到下面 `result?.bool` 的 else 再吃一次。改为 `player.damage({ num: 1, nature: "fire", nosource: true })` 并在每个分支后 `return`。
+- **`packs/card/ksl_lulitongxinmrfz.ts`（filterTarget 形参倒置）**：`filterTarget` 的引擎签名是 `(card, player, target)`，原来写成 `(card, target, player)` ⇒ 判定里 `player`/`target` 互换，合法性完全反了。`char_459_tachak.ts:76` 有同一写法，但它不在清单里，见末尾「待裁决」。
+- **`packs/card/dazijimrfz.ts`（技能 id 写错）**：`player.hasSkill("dazijimrfz_buff")` 里没有这个技能（真正的大自在 buff 是 `dazijimrfzskill_buff`），恒假 ⇒ 已经挂着 buff 的角色会被再挂一次。
+- **`packs/character/char_4177_brigid.ts`（三岩的减伤从未生效）**：`subSkill` 只声明了名字，没有对应的技能条目。`Player.addSkill` 在 `lib.skill[id]` 不存在时**直接 return** ⇒ 名字进不了 `skills`，`hasSkill("sanyanmrfz_recovered")` 恒假（引擎确实会把 subSkill 注册成 `父_子` 键，见 `library/zhanfa.js:3119`、`game/index.js:8761`，所以补上子技能定义就能生效）。在 `count` 之后补 `recovered: { silent: true }`。
+- **`packs/character/char_206_gnosis.ts`（“已用花色”标记既不上屏也清不掉）**：`addTempSkill`/`markSkill` 用的 `siyongmrfz2` 在 `lib.skill` 里根本没有条目，而 `markSkill` 无 `info` 时要读 `lib.skill[name].intro`，读不到就 return（`player.js:10495`）。补技能条目：`silent` + `intro.content`（显示 `get.translation(storage) + "已用花色"`）+ `onremove` 删 storage，避免到期后 storage 残留。
+- **`nonameEx/custom/override.ts`（兵临城下「弃牌」分支永远走不到）**：`player.chooseControl({...})` 既不 `await` 也不 `forResult()`，紧接着读的 `result` 还是上面那次判定的结果（没有 `control` 属性）⇒ 只会平白吃一次伤害，且控件还没点完结算就抢先跑完。改成 `const { control } = await player.chooseControl({ controls, ai }).forResult();`（规范见 `nonameEx/library/element/content.ts:3657`）。
+- **`nonameEx/library/element/player.js`（隐匿一次就把武将定义改坏）**：`reUnseen` 里 `var skills = lib.character[name][3];` 拿的是**定义本体**——`game.addCharacter`（`game/index.js:6031`）把同一个数组引用同时存进 `lib.character` 和 `lib.characterPack`，原来的 `add`/`splice` 就地作用在它上面 ⇒ 二技能牌名被并进主技能、没有 `_info` 翻译的技能被永久删除，下一局这个武将的技能列表就是坏的。改成 `.slice(0)` 取副本。
+- **`nonameEx/custom/weina.js`（伪裔时机清单恒为全集）**：`if ((!name) in this.translation)` 里 `(!name)` 是布尔，`true`/`false` 不可能是翻译表的键 ⇒ 条件恒假，一个时机都没剔除，返回的是整个 `lib.hookmap`；而且边遍历数组边 `names.remove()` 会跳过被前移的下一项。改成 `Object.keys(this.name).filter(name => name in newTranslation)`（判据用 `newTranslation`：上一步已把裸时机名展开成 `xxxBegin`/`xxxAfter` 并删裸名，只有落在这张表里的时机才有中文名可显示）。
+- **`nonameEx/get/index.js`（四处）**：① `lib.card[name]` 取到 `undefined` 时后面读 `info.notarget` 直接抛 TypeError ⇒ 补 `if (!info) return 0;`；② `Math.max(info.selectTarget)` 传数组恒 NaN（先转成 `"1,2"` 再转数字），改 `Math.max(...info.selectTarget)`；③ `!info.notarget && info.selectTarget && info.selectTarget === 1` 中间那段多余，且 `selectTarget` 未定义时返回 `undefined` 而非 `false`（与 `@return {boolean}` 不符），改为 `!info.notarget && info.selectTarget === 1`；④ `isView` 的数组分支只调用递归却不 `return` ⇒ 数组进来恒返回假，改成「有一张命中即 true，否则 false」。
+- **`extCompatible/decade.js`（十周年动画补丁重复安装）**：`disableAnimation()` 每次执行都往 `AnimationPlayer.prototype` 上装包装，`copyPlaySpine` 记的却是**上一层包装**而不是原始实现 ⇒ 配置从 `partly` 直接切到 `disable` 后再切回「启用」，动画永久坏掉。首行加 `if (decadeUI.AnimationPlayer.prototype.copyPlaySpine) return;` 幂等守卫，`copyPlaySpine` 改记 `originalPlaySpine`。顺带修同文件的 `whichWayUtil.config === "partly"`——比的是函数本身，恒假，应为 `whichWayUtil.config("banDecadeUIAnimation") === "partly"`。
+- **`skin/spineWork.js`（动皮计时器从没清过 + 无配置时崩）**：缓存结构是 `spineCache.get(dynamicName)[playerid][action]`，判断里多写了一层 `[dynamicName]` ⇒ 取到 `undefined`，`clearTimeout` 永不执行，同一动作连播会叠两个计时器、先那个提前收掉画面。另一处 `actionConfig` 缺失只 warn 不 `return`，紧接着建 `SpinePlayer` 读 `actionConfig.action` 抛 TypeError，还把立绘层 `display:none` 留下没人恢复 ⇒ 补 `return`。
+- **`skin/index.ts`（四处）**：① `init()` 是模块顶层 `await whichWaySkin.init()` 的一环，皮肤数据/位置档案一抛（无 fs 后端、首帧写缓存失败）整个 `init()` 就 reject，后面的 `onInit`/`onConfig`/`onArenaReady` 全不注册 ⇒ 配音、模组、干员连带失效，链尾补 `.catch` 只降级皮肤层；② `mode === "piqie"` 里 `{ ...lib.config.sjzxDycAssets }` 是浅拷贝，随后的 `skin.action = skin.action[0]` 写在嵌套对象上 ⇒ **直接改到 lib.config 里那份存盘数据**，数组形态被永久削成字符串，改 `structuredClone(lib.config.sjzxDycAssets ?? {})`（引擎本身已在用 `structuredClone`，见 `game/index.js:7142`）；③ 「更新皮肤数据」按钮只在 `.then` 里复位 `updatingSkinData`，`autoUpdateSkinData` 一 reject 就永久停在 `true`，之后每次点都只弹「请勿重复操作」，改成 `try/catch/finally`，失败也别再报「更新完成」；④ 皮肤键名用 `file.name.replace(".jpg","").replace(".png","")`，`a.png.jpg` 这类名字会被剥两刀，统一走 `whichWayFile.removeExt(file.name)`。
+- **`packs/hooks.ts`（两处「看着有效其实是空操作」）**：① `[...hooks].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))` —— 注册路径只 push `{ key, obj }`，没有任何 API 能传 `priority`，每项都是 `undefined`，排序恒为 `0-0`；既然不生效就删掉这个「支持优先级」的假象，执行顺序即注册顺序；② `finalValue = fn(obj, key, hookName) || finalValue` 两个毛病：传 `obj` 让每个 execute 都从原始值起步（后一个覆盖前一个，链式预处理失效），而 `||` 又把合法返回的 `0`/`""`/`false` 当成「没返回」退回原值 ⇒ 改为 `const next = fn(finalValue, key, hookName); if (next !== undefined) finalValue = next;`。
+- **`packs/index.ts`（三处）**：① 声明了 `CHARACTER_PACKS` 之外的包名（多半写错）时 `lib.characterPack[data.pack]` 是 `undefined`，`[name] ??=` 抛 TypeError 打断**整批** character 注册 ⇒ 兜底建表并 `console.warn`；② 统一势力分支只补了 `lib.translate["sjzx_group"]`，`sjzx_group` 从来不在 `lib.group` 里（分立势力分支会注册），`game.countGroup()`（`game/index.js:10321`）按 `lib.group` 枚举 ⇒ 按势力判定的技能把干员当未知势力，补 `lib.group.push`；③ 每次启动无条件 `lib.config.cards.push("mrfzcard")` ⇒ 玩家在「卡牌包」菜单关掉它，重启就被强开，改成用 `extension_WhichWay_cardPackDefaulted` 标志只在首次默认加入并 `saveConfig`，之后尊重玩家开关。
+- **`packs/base/index.ts`（`getDesigner` 的 `fromStorage` 对对象入参完全不起作用）**：调用方（`packs/index.ts`「都没声明才查设计者记录」）传 `true` 期望读 `charDes`，但记录查询只写在字符串分支 ⇒ 对象进来一路掉到缺省设计者。补 `if (fromStorage && config.charId)` 读 `whichWayCharacterPack.designer[config.charId]`。
+- **`GloriousIdeal/battleHost.ts`（A-12：`directstart` 泄漏给父实例下次启动）**：iframe 子实例靠 `localStorage.setItem(lib.configprefix + "directstart", "true")` 静默 boot，引擎在 `init/index.ts:476` 消费后自行清掉——但前提是这个子实例真的启动了。看门狗超时与「建 iframe 失败」两条兜底路径都直接 `finish(fallbackResult(init))`，标志原样留在 localStorage ⇒ 父实例**下一次开游戏跳过选模式直接开局**。在 `cleanup()` 里补 `localStorage.removeItem(...)`（`finish` 必经，正常路径下子实例已自清，重复 remove 无害）。
+- **`GloriousIdeal/state/campaign.ts`（三处）**：① `unityGrowMod` 用 `UNITY_TIERS.find(t => unity >= t.min && unity <= t.max)`，而团结度可以是小数（`starvation` 是 `-0.2`）⇒ `50.5`/`100.5` 这类值掉进档位间隙，倍率静默变成 `0`（阶梯修正失效），取整后落档；② `beginRun` 里 `hp` 直接按引用进 `run.hp`（`maxHp` 却拷了），而调用方 `ui/store.ts:379` 随后 `view.dungeonHp = hp` ⇒ 战役内的缺粮/障碍/战斗结算写 `run.hp` 会同时改到 UI 那份「副本外快照」，改成 `{ ...hp }`；③ `ensureShopToday` 的条件 `if (s.day === this.data.day && s.stock.length) return;` 与它自己的文档注释（「跨天则重 roll」）矛盾：当天货架被买空后重开商店会**免费补满库存**，顺带把 `s.refreshLeft` 重置回当日额度 ⇒ 刷新次数等于无限。改为同一天直接返回。
+- **`GloriousIdeal/ui/components/common/StatusBar.vue`（结束旅程误点即清档）**：`endJourney()` 里 `clearCampaignSave()` 直接抹存档，按钮却是一点就走。改成与 `DungeonView.vue` 的「撤退」同一套二次确认（`endAsk` + 再想想 / 确认结束），文案 `清空存档、回到标题？`，样式复用全局 `gi-btn-*`。
+
+**只报告、未动手**（证实了现象，但正确做法要作者意图）：
+
+- `packs/character/char_300_phenxi.ts:17` 的 `hasSkill("lvwaimrfz_ban")`：全仓库没有这个技能的定义，也没有任何授予方 ⇒ 恒假。但它的语义是「没有禁止方就照常发动」，补定义或删判定都会改变技能行为，需要确认「禁止方」本应由谁给。
+- `packs/index.ts:113-117`、`:21`（后者在注释里）：现象存在但属于既有约定，不在本轮清单内。
+- `packs/hooks.ts:194`（校验本身是对的）、`:227`（重复 key 直接抛错是设计选择，改成覆盖会掩盖注册冲突）。
+- `GloriousIdeal/battleHost.ts` 的另外两条同源风险：`gi-battle-ready` 一到就 `clearTimeout(watchdog)`，此后再无任何兜底 ⇒ 子实例 boot 完却不回传 `gi-battle-result`（真人局时长无界，不能简单加超时）会让 `runBattle` 永不 settle、`message` 监听常驻；`sendInit()` 只在 RAF 动画走到 `fade` 时下发 ⇒ 后台标签页 RAF 被节流时 init 永不下发。这两个都需要设计「谁负责判死」，不是可证的最小修复。
+
+**判为假阳性**（复核后确认不是问题）：A-3、A-4、A-6、A-11①、`cuoe` 的 `failToUse`、`teleixiyamrfz:49`、`puruisaisimrfz:474`、`amiya:92`。
+
+**待裁决**：`packs/character/char_459_tachak.ts:76` 与本轮已修的卡牌侧 `filterTarget` 形参倒置是同一类问题（引擎签名 `(card, player, target)`），已确证但**不在清单里**，没有动，等一句「要不要一起改」。
+
+- 校验：`pnpm eslint` 跑全部 15 个改动文件 ⇒ 新增/改动文件 0 error；`weina.js`（78/82/351 `no-prototype-builtins`）与 `player.js:289`（`no-self-assign`）共 4 条报错**是既有债务**，用 `git show HEAD:…` 逐行比对确认行号与内容在改动前就存在，未顺手改（改这些会扩面到无关代码）。`WW_SKIP_STATIC_COPY=1 pnpm -F ./packages/extension/WhichWay build` 通过，并到产物里逐条抽查落地：`chunks/GloriousIdeal-battleHost.js` 含 `removeItem(lib.configprefix+"directstart")`；`chunks/GloriousIdeal-battleOverlay-shared.js` 含 `Math.floor(this.data.unity)` 与 `清空存档、回到标题`；`chunks/packs.js` 含 `siyongmrfz2` 与「已用花色」；`chunks/` 里还能搜到 `copyPlaySpine`、`cardPackDefaulted`、`sjzxDycAssets` 的新写法。**未游戏内实测**：需要人工确认的四件事——三岩【三岩】减伤触发后 intro 是否显示（此前恒不显示）、兵临城下「弃牌」分支现在能否选到、十周年动画在 `partly ⇄ disable` 来回切一次后是否还能恢复、瑰丽理想打完一场战斗回到标题后**下一次开游戏**是否还弹选模式（这条正是 A-12 的验收点）。
+
 ## 2026-10-16
 
 ### 撤回：立绘「放大画布 + 夹取」方案（方向错了，已完整回滚）
@@ -1268,3 +1320,12 @@ console.log("extUID:", whichWay.arknight.shcema.transfer("char_002_amiya", "char
 - **三/四档 = 借「江山如故」的现成技能**：卡面写「八荒 / 火中」，而 `get.poptip("jsrgbahu")`、`get.poptip("jsrghuozhong")` 指向的是 core 自带武将包 jsrg 的 **跋扈**（准备阶段摸一张 + 杀次数上限+1）与 **惑众**（黑色非锦囊当兵粮寸断，令惑众持有者摸两张）——即同音误写，按 id 取用才是原意。因此三/四档不自己写 mod，直接按档数 `addSkill`/`removeSkill` 这两个技能；发放记录存 `storage.weiyimrfz_granted`，只回收自己发出去的，避免把【神宠】之类别人给的跋扈一并撤走。jsrg 未导入时 `lib.skill` 查不到，静默不生效。`get.poptip(skillId)` 是「技能 id 型词条」（`lib.poptip` 的 skill 类 idList 就是 `Object.keys(lib.skill)`），依赖该包已导入。
 - ~~「游戏开始时」没有可靠时机，用第一轮 `roundStart` 等价~~ —— **已纠正**：`gameStart` 由各模式（`single/identity/versus/...`）在开局 `event.trigger("gameStart")` 发出，而 core 武将牌上写「游戏开始时」的技能（`qixing`、`identity_mingcha` 等）统一用 `global:phaseBefore` + `player:enterGame` + `game.phaseNumber == 0`，贵胄改成与它们一致；`weiyimrfz` 的「每轮开始时」仍留在 `roundStart`（卡面就是每轮），且 `phaseBefore` 先于 `roundStart`，开局授技会先算好档数再触发伪裔。
 - 校验：`pnpm eslint` 两文件通过、`vite build` 通过，产物 `chunks/packs.js` 已 grep 核对（`skills.includes` 判重、`jsrgbahu`/`jsrghuozhong` 引用、`global: "phaseBefore", player: "enterGame"`、`lib.group.filter` 取势力全集均在）。**未游戏内实测**（browser MCP 起不了 dev app）。
+
+### 实现：`scripts/update-portraits.mjs` 新增 GitHub 备份源（`github_skin` / `github_portrait`）
+
+`--sources` 新增两个逻辑来源，指向 `github.com/yuanyan3060/ArknightsGameResource`：`github_skin` = 仓库 `skin/`（实测 1406 个全身立绘，命名同为 `{portraitId}b.png`），`github_portrait` = `portrait/`（实测 1415 个半身像，约 100~125KB）。默认来源仍是 `char_arts`，新来源只在显式 `--sources` 时启用，可与 PRTS 目录按顺序混排（前者取不到再回落后者）。
+
+- **清单**：GitHub 用一次递归 `git/trees/main?recursive=1`（实测 28,354 条 / 7.3MB），按 `skin/`、`portrait/` 裁剪后分别写 `scripts/cache/github_*_index.json`（与 PRTS 缓存同格式、同 7 天有效期）；同一次运行同时选两个目录也只请求一次 tree。匿名 API 限流可用 `GITHUB_TOKEN`/`GH_TOKEN` 提升，token 只随 `api.github.com` 的清单请求发送，绝不发给 raw 域。
+- **取图**：`assetUrl()` 改为按来源分派；GitHub 走 `--github-raw` 前缀（默认 `https://raw.githubusercontent.com`），路径逐段 `encodeURIComponent`，覆盖文件名里的 `#`/`+`（仓库里有 534 个这种变体）；`--github-ref` 默认 `main`。未编码的 `#` 会被当成 URL 锚点，取到错误文件。
+- **复用**：PNG 签名校验、`--delay`/`--jobs`/`--limit`/`--offline`/`--refresh-index`、断点续传缓存、ImageMagick 压缩与「只新增不覆盖」全部沿用；原始图按逻辑来源分目录缓存，不会与 PRTS 同名图互顶。
+- 校验：`node --check` 通过；`--sources github_skin,github_portrait --ids char_003_kalts,char_123_fang,char_002_amiya --dry-run` 实测 tree 拉取、两目录清单落缓存、精二/初始替代匹配（凯尔希 `char_003_kalts_2b.png`、阿米娅 `char_002_amiya_2b.png`、芬 `char_123_fang_1b.png`）均正确；`--offline` 可只读缓存复现同一计划。**未实测真实下载**：本机 `raw.githubusercontent.com` 不可达（普通图与 `#` 变体的 fetch 均失败），需在有直连或镜像的环境补跑；不可直连时用 `--github-raw` 指向路径结构相同的镜像前缀。ESLint 对该脚本报的 `process/console/fetch is not defined` 为改动前既有（`scripts/` 未声明 Node globals，`compress-skin.mjs` 同样报），本次未引入新的规则问题。

@@ -410,7 +410,10 @@ export class PlayerExt extends lib.element.Player {
 			player.hp = 1;
 			player.maxHp = 1;
 			player.update();
-			var skills = lib.character[name][3];
+			//lib.character[name][3] 是武将定义本身（game.addCharacter 直接把它同时存进 lib.character 和 lib.characterPack），
+			//跨对局常驻且和选将面板共用同一个数组。原来的写法在它上面 add/splice：
+			//隐匿一次就把二技能的牌名并进主技能、并把没有 _info 翻译的技能永久删掉，下一局这个武将的技能列表就坏了。
+			var skills = lib.character[name][3].slice(0);
 			if (player.name2) {
 				for (var i of lib.character[player.name2][3]) {
 					skills.add(i);

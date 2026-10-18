@@ -18,6 +18,7 @@ export const upDataContentCurrent = {
 - **修复**: 修复嵯峨、普瑞赛斯模组技能丢失的bug
 - **修复**：仍处于开发中的模式\`GloriousIdeal\`在非开发环境下会加载的bug
 - **修复**：跃跃因 AI 批量修改导致代码错误的 bug
+- **修复**：部分配音不受无名杀音量控制的影响
 `,
 
 	/**

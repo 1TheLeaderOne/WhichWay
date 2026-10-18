@@ -206,9 +206,10 @@ skill({
 						player.chat(`牌堆中没有字数为${get.cnNumber(num)}的牌！`);
 						return;
 					}
+					//chooseButton 的 result.links 是数组，单张候选也要包成数组，否则下面 links[0] 取到 undefined
 					const { links } =
 						list.length == 1
-							? { links: list[0] }
+							? { links: [list[0]] }
 							: await player
 									.chooseCardButton({
 										prompt:"【号鸣】:请选择你要获得的牌",

@@ -21,7 +21,7 @@ skill({
 		audio: ["作战中1", "作战中2"],
 		enable: "phaseUse",
 		usable: 1,
-		filterTarget(card, target, player) {
+		filterTarget(card, player, target) {
 			return player.canCompare(target, true);
 		},
 		async content(event, trigger, player) {

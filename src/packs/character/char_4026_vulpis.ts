@@ -71,7 +71,7 @@ skill({
 				if (count > 0 && !player.hasSkill("yinhumrfz_addcount")) return false;
 				return game.hasPlayer(current => !!player.canUse("juedou", current) && player.inRange(current));
 			},
-			filterTarget(card, target, player) {
+			filterTarget(card, player, target) {
 				return target != player && !!player.canUse("juedou", target) && player.inRange(target);
 			},
 			async content(event, trigger, player) {

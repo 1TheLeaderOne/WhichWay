@@ -58,7 +58,7 @@ skill({
         },
         intro:{
             content(storage, player, skill) {
-                if(!storage || (Array.isArray(storage) && storage.length < 0)) return `·无效果`
+                if(!storage || (Array.isArray(storage) && storage.length < 1)) return `·无效果`
                 return `·你为${get.translation(storage)}使用的下一张基本牌或普通锦囊牌额外指定一名角色为目标`
             },
         },

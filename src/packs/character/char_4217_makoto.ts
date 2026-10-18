@@ -16,6 +16,7 @@ const resigter = function (name = "char_4217_makoto") {
 		},
 		pack: "legendSJZX",
 		llm: "Qwen-3.8-Flash",
+		designer:["Flandre"]
 	});
 
 	characterTitle(name, whichWayUtil.colorize("#blue#开辟明日之人#"));

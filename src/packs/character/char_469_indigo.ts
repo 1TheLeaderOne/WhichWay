@@ -142,16 +142,15 @@ skill({
 								_status.event.chars.find(t => t.name === i)
 							);
 						let func = function (to) {
-							let previous;
-							while (true) {
-								previous = previous || to.getPrevious();
-								if (previous === player && get.attitude(player, previous) > 2) return true;
-								else if (previous !== player && get.attitude(player, previous) > 2) {
-									previous.getPrevious();
-									continue;
-								}
-								return false;
+							//沿座位逆序回查直到玩家：中途出现非友方角色即为「非友方序列」。
+							//previous 必须在循环里前进，否则原写法会永远停在同一个上家上死循环；
+							//走回 to 说明永远碰不到玩家（例如玩家有 undist），同样退出。
+							let previous = to.getPrevious();
+							while (previous && previous !== player && previous !== to) {
+								if (get.attitude(player, previous) <= 2) return false;
+								previous = previous.getPrevious();
 							}
+							return previous === player;
 						};
 						for (var target of targets) {
 							//@ts-ignore

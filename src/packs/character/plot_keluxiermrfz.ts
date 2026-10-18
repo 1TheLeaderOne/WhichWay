@@ -110,14 +110,20 @@ skill({
 					lib.translate[name + "_info"] = lib.translate["jingxiangmrfz_info"];
 					player.addSkill(name);
 				}
-				let random = Math.random();
-				if (random >= 0.95 || lib.config.lucky_star) {
-					player.addSkill("clanzhongliu");
-					let info = get.info("clanzhongliu");
-					if (!info.audioname2) info.audioname2 = {};
-					info.audioname2["char_4228_closur"] = "clanzhongliu_keluxiermrfz";
-					player.addSkill("kuorongmrfz_reset");
-				}
+				//content 每台各执行一遍：Math.random 与本地 lucky_star 都会让主机与客户端的技能列表对不上，
+				//所以由主机算出结果再广播，客户端上的 broadcastAll 是空操作，效果只来自广播。
+				game.broadcastAll(
+					(current, lucky) => {
+						if (!lucky) return;
+						current.addSkill("clanzhongliu");
+						let info = get.info("clanzhongliu");
+						if (!info.audioname2) info.audioname2 = {};
+						info.audioname2["char_4228_closur"] = "clanzhongliu_keluxiermrfz";
+						current.addSkill("kuorongmrfz_reset");
+					},
+					player,
+					Math.random() >= 0.95 || lib.config.lucky_star
+				);
 			},
 			subSkill: {
 				reset: {

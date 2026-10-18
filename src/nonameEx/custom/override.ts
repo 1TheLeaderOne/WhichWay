@@ -97,8 +97,12 @@ if (!lib.card.binglinchengxia) {
 				) {
 					player.damage().set("nosource", true);
 					return;
-				} else
-					player.chooseControl({
+				}
+				//chooseControl 是异步事件。原来既不 await 也不 forResult，接着读的 result 还是上面那个判定结果
+				//（它没有 control 属性），所以「弃牌」分支永远走不到，只会平白伤害一次；
+				//而且控件还没等玩家点完，后面的结算就已经抢先跑完了。
+				const { control } = await player
+					.chooseControl({
 						controls: ["discard_card", "take_damage"],
 						ai(event, player) {
 							if (get.damageEffect(player, event.player, player) >= 0) {
@@ -109,15 +113,16 @@ if (!lib.card.binglinchengxia) {
 							}
 							return "discard_card";
 						},
+					})
+					.forResult();
+				if (control == "discard_card") {
+					player.discard({
+						cards: player.getCards("e", function (card) {
+							return lib.filter.cardDiscardable(card, player, "shuiyanqijuny");
+						}),
 					});
-			} else return;
-			if (result.control == "discard_card") {
-				player.discard({
-					cards: player.getCards("e", function (card) {
-						return lib.filter.cardDiscardable(card, player, "shuiyanqijuny");
-					}),
-				});
-			} else player.damage().set("nosource", true);
+				} else player.damage().set("nosource", true);
+			}
 		},
 		ai: {
 			order: 1,

@@ -55,7 +55,14 @@ skill({
 							//@ts-ignore
 							(skills, player) => {
 								//@ts-ignore
-								lib.skill.lingxinmrfz.trigger.player.addArray(skills);
+								const list = lib.skill.lingxinmrfz.trigger.player;
+								//lib.skill 跨对局常驻，原来的 addArray 会把上一局的 *_costBegin 永久堆在 trigger.player 上。
+								//这里先摘掉所有动态挂进去的触发名再重建；已注册到角色身上的触发不受影响。
+								for (let i = list.length - 1; i >= 0; i--) {
+									if (list[i].endsWith("_costBegin")) list.splice(i, 1);
+								}
+								//@ts-ignore
+								list.addArray(skills);
 								player.addSkillTrigger("lingxinmrfz", null, true);
 							},
 							skills,

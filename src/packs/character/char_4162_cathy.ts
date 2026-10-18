@@ -89,6 +89,8 @@ skill({
 			async content(event, trigger, player) {
 				player.storage.duantiemrfz_buff = player.name;
 				let audio = new Audio("extension/WhichWay/audio/up.mp3");
+				//跟随本体「游戏音量」（volumn_audio 取值 0~8）
+				audio.volume = lib.config.volumn_audio / 8;
 				audio.play();
 				await player.reinitCharacter(player.name, "paxinghaomrfz", false);
 				player.addSkill("duantiemrfz_buff");
@@ -107,6 +109,8 @@ skill({
 					trigger: { player: "dying" },
 					async content(event, trigger, player) {
 						let audio = new Audio("extension/WhichWay/audio/down.mp3");
+						//跟随本体「游戏音量」（volumn_audio 取值 0~8）
+						audio.volume = lib.config.volumn_audio / 8;
 						audio.play();
 						await player.reinitCharacter("paxinghaomrfz", player.storage.duantiemrfz_buff, false);
 						player.recoverTo(2);

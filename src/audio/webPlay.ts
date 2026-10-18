@@ -1,3 +1,4 @@
+import { lib } from "noname";
 import { whichWayUtil } from "../utill.js";
 import { whichWayAudio } from "./index.ts";
 import { whichWayToast } from "../toast/index.ts";
@@ -73,6 +74,8 @@ export class whichWayWebPlay {
 	play(): HTMLAudioElement {
 		// this.stop();
 		const audio = new Audio(this.voiceUrl.randomGet());
+		//与引擎自己的 game.playAudio 保持同一换算（volumn_audio 取值范围 0~8）
+		audio.volume = lib.config.volumn_audio / 8;
 		audio.play();
 		this._playing = audio;
 

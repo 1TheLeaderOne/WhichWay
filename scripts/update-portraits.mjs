@@ -1,5 +1,5 @@
 /**
- * 补齐缺失的干员立绘：从 torappu 公益资源站下载、压缩后放进 image/illustration/character/。
+ * 补齐缺失的干员立绘：从 torappu 公益资源站（或 GitHub 备份仓库）下载、压缩后放进 image/illustration/character/。
  *
  * 为什么日常只用「问服务器要一张目录清单」，不用「下载两张大表再比对」：
  *   缺哪张图本地就能算出来（`json/arknight/skin_table.json` 给 portraitId，本地 character 目录给已有项），
@@ -32,15 +32,22 @@
  *     刻意**不作默认回落**：分辨率差一个数量级、裁切也不同，混进同一目录会让武将卡明显发虚，
  *     要收就自己显式加 `--sources char_arts,char_portrait`（脚本会把这类计划标成「半身像」）。
  *   - 清单缓存按目录各存一份（`scripts/cache/<目录>_index.json`），所以加一个来源只是多一次清单请求，不会重复抓。
+ *   - `github_skin` = GitHub 备份仓库 `yuanyan3060/ArknightsGameResource` 的 `skin/`：同一批全身立绘（实测 1406 个，
+ *     命名同为 `{portraitId}b.png`，另有 `+`/`#` 变体；findArt 只按精确名取基础立绘）。
+ *   - `github_portrait` = 该仓库的 `portrait/` 半身像（实测 1415 个、约 100~125KB），同样只有显式列进 `--sources` 才用。
+ *     GitHub 源共用一次递归 tree 清单（约 9MB，按目录裁剪后缓存 7 天），所以同时列两个 GitHub 目录也只请求一次。
+ *     `raw.githubusercontent.com` 在部分网络环境不可达，可用 `--github-raw` 指向路径结构相同的镜像/代理
+ *     （格式：`{前缀}/{owner}/{repo}/{ref}/{路径}`）；GitHub API 有匿名限流，可设 `GITHUB_TOKEN`/`GH_TOKEN`。
  *
  * 对公益服务器的负担（默认范围 = 可获取干员；具体缺口每次先看 --dry-run，别凭记忆估）：串行下载（`--jobs` 最多 3）、
  *   每张之间默认隔 400ms、单次运行的请求数 = 待下载数 + 每个 `--sources` 目录至多 1 次清单（7 天内走缓存）；
  *   原始图落在缓存目录 `scripts/cache/arts/<目录>/`，大小与远端一致就复用（中断后重跑不重复下载）。
+ *   GitHub 源另算：整轮运行最多 1 次 tree 清单 + 每张 1 次 raw 下载（匿名 API 限流 60 次/小时，清单缓存 7 天）。
  *   放大范围（`--scope any` / `--ids`）时请自觉配 `--limit`。
  *
  * ⚠ 只新增、从不覆盖：目标已存在（png 或 jpg 都算已有）直接跳过，已有资源永不被改写；
  *   压缩依赖 ImageMagick 7（`magick`，可用 MAGICK 环境变量指定），参数与 scripts/compress-skin.mjs 同构。
- *   站点未知路径会拿 200 返回前端 HTML 而不是 404，所以每份响应都先校验 JSON/PNG 签名再落盘。
+ *   PRTS 站点未知路径会拿 200 返回前端 HTML 而不是 404（GitHub 是正常的 404），所以每份响应都先校验 JSON/PNG 签名再落盘。
  *
  * 用法：
  *   node scripts/update-portraits.mjs --dry-run            # 只打印计划与缺口统计（每个来源目录最多一次清单，不下图）
@@ -49,13 +56,16 @@
  *   node scripts/update-portraits.mjs --ids char_123_fang,char_208_melan
  *   node scripts/update-portraits.mjs --update-tables      # 先把远端两张表拉到缓存目录再比对（表过期时用；本地那份 skin_table 只在有人跑过更新脚本时才刷新，新干员常常还是得靠它）
  *   node scripts/update-portraits.mjs --sources char_arts,char_portrait --ids char_4231_clemnt   # 只收半身像兜底（默认不收）
+ *   node scripts/update-portraits.mjs --sources github_skin --dry-run   # 看 GitHub 备份仓库能补多少
+ *   node scripts/update-portraits.mjs --sources char_arts,github_skin     # PRTS 缺的再从 GitHub 补
  *   node scripts/update-portraits.mjs --refresh-index      # 强制重取远端目录清单
  *   node scripts/update-portraits.mjs --delay 800 --max 1024 --colors 128 --keep-raw
  *
  * 参数：--scope obtainable|char|any（默认 obtainable）、--ids 逗号分隔形态id、--limit 本次下载上限（0=不限）、
- *   --sources 图片来源目录（默认 char_arts，可加 char_portrait，顺序即优先级）、
+ *   --sources 图片来源目录（默认 char_arts，可加 char_portrait / github_skin / github_portrait，顺序即优先级）、
  *   --delay 每次请求间隔毫秒、--jobs 并发数(1~3)、--max 长边上限、--colors 量化色数(0=真彩)、
  *   --out 立绘根目录、--cache 缓存目录（默认 scripts/cache）、--url 站点根、--timeout 单请求毫秒、--retry 重试次数、
+ *   --github-ref GitHub 分支（默认 main）、--github-raw GitHub raw 前缀（默认 https://raw.githubusercontent.com）、
  *   --max-age 清单缓存天数、--keep-raw 保留原始图、--offline 只用缓存不联网。
  */
 import fs from "node:fs";
@@ -78,6 +88,12 @@ const getOpt = (name, def) => {
 };
 
 const ORIGIN = String(getOpt("url", "https://torappu.prts.wiki")).replace(/\/+$/, "");
+const GITHUB_REPO = "yuanyan3060/ArknightsGameResource";
+const GITHUB_REF = String(getOpt("github-ref", "main"));
+const GITHUB_API = "https://api.github.com";
+const GITHUB_RAW = String(getOpt("github-raw", "https://raw.githubusercontent.com")).replace(/\/+$/, "");
+//只给 api.github.com 的清单请求带 token；raw 下载走另一个域，绝不能把 token 发过去
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || "";
 const OUT = path.resolve(getOpt("out", path.join(ROOT, "image", "illustration")));
 const TARGET_DIR = path.join(OUT, "character");
 const SKIN_TABLE = path.resolve(getOpt("gamedata", path.join(ROOT, "json", "arknight", "skin_table.json")));
@@ -93,8 +109,24 @@ const REFRESH_INDEX = getFlag("refresh-index");
 const UPDATE_TABLES = getFlag("update-tables");
 const KEEP_RAW = getFlag("keep-raw");
 const SCOPE = String(getOpt("scope", "obtainable")).toLowerCase();
-/** 站点上可当立绘用的两个图片目录；标签会打进计划里，一眼看出这张图是哪一类 */
-const SOURCE_KIND = { char_arts: "全身立绘", char_portrait: "半身像" };
+/** 可当立绘用的目录；标签会打进计划里，一眼看出这张图来自哪个站、是哪一类 */
+const SOURCE_KIND = {
+	char_arts: "全身立绘",
+	char_portrait: "半身像",
+	github_skin: "全身立绘·GitHub",
+	github_portrait: "半身像·GitHub",
+};
+/** 清单怎么取、图片 URL 怎么拼 */
+const SOURCE_PROVIDER = {
+	char_arts: "prts",
+	char_portrait: "prts",
+	github_skin: "github",
+	github_portrait: "github",
+};
+/** GitHub 逻辑来源 → 仓库里的实际目录 */
+const GITHUB_DIRS = { github_skin: "skin", github_portrait: "portrait" };
+/** 全身立绘来源：拿到精二就标「精二」，不必再带目录前缀 */
+const FULL_BODY_SOURCES = new Set(["char_arts", "github_skin"]);
 const SOURCES = [
 	...new Set(
 		String(getOpt("sources", "char_arts"))
@@ -128,14 +160,14 @@ const readJson = file => JSON.parse(fs.readFileSync(file, "utf8"));
  * 取一份远端内容（带超时与重试）。accept 决定站点给 JSON 还是给图——
  * `/api/v1/*` 若不带 `accept: application/json` 会被网关当成前端路由、200 返回 HTML。
  */
-async function fetchBytes(url, accept) {
+async function fetchBytes(url, accept, headers = {}) {
 	let last;
 	for (let attempt = 0; attempt <= RETRY; attempt++) {
 		if (attempt) await sleep(1000 * attempt);
 		const ctrl = new AbortController();
 		const timer = setTimeout(() => ctrl.abort(), TIMEOUT);
 		try {
-			const res = await fetch(url, { signal: ctrl.signal, headers: { accept, "user-agent": UA } });
+			const res = await fetch(url, { signal: ctrl.signal, headers: { accept, "user-agent": UA, ...headers } });
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
 			return Buffer.from(await res.arrayBuffer());
 		} catch (e) {
@@ -148,8 +180,15 @@ async function fetchBytes(url, accept) {
 	throw last ?? new Error(`请求失败：${url}`);
 }
 
-/** 站点自己的取图规则（前端 AssetContent 就是这么拼的）：raw/ 段换成 assets/，只编码最后一段 */
-function assetUrl(remotePath) {
+/**
+ * 取图 URL。PRTS 用自己的规则（raw/ 段换成 assets/，只编码最后一段）；
+ * GitHub 走 raw 前缀，路径逐段编码——立绘名里的 `#`/`+` 不编码会被当成锚点或加号。
+ */
+function assetUrl(dir, remotePath) {
+	if (SOURCE_PROVIDER[dir] === "github") {
+		const encoded = remotePath.split("/").map(encodeURIComponent).join("/");
+		return `${GITHUB_RAW}/${GITHUB_REPO}/${GITHUB_REF}/${encoded}`;
+	}
 	const seg = remotePath.replace(/^raw\//, "").split("/");
 	const file = encodeURIComponent(seg.pop());
 	return `${ORIGIN}/assets/${[...seg, file].join("/")}`;
@@ -167,33 +206,32 @@ function isPng(file) {
 }
 
 /**
- * 远端某个图片目录的清单：name → { name, path, size }。
- * 每个目录各一份缓存文件（`<目录>_index.json`），7 天内直接复用（`--refresh-index` 强制重取，`--offline` 只允许读缓存）。
+ * 读一份目录清单缓存。命中（未过期，或 --offline 下即使过期）返回 name → 条目；否则返回 null。
+ * PRTS 与 GitHub 共用同一格式：`{ children: [{ name, path, size }] }`。
  */
-async function loadIndex(dir) {
-	const indexFile = path.join(CACHE, `${dir}_index.json`);
-	if (!REFRESH_INDEX && fs.existsSync(indexFile)) {
-		try {
-			const data = readJson(indexFile);
-			const ageDays = (Date.now() - fs.statSync(indexFile).mtimeMs) / 86400000;
-			//按「去掉子目录后的条目数」报数：children 里会夹着目录项，直接报 length 会和实际可比对的文件数对不上
-			const files = data?.children ? toIndexMap(data) : null;
-			if (files && ageDays <= MAX_AGE_DAYS) {
-				console.log(`远端清单：读缓存 ${path.relative(ROOT, indexFile)}（${ageDays.toFixed(1)} 天前，${files.size} 个文件；--refresh-index 可强制重取）`);
-				return files;
-			}
-			if (files && OFFLINE) {
-				console.log(`远端清单：缓存已过期（${ageDays.toFixed(1)} 天）但 --offline 不联网，仍按缓存 ${files.size} 个文件计算`);
-				return files;
-			}
-		} catch (e) {
-			console.error(`  缓存清单不可用（${String(e).split("\n")[0]}），改为重新抓取`);
+function readIndexCache(indexFile) {
+	if (!fs.existsSync(indexFile)) return null;
+	try {
+		const data = readJson(indexFile);
+		const ageDays = (Date.now() - fs.statSync(indexFile).mtimeMs) / 86400000;
+		//按「去掉子目录后的条目数」报数：children 里会夹着目录项，直接报 length 会和实际可比对的文件数对不上
+		const files = data?.children ? toIndexMap(data) : null;
+		if (!files) return null;
+		if (ageDays <= MAX_AGE_DAYS) {
+			console.log(`远端清单：读缓存 ${path.relative(ROOT, indexFile)}（${ageDays.toFixed(1)} 天前，${files.size} 个文件；--refresh-index 可强制重取）`);
+			return files;
 		}
+		if (OFFLINE) {
+			console.log(`远端清单：缓存已过期（${ageDays.toFixed(1)} 天）但 --offline 不联网，仍按缓存 ${files.size} 个文件计算`);
+			return files;
+		}
+	} catch (e) {
+		console.error(`  缓存清单不可用（${String(e).split("\n")[0]}），改为重新抓取`);
 	}
-	if (OFFLINE) {
-		console.error(`--offline 但缓存清单不存在：${indexFile}`);
-		process.exit(1);
-	}
+	return null;
+}
+
+async function fetchPrtsIndex(dir) {
 	//路径参数里的斜杠必须编码成 %2F：未编码时网关会回落到前端页面
 	const buf = await fetchBytes(`${ORIGIN}/api/v1/files/${encodeURIComponent(`raw/${dir}`)}`, "application/json");
 	let data;
@@ -203,10 +241,69 @@ async function loadIndex(dir) {
 		throw new Error("清单响应不是 JSON（站点可能改版了）");
 	}
 	if (!data?.children) throw new Error("清单响应缺少 children 字段");
+	console.log(`远端清单：已抓取 ${dir} 共 ${toIndexMap(data).size} 个文件（${fmt(buf.length)}）`);
+	return data;
+}
+
+let githubTreePromise = null;
+
+/**
+ * GitHub 整个仓库的递归 tree（一次约 9MB）。同一次运行里两个 GitHub 目录共用这一份，
+ * 所以 `--sources github_skin,github_portrait` 也只打一次 API；成功的清单随后按目录裁剪进缓存。
+ */
+function loadGithubTree() {
+	githubTreePromise ??= (async () => {
+		const url = `${GITHUB_API}/repos/${GITHUB_REPO}/git/trees/${encodeURIComponent(GITHUB_REF)}?recursive=1`;
+		const headers = GITHUB_TOKEN ? { authorization: `Bearer ${GITHUB_TOKEN}` } : {};
+		const buf = await fetchBytes(url, "application/vnd.github+json", headers);
+		let data;
+		try {
+			data = JSON.parse(buf.toString("utf8"));
+		} catch {
+			throw new Error("GitHub 清单响应不是 JSON（API 可能限流或被代理改写）");
+		}
+		if (!Array.isArray(data?.tree)) throw new Error(`GitHub 清单响应缺少 tree 字段${data?.message ? `：${data.message}` : ""}`);
+		if (data.truncated) console.warn("  ! GitHub tree 响应被截断，清单可能不全");
+		console.log(`远端清单：GitHub tree ${data.tree.length} 条（${fmt(buf.length)}，${GITHUB_REPO}@${GITHUB_REF}）`);
+		return data.tree;
+	})();
+	return githubTreePromise;
+}
+
+async function fetchGithubIndex(dir) {
+	const tree = await loadGithubTree();
+	const prefix = `${GITHUB_DIRS[dir]}/`;
+	const children = [];
+	for (const entry of tree) {
+		if (entry.type !== "blob" || !entry.path.startsWith(prefix)) continue;
+		const name = entry.path.slice(prefix.length);
+		if (!name || name.includes("/")) continue; //只收目录直属文件，与 PRTS 清单口径一致
+		children.push({ name, path: entry.path, size: entry.size ?? 0 });
+	}
+	if (!children.length) throw new Error(`GitHub 仓库 ${GITHUB_REPO}@${GITHUB_REF} 的 ${GITHUB_DIRS[dir]}/ 没有文件（分支名或仓库结构改了？）`);
+	console.log(`远端清单：GitHub ${GITHUB_DIRS[dir]}/ 共 ${children.length} 个文件`);
+	return { children };
+}
+
+/**
+ * 远端某个图片目录的清单：name → { name, path, size }。
+ * 每个目录各一份缓存文件（`<目录>_index.json`），7 天内直接复用（`--refresh-index` 强制重取，`--offline` 只允许读缓存）。
+ */
+async function loadIndex(dir) {
+	const indexFile = path.join(CACHE, `${dir}_index.json`);
+	if (!REFRESH_INDEX) {
+		const cached = readIndexCache(indexFile);
+		if (cached) return cached;
+	}
+	if (OFFLINE) {
+		console.error(`--offline 但缓存清单不存在或不可用：${indexFile}`);
+		process.exit(1);
+	}
+	const data = SOURCE_PROVIDER[dir] === "github" ? await fetchGithubIndex(dir) : await fetchPrtsIndex(dir);
 	fs.mkdirSync(CACHE, { recursive: true });
 	fs.writeFileSync(indexFile, JSON.stringify(data));
 	const files = toIndexMap(data);
-	console.log(`远端清单：已抓取 ${dir} 共 ${files.size} 个文件（${fmt(buf.length)}）→ ${path.relative(ROOT, indexFile)}`);
+	console.log(`  已缓存 ${path.relative(ROOT, indexFile)}`);
 	return files;
 }
 
@@ -248,7 +345,7 @@ function pickArt(indexes, rec) {
 		const art = advanced ?? findArt(index, rec.ILLUST_0);
 		if (!art) continue;
 		const tier = advanced ? "精二" : "初始替代";
-		return { dir, art, kind: dir === "char_arts" ? tier : `${SOURCE_KIND[dir] ?? dir}·${tier}` };
+		return { dir, art, kind: FULL_BODY_SOURCES.has(dir) ? tier : `${SOURCE_KIND[dir] ?? dir}·${tier}` };
 	}
 	return null;
 }
@@ -328,7 +425,7 @@ async function main() {
 	//形态全集 = skin_table 的形态 ∪ 干员表里的干员：少了后半截，本地皮肤表还没收录的新干员连「被报告」的资格都没有（clemnt 那次就是这么漏的）。
 	const forms = IDS.length ? IDS : [...new Set([...byForm.keys(), ...Object.keys(characters).filter(isCharacter)])];
 
-	console.log(`站点：${ORIGIN}`);
+	console.log(`站点：${ORIGIN}${SOURCES.some(d => SOURCE_PROVIDER[d] === "github") ? ` | GitHub：${GITHUB_REPO}@${GITHUB_REF}（raw 前缀 ${GITHUB_RAW}）` : ""}`);
 	console.log(`本地表：${path.relative(ROOT, skinFile)}（${byForm.size} 个形态）| 角色表 ${Object.keys(characters).length} 条 | 待比对形态 ${forms.length}`);
 	console.log(`目标：${TARGET_DIR}（已有 ${have.size} 张）| 范围：${IDS.length ? `指定 ${IDS.length} 个形态` : `--scope ${SCOPE}`} | 图片目录：${SOURCES.map(d => `${d}(${SOURCE_KIND[d]})`).join(" → ")} | 动作：${DRY ? "仅预览(dry-run)" : "下载+压缩+落盘"}`);
 
@@ -383,6 +480,9 @@ async function main() {
 	if (noRemote.length && !SOURCES.includes("char_portrait")) {
 		console.log(`    → 其中若有站点只收录了半身像的干员（新干员常见，如 char_4231_clemnt），可加 --sources char_arts,char_portrait 收半身像；但半身像只有 180x360，放进长边 1280 的立绘目录会明显发虚，所以默认不收。`);
 	}
+	if (noRemote.length && !SOURCES.some(d => SOURCE_PROVIDER[d] === "github")) {
+		console.log(`    → 也可以换 GitHub 备份仓库试试：--sources char_arts,github_skin（命名规则相同；先 --dry-run 看还剩多少没收录）。`);
+	}
 
 	if (!limited.length) {
 		console.log(`\n没有需要下载的图片，退出。`);
@@ -421,8 +521,8 @@ async function main() {
 					console.log(`  ${label} 复用缓存 ${p.art.name}`);
 				} else {
 					await sleep(DELAY);
-					const buf = await fetchBytes(assetUrl(p.art.path), "image/png, image/*");
-					//站点未知路径回的是 200 的前端 HTML，不是 404：不校验签名就会写出一堆打不开的 .png
+					const buf = await fetchBytes(assetUrl(p.dir, p.art.path), "image/png, image/*");
+					//PRTS 未知路径回的是 200 的前端 HTML 而不是 404：不校验签名就会写出一堆打不开的 .png
 					if (buf.subarray(0, 8).toString("hex") !== PNG_MAGIC) throw new Error(`响应不是 PNG（${fmt(buf.length)}，站点可能没这个文件）`);
 					//字节数只用来判断缓存能否复用：CDN 若重新编码过 PNG，签名对就该收下，别因体积不符把整批图卡死
 					if (buf.length !== p.art.size) console.warn(`  ${label} 体积与清单不符（${fmt(buf.length)} vs ${fmt(p.art.size)}），仍按有效图收下`);

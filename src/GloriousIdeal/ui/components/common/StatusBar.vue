@@ -4,10 +4,20 @@
  * 展示：天数 / 源石碇 / 团结度进度条 / 副本战况（可选插槽），右侧操作按钮。
  * 所有值直接读 store.view（reactive），无需 props。
  */
+import { ref } from "vue";
 import { view, CONFIG } from "../../store.js";
 import * as store from "../../store.js";
 
 const unityPct = () => Math.max(0, Math.min(100, ((view.ctrl?.data.unity ?? 0) / CONFIG.UNITY.max) * 100));
+
+/* ---------- 结束旅程二次确认（与副本撤退同一套：先按下、再确认），避免误点即清空存档 ---------- */
+const endAsk = ref(false);
+const askEnd = () => (endAsk.value = true);
+const cancelEnd = () => (endAsk.value = false);
+const doEnd = () => {
+	endAsk.value = false;
+	store.endJourney();
+};
 </script>
 
 <template>
@@ -33,9 +43,12 @@ const unityPct = () => Math.max(0, Math.min(100, ((view.ctrl?.data.unity ?? 0) /
         <b>{{ Math.round(view.ctrl?.data.unity ?? 0) }}</b>
         <span class="dim">/{{ CONFIG.UNITY.max }}</span>
       </span>
-      <button class="gi-btn gi-btn-danger gi-btn-sm" title="放弃当前旅程（清空存档）" @click="store.endJourney()">
-        ✕ 结束旅程
-      </button>
+      <template v-if="endAsk">
+        <span class="gi-sb-end-ask">清空存档、回到标题？</span>
+        <button class="gi-btn gi-btn-ghost gi-btn-sm" @click="cancelEnd">再想想</button>
+        <button class="gi-btn gi-btn-danger gi-btn-sm" @click="doEnd">确认结束</button>
+      </template>
+      <button v-else class="gi-btn gi-btn-danger gi-btn-sm" title="放弃当前旅程（清空存档）" @click="askEnd">✕ 结束旅程</button>
     </div>
   </div>
 </template>
@@ -59,6 +72,10 @@ const unityPct = () => Math.max(0, Math.min(100, ((view.ctrl?.data.unity ?? 0) /
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+}
+.gi-sb-end-ask {
+  font-size: 13px;
+  color: var(--gi-text, #ecdeb8);
 }
 .gi-sb-brand {
   color: var(--gi-gold);

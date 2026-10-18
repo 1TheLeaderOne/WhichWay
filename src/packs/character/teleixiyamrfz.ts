@@ -152,6 +152,8 @@ skill({
 							var target = game.findPlayer(current => {
 								return current == player.storage.bojimrfz_mark;
 							});
+							//标记的对象可能已经死亡/离场，findPlayer 返回 undefined 时下面读 storage 会直接报错
+							if (!target?.storage?.bojimrfz) return "";
 							//@ts-ignore
 							var storage = target.storage.bojimrfz.players.slice();
 							storage.remove(target);
@@ -220,6 +222,8 @@ skill({
 								target = game.findPlayer(current => {
 									return current == player.storage.bojimrfz_mark;
 								});
+							//标记的对象可能已经死亡/离场，findPlayer 返回 undefined 时下面读 storage 会直接报错
+							if (!target?.storage?.bojimrfz) return;
 							//@ts-ignore
 							for (var i of target.storage.bojimrfz.players) {
 								if (i.countCards("h") == 0) continue;
@@ -279,6 +283,8 @@ skill({
 							// @ts-ignore
 							return current == player.storage.bojimrfz_mark;
 						});
+						//标记的对象可能已经死亡/离场，findPlayer 返回 undefined 时下面读 storage 会直接报错
+						if (!target?.storage?.bojimrfz) return;
 						//@ts-ignore
 						for (var i of target.storage.bojimrfz.players) {
 							if (i.countCards("h") == 0) continue;
@@ -327,6 +333,8 @@ skill({
 							// @ts-ignore
 							return current == player.storage.bojimrfz_mark;
 						});
+						//标记的对象可能已经死亡/离场，findPlayer 返回 undefined 时下面读 storage 会直接报错
+						if (!target?.storage?.bojimrfz) return;
 						//@ts-ignore
 						for (var i of target.storage.bojimrfz.players) {
 							if (i.countCards("h") == 0) continue;
@@ -392,6 +400,8 @@ skill({
 							// @ts-ignore
 							return current == player.storage.bojimrfz_mark;
 						});
+						//标记的对象可能已经死亡/离场，findPlayer 返回 undefined 时下面读 storage 会直接报错
+						if (!target?.storage?.bojimrfz) return;
 						//@ts-ignore
 						for (var i of target.storage.bojimrfz.players) {
 							if (i.countCards("h") == 0) continue;

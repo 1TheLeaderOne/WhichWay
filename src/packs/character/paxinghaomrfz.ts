@@ -23,7 +23,8 @@ skill({
 			trigger:{player:["phaseJudgeBefore","phaseDrawBegin2"]},
 			forced:true,
 			async content(event,trigger,player){
-				if(trigger.name==='name') trigger.cancel();
+				//phaseJudgeBefore 触发时 trigger 就是 phaseJudge 阶段事件，写成 'name' 永不匹配，判定阶段跳不掉
+				if(trigger.name==='phaseJudge') trigger.cancel();
 				else trigger.num+=2;
 			},
 			ai: {

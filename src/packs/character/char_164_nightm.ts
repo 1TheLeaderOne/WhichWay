@@ -8,6 +8,41 @@ character("char_164_nightm", { pack: "epicSJZX",
 			skills: ["biaolimrfz","ymkongwomrfz"],
 		});
 
+//lib.card 全局常驻，换局不重建；而 set 子技能同时挂 enterGame 与首回合 phaseBefore，
+//一局内就会跑两次以上 ⇒ 原写法会把上一层包装记成「原始实现」并不断叠加。
+//只安装一次，包装体内部按 storage 动态判断，装一次即可覆盖所有角色。
+let taoPatched = false;
+
+function patchTaoCard() {
+	if (taoPatched) return;
+	taoPatched = true;
+	const enable = lib.card.tao.enable;
+	const selectTarget = lib.card.tao.selectTarget;
+	const filterTarget = lib.card.tao.filterTarget;
+
+	lib.card.tao.enable = function (card, player) {
+		if (player.storage.biaolimrfz && player.storage.biaolimrfz == "red" && player.isPhaseUsing()) {
+			if (card.storage.biaolimrfz) return true;
+			return player.hp < player.maxHp;
+		}
+		return enable(card, player);
+	};
+	lib.card.tao.selectTarget = function () {
+		var player = _status.event.player;
+		if (player.storage.biaolimrfz && player.storage.biaolimrfz == "red" && player.isPhaseUsing()) {
+			return [1, 1];
+		}
+		return selectTarget;
+	};
+	lib.card.tao.filterTarget = function (card, player, target) {
+		if (player.storage.biaolimrfz && player.storage.biaolimrfz == "red" && player.isPhaseUsing()) {
+			if (card.storage.biaolimrfz) return target.hp < target.maxHp;
+			return target.hp < target.maxHp && target == player;
+		}
+		return filterTarget(card, player, target);
+	};
+}
+
 skill({
 	"biaolimrfz": {
 			mod: {
@@ -52,30 +87,7 @@ skill({
 						return event.name != "phase" || game.phaseNumber == 0;
 					},
 					async content(event, trigger, player) {
-						var enable = lib.card.tao.enable;
-						lib.card.tao.enable = function (card, player) {
-							if (player.storage.biaolimrfz && player.storage.biaolimrfz == "red" && player.isPhaseUsing()) {
-								if (card.storage.biaolimrfz) return true;
-								return player.hp < player.maxHp;
-							}
-							return enable(card, player);
-						};
-						var selectTarget = lib.card.tao.selectTarget;
-						lib.card.tao.selectTarget = function () {
-							var player = _status.event.player;
-							if (player.storage.biaolimrfz && player.storage.biaolimrfz == "red" && player.isPhaseUsing()) {
-								return [1, 1]; //QQQ
-							}
-							return selectTarget;
-						};
-						var filterTarget = lib.card.tao.filterTarget;
-						lib.card.tao.filterTarget = function (card, player, target) {
-							if (player.storage.biaolimrfz && player.storage.biaolimrfz == "red" && player.isPhaseUsing()) {
-								if (card.storage.biaolimrfz) return target.hp < target.maxHp;
-								return target.hp < target.maxHp && target == player;
-							}
-							return filterTarget(card, player, target);
-						};
+						patchTaoCard();
 					},
 				},
 				nocount: {

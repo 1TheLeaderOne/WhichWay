@@ -543,6 +543,8 @@ class WhichWayUtil {
 		url = compilePath ? window.whichWay.file.compilePath(url) : url;
 
 		const audio = new Audio(url);
+		//与本体 game.playAudio 一致：游戏音量（volumn_audio）取值 0~8
+		audio.volume = lib.config.volumn_audio / 8;
 
 		const cleanup = () => {
 			audio.remove();

@@ -148,7 +148,7 @@ const resigter = function (name = "char_4219_yukari") {
 						target.adjustHandCardTo(max);
 					}
 				} else if (result.opinion === "black") {
-					const min = Math.max(...result.targets.map(i => i.hp));
+					const min = Math.min(...result.targets.map(i => i.hp));
 					for (let target of result.targets) {
 						if (target.hp === min) continue;
 						target.changeHp(min - target.hp);

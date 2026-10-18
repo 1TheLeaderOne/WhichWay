@@ -182,7 +182,7 @@ skill({
 					return false;
 				}
 				//@ts-ignore
-				return game.filterPlayer(char => player.canUse(event.card, char) && !event.targets.includes(char)) && (get.name(event.card) === "sha" || get.type(event.card) === "trick");
+				return game.hasPlayer(char => player.canUse(event.card, char) && !event.targets.includes(char)) && (get.name(event.card) === "sha" || get.type(event.card) === "trick");
 			},
 			async cost(event, trigger, player) {
 				event.result = await player
@@ -419,6 +419,8 @@ skill({
 							if (event.control) event.control.close();
 							//@ts-ignore
 							event.sort = Object.values(player.storage.tanxianmrfz).sort((a, b) => b - a);
+							//不返回的话上面的 await next 拿到 undefined，下面的写回 storage 整段被 if (!result) return 跳过
+							return event.sort;
 						}
 					},
 				},

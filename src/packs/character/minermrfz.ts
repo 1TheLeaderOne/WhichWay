@@ -26,7 +26,7 @@ skill({
 					//@ts-ignore
 					let gains = ["xinjuejing", "weijing"].map(i => `${i}_${get.randomNumberSJZX()}`);
 					// @ts-ignore
-					game.broadcastAll(skills => {
+					game.broadcastAll(async (current, skills) => {
 						//@ts-ignore
 						skills.forEach(skill => {
 							let original = skill.split("_")[0];
@@ -104,9 +104,10 @@ skill({
 							}
 						});
 						//@ts-ignore
-					}, gains);
-
-					await player.addSkills(gains);
+						//技能名是 Math.random 出来的，各端各算各的：客户端上 broadcastAll 是空操作，
+						//addSkills 留在回调外会用本机那套名字加技能，而 lib.skill 里只有主机广播过来的键。
+						await current.addSkills(skills);
+					}, player, gains);
 
 					await player.loseMaxHp();
 					player.recoverTo(1);

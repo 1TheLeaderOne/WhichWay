@@ -86,10 +86,12 @@ export const weinaData = {
 				}
 			}
 
-			let names = Object.keys({ ...this.name });
-			for (let name of names) {
-				if ((!name) in this.translation) names.remove(name);
-			}
+			//原来写的是 if ((!name) in this.translation)：(!name) 是布尔值，true/false 不可能是翻译表的键，
+			//所以条件恒假，一个时机都没被剔除，返回的其实是整个 lib.hookmap（含大量没有中文名的内部时机）。
+			//而且边遍历边 names.remove() 会让被前移的那一项直接跳过。
+			//判据用 newTranslation：上面刚把裸时机名展开成 xxxBegin/xxxAfter 并删掉裸名，
+			//只有落在这张表里的时机才和返回的 translation 对得上，也就才有名字可显示。
+			const names = Object.keys(this.name).filter(name => name in newTranslation);
 
 			return {
 				triggers: names,

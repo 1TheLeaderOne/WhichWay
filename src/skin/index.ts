@@ -23,6 +23,9 @@ class WhichWaySkin {
 	 * 皮肤组件初始化
 	 */
 	async init() {
+		//这里是模块顶层 await（文件末尾 whichWaySkin.init()）的一环：皮肤数据/位置档案只要抛一次
+		//（没有 fs 后端、首帧写缓存失败等），整个 init() 就 reject，后面的 onInit/onConfig/onArenaReady
+		//注册全都不会执行 ⇒ 配音、模组、干员等一起跟着失效。皮肤读不到不该有这种连带面积。
 		await whichWayUtil
 			.measureExecutionTime(async () => {
 				//立绘位置设定要先于任何一次绘制就位，否则首帧会按默认值画一遍再跳一次
@@ -32,6 +35,9 @@ class WhichWaySkin {
 			})
 			.then(({ duration }) => {
 				if (whichWayUtil.isDeveloperMode()) console.log(`[whichWaySkin] init skin time ${duration}ms`);
+			})
+			.catch(error => {
+				console.error("[whichWaySkin] 皮肤数据初始化失败，已跳过皮肤层，其余功能继续加载", error);
 			});
 
 		// onArenaReady({
@@ -111,7 +117,10 @@ class WhichWaySkin {
 						},
 					});
 				} else if (mode === "piqie") {
-					let piqieData = { ...lib.config.sjzxDycAssets };
+					//{ ...lib.config.sjzxDycAssets } 只是浅拷贝，下面那句 skin.action = skin.action[0]
+					//写在嵌套的 { 皮肤: { action } } 上 ⇒ 直接改到了 lib.config 里那份存盘的原始数据，
+					//数组形态被永久削成字符串。这里改成深拷贝，归一化只作用于本次要广播出去的副本。
+					let piqieData = structuredClone(lib.config.sjzxDycAssets ?? {});
 					for (let charName in piqieData) {
 						let char = piqieData[charName];
 						for (let skinName in char) {
@@ -173,11 +182,20 @@ class WhichWaySkin {
 						}
 						window.whichWaySave.updatingSkinData = true;
 						whichWayToast.showToast("[驶舰之向] 正在更新皮肤数据...", true, "topLeft", "configTips_updateSkinData");
-						await whichWaySkin.autoUpdateSkinData(true).then(() => {
+						//原来只在 .then 里复位：autoUpdateSkinData 一旦 reject（扫描/写缓存失败）
+						//updatingSkinData 就永久停在 true，这个按钮之后每次都只弹「请勿重复操作」。
+						try {
+							await whichWaySkin.autoUpdateSkinData(true);
+						} catch (error) {
+							//不让异常从 onclick 里逃出去（否则变成 unhandled rejection），也不要在失败后报「更新完成」
+							console.error("[whichWaySkin] 皮肤数据更新失败", error);
+							whichWayToast.showToast("[驶舰之向] 皮肤数据更新失败，详见控制台", 3000, "topLeft", "configTips_updateSkinData");
+							return;
+						} finally {
 							window.whichWaySave.updatingSkinData = false;
 							whichWayToast.removeToastById("configTips_updateSkinData_updatingSkinData");
-							whichWayToast.showToast("[驶舰之向] 皮肤数据更新完成!", 3000, "topLeft", "configTips_updateSkinData");
-						});
+						}
+						whichWayToast.showToast("[驶舰之向] 皮肤数据更新完成!", 3000, "topLeft", "configTips_updateSkinData");
 					},
 				},
 			},
@@ -260,7 +278,7 @@ class WhichWaySkin {
 			};
 			if (folder.files.length > 0) {
 				for (const file of folder.files) {
-					this.skinData[folder.name].skins[file.name.replace(".jpg", "").replace(".png", "")] = {
+					this.skinData[folder.name].skins[whichWayFile.removeExt(file.name)] = {
 						name: file.name,
 						path: file.path,
 					};

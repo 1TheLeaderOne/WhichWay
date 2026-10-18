@@ -13,12 +13,16 @@ export class GetExt extends Get {
 		else if(card === undefined) return 0;
 
 		let info = lib.card[name];
+		//name 可能是 undefined 之外的非法牌名（比如未收录的自定义牌），lib.card[name] 取到 undefined 时
+		//下面读 info.notarget 会直接抛 TypeError，把整段判定带崩。
+		if (!info) return 0;
 		if (info.notarget) {
 			return 0;
 		}
 		if (info.selectTarget !== undefined) {
 			if (Array.isArray(info.selectTarget)) {
-				return Math.max(info.selectTarget);
+				//Math.max 收到数组参数会先把数组转成 "1,2" 这样的字符串 ⇒ 恒返回 NaN，要展开
+				return Math.max(...info.selectTarget);
 			}
 			else if(info.selectTarget === -1 && info.toself){
 				return 1;
@@ -40,14 +44,19 @@ export class GetExt extends Get {
 		if(typeof card === "string") card = {name:card};
 		let info = get.info(card);
 
-		return !info.notarget && info.selectTarget && info.selectTarget === 1;
+		//中间那个 info.selectTarget && 是多余的，而且在 selectTarget 未定义时整个表达式会返回 undefined
+		//而不是 false，与 @return {boolean} 不符。
+		return !info.notarget && info.selectTarget === 1;
 	}
 
 	isView(card) {
 		if (Array.isArray(card)) {
+			//原来的循环只调用递归却没有 return，数组进来恒返回 undefined（假值）⇒ 「数组永远不算 view」。
+			//按本函数的判据（不是「单张且名称对得上的实牌」就算 view），数组里只要有一张命中就算命中。
 			for (var i of card) {
-				this.isView(i);
+				if (this.isView(i)) return true;
 			}
+			return false;
 		}
 		else if (card && get.is.object(card)) {
 			if (!card.cards || !card.cards[0]) return true;

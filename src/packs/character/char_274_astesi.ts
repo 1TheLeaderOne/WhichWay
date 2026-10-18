@@ -123,7 +123,8 @@ skill({
 			subSkill: {
 				minus: {
 					onremove: function (player) {
-						player.removeMark("huijuanmrfz_minus", player.countMark("huijuanmrfz_minus"), false);
+						//技能与标记名都是 huijianmrfz，写成 huijuanmrfz 会让标记永远清不掉
+						player.removeMark("huijianmrfz_minus", player.countMark("huijianmrfz_minus"), false);
 					},
 					charlotte: true,
 					mod: {

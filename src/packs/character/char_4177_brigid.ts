@@ -91,6 +91,12 @@ skill({
 						player.addTempSkill("sanyanmrfz_recovered", { global: "phaseAfter" });
 					},
 				},
+				//纯标记技能：本体没有任何效果，只用来让 hasSkill("sanyanmrfz_recovered") 判真。
+				//之前只写了引用没写定义，addSkill 在 lib.skill 里查不到就直接 return，名字根本不会挂到角色身上，
+				//于是 :36 的三言判定和 count 的「本回合已结算过回复」去重一直失效。引擎会把 subSkill 注册成 sanyanmrfz_recovered。
+				recovered: {
+					silent: true,
+				},
 			},
 			ai: {
 				threaten: 1.8,

@@ -137,10 +137,9 @@ skill({
 				trigger: {
 					player: ["loseBegin"],
 				},
-				// @ts-ignore
+				// filter 返回数组恒真（空数组也为真），要用 some 才会在没有内化牌时不触发
 				filter(event, player) {
-					// @ts-ignore
-					return event.cards.filter(card => card.neihuamrfz);
+					return event.cards.some(card => card.neihuamrfz);
 				},
 				// @ts-ignore
 				async content(event, trigger, player) {
@@ -343,7 +342,9 @@ skill({
 			let findWord;
 
 			// 性能挑战（划掉）
-			while (true) {
+			//技能库不够大时可能永远凑不满 15 个组合，原来的 while(true) 会重抽到死把整局卡住，这里给 200 次兜底
+			let tries = 0;
+			while (++tries <= 200) {
 				let skillsList = getRandomKeys(lib.skill.bianyimrfz.GetAllSkills(player), 100);
 				/** @type {string[]} */
 				let CNSkills: string[] = [];
@@ -378,7 +379,8 @@ skill({
 				// 不给调了喵
 				let per = 75;
 				if (per == 0) return [];
-				let filterEnd = getRandomElements(list, Math.floor(list.length * per));
+				//per 是百分数，直接乘会算出 75 倍长度，getRandomElements 取超量时会补进一堆 undefined，等于没抽样
+				let filterEnd = getRandomElements(list, Math.floor(list.length * (per / 100)));
 				return filterEnd;
 			};
 

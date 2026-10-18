@@ -85,7 +85,8 @@ skill({
 				});
 				for (var i of loseCards) {
 					if (!i.cards) continue;
-					banCards.push(i.cards);
+					//i.cards 是数组，直接 push 会让 banCards 里全是数组，下面的 includes(card) 恒为 false
+					banCards.push(...i.cards);
 				}
 				while (cards.length < num) {
 					var card = get.discardPile(card => {

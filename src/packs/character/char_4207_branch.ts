@@ -33,7 +33,8 @@ skill({
 			},
 			async content(event, trigger, player) {
 				player.addTempSkill("shijingmrfz", { global: "roundStart" });
-				if (player.storage.shijingmrfz) player.storage.shijingmrfz = [];
+				//漏了 ! ：原写法只要 storage 存在（哪怕是空数组）就把它清空，已记录的牌类型留不下来
+				if (!player.storage.shijingmrfz) player.storage.shijingmrfz = [];
 				player.storage.shijingmrfz.add(get.type2(trigger.card));
 			},
 		},
@@ -75,7 +76,8 @@ skill({
 				if (Array.isArray(targets) && targets.length > 0) {
 					let target = targets[0];
 					target.addTempSkill("shijingmrfz", { global: "roundStart" });
-					if (target.storage.shijingmrfz) target.storage.shijingmrfz = [];
+					//同上：只在没有存档时初始化，否则会把玩家交出去的记录清空
+					if (!target.storage.shijingmrfz) target.storage.shijingmrfz = [];
 					target.storage.shijingmrfz.addArray(player.storage.shijingmrfz);
 				}
 			},
@@ -189,10 +191,12 @@ skill({
 					.set("filterCard", () => true)
 					.set("selectCard", num)
 					.set("ai", card => {
-						let event = get.event;
+						//get.event 漏括号拿到的是函数本身，att/name 全是 undefined，AI 既不拒绝也不优先救濒死角色
+						const evt = get.event();
 						//@ts-ignore
-						if (event.att < 0) return -114514;
-						return event.name === "dying" ? 10 - get.value(card) : 6 - get.value(card);
+						if (evt.att < 0) return -114514;
+						//@ts-ignore
+						return evt.getParent("dying", true) ? 10 - get.value(card) : 6 - get.value(card);
 					})
 					.set("att", get.attitude(target, player))
 					.forResult();

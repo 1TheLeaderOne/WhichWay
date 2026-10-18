@@ -52,6 +52,7 @@ translate({
 	"shuangwangmrfz_ab": "萨卡兹双王",
 	"char_1030_noirc2_ab": "太刀侠黑角",
 	"visible_shenshemrfz": "明置",
+	"visible_ksl_luli": "明置",
 	"shixingmrfz_trick_backup": "逍遥",
 	"beicaimrfzx": "<font color='#8b008b'>能吃？</font>",
 	"pengcaimrfzx": "<font color='red'>吃饱了！</font>",

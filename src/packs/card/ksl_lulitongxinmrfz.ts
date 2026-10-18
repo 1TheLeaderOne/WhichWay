@@ -46,7 +46,7 @@ cardHook("ksl_lulitongxinmrfz", {
 					forced: true,
 					prompt: `请横置至多${game.countGroup()}名角色`,
 				})
-				.set("filterTarget", (card, target, player) => {
+				.set("filterTarget", (card, player, target) => {
 					return !target.isLinked();
 				})
 				.set("ai", target => get.attitude2(target) > 0 && target.countCards("h") < 4)

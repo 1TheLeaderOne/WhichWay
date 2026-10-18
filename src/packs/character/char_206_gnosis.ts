@@ -114,6 +114,20 @@ skill({
 			},
 			forced: true,
 		},
+	//旧「思涌」的标记技能：上面 content 里的 addTempSkill/markSkill 都只写了引用没写定义，
+	//addSkill 在 lib.skill 里查不到就直接 return，markSkill 又因取不到 intro 而返回 ⇒ 花色标记从来不显示。
+	//按包里既有标记技能（如 zhumengmrfz2）的写法补上 intro；临时技能到期摘除时顺带清掉记录。
+	"siyongmrfz2": {
+		silent: true,
+		intro: {
+			content(storage) {
+				return get.translation(storage) + "已用花色";
+			},
+		},
+		onremove(player) {
+			delete player.storage.siyongmrfz2;
+		},
+	},
 });
 
 characterTitle("char_206_gnosis",whichWayUtil.colorize("#gray#俯瞰风雪#"))

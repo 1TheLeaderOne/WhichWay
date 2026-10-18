@@ -218,9 +218,10 @@ class WhichWayPackHooks {
 		const hooks = this._hooks[hookName];
 		if (!hooks?.length) return;
 
-		const sorted = [...hooks].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
-
-		for (const hook of sorted) {
+		//这里原本按 hook.priority 排序，但 _validateAndRegister 往队列里只 push { key, obj }，
+		//注册 API 也没有任何地方能传 priority ⇒ 每一项都是 undefined，排序恒为 0-0 的空操作。
+		//既然排序不生效，就别留这个「看起来支持优先级」的假象：执行顺序就是注册顺序。
+		for (const hook of hooks) {
 			const { key, obj } = hook;
 
 			// ===== 防重复校验：禁止覆盖已有属性 =====
@@ -238,7 +239,10 @@ class WhichWayPackHooks {
 				// 如果该 hook 注册了 execute 函数，则先执行预处理
 				if (this._execute[hookName] && this._execute[hookName].length>0) {
 					for(const fn of this._execute[hookName]){
-						finalValue = fn(obj, key, hookName) || finalValue;
+						//两处都会丢结果：传 obj 会让每个 execute 都从原始值起步（后一个覆盖前一个，链式预处理失效）；
+						//而 `|| finalValue` 又把 execute 合法返回的 0 / "" / false 当成「没返回」，退回原值。
+						const next = fn(finalValue, key, hookName);
+						if (next !== undefined) finalValue = next;
 					}
 				}
 

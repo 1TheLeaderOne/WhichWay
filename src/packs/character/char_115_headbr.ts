@@ -89,6 +89,8 @@ skill({
 				// Steps 0-1 Loop: Player prepares to use a card (draw until usable)
 				while (true) {
 					const cards = player.getCards("h");
+					//牌堆与弃牌堆都空时 draw 再也拿不到牌，原来的 while(true) 会永远卡死这一局
+					if (!ui.cardPile.childNodes.length && !ui.discardPile.childNodes.length) return;
 					if (player.countCards("h") < 1) {
 						await player.draw();
 						continue;
@@ -137,6 +139,7 @@ skill({
 				// Steps 5-6 Loop: Target prepares to use a card (draw until usable)
 				while (true) {
 					const cards = event.target.getCards("h");
+					if (!ui.cardPile.childNodes.length && !ui.discardPile.childNodes.length) return;
 					if (event.target.countCards("h") < 1) {
 						await event.target.draw();
 						continue;

@@ -184,6 +184,12 @@ class WhichWayPackManager {
 				}
 			}
 
+			if (!lib.characterPack[data.pack]) {
+				//声明了 CHARACTER_PACKS 之外的包名（多半是写错）时这里取到 undefined，原来的 [name] ??= 会抛
+				//TypeError 并打断整批 character 注册。兜底建表并显式报警，别让干员静默消失。
+				console.warn(`[WhichWay] 武将 ${name} 声明了未注册的武将包「${data.pack}」，已按新包建表`);
+				lib.characterPack[data.pack] = {};
+			}
 			lib.characterPack[data.pack][name] ??= char;
 
 			//设计者：优先武将包声明的（顶层 designer 或 whichWay.designer），都没有才查设计者记录
@@ -212,6 +218,9 @@ class WhichWayPackManager {
 			} else {
 				char.group = "sjzx_group";
 				if (!lib.translate["sjzx_group"]) lib.translate["sjzx_group"] = "泰拉";
+				//分立势力分支会把势力注册进 lib.group，统一势力分支却只补了翻译：sjzx_group 从来不在 lib.group 里，
+				//game.countGroup() 这类按 lib.group 枚举势力的逻辑就数不到干员（按势力判定的技能会把它当未知势力）。
+				if (!lib.group.includes("sjzx_group")) lib.group.push("sjzx_group");
 			}
 
 			//————设置Arknight配置————//
@@ -273,7 +282,15 @@ class WhichWayPackManager {
 
 		const mrfzcard = { name: "mrfzcard", connect: true, card, skill, translate, list: [] };
 		lib.translate["mrfzcard_card_config"] = "驶舰之向";
-		if (!lib.config.cards.includes("mrfzcard")) lib.config.cards.push("mrfzcard");
+		//与上面武将包子包同样的坑：每次启动都无条件把 mrfzcard 塞回 lib.config.cards，
+		//玩家在「卡牌包」菜单里关掉它，重启就被强行打开。改成只在首次运行时默认加入并持久化，之后尊重玩家的开关。
+		if (!lib.config.extension_WhichWay_cardPackDefaulted) {
+			if (!lib.config.cards.includes("mrfzcard")) {
+				lib.config.cards.push("mrfzcard");
+				game.saveConfig("cards", lib.config.cards);
+			}
+			game.saveConfig("extension_WhichWay_cardPackDefaulted", true);
+		}
 		await game.import("card", () => mrfzcard);
 		const tAssemble = performance.now() - t1;
 

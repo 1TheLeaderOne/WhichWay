@@ -390,6 +390,8 @@ skill({
 					})
 				) {
 					const audio = new Audio("extension/WhichWay/audio/CN/caidankelisitengmrfz.mp3");
+					//跟随本体「游戏音量」（volumn_audio 取值 0~8）
+					audio.volume = lib.config.volumn_audio / 8;
 					audio.play();
 				}
 			},

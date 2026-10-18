@@ -625,7 +625,10 @@ class SpineWorker {
 		let playerid = char.playerid;
 		let cache = spineWorker.spineCache;
 
-		if (cache.get(dynamicName)?.[dynamicName]?.[playerid]?.[action]?.timer) {
+		//缓存结构是 spineCache.get(dynamicName)[playerid][action]（见本文件 dycSkin[playerid]["from"] 与
+		//dycSkin[playerid][action] = actionPlayer），这里中间多写了一层 [dynamicName] ⇒ 取到 undefined，
+		// clearTimeout 永远不执行，同一动作连播两次就会叠两个计时器，先那个把后一次的画面提前收掉。
+		if (cache.get(dynamicName)?.[playerid]?.[action]?.timer) {
 			clearTimeout(cache.get(dynamicName)[playerid][action].timer);
 		}
 
@@ -635,6 +638,9 @@ class SpineWorker {
 		if (!actionConfig) {
 			console.warn(`${action}没有对应的动作配置！`);
 			whichWayToast.showToast(`${action}没有对应的动作配置！`);
+			//下面建 SpinePlayer 时要读 actionConfig.action/alpha/speed，没有配置就只能到此为止；
+			//原来只 warn 不返回，会在这里抛 TypeError，还把立绘层 display 置了 none 却没人恢复。
+			return;
 		}
 
 		player.dom.style.display = "none";

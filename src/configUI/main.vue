@@ -43,6 +43,8 @@ let imgTitleSrc = "./extension/WhichWay/image/ui/painter.png";
 //实现不同面板的切换
 const panels = [
 	{ name: "更新公告", component: UpdateCurrent, autoLoad: false },
+	//默认界面,祈求能有更多稿件
+	{ name: "征稿在前", component: SolicitForth , autoLoad: true},
 	{ name: "更新日志", component: UpdateLog },
 	{ name: "扩展介绍", component: ExtIntro },
 	{ name: "背景设置", component: BackgroundSet },
@@ -50,8 +52,6 @@ const panels = [
 	{ name: "模组切换", component: ModuleSetting },
 	//皮肤位置调整是开发者工具：普通玩家没有调 pos.json 的需求，误拖还会改坏别人的构图设定
 	...(whichWayUtil.isDeveloperMode() ? [{ name: "皮肤位置调整", component: PortraitPosSetting }] : []),
-	//默认界面,祈求能有更多稿件
-	{ name: "征稿在前", component: SolicitForth , autoLoad: true},
 ];
 
 //当前面板
@@ -92,18 +92,14 @@ const handleContentLoaded = () => {
 
 // 初始化
 onMounted(async () => {
-	// 默认选中第一个面板
-	if (panels[0]) {
-		currentPanel.value = panels[0].name;
+	// 默认显示标记为 autoLoad 的面板；若没有任何面板标记，则显示第一个
+	const defaultPanel = panels.find(p => p.autoLoad) || panels[0];
+	if (!defaultPanel) return;
 
-		// 自动加载标记的面板
-		const autoLoadPanel = panels.find(p => p.autoLoad);
-		if (autoLoadPanel) {
-			await nextTick();
-			if (autoLoadPanel.onLoad) {
-				autoLoadPanel.onLoad();
-			}
-		}
+	currentPanel.value = defaultPanel.name;
+	if (defaultPanel.onLoad) {
+		await nextTick();
+		defaultPanel.onLoad();
 	}
 });
 

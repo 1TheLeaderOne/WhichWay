@@ -105,16 +105,21 @@ class DecadeExtCompatible {
 		return item;
 
 		function disableAnimation() {
+			//prototype 上的补丁会一直留在十周年 UI 的类上：配置从 partly 直接改成 disable 时这里会再跑一遍，
+			//把上一层包装当成「原始实现」记进 copyPlaySpine，切回「启用」只能还原成包装体，动画永久坏掉。
+			//已经装过就不再重复安装。
+			//@ts-ignore
+			if (decadeUI.AnimationPlayer.prototype.copyPlaySpine) return;
 			//@ts-ignore
 			const originalPlaySpine = decadeUI.AnimationPlayer.prototype.playSpine;
 			//@ts-ignore
-			decadeUI.AnimationPlayer.prototype.copyPlaySpine = decadeUI.animation.playSpine;
+			decadeUI.AnimationPlayer.prototype.copyPlaySpine = originalPlaySpine;
 			//@ts-ignore
 			decadeUI.AnimationPlayer.prototype.playSpine = function (sprite, position) {
 				const result = originalPlaySpine.call(this, sprite, position);
 				if (whichWayUtil.isDeveloperMode() && !decadeExtCompatible.enableDecadeUISpineEffect.includes(result?.name)) console.log(result?.name);
 				//@ts-ignore
-				if (window.decadeUI && window.decadeUI.animation && whichWayUtil.config === "partly" && !decadeExtCompatible.enableDecadeUISpineEffect.includes(result?.name)) {
+				if (window.decadeUI && window.decadeUI.animation && whichWayUtil.config("banDecadeUIAnimation") === "partly" && !decadeExtCompatible.enableDecadeUISpineEffect.includes(result?.name)) {
 					//@ts-ignore
 					window.decadeUI.animation.stopSpineAll();
 					//@ts-ignore

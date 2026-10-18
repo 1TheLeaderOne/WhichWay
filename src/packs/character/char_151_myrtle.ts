@@ -339,7 +339,8 @@ skill({
 			if (trigger.cards.length >= 3) {
 				while (true) {
 					const result = await player.draw().forResult();
-					if (!result.cards) break;
+					//牌堆抽空时 result.cards 是空数组，!result.cards 永远不成立 ⇒ 原地死循环
+					if (!result.cards?.length) break;
 
 					if (result.cards.some(i => get.type2(i) === "basic")) {
 						if (player.countCards("h") > player.getHandcardLimit()) {

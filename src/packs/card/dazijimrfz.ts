@@ -72,7 +72,7 @@ cardSkill("dazijimrfzskill", {
 	direct: true,
 	filter: function (event, player) {
 		if (!player.hasSkill("ruibimrfz")) return false;
-		if (event.dazijimrfzskill_buff || !event.targets.length || player.hasSkill("dazijimrfz_buff")) return false;
+		if (event.dazijimrfzskill_buff || !event.targets.length || player.hasSkill("dazijimrfzskill_buff")) return false;
 		return event.card.name == "sha";
 	},
 	content: async function (event,trigger,player) {

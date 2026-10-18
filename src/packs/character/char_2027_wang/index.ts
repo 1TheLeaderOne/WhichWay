@@ -201,7 +201,7 @@ const years: Record<string, ExtendedSkill> = {
 				},
 				async content(event, trigger, player) {
 					trigger.num *= 2 ** player.countMark("wangmrfz_shumrfz");
-					game.log(player, `此次摸牌数翻${2 ^ player.countMark("wangmrfz_shumrfz")}倍`);
+					game.log(player, `此次摸牌数翻${2 ** player.countMark("wangmrfz_shumrfz")}倍`);
 					player.removeMark("wangmrfz_shumrfz", 1145141919810, false);
 					player.unmarkSkill("wangmrfz_shumrfz");
 				},

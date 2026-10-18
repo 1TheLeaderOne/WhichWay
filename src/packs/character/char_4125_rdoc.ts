@@ -3,6 +3,51 @@ import { character, skill, translate, characterTitle, characterIntro } from "../
 
 character("char_4125_rdoc", { pack: "epicSJZX", sex: "male", group: "othermrfz", hp: 4, skills: ["yizhemrfz", "zhulimrfz"] });
 
+//lib.card 是全局常驻对象，换局不会重建；而 init 每个获得【一折】的角色都会跑一次。
+//原写法每次都把上一层包装当成「原始实现」记下来 ⇒ 跨对局无限叠加包装。
+//这里只安装一次，包装体内部按 hasSkill 动态判断，所以装一次就够所有角色用。
+let taoPatched = false;
+
+function patchTaoCard() {
+	if (taoPatched) return;
+	taoPatched = true;
+	const enable = lib.card.tao.enable;
+	const selectTarget = lib.card.tao.selectTarget;
+	const filterTarget = lib.card.tao.filterTarget;
+
+	lib.card.tao.enable = function (card, player) {
+		if (player.hasSkill("yizhemrfz")) {
+			return true;
+		}
+		return enable(card, player);
+	};
+	lib.card.tao.selectTarget = function () {
+		let player = _status.event.player;
+		if (player.hasSkill("yizhemrfz")) {
+			return [1, 1];
+		}
+		return selectTarget;
+	};
+	lib.card.tao.filterTarget = function (card, player, target) {
+		if (player.hasSkill("yizhemrfz")) {
+			return target.hp < target.maxHp && (player.inRange(target) || player == target);
+		}
+		return filterTarget(card, player, target);
+	};
+	lib.card.tao.content = async function (event, trigger, player) {
+		const { target } = event;
+		if (player.hasSkill("yizhemrfz")) {
+			let num = target.getDamagedHp();
+			target.recover(5);
+			if (5 - num > 0) {
+				target.addSkill("yizhemrfz_eff");
+				target.storage.yizhemrfz_eff = 5 - num;
+				target.changeHujia(5 - num);
+			}
+		} else await target.recover();
+	};
+}
+
 skill({
 	yizhemrfz: {
 		mod: {
@@ -16,40 +61,7 @@ skill({
 			},
 		},
 		init() {
-			let enable = lib.card.tao.enable;
-			lib.card.tao.enable = function (card, player) {
-				if (player.hasSkill("yizhemrfz")) {
-					return true;
-				}
-				return enable(card, player);
-			};
-			let selectTarget = lib.card.tao.selectTarget;
-			lib.card.tao.selectTarget = function () {
-				let player = _status.event.player;
-				if (player.hasSkill("yizhemrfz")) {
-					return [1, 1]; //QQQ
-				}
-				return selectTarget;
-			};
-			let filterTarget = lib.card.tao.filterTarget;
-			lib.card.tao.filterTarget = function (card, player, target) {
-				if (player.hasSkill("yizhemrfz")) {
-					return target.hp < target.maxHp && (player.inRange(target) || player == target);
-				}
-				return filterTarget(card, player, target);
-			};
-			lib.card.tao.content = async function (event, trigger, player) {
-				const { target } = event;
-				if (player.hasSkill("yizhemrfz")) {
-					let num = target.getDamagedHp();
-					target.recover(5);
-					if (5 - num > 0) {
-						target.addSkill("yizhemrfz_eff");
-						target.storage.yizhemrfz_eff = 5 - num;
-						target.changeHujia(5 - num);
-					}
-				} else target.recover();
-			};
+			patchTaoCard();
 		},
 		audio: 2,
 		trigger: {

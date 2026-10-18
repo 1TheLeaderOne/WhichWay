@@ -31,11 +31,12 @@ skill({
 				function aiChoose(char) {
 					let cards = char.getCards("h");
 					if (cards.length < 2) return cards;
-					let sortNumber = cards.sort((a, b) => {
+					//两次 sort 都作用在同一个 cards 上，后者会把前者排好的顺序覆盖掉，各自取副本
+					let sortNumber = cards.slice().sort((a, b) => {
 						//@ts-ignore
 						return get.number(b, char) - get.number(a, char);
 					});
-					let sortValue = cards.sort((a, b) => {
+					let sortValue = cards.slice().sort((a, b) => {
 						return get.value(b, char) - get.value(a, char);
 					});
 					let max = sortNumber[0];

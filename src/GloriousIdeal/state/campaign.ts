@@ -245,7 +245,10 @@ export class CampaignController {
 	}
 
 	unityGrowMod(): number {
-		const tier = UNITY_TIERS.find(t => this.data.unity >= t.min && this.data.unity <= t.max);
+		// 团结度可为小数（如 starvation -0.2），而 UNITY_TIERS 是按整数区间划档的，
+		// 档与档之间存在空隙（50.5、100.5 等）；取整后再落档，保证任何值都命中一档。
+		const unity = Math.floor(this.data.unity);
+		const tier = UNITY_TIERS.find(t => unity >= t.min && unity <= t.max);
 		return tier ? tier.growMod : 0;
 	}
 
@@ -452,7 +455,7 @@ export class CampaignController {
 			layout,
 			cur: layout.entry,
 			party: [...party],
-			hp,
+			hp: { ...hp },
 			maxHp: { ...(maxHp ?? hp) },
 			actions: 0,
 			feedReadyAt: 0,
@@ -814,7 +817,9 @@ export class CampaignController {
 	/** 进入商店时确保库存对应当天：跨天则重 roll 库存并按商人等级重置当日刷新次数 */
 	ensureShopToday() {
 		const s = this.data.shop;
-		if (s.day === this.data.day && s.stock.length) return;
+		// 只在跨天时重 roll：若把「当天库存已买空」也当作需要补货，则重开商店会免费补满货架，
+		// 顺带把 s.refreshLeft 重置回当日额度（刷新次数等于无限）。
+		if (s.day === this.data.day) return;
 		s.day = this.data.day;
 		s.stock = rollMerchantStock();
 		s.refreshLeft = merchantDailyRefresh(this.merchantLevel());

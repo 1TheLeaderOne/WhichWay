@@ -552,6 +552,8 @@ skill({
 					ai(button) {
 						const code = get.event().code as { cards: Card[] };
 						const card = button.link;
+						//没有匹配到计策时 code 兜底成了空数组，取 code.cards 会直接报错
+						if (!code?.cards?.length) return 6 - get.value(card);
 						if (get.suit(card) === get.suit(code.cards[ui.selected.buttons.length])) return 1145141919810 - get.value(card);
 						return 6 - get.value(card);
 					},

@@ -251,6 +251,18 @@ skill({
 				}
 			},
 		},
+	//下面两个是纯状态标记，本体里没有任何效果：
+	//雪变用它记住「本阶段被指定过的角色」，兴邦用它挂 storage 记录本阶段用过的牌型。
+	//之前只写了引用没写定义，addSkill 会因为 lib.skill 里查不到而报错，hasSkill 判定也就一直为假。
+	"xuebianmrfz2": {
+		silent: true,
+	},
+	"xinbangmrfz2": {
+		silent: true,
+		onremove(player) {
+			delete player.storage.xinbangmrfz2;
+		},
+	},
 });
 
 translate({

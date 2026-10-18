@@ -136,7 +136,8 @@ skill({
 		audio: ["部署1", "部署2"],
 		trigger: { player: "damageEnd" },
 		filter: function (event, player) {
-			return event.source != player && event.source.isAlive() && event.source != undefined;
+			//无来源伤害时 source 为 undefined，必须先判空再调 isAlive
+			return event.source != undefined && event.source != player && event.source.isAlive();
 		},
 		check(event, player) {
 			return get.attitude(player, event.source) < 0;

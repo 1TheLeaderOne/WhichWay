@@ -66,8 +66,9 @@ skill({
 					cards: cards,
 					forced: true,
 					ai(button) {
-						const { player, targetx, answer } = event;
-						if (player.hasSkillTag("viewHandcard", null, targetx, true) && answer !== undefined) {
+						//targetx / answer 是 set 在 chooseCardButton 事件上的，从 content 的 event 里解构只会拿到 undefined，
+						//直接用闭包里的 source / answer 才对（这里的 player 就是 content 的角色）
+						if (player.hasSkillTag("viewHandcard", null, source, true) && answer !== undefined) {
 							return button.link === answer ? 1 : 0;
 						}
 						return get.value(button.link, player);

@@ -84,7 +84,7 @@ skill({
 				},
 				use: {
 					hiddenCard: function (player, name) {
-						if (name == "wuxie") return player.getStorage("huijianmrfz").includes(name);
+						if (name == "wuxie") return player.getStorage("huijuanmrfz").includes(name);
 					},
 					enable: ["chooseToRespond", "chooseToUse"],
 					filter: function (event, player) {

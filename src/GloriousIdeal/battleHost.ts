@@ -197,6 +197,9 @@ export function startBattle(init: BattleInit): Promise<BattleResult> {
 			if (raf) cancelAnimationFrame(raf);
 			window.removeEventListener("message", onMessage);
 			if (watchdog !== undefined) clearTimeout(watchdog);
+			// directstart 是本 realm 共享的键：子实例正常 boot 会自行清掉，但看门狗超时/建 iframe 失败两条兜底路径
+			// 子实例并未启动，标志会残留并让父实例下次启动跳过选模式直接开局。
+			localStorage.removeItem(lib.configprefix + "directstart");
 			removeMask();
 			try {
 				iframe.remove();

@@ -88,6 +88,12 @@ class WhichWayCharacterPack {
 		} else if (get.is.object(char)) {
 			const config = char.whichWay!;
 			if (config.designer && config.designer.length > 0 && !fromStorage) return Array.isArray(config.designer) ? config.designer : [config.designer];
+			//fromStorage 对对象入参之前完全不起作用：调用方（packs/index.ts 的「都没声明才查设计者记录」）
+			//传 true 期望读 charDes，可这里唯一的记录查询在字符串分支 ⇒ 对象进来只会一路掉到缺省设计者。
+			if (fromStorage && config.charId) {
+				const recorded = whichWayCharacterPack.designer[config.charId];
+				if (recorded?.length) return recorded;
+			}
 		}
 		return igDefault ? ["佚名"] : ["林登万"];
 	}

@@ -159,7 +159,10 @@ skill({
 					let num = 0;
 					const skill = skills[index];
 					let info = get.info(skill);
-					tmpSave[`${player.playerid}_pozemrfz`] = { name: skill, info: { ...info } };
+					const key = `${player.playerid}_pozemrfz`;
+					//这里改的是 lib.skill 上的技能定义，还原前重复发动时若把已被删过标记的定义再存成备份，
+					//回合结束还原后就永久丢掉 forced/locked 等了，所以只在没有待还原记录时存原始副本。
+					if (tmpSave[key] == null) tmpSave[key] = { name: skill, info: { ...info } };
 
 					const tags = ["forced", "locked", "zhuanhuanji", "juexingji", "limited", "dutySkill"];
 
@@ -174,9 +177,11 @@ skill({
 					if (num > 0) player.draw(num);
 
 					player.when({ player: "phaseEnd", global: "phaseEnd" }).step(async (event, trigger, player) => {
-						const save = tmpSave[`${player.playerid}_pozemrfz`];
+						const save = tmpSave[key];
 						if (save && Object.keys(save).length > 0) {
 							lib.skill[save.name] = save.info;
+							//还原完删掉，否则这条记录会一直挂在跨对局复用的 tmpSave 上
+							delete tmpSave[key];
 						}
 					});
 				}

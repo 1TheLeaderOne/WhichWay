@@ -33,25 +33,27 @@ cardHook("sjzx_zhuihuomrfz", {
 				})
 				.forResult();
 		else {
-			player
-				.damage({
-					nature: "fire",
-				})
-				.set("source", "nosource");
+			player.damage({
+				num: 1,
+				nature: "fire",
+				nosource: true,
+			});
 			player.loseToDiscardpile({
 				cards: event.cards,
 			});
 			event.finish();
+			//不 return 会继续走下面 result?.bool 的 else，把火焰伤害再吃一次
+			return;
 		}
 		if (result?.bool) {
 			//game.log(player,'弃置了',result.cards);
 			player.loseToDiscardpile({ cards: event.cards });
 		} else {
-			player
-				.damage({
-					nature: "fire",
-				})
-				.set("source", "nosource");
+			player.damage({
+				num: 1,
+				nature: "fire",
+				nosource: true,
+			});
 			player.loseToDiscardpile({ cards: event.cards });
 		}
 	},
