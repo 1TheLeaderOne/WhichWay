@@ -38,6 +38,10 @@
  *     GitHub 源共用一次递归 tree 清单（约 9MB，按目录裁剪后缓存 7 天），所以同时列两个 GitHub 目录也只请求一次。
  *     `raw.githubusercontent.com` 在部分网络环境不可达，可用 `--github-raw` 指向路径结构相同的镜像/代理
  *     （格式：`{前缀}/{owner}/{repo}/{ref}/{路径}`）；GitHub API 有匿名限流，可设 `GITHUB_TOKEN`/`GH_TOKEN`。
+ *     GitHub 整体（含 api.github.com 的 tree 清单与 raw 下载）连接不稳定时，可加 `--proxy http://127.0.0.1:7890`
+ *     让本脚本的全部请求走 HTTP(S) 代理；不写 `--proxy` 时沿用 HTTPS_PROXY / HTTP_PROXY 环境变量。
+ *     （Node 自带的 fetch 不读这两个变量，所以代理是在脚本里用 CONNECT 隧道实现的；只支持 http/https 代理，
+ *     socks5 请换成本地代理软件提供的 HTTP 端口。代理的账号密码可写在地址里，如 `http://user:pass@127.0.0.1:7890`。）
  *
  * 对公益服务器的负担（默认范围 = 可获取干员；具体缺口每次先看 --dry-run，别凭记忆估）：串行下载（`--jobs` 最多 3）、
  *   每张之间默认隔 400ms、单次运行的请求数 = 待下载数 + 每个 `--sources` 目录至多 1 次清单（7 天内走缓存）；
@@ -59,17 +63,23 @@
  *   node scripts/update-portraits.mjs --sources github_skin --dry-run   # 看 GitHub 备份仓库能补多少
  *   node scripts/update-portraits.mjs --sources char_arts,github_skin     # PRTS 缺的再从 GitHub 补
  *   node scripts/update-portraits.mjs --refresh-index      # 强制重取远端目录清单
+ *   node scripts/update-portraits.mjs --proxy http://127.0.0.1:7890 --sources github_skin --dry-run   # GitHub 走本地代理
  *   node scripts/update-portraits.mjs --delay 800 --max 1024 --colors 128 --keep-raw
  *
  * 参数：--scope obtainable|char|any（默认 obtainable）、--ids 逗号分隔形态id、--limit 本次下载上限（0=不限）、
  *   --sources 图片来源目录（默认 char_arts，可加 char_portrait / github_skin / github_portrait，顺序即优先级）、
  *   --delay 每次请求间隔毫秒、--jobs 并发数(1~3)、--max 长边上限、--colors 量化色数(0=真彩)、
  *   --out 立绘根目录、--cache 缓存目录（默认 scripts/cache）、--url 站点根、--timeout 单请求毫秒、--retry 重试次数、
+ *   --proxy HTTP(S) 代理地址（默认读 HTTPS_PROXY / HTTP_PROXY；全部请求都走代理，socks5 请填其 HTTP 端口）、
  *   --github-ref GitHub 分支（默认 main）、--github-raw GitHub raw 前缀（默认 https://raw.githubusercontent.com）、
  *   --max-age 清单缓存天数、--keep-raw 保留原始图、--offline 只用缓存不联网。
  */
 import fs from "node:fs";
 import path from "node:path";
+import http from "node:http";
+import https from "node:https";
+import tls from "node:tls";
+import zlib from "node:zlib";
 import { fileURLToPath } from "node:url";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
@@ -94,6 +104,9 @@ const GITHUB_API = "https://api.github.com";
 const GITHUB_RAW = String(getOpt("github-raw", "https://raw.githubusercontent.com")).replace(/\/+$/, "");
 //只给 api.github.com 的清单请求带 token；raw 下载走另一个域，绝不能把 token 发过去
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || "";
+//GitHub 直连不稳定时走代理；未显式给 --proxy 时沿用 curl 那套环境变量（update-arknight-data.bat 也是这么教的）
+const PROXY = parseProxy(getOpt("proxy", process.env.HTTPS_PROXY || process.env.https_proxy || process.env.HTTP_PROXY || process.env.http_proxy || ""));
+const PROXY_LABEL = PROXY ? `${PROXY.protocol}//${PROXY.host}` : "";
 const OUT = path.resolve(getOpt("out", path.join(ROOT, "image", "illustration")));
 const TARGET_DIR = path.join(OUT, "character");
 const SKIN_TABLE = path.resolve(getOpt("gamedata", path.join(ROOT, "json", "arknight", "skin_table.json")));
@@ -157,6 +170,28 @@ const fmt = b => (b > 1048576 ? `${(b / 1048576).toFixed(2)}MB` : `${(b / 1024).
 const readJson = file => JSON.parse(fs.readFileSync(file, "utf8"));
 
 /**
+ * 解析 --proxy / 环境变量：允许省略协议（按 http:// 补），只接受 HTTP(S) 代理。
+ * socks5 需要另做握手，这里不做，报错时直接告诉用户改填本地代理软件的 HTTP 端口。
+ */
+function parseProxy(raw) {
+	const text = String(raw ?? "").trim();
+	if (!text) return null;
+	const withScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(text) ? text : `http://${text}`;
+	let url;
+	try {
+		url = new URL(withScheme);
+	} catch {
+		console.error(`--proxy 不是合法的地址：${text}`);
+		process.exit(1);
+	}
+	if (url.protocol !== "http:" && url.protocol !== "https:") {
+		console.error(`--proxy 只支持 http:// 或 https:// 代理（收到 ${url.protocol}//）。socks5 请换成本地代理软件提供的 HTTP 端口，如 Clash 的 7890。`);
+		process.exit(1);
+	}
+	return url;
+}
+
+/**
  * 取一份远端内容（带超时与重试）。accept 决定站点给 JSON 还是给图——
  * `/api/v1/*` 若不带 `accept: application/json` 会被网关当成前端路由、200 返回 HTML。
  */
@@ -167,7 +202,9 @@ async function fetchBytes(url, accept, headers = {}) {
 		const ctrl = new AbortController();
 		const timer = setTimeout(() => ctrl.abort(), TIMEOUT);
 		try {
-			const res = await fetch(url, { signal: ctrl.signal, headers: { accept, "user-agent": UA, ...headers } });
+			const allHeaders = { accept, "user-agent": UA, ...headers };
+			if (PROXY) return await proxyGet(url, allHeaders, ctrl.signal);
+			const res = await fetch(url, { signal: ctrl.signal, headers: allHeaders });
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
 			return Buffer.from(await res.arrayBuffer());
 		} catch (e) {
@@ -178,6 +215,125 @@ async function fetchBytes(url, accept, headers = {}) {
 		}
 	}
 	throw last ?? new Error(`请求失败：${url}`);
+}
+
+/**
+ * 经代理 GET 一个地址。Node 自带的 fetch 不读 HTTPS_PROXY、也没把 undici 的 ProxyAgent 暴露出来，
+ * 所以这里自己实现：http 目标用 absolute-form 转发，https 目标先 CONNECT 建隧道再套 TLS。
+ * 跟随最多 5 次重定向（raw.githubusercontent.com 会 302 到 objects.githubusercontent.com）。
+ */
+async function proxyGet(rawUrl, initialHeaders, signal) {
+	const headers = { ...initialHeaders };
+	let current = new URL(rawUrl);
+	for (let hop = 0; hop <= 5; hop++) {
+		const res = await proxyRequest(current, headers, signal);
+		if ([301, 302, 303, 307, 308].includes(res.statusCode) && res.headers.location) {
+			const next = new URL(res.headers.location, current);
+			//跨主机重定向不带 token 等自定义头，避免把凭据发到别的域
+			if (next.host !== current.host) delete headers.authorization;
+			current = next;
+			continue;
+		}
+		if (res.statusCode < 200 || res.statusCode >= 300) throw new Error(`HTTP ${res.statusCode}`);
+		return decodeBody(res.body, res.headers["content-encoding"]);
+	}
+	throw new Error(`重定向次数过多：${rawUrl}`);
+}
+
+/** 代理链路自己收 body，就不会有 fetch 的自动解压，这里补上（收不收得到取决于站点实现） */
+function decodeBody(buf, encoding) {
+	const enc = String(encoding ?? "").trim().toLowerCase();
+	if (!enc || enc === "identity") return buf;
+	try {
+		if (enc === "gzip") return zlib.gunzipSync(buf);
+		if (enc === "deflate") return zlib.inflateSync(buf, { finishFlush: zlib.constants.Z_SYNC_FLUSH });
+		if (enc === "br") return zlib.brotliDecompressSync(buf);
+	} catch (e) {
+		throw new Error(`响应解压失败（content-encoding: ${enc}）：${String(e).split("\n")[0]}`);
+	}
+	return buf;
+}
+
+/** 发一次经代理的 GET，返回 { statusCode, headers, body } */
+function proxyRequest(url, headers, signal) {
+	return new Promise((resolve, reject) => {
+		const isHttpsTarget = url.protocol === "https:";
+		const isHttpsProxy = PROXY.protocol === "https:";
+		const proxyMod = isHttpsProxy ? https : http;
+		const targetHost = url.hostname;
+		const targetPort = Number(url.port) || (isHttpsTarget ? 443 : 80);
+		const proxyPort = Number(PROXY.port) || (isHttpsProxy ? 443 : 80);
+		const requestPath = `${url.pathname}${url.search}` || "/";
+		const proxyAuth = PROXY.username
+			? `Basic ${Buffer.from(`${decodeURIComponent(PROXY.username)}:${decodeURIComponent(PROXY.password)}`).toString("base64")}`
+			: "";
+		const proxyCommon = { host: PROXY.hostname, port: proxyPort, signal };
+
+		if (!isHttpsTarget) {
+			const req = proxyMod.request(
+				{
+					...proxyCommon,
+					method: "GET",
+					path: url.href, //http 目标经代理时要发绝对地址
+					headers: { ...headers, host: `${targetHost}:${targetPort}`, ...(proxyAuth ? { "proxy-authorization": proxyAuth } : {}) },
+				},
+				res => collect(res, resolve, reject)
+			);
+			req.on("error", reject);
+			req.end();
+			return;
+		}
+
+		const connectReq = proxyMod.request({
+			...proxyCommon,
+			method: "CONNECT",
+			path: `${targetHost}:${targetPort}`,
+			headers: { host: `${targetHost}:${targetPort}`, ...(proxyAuth ? { "proxy-authorization": proxyAuth } : {}) },
+		});
+		connectReq.on("connect", (res, socket) => {
+			if (res.statusCode !== 200) {
+				socket.destroy();
+				reject(new Error(`代理 CONNECT 失败：HTTP ${res.statusCode}`));
+				return;
+			}
+			//CONNECT 建完到 TLS 握手完成之间，AbortSignal 只绑在 ClientRequest 上、管不到裸 socket，这里手动兜住超时
+			const onAbort = () => socket.destroy(new Error("请求已取消（超时或被中止）"));
+			if (signal.aborted) {
+				socket.destroy();
+				reject(new Error("请求已取消（超时或被中止）"));
+				return;
+			}
+			signal.addEventListener("abort", onAbort, { once: true });
+			const tlsSocket = tls.connect({ socket, servername: targetHost }, () => {
+				signal.removeEventListener("abort", onAbort);
+				const req = https.request(
+					{
+						host: targetHost,
+						port: targetPort,
+						path: requestPath,
+						method: "GET",
+						headers,
+						signal,
+						//隧道里的 TLS 已由上面建好；给了 createConnection 时 ClientRequest 不再走默认 Agent
+						createConnection: () => tlsSocket,
+					},
+					res2 => collect(res2, resolve, reject)
+				);
+				req.on("error", reject);
+				req.end();
+			});
+			tlsSocket.on("error", reject);
+		});
+		connectReq.on("error", reject);
+		connectReq.end();
+	});
+}
+
+function collect(res, resolve, reject) {
+	const chunks = [];
+	res.on("data", chunk => chunks.push(chunk));
+	res.on("end", () => resolve({ statusCode: res.statusCode, headers: res.headers, body: Buffer.concat(chunks) }));
+	res.on("error", reject);
 }
 
 /**
@@ -425,7 +581,7 @@ async function main() {
 	//形态全集 = skin_table 的形态 ∪ 干员表里的干员：少了后半截，本地皮肤表还没收录的新干员连「被报告」的资格都没有（clemnt 那次就是这么漏的）。
 	const forms = IDS.length ? IDS : [...new Set([...byForm.keys(), ...Object.keys(characters).filter(isCharacter)])];
 
-	console.log(`站点：${ORIGIN}${SOURCES.some(d => SOURCE_PROVIDER[d] === "github") ? ` | GitHub：${GITHUB_REPO}@${GITHUB_REF}（raw 前缀 ${GITHUB_RAW}）` : ""}`);
+	console.log(`站点：${ORIGIN}${SOURCES.some(d => SOURCE_PROVIDER[d] === "github") ? ` | GitHub：${GITHUB_REPO}@${GITHUB_REF}（raw 前缀 ${GITHUB_RAW}）` : ""}${PROXY ? ` | 代理：${PROXY_LABEL}` : ""}`);
 	console.log(`本地表：${path.relative(ROOT, skinFile)}（${byForm.size} 个形态）| 角色表 ${Object.keys(characters).length} 条 | 待比对形态 ${forms.length}`);
 	console.log(`目标：${TARGET_DIR}（已有 ${have.size} 张）| 范围：${IDS.length ? `指定 ${IDS.length} 个形态` : `--scope ${SCOPE}`} | 图片目录：${SOURCES.map(d => `${d}(${SOURCE_KIND[d]})`).join(" → ")} | 动作：${DRY ? "仅预览(dry-run)" : "下载+压缩+落盘"}`);
 

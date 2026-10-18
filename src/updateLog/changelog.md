@@ -2,6 +2,13 @@
 
 ## 2026-10-18
 
+### 脚本：`update-portraits.mjs` 新增 `--proxy` 代理地址（GitHub 连接不稳定时用）
+
+- **需求与背景**：GitHub 直连不稳定时，`--sources github_skin` / `github_portrait` 的 `api.github.com` 清单与 `raw.githubusercontent.com` 下载都会卡住；`--github-raw` 只能换 raw 前缀，管不到 API。
+- **实现**：脚本新增 `--proxy <地址>`（可省略 `http://`，也接受 `HTTPS_PROXY` / `HTTP_PROXY` 环境变量）。Node 自带的 `fetch` 不读代理环境变量，所以脚本内自己实现了代理链路：http 目标用 absolute-form 转发，https 目标先 `CONNECT` 建隧道再套 TLS；带代理账号密码、跟随最多 5 次重定向（raw → objects.githubusercontent.com）、自动解压 gzip/deflate/br；跨主机重定向会去掉 `authorization` 头。`socks5://` 不支持，会明确提示改填本地代理软件的 HTTP 端口（如 Clash 的 7890）。站点信息行会打印实际使用的代理地址（不含账号密码）。
+- **说明同步**：`index.bat` 的菜单说明是从脚本文档头实时读取的，脚本头的用法示例与参数表已加入 `--proxy`，菜单里可直接看到；`index-menu.mjs` 的一行摘要也补了「GitHub 走不稳可加 --proxy」。
+- 校验：`pnpm eslint` 仅该目录既有的 Node 全局 `no-undef` 噪声（脚本基线同样如此），无新增规则错误。端到端用本地 HTTPS 资源站 + 本地 CONNECT 代理实测：302 重定向、gzip 清单、PNG 下载、ImageMagick 压缩落盘全部通过；仅设 `HTTPS_PROXY` 环境变量的回退路径同样通过；`--proxy socks5://…` 以退出码 1 报错。**未对真实 GitHub 实测**（当前网络不稳），建议人工用 `--sources github_skin --dry-run --proxy http://127.0.0.1:7890` 验证一次。
+
 ### 调整：设置界面默认显示 `autoLoad: true` 的面板（无标记时退回第一个）
 
 - **现象与根因**：`configUI/main.vue` 的 `onMounted` 总是把 `currentPanel` 设为 `panels[0]`（更新公告），`autoLoad` 只用来触发 `onLoad` 回调、不影响选中项；因此「征稿在前」虽然标了 `autoLoad: true`，打开设置界面时默认显示的仍是「更新公告」。
