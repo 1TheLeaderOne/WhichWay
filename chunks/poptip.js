@@ -1,4 +1,4 @@
-import { lib as e, get as p } from "noname";
+import { get as f, lib as e } from "noname";
 import { onArenaReady as h, onSetDev as y } from "./hooks.js";
 const d = {
   //回合轮
@@ -68,6 +68,11 @@ const d = {
     name: "充能球区",
     info: ["充能球区上限为3张牌，超出上限的牌将被置入弃牌堆并触发对应的激发效果", "每轮开始时，会执行每张牌对应的被动效果"],
     trim: !1
+  },
+  persona: {
+    name: "人格面具",
+    info: ["结城理的专属技能，总共有两个：", "塔纳托斯:", `转换技，当你脱离濒死状态后，你令至多X（X = 你的[①体力值;②已损失体力值])名角色[①进行三次${f.poptip("shandian")}判定;②弃一张手牌并受到一点伤害]。本技能的状态切换条件改为进入濒死状态时切换且你失去此技能不会重置此技能的状态。`, "俄尔普斯：", "转换技，回合结束时，你令至多[①Y;②一]名角色各回复[①一;②Y]点体力，且溢出的体力值改为摸等量张牌（Y = 你的[①体力值;②已损失体力值]）。本技能的状态切换条件改为进入濒死状态时切换且你失去此技能不会重置此技能的状态。"],
+    trim: !1
   }
 };
 class u {
@@ -90,19 +95,19 @@ class u {
    * @returns {void}
    */
   compilePopTipTranslate(o) {
-    Array.isArray(o) && (o = o.reduce((t, r) => (t[r] = e.skill[r], t), {}));
+    Array.isArray(o) && (o = o.reduce((t, n) => (t[n] = e.skill[n], t), {}));
     for (let t in o) {
-      let r = o[t];
-      if (r.derivation) {
-        let i = Array.isArray(r.derivation) ? r.derivation : [r.derivation];
-        for (let n of i)
-          if (e.translate[n]) {
+      let n = o[t];
+      if (n.derivation) {
+        let i = Array.isArray(n.derivation) ? n.derivation : [n.derivation];
+        for (let r of i)
+          if (e.translate[r]) {
             let a = `${t}_info`;
-            if (e.translate[a] && e.translate[a].includes(p.translation(n))) {
-              let l = p.translation(n), c = e.translate[a].indexOf(l) - 1, s = "";
-              for (let f = 0; f < l.length + 2; f++)
-                s += e.translate[a][c + f];
-              e.translate[a] = e.translate[a].replaceAll(s, p.poptip(n));
+            if (e.translate[a] && e.translate[a].includes(f.translation(r))) {
+              let l = f.translation(r), c = e.translate[a].indexOf(l) - 1, s = "";
+              for (let p = 0; p < l.length + 2; p++)
+                s += e.translate[a][c + p];
+              e.translate[a] = e.translate[a].replaceAll(s, f.poptip(r));
             }
           }
       }
@@ -115,23 +120,23 @@ class u {
    */
   registerPopTip(o) {
     let t = [];
-    for (let r in o) {
-      if (r in this.popTips) {
-        console.warn(`popTip ${r} 已存在`);
+    for (let n in o) {
+      if (n in this.popTips) {
+        console.warn(`popTip ${n} 已存在`);
         continue;
       }
-      let i = o[r];
-      if (i.id || (i.id = `sjzx_${r}`), i.name || (i.name = r), i.info || (i.info = "无详细信息"), Array.isArray(i.info) || (i.info = [i.info]), i.trim !== void 0 && i.trim !== !1) {
+      let i = o[n];
+      if (i.id || (i.id = `sjzx_${n}`), i.name || (i.name = n), i.info || (i.info = "无详细信息"), Array.isArray(i.info) || (i.info = [i.info]), i.trim !== void 0 && i.trim !== !1) {
         if (i.trim === !0) i.info[0] = `『${i.info[0]}』`;
         else if (typeof i.trim == "number" || Array.isArray(i.trim)) {
           i.trim = Array.isArray(i.trim) ? i.trim : [i.trim];
-          for (let n = 0; n < i.info.length; n++)
-            i.trim.includes(n) && (i.info[n] = `『${i.info[n]}』`);
+          for (let r = 0; r < i.info.length; r++)
+            i.trim.includes(r) && (i.info[r] = `『${i.info[r]}』`);
         }
       }
-      i.info = i.info.join("<br>"), i.sourceInfo ? i.info = `${i.info}<br><font color="red">来自${i.sourceInfo}</font>` : i.info = `${i.info}<br><font color="red">来自驶舰之向</font>`, t.push(i), this.popTips[r] = i;
+      i.info = i.info.join("<br>"), i.sourceInfo ? i.info = `${i.info}<br><font color="red">来自${i.sourceInfo}</font>` : i.info = `${i.info}<br><font color="red">来自驶舰之向</font>`, t.push(i), this.popTips[n] = i;
     }
-    t.length > 0 && t.forEach((r) => e.poptip.add(r));
+    t.length > 0 && t.forEach((n) => e.poptip.add(n));
   }
 }
 const m = new u();

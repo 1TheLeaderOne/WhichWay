@@ -1,0 +1,14 @@
+dist
+output
+package-lock.json
+node_modules/
+
+# locally exported release packages (release.bat release -> release.bat pack)
+release/
+
+# scripts/update-portraits.mjs 的缓存：远端目录清单、待压缩原图、--update-tables 的两张临时表
+scripts/cache/
+
+# IDE
+.idea/
+.vscode/

@@ -1,4 +1,4 @@
-import { game as d, get as n, lib as r } from "noname";
+import { game as o, get as n, lib as r } from "noname";
 import { whichWayAPIOverride as s } from "./override.js";
 s.overrideAPI("lib.skill.jiu", {
   trigger: {
@@ -11,8 +11,8 @@ s.overrideAPI("lib.skill.jiu", {
   charlotte: !0,
   firstDo: !0,
   content: async function(e, a, i) {
-    i.hasSkill("tiaojiumrfz") ? a.effectCount += i.storage.jiu : (a.baseDamage || (a.baseDamage = 1), a.baseDamage += i.storage.jiu), a.jiu = !0, a.jiu_add = i.storage.jiu, d.addVideo("jiuNode", i, !1), d.broadcastAll(function(c) {
-      c.removeSkill("jiu");
+    i.hasSkill("tiaojiumrfz") ? a.effectCount += i.storage.jiu : (a.baseDamage || (a.baseDamage = 1), a.baseDamage += i.storage.jiu), a.jiu = !0, a.jiu_add = i.storage.jiu, o.addVideo("jiuNode", i, !1), o.broadcastAll(function(d) {
+      d.removeSkill("jiu");
     }, i);
   },
   temp: !0,
@@ -45,27 +45,25 @@ r.card.binglinchengxia || (r.card.binglinchengxia = {
     return n.suit(e) == "diamond" ? 0 : -3;
   },
   effect: async function(e, a, i) {
-    const c = e.result;
-    if (c.bool == !1)
-      if (i.countCards("e", function(t) {
+    if (e.result.bool == !1) {
+      if (!i.countCards("e", function(t) {
         return r.filter.cardDiscardable(t, i, "shuiyanqijuny");
-      }))
-        i.chooseControl({
-          controls: ["discard_card", "take_damage"],
-          ai(t, u) {
-            return n.damageEffect(u, t.player, u) >= 0 || u.hp >= 3 && u.countCards("e") >= 2 ? "take_damage" : "discard_card";
-          }
-        });
-      else {
+      })) {
         i.damage().set("nosource", !0);
         return;
       }
-    else return;
-    c.control == "discard_card" ? i.discard({
-      cards: i.getCards("e", function(t) {
-        return r.filter.cardDiscardable(t, i, "shuiyanqijuny");
-      })
-    }) : i.damage().set("nosource", !0);
+      const { control: c } = await i.chooseControl({
+        controls: ["discard_card", "take_damage"],
+        ai(t, u) {
+          return n.damageEffect(u, t.player, u) >= 0 || u.hp >= 3 && u.countCards("e") >= 2 ? "take_damage" : "discard_card";
+        }
+      }).forResult();
+      c == "discard_card" ? i.discard({
+        cards: i.getCards("e", function(t) {
+          return r.filter.cardDiscardable(t, i, "shuiyanqijuny");
+        })
+      }) : i.damage().set("nosource", !0);
+    }
   },
   ai: {
     order: 1,
@@ -76,12 +74,12 @@ r.card.binglinchengxia || (r.card.binglinchengxia = {
       loseCard: 1
     },
     result: {
-      target: function(e, a, i, c) {
-        let t = a.getCards("e");
-        if (!t.length) return -1.5;
-        let u = 0;
-        for (let o of t) u += n.value(o, a);
-        return -Math.min(1.5, u / 5);
+      target: function(e, a, i, d) {
+        let c = a.getCards("e");
+        if (!c.length) return -1.5;
+        let t = 0;
+        for (let u of c) t += n.value(u, a);
+        return -Math.min(1.5, t / 5);
       }
     }
   }

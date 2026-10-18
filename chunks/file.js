@@ -1,12 +1,12 @@
-import { lib as y, game as n } from "noname";
-import { onSetDev as p } from "./hooks.js";
-import { whichWayToast as u } from "./toast.js";
+import { lib as x, game as n } from "noname";
+import { onSetDev as y } from "./hooks.js";
+import { whichWayToast as w } from "./toast.js";
 import { whichWayUtil as f } from "./utill.js";
-class x {
+class p {
   /**
    * 驶舰之向扩展根目录
    */
-  extDir = `${y.assetURL}extension/WhichWay/`;
+  extDir = `${x.assetURL}extension/WhichWay/`;
   /**
    * 路径映射
    * @type {Record<string,string>}
@@ -20,9 +20,10 @@ class x {
     "json:": `${this.extDir}json/`,
     "audio:": `${this.extDir}audio/`,
     "css:": `${this.extDir}css/`,
-    "skin:": `${this.extDir}image/skin/`,
+    "skin:": `${this.extDir}image/illustration/skin/`,
     "ui:": `${this.extDir}image/ui/`,
     "img:": `${this.extDir}image/`,
+    "illu:": `${this.extDir}image/illustration/`,
     "dyc:": `${this.extDir}dynamicSkin/illust/`,
     "dybg:": `${this.extDir}dynamicSkin/background/`,
     "mod:": `${this.extDir}image/modules/`,
@@ -36,9 +37,53 @@ class x {
    * @returns { string }
    */
   compilePath(e) {
-    for (let i in this.pathShceme)
-      e.startsWith(i) && (e = e.replace(i, this.pathShceme[i]));
+    for (let t in this.pathShceme)
+      e.startsWith(t) && (e = e.replace(t, this.pathShceme[t]));
     return e;
+  }
+  /**
+   * 干员立绘（`image/illustration/character/`）实际存在的扩展名索引：干员id → `"png" | "jpg"`。
+   *
+   * 立绘同时提供 png（立绘分离脚本产出）与 jpg 两种格式，取值规则「有 png 用 png，否则用 jpg」；
+   * jpg 视为必定存在，不做 jpg 缺失的兜底。
+   * 之所以要启动期扫一次目录建索引：取图点（武将注册、皮肤「经典形象」补条目）都落在同步路径上，
+   * 而逐个 checkFile 要为几百个干员发几百次 IPC。
+   * @type {Record<string, string>}
+   */
+  characterPortraitExt = {};
+  /**
+   * 扫描 `illustration/character` 建立立绘扩展名索引（png 优先）。
+   * 当前环境没有 fs 后端时 getFileTree 返回空清单，索引为空 ⇒ 一律按 jpg 取值。
+   *
+   * @returns {Promise<Record<string, string>>}
+   */
+  async initCharacterPortraitIndex() {
+    const { files: e } = await this.getFileTree("illu:character/", 0), t = {};
+    for (const s of e) {
+      const i = this.getFileExtension(s.name).toLowerCase();
+      if (i !== "png" && i !== "jpg" && i !== "jpeg") continue;
+      const r = this.removeExt(s.name);
+      t[r] !== "png" && (t[r] = i);
+    }
+    return this.characterPortraitExt = t, t;
+  }
+  /**
+   * 获取干员立绘文件名（png 优先，无 png 用 jpg）
+   * @param { string } name 干员id
+   *
+   * @returns { string }
+   */
+  getCharacterPortraitFile(e) {
+    return `${e}.${this.characterPortraitExt[e] ?? "jpg"}`;
+  }
+  /**
+   * 获取干员立绘完整路径（png 优先，无 png 用 jpg）
+   * @param { string } name 干员id
+   *
+   * @returns { string }
+   */
+  getCharacterPortraitPath(e) {
+    return this.compilePath(`illu:character/${this.getCharacterPortraitFile(e)}`);
   }
   /**
    * 获取是什么平台
@@ -54,11 +99,11 @@ class x {
    * @param {string} target - 目标位置（可以是目录路径或完整文件路径）
    * @returns {Promise<void>}
    */
-  async copyFile(e, i) {
-    e = this.compilePath(e), i = this.compilePath(i);
-    const t = await n.promises.readFile(e);
-    let s, l;
-    i.endsWith("/") ? (s = i, l = e.slice(e.lastIndexOf("/") + 1)) : (s = i.slice(0, i.lastIndexOf("/") + 1), l = i.slice(i.lastIndexOf("/") + 1)), await n.promises.writeFile(t, s, l);
+  async copyFile(e, t) {
+    e = this.compilePath(e), t = this.compilePath(t);
+    const s = await n.promises.readFile(e);
+    let i, r;
+    t.endsWith("/") ? (i = t, r = e.slice(e.lastIndexOf("/") + 1)) : (i = t.slice(0, t.lastIndexOf("/") + 1), r = t.slice(t.lastIndexOf("/") + 1)), await n.promises.writeFile(s, i, r);
   }
   /**
    * 下载文件
@@ -70,42 +115,42 @@ class x {
    *
    * @returns {Promise<boolean>}
    */
-  async download(e, i, t, s) {
+  async download(e, t, s, i) {
     if (typeof n.download != "function")
       return console.warn(`[WhichWayFile] Download function ( game.download ) not available in current environment (${this.detectPlatform()}) .`), !1;
-    if (i = this.compilePath(i), !t) {
-      const r = e.lastIndexOf("/");
-      if (r === -1) throw new Error("Invalid URL");
-      t = e.slice(r + 1).split("?")[0];
+    if (t = this.compilePath(t), !s) {
+      const a = e.lastIndexOf("/");
+      if (a === -1) throw new Error("Invalid URL");
+      s = e.slice(a + 1).split("?")[0];
     }
-    const l = i + t, a = this.detectPlatform() === "cordova";
+    const r = t + s, l = this.detectPlatform() === "cordova";
     let c = null;
-    if (!a && s)
+    if (!l && i)
       try {
         c = await this.getFileSize(e);
-      } catch (r) {
-        console.warn("Failed to get file size:", r), c = null;
+      } catch (a) {
+        console.warn("Failed to get file size:", a), c = null;
       }
-    const m = s ? (r, d) => {
-      const h = a ? d : c, o = h ? Math.min(99, Math.floor(r / h * 100)) : null;
-      s({ loaded: r, total: h, percent: o });
+    const m = i ? (a, h) => {
+      const d = l ? h : c, o = d ? Math.min(99, Math.floor(a / d * 100)) : null;
+      i({ loaded: a, total: d, percent: o });
     } : void 0;
     try {
-      return new Promise((r, d) => {
+      return new Promise((a, h) => {
         n.download(
           e,
-          l,
-          () => r(!0),
-          (h) => {
-            console.warn(`Failed to download "${e}": ${h.message}`), d(!1);
+          r,
+          () => a(!0),
+          (d) => {
+            console.warn(`Failed to download "${e}": ${d.message}`), h(!1);
           },
           void 0,
           // dev
           m
         );
       });
-    } catch (r) {
-      return console.warn(`Failed to download "${e}": ${r.message}`), !1;
+    } catch (a) {
+      return console.warn(`Failed to download "${e}": ${a.message}`), !1;
     }
   }
   /**
@@ -114,9 +159,9 @@ class x {
    * @param {string} file 文件名
    * @param {string} toastID 进度提示toast的ID
    */
-  generateProgress(e, i, t) {
-    const { loaded: s, total: l, percent: a } = e;
-    a !== null ? (f.isDeveloperMode() && console.log(`正在下载文件${i}: ${a}%`), u.showToast(`正在下载文件${i}: ${a}%`, 3e3, "topRight", t)) : (f.isDeveloperMode() && console.log(`正在下载文件 ${i}: ${s} bytes`), u.showToast(`正在下载文件 ${i}: ${Math.floor(s / 1024)} KB`, 3e3, "topRight", t));
+  generateProgress(e, t, s) {
+    const { loaded: i, total: r, percent: l } = e;
+    l !== null ? (f.isDeveloperMode() && console.log(`正在下载文件${t}: ${l}%`), w.showToast(`正在下载文件${t}: ${l}%`, 3e3, "topRight", s)) : (f.isDeveloperMode() && console.log(`正在下载文件 ${t}: ${i} bytes`), w.showToast(`正在下载文件 ${t}: ${Math.floor(i / 1024)} KB`, 3e3, "topRight", s));
   }
   /**
    * 通过 HEAD 请求获取远程文件大小 (只有node环境才能用)
@@ -124,12 +169,12 @@ class x {
    * @returns {Promise<number|null>}
    */
   async getFileSize(e) {
-    return this.detectPlatform() !== "node" ? (console.warn(`[WhichWayFile] getFileSize is not supported in ${this.detectPlatform()} environment`), null) : new Promise((i, t) => {
-      const l = (e.startsWith("https") ? require("https") : require("http")).request(e, { method: "HEAD", headers: { "User-Agent": "AppleWebkit" } }, (a) => {
-        const c = a.headers["content-length"];
-        i(c ? parseInt(c, 10) : null);
+    return this.detectPlatform() !== "node" ? (console.warn(`[WhichWayFile] getFileSize is not supported in ${this.detectPlatform()} environment`), null) : new Promise((t, s) => {
+      const r = (e.startsWith("https") ? require("https") : require("http")).request(e, { method: "HEAD", headers: { "User-Agent": "AppleWebkit" } }, (l) => {
+        const c = l.headers["content-length"];
+        t(c ? parseInt(c, 10) : null);
       });
-      l.on("error", t), l.end();
+      r.on("error", s), r.end();
     });
   }
   /**
@@ -139,8 +184,8 @@ class x {
    *
    * @returns {Promise<boolean>}
    */
-  async exsitFile(e, i = "any") {
-    return e = this.compilePath(e), i === "file" ? await n.promises.checkFile(e) > 0 : i === "folder" ? await n.promises.checkDir(e) > 0 : await n.promises.checkFile(e) > 0 || await n.promises.checkDir(e) > 0;
+  async exsitFile(e, t = "any") {
+    return e = this.compilePath(e), t === "file" ? await n.promises.checkFile(e) > 0 : t === "folder" ? await n.promises.checkDir(e) > 0 : await n.promises.checkFile(e) > 0 || await n.promises.checkDir(e) > 0;
   }
   /**
    * 创建文件夹
@@ -170,12 +215,12 @@ class x {
    * @param {number} [step=3] - 递归深度（文件夹嵌套层数），默认 3；0 表示不递归子文件夹
    * @returns {Promise<{ files: FileItem[], folders: FolderItem[] }>}
    */
-  async getFileTree(e, i = 3) {
+  async getFileTree(e, t = 3) {
     e = this.compilePath(e);
     try {
-      return await this.scanDir(e, i);
-    } catch (t) {
-      return console.warn(`[WhichWayFile] Failed to get file list of "${e}": ${t.message}`), { files: [], folders: [] };
+      return await this.scanDir(e, t);
+    } catch (s) {
+      return console.warn(`[WhichWayFile] Failed to get file list of "${e}": ${s.message}`), { files: [], folders: [] };
     }
   }
   /**
@@ -189,30 +234,30 @@ class x {
    * @param {number} step 剩余递归深度，0 表示只取本层文件、不再进入子目录
    * @returns {Promise<{ files: FileItem[], folders: FolderItem[] }>}
    */
-  async scanDir(e, i) {
-    const t = (o, w) => o.endsWith("/") ? o + w : o + "/" + w, [s, l] = await n.promises.getFileList(e), a = l.map((o) => ({
+  async scanDir(e, t) {
+    const s = (o, u) => o.endsWith("/") ? o + u : o + "/" + u, [i, r] = await n.promises.getFileList(e), l = r.map((o) => ({
       name: o,
-      path: t(e, o)
+      path: s(e, o)
     })), c = [];
-    if (s.length === 0 || i <= 0) return { files: a, folders: c };
+    if (i.length === 0 || t <= 0) return { files: l, folders: c };
     const m = 16;
-    let r = 0;
-    const d = new Array(s.length), h = Array.from({ length: Math.min(m, s.length) }, async () => {
+    let a = 0;
+    const h = new Array(i.length), d = Array.from({ length: Math.min(m, i.length) }, async () => {
       for (; ; ) {
-        const o = r++;
-        if (o >= s.length) return;
-        d[o] = await this.scanDir(t(e, s[o]), i - 1);
+        const o = a++;
+        if (o >= i.length) return;
+        h[o] = await this.scanDir(s(e, i[o]), t - 1);
       }
     });
-    await Promise.all(h);
-    for (let o = 0; o < s.length; o++)
+    await Promise.all(d);
+    for (let o = 0; o < i.length; o++)
       c.push({
-        name: s[o],
-        path: t(e, s[o]),
-        files: d[o].files,
-        folders: d[o].folders
+        name: i[o],
+        path: s(e, i[o]),
+        files: h[o].files,
+        folders: h[o].folders
       });
-    return { files: a, folders: c };
+    return { files: l, folders: c };
   }
   /**
    * 单层目录扫描：仅返回直接子目录名，不递归。
@@ -223,8 +268,8 @@ class x {
    */
   async listDirNames(e) {
     e = this.compilePath(e);
-    const [i] = await n.promises.getFileList(e);
-    return i;
+    const [t] = await n.promises.getFileList(e);
+    return t;
   }
   /**
    * 读取文件内容,会自动解析json文件
@@ -232,10 +277,10 @@ class x {
    */
   async readFile(e) {
     e = this.compilePath(e);
-    const i = this.getFileExtension(e);
-    if (["json", "txt"].includes(i)) {
-      const t = await n.promises.readFileAsText(e);
-      return i == "json" ? JSON.parse(t) : t;
+    const t = this.getFileExtension(e);
+    if (["json", "txt"].includes(t)) {
+      const s = await n.promises.readFileAsText(e);
+      return t == "json" ? JSON.parse(s) : s;
     }
     return await n.promises.readFile(e);
   }
@@ -246,8 +291,8 @@ class x {
    * @returns {string}
    */
   getFileExtension(e) {
-    const i = e.lastIndexOf(".");
-    return i == -1 ? (console.warn(`"${e}" has no file extension`), "") : e.slice(i + 1);
+    const t = e.lastIndexOf(".");
+    return t == -1 ? (console.warn(`"${e}" has no file extension`), "") : e.slice(t + 1);
   }
   /**
    * 写入Json文件
@@ -255,13 +300,13 @@ class x {
    * @param {string} path 文件路径
    * @param {string} [name] 文件名
    */
-  writeFileAsJson(e, i, t) {
-    i = this.compilePath(i);
+  writeFileAsJson(e, t, s) {
+    t = this.compilePath(t);
     try {
-      const s = JSON.stringify(e, null, 2);
-      return n.promises.writeFile(s, i, t);
-    } catch (s) {
-      return Promise.reject(new Error(`Failed to serialize object to JSON: ${s}`));
+      const i = JSON.stringify(e, null, 2);
+      return n.promises.writeFile(i, t, s);
+    } catch (i) {
+      return Promise.reject(new Error(`Failed to serialize object to JSON: ${i}`));
     }
   }
   /**
@@ -271,8 +316,8 @@ class x {
    * @returns {string}
    */
   removeExt(e) {
-    const i = e.lastIndexOf(".");
-    return i == -1 ? e : e.slice(0, i);
+    const t = e.lastIndexOf(".");
+    return t == -1 ? e : e.slice(0, t);
   }
   /**
    * 加载CSS文件
@@ -280,21 +325,21 @@ class x {
    */
   loadCSS(e) {
     e = this.compilePath(e);
-    const i = document.createElement("link");
-    i.rel = "stylesheet", i.href = e, document.head.appendChild(i);
+    const t = document.createElement("link");
+    t.rel = "stylesheet", t.href = e, document.head.appendChild(t);
   }
   /**
    * 自动加载扩展内的css文件
    */
   async autoLoadCSS() {
-    const { files: e } = await this.getFileTree("css:", 0), i = [];
-    e.forEach((t) => {
-      t.name.endsWith(".css") && (this.loadCSS(t.path), i.push(t.name));
-    }), f.isDeveloperMode() && console.log(`[WhichWayFile] Auto loaded CSS files: ${i.join(", ")}`);
+    const { files: e } = await this.getFileTree("css:", 0), t = [];
+    e.forEach((s) => {
+      s.name.endsWith(".css") && (this.loadCSS(s.path), t.push(s.name));
+    }), f.isDeveloperMode() && console.log(`[WhichWayFile] Auto loaded CSS files: ${t.join(", ")}`);
   }
 }
-const g = new x();
-p({
+const g = new p();
+y({
   name: "WhichWayFile_dev",
   fn: () => {
     window.whichWayFile = g;

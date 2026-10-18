@@ -1,47 +1,25 @@
-import { lib as d } from "noname";
-import { whichWayHooksApi as h } from "./hooks.js";
-import { w } from "./version-shared.js";
-async function f(n) {
-  const e = /* @__PURE__ */ new Map();
-  for (const a of n) {
-    if (e.has(a.name)) throw new Error(`[stageLoader] 阶段名重复: ${a.name}`);
-    e.set(a.name, a);
-  }
-  const t = /* @__PURE__ */ new Map(), o = /* @__PURE__ */ new Map(), i = (a) => {
-    const s = t.get(a.name);
-    if (s) return s;
-    const l = (async () => {
-      a.deps?.length && await Promise.all(
-        a.deps.map((r) => {
-          const c = e.get(r);
-          if (!c) throw new Error(`[stageLoader] 阶段 "${a.name}" 依赖了不存在的阶段 "${r}"`);
-          return i(c);
-        })
-      );
-      const p = performance.now();
-      try {
-        await a.load();
-      } catch (r) {
-        if (console.error(`[WhichWay] 阶段 "${a.name}" 加载失败`, r), !a.optional) throw r;
-      } finally {
-        o.set(a.name, performance.now() - p);
-      }
-    })();
-    return t.set(a.name, l), l;
-  };
-  return await Promise.all(n.map(i)), n.map((a) => [a.name, o.get(a.name) ?? 0]);
-}
-const m = [], u = (n) => {
-  const e = m.map(([o, i]) => `  ${o.padEnd(26)} ${i.toFixed(0).padStart(5)} ms`), t = [...m].sort((o, i) => i[1] - o[1]).slice(0, 3).map(([o]) => o);
-  console.groupCollapsed(`%c[WhichWay] 加载完成 · 总计 ${n.toFixed(0)}ms`, "color:#4a9eff;font-weight:bold;"), console.log("%c阶段耗时（无依赖的阶段并发执行，各行之和 ≥ 总计）", "color:#888;font-weight:bold;"), console.log(e.join(`
-`)), t.length && console.log(`%c最耗时: ${t.join(" / ")}`, "color:#e67e22;"), console.groupEnd();
-}, b = async () => {
-  d.translate.extension_WhichWay = "驶舰之向", w.checkVersionCompatible();
-  const n = [
+import { lib as r } from "noname";
+import { whichWayHooksApi as m } from "./hooks.js";
+import { w as l, m as s, r as c } from "./arknight-arkidMigration-shared.js";
+const e = [], p = (i) => {
+  const t = e.map(([o, n]) => `  ${o.padEnd(26)} ${n.toFixed(0).padStart(5)} ms`), a = [...e].sort((o, n) => n[1] - o[1]).slice(0, 3).map(([o]) => o);
+  console.groupCollapsed(`%c[WhichWay] 加载完成 · 总计 ${i.toFixed(0)}ms`, "color:#4a9eff;font-weight:bold;"), console.log("%c阶段耗时（无依赖的阶段并发执行，各行之和 ≥ 总计）", "color:#888;font-weight:bold;"), console.log(t.join(`
+`)), a.length && console.log(`%c最耗时: ${a.join(" / ")}`, "color:#e67e22;"), console.groupEnd();
+}, u = async () => {
+  r.translate.extension_WhichWay = "驶舰之向", l.checkVersionCompatible(), s();
+  const i = [
     //导入toast组件
     { name: "toast", load: () => import("./toast.js") },
     //导入文件管理组件
-    { name: "file", load: () => import("./file.js") },
+    //load 里额外建立立绘 png/jpg 索引：所有取图点（武将注册、皮肤「经典形象」）都在同步路径上，
+    //必须在 onBeforeInit 之前把 illustration/character 的目录清单扫好备查。
+    {
+      name: "file",
+      load: async () => {
+        const { whichWayFile: o } = await import("./file.js");
+        await o.initCharacterPortraitIndex();
+      }
+    },
     //@ts-ignore 加载css（要等 file 阶段把实例注册到 window.whichWay.file 上）
     {
       name: "css",
@@ -72,11 +50,11 @@ const m = [], u = (n) => {
       }
     },
     //————————————模式：特蕾西娅与瑰丽理想————————————//
-    // 还处于测试阶段,暂时不进行添加
     {
-      name: "gloriousIdeal(新模式)",
+      name: "gloriousIdeal",
       optional: !0,
       load: async () => {
+        if (d() !== !0) return;
         const { registerGloriousIdealMode: o } = await import("./GloriousIdeal.js");
         o();
       }
@@ -98,13 +76,13 @@ const m = [], u = (n) => {
     //导入音频组件
     { name: "audio", load: () => import("./audio.js") },
     //导入皮肤
-    { name: "skin", load: () => import("./skin-confOverride-shared.js").then((o) => o.i) },
+    { name: "skin", load: () => import("./skin-PortraitLayers-shared.js").then((o) => o.c) },
     //导入poptip
     { name: "poptip", load: () => import("./poptip.js") },
     //导入tips
     { name: "tips", load: () => import("./tips.js") },
     //导入角色卡片
-    { name: "characterCard", load: () => import("./characterCard.js") },
+    { name: "characterCard", load: () => import("./characterCard-CharacterCard-shared.js").then((o) => o.i) },
     //扩展适配
     { name: "extCompatible", load: () => import("./extCompatible.js") },
     //导入更新日志
@@ -113,11 +91,12 @@ const m = [], u = (n) => {
     { name: "configUI", load: () => import("./configUI.js") },
     //导入模组系统
     { name: "modules", load: () => import("./modules.js") }
-  ], e = performance.now();
-  m.push(...await f(n));
-  const t = performance.now();
-  await h.init(), m.push(["hooksApi.init(pendingRun)", performance.now() - t]), u(performance.now() - e);
-};
+  ], t = performance.now();
+  e.push(...await c(i));
+  const a = performance.now();
+  await m.init(), e.push(["hooksApi.init(pendingRun)", performance.now() - a]), p(performance.now() - t);
+}, d = () => document.querySelectorAll('script[type="module"][src*="/@vite/"]').length > 0;
 export {
-  b as whichWayInit
+  d as isViteDevServer,
+  u as whichWayInit
 };

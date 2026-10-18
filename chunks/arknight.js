@@ -1,10 +1,10 @@
-import { whichWayFile as w } from "./file.js";
-import { onInit as U, onConfig as C, onSetDev as b } from "./hooks.js";
-import { get as f } from "noname";
-import { whichWayUtil as u } from "./utill.js";
-import { w as W } from "./version-shared.js";
-import { whichWayToast as k } from "./toast.js";
-class I {
+import { whichWayFile as g } from "./file.js";
+import { onInit as D, onConfig as b, onSetDev as W } from "./hooks.js";
+import { get as k } from "noname";
+import { whichWayUtil as d } from "./utill.js";
+import { w as p } from "./arknight-arkidMigration-shared.js";
+import { whichWayToast as f } from "./toast.js";
+class A {
   audio = {
     index: ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010", "011", "012", "013", "014", "017", "018", "019", "020", "021", "022", "023", "024", "025", "026", "027", "028", "029", "030", "031", "032", "033", "034", "036", "037", "038", "042", "043", "044"],
     name: ["任命助理", "交谈1", "交谈2", "交谈3", "晋升后交谈1", "晋升后交谈2", "信赖提升后交谈1", "信赖提升后交谈2", "信赖提升后交谈3", "闲置", "干员报到", "观看作战记录", "精英化晋升1", "精英化晋升2", "编入队伍", "任命队长", "行动出发", "行动开始", "选中干员1", "选中干员2", "部署1", "部署2", "作战中1", "作战中2", "作战中3", "作战中4", "完成高难行动", "3星结束行动", "非3星结束行动", "行动失败", "进驻设施", "戳一下", "信赖触摸", "标题", "新年祝福", "问候", "生日", "周年庆典"]
@@ -25,23 +25,23 @@ class I {
    * @param { string } [subtype] -子类别,不选则自动识别
    * @returns { string | ArksCamps | undefined } 映射后的字符串
    */
-  transfer(a, t, e) {
-    if (typeof t != "string" || e !== void 0 && typeof e != "string") throw new Error("参数类型错误！");
+  transfer(a, t, i) {
+    if (typeof t != "string" || i !== void 0 && typeof i != "string") throw new Error("参数类型错误！");
     if (t === "audio") {
-      if (e) {
-        const n = e === "index" ? "name" : "index", h = this[t][n], c = this[t][e], i = h.indexOf(a);
-        return i !== -1 ? c[i] : void 0;
+      if (i) {
+        const e = i === "index" ? "name" : "index", s = this[t][e], h = this[t][i], r = s.indexOf(a);
+        return r !== -1 ? h[r] : void 0;
       }
-      return u.bidirectionalLookup(this[t].index, this[t].name, a);
+      return d.bidirectionalLookup(this[t].index, this[t].name, a);
     } else if (t === "group") {
-      if (e) {
-        const n = e === "whichWay" ? "arknight" : "whichWay", h = this[t][n], c = this[t][e], i = h.indexOf(a);
-        return i !== -1 ? c[i] : void 0;
+      if (i) {
+        const e = i === "whichWay" ? "arknight" : "whichWay", s = this[t][e], h = this[t][i], r = s.indexOf(a);
+        return r !== -1 ? h[r] : void 0;
       }
-      return u.bidirectionalLookup(this[t].whichWay, this[t].arknight, a);
+      return d.bidirectionalLookup(this[t].whichWay, this[t].arknight, a);
     } else if (t === "character") {
-      const n = this.character;
-      return e ? e === "chineseName" ? n.chineseName.get(a) : n[e][a] : n.whichWayUID[a] || n.arknightUID[a] || n.chineseName.get(a);
+      const e = this.character;
+      return i ? i === "chineseName" ? e.chineseName.get(a) : e[i][a] : e.whichWayUID[a] || e.arknightUID[a] || e.chineseName.get(a);
     }
   }
 }
@@ -62,13 +62,13 @@ class _ {
    * @param {[string, string]} keys - [明日方舟UID, WhichWayUID]
    * @param {string} value - 中文名
    */
-  set([a, t], e) {
-    const n = this.arkUID[a] || this.arkUID[t] || this.whichWayUID[a] || this.whichWayUID[t];
-    n && console.warn(`[WhichWayArkChineseName] 翻译覆盖: 角色 ${a},${t} 已存在中文翻译 ${n}`), this.arkUID[a] = e, this.whichWayUID[t] = e;
+  set([a, t], i) {
+    const e = this.arkUID[a] || this.arkUID[t] || this.whichWayUID[a] || this.whichWayUID[t];
+    e && console.warn(`[WhichWayArkChineseName] 翻译覆盖: 角色 ${a},${t} 已存在中文翻译 ${e}`), this.arkUID[a] = i, this.whichWayUID[t] = i;
   }
 }
-const A = new I();
-class z {
+const I = new A();
+class C {
   normal = {
     爱布拉娜: "死芒",
     隐德莱希: "隐德来希",
@@ -99,7 +99,7 @@ class z {
     return t ? this[t][a] || a : this.normal[a] || this.amiya[a] || a;
   }
 }
-const v = new z();
+const U = new C();
 class x {
   /**
    * 初始化
@@ -107,26 +107,28 @@ class x {
   async init() {
     const a = performance.now();
     await this.autoUpdate();
-    const t = performance.now() - a, e = performance.now();
+    const t = performance.now() - a, i = performance.now();
     await this.loadArknightData();
-    const n = performance.now() - e, h = performance.now();
+    const e = performance.now() - i, s = performance.now();
     await this.loadShcema();
-    const c = performance.now() - h, i = t + n + c;
-    i > 500 && (console.groupCollapsed(`%c[WhichWay·arknight] init ${i.toFixed(0)}ms`, "color:#e67e22;"), console.log(`  autoUpdate:       ${t.toFixed(0)}ms`), console.log(`  loadArknightData: ${n.toFixed(0)}ms`), console.log(`  loadShcema:       ${c.toFixed(0)}ms`), console.groupEnd()), U({
+    const h = performance.now() - s;
+    this.buildVaildArkId();
+    const r = t + e + h;
+    r > 500 && (console.groupCollapsed(`%c[WhichWay·arknight] init ${r.toFixed(0)}ms`, "color:#e67e22;"), console.log(`  autoUpdate:       ${t.toFixed(0)}ms`), console.log(`  loadArknightData: ${e.toFixed(0)}ms`), console.log(`  loadShcema:       ${h.toFixed(0)}ms`), console.groupEnd()), D({
       name: "arknight_init",
-      fn: (o) => {
-        for (let m of o)
-          for (let d in m.character)
-            this.initCharArknight(m.character[d]);
+      fn: (m) => {
+        for (let n of m)
+          for (let l in n.character)
+            this.initCharArknight(n.character[l]);
       },
       priority: -1145141919810
-    }), C({
+    }), b({
       name: "whichWayNumberOfArknigtChars_add",
       fn() {
         return {
           name: "numberOfArknigtChars",
           options: {
-            name: `明日方舟干员数:${Object.keys(p.arknightData.charword_table.charDefaultTypeDict).length}`,
+            name: `明日方舟干员数:${Object.keys(u.arknightData.charword_table.charDefaultTypeDict).length}`,
             clear: !0
           }
         };
@@ -150,22 +152,22 @@ class x {
    */
   async loadArknightData(a = "json:arknight/") {
     if (this.arknightData || (this.arknightData = {}), !this.arknightDataUpdated) {
-      const i = await this.readSlimCache();
-      if (i) {
-        Object.assign(this.arknightData, i);
+      const r = await this.readSlimCache();
+      if (r) {
+        Object.assign(this.arknightData, r);
         return;
       }
     }
-    const { files: t } = await w.getFileTree(a, 0), e = t.filter((i) => i.name.endsWith(".json") && !this.loadSkipFiles.includes(i.name.replace(".json", ""))), n = await Promise.all(e.map((i) => w.readFile(i.path))), h = {};
-    e.forEach((i, o) => {
-      h[i.name.replace(".json", "")] = n[o];
+    const { files: t } = await g.getFileTree(a, 0), i = t.filter((r) => r.name.endsWith(".json") && !this.loadSkipFiles.includes(r.name.replace(".json", ""))), e = await Promise.all(i.map((r) => g.readFile(r.path))), s = {};
+    i.forEach((r, m) => {
+      s[r.name.replace(".json", "")] = e[m];
     });
-    const c = this.slimArknightData(h);
-    Object.assign(this.arknightData, c);
+    const h = this.slimArknightData(s);
+    Object.assign(this.arknightData, h);
     try {
-      await w.writeFileAsJson({ schema: this.slimCacheSchema, version: W.ext, data: c }, "json:cache/", "arknight.json");
-    } catch (i) {
-      console.warn("[WhichWay] 写入明日方舟精简缓存失败（不影响本次运行）", i);
+      await g.writeFileAsJson({ schema: this.slimCacheSchema, version: p.ext, data: h }, "json:cache/", "arknight.json");
+    } catch (r) {
+      console.warn("[WhichWay] 写入明日方舟精简缓存失败（不影响本次运行）", r);
     }
   }
   /**
@@ -175,8 +177,8 @@ class x {
    */
   async readSlimCache() {
     try {
-      const a = await w.readFile(`json:${this.slimCacheFile}`);
-      return !a || a.schema !== this.slimCacheSchema || a.version !== W.ext || !a.data ? void 0 : a.data;
+      const a = await g.readFile(`json:${this.slimCacheFile}`);
+      return !a || a.schema !== this.slimCacheSchema || a.version !== p.ext || !a.data ? void 0 : a.data;
     } catch {
       return;
     }
@@ -190,37 +192,37 @@ class x {
    * （3）把 slimCacheSchema +1 让老缓存失效——否则精简缓存会静默缺字段。
    *
    * 白名单依据（全仓核实：除本文件外没有任何位置读取这三张表）：
-   * - character_table[uid]：name（译名匹配）、subProfessionId（isCharacter）、tagList（getTags）、键存在性
-   * - char_patch_table.patchChars[uid]：name、subProfessionId、tagList
+   * - character_table[uid]：name（译名匹配）、subProfessionId（isCharacter）、tagList（getTags）、isNotObtainable（isObtainable）、键存在性
+   * - char_patch_table.patchChars[uid]：name、subProfessionId、tagList、isNotObtainable
    * - charword_table.charDefaultTypeDict：仅 Object.keys().length
    * - charword_table.voiceLangTypeDict：Object.keys() 与 [lang].name
    * - charword_table.voiceLangDict[uid].dict：仅真值判断与 Object.keys()
    */
   slimArknightData(a) {
-    const t = a.character_table ?? {}, e = {};
-    for (const r in t) {
-      const s = t[r];
-      e[r] = { name: s.name, subProfessionId: s.subProfessionId, tagList: s.tagList };
+    const t = a.character_table ?? {}, i = {};
+    for (const c in t) {
+      const o = t[c];
+      i[c] = { name: o.name, subProfessionId: o.subProfessionId, tagList: o.tagList, isNotObtainable: o.isNotObtainable };
     }
-    const n = a.char_patch_table?.patchChars, h = {};
-    for (const r in n ?? {}) {
-      const s = n[r];
-      h[r] = { name: s.name, subProfessionId: s.subProfessionId, tagList: s.tagList };
+    const e = a.char_patch_table?.patchChars, s = {};
+    for (const c in e ?? {}) {
+      const o = e[c];
+      s[c] = { name: o.name, subProfessionId: o.subProfessionId, tagList: o.tagList, isNotObtainable: o.isNotObtainable };
     }
-    const c = a.charword_table ?? {}, i = {};
-    for (const r in c.charDefaultTypeDict ?? {}) i[r] = !0;
-    const o = {}, m = c.voiceLangTypeDict ?? {};
-    for (const r in m) o[r] = { name: m[r].name };
-    const d = {};
-    for (const r in c.voiceLangDict ?? {}) {
-      const s = {};
-      for (const l in c.voiceLangDict[r]?.dict ?? {}) s[l] = !0;
-      d[r] = { dict: s };
+    const h = a.charword_table ?? {}, r = {};
+    for (const c in h.charDefaultTypeDict ?? {}) r[c] = !0;
+    const m = {}, n = h.voiceLangTypeDict ?? {};
+    for (const c in n) m[c] = { name: n[c].name };
+    const l = {};
+    for (const c in h.voiceLangDict ?? {}) {
+      const o = {};
+      for (const y in h.voiceLangDict[c]?.dict ?? {}) o[y] = !0;
+      l[c] = { dict: o };
     }
     return {
-      character_table: e,
-      char_patch_table: { patchChars: h },
-      charword_table: { charDefaultTypeDict: i, voiceLangTypeDict: o, voiceLangDict: d }
+      character_table: i,
+      char_patch_table: { patchChars: s },
+      charword_table: { charDefaultTypeDict: r, voiceLangTypeDict: m, voiceLangDict: l }
     };
   }
   /**
@@ -228,89 +230,116 @@ class x {
    */
   async loadShcema() {
     const {
-      character: { whichWayUID: a, chineseName: t, arknightUID: e }
-    } = this.shcema, n = window.whichWaySave.allCharacters, h = this.arknightData.character_table, c = n.filter((r) => {
-      const s = f.character(r);
-      return !!s && typeof s.arkuid == "string";
-    }), i = /* @__PURE__ */ new Map();
-    for (const r of c) {
-      const s = f.character(r).arkuid;
-      let l = i.get(s);
-      l || i.set(s, l = []), l.push(r);
-    }
-    const o = n.map((r) => f.translation(r)), m = /* @__PURE__ */ new Map();
-    n.forEach((r, s) => {
-      const l = this.redirect.transfer(o[s]);
-      l !== void 0 && !m.has(l) && m.set(l, r);
+      character: { whichWayUID: a, chineseName: t, arknightUID: i }
+    } = this.shcema, e = window.whichWaySave.allCharacters, s = this.arknightData.character_table, h = e.map((n) => k.translation(n)), r = /* @__PURE__ */ new Map();
+    e.forEach((n, l) => {
+      const c = this.redirect.transfer(h[l]);
+      c !== void 0 && !r.has(c) && r.set(c, n);
     });
-    for (let r in h) {
-      const s = h[r];
-      if (!this.isCharacter(s)) continue;
-      const l = i.get(r);
-      if (l)
-        for (const y of l)
-          a[y] = r, e[r] = y, t.set([r, y], f.translation(y));
-      const g = m.get(s.name);
-      g !== void 0 && (a[g] = r, e[r] = g, t.set([r, g], s.name));
+    for (let n in s) {
+      const l = s[n];
+      if (!this.isCharacter(l)) continue;
+      if (window.whichWaySave.hasChar(n)) {
+        a[n] = n, i[n] = n, t.set([n, n], l.name);
+        continue;
+      }
+      const c = r.get(l.name);
+      c !== void 0 && (a[c] = n, i[n] = c, t.set([n, c], l.name));
     }
-    const d = this.arknightData.char_patch_table.patchChars;
-    for (let r in d) {
-      let s = d[r];
-      if (!this.isCharacter(s)) continue;
-      h[r] = s;
-      const l = this.redirect.transfer(r, "amiya");
-      if (o.includes(l)) {
-        const g = n[o.indexOf(l)];
-        a[g] = r, e[r] = g, t.set([r, g], l);
+    const m = this.arknightData.char_patch_table.patchChars;
+    for (let n in m) {
+      let l = m[n];
+      if (!this.isCharacter(l)) continue;
+      s[n] = l;
+      const c = this.redirect.transfer(n, "amiya");
+      if (h.includes(c)) {
+        const o = e[h.indexOf(c)];
+        a[o] = n, i[n] = o, t.set([n, o], c);
       }
     }
+  }
+  /**
+   * 构造 vaildArkId：全量明日方舟干员uid清单。
+   *
+   * 数据源为 `json/arknight/` 下的角色表（经精简缓存加载后的 arknightData）：
+   * - character_table：游戏内正式干员主表
+   * - char_patch_table.patchChars：不在主表里的升变形态（如升变阿米娅）
+   *
+   * 两者都按 isCharacter 过滤（subProfessionId 以 notchar 开头的是敌方/ NPC 占位，
+   * 不是可选干员），并与 addVaildArk 一样保持去重。
+   */
+  buildVaildArkId() {
+    this.vaildArkId = [];
+    const a = [this.arknightData?.character_table, this.arknightData?.char_patch_table?.patchChars];
+    for (const t of a)
+      if (t)
+        for (const i in t)
+          this.isCharacter(t[i]) && this.addVaildArk(i);
+  }
+  /**
+   * 是否是明日方舟干员
+   * @param {string} id 明日方舟干员uid
+   * @returns {boolean} id 是否在 vaildArkId 之中
+   */
+  isArknght(a) {
+    return this.vaildArkId.includes(a);
+  }
+  /**
+   * 添加一个明日方舟干员uid到 vaildArkId（已存在则忽略）
+   * @param {string} id 明日方舟干员uid
+   */
+  addVaildArk(a) {
+    this.isArknght(a) || this.vaildArkId.push(a);
+  }
+  /**
+   * 登记「扩展里已经存在」的明日方舟干员uid（由武将包构造流程 addShcema 调用）
+   * @param {string} id 明日方舟干员uid
+   */
+  addExsitArk(a) {
+    this.isArknght(a) && !this.exsitArk.includes(a) && this.exsitArk.push(a);
   }
   /**
    * 明日方舟干员名 → 明日方舟uid 的反查索引（懒构建，仅构建一次）
    *
    * 原先 addShcema 对每个干员都遍历整张 character_table，且循环体内还对全部干员
    * 反复做 filter/map，规模为 干员数 × 全表大小 × 干员数，是扩展加载的最大热点。
+   *
+   * 全表有 98 组同名干员，其中「阿米娅」三名共用：char_002_amiya 在主表，
+   * char_1001_amiya2 / char_1037_amiya3 由 loadShcema 从 char_patch_table 并进主表。
+   * 反查只服务于旧式命名干员（本体形态一律走 addShcema 的恒等分支），
+   * 因此排除升变形态并保留首个命中者——否则「阿米娅」会被后写入的 char_1037_amiya3 顶掉。
    */
   _arkNameIndex = null;
   _getArkNameIndex() {
     if (!this._arkNameIndex) {
-      const a = /* @__PURE__ */ new Map(), t = this.arknightData.character_table;
-      for (const e in t)
-        this.isCharacter(t[e]) && a.set(t[e].name, e);
+      const a = /* @__PURE__ */ new Map(), t = this.arknightData.character_table, i = this.arknightData.char_patch_table?.patchChars;
+      for (const e in t) {
+        if (i?.[e] || !this.isCharacter(t[e])) continue;
+        const s = t[e].name;
+        s !== void 0 && !a.has(s) && a.set(s, e);
+      }
       this._arkNameIndex = a;
     }
     return this._arkNameIndex;
   }
   /**
    * 添加到映射表
-   * @param { string } id 驶舰之向干员id（或明日方舟uid）
-   * @param { WhichWayCharacter } [char] 干员数据对象；传入后可识别干员显式声明的 arkuid
+   * @param { string } id 驶舰之向干员id（已与明日方舟 uid 统一）
    */
-  async addShcema(a, t) {
+  async addShcema(a) {
     const {
-      character: { whichWayUID: e, chineseName: n, arknightUID: h }
-    } = this.shcema, c = this.arknightData.character_table;
-    if (window.whichWaySave.allCharacters, window.whichWaySave.hasChar(a)) {
-      const i = t?.arkuid;
-      if (typeof i == "string" && i in c) {
-        e[a] = i, h[i] = a, n.set([i, a], f.translation(a));
-        return;
-      }
-      const o = this._getArkNameIndex().get(this.redirect.transfer(f.translation(a)));
-      if (o !== void 0) {
-        e[a] = o, h[o] = a, n.set([o, a], c[o].name);
-        return;
-      }
-      console.warn(`角色${a}不存在`);
-    } else if (a in c) {
-      const i = c[a];
-      if (this.isCharacter(i)) {
-        const o = window.whichWaySave.allCharacters.find((m) => this.redirect.transfer(f.translation(m)) === i.name);
-        e[o] = a, h[a] = a, n.set([a, o], i.name);
-        return;
-      } else
-        console.warn(`角色${a}不存在`);
+      character: { whichWayUID: t, chineseName: i, arknightUID: e }
+    } = this.shcema, s = this.arknightData.character_table;
+    if (this.isCharacter(a)) {
+      t[a] = a, e[a] = a, i.set([a, a], s[a].name), this.addExsitArk(a);
+      return;
     }
+    const h = this._getArkNameIndex().get(this.redirect.transfer(k.translation(a)));
+    if (h !== void 0) {
+      t[a] = h, e[h] = a, i.set([h, a], s[h].name), this.addExsitArk(h);
+      return;
+    }
+    console.warn(`角色${a}不存在`);
   }
   /**
    * 是否是干员
@@ -319,6 +348,22 @@ class x {
    */
   isCharacter(a) {
     return typeof a == "string" && (a = this.arknightData.character_table[a]), a?.subProfessionId ? !a.subProfessionId.startsWith("notchar") : !1;
+  }
+  /**
+   * 是否是明日方舟**游戏内可获取**的干员
+   *
+   * 判据是角色表的 `isNotObtainable`（全量 1382 条都带这个布尔，无需推测）。为 `true` 的是
+   * 「有完整干员数据但玩家拿不到」的角色：预备干员系列（`char_5xx_r*` / `char_6xx_c*`）、
+   * 集成战略/活动 NPC（Sharp、Pith、Touch、Stormeye、Raidian、Misery、Mechanist、暮落、郁金香）、
+   * 盟约·辅助干员等，共 29 条。它们与「阿消／洛洛／罗宾／迷迭香」这类正常可获取干员（`false`）
+   * 在数据上仅此一处区别，所以不能靠 `rarity`、`itemObtainApproach`（只是 null）或 id 前缀去猜。
+   *
+   * 字段缺失（读到了旧版精简缓存）一律按**可获取**处理：宁可多列一条待征稿，
+   * 也不要把正常干员悄悄排除在名单外。
+   * @param id 明日方舟干员uid
+   */
+  isObtainable(a) {
+    return (this.arknightData?.character_table?.[a] ?? this.arknightData?.char_patch_table?.patchChars?.[a])?.isNotObtainable !== !0;
   }
   /**
    * 判断是否在明日方舟角色列表中
@@ -337,8 +382,8 @@ class x {
    * @param {WhichWayCharacterInitialized} char 角色数据（`initCharConfig` 之后的初始化态）
    */
   initCharArknight(a) {
-    const t = a.whichWay, e = t.arknight ??= {}, n = a.arkuid;
-    e.charId ??= n || this.shcema.transfer(t.charId, "character", "whichWayUID") || "", e.camp ??= this.getCamp(a) ?? "", e.avaiableLangs ??= this.getAviableLangs(t.charId) || [], e.tags ??= this.getTags(t.charId) || [], t.supportingEquipment ??= e.tags.includes("支援机器"), t.linkage ??= e.avaiableLangs.includes("LINKAGE");
+    const t = a.whichWay, i = t.arknight ??= {};
+    i.charId ??= this.shcema.transfer(t.charId, "character", "whichWayUID") || "", i.camp ??= this.getCamp(a) ?? "", i.avaiableLangs ??= this.getAviableLangs(t.charId) || [], i.tags ??= this.getTags(t.charId) || [], t.supportingEquipment ??= i.tags.includes("支援机器"), t.linkage ??= i.avaiableLangs.includes("LINKAGE");
   }
   /**
    * 通过索引获取音频信息
@@ -359,7 +404,7 @@ class x {
    */
   getVoiceLangs(a = !1) {
     let t = Object.keys(this.arknightData.charword_table.voiceLangTypeDict);
-    return t.push("CUSTOM"), a ? t.map((e) => e.toLowerCase()) : t;
+    return t.push("CUSTOM"), a ? t.map((i) => i.toLowerCase()) : t;
   }
   /**
    * 获取语言的中文翻译
@@ -388,8 +433,8 @@ class x {
    * @returns {string[] | undefined}
    */
   getAviableLangs(a) {
-    const { voiceLangDict: t } = this.arknightData.charword_table, e = this.shcema.transfer(a, "character", "whichWayUID") || a;
-    return t[e]?.dict ? Object.keys(t[e].dict) || void 0 : ["CUSTOM"];
+    const { voiceLangDict: t } = this.arknightData.charword_table, i = this.shcema.transfer(a, "character", "whichWayUID") || a;
+    return t[i]?.dict ? Object.keys(t[i].dict) || void 0 : ["CUSTOM"];
   }
   /**
    * 获得角色在明日方舟中的阵营id
@@ -397,11 +442,11 @@ class x {
    * @returns {ArksCamps | undefined}
    */
   getCamp(a) {
-    if (f.itemtype(a) === "player" && (a = a.name), f.is.object(a)) {
+    if (k.itemtype(a) === "player" && (a = a.name), k.is.object(a)) {
       let t = a;
       return t.whichWay ? this.shcema.transfer(t.whichWay?.reallyGroup, "group", "arknight") : void 0;
     } else if (typeof a == "string" && window.whichWaySave.hasChar(a)) {
-      const t = u.getCharExtConfig(a)?.reallyGroup || "";
+      const t = d.getCharExtConfig(a)?.reallyGroup || "";
       return this.shcema.transfer(t, "group", "arknight");
     }
   }
@@ -417,20 +462,20 @@ class x {
    * 自动检测更新明日方舟数据
    */
   async autoUpdate() {
-    const { files: a } = await w.getFileTree("json:arknight/", 0), t = a.map((e) => e.name);
-    return t.length < 1 || !this.updateFile.every((e) => t.includes(e + ".json")) ? await this.updateArknigtData() : W.extVersionChanged && await this.updateArknigtData(), !0;
+    const { files: a } = await g.getFileTree("json:arknight/", 0), t = a.map((i) => i.name);
+    return t.length < 1 || !this.updateFile.every((i) => t.includes(i + ".json")) ? await this.updateArknigtData() : p.extVersionChanged && await this.updateArknigtData(), !0;
   }
   /**
    * 更新明日方舟数据
    */
   async updateArknigtData() {
     const { updateFile: a, updateUrl: t } = this;
-    this.arknightDataUpdated = !0, k.showToast("[驶舰之向] 正在更新明日方舟数据...", 3e3, "topRight", "whichWayArknightUpdateTitle");
-    for (const e of a) {
-      const n = `${t}${e}.json`;
-      await w.download(n, "json:arknight/", `${e}.json`, ({ percent: h, total: c, loaded: i }) => {
-        h !== null ? (u.isDeveloperMode() && console.log(`正在下载文件${e}: ${h}%`), k.showToast(`正在下载文件${e}: ${h}%`, 3e3, "topRight", "whichWayArknightUpdate")) : (u.isDeveloperMode() && console.log(`正在下载文件 ${e}: ${i} bytes`), k.showToast(`正在下载文件 ${e}: ${Math.floor(i / 1024)} KB`, 3e3, "topRight", "whichWayArknightUpdate"));
-      }), k.showToast(`文件 ${e} 下载完成!`, 3e3, "topRight"), k.removeToastById("whichWayArknightUpdate"), k.removeToastById("whichWayArknightUpdateTitle");
+    this.arknightDataUpdated = !0, f.showToast("[驶舰之向] 正在更新明日方舟数据...", 3e3, "topRight", "whichWayArknightUpdateTitle");
+    for (const i of a) {
+      const e = `${t}${i}.json`;
+      await g.download(e, "json:arknight/", `${i}.json`, ({ percent: s, total: h, loaded: r }) => {
+        s !== null ? (d.isDeveloperMode() && console.log(`正在下载文件${i}: ${s}%`), f.showToast(`正在下载文件${i}: ${s}%`, 3e3, "topRight", "whichWayArknightUpdate")) : (d.isDeveloperMode() && console.log(`正在下载文件 ${i}: ${r} bytes`), f.showToast(`正在下载文件 ${i}: ${Math.floor(r / 1024)} KB`, 3e3, "topRight", "whichWayArknightUpdate"));
+      }), f.showToast(`文件 ${i} 下载完成!`, 3e3, "topRight"), f.removeToastById("whichWayArknightUpdate"), f.removeToastById("whichWayArknightUpdateTitle");
     }
     return !0;
   }
@@ -440,6 +485,17 @@ class x {
    */
   arknightData;
   /**
+   * 全量明日方舟干员uid清单（由 buildVaildArkId 在初始化时用 json/arknight 的角色表构造，
+   * 含 char_patch_table 的升变形态，已按 isCharacter 过滤）
+   */
+  vaildArkId = [];
+  /**
+   * 扩展里已经存在的明日方舟干员uid（武将包构造时由 addShcema 逐个登记，恒为 vaildArkId 的子集）。
+   *
+   * 用途：`vaildArkId` 与 `exsitArk` 的差集即「明日方舟有、扩展还没做」的干员。
+   */
+  exsitArk = [];
+  /**
    * 精简缓存文件（相对 json: 的路径），与 json/cache/skin.json 同目录、同读写方式
    */
   slimCacheFile = "cache/arknight.json";
@@ -447,7 +503,7 @@ class x {
    * 精简缓存的结构版本：白名单字段发生变化时必须 +1，否则老缓存不会被重建
    * （只靠扩展版本号覆盖不了「改了白名单但没升版本」的情况）
    */
-  slimCacheSchema = 1;
+  slimCacheSchema = 2;
   /**
    * 本次启动是否重新下载过明日方舟数据。
    *
@@ -458,30 +514,38 @@ class x {
   /**
    * 启动期不读入内存的数据文件名（仍保留在 updateFile 清单里，自动更新/下载不受影响）。
    *
-   * handbook_team_table 全扩展零运行时读取（只出现在本文件的 updateFile 清单中），
-   * 也不在精简缓存的裁剪范围内——裁剪只保留 ArknightSlimData 声明的三张表。
+   * - handbook_team_table：全扩展零运行时读取（只出现在本文件的 updateFile 清单中）
+   * - skin_table：皮肤形态表（3.8MB），只有 scripts 下的开发脚本读磁盘上的那份
+   *   （update-portraits / split-illustration 按 portraitId 反查形态），运行时的皮肤数据来自
+   *   json/cache/skin.json，跟这张表没有关系
+   *
+   * 两者都不在精简缓存的裁剪范围内——裁剪只保留 ArknightSlimData 声明的三张表，
+   * 所以往这里加文件名不需要动 slimCacheSchema。
    */
-  loadSkipFiles = ["handbook_team_table"];
+  loadSkipFiles = ["handbook_team_table", "skin_table"];
   /**
    * 需要更新的JSON文件名
+   *
+   * ⚠️ 与 scripts/update-arknight-data.bat 的 FILES 清单是一对镜像，改一边就要改另一边
+   * （那边的头部注释写明了这条约束）。
    */
-  updateFile = ["character_table", "charword_table", "handbook_team_table", "char_patch_table"];
+  updateFile = ["character_table", "charword_table", "handbook_team_table", "char_patch_table", "skin_table"];
   /**
    * 更新的JSON文件地址
    */
   updateUrl = "https://torappu.prts.wiki/gamedata/latest/excel/";
-  shcema = A;
-  redirect = v;
+  shcema = I;
+  redirect = U;
 }
-const p = new x();
-await p.init();
-b({
+const u = new x();
+await u.init();
+W({
   name: "whichWayArknight",
   fn: () => {
-    window.whichWayArknight = p;
+    window.whichWayArknight = u;
   }
 });
-window.whichWay.register("arknight", p);
+window.whichWay.register("arknight", u);
 export {
-  p as whichWayArknight
+  u as whichWayArknight
 };

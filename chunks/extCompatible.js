@@ -1,8 +1,8 @@
-import { onConfig as U, onContent as y, onArenaReady as I, onSetDev as g } from "./hooks.js";
-import { whichWayFile as r } from "./file.js";
-import { whichWayToast as w } from "./toast.js";
+import { onConfig as U, onContent as h, onArenaReady as I, onSetDev as g } from "./hooks.js";
+import { whichWayFile as d } from "./file.js";
+import { whichWayToast as u } from "./toast.js";
 import { whichWayUtil as e } from "./utill.js";
-import { get as u, lib as p } from "noname";
+import { get as w, lib as p } from "noname";
 class b {
   prefixPath = "extension/十周年UI/";
   /**
@@ -11,8 +11,8 @@ class b {
    */
   enableDecadeUISpineEffect = e.config("enableDecadeUISpineEffect") || ["effect_youxikaishi", "effect_shoujidonghua", "../../../十周年UI/assets/animation/globaltexiao/shanghaishuzi/SZN_shuzi", "effect_jisha1", "effect_xianding", "../../../十周年UI/assets/animation/globaltexiao/huifushuzi/shuzi2"];
   copys = [
-    [r.compilePath("img:decadeUI/group/name_sjzx_group.png"), `${this.prefixPath}image/styles/decade/`],
-    [r.compilePath("img:decadeUI/images/name2_sjzx_group.png"), `${this.prefixPath}image/styles/shousha/`]
+    [d.compilePath("img:decadeUI/group/name_sjzx_group.png"), `${this.prefixPath}image/styles/decade/`],
+    [d.compilePath("img:decadeUI/images/name2_sjzx_group.png"), `${this.prefixPath}image/styles/shousha/`]
   ];
   async init() {
     U({
@@ -30,7 +30,7 @@ class b {
             disable: "关闭"
           },
           onclick: (i) => {
-            e.config("enable", "十周年UI") ? c.setDecadeUIAnimation(i) : w.showToast("您已关闭了十周年UI，请勿使用此功能！");
+            e.config("enable", "十周年UI") ? c.setDecadeUIAnimation(i) : u.showToast("您已关闭了十周年UI，请勿使用此功能！");
           }
         }
       }
@@ -38,11 +38,11 @@ class b {
   }
   async copy() {
     const i = window.confirm("【驶舰之向】:是否将素材导入至十周年UI？");
-    this.noTipsCopyFile = !0, i === !0 && y({
+    this.noTipsCopyFile = !0, i === !0 && h({
       name: "WhichWay_decadeUI_copyFile",
       fn: async () => {
         for (const n of this.copys)
-          await r.copyFile(n[0], n[1]);
+          await d.copyFile(n[0], n[1]);
       }
     });
   }
@@ -67,15 +67,16 @@ class b {
       }
     }) : s(), e.saveConfig("banDecadeUIAnimation", i), i;
     function s() {
-      const o = decadeUI.AnimationPlayer.prototype.playSpine;
-      decadeUI.AnimationPlayer.prototype.copyPlaySpine = decadeUI.animation.playSpine, decadeUI.AnimationPlayer.prototype.playSpine = function(l, d) {
-        const t = o.call(this, l, d);
-        return e.isDeveloperMode() && !c.enableDecadeUISpineEffect.includes(t?.name) && console.log(t?.name), window.decadeUI && window.decadeUI.animation && e.config === "partly" && !c.enableDecadeUISpineEffect.includes(t?.name) ? (window.decadeUI.animation.stopSpineAll(), window.decadeUI.animation.gl && window.decadeUI.animation.render(performance.now())) : e.config("banDecadeUIAnimation") === "disable" && (document.querySelector(".animation-player").style.display = "none"), t;
+      if (decadeUI.AnimationPlayer.prototype.copyPlaySpine) return;
+      const t = decadeUI.AnimationPlayer.prototype.playSpine;
+      decadeUI.AnimationPlayer.prototype.copyPlaySpine = t, decadeUI.AnimationPlayer.prototype.playSpine = function(l, r) {
+        const o = t.call(this, l, r);
+        return e.isDeveloperMode() && !c.enableDecadeUISpineEffect.includes(o?.name) && console.log(o?.name), window.decadeUI && window.decadeUI.animation && e.config("banDecadeUIAnimation") === "partly" && !c.enableDecadeUISpineEffect.includes(o?.name) ? (window.decadeUI.animation.stopSpineAll(), window.decadeUI.animation.gl && window.decadeUI.animation.render(performance.now())) : e.config("banDecadeUIAnimation") === "disable" && (document.querySelector(".animation-player").style.display = "none"), o;
       };
       const f = decadeUI.AnimationPlayerPool.prototype.playSpineTo;
-      decadeUI.AnimationPlayerPool.prototype.playSpineTo = function(l, d, t) {
+      decadeUI.AnimationPlayerPool.prototype.playSpineTo = function(l, r, o) {
         if (e.config("banDecadeUIAnimation") !== "disable")
-          return f.call(this, l, d, t);
+          return f.call(this, l, r, o);
       };
     }
   }
@@ -101,11 +102,11 @@ const m = {
     return window.whichWaySave.hasChar(a);
   },
   characterNameTranslate: function(a) {
-    return u.translation(a);
+    return w.translation(a);
   },
-  prefix: "extension/WhichWay/image/character/",
+  prefix: "extension/WhichWay/image/illustration/character/",
   skin: {
-    standard: "extension/WhichWay/image/skin/"
+    standard: "extension/WhichWay/image/illustration/skin/"
   }
 };
 p.qhlypkg.push(m);
@@ -116,8 +117,8 @@ const S = m, A = function() {
     for (let i in a) {
       let n = a[i];
       for (let s in n) {
-        let o = n[s];
-        Array.isArray(o.action) && (o.action = o.action[0]);
+        let t = n[s];
+        Array.isArray(t.action) && (t.action = t.action[0]);
       }
     }
     decadeUI.dynamicSkin || (decadeUI.dynamicSkin = {}), Object.assign(decadeUI.dynamicSkin, a), skinSwitch.saveSkinParams || (skinSwitch.saveSkinParams = {}), Object.assign(skinSwitch.saveSkinParams, a);
@@ -125,7 +126,7 @@ const S = m, A = function() {
 };
 class P {
   async init() {
-    this.qianhuan = S, this.decade = c, this.skinSwitch = A, y({
+    this.qianhuan = S, this.decade = c, this.skinSwitch = A, h({
       name: "whichWayExtCompatible_skinSwitch",
       fn: () => {
         this.skinSwitch();
@@ -140,15 +141,15 @@ class P {
   decade;
   skinSwitch;
 }
-const h = new P();
-await h.init();
+const y = new P();
+await y.init();
 g({
   name: "whichWayExtCompatible_setDev",
   fn() {
-    window.whichWayExtCompatible = h;
+    window.whichWayExtCompatible = y;
   }
 });
-window.whichWay.register("extCompatible", h);
+window.whichWay.register("extCompatible", y);
 export {
-  h as whichWayExtCompatible
+  y as whichWayExtCompatible
 };
