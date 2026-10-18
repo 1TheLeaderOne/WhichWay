@@ -326,6 +326,17 @@ let data = {
 			alpha: true,
 			background: `场景_青穰`,
 		},
+		源远流长: {
+			name: "dyn_illust_char_2025_shu_nlc1",
+			x: [0, 0.66],
+			y: [0, -1.52],
+			scale: 0.28,
+			version: "3.8",
+			action: ["Idle", "Special", "Interact"],
+			speed: 1,
+			alpha: true,
+			background: `场景_青穰`,
+		},
 	},
 	// W w
 	char_113_cqbw: {
