@@ -1,0 +1,26 @@
+/* 皮肤拖拽模式期间的浮动按钮条（见 src/skin/portraitDrag.ts） */
+#portraitDragBarSJZX {
+	position: fixed;
+	top: 56px;
+	left: 0;
+	right: 0;
+	z-index: 9999;
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+	pointer-events: none;
+}
+
+#portraitDragBarSJZX button {
+	pointer-events: all;
+	padding: 6px 14px;
+	border: none;
+	border-radius: 4px;
+	background-color: #ff9800;
+	color: #fff;
+	cursor: pointer;
+}
+
+#portraitDragBarSJZX button:hover {
+	background-color: #e68200;
+}

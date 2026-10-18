@@ -1,48 +1,48 @@
 import { get as p } from "noname";
 import "./file.js";
-const s = {
+const i = {
   bg: "../../../WhichWay/dynamicSkin/background/{xxx}.png",
   illust: "../../../WhichWay/dynamicSkin/illust/{xxx}/{yyy}/{zzz}"
 };
-function u(c) {
-  for (let i in c) {
-    const _ = c[i];
-    for (let r in _) {
-      const a = _[r];
-      if (a.background && (a.background = s.bg.replace("{xxx}", a.background)), a.name && (a.name = s.illust.replace("{xxx}", i).replace("{yyy}", r).replace("{zzz}", a.name)), a.alpha === void 0 && (a.alpha = !0), a.speed === void 0 && (a.speed = 1.5), Array.isArray(a.x) || (a.x = [0, 0]), Array.isArray(a.y) || (a.y = [0, 0]), a.scale === void 0 && (a.scale = 0), a.action === void 0 && (a.action = "Idle"), a.version === void 0 && (a.version = "3.8"), a.weighting === void 0) {
-        a.weighting = [8];
-        let n = Array.isArray(a.action) ? a.action : [a.action];
-        if (a.action.length > 1) {
-          let e = 2 / (n.length - 1);
-          for (let l = 0; l < n.length - 1; l++)
-            a.weighting.push(e);
-        } else a.weighting = [1];
+function h(l) {
+  for (let _ in l) {
+    const t = l[_];
+    for (let r in t) {
+      const e = t[r];
+      if (e.background && (e.background = i.bg.replace("{xxx}", e.background)), e.name && (e.name = i.illust.replace("{xxx}", _).replace("{yyy}", r).replace("{zzz}", e.name)), e.alpha === void 0 && (e.alpha = !0), e.speed === void 0 && (e.speed = 1.5), Array.isArray(e.x) || (e.x = [0, 0]), Array.isArray(e.y) || (e.y = [0, 0]), e.scale === void 0 && (e.scale = 0), e.action === void 0 && (e.action = "Idle"), e.version === void 0 && (e.version = "3.8"), e.weighting === void 0) {
+        e.weighting = [8];
+        let n = Array.isArray(e.action) ? e.action : [e.action];
+        if (e.action.length > 1) {
+          let a = 2 / (n.length - 1);
+          for (let c = 0; c < n.length - 1; c++)
+            e.weighting.push(a);
+        } else e.weighting = [1];
       }
-      for (let n in a) {
-        const e = a[n];
-        if (p.is.object(e)) {
+      for (let n in e) {
+        const a = e[n];
+        if (p.is.object(a)) {
           if (window.whichWaySave.dycOtherEffect !== !0) {
-            delete c[i][r][n];
+            delete l[_][r][n];
             continue;
           }
-          if (e.name ? e.name = s.illust.replace("{xxx}", i).replace("{yyy}", r).replace("{zzz}", e.name) : e.name = a.name, e.alpha === void 0 && (e.alpha = !1), e.speed === void 0 && (e.speed = 1.5), Array.isArray(e.x) || (e.x = [0, 0]), Array.isArray(e.y) || (e.y = [0, 0]), e.scale === void 0 && (e.scale = 0), e.version === void 0 && (e.version = "3.8"), n === "gongji" && e.action === void 0 && (e.action = "Special"), n === "chuchang" && e.action === void 0 && (e.action = "Interact"), n === "teshu" && e.action === void 0 && (e.action = "Special"), e.weighting === void 0) {
-            e.weighting = [8];
-            let l = Array.isArray(e.action) ? e.action : [e.action];
-            if (e.action.length > 1) {
-              let o = 2 / (l.length - 1);
-              for (let d = 0; d < l.length - 1; d++)
-                e.weighting.push(o);
-            } else e.weighting = [1];
+          if (a.name ? a.name = i.illust.replace("{xxx}", _).replace("{yyy}", r).replace("{zzz}", a.name) : a.name = e.name, a.alpha === void 0 && (a.alpha = !1), a.speed === void 0 && (a.speed = 1.5), Array.isArray(a.x) || (a.x = [0, 0]), Array.isArray(a.y) || (a.y = [0, 0]), a.scale === void 0 && (a.scale = 0), a.version === void 0 && (a.version = "3.8"), n === "gongji" && a.action === void 0 && (a.action = "Special"), n === "chuchang" && a.action === void 0 && (a.action = "Interact"), n === "teshu" && a.action === void 0 && (a.action = "Special"), a.weighting === void 0) {
+            a.weighting = [8];
+            let c = Array.isArray(a.action) ? a.action : [a.action];
+            if (a.action.length > 1) {
+              let o = 2 / (c.length - 1);
+              for (let d = 0; d < c.length - 1; d++)
+                a.weighting.push(o);
+            } else a.weighting = [1];
           }
         }
       }
     }
   }
-  return c;
+  return l;
 }
-let t = {
+let s = {
   //近卫阿米娅
-  spamiyamrfz: {
+  char_1001_amiya2: {
     于万千宇宙之中: {
       name: "dyn_illust_char_1001_amiya2_sale16",
       x: [0, 0.235],
@@ -68,7 +68,7 @@ let t = {
     }
   },
   //异客
-  kamimrfz: {
+  char_472_pasngr: {
     今昔须臾之梦: {
       name: "dyn_illust_char_472_pasngr_epoque17",
       x: [0, 0.287],
@@ -81,7 +81,7 @@ let t = {
     }
   },
   //凯尔希
-  kaierximrfz: {
+  char_003_kalts: {
     残余: {
       name: "dyn_illust_char_003_kalts_boc6",
       x: [0, 0.551],
@@ -117,7 +117,7 @@ let t = {
     }
   },
   // 纯烬艾雅法拉
-  spxiaoyangmrfz: {
+  char_1016_agoat2: {
     经典形象: {
       name: "dyn_illust_char_1016_agoat2",
       x: [0, 0.426],
@@ -155,7 +155,7 @@ let t = {
     }
   },
   // 缪尔赛思
-  miumiumrfz: {
+  char_249_mlyss: {
     经典形象: {
       name: "dyn_illust_char_249_mlyss",
       x: [0, -0.03],
@@ -190,7 +190,7 @@ let t = {
     }
   },
   //老鲤
-  laolimrfz: {
+  char_322_lmlee: {
     手到牌来: {
       name: "dyn_illust_char_322_lmlee_witch3",
       x: [0, 0.43],
@@ -203,7 +203,7 @@ let t = {
     }
   },
   //空弦
-  kongxianmrfz: {
+  char_332_archet: {
     至虔者荣光: {
       name: "dyn_illust_char_332_archet_sale14",
       x: [0, 0.59],
@@ -216,7 +216,7 @@ let t = {
     }
   },
   //傀影
-  kuiyingmrfz: {
+  char_250_phatom: {
     焦点: {
       name: "dyn_illust_char_250_phatom_sale4",
       x: [0, 0.53],
@@ -229,7 +229,7 @@ let t = {
     }
   },
   //水月
-  shuiyuemrfz: {
+  char_437_mizuki: {
     夏日餮宴: {
       name: "dyn_illust_char_437_mizuki_sale7",
       x: [0, 0.57],
@@ -242,7 +242,7 @@ let t = {
     }
   },
   // 迷迭香
-  midiexiangmrfz: {
+  char_391_rosmon: {
     经典形象: {
       name: "dyn_illust_char_391_rosmon",
       x: [0, 0.78],
@@ -277,7 +277,7 @@ let t = {
     }
   },
   // 黍
-  shumrfz: {
+  char_2025_shu: {
     经典形象: {
       name: "dyn_illust_char_2025_shu",
       x: [0, 0.48],
@@ -299,10 +299,21 @@ let t = {
       speed: 1,
       alpha: !0,
       background: "场景_青穰"
+    },
+    源远流长: {
+      name: "dyn_illust_char_2025_shu_nlc1",
+      x: [0, 0.66],
+      y: [0, -1.52],
+      scale: 0.28,
+      version: "3.8",
+      action: ["Idle", "Special", "Interact"],
+      speed: 1,
+      alpha: !0,
+      background: "场景_青穰"
     }
   },
   // W w
-  wmrfz: {
+  char_113_cqbw: {
     经典形象: {
       name: "dyn_illust_char_113_cqbw",
       x: [0, 0.59],
@@ -327,7 +338,7 @@ let t = {
     }
   },
   // 塑心
-  suxinmrfz: {
+  char_245_cello: {
     经典形象: {
       name: "dyn_illust_char_245_cello",
       x: [0, 0.58],
@@ -351,7 +362,7 @@ let t = {
     }
   },
   // 浊心斯卡蒂
-  spsikadimrfz: {
+  char_1012_skadi2: {
     经典形象: {
       name: "dyn_illust_char_1012_skadi2",
       x: [0, 0.48],
@@ -385,7 +396,7 @@ let t = {
     }
   },
   //焰影苇草
-  spweicaomrfz: {
+  char_1020_reed2: {
     博物: {
       name: "dyn_illust_char_1020_reed2_epoque30",
       x: [0, 0.36],
@@ -409,7 +420,7 @@ let t = {
     }
   },
   // 耀骑士临光
-  splinguangmrfz: {
+  char_1014_nearl2: {
     经典形象: {
       name: "dyn_illust_char_1014_nearl2",
       x: [0, 0.93],
@@ -433,7 +444,7 @@ let t = {
     }
   },
   // 归溟幽灵鲨
-  spyoulingshamrfz: {
+  char_1023_ghost2: {
     经典形象: {
       name: "dyn_illust_char_1023_ghost2",
       x: [0, 0.48],
@@ -457,7 +468,7 @@ let t = {
     }
   },
   // 百炼嘉维尔
-  spjiaweiermrfz: {
+  char_1026_gvial2: {
     经典形象: {
       name: "dyn_illust_char_1026_gvial2",
       x: [0, 0.78],
@@ -481,7 +492,7 @@ let t = {
     }
   },
   //银灰
-  yinhuimrfz: {
+  char_172_svrash: {
     不融冰: {
       name: "dyn_illust_char_172_svrash_ambienceSynesthesia4",
       x: [0, 0.41],
@@ -495,7 +506,7 @@ let t = {
     }
   },
   //夜莺
-  yeyingmrfz: {
+  char_179_cgbird: {
     流辉: {
       name: "dyn_illust_char_179_cgbird_sightseer1",
       x: [0, 0.94],
@@ -509,7 +520,7 @@ let t = {
     }
   },
   // 缄默德克萨斯 德狗
-  spdegoumrfz: {
+  char_1028_texas2: {
     经典形象: {
       name: "dyn_illust_char_1028_texas2",
       x: [0, 0.51],
@@ -543,7 +554,7 @@ let t = {
     }
   },
   // 维什戴尔
-  weishidaiermrfz: {
+  char_1035_wisdel: {
     经典形象: {
       name: "dyn_illust_char_1035_wisdel",
       x: [0, 0.49],
@@ -568,7 +579,7 @@ let t = {
     }
   },
   // 年
-  nianmrfz: {
+  char_2014_nian: {
     经典形象: {
       name: "dyn_illust_char_2014_nian2",
       x: [0, 0.48],
@@ -604,7 +615,7 @@ let t = {
     }
   },
   // 夕
-  xigymrfz: {
+  char_2015_dusk: {
     经典形象: {
       name: "dyn_illust_char_2015_dusk",
       x: [0, 0.56],
@@ -640,7 +651,7 @@ let t = {
     }
   },
   // 令
-  lingmrfz: {
+  char_2023_ling: {
     经典形象: {
       name: "dyn_illust_char_2023_ling",
       x: [0, 0.58],
@@ -687,7 +698,7 @@ let t = {
     }
   },
   // 重岳
-  chongyuemrfz: {
+  char_2024_chyue: {
     经典形象: {
       name: "dyn_illust_char_2024_chyue",
       x: [0, 0.5],
@@ -723,7 +734,7 @@ let t = {
     }
   },
   // 荒芜拉普兰德
-  splapulandemrfz: {
+  char_1038_whitw2: {
     经典形象: {
       name: "dyn_illust_char_1038_whitw2",
       x: [0, 0.51],
@@ -748,7 +759,7 @@ let t = {
     }
   },
   //维多利亚 维纳
-  spweinamrfz: {
+  char_1019_siege2: {
     光耀之途: {
       name: "dyn_illust_char_1019_siege2_epoque50",
       x: [0, 0.58],
@@ -762,7 +773,7 @@ let t = {
     }
   },
   //凛御银灰
-  spyinhuimrfz: {
+  char_1045_svash2: {
     经典形象: {
       name: "dyn_illust_char_1045_svash2",
       x: [0, 0.55],
@@ -776,7 +787,7 @@ let t = {
     }
   },
   //魔王
-  mowangmrfz: {
+  char_4134_cetsyr: {
     追悼: {
       name: "dyn_illust_char_4134_cetsyr_epoque50",
       x: [0, 0.33],
@@ -790,7 +801,7 @@ let t = {
     }
   },
   // 新约能天使
-  spnengtianshimrfz: {
+  char_1041_angel2: {
     经典形象: {
       name: "dyn_illust_char_1041_angel2",
       x: [0, 0.35],
@@ -815,7 +826,7 @@ let t = {
     }
   },
   // 佩佩
-  peipeimrfz: {
+  char_4058_pepe: {
     经典形象: {
       name: "dyn_illust_char_4058_pepe",
       x: [0, 0.46],
@@ -842,7 +853,7 @@ let t = {
     }
   },
   //死芒 爱布拉娜
-  aibulanamrfz: {
+  char_450_necras: {
     夏卉: {
       name: "necras_xiahui",
       x: [0, 0.57],
@@ -856,7 +867,7 @@ let t = {
     }
   },
   //引星棘刺 异格棘刺
-  spjicimrfz: {
+  char_1039_thorn2: {
     无际之帆: {
       name: "spjici_wujizhifan",
       x: [0, 0.46],
@@ -870,7 +881,7 @@ let t = {
     }
   },
   //斩业星熊
-  spxingxiongmrfz: {
+  char_1044_hsgma2: {
     经典形象: {
       name: "spxingxiong_default",
       x: [0, 0.618],
@@ -895,7 +906,7 @@ let t = {
     }
   },
   //林
-  linmrfz: {
+  char_4080_lin: {
     夏卉: {
       name: "linSummer",
       x: [0, -0.16],
@@ -920,7 +931,7 @@ let t = {
     }
   },
   //锏
-  jianmrfz: {
+  char_4116_blkkgt: {
     暗月的影子: {
       name: "dyn_illust_char_4116_blkkgt_witch5",
       x: [0, 0.47],
@@ -934,7 +945,7 @@ let t = {
     }
   },
   //伊内丝
-  yineisimrfz: {
+  char_4087_ines: {
     蝶舞华章: {
       name: "dyn_illust_char_4087_ines_ambienceSynesthesia",
       x: [0, 0.6],
@@ -959,7 +970,7 @@ let t = {
     }
   },
   // 余
-  yumrfz: {
+  char_2026_yu: {
     经典形象: {
       name: "dyn_illust_char_2026_yu",
       x: [0, 0.46],
@@ -984,7 +995,7 @@ let t = {
     }
   },
   // 史尔特尔
-  semrfz: {
+  char_350_surtr: {
     缤纷奇境: {
       name: "dyn_illust_char_350_surtr_summer9",
       x: [0, 0.29],
@@ -1009,7 +1020,7 @@ let t = {
     }
   },
   // 澄闪
-  chengshanmrfz: {
+  char_377_gdglow: {
     夏卉: {
       name: "dyn_illust_char_377_gdglow_summer12",
       x: [0, 0.63],
@@ -1023,7 +1034,7 @@ let t = {
     }
   },
   // 水陈 假日威龙陈
-  spzzxpmrfz: {
+  char_1013_chen2: {
     万重山: {
       name: "dyn_illust_char_1013_chen2_boc6",
       x: [0, 0.62],
@@ -1059,7 +1070,7 @@ let t = {
     }
   },
   // 医疗阿米娅
-  medical_amiyamrfz: {
+  char_1037_amiya3: {
     寰宇独奏: {
       name: "dyn_illust_char_1037_amiya3_sale13",
       x: [0, 0.28],
@@ -1073,7 +1084,7 @@ let t = {
     }
   },
   // 左乐
-  zuolemrfz: {
+  char_4121_zuole: {
     少年游: {
       name: "dyn_illust_char_4121_zuole_nian11",
       x: [0, 0.77],
@@ -1087,7 +1098,7 @@ let t = {
     }
   },
   //阿斯卡纶
-  asikalunmrfz: {
+  char_4132_ascln: {
     趋光之暗: {
       name: "asklFixed",
       x: [0, 0.45],
@@ -1101,7 +1112,7 @@ let t = {
     }
   },
   //逻格斯 logos
-  luogesimrfz: {
+  char_4133_logos: {
     辉煌的静谧: {
       name: "logos",
       x: [0, 0.19],
@@ -1115,7 +1126,7 @@ let t = {
     }
   },
   // 玛恩纳 叔叔
-  maennamrfz: {
+  char_4064_mlynar: {
     远路: {
       name: "dyn_illust_char_4064_mlynar_epoque28",
       x: [0, 0.28],
@@ -1129,7 +1140,7 @@ let t = {
     }
   },
   // 圣约送葬人
-  spsongzangrenmrfz: {
+  char_1032_excu2: {
     众志归一: {
       name: "dyn_illust_char_1032_excu2_sale12",
       x: [0, 0.55],
@@ -1143,7 +1154,7 @@ let t = {
     }
   },
   // 鸿雪
-  hongxuemrfz: {
+  char_4055_bgsnow: {
     字句中的雪原: {
       name: "hongxue",
       x: [0, 0.58],
@@ -1157,7 +1168,7 @@ let t = {
     }
   },
   //隐德来希
-  yindelaiximrfz: {
+  char_4010_etlchi: {
     耀目之蓝: {
       name: "dyn_illust_char_4010_etlchi_winter5",
       x: [0, 0.593],
@@ -1171,7 +1182,7 @@ let t = {
     }
   },
   //望
-  wangmrfz: {
+  char_2027_wang: {
     经典形象: {
       name: "dyn_illust_char_2027_wang",
       x: [0, 0.559],
@@ -1185,7 +1196,7 @@ let t = {
     }
   },
   // 塞雷娅
-  saileiyamrfz: {
+  char_202_demkni: {
     黑白冷峻: {
       name: "dyn_illust_char_202_demkni_ambienceSynesthesia7",
       x: [0, 0.65],
@@ -1199,7 +1210,7 @@ let t = {
     }
   },
   // 遥
-  ziyeyaomrfz: {
+  char_4202_haruka: {
     常世之幻: {
       name: "dyn_illust_char_4202_haruka_iteration6",
       x: [0, 0.724],
@@ -1213,7 +1224,7 @@ let t = {
     }
   },
   // mon3tr
-  mon3trmrfz: {
+  char_4179_monstr: {
     锋锐: {
       name: "dyn_illust_char_4179_monstr_boc11",
       x: [0, 0.494],
@@ -1227,7 +1238,7 @@ let t = {
     }
   },
   //凯尔希·思衡托
-  spkaierximrfz: {
+  char_1052_kalts2: {
     经典形象: {
       name: "dyn_illust_char_1052_kalts2",
       x: [0, 0.324],
@@ -1241,7 +1252,7 @@ let t = {
     }
   },
   // 圣聆初雪
-  spchuxuemrfz: {
+  char_1046_sbell2: {
     曙光祝颂: {
       name: "dyn_illust_char_1046_sbell2_ambienceSynesthesia8",
       x: [0, 0.862],
@@ -1255,7 +1266,7 @@ let t = {
     }
   },
   // 予愿安洁丽娜
-  spanjielinamrfz: {
+  char_1015_aglna2: {
     经典形象: {
       name: "dyn_illust_char_1015_aglna2",
       x: [0, 0.469],
@@ -1270,5 +1281,5 @@ let t = {
     }
   }
 };
-t = u(t);
-window.whichWaySave.dycSave.assets = t;
+s = h(s);
+window.whichWaySave.dycSave.assets = s;

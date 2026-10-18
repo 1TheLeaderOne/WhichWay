@@ -1,104 +1,123 @@
-import { game as l, ui as x, _status as g, lib as i, get as m, Game as B, Get as j } from "noname";
-import { r as V, a as K } from "./tips-prompt-shared.js";
-import { onBeforeContent as Y } from "./hooks.js";
-import { s as Q } from "./nonameEx-custom-skill-shared.js";
-const X = "whichWayFakeCard", ee = ["prompt", "prompt2", "promptx", "selectCard", "filterOk", "ai", "forced", "complexCard", "complexSelect", "allowChooseAll", "hsskill", "type"];
-function te(a, t) {
+import { game as c, ui as x, _status as p, lib as o, get as f, Game as B, Get as q } from "noname";
+import { r as V, a as Y } from "./tips-prompt-shared.js";
+import { onBeforeContent as Q } from "./hooks.js";
+import { s as ee } from "./nonameEx-custom-skill-shared.js";
+const b = "whichWayFakeCard", te = ["prompt", "prompt2", "promptx", "selectCard", "filterOk", "ai", "forced", "complexCard", "complexSelect", "allowChooseAll", "hsskill", "type"], re = [
+  "prompt",
+  "prompt2",
+  "promptx",
+  "selectCard",
+  "selectTarget",
+  "filterTarget",
+  "filterOk",
+  "ai1",
+  "ai2",
+  "forced",
+  "hsskill",
+  "deadTarget",
+  "includeOut",
+  "complexCard",
+  "complexSelect",
+  "allowChooseAll",
+  "type",
+  "animate"
+];
+function Z(a, t) {
   const e = a.node.handcards1, r = a.node.handcards2, n = x.handcards1Container, s = x.handcards2Container;
   if (!n || !e) return null;
-  const o = new Set(t), f = 10;
+  const i = new Set(t), d = 10;
   let u = "real";
-  const d = /* @__PURE__ */ new Set(), y = /* @__PURE__ */ new Set();
-  let k = 0;
-  const S = [], _ = [
+  const g = /* @__PURE__ */ new Set(), y = /* @__PURE__ */ new Set();
+  let C = 0;
+  const w = [], _ = [
     { inner: e, outer: n },
     { inner: r, outer: s }
-  ], h = x.updatehl, p = (c) => o.has(c) || c.classList.contains("glows"), v = (c) => u === "fake" ? p(c) : !p(c), A = (c) => {
-    let C = 0;
-    for (const { inner: b } of _)
-      if (b)
-        for (const P of b.childNodes) {
-          const F = (
+  ], l = x.updatehl, m = (h) => i.has(h) || h.classList.contains("glows"), T = (h) => u === "fake" ? m(h) : !m(h), E = (h) => {
+    let k = 0;
+    for (const { inner: M } of _)
+      if (M)
+        for (const O of M.childNodes) {
+          const P = (
             /** @type { HTMLElement } */
-            P
+            O
           );
-          !F.classList || !F.classList.contains("card") || F.classList.contains("removing") || p(F) === c && C++;
+          !P.classList || !P.classList.contains("card") || P.classList.contains("removing") || m(P) === h && k++;
         }
-    return C;
-  }, E = () => {
-    const c = u === "real" ? "fake" : "real";
-    A(c === "fake") && (u = c, x.updatehl());
-  }, G = function() {
-    if (g.dragged || g.justdragged || !v(this) || this.classList.contains("removing")) return;
-    const c = Date.now();
-    c - k < 350 || (k = c, E());
-  }, H = (c) => {
-    y.has(c) || (y.add(c), c.addEventListener(i.config.touchscreen ? "touchend" : "click", G));
-  }, T = () => {
-    const c = x._handcardHover;
-    for (const { inner: C, outer: b } of _) {
-      if (!C || !b || !C.childNodes.length) continue;
-      const P = Array.from(C.childNodes).filter(
-        (L) => L.classList && L.classList.contains("card") && !L.classList.contains("removing")
+    return k;
+  }, L = () => {
+    const h = u === "real" ? "fake" : "real";
+    E(h === "fake") && (u = h, x.updatehl());
+  }, X = function() {
+    if (p.dragged || p.justdragged || !T(this) || this.classList.contains("removing")) return;
+    const h = Date.now();
+    h - C < 350 || (C = h, L());
+  }, H = (h) => {
+    y.has(h) || (y.add(h), h.addEventListener(o.config.touchscreen ? "touchend" : "click", X));
+  }, A = () => {
+    const h = x._handcardHover;
+    for (const { inner: k, outer: M } of _) {
+      if (!k || !M || !k.childNodes.length) continue;
+      const O = Array.from(k.childNodes).filter(
+        (F) => F.classList && F.classList.contains("card") && !F.classList.contains("removing")
       );
-      if (!P.length) continue;
-      const F = (L, I, w) => {
-        const O = /translateX\((-?[\d.]+)px\)/.exec(L.style.transform || "");
-        return O ? parseFloat(O[1]) : I * w;
-      }, R = i.config.fold_card && P.length > 1 ? Math.max(32, Math.min(112, (b.offsetWidth - 128) / (P.length - 1))) : 112;
-      let U = 0, $, N = 0;
-      P.forEach((L, I) => {
-        const w = (
+      if (!O.length) continue;
+      const P = (F, R, S) => {
+        const G = /translateX\((-?[\d.]+)px\)/.exec(F.style.transform || "");
+        return G ? parseFloat(G[1]) : R * S;
+      }, $ = o.config.fold_card && O.length > 1 ? Math.max(32, Math.min(112, (M.offsetWidth - 128) / (O.length - 1))) : 112;
+      let U = 0, I, N = 0;
+      O.forEach((F, R) => {
+        const S = (
           /** @type { HTMLElement } */
-          L
+          F
         );
-        if (H(w), v(w)) {
-          const z = w === c ? Math.max(f, w.offsetWidth || 0) : f;
-          N = I * R - U, U += R - z, w.classList.contains("selectable") && (d.add(w), w.classList.remove("selectable"));
+        if (H(S), T(S)) {
+          const K = S === h ? Math.max(d, S.offsetWidth || 0) : d;
+          N = R * $ - U, U += $ - K, S.classList.contains("selectable") && (g.add(S), S.classList.remove("selectable"));
         } else
-          N = F(w, I, R) - U, d.delete(w) && w.classList.add("selectable");
-        const O = `translateX(${Math.round(N)}px)`;
-        w._transform = O, w.style.transform = w.classList.contains("selected") ? `${O} translateY(-20px)` : O, $ = w;
+          N = P(S, R, $) - U, g.delete(S) && S.classList.add("selectable");
+        const G = `translateX(${Math.round(N)}px)`;
+        S._transform = G, S.style.transform = S.classList.contains("selected") ? `${G} translateY(-20px)` : G, I = S;
       });
-      const J = Math.round(N) + ($?.offsetWidth || 0);
-      C.style.setProperty("width", `${J}px`, "important"), b.classList.toggle("scrollh", J > b.offsetWidth);
+      const J = Math.round(N) + (I?.offsetWidth || 0);
+      k.style.setProperty("width", `${J}px`, "important"), M.classList.toggle("scrollh", J > M.offsetWidth);
     }
-  }, q = function(...c) {
-    const C = h.apply(this, c);
+  }, z = function(...h) {
+    const k = l.apply(this, h);
     try {
-      T();
-    } catch (b) {
-      console.warn("[chooseFakeCard] 应用假牌布局失败：", b);
+      A();
+    } catch (M) {
+      console.warn("[chooseFakeCard] 应用假牌布局失败：", M);
     }
-    return C;
+    return k;
   }, W = () => {
-    x.updatehl = h;
-    for (const c of y) c.removeEventListener(i.config.touchscreen ? "touchend" : "click", G);
+    x.updatehl = l;
+    for (const h of y) h.removeEventListener(o.config.touchscreen ? "touchend" : "click", X);
     y.clear();
-    for (const c of d) c.classList.add("selectable");
-    d.clear();
-    for (const { inner: c, outer: C } of _)
-      !c || !C || (c.style.removeProperty("width"), C.classList.remove("scrollh"));
-    for (const { card: c, origin: C } of S)
-      c.parentNode !== e && c.parentNode !== r || C.appendChild(c);
+    for (const h of g) h.classList.add("selectable");
+    g.clear();
+    for (const { inner: h, outer: k } of _)
+      !h || !k || (h.style.removeProperty("width"), k.classList.remove("scrollh"));
+    for (const { card: h, origin: k } of w)
+      h.parentNode !== e && h.parentNode !== r || k.appendChild(h);
     x.updatehl();
   };
   try {
-    if (!m.is.singleHandcard())
-      for (const c of Array.from(r.childNodes)) {
-        const C = (
+    if (!f.is.singleHandcard())
+      for (const h of Array.from(r.childNodes)) {
+        const k = (
           /** @type { Card } */
-          c
+          h
         );
-        C.classList.contains("removing") || C.classList.contains("glows") || o.has(C) || (S.push({ card: C, origin: r }), e.appendChild(C));
+        k.classList.contains("removing") || k.classList.contains("glows") || i.has(k) || (w.push({ card: k, origin: r }), e.appendChild(k));
       }
-    x.updatehl = q, x.updatehl();
-  } catch (c) {
-    throw W(), c;
+    x.updatehl = z, x.updatehl();
+  } catch (h) {
+    throw W(), h;
   }
   return W;
 }
-const Z = {
+const j = {
   /**
    * 假牌选牌（`player.chooseFakeCard()` 的 content）。
    *
@@ -118,34 +137,90 @@ const Z = {
       if (!r.length) return;
       const n = [];
       let s = null;
-      const o = a.tagName ?? a.name, f = X in i.translate, u = i.translate[X];
-      o && (i.translate[X] = m.translation(o));
+      const i = a.tagName ?? a.name, d = b in o.translate, u = o.translate[b];
+      i && (o.translate[b] = f.translation(i));
       try {
-        n.push(...l.createFakeCards(r)), n.forEach((h, p) => {
-          h._cardid || (h._cardid = `whichWayFake_${p}_${m.id()}`);
+        n.push(...c.createFakeCards(r)), n.forEach((l, m) => {
+          l._cardid || (l._cardid = `whichWayFake_${m}_${f.id()}`);
         });
-        const d = new Map(n.map((h, p) => [h, r[p]])), y = new Set(n);
-        e.directgains(n, null, X), e == l.me && (s = te(e, n));
-        const k = {
+        const g = new Map(n.map((l, m) => [l, r[m]])), y = new Set(n);
+        e.directgains(n, null, b), e == c.me && (s = Z(e, n));
+        const C = {
           //position 固定为 "s"：只迭代「特殊区」。配合 filterCard 限定，
           //既不会误选真手牌，也不会误选木牛流马等其它既有的特殊区牌
           position: "s",
           //filterCard 需要额外包裹：只允许选中本次创建的假牌
-          filterCard: (h, p, v) => y.has(h) && a.filterCard(h, p, v)
+          filterCard: (l, m, T) => y.has(l) && a.filterCard(l, m, T)
         };
-        for (const h of ee)
-          a[h] != null && (k[h] = a[h]);
-        const S = await e.chooseCard(k).forResult() || {}, _ = (S.cards || []).map((h) => d.get(h) || h);
+        for (const l of te)
+          a[l] != null && (C[l] = a[l]);
+        const w = await e.chooseCard(C).forResult() || {}, _ = (w.cards || []).map((l) => g.get(l) || l);
         a.result = {
-          ...S,
-          bool: S.bool ?? !1,
+          ...w,
+          bool: w.bool ?? !1,
           //cards 与本体 result 保持一致：就是玩家选中的那几张假牌
-          cards: S.cards || [],
+          cards: w.cards || [],
           //links 携带上面的假牌对应的真实值（本体在纯选牌场景下不会往 links 写内容）
           links: _
-        }, a.glow_result && _.forEach((h) => h?.classList?.add("glow"));
+        }, a.glow_result && _.forEach((l) => l?.classList?.add("glow"));
       } finally {
-        s && s(), n.length && l.deleteFakeCards(n), f ? i.translate[X] = u : delete i.translate[X];
+        s && s(), n.length && c.deleteFakeCards(n), d ? o.translate[b] = u : delete o.translate[b];
+      }
+    }
+  ],
+  /**
+   * 假牌选牌并选目标（`player.chooseFakeCardTarget()` 的 content）。
+   *
+   * 结构与 `chooseFakeCard` 完全一致：造牌 → 置入特殊区 → 折叠真手牌 → 委托本体 `chooseCardTarget`
+   * 完成「选牌 + 选目标」→ 把选中的假牌回映射成原牌放进 `result.links`（`result.targets` 原样保留）→
+   * finally 复原手牌布局并删除假牌。
+   *
+   * 为什么委托给本体 chooseCardTarget：cardChooseAll、提示计数、selectCard / selectTarget 范围门控、
+   * `filterTarget(card, player, target)` 的目标侧语义、AI 选牌选目标（ai1 / ai2）、在线 / 多端、
+   * 目标动画等全部白拿，且天然与 chooseCardTarget 保持一致；折叠的接管与复原同样放进同一个 try / finally。
+   *
+   * 与 chooseFakeCard 的唯一区别：这里的目标侧 `filterTarget` **原样透传**，收到的 `card` 就是玩家
+   * 选中的那张假牌（与其原牌同名，`get.info` / `card.name` 一致），因此本体语义下无差别。
+   *
+   * @type { ContentFuncByAll[] }
+   */
+  chooseFakeCardTarget: [
+    async function(a, t, e) {
+      a.result = { bool: !1, cards: [], targets: [], links: [], confirm: "ok" };
+      const r = Array.isArray(a.cards) ? a.cards.slice() : [];
+      if (!r.length) return;
+      const n = [];
+      let s = null;
+      const i = a.tagName ?? a.name, d = b in o.translate, u = o.translate[b];
+      i && (o.translate[b] = f.translation(i));
+      try {
+        n.push(...c.createFakeCards(r)), n.forEach((l, m) => {
+          l._cardid || (l._cardid = `whichWayFake_${m}_${f.id()}`);
+        });
+        const g = new Map(n.map((l, m) => [l, r[m]])), y = new Set(n);
+        e.directgains(n, null, b), e == c.me && (s = Z(e, n));
+        const C = {
+          //position 固定为 "s"：Check.card 只迭代「特殊区」。配合 filterCard 限定，
+          //既不会误选真手牌，也不会误选木牛流马等其它既有的特殊区牌
+          position: "s",
+          //filterCard 需要额外包裹：只允许选中本次创建的假牌
+          filterCard: (l, m, T) => y.has(l) && a.filterCard(l, m, T)
+        };
+        for (const l of re)
+          a[l] != null && (C[l] = a[l]);
+        const w = await e.chooseCardTarget(C).forResult() || {}, _ = (w.cards || []).map((l) => g.get(l) || l);
+        a.result = {
+          ...w,
+          bool: w.bool ?? !1,
+          //cards 与本体 result 保持一致：就是玩家选中的那几张假牌
+          cards: w.cards || [],
+          //targets 原样保留（本体选目标阶段的产物）
+          targets: w.targets || [],
+          //links 携带上面的假牌对应的真实值
+          links: _
+        }, a.glow_result && _.forEach((l) => l?.classList?.add("glow"));
+      } finally {
+        s && s(), n.length && c.deleteFakeCards(n), d ? o.translate[b] = u : delete o.translate[b];
       }
     }
   ],
@@ -182,73 +257,73 @@ const Z = {
       a.result = { bool: !1, targets: [], control: void 0, index: -1, confirm: "cancel" };
       let r, n = [];
       const s = a.isMine();
-      let o, f, u = null, d, y = !1;
-      const k = (h) => {
-        const p = typeof a.controls == "function" ? a.controls(h.slice()) : a.controls;
-        return Array.isArray(p) ? p.slice() : [];
+      let i, d, u = null, g, y = !1;
+      const C = (l) => {
+        const m = typeof a.controls == "function" ? a.controls(l.slice()) : a.controls;
+        return Array.isArray(m) ? m.slice() : [];
       };
-      function S(h, p) {
-        if (!(y || g.dragged || g.justdragged)) {
-          if (y = !0, setTimeout(() => y = !1, 200), r = h, h === "cancel2") {
+      function w(l, m) {
+        if (!(y || p.dragged || p.justdragged)) {
+          if (y = !0, setTimeout(() => y = !1, 200), r = l, l === "cancel2") {
             x.confirm && (x.confirm.close(), delete x.confirm), x.click.cancel();
             return;
           }
-          _(), l.check();
+          _(), c.check();
         }
       }
       function _() {
-        const h = x.selected.targets.slice();
-        h.length && (n = h);
-        const p = k(h), v = p.join("\0");
-        if (v !== u && (u = v, r != null && !p.includes(r) && (r = void 0), s && (p.length ? f ? f.replace(p.concat(S)) : f = x.create.control(p.concat(S)) : f && (f.close(), f = void 0))), !!f)
-          for (const A of Array.from(f.childNodes)) A.classList.toggle("glow", A.link === r);
+        const l = x.selected.targets.slice();
+        l.length && (n = l);
+        const m = C(l), T = m.join("\0");
+        if (T !== u && (u = T, r != null && !m.includes(r) && (r = void 0), s && (m.length ? d ? d.replace(m.concat(w)) : d = x.create.control(m.concat(w)) : d && (d.close(), d = void 0))), !!d)
+          for (const E of Array.from(d.childNodes)) E.classList.toggle("glow", E.link === r);
       }
       try {
-        if (s && (l.uncheck(), o = x.create.dialog("", "hidden"), a.prompt && o.addText(a.prompt, a.prompt.length <= 20), a.prompt2 && o.addText(a.prompt2, a.prompt2.length <= 20), o.open(), _()), d = e.chooseTarget({
+        if (s && (c.uncheck(), i = x.create.dialog("", "hidden"), a.prompt && i.addText(a.prompt, a.prompt.length <= 20), a.prompt2 && i.addText(a.prompt2, a.prompt2.length <= 20), i.open(), _()), g = e.chooseTarget({
           filterTarget: a.filterTarget,
           selectTarget: a.selectTarget,
           //隐藏技能：与本体一致，引擎会在需要时（`_status.prehidden_skills`）直接取消本次选择
           hsskill: a.hsskill,
           ai: a.ai,
           forced: a.forced,
-          dialog: o,
+          dialog: i,
           //隐藏「取消」按钮：本函数的约束是"必须同时选定目标与选项才结束"（fakeforce 只影响这个按钮，
           //不影响 forced 对目标数下限的门控；想允许放弃的调用方请在 controls 里加 "cancel2"）
           fakeforce: !0,
           //「确定」门控：本地交互时必须已点选选项才会出现（见文件头注释）。
           //AI / 托管 / 联机客机走引擎自己的收尾（选项由事件结束后按 controlAi 补），这里不能拦：
           //引擎的 AI 分支会因 filterOk 不通过而直接取消事件，AI 就永远选不到选项了。
-          filterOk: () => typeof a.filterOk == "function" && !a.filterOk() ? !1 : !s || g.auto || d?.result === "ai" ? !0 : r != null || !k(x.selected.targets.slice()).length
+          filterOk: () => typeof a.filterOk == "function" && !a.filterOk() ? !1 : !s || p.auto || g?.result === "ai" ? !0 : r != null || !C(x.selected.targets.slice()).length
         }), s) {
-          d.custom || (d.custom = { add: {}, replace: {} }), d.custom.add || (d.custom.add = {});
-          const H = d.custom.add.target;
-          d.custom.add.target = () => {
+          g.custom || (g.custom = { add: {}, replace: {} }), g.custom.add || (g.custom.add = {});
+          const H = g.custom.add.target;
+          g.custom.add.target = () => {
             typeof H == "function" && H.call(this), _();
           };
         }
-        const h = await d.forResult() || {}, p = !!h.bool, v = p && Array.isArray(h.targets) ? h.targets.slice() : n.slice();
-        if (r == null && v.length) {
-          const H = k(v);
+        const l = await g.forResult() || {}, m = !!l.bool, T = m && Array.isArray(l.targets) ? l.targets.slice() : n.slice();
+        if (r == null && T.length) {
+          const H = C(T);
           if (H.length) {
-            let T = typeof a.controlAi == "function" ? a.controlAi(a.getParent(), e) : void 0;
-            typeof T == "number" && (T = H[T]), T == null && (T = H[0]), r = T;
+            let A = typeof a.controlAi == "function" ? a.controlAi(a.getParent(), e) : void 0;
+            typeof A == "number" && (A = H[A]), A == null && (A = H[0]), r = A;
           }
         }
-        const A = k(v), E = r != null && A.includes(r) ? r : void 0, G = E != null && E !== "cancel2";
+        const E = C(T), L = r != null && E.includes(r) ? r : void 0, X = L != null && L !== "cancel2";
         a.result = {
-          bool: p && G,
-          targets: v,
-          control: E,
-          index: E != null ? A.indexOf(E) : -1,
-          confirm: G ? "ok" : "cancel"
+          bool: m && X,
+          targets: T,
+          control: L,
+          index: L != null ? E.indexOf(L) : -1,
+          confirm: X ? "ok" : "cancel"
         };
       } finally {
-        f && f.close(), o && o.close(), l.uncheck();
+        d && d.close(), i && i.close(), c.uncheck();
       }
     }
   ]
 };
-class re extends i.element.Player {
+class ne extends o.element.Player {
   /**
    * 移除手牌中所有的（驶舰之向）提示
    * @param { string } id 删除指定id的描述，不填删除所有
@@ -259,10 +334,10 @@ class re extends i.element.Player {
   /**
    * 设置某一个技能的使用次数
    * @param { number } num 清除次数
-   * @param { string } skill 技能名  
+   * @param { string } skill 技能名
    */
   setSkillCount(t, e) {
-    this.getSkills().includes(t) || console.warn(`${m.translation(this)}(${this.name}) 没有技能 ${t}`), this.getStat("skill")?.[t] && (this.getStat("skill")[t] += e, typeof this.stat.allSkills == "number" && (this.stat.allSkills += e)), typeof this.storage?.counttrigger?.[t] == "number" && (this.storage.counttrigger[t] += e);
+    this.getSkills().includes(t) || console.warn(`${f.translation(this)}(${this.name}) 没有技能 ${t}`), this.getStat("skill")?.[t] && (this.getStat("skill")[t] += e, typeof this.stat.allSkills == "number" && (this.stat.allSkills += e)), typeof this.storage?.counttrigger?.[t] == "number" && (this.storage.counttrigger[t] += e);
   }
   /**
    * 从传入的牌中选牌（假牌版）。
@@ -310,8 +385,46 @@ class re extends i.element.Player {
    * ```
    */
   chooseFakeCard(t) {
-    const e = l.createEvent("chooseFakeCard");
-    return e.player = this, Object.assign(e, t), e.filterCard != null && typeof e.filterCard == "object" && (e.filterCard = m.filter(e.filterCard)), typeof e.selectCard == "number" && (e.selectCard = [e.selectCard, e.selectCard]), t != null && t.prompt != null && (delete e.prompt, m.evtprompt(e, t.prompt)), e.cards = Array.isArray(e.cards) ? e.cards.slice(0) : [], e.filterCard == null && (e.filterCard = i.filter.all), e.selectCard == null && (e.selectCard = [1, 1]), e.ai == null && (e.ai = m.unuseful3), e.setContent("chooseFakeCard"), e._args = [t], e;
+    const e = c.createEvent("chooseFakeCard");
+    return e.player = this, Object.assign(e, t), e.filterCard != null && typeof e.filterCard == "object" && (e.filterCard = f.filter(e.filterCard)), typeof e.selectCard == "number" && (e.selectCard = [e.selectCard, e.selectCard]), t != null && t.prompt != null && (delete e.prompt, f.evtprompt(e, t.prompt)), e.cards = Array.isArray(e.cards) ? e.cards.slice(0) : [], e.filterCard == null && (e.filterCard = o.filter.all), e.selectCard == null && (e.selectCard = [1, 1]), e.ai == null && (e.ai = f.unuseful3), e.setContent("chooseFakeCard"), e._args = [t], e;
+  }
+  /**
+   * 从传入的牌中选牌并选目标（假牌版）。
+   *
+   * 效果基于本体 `chooseCardTarget`：一次交互里既选牌又选目标，区别只在于**供选择的牌是假牌**。
+   * 机制与 `chooseFakeCard` 完全一致 —— 把 `params.cards` 里的每张牌复制成假牌直接置入特殊区
+   * （`directgains`，不触发获得事件），选择期间真手牌分组折叠、点折叠组切换视图，选完删除假牌并复原；
+   * 不同之处在于底层委托的是本体 `chooseCardTarget`（而非 `chooseCard`），因此目标侧的
+   * `filterTarget` / `selectTarget` / `ai2` 等全部沿用本体语义。
+   *
+   * 参数（对象式）= 本体 `chooseCardTarget` 的参数集（`EventChooseCardTargetParams`：`filterCard` /
+   * `selectCard` / `filterTarget` / `selectTarget` / `ai1` / `ai2` / `filterOk` / `forced` / `prompt` /
+   * `prompt2` / `hsskill` / `deadTarget` / `includeOut` / `complexSelect` / `allowChooseAll` 等），
+   * 另多一个必填的 `cards`；`position` 会被忽略（内部固定 `"s"`，以免误选真手牌）；
+   * `tagName` 与 `glow_result` 见 `chooseFakeCard` 同名字段。
+   *
+   * 结果：形态与本体 `chooseCardTarget` 一致（`cards` / `targets` / `bool` / `confirm`）。
+   * 其中 `result.cards` 是玩家选中的**假牌**（选完即删除），它们对应的原牌（Card / VCard）放在
+   * `result.links` 里；`result.targets` 就是本体选出的目标（不受假牌删除影响）。
+   * 未做出选择时 `result.bool` 为 false，`cards` / `links` / `targets` 都是空数组。
+   *
+   * @param { import("@/library/element/Player/type.d").EventChooseCardTargetParams & { cards: Array<Card|VCard> } } params 参数对象，见上方说明
+   * @returns { GameEvent } 可链式 `.set(...)`、可 `.forResult()` 的事件；`forResult()` 的返回值见 typings
+   *
+   * @example
+   * ```js
+   * const vcards = tricks.map(name => new lib.element.VCard({ name }));
+   * const result = await player
+   * 	.chooseFakeCardTarget({ cards: vcards, selectCard: 1, selectTarget: -1, prompt: "选择一张牌并选择目标" })
+   * 	.forResult();
+   * if (result.bool) {
+   * 	// result.links[0] 是选中的原牌，result.targets 是选中的目标
+   * }
+   * ```
+   */
+  chooseFakeCardTarget(t) {
+    const e = c.createEvent("chooseFakeCardTarget");
+    return e.player = this, Object.assign(e, t), e.filterCard != null && typeof e.filterCard == "object" && (e.filterCard = f.filter(e.filterCard)), e.filterTarget != null && typeof e.filterTarget == "object" && (e.filterTarget = f.filter(e.filterTarget, 2)), typeof e.selectCard == "number" && (e.selectCard = [e.selectCard, e.selectCard]), typeof e.selectTarget == "number" && (e.selectTarget = [e.selectTarget, e.selectTarget]), t != null && t.prompt != null && (delete e.prompt, f.evtprompt(e, t.prompt)), e.cards = Array.isArray(e.cards) ? e.cards.slice(0) : [], e.filterCard == null && (e.filterCard = o.filter.all), e.filterTarget == null && (e.filterTarget = o.filter.all), e.selectCard == null && (e.selectCard = [1, 1]), e.selectTarget == null && (e.selectTarget = [1, 1]), e.ai1 == null && (e.ai1 = f.unuseful2), e.ai2 == null && (e.ai2 = f.attitude2), e.setContent("chooseFakeCardTarget"), e._args = [t], e;
   }
   /**
    * 同时选择角色（目标）与选项。
@@ -359,8 +472,8 @@ class re extends i.element.Player {
    * ```
    */
   chooseTargetControl(t) {
-    const e = l.createEvent("chooseTargetControl");
-    return e.player = this, Object.assign(e, t), typeof e.selectTarget == "number" && (e.selectTarget = [e.selectTarget, e.selectTarget]), e.filterTarget == null && (e.filterTarget = i.filter.all), e.selectTarget == null && (e.selectTarget = [1, 1]), e.ai == null && (e.ai = m.attitude2), e.controls == null && Array.isArray(e.choiceList) && (e.controls = e.choiceList.slice()), e.controls == null && (e.controls = []), t && t.prompt != null && (delete e.prompt, m.evtprompt(e, t.prompt)), e.setContent("chooseTargetControl"), e._args = [t], e;
+    const e = c.createEvent("chooseTargetControl");
+    return e.player = this, Object.assign(e, t), typeof e.selectTarget == "number" && (e.selectTarget = [e.selectTarget, e.selectTarget]), e.filterTarget == null && (e.filterTarget = o.filter.all), e.selectTarget == null && (e.selectTarget = [1, 1]), e.ai == null && (e.ai = f.attitude2), e.controls == null && Array.isArray(e.choiceList) && (e.controls = e.choiceList.slice()), e.controls == null && (e.controls = []), t && t.prompt != null && (delete e.prompt, f.evtprompt(e, t.prompt)), e.setContent("chooseTargetControl"), e._args = [t], e;
   }
   /**
    * 显示提示
@@ -370,14 +483,14 @@ class re extends i.element.Player {
    */
   showPrompt(t, e, r = !1) {
     let n;
-    r === !0 && this.node.prompt && (this.node.prompt.remove(), delete this.node.prompt), this.node.prompt ? (n = this.node.prompt, n.innerHTML = n.innerHTML) : (n = x.create.div("promptCharacterSJZX", this), this.node.prompt = n, x.refresh(n)), n.classList.add("promptCharacterSJZX"), n.classList.add("hiddenSJZX"), n.innerHTML = n.innerHTML + t, n.dataset.nature = e || "soil", function(o) {
-      if (!o) return;
-      const f = o.querySelectorAll(".promptTextSJZX"), u = o.clientWidth;
-      f.forEach((d) => {
-        let y = parseFloat(window.getComputedStyle(d).fontSize);
-        const k = () => d.offsetWidth > u - 10;
-        for (; k() && y > 12; )
-          y -= 1, d.style.fontSize = `${y}px`;
+    r === !0 && this.node.prompt && (this.node.prompt.remove(), delete this.node.prompt), this.node.prompt ? (n = this.node.prompt, n.innerHTML = n.innerHTML) : (n = x.create.div("promptCharacterSJZX", this), this.node.prompt = n, x.refresh(n)), n.classList.add("promptCharacterSJZX"), n.classList.add("hiddenSJZX"), n.innerHTML = n.innerHTML + t, n.dataset.nature = e || "soil", function(i) {
+      if (!i) return;
+      const d = i.querySelectorAll(".promptTextSJZX"), u = i.clientWidth;
+      d.forEach((g) => {
+        let y = parseFloat(window.getComputedStyle(g).fontSize);
+        const C = () => g.offsetWidth > u - 10;
+        for (; C() && y > 12; )
+          y -= 1, g.style.fontSize = `${y}px`;
       });
     }(n), requestAnimationFrame(() => {
       n.classList.remove("hiddenSJZX");
@@ -392,9 +505,9 @@ class re extends i.element.Player {
    */
   getCardUsable2(t, e) {
     var r = this;
-    typeof t == "string" && (t = { name: t }), t = m.autoViewAs(t);
-    var n = m.info(t).usable;
-    return typeof n == "function" && (n = n(t, r)), n = l.checkMod(t, r, n, "cardUsable", r), typeof n == "boolean" && n === !1 ? 0 : typeof n != "number" ? 1 / 0 : !e && g.currentPhase == r ? n - r.countUsed(t) : n;
+    typeof t == "string" && (t = { name: t }), t = f.autoViewAs(t);
+    var n = f.info(t).usable;
+    return typeof n == "function" && (n = n(t, r)), n = c.checkMod(t, r, n, "cardUsable", r), typeof n == "boolean" && n === !1 ? 0 : typeof n != "number" ? 1 / 0 : !e && p.currentPhase == r ? n - r.countUsed(t) : n;
   }
   /**
    * @description: 是否满足某个应变条件
@@ -403,8 +516,8 @@ class re extends i.element.Player {
    *
    * @return {boolean}
    */
-  satisfyYingbian(t, e = m.event()) {
-    const r = new Map([...i.yingbian.condition.simple, ...i.yingbian.condition.complex]);
+  satisfyYingbian(t, e = f.event()) {
+    const r = new Map([...o.yingbian.condition.simple, ...o.yingbian.condition.complex]);
     if (typeof t != "string") throw new TypeError("The parameter type is incorrect");
     if (!Array.from(r.keys()).includes(t)) throw new Error("The conditional does not exist");
     const n = r.get(t);
@@ -418,13 +531,13 @@ class re extends i.element.Player {
   async reUnseen(t) {
     var e = this, r = e.name || e.name1;
     let n = "noChangeSJZX_mark" + r;
-    if (t != !1 && (i.skill[n] = {
+    if (t != !1 && (o.skill[n] = {
       charlotte: !0,
       mark: !0,
       intro: {
         content: "隐匿前体力值"
       }
-    }, i.translate[n] = `${e.hp}/${e.maxHp}`, e.storage[n] = {
+    }, o.translate[n] = `${e.hp}/${e.maxHp}`, e.storage[n] = {
       hp: e.hp,
       maxHp: e.maxHp
     }, e.addTempSkill(n, { player: "showCharacterAfter" }), e.when("showCharacterAfter").then(() => {
@@ -433,36 +546,41 @@ class re extends i.element.Player {
       hp: e.hp,
       maxHp: e.maxHp,
       skillName: n
-    })), r && i.character[r]) {
+    })), r && o.character[r]) {
       e.storage.rawHp = e.hp, e.storage.rawMaxHp = e.maxHp, e.hp = 1, e.maxHp = 1, e.update();
-      var s = i.character[r][3];
+      var s = o.character[r][3].slice(0);
       if (e.name2)
-        for (var o of i.character[e.name2][3])
-          s.add(o);
-      for (var o = 0; o < s.length; o++)
-        i.translate[s[o] + "_info"] || s.splice(o--, 1);
-      for (var o of s)
-        e.removeSkill(o);
-      e.hiddenSkills || (e.hiddenSkills = []), e.hiddenSkills.addArray(s), e.classList.add("unseen"), e.name2 && e.classList.add("unseen2"), e.name = "unknown", !e.node.name_seat && !g.video && (e.node.name_seat = x.create.div(".name.name_seat", m.verticalStr(m.translation(e.name)), e), e.node.name_seat.dataset.nature = m.groupnature(e.group)), e.sex = "male", e.storage.nohp = !0, e.node.hp.hide(), e.update();
+        for (var i of o.character[e.name2][3])
+          s.add(i);
+      for (var i = 0; i < s.length; i++)
+        o.translate[s[i] + "_info"] || s.splice(i--, 1);
+      for (var i of s)
+        e.removeSkill(i);
+      e.hiddenSkills || (e.hiddenSkills = []), e.hiddenSkills.addArray(s), e.classList.add("unseen"), e.name2 && e.classList.add("unseen2"), e.name = "unknown", !e.node.name_seat && !p.video && (e.node.name_seat = x.create.div(".name.name_seat", f.verticalStr(f.translation(e.name)), e), e.node.name_seat.dataset.nature = f.groupnature(e.group)), e.sex = "male", e.storage.nohp = !0, e.node.hp.hide(), e.update();
     }
     t != !1 && setTimeout(() => {
-      let f = document.querySelector(".mark-text.small-text");
-      f && f.textContent && (f.textContent = i.translate[n]);
+      let d = document.querySelector(".mark-text.small-text");
+      d && d.textContent && (d.textContent = o.translate[n]);
     }, 500);
   }
   adjustHandCardTo(t) {
     if (typeof t != "number") return console.error("ERROR:num must be number!");
     let e = this.countCards("h") - t;
-    e > 0 ? this.chooseToDiscard(!0, `请弃置${m.cnNumber(this.countCards("h") - t)}张牌`, e) : e < 0 && this.draw(Math.abs(e));
+    e > 0 ? this.chooseToDiscard({
+      forced: !0,
+      prompt: `请弃置${f.cnNumber(this.countCards("h") - t)}张牌`,
+      selectCard: e,
+      filterCard: () => !0
+    }) : e < 0 && this.draw(Math.abs(e));
   }
   canUseCardAtt(t, e, r) {
-    return r === void 0 && (r = !0), e === void 0 && (e = !0), l.hasPlayer((n) => {
-      var s = m.attitude(n, this);
+    return r === void 0 && (r = !0), e === void 0 && (e = !0), c.hasPlayer((n) => {
+      var s = f.attitude(n, this);
       return this.canUse(t, n, r) && (e == !0 ? s > 0 : s < 0);
     });
   }
   getNumberInRange() {
-    for (var t = 0, e = l.filterPlayer(), r = 0; r < e.length; r++)
+    for (var t = 0, e = c.filterPlayer(), r = 0; r < e.length; r++)
       this.inRange(e[r]) && t++;
     return t;
   }
@@ -490,64 +608,64 @@ class re extends i.element.Player {
   }
   isTypeExpansions(t, e) {
     return !!this.getExpansions(t).filter(function(r) {
-      return m.type2(r) == e;
+      return f.type2(r) == e;
     }).length;
   }
   isPhase(t, e) {
-    return !e && g.currentPhase != this ? !1 : g.event.name == t || g.event.getParent(t).name == t;
+    return !e && p.currentPhase != this ? !1 : p.event.name == t || p.event.getParent(t).name == t;
   }
   canUseToAnyone(t, e = !0, r = !0) {
     typeof t == "string" && (t = { name: t, isCard: !0 });
-    for (var n = 0; n < l.players.length; n++)
-      if (!(r == !1 && l.players[n] == this)) {
+    for (var n = 0; n < c.players.length; n++)
+      if (!(r == !1 && c.players[n] == this)) {
         if (e != !1) {
-          if (this.canUse(t, l.players[n], !1))
+          if (this.canUse(t, c.players[n], !1))
             return !0;
-        } else if (this.canUse(t, l.players[n]))
+        } else if (this.canUse(t, c.players[n]))
           return !0;
       }
     return !1;
   }
   isMaxHandCardLimit(t) {
-    for (var e = this.getHandcardLimit(), r = 0; r < l.players.length; r++)
-      if (!(l.players[r].isOut() || l.players[r] == this)) {
+    for (var e = this.getHandcardLimit(), r = 0; r < c.players.length; r++)
+      if (!(c.players[r].isOut() || c.players[r] == this)) {
         if (t) {
-          if (l.players[r].getHandcardLimit() >= e) return !1;
-        } else if (l.players[r].getHandcardLimit() > e) return !1;
+          if (c.players[r].getHandcardLimit() >= e) return !1;
+        } else if (c.players[r].getHandcardLimit() > e) return !1;
       }
     return !0;
   }
   isMinHandCardLimit(t) {
-    for (var e = this.getHandcardLimit(), r = 0; r < l.players.length; r++)
-      if (!(l.players[r].isOut() || l.players[r] == this)) {
+    for (var e = this.getHandcardLimit(), r = 0; r < c.players.length; r++)
+      if (!(c.players[r].isOut() || c.players[r] == this)) {
         if (t) {
-          if (l.players[r].getHandcardLimit() <= e) return !1;
-        } else if (l.players[r].getHandcardLimit() < e) return !1;
+          if (c.players[r].getHandcardLimit() <= e) return !1;
+        } else if (c.players[r].getHandcardLimit() < e) return !1;
       }
     return !0;
   }
   getSkillsList(t, e) {
     t !== !0 && (t = !1), typeof e == "string" && (e = [e]);
     let r = this;
-    var n = [], s = [], o = [];
-    r.name1 != null ? s = i.character[r.name1][3] : s = i.character[r.name][3], r.name2 != null && (o = i.character[r.name2][3]), s = s.concat(o);
-    for (var f = function(y) {
-      var k = m.info(y);
-      if (!k || k.charlotte) return !1;
+    var n = [], s = [], i = [];
+    r.name1 != null ? s = o.character[r.name1][3] : s = o.character[r.name][3], r.name2 != null && (i = o.character[r.name2][3]), s = s.concat(i);
+    for (var d = function(y) {
+      var C = f.info(y);
+      if (!C || C.charlotte) return !1;
       if (Array.isArray(e)) {
-        for (var S of e)
-          if (k[S]) return !1;
+        for (var w of e)
+          if (C[w]) return !1;
       }
       return !0;
     }, u = 0; u < s.length; u++)
-      f(s[u]) && n.add(s[u]);
+      d(s[u]) && n.add(s[u]);
     if (r.disabledSkills && t)
-      for (var d in r.disabledSkills)
-        n.remove(d);
+      for (var g in r.disabledSkills)
+        n.remove(g);
     return n;
   }
 }
-class ne extends i.element.Card {
+class ae extends o.element.Card {
   /**
    * 移除卡牌上的（驶舰之向）提示
    * @param {string} [id] 只移除该 id 的提示；不传则移除全部
@@ -566,47 +684,47 @@ class ne extends i.element.Card {
    * @returns {this}
    */
   addPromptSJZX(t, e) {
-    return K(this, { id: e || t, text: t, type: "card" }), this;
+    return Y(this, { id: e || t, text: t, type: "card" }), this;
   }
   isConnect() {
-    return l.broadcastAll(() => {
-      g.sxrmConnectCards ??= [];
-    }), g.sxrmConnectCards.includes(this);
+    return c.broadcastAll(() => {
+      p.sxrmConnectCards ??= [];
+    }), p.sxrmConnectCards.includes(this);
   }
   addConnect() {
     if (this.isConnect()) return this;
-    l.broadcastAll((e) => {
-      e.addGaintag("visible_sxrm_connect_tag"), g.sxrmConnectCards.add(e);
+    c.broadcastAll((e) => {
+      e.addGaintag("visible_sxrm_connect_tag"), p.sxrmConnectCards.add(e);
     }, this);
-    const t = m.owner(this);
+    const t = f.owner(this);
     return t?.isIn() && t.markSkill("_sxrm_connect"), this.refreshMark(), this;
   }
   removeConnect() {
-    return g.sxrmConnectCards ??= [], g.sxrmConnectCards.remove(this), l.broadcast((t) => {
-      g.sxrmConnectCards = t;
-    }, g.sxrmConnectCards), l.broadcastAll((t) => {
+    return p.sxrmConnectCards ??= [], p.sxrmConnectCards.remove(this), c.broadcast((t) => {
+      p.sxrmConnectCards = t;
+    }, p.sxrmConnectCards), c.broadcastAll((t) => {
       t.removeGaintag("visible_sxrm_connect_tag");
     }, this), this.refreshMark(), this;
   }
   refreshMark() {
-    l.filterPlayer((t) => {
+    c.filterPlayer((t) => {
       t.getCards("h", (e) => e.isConnect()).length ? t.markSkill("_sxrm_connect") : t.unmarkSkill("_sxrm_connect");
     });
   }
 }
-class ae extends B {
+class se extends B {
   /**
    * 获得所有连接牌
    * @returns { Card[] | Array }
    */
   getConnectCards() {
-    return g.sxrmConnectCards || [];
+    return p.sxrmConnectCards || [];
   }
   /**
    * 刷新连接标记
    */
   refreshMark() {
-    l.filterPlayer((t) => {
+    c.filterPlayer((t) => {
       t.getCards("h", (e) => e.isConnect()).length ? t.markSkill("_sxrm_connect") : t.unmarkSkill("_sxrm_connect");
     });
   }
@@ -633,10 +751,10 @@ class ae extends B {
    * const totalFireMarks = game.countMark("fire", ()=>true, true);
    */
   countMark(t, e, r = !1) {
-    let n = 0, s = r ? l.players.concat(l.dead) : l.players;
+    let n = 0, s = r ? c.players.concat(c.dead) : c.players;
     typeof e != "function" && (e = () => !0);
-    for (let o of s)
-      e(o) && (n += o.countMark(t));
+    for (let i of s)
+      e(i) && (n += i.countMark(t));
     return n;
   }
   /**
@@ -645,21 +763,21 @@ class ae extends B {
    * @param { { translate: string, config: { [key: string]: object } } } info2
    */
   addModeSJZX(t, e, r) {
-    i.config.all.mode.push(t), i.translate[t] = r.translate;
-    let n, s = g.extension || r.extension;
-    e.splash ? n = e.splash : g.evaluatingExtension ? n = "extension-" + s + ":image/mode/backgroud/" + t + ".jpg" : n = "ext:" + s + "/image/mode/backgroud/" + t + ".jpg", i.mode[t] = {
+    o.config.all.mode.push(t), o.translate[t] = r.translate;
+    let n, s = p.extension || r.extension;
+    e.splash ? n = e.splash : p.evaluatingExtension ? n = "extension-" + s + ":image/mode/backgroud/" + t + ".jpg" : n = "ext:" + s + "/image/mode/backgroud/" + t + ".jpg", o.mode[t] = {
       name: r.translate,
       config: r.config,
       splash: n,
       fromextension: !0
-    }, i.init["setMode_" + t] = async () => {
-      await l.import("mode", (o, f, u, d, y, k) => (e.name = t, e));
-    }, i.config.extensionInfo[s] || (i.config.extensionInfo[s] = {}), i.config.extensionInfo[s].mode || (i.config.extensionInfo[s].mode = []), i.config.extensionInfo[s].mode.indexOf(t) == -1 && i.config.extensionInfo[s].mode.push(t), l.saveConfig("extensionMode", i.config.extensionInfo);
+    }, o.init["setMode_" + t] = async () => {
+      await c.import("mode", (i, d, u, g, y, C) => (e.name = t, e));
+    }, o.config.extensionInfo[s] || (o.config.extensionInfo[s] = {}), o.config.extensionInfo[s].mode || (o.config.extensionInfo[s].mode = []), o.config.extensionInfo[s].mode.indexOf(t) == -1 && o.config.extensionInfo[s].mode.push(t), c.saveConfig("extensionMode", o.config.extensionInfo);
   }
   totalmark(t) {
     let e = 0;
-    for (let r = 0; r < l.players.length; r++)
-      l.players[r].hasMark(t) && (e += l.players[r].countMark(t));
+    for (let r = 0; r < c.players.length; r++)
+      c.players[r].hasMark(t) && (e += c.players[r].countMark(t));
     return e;
   }
   shushuRDbet(t, e) {
@@ -676,20 +794,20 @@ class ae extends B {
     return Math.floor(Math.random() * (e - t + 1) + t);
   }
   mostStr(t) {
-    let e = t.slice().sort(), r = 0, n = [], s = 1, o = e[0];
-    for (let f = 1; f <= e.length; f++)
-      f < e.length && e[f] === o ? s++ : (s >= r && (s > r && (n = []), r = s, n.push(o)), f < e.length && (o = e[f], s = 1));
+    let e = t.slice().sort(), r = 0, n = [], s = 1, i = e[0];
+    for (let d = 1; d <= e.length; d++)
+      d < e.length && e[d] === i ? s++ : (s >= r && (s > r && (n = []), r = s, n.push(i)), d < e.length && (i = e[d], s = 1));
     return n;
   }
   getGlobalmark(t) {
-    for (var e = 0, r = 0; r < l.players.length; r++) {
-      var n = l.players[r];
+    for (var e = 0, r = 0; r < c.players.length; r++) {
+      var n = c.players[r];
       n.hasMark(t) && (e += n.countMark(t));
     }
     return e;
   }
 }
-class se extends j {
+class ie extends q {
   /**
    * 获取此牌的目标数
    * @param { VCard | string } card
@@ -699,8 +817,8 @@ class se extends j {
     let e = t?.name;
     if (typeof t == "string") e = t;
     else if (t === void 0) return 0;
-    let r = i.card[e];
-    return r.notarget ? 0 : r.selectTarget !== void 0 ? Array.isArray(r.selectTarget) ? Math.max(r.selectTarget) : r.selectTarget === -1 && r.toself ? 1 : r.selectTarget === -1 ? 1 / 0 : r.selectTarget : r.filterTarget ? 1 : 0;
+    let r = o.card[e];
+    return !r || r.notarget ? 0 : r.selectTarget !== void 0 ? Array.isArray(r.selectTarget) ? Math.max(...r.selectTarget) : r.selectTarget === -1 && r.toself ? 1 : r.selectTarget === -1 ? 1 / 0 : r.selectTarget : r.filterTarget ? 1 : 0;
   }
   /**
    * @description: 判断该牌是否为单一目标
@@ -710,15 +828,16 @@ class se extends j {
    */
   isSingle(t) {
     typeof t == "string" && (t = { name: t });
-    let e = m.info(t);
-    return !e.notarget && e.selectTarget && e.selectTarget === 1;
+    let e = f.info(t);
+    return !e.notarget && e.selectTarget === 1;
   }
   isView(t) {
-    if (Array.isArray(t))
+    if (Array.isArray(t)) {
       for (var e of t)
-        this.isView(e);
-    else {
-      if (t && m.is.object(t))
+        if (this.isView(e)) return !0;
+      return !1;
+    } else {
+      if (t && f.is.object(t))
         return !t.cards || !t.cards[0] || t.cards.length > 1 || t.name != t.cards[0].name;
       throw new Error(
         "The first parameter of type must be Array or VCard!"
@@ -748,9 +867,9 @@ class se extends j {
     } else if (Array.isArray(t)) {
       let n = [];
       return t.forEach((s) => {
-        for (let o = 0; o < e.length; o++)
-          if (s === e[o]) {
-            n.push(r[o]);
+        for (let i = 0; i < e.length; i++)
+          if (s === e[i]) {
+            n.push(r[i]);
             break;
           }
       }), n;
@@ -760,7 +879,7 @@ class se extends j {
     return Math.floor(Math.random() * 1e6).toString().padStart(6, "0") + "SJZX";
   }
 }
-class oe extends i.element.GameEvent {
+class oe extends o.element.GameEvent {
   getChildren(t, e = 20) {
     let r = this;
     if (e <= 0) return {};
@@ -769,19 +888,19 @@ class oe extends i.element.GameEvent {
       return console.warn("getChildren: filter is not a function or string !"), {};
     if (typeof t == "string") {
       const s = t;
-      n = (o) => o.name === s;
+      n = (i) => i.name === s;
     }
     if (n(r))
       return r;
     for (const s of this.childEvents || []) {
-      const o = s.getChildren(t, e - 1);
-      if (o && Object.keys(o).length > 0)
-        return o;
+      const i = s.getChildren(t, e - 1);
+      if (i && Object.keys(i).length > 0)
+        return i;
     }
     return {};
   }
 }
-class ie extends Array {
+class le extends Array {
   /**
    * 判断两个数组是否相等
    * @param { Array } arr
@@ -856,37 +975,37 @@ class ie extends Array {
    * arr.insert(-1, 3, true, true, true); // 在倒数第一个元素之后插入3，结果为[1, 2, 4, 3]
    */
   insert(t, e, r = !0, n = !0, s = !1) {
-    let o = n ? this : f(this);
+    let i = n ? this : d(this);
     if (s) {
-      if (typeof t == "number" && t >= -o.length - 1 && t <= o.length) {
-        let u = t < 0 ? o.length + t + 1 : t, d = r ? u + 1 : u;
-        o.splice(d, 0, e);
+      if (typeof t == "number" && t >= -i.length - 1 && t <= i.length) {
+        let u = t < 0 ? i.length + t + 1 : t, g = r ? u + 1 : u;
+        i.splice(g, 0, e);
       }
     } else {
-      let u = o.indexOf(t);
+      let u = i.indexOf(t);
       if (u !== -1) {
-        let d = r ? u + 1 : u;
-        o.splice(d, 0, e);
+        let g = r ? u + 1 : u;
+        i.splice(g, 0, e);
       }
     }
-    return n ? this : o;
-    function f(u) {
+    return n ? this : i;
+    function d(u) {
       if (u === null || typeof u != "object")
         return u;
       if (u instanceof Date)
         return new Date(u.getTime());
       if (u instanceof Array)
-        return u.map((d) => f(d));
+        return u.map((g) => d(g));
       if (typeof u == "object") {
-        const d = {};
+        const g = {};
         for (let y in u)
-          u[y] && (d[y] = f(u[y]));
-        return d;
+          u[y] && (g[y] = d(u[y]));
+        return g;
       }
     }
   }
 }
-class le extends HTMLDivElement {
+class ce extends HTMLDivElement {
   /**
    * 当HTMLDivElement被移除时触发的回调方法
    * @param {Function} callback - 元素被移除时执行的回调函数
@@ -916,7 +1035,7 @@ class le extends HTMLDivElement {
     });
   }
 }
-const ce = {
+const fe = {
   HMS: {
     HMS_Anson: "安森",
     HMS_Rodney: "罗德尼",
@@ -948,7 +1067,7 @@ const ce = {
     HMS_Archer: "弓手"
   },
   trigger: {
-    name: i.hookmap,
+    name: o.hookmap,
     translation: {
       addJudgeAfter: "添加判定牌后",
       addToExpansionAfter: "将牌移除游戏后",
@@ -977,14 +1096,11 @@ const ce = {
     },
     get() {
       const a = ["Begin", "After", "End"], t = { ...this.translation };
-      for (let r of i.phaseName) this.translation[r] = m.translation(r);
+      for (let r of o.phaseName) this.translation[r] = f.translation(r);
       for (let r in this.translation)
         a.some((n) => r.endsWith(n)) || (t.hasOwnProperty(r + "Begin") || (t[r + "Begin"] = this.translation[r] + "时", delete t[r]), t.hasOwnProperty(r + "After") || (t[r + "After"] = this.translation[r] + "后", delete t[r]));
-      let e = Object.keys({ ...this.name });
-      for (let r of e)
-        !r in this.translation && e.remove(r);
       return {
-        triggers: e,
+        triggers: Object.keys(this.name).filter((r) => r in t),
         translation: t
       };
     }
@@ -1045,49 +1161,49 @@ const ce = {
     countCard_bigger: {
       intro: "手牌数大于X",
       filter: function(a, t, e) {
-        return t.countCards("h") > g.weinaData[e].random.num.num(a, t);
+        return t.countCards("h") > p.weinaData[e].random.num.num(a, t);
       }
     },
     countCard_lower: {
       intro: "手牌数小于X",
       filter: function(a, t, e) {
-        return t.countCards("h") < g.weinaData[e].random.num.num(a, t);
+        return t.countCards("h") < p.weinaData[e].random.num.num(a, t);
       }
     },
     countHp_bigger: {
       intro: "体力值大于X",
       filter: function(a, t, e) {
-        return t.hp > g.weinaData[e].random.num.num(a, t);
+        return t.hp > p.weinaData[e].random.num.num(a, t);
       }
     },
     countHp_lower: {
       intro: "体力值小于X",
       filter: function(a, t, e) {
-        return t.hp < g.weinaData[e].random.num.num(a, t);
+        return t.hp < p.weinaData[e].random.num.num(a, t);
       }
     },
     countloseCard_bigger: {
       intro: "本回合失去过不少于X牌",
       filter: function(a, t, e) {
-        return t.getHistory("lose").length > g.weinaData[e].random.num.num(a, t);
+        return t.getHistory("lose").length > p.weinaData[e].random.num.num(a, t);
       }
     },
     countloseCard_lower: {
       intro: "本回合失去过至多X张牌",
       filter: function(a, t, e) {
-        return !t.getHistory("lose").length < g.weinaData[e].random.num.num(a, t);
+        return !t.getHistory("lose").length < p.weinaData[e].random.num.num(a, t);
       }
     },
     countUseCard_bigger: {
       intro: "本回合使用过至少X+1张牌名不同的牌",
       filter: function(a, t, e) {
-        return Object.keys(t.getStat().card).length > g.weinaData[e].random.num.num(a, t);
+        return Object.keys(t.getStat().card).length > p.weinaData[e].random.num.num(a, t);
       }
     },
     countUseCard_lower: {
       intro: "本回合使用过至多X+1张牌名不同的牌",
       filter: function(a, t, e) {
-        return Object.keys(t.getStat().card).length < g.weinaData[e].random.num.num(a, t);
+        return Object.keys(t.getStat().card).length < p.weinaData[e].random.num.num(a, t);
       }
     }
   },
@@ -1108,7 +1224,7 @@ const ce = {
       choose: {
         intro: "使用一张【$name】",
         content() {
-          player.hasUseTarget(event.weinaData.name) && player.chooseToUse(`你可以使用一张${m.translation(event.weinaData.name)}`, (a) => m.name(a) == event.weinaData.name);
+          player.hasUseTarget(event.weinaData.name) && player.chooseToUse(`你可以使用一张${f.translation(event.weinaData.name)}`, (a) => f.name(a) == event.weinaData.name);
         }
       }
     },
@@ -1144,7 +1260,7 @@ const ce = {
             "step 0";
             player.chooseTarget("请选择一名其他角色", function(a, t, e) {
               return e != t;
-            }).set("ai", (a) => m.attitude2(player) < 0), result.targets && player.gainPlayerCard("hej", result.targets[0], !0).set("target", result.targets[0]).set("complexSelect", !1).set("ai", i.card.shunshou.ai.button);
+            }).set("ai", (a) => f.attitude2(player) < 0), result.targets && player.gainPlayerCard("hej", result.targets[0], !0).set("target", result.targets[0]).set("complexSelect", !1).set("ai", o.card.shunshou.ai.button);
           }
         },
         jump: {
@@ -1160,7 +1276,7 @@ const ce = {
     group: {
       intro: "场上势力数",
       num() {
-        return l.countGroup();
+        return c.countGroup();
       }
     },
     damage: {
@@ -1173,7 +1289,7 @@ const ce = {
     type: {
       intro: "手牌中牌的类型数",
       num(a, t) {
-        return new Set(t.getCards("h").map((e) => m.type2(e))).size;
+        return new Set(t.getCards("h").map((e) => f.type2(e))).size;
       }
     },
     maxHp: {
@@ -1184,17 +1300,17 @@ const ce = {
     }
   },
   getName() {
-    return i.inpile.filter((t) => m.type(t) !== "delay" && m.type(t) !== "equip").randomGet();
+    return o.inpile.filter((t) => f.type(t) !== "delay" && f.type(t) !== "equip").randomGet();
   },
   getPhase() {
-    return i.phaseName.randomGet();
+    return o.phaseName.randomGet();
   },
   getInfo(a, t = "", e = {}, r) {
     a || (a = this);
     for (let n in a)
       if (typeof a[n] == "object" && a[n] !== null && !Array.isArray(a[n]) && this.getInfo(a[n], n, e, r), n === "intro") {
         let s = a[n];
-        s = s.replace(/\$name/g, m.translation(r.name)).replace(/\$phase/g, m.translation(r.phase)).replace(/X/g, `X(${r.num?.intro || "default"})`), e[t] = s;
+        s = s.replace(/\$name/g, f.translation(r.name)).replace(/\$phase/g, f.translation(r.phase)).replace(/X/g, `X(${r.num?.intro || "default"})`), e[t] = s;
       }
     return e;
   },
@@ -1218,31 +1334,31 @@ const ce = {
     return r(a), e;
   }
 };
-window.whichWaySave.weinaData = ce;
+window.whichWaySave.weinaData = fe;
 window.whichWay.nonameEx ??= {};
-const M = window.whichWay.nonameEx;
-M.customFuc = {
-  skill: Q
+const v = window.whichWay.nonameEx;
+v.customFuc = {
+  skill: ee
 };
-M.jsExt ??= {};
-M.ArrayExt = D(ie, Array.prototype, Array.prototype);
-M.HTMLDivElementExt = D(le, HTMLDivElement.prototype);
-Y({
+v.jsExt ??= {};
+v.ArrayExt = D(le, Array.prototype, Array.prototype);
+v.HTMLDivElementExt = D(ce, HTMLDivElement.prototype);
+Q({
   name: "WhichWayNonameEx",
   fn: async () => {
-    M.CardExt = D(ne, i.element.card), M.PlayerExt = D(re, i.element.player), M.GameExt = D(ae, B.prototype), M.GetExt = D(se, j.prototype), M.GameEventExt = D(oe, i.element.GameEvent.prototype), M.ContentExt = Z, Object.assign(i.element.content, Z), await import("./nonameEx-custom-override.js");
+    v.CardExt = D(ae, o.element.card), v.PlayerExt = D(ne, o.element.player), v.GameExt = D(se, B.prototype), v.GetExt = D(ie, q.prototype), v.GameEventExt = D(oe, o.element.GameEvent.prototype), v.ContentExt = j, Object.assign(o.element.content, j), await import("./nonameEx-custom-override.js");
   }
 });
 function D(a, t, e) {
   e = e || Object.getPrototypeOf(t);
   const r = Object.getOwnPropertyDescriptors(a.prototype), n = {};
-  for (const [s, o] of Object.entries(r))
-    s !== "constructor" && typeof o.value == "function" && (s in e || (Object.defineProperty(t, s, {
-      ...o,
+  for (const [s, i] of Object.entries(r))
+    s !== "constructor" && typeof i.value == "function" && (s in e || (Object.defineProperty(t, s, {
+      ...i,
       enumerable: !1,
       configurable: !0,
       writable: !0
-    }), n[s] = o.value));
+    }), n[s] = i.value));
   return {
     injected: n,
     count: Object.keys(n).length,

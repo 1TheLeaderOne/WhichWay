@@ -1,8 +1,8 @@
-import { get as o, _status as m, game as k, lib as a } from "noname";
-import { whichWayFile as f } from "./file.js";
-import { onContent as y, onSetDev as S } from "./hooks.js";
-import { whichWayUtil as u } from "./utill.js";
-const h = {
+import { get as c, _status as k, game as S, lib as l } from "noname";
+import { whichWayFile as u } from "./file.js";
+import { onContent as g, onSetDev as y } from "./hooks.js";
+import { whichWayUtil as f } from "./utill.js";
+const m = {
   //普瑞赛斯
   puruisaisimrfz: {
     zaowuzhu: {
@@ -14,16 +14,16 @@ const h = {
           "·体力上限/初始体力值 + 1",
           "·变更技能组：",
           "【编译】",
-          () => o.skillInfoTranslation("bianyimrfz")
+          () => c.skillInfoTranslation("bianyimrfz")
         ],
-        content(d, e) {
-          e && (e.hp = 4, e.maxHp = 4);
+        content(o) {
+          o && (o.hp = 4, o.maxHp = 4);
         }
       }
     }
   },
   //嵯峨
-  cuoemrfz: {
+  char_362_saga: {
     hechuxuntuo: {
       name: "何处寻驼？",
       intro: [
@@ -45,25 +45,23 @@ const h = {
         intro: [
           "·变更技能组：",
           "【千相】",
-          () => o.skillInfoTranslation("qianxianmrfz"),
+          () => c.skillInfoTranslation("qianxianmrfz"),
           "【自悟】",
-          () => o.skillInfoTranslation("ziwumrfz"),
+          () => c.skillInfoTranslation("ziwumrfz"),
           "【遁空】(非初始技能)",
-          () => o.skillInfoTranslation("dunkongmrfz")
+          () => c.skillInfoTranslation("dunkongmrfz")
         ]
       }
     }
   }
-}, g = Object.entries(h).flatMap(
-  ([d, e]) => Object.entries(e).map(([r, l]) => l.id ?? r)
-), s = window.whichWaySave.modulesSet;
-class w {
+}, w = Object.values(m).flatMap((o) => Object.keys(o)), r = window.whichWaySave.modulesSet;
+class M {
   modules = {};
   modulesList = [];
   async init() {
     this.modules = {
-      ...h
-    }, this.modulesList.push(...g), y({
+      ...m
+    }, this.modulesList.push(...w), g({
       name: "whichWayCharacterModules_init",
       fn: () => {
         this.initCharModules();
@@ -71,61 +69,43 @@ class w {
     });
   }
   /**
-   * 获取指定角色的所有可用模组或当前装备的模组。
-   *
-   * 如果 `current` 为 true，则返回该角色当前激活的模组（若存在），否则返回默认模组。
-   * 如果 `current` 为 false，则返回该角色在 `modulesList` 中定义的所有模组；
-   * 若该角色未定义任何模组，则返回一个默认的基础模组。
-   *
-   * @param {string | Player} name - 角色名或者模组名
-   * @param {boolean} [current=true] - 是否只获取当前激活的模组（仅name为角色名时有效）。
-   * @returns {Object} 返回一个表示模组或模组集合的对象。
-   *
-   * @example
-   * // 获取当前激活模组
-   * const currentModule = getCharModules('character1');
-   *
-   * // 获取所有可用模组
-   * const allModules = getCharModules('character1', false);
+   * 构造基础证章（`default`）模组。`intro` 会内嵌角色译名，故需传入角色名。
    */
-  getCharModules(e, r = !0) {
-    o.itemtype(e) === "player" && (e = o.name(e));
-    const l = {
-      default: {
-        url: f.compilePath("mod:default.png"),
-        name: "基础证章",
-        id: "default",
-        intro: ["基础证章，无特殊效果。", `${o.translation(e)}通过罗德岛人事部考核，准许参加外勤任务`, "特别颁发此证章", "以兹证明"]
-      }
+  buildDefaultModule(e) {
+    return {
+      url: u.compilePath("mod:default.png"),
+      name: "基础证章",
+      id: "default",
+      intro: ["基础证章，无特殊效果。", `${c.translation(e)}通过罗德岛人事部考核，准许参加外勤任务`, "特别颁发此证章", "以兹证明"]
     };
-    if (window.whichWaySave.hasChar(e) && this.modulesList.includes(e))
-      throw new Error(`${e} 即是角色名也是模组名，请重新命名模组！`);
-    if (e === "default") return l.default;
-    if (window.whichWaySave.hasChar(e)) {
-      if (r)
-        return s[e] ? this.getCharModules(s[e]) : l.default;
-      if (!Object.keys(this.modules).includes(e)) return l;
-      let t = {
-        default: l.default,
-        ...this.modules[e]
-      };
-      for (let i in t) {
-        let n = t[i];
-        n.url || (n.url = f.compilePath(`mod:${e}/${i}.png`)), n.id || (n.id = i);
+  }
+  getCharModules(e, n = !0) {
+    const t = c.itemtype(e) === "player" ? e.name : e;
+    if (window.whichWaySave.hasChar(t) && this.modulesList.includes(t))
+      throw new Error(`${t} 即是角色名也是模组名，请重新命名模组！`);
+    if (t === "default") return this.buildDefaultModule(t);
+    if (window.whichWaySave.hasChar(t)) {
+      if (n)
+        return r[t] ? this.getCharModules(r[t]) : this.buildDefaultModule(t);
+      const i = { default: this.buildDefaultModule(t) }, a = this.modules[t];
+      if (!a) return i;
+      for (const s in a) {
+        const h = a[s];
+        h.url || (h.url = u.compilePath(`mod:${t}/${s}.png`)), h.id || (h.id = s), i[s] = h;
       }
-      return t;
-    } else if (this.modulesList.includes(e))
-      for (let t in this.modules) {
-        let i = this.modules[t];
-        if (Object.keys(i).includes(e))
+      return i;
+    }
+    if (this.modulesList.includes(t))
+      for (const i in this.modules) {
+        const a = this.modules[i];
+        if (Object.keys(a).includes(t))
           return {
-            url: f.compilePath(`mod:${t}/${e}.png`),
-            id: e,
-            /** @ts-ignore */
-            ...i[e]
+            url: u.compilePath(`mod:${i}/${t}.png`),
+            id: t,
+            ...a[t]
           };
       }
-    u.isDeveloperMode() && console.warn(`角色或模组 ${e} 不存在`);
+    f.isDeveloperMode() && console.warn(`角色或模组 ${t} 不存在`);
   }
   /**
    * 设置角色的模组
@@ -138,60 +118,62 @@ class w {
    * @param {string} [moduleName] - 要设置的模组名称，默认为 "default"。
    * @returns {string} 模组名。
    */
-  setCharModules(e, r) {
-    if (r || (r = "default"), !this.getCharModules(e, !1)[r]) throw new Error(`设置失败：${e} 的模组 ${r} 不存在`);
-    return s[e] = r, u.saveConfig("modulesSet", s), this.initCharModules(), r;
+  setCharModules(e, n = "default") {
+    const t = this.getCharModules(e, !1);
+    if (!t) return n;
+    if (!t[n]) throw new Error(`设置失败：${e} 的模组 ${n} 不存在`);
+    return r[e] = n, f.saveConfig("modulesSet", r), this.initCharModules(), n;
   }
   initCharModules() {
-    if (m.gameStarted)
-      k.players.forEach((e) => {
-        if (Object.keys(s).includes(e.name)) {
-          let l = this.getCharModules(e);
-          if (a.character[e.name].copySJZX || (a.character[e.name].copySJZX = {
-            ...a.character[e.name]
-          }), l.id === "default") {
-            let { skills: t } = a.character[e.name].copySJZX;
-            a.character[e.name].skills !== t && (e.removeSkill(a.character[e.name].skills), e.addSkill(t)), a.character[e.name] = a.character[e.name].copySJZX;
-            return;
+    if (k.gameStarted) {
+      for (let e of S.players)
+        if (Object.keys(r).includes(e.name)) {
+          let t = this.getCharModules(e);
+          if (!t) continue;
+          if (l.character[e.name].copySJZX || (l.character[e.name].copySJZX = {
+            ...l.character[e.name]
+          }), t.id === "default") {
+            let { skills: i } = l.character[e.name].copySJZX;
+            l.character[e.name].skills !== i && (e.removeSkill(l.character[e.name].skills), e.addSkill(i)), l.character[e.name] = l.character[e.name].copySJZX;
+            continue;
           }
-          if (l.effect) {
-            let t = l.effect;
-            if (t.content && t.content(e, a.character[e.name]), t.changeSkill) {
-              let i = Array.isArray(t.changeSkill) ? t.changeSkill : [t.changeSkill];
-              e.removeSkill(e.getOriginalSkills()), e.addSkill(i), a.character[e.name].skills = i;
+          if (t.effect) {
+            let i = t.effect;
+            if (i.content && i.content(l.character[e.name], e), i.changeSkill) {
+              let a = Array.isArray(i.changeSkill) ? i.changeSkill : [i.changeSkill];
+              e.removeSkill(e.getOriginalSkills()), e.addSkill(a), l.character[e.name].skills = a;
             }
           }
         }
-      });
-    else {
+    } else {
       this.clearCharModuleDefaultSet();
-      for (let e in s) {
-        let r = s[e], l = this.getCharModules(r), t = a.character[e];
-        if (l.effect) {
-          let i = l.effect;
-          if (i.content && i.content(void 0, t), i.changeSkill) {
-            let n = Array.isArray(i.changeSkill) ? i.changeSkill : [i.changeSkill];
-            a.character[e].skills = n;
+      for (let e in r) {
+        let n = r[e], t = this.getCharModules(n), i = l.character[e];
+        if (t && t.effect) {
+          let a = t.effect;
+          if (a.content && a.content(i), a.changeSkill) {
+            let s = Array.isArray(a.changeSkill) ? a.changeSkill : [a.changeSkill];
+            l.character[e].skills = s;
           }
         }
       }
     }
   }
   clearCharModuleDefaultSet() {
-    for (let e in s)
-      s[e] === "default" && delete s[e];
-    return u.saveConfig("modulesSet", s), s;
+    for (let e in r)
+      r[e] === "default" && delete r[e];
+    return f.saveConfig("modulesSet", r), r;
   }
 }
-const c = new w();
-await c.init();
-S({
+const d = new M();
+await d.init();
+y({
   name: "whichWayCharacterModules_setDev",
   fn: () => {
-    window.whichWayCharacterModules = c;
+    window.whichWayCharacterModules = d;
   }
 });
-window.whichWay.register("characterModules", c);
+window.whichWay.register("characterModules", d);
 export {
-  c as whichWayCharacterModules
+  d as whichWayCharacterModules
 };
