@@ -1,6 +1,7 @@
 import { lib as d, ui as N, get as A, game as M } from "noname";
 import { whichWayHooksApi as D, onSetDev as B, onExtension as C } from "./hooks.js";
-class L {
+import { isViteDevServer as L } from "./init.js";
+class _ {
   /**
    * 工具函数组，提供常见的数值比较和动态最值判断。
    * @typedef {Object} Tools
@@ -47,22 +48,22 @@ class L {
       throw new TypeError("第一个参数必须是数组");
     if (typeof n != "function")
       throw new TypeError("第二个参数必须是函数");
-    const i = /* @__PURE__ */ new Map(), t = /* @__PURE__ */ new Map(), s = {
+    const i = /* @__PURE__ */ new Map(), r = /* @__PURE__ */ new Map(), s = {
       // 基础比较（直接比较元素本身）
-      gt: (o, r) => o > r,
-      lt: (o, r) => o < r,
-      eq: (o, r) => o === r,
-      gte: (o, r) => o >= r,
-      lte: (o, r) => o <= r,
-      between: (o, r, a) => o >= r && o <= a,
+      gt: (o, t) => o > t,
+      lt: (o, t) => o < t,
+      eq: (o, t) => o === t,
+      gte: (o, t) => o >= t,
+      lte: (o, t) => o <= t,
+      between: (o, t, a) => o >= t && o <= a,
       /**
        * 判断当前元素（或通过 selector 提取的值）是否等于数组中的最大值。
        * @param {*} item - 当前元素。
        * @param {Function} [selector] - 可选的取值函数，用于提取比较值，默认为恒等函数。
        * @returns {boolean}
        */
-      isMax: (o, r) => {
-        const a = typeof r == "function" ? r : (f) => f, c = r || "default";
+      isMax: (o, t) => {
+        const a = typeof t == "function" ? t : (f) => f, c = t || "default";
         if (!i.has(c))
           if (e.length === 0)
             i.set(c, void 0);
@@ -82,19 +83,19 @@ class L {
        * @param {Function} [selector] - 可选的取值函数，用于提取比较值，默认为恒等函数。
        * @returns {boolean}
        */
-      isMin: (o, r) => {
-        const a = typeof r == "function" ? r : (f) => f, c = r || "default";
-        if (!t.has(c))
+      isMin: (o, t) => {
+        const a = typeof t == "function" ? t : (f) => f, c = t || "default";
+        if (!r.has(c))
           if (e.length === 0)
-            t.set(c, void 0);
+            r.set(c, void 0);
           else {
             const f = e.reduce((l, h) => {
               const u = a(h);
               return u < l ? u : l;
             }, a(e[0]));
-            t.set(c, f);
+            r.set(c, f);
           }
-        const g = t.get(c);
+        const g = r.get(c);
         return a(o) === g;
       }
     };
@@ -110,7 +111,7 @@ class L {
       return "";
     const n = "0123456789";
     let i = "";
-    for (let t = 0; t < e; t++) {
+    for (let r = 0; r < e; r++) {
       const s = Math.floor(Math.random() * n.length);
       i += n[s];
     }
@@ -155,14 +156,14 @@ class L {
    * @returns {number[]} 包含两个调整后数值的数组 [adjustedA, adjustedB]
    * @throws {Error} 如果比例字符串格式不正确、输入值不是有效数字或 minValues 格式不正确时抛出错误
    */
-  adjustToRatio(e, n, i, t) {
+  adjustToRatio(e, n, i, r) {
     const o = (i || "16:9").trim().match(/^(\d+(\.\d+)?):(\d+(\.\d+)?)$/);
     if (!o)
       throw new Error('Ratio must be in the format "A:B", where A and B are positive numbers (e.g., "16:9").');
-    const r = parseFloat(o[1]), a = parseFloat(o[3]);
-    if (isNaN(r) || isNaN(a) || r <= 0 || a <= 0)
+    const t = parseFloat(o[1]), a = parseFloat(o[3]);
+    if (isNaN(t) || isNaN(a) || t <= 0 || a <= 0)
       throw new Error("Ratio values must be positive numbers.");
-    const c = r / a;
+    const c = t / a;
     function g(E) {
       return typeof E == "string" && /^-?\d+(\.\d+)?$/.test(E.trim());
     }
@@ -170,25 +171,25 @@ class L {
     if (typeof f != "number" || isNaN(f) || typeof l != "number" || isNaN(l))
       throw new Error("Both inputs must be numbers or numeric strings.");
     let h = -1 / 0, u = -1 / 0;
-    if (t !== void 0)
-      if (typeof t == "number" && !isNaN(t))
-        h = u = t;
-      else if (Array.isArray(t))
-        if (t.length >= 1 && typeof t[0] == "number" && !isNaN(t[0]))
-          h = t[0], u = t.length >= 2 && typeof t[1] == "number" && !isNaN(t[1]) ? t[1] : t[0];
+    if (r !== void 0)
+      if (typeof r == "number" && !isNaN(r))
+        h = u = r;
+      else if (Array.isArray(r))
+        if (r.length >= 1 && typeof r[0] == "number" && !isNaN(r[0]))
+          h = r[0], u = r.length >= 2 && typeof r[1] == "number" && !isNaN(r[1]) ? r[1] : r[0];
         else
           throw new Error("minValues array must contain valid numbers.");
-      else if (typeof t == "string") {
-        const p = t.trim().split("|").map((m) => m.trim()).map((m) => g(m) ? Number(m) : NaN);
+      else if (typeof r == "string") {
+        const p = r.trim().split("|").map((m) => m.trim()).map((m) => g(m) ? Number(m) : NaN);
         if (p.every((m) => !isNaN(m)))
           p.length === 1 ? h = u = p[0] : (h = p[0], u = p[1]);
         else
           throw new Error('minValues string must be in the format "minA|minB" or "value", with numeric values.');
       } else
         throw new Error('minValues must be a number, an array [a, b], or a string "a|b".');
-    const y = Math.max(f, h), w = Math.max(l, u), W = y / w, S = 1e-6;
+    const w = Math.max(f, h), y = Math.max(l, u), W = w / y, S = 1e-6;
     let v, b;
-    return Math.abs(W - c) < S ? (v = y, b = w) : W > c ? (v = y, b = y / c) : (v = w * c, b = w), [v, b];
+    return Math.abs(W - c) < S ? (v = w, b = y) : W > c ? (v = w, b = w / c) : (v = y * c, b = y), [v, b];
   }
   /**
    * 将一个正数数组转换为保持比例的整数数组。
@@ -202,23 +203,23 @@ class L {
    * @throws {Error} 如果输入不是一个数组，或者数组中包含非正数（包括 0 或负数），则抛出错误。
    */
   scaleToIntegerRatio(e) {
-    if (!Array.isArray(e) || e.some((r) => r <= 0))
+    if (!Array.isArray(e) || e.some((t) => t <= 0))
       throw new Error("数组必须只包含正数");
     const n = Math.max(
-      ...e.map((r) => {
-        const a = r.toString().split(".");
+      ...e.map((t) => {
+        const a = t.toString().split(".");
         return a.length > 1 ? a[1].length : 0;
       })
     ), i = Math.pow(10, n);
-    let t = e.map((r) => Math.round(r * i));
-    const s = (r, a) => {
+    let r = e.map((t) => Math.round(t * i));
+    const s = (t, a) => {
       for (; a !== 0; ) {
         let c = a;
-        a = r % a, r = c;
+        a = t % a, t = c;
       }
-      return r;
-    }, o = t.reduce((r, a) => s(r, a), t[0]);
-    return t.map((r) => r / o);
+      return t;
+    }, o = r.reduce((t, a) => s(t, a), r[0]);
+    return r.map((t) => t / o);
   }
   /**
    * 将字符串中的颜色代码转为 HTML 标签，并用 `<span>` 包裹。
@@ -234,10 +235,12 @@ class L {
       p: "purple",
       o: "orange",
       s: "#696969"
-    };
-    return e.replace(/#([a-zA-Z])([^#]*)#/g, (i, t, s) => {
-      const o = n[t.toLowerCase()];
-      return o ? `<span style="color: ${o};">${s}</span>` : s;
+    }, i = /#((?:[a-zA-Z]+)|(?:#[0-9a-fA-F]{3,8}))#([^#]*)#|#([a-zA-Z])([^#]*)#/g;
+    return e.replace(i, (r, s, o, t, a) => {
+      if (s !== void 0)
+        return `<font color =${s}>${o}</font>`;
+      const c = n[t.toLowerCase()];
+      return c ? `<span style="color: ${c};">${a}</span>` : a;
     });
   };
   /**
@@ -267,8 +270,8 @@ class L {
    * @returns {*} 找到的对应值，否则 undefined
    */
   bidirectionalLookup(e, n, i) {
-    const t = e.indexOf(i);
-    if (t !== -1) return n[t];
+    const r = e.indexOf(i);
+    if (r !== -1) return n[r];
     const s = n.indexOf(i);
     if (s !== -1) return e[s];
   }
@@ -294,12 +297,12 @@ class L {
    */
   toggleClass(e, n, i) {
     if (!e) throw new Error("element is null");
-    const t = (s) => {
+    const r = (s) => {
       if (!s.classList) return;
-      const o = s.classList.contains(n), r = s.classList.contains(i);
-      o ? (s.classList.remove(n), s.classList.add(i)) : r && (s.classList.remove(i), s.classList.add(n));
+      const o = s.classList.contains(n), t = s.classList.contains(i);
+      o ? (s.classList.remove(n), s.classList.add(i)) : t && (s.classList.remove(i), s.classList.add(n));
     };
-    Array.isArray(e) ? e.forEach((s) => t(s)) : t(e);
+    Array.isArray(e) ? e.forEach((s) => r(s)) : r(e);
   }
   /**
    * 保存配置项
@@ -328,7 +331,7 @@ class L {
    * 是否是ViteServer开发环境
    * @returns {boolean}
    */
-  isViteDevServer = () => document.querySelectorAll('script[type="module"][src*="/@vite/"]').length > 0;
+  isViteDevServer = L;
   /**
    * 开启开发者模式相关设置,默认会自动检查是否开启了开发者模式,如果没开启则不会生效
    * @param {boolean} [forceEnable=false] 是否强制配置开发者模式设置
@@ -348,12 +351,12 @@ class L {
       throw new TypeError("First argument must be a function.");
     if (this.isDeveloperMode())
       try {
-        const r = Function.prototype.toString.call(e).trim();
-        (r.startsWith("function") || r.startsWith("async function")) && console.warn("[measureExecutionTime] Detected a regular function. Consider using an arrow function to avoid unexpected `this` binding.");
+        const t = Function.prototype.toString.call(e).trim();
+        (t.startsWith("function") || t.startsWith("async function")) && console.warn("[measureExecutionTime] Detected a regular function. Consider using an arrow function to avoid unexpected `this` binding.");
       } catch {
       }
-    const i = Date.now(), t = await e(), o = Date.now() - i;
-    return n && console.log(`Function executed in ${o} ms`), { result: t, duration: o };
+    const i = Date.now(), r = await e(), o = Date.now() - i;
+    return n && console.log(`Function executed in ${o} ms`), { result: r, duration: o };
   }
   /**
    * 播放音频
@@ -366,15 +369,17 @@ class L {
       return;
     }
     e = n ? window.whichWay.file.compilePath(e) : e;
-    const i = new Audio(e), t = () => {
-      i.remove(), i.removeEventListener("ended", t), i.removeEventListener("error", t);
+    const i = new Audio(e);
+    i.volume = d.config.volumn_audio / 8;
+    const r = () => {
+      i.remove(), i.removeEventListener("ended", r), i.removeEventListener("error", r);
     };
-    i.addEventListener("ended", t), i.addEventListener("error", t);
+    i.addEventListener("ended", r), i.addEventListener("error", r);
     const s = i.play();
-    s !== void 0 && s.catch(t);
+    s !== void 0 && s.catch(r);
   }
 }
-const x = new L();
+const x = new _();
 B({
   name: "WhichWayUtil_dev",
   fn: () => {

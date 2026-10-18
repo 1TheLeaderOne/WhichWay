@@ -1,7 +1,7 @@
 import { defineComponent as _, openBlock as h, createElementBlock as d, createElementVNode as t, Fragment as p, renderList as m, toDisplayString as g, createApp as y } from "vue";
 import { lib as v, ui as b } from "noname";
 import { _ as w } from "./_plugin-vue_export-helper.js";
-import { w as L } from "./version-shared.js";
+import { w as L } from "./arknight-arkidMigration-shared.js";
 import { onArenaReady as k } from "./hooks.js";
 const E = { class: "author-background" }, $ = ["src"], x = { class: "author-name" }, W = ["src"], A = { class: "author-name agent-name" }, S = /* @__PURE__ */ _({
   __name: "author",
