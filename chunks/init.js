@@ -1,23 +1,23 @@
 import { lib as r } from "noname";
-import { whichWayHooksApi as m } from "./hooks.js";
-import { w as l, m as s, r as c } from "./arknight-arkidMigration-shared.js";
+import { whichWayHooksApi as l } from "./hooks.js";
+import { w as m, m as s, r as c } from "./arknight-arkidMigration-shared.js";
 const e = [], p = (i) => {
-  const t = e.map(([o, n]) => `  ${o.padEnd(26)} ${n.toFixed(0).padStart(5)} ms`), a = [...e].sort((o, n) => n[1] - o[1]).slice(0, 3).map(([o]) => o);
-  console.groupCollapsed(`%c[WhichWay] 加载完成 · 总计 ${i.toFixed(0)}ms`, "color:#4a9eff;font-weight:bold;"), console.log("%c阶段耗时（无依赖的阶段并发执行，各行之和 ≥ 总计）", "color:#888;font-weight:bold;"), console.log(t.join(`
+  const n = e.map(([o, t]) => `  ${o.padEnd(26)} ${t.toFixed(0).padStart(5)} ms`), a = [...e].sort((o, t) => t[1] - o[1]).slice(0, 3).map(([o]) => o);
+  console.groupCollapsed(`%c[WhichWay] 加载完成 · 总计 ${i.toFixed(0)}ms`, "color:#4a9eff;font-weight:bold;"), console.log("%c阶段耗时（无依赖的阶段并发执行，各行之和 ≥ 总计）", "color:#888;font-weight:bold;"), console.log(n.join(`
 `)), a.length && console.log(`%c最耗时: ${a.join(" / ")}`, "color:#e67e22;"), console.groupEnd();
 }, u = async () => {
-  r.translate.extension_WhichWay = "驶舰之向", l.checkVersionCompatible(), s();
+  r.translate.extension_WhichWay = "驶舰之向", m.checkVersionCompatible(), s();
   const i = [
     //导入toast组件
     { name: "toast", load: () => import("./toast.js") },
     //导入文件管理组件
-    //load 里额外建立立绘 png/jpg 索引：所有取图点（武将注册、皮肤「经典形象」）都在同步路径上，
-    //必须在 onBeforeInit 之前把 illustration/character 的目录清单扫好备查。
+    //load 里额外建立两份目录索引：所有取图点（武将注册、皮肤「经典形象」、动皮静图）都在同步路径上，
+    //必须在 onBeforeInit 之前把 illustration/character 与 illustration/skin 的清单扫好备查。
     {
       name: "file",
       load: async () => {
         const { whichWayFile: o } = await import("./file.js");
-        await o.initCharacterPortraitIndex();
+        await Promise.all([o.initCharacterPortraitIndex(), o.initSkinFileIndex()]);
       }
     },
     //@ts-ignore 加载css（要等 file 阶段把实例注册到 window.whichWay.file 上）
@@ -91,10 +91,10 @@ const e = [], p = (i) => {
     { name: "configUI", load: () => import("./configUI.js") },
     //导入模组系统
     { name: "modules", load: () => import("./modules.js") }
-  ], t = performance.now();
+  ], n = performance.now();
   e.push(...await c(i));
   const a = performance.now();
-  await m.init(), e.push(["hooksApi.init(pendingRun)", performance.now() - a]), p(performance.now() - t);
+  await l.init(), e.push(["hooksApi.init(pendingRun)", performance.now() - a]), p(performance.now() - n);
 }, d = () => document.querySelectorAll('script[type="module"][src*="/@vite/"]').length > 0;
 export {
   d as isViteDevServer,

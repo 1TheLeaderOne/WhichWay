@@ -1,4 +1,4 @@
-import { computed as P, onMounted as J, nextTick as A, onBeforeUnmount as K, watch as X, openBlock as b, createElementBlock as v, createElementVNode as y, toDisplayString as L, unref as W, Fragment as O, renderList as tt, createCommentVNode as et, createApp as ot } from "vue";
+import { computed as P, onMounted as J, nextTick as W, onBeforeUnmount as K, watch as X, openBlock as b, createElementBlock as v, createElementVNode as y, toDisplayString as L, unref as A, Fragment as O, renderList as tt, createCommentVNode as et, createApp as ot } from "vue";
 import { whichWayFile as st } from "./file.js";
 import { onContent as nt, onSetDev as rt } from "./hooks.js";
 import { ui as it } from "noname";
@@ -11,21 +11,12 @@ const at = {
    */
   md: `
 ### 更新概要
-- **新增武将**: 旅骨、岳羽由加莉、克莱门莎、结城理、托莱多
-- **技能 / 武将调整**：灵知
-- **新增皮肤**: 皮肤更新至\`恒远津梁\`版本
-- **重构**：露托、温米、迷迭香的技能部分改用新写法
-- **重构**：所有干员id统一化，现在明日方舟已实装角色的武将id将与明日方舟同步
-- **新增 API**：\`Player.chooseFakeCardTarget\`
-- **新增**: 明日方舟扩展设置界面新增\`征稿在前\`、\`配音设置\`、\`模组设置\`、\`皮肤位置设这\`（仅开发者模式可用）界面
-- **新增**: 为明日方舟干员新增立绘双层渲染，重定向头像绘制入口以 \`default.png\` 背板替代透明区保底图，并兼容换肤重绘与战报克隆
-- **优化**: 优化势力显示，现在联动角色会正确显示其势力
-- **优化**: 干员id统一化，现在所有明日方舟实装角色的id均与明日方舟id相同
-- **修复**: 修复黍、信仰搅拌机因AI批量迁移导致的bug
-- **修复**: 修复嵯峨、普瑞赛斯模组技能丢失的bug
-- **修复**：仍处于开发中的模式\`GloriousIdeal\`在非开发环境下会加载的bug
-- **修复**：跃跃因 AI 批量修改导致代码错误的 bug
-- **修复**：部分配音不受无名杀音量控制的影响
+- **新增动皮**: （剧情）可露希尔 
+- **技能 / 武将调整**: 斯卡蒂、风笛、缪尔赛思
+- **修复**：开启驶舰之向时，本体武将选择的动皮重开游戏后变回原皮的 bug
+- **修复**：千幻聆音里驶舰之向动皮对应的静皮显示两张（png / jpg 同名）的 bug
+- **修复**：干员原画、皮肤在部分场景下显示为空白（立绘/皮肤路径未解析）的 bug
+- **修复**：海蒂【暗信】在特殊情况报错的 bug
 `,
   /**
    * 干员按钮组（干员 id），分「新增」与「调整」两组渲染，按钮可双击查看信息卡
@@ -33,9 +24,9 @@ const at = {
    */
   player: {
     /** 本版新增的干员 */
-    add: ["char_4232_hbound", "char_4219_yukari", "char_4231_clemnt", "char_4217_makoto", "char_393_toledo"],
+    add: [],
     /** 本版调整过技能 / 数据的干员 */
-    adjust: ["char_206_gnosis"]
+    adjust: ["char_263_skadi", "char_222_bpipe", "char_249_mlyss"]
   },
   /**
    * 卡牌按钮组（牌名 / 牌 id），同样分「新增」与「调整」
@@ -62,19 +53,19 @@ const at = {
   change: "adjust",
   modify: "adjust",
   调整: "adjust"
-}, N = /^(\s*)([-*+]|\d+[.)])\s+(.*)$/, D = /^\s*(#{1,6})\s+(.*)$/, M = /^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/, k = /^\s*>\s?/, I = /^\s*```/, q = /^\s*:::\s*([^\s:]+)(?:\s+([^\s:]+))?\s*$/, F = /^\s*:::\s*$/, ht = /^\s*\|?[\s:|-]*-{3,}[\s:|-]*\|?\s*$/;
+}, N = /^(\s*)([-*+]|\d+[.)])\s+(.*)$/, D = /^\s*(#{1,6})\s+(.*)$/, M = /^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/, j = /^\s*>\s?/, I = /^\s*```/, q = /^\s*:::\s*([^\s:]+)(?:\s+([^\s:]+))?\s*$/, H = /^\s*:::\s*$/, pt = /^\s*\|?[\s:|-]*-{3,}[\s:|-]*\|?\s*$/;
 function V(l, e, s) {
   const t = e === "player" ? l?.player : l?.cards;
   if (Array.isArray(t)) return s === "add" ? t.slice() : [];
   const o = t?.[s];
   return Array.isArray(o) ? o.slice() : [];
 }
-function j(l) {
+function k(l) {
   const e = [];
   let s = String(l ?? "").replace(/`([^`\n]+)`/g, (t, o) => `\0${e.push(o) - 1}\0`);
   return s = s.replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>").replace(/__([^_\n]+)__/g, "<strong>$1</strong>").replace(/~~([^~\n]+)~~/g, "<del>$1</del>").replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>").replace(/\[([^\]\n]+)\]\(([^)\s]+)\)/g, (t, o, c) => `<a class="md-a" href="${/^\s*(?:javascript|data|vbscript):/i.test(c) ? "#" : c}" target="_blank" rel="noreferrer noopener">${o}</a>`), s.replace(/\u0000(\d+)\u0000/g, (t, o) => `<code class="md-code">${e[Number(o)]}</code>`);
 }
-function pt(l) {
+function ht(l) {
   const e = [];
   let s = "";
   for (const t of l) {
@@ -89,7 +80,7 @@ function pt(l) {
       const c = e.pop();
       s += c.ordered ? "</ol>" : "</ul>", e.push({ ordered: t.ordered, level: o }), s += t.ordered ? '<ol class="md-ol">' : '<ul class="md-ul">';
     }
-    s += `<li>${j(t.text)}</li>`;
+    s += `<li>${k(t.text)}</li>`;
   }
   for (; e.length; ) {
     const t = e.pop();
@@ -97,7 +88,7 @@ function pt(l) {
   }
   return s;
 }
-function H(l) {
+function B(l) {
   const e = String(l ?? "").replace(/\r\n?/g, `
 `).split(`
 `), s = [];
@@ -123,25 +114,25 @@ function H(l) {
     const c = o.match(D);
     if (c) {
       const n = c[1].length;
-      s.push(`<h${n} class="md-h md-h${n}">${j(c[2].trim())}</h${n}>`), t++;
+      s.push(`<h${n} class="md-h md-h${n}">${k(c[2].trim())}</h${n}>`), t++;
       continue;
     }
-    if (k.test(o)) {
+    if (j.test(o)) {
       const n = [];
-      for (; t < e.length && k.test(e[t]); )
-        n.push(e[t++].replace(k, ""));
-      s.push(`<blockquote class="md-quote">${H(n.join(`
+      for (; t < e.length && j.test(e[t]); )
+        n.push(e[t++].replace(j, ""));
+      s.push(`<blockquote class="md-quote">${B(n.join(`
 `))}</blockquote>`);
       continue;
     }
-    if (o.includes("|") && t + 1 < e.length && ht.test(e[t + 1])) {
-      const n = (u) => u.trim().replace(/^\||\|$/g, "").split("|").map((w) => j(w.trim())), r = n(o);
+    if (o.includes("|") && t + 1 < e.length && pt.test(e[t + 1])) {
+      const n = (u) => u.trim().replace(/^\||\|$/g, "").split("|").map((w) => k(w.trim())), r = n(o);
       t += 2;
-      const h = [];
+      const p = [];
       for (; t < e.length && e[t].includes("|") && e[t].trim(); )
-        h.push(n(e[t++]));
-      const p = r.map((u) => `<th>${u}</th>`).join(""), g = h.map((u) => `<tr>${u.map((w) => `<td>${w}</td>`).join("")}</tr>`).join("");
-      s.push(`<table class="md-table"><thead><tr>${p}</tr></thead><tbody>${g}</tbody></table>`);
+        p.push(n(e[t++]));
+      const h = r.map((u) => `<th>${u}</th>`).join(""), g = p.map((u) => `<tr>${u.map((w) => `<td>${w}</td>`).join("")}</tr>`).join("");
+      s.push(`<table class="md-table"><thead><tr>${h}</tr></thead><tbody>${g}</tbody></table>`);
       continue;
     }
     if (o.match(N)) {
@@ -162,23 +153,23 @@ function H(l) {
         }
         break;
       }
-      s.push(pt(n));
+      s.push(ht(n));
       continue;
     }
     const _ = [];
     for (; t < e.length; ) {
       const n = e[t];
-      if (!n.trim() || I.test(n) || M.test(n) || D.test(n) || k.test(n) || N.test(n) || q.test(n) || F.test(n))
+      if (!n.trim() || I.test(n) || M.test(n) || D.test(n) || j.test(n) || N.test(n) || q.test(n) || H.test(n))
         break;
       _.push(n.trim()), t++;
     }
-    _.length && s.push(`<p class="md-p">${j(_.join(`
+    _.length && s.push(`<p class="md-p">${k(_.join(`
 `)).replace(/\n/g, "<br>")}</p>`);
   }
   return s.join(`
 `);
 }
-function B(l, e = {}) {
+function F(l, e = {}) {
   let s = l;
   typeof s != "string" && (s = Array.isArray(e?.intro) ? e.intro.map((r) => `- ${r}`).join(`
 
@@ -188,33 +179,33 @@ function B(l, e = {}) {
 `), o = [];
   let c = [];
   const d = () => {
-    c.some((r) => r.trim()) && o.push({ type: "html", html: H(c.join(`
+    c.some((r) => r.trim()) && o.push({ type: "html", html: B(c.join(`
 `)) }), c = [];
   }, _ = ["player", "card"], n = ["add", "adjust"];
   for (let r = 0; r < t.length; r++) {
-    const h = t[r].match(q), p = h ? lt[h[1].toLowerCase()] : void 0, g = p && h[2] ? dt[h[2].toLowerCase()] : p ? "add" : void 0;
-    if (!p || !g) {
+    const p = t[r].match(q), h = p ? lt[p[1].toLowerCase()] : void 0, g = h && p[2] ? dt[p[2].toLowerCase()] : h ? "add" : void 0;
+    if (!h || !g) {
       c.push(t[r]);
       continue;
     }
     const u = [];
-    for (r++; r < t.length && !F.test(t[r]); )
+    for (r++; r < t.length && !H.test(t[r]); )
       t[r].trim() && u.push(t[r].trim()), r++;
     d();
-    const w = V(e, p, g);
-    o.push({ type: p, group: g, items: u.length ? u : w });
+    const w = V(e, h, g);
+    o.push({ type: h, group: g, items: u.length ? u : w });
   }
   d();
   for (const r of _)
-    for (const h of n) {
-      if (o.some((g) => g.type === r && g.group === h)) continue;
-      const p = V(e, r, h);
-      p.length && o.push({ type: r, group: h, items: p });
+    for (const p of n) {
+      if (o.some((g) => g.type === r && g.group === p)) continue;
+      const h = V(e, r, p);
+      h.length && o.push({ type: r, group: p, items: h });
     }
   return o;
 }
 function ut(l = {}) {
-  return B(l?.md, l).some((s) => s.type === "html" ? !!s.html.trim() : s.items.length > 0);
+  return F(l?.md, l).some((s) => s.type === "html" ? !!s.html.trim() : s.items.length > 0);
 }
 const mt = { class: "update-notice" }, ft = { class: "notice-header" }, gt = { class: "notice-content" }, yt = { class: "update-section" }, _t = ["innerHTML"], wt = {
   key: 1,
@@ -242,12 +233,12 @@ const mt = { class: "update-notice" }, ft = { class: "notice-header" }, gt = { c
   emits: ["close"],
   setup(l, { emit: e }) {
     let s = T.ext, t = T.noname.over;
-    const o = l, c = e, d = P(() => B(o.info?.md, o.info)), _ = P(() => ut(o.info)), n = (i) => {
+    const o = l, c = e, d = P(() => F(o.info?.md, o.info)), _ = P(() => ut(o.info)), n = (i) => {
       const m = i.type === "player", a = i.group !== "adjust";
       return m ? a ? "👥 新增干员" : "🔧 调整干员" : a ? "🃏 新增卡片" : "🔧 调整卡牌";
-    }, r = /* @__PURE__ */ new Map(), h = (i, m) => {
+    }, r = /* @__PURE__ */ new Map(), p = (i, m) => {
       i ? r.set(m, i) : r.delete(m);
-    }, p = {
+    }, h = {
       player: { width: 80, height: 100 },
       card: { width: 100, height: 140 }
     }, g = () => it?.create?.buttonPresets ?? window?.ui?.create?.buttonPresets, u = (i, m) => {
@@ -287,7 +278,7 @@ const mt = { class: "update-notice" }, ft = { class: "notice-header" }, gt = { c
           console.warn(`[UpdateNotice] 按钮 API 不可用，跳过渲染：${a.type}`);
           return;
         }
-        const { width: z, height: Q } = p[f ? "player" : "card"];
+        const { width: z, height: Q } = h[f ? "player" : "card"];
         a.items.forEach((S) => {
           try {
             const $ = R(S);
@@ -315,7 +306,7 @@ const mt = { class: "update-notice" }, ft = { class: "notice-header" }, gt = { c
       c("close"), typeof o.onClose == "function" && o.onClose();
     };
     return J(() => {
-      A(U);
+      W(U);
     }), K(() => {
       r.forEach((i) => {
         for (; i.firstChild; ) i.removeChild(i.firstChild);
@@ -323,19 +314,19 @@ const mt = { class: "update-notice" }, ft = { class: "notice-header" }, gt = { c
     }), X(
       () => o.info,
       () => {
-        A(U);
+        W(U);
       },
       { deep: !0 }
     ), (i, m) => (b(), v("div", mt, [
       y("div", ft, [
-        y("h2", null, "驶舰之向 v" + L(W(s)) + " 更新公告", 1),
+        y("h2", null, "驶舰之向 v" + L(A(s)) + " 更新公告", 1),
         y("button", {
           onClick: G,
           class: "close-btn"
         }, "×")
       ]),
       y("div", gt, [
-        y("div", yt, "最低适配版本: " + L(W(t)), 1),
+        y("div", yt, "最低适配版本: " + L(A(t)), 1),
         (b(!0), v(O, null, tt(d.value, (a, f) => (b(), v(O, { key: f }, [
           a.type === "html" ? (b(), v("section", {
             key: 0,
@@ -345,14 +336,14 @@ const mt = { class: "update-notice" }, ft = { class: "notice-header" }, gt = { c
             y("h3", null, L(n(a)), 1),
             y("div", {
               ref_for: !0,
-              ref: (E) => h(E, f),
+              ref: (E) => p(E, f),
               class: "character-grid"
             }, null, 512)
           ])) : (b(), v("section", bt, [
             y("h3", null, L(n(a)), 1),
             y("div", {
               ref_for: !0,
-              ref: (E) => h(E, f),
+              ref: (E) => p(E, f),
               class: "card-grid"
             }, null, 512)
           ]))
@@ -443,7 +434,7 @@ const Tt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
 }, Symbol.toStringTag, { value: "Module" }));
 export {
   Tt as i,
-  j as r,
-  B as s,
+  k as r,
+  F as s,
   x as w
 };
