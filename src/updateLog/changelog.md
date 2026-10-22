@@ -1,6 +1,190 @@
 # 瑰丽理想 WhichWay 更新日志
 
+## 2026-10-22
+
+### 修复：千幻聆音读不到驶舰之向的皮肤（皮肤列表为空）
+
+- **现象**：开驶舰之向后，千幻聆音的换肤界面里，方舟干员**一张皮肤都列不出来**（或点开后是空图）。
+- **根因 1（`qs:` 少了 `lib.assetURL`）**：`file.js` 里 `qs:` 被我写成了
+  `extension/WhichWay/image/illustration/skin/`（相对路径），而千幻 `qhly_getSkinList` 的**第一步**
+  就是 `game.qhly_checkFileExist(path)`：
+  ```js
+  // 千幻 content.js:4491
+  game.qhly_checkFileExist = function (path, callback) {
+      if (lib.node && lib.node.fs) {
+          var stat = lib.node.fs.statSync(__dirname + '/' + path);   // 相对路径靠 __dirname 兜
+      } else { callback(false); }                                    // 非 Node 环境直接 false
+  };
+  ```
+  这个探针一旦返回假，`qhly_getSkinList` 就直接 `callback(false)`，**整个皮肤列表为空**。
+  我上一轮误以为「千幻会自己补 `assetURL`」，但那只对 `writeTextFile` / `lib.init.js` 成立，
+  对 `checkFileExist` 不成立。
+- **根因 2（`replaceAvatarDestination` 返回了绝对路径，形成双重前缀）**：这个钩子的返回值会被千幻
+  拿去当图片地址，而千幻是 `img.src = lib.assetURL + file`（`content.js:11131`）、
+  `setBackgroundImage` 内部也是 `url("${lib.assetURL}${img}")`（`polyfill.ts:250-262`）。
+  我原来返回的是 `whichWayFile.extDir + …`（`extDir` 已含 `assetURL`）⇒ `${assetURL}${assetURL}…`，
+  必然 404。
+
+- **修法**（两种路径形态分开，不能混）：
+  - `qs:`（= 千幻的 `skin.standard`，**目录**，供 `checkFileExist` / `getFileList`）⇒ **改回绝对**：
+    `` `${this.extDir}image/illustration/skin/` ``；
+  - `replaceAvatarDestination`（**图片文件**路径，供 `img.src` / `setBackgroundImage`）⇒ **保持相对**：
+    `extension/WhichWay/image/illustration/skin/{id}/{文件}`；
+  - 「经典形象」同理改为相对：`extension/WhichWay/image/illustration/character/{id}.{png|jpg}`。
+- 核对：`qs:` 全局只有 `extCompatible/qianhuan.js` 的 `skin.standard` 一个消费方，
+  改成绝对不影响其它代码；`getAdditionalSkins` 返回的 `skinName` 只被千幻当**皮肤名**参与
+  `duibiList` 比对（`content.js:8669`），不参与拼路径，无需改动。
+
+## 2026-10-22（此前）
+
+### 修复：千幻换肤界面 / `get.nodeintro` 皮肤按钮仍有「影子」
+
+- **现象**：千幻聆音的换肤界面（`skin1/2/3` 预览格、`skinView.avatar`）与无名杀自带的 `get.nodeintro`（右键武将 →「更改皮肤」按钮）里，方舟干员的立绘仍会透出 `default_silhouette_*`，或出现「子元素画立绘 + 节点背景又贴一张」的叠影。
+- **根因 1（`.qh-not-replace` 被我当成「谁都不许接管」）**：千幻给皮肤预览格显式加了 `.qh-not-replace`（`content.js:10930`、`11238`、`12091`、`12379`、`14360`、`17247-17249`）。它的原意是「**千幻自己的** `setBackground` 包装层别接手」，而不是「驶舰之向也别丢剪影」——而这些预览格恰恰最需要丢剪影。我上一轮把它当成一票否决，导致这些节点全部退回引擎原版绘制。
+- **根因 2（`setBackgroundImage` 完全没被接管）**：`nodeintro` 的皮肤按钮走 `button.setBackgroundImage(src)`（`get/index.js:5146`），千幻预览格也常走 `currentSkinView.setBackgroundImage(...)`（`content.js:16685`）。这条路我原来只在「节点已有 layers」时才同步，新节点没有 layers ⇒ 直接透传 ⇒ 单层带 alpha 的图贴在透明格上。
+- **根因 3（十周年UI 出框图绕过所有门）**：`outcropAvatar.js` 的 `setupOutcropAvatar()` 在 `setBackground` 之后用 `setTimeout` 把出框图 **直接写进 `node.style.backgroundImage`**，既不走 `setBackground` 也不走 `setBackgroundImage`。结果是「子元素画立绘、内联样式写出框图」两层叠加。
+
+- **修法**（`src/skin/avatarBackground.ts`）：
+  1. **白名单收窄 `.qh-not-replace` 语义**：不再一票否决。`.qh-must-replace` 仍短路为「必须接管」。同时补上十周年UI 的真实类名 `.deputy-avatar`（引擎玩家头像是 `.primary-avatar` / `.deputy-avatar`，不是 `.avatar`）。
+  2. **`setBackgroundImage` 精确接管**：新增 `isOperatorImage()`，判据是「图路径能被 `resolvePortraitKey()` 反解成**官方**方舟干员」（它内部只认 `whichWayArknight.isArknght()`，即 `character_table` + `patchChars`）。因此：
+     - 官方干员的立绘 / 皮肤 ⇒ 接管；
+     - **本扩展自造 id**（`acemrfz`、`plot_keluxiermrfz`…，不在 `character_table`、也没有官方立绘）⇒ 不接管（它们本来就没有透明区问题）；
+     - 本体武将 `image/skin/…`、千幻自带皮肤包 `sanguoskin/…`、游戏背景、装饰底板、边框角标 ⇒ 全部透传，**不扩大接管面**；
+     - 数组入参（引擎 `setBackground` 内部拼的 `[立绘, 保底图]`）⇒ 直接透传，交给 `setBackground` 的 gate，避免重复绘制。
+  3. **出框图优先（方案 A）**：新增 `watchExternalBackground()`，用 `MutationObserver` 观察节点 `style` 变化。当内联 `background-image` 与本扩展两层背景当前那张不一致时，判定为外部改图（出框图 / 千幻预览图），把它同步进两层背景并清掉内联那份。用 `selfWritingNodes` 标记放过「本扩展自己写影子副本」的那次变化，避免同一张图反复回灌。
+
+- **顺带统一**：所有写影子副本的地方改走新的 `writeInlineBackground()`（带 selfWriting 标记），共三处：`paintPortrait`、`setBackgroundImage` gate、`mountPortrait`。
+
+### 说明：默认背板维持现状
+
+`image/ui/background/default.png` 实测边缘 alpha 为 196~223（中心 255），并非完全不透明。经确认**不修改素材、不追加不透明底色**，保持现状。
+
+### 修复：双层立绘与千幻聆音武将卡样式冲突（千幻卡片仍透出 `default_silhouette_*.jpg`）
+
+- **现象**：开驶舰之向后，千幻聆音的武将卡里，方舟干员立绘的透明区透出 `image/character/default_silhouette_female.jpg`，且换肤不能正确应用。
+- **根因**：本扩展的绘制劫持原先只装在**引擎的玩家头像节点**上（`installRedirect` 给 `node.avatar`/`avatar2` 装自有属性）。而千幻的卡片容器（`.primary-avatar`、`.qh-image-standard`、`.qh-shousha-big-avatar`、`.qh-image-lutou` 等）是它运行时 `ui.create.div()` 出来的**新节点**，拿不到本扩展的自有属性 ⇒ 直接走引擎原版 `setBackground` ⇒ 引擎贴的 `[立绘, default_silhouette_*]` 两层背景原样生效。千幻还会在很多路径里绕过 `prototype.setBackground`、直接调它自己保存的原版 `qhly_origin_setBackground`（`content.js:8018`），只劫持原型上的 `setBackground` 也拦不住。
+- **修法**（`src/skin/avatarBackground.ts`）：
+  - 新增**原型级 gate**：`HTMLDivElement.prototype.setBackground` 上按「方舟干员 + 节点在白名单内」改画进两层背景；
+  - 同时把 `qhly_origin_setBackground`（千幻保存的原版入口）接到同一个 gate 上，两种加载顺序（千幻先/后于本扩展）都能覆盖；
+  - 用 `setBackgroundDepth` 防重入，避免「gate ↔ 千幻包装层」互相回调成死循环；
+  - 新增 `setBackgroundImage` 原型层同步：千幻换肤时直接调 `qhly_origin_setBackgroundImage(图片路径)`，不跟着同步的话两层背景（子元素）会一直显示上一张皮肤。
+- **白名单**（按确认的方案一，不做无条件劫持）：`.avatar`、`.avatar2`、`.button.character`、`.primary-avatar`、`.qh-avatar`、`.qh-shousha-big-avatar`、`.qh-image-standard`、`.qh-image-lutou`、`.qh-page-skinavatarpicture(-lutou)`；并尊重千幻自己的接管意愿（`.qh-not-replace` 不接管、`.qh-must-replace` 必接管）。
+- **顺带清理**：`installRedirect` 不再给节点装自有属性，改为统一交给原型 gate —— 否则两套判据并存时，自有属性会绕过白名单、把 `.qh-not-replace` 的节点（皮肤预览缩略图）也抢过来。
+
+### 修复：千幻皮肤包钩子有一半是死代码，改用真正会被调用的入口
+
+`src/extCompatible/qianhuan.js`：
+
+- **删除** `getSkinExt`、`filterDynamicSkins`：全文件计数确认千幻**一次都不调用**（它不认这两个键）。
+- **新增** `replaceAvatarDestination(name, skin)`：千幻的 `qhly_getSkinFile` / `setBackground` / `setBackgroundImage` 三处都会先问它，返回本扩展解析出的**真实文件路径**（`夏卉` → `夏卉 FA075.png`），绕开它自己按「皮肤名 + 扩展名」硬拼（那把扩展的 png 拼成 jpg，必然 404）。
+- **新增** `hideSkin(name, skin)`：把「只有动作数据、没有静皮」的动皮条目（`时遗2`、`远行前的野餐`、`重装芯片`）从千幻的皮肤列表里隐藏，避免它给每条补一张 `皮肤名.jpg` 的空图卡片。
+- **新增** `originSkinInfo()`：千幻「原画」页会问它，返回空串（本扩展没有额外内容）。
+- `getAdditionalSkins` 保持不变（返回动皮名，这是千幻唯一读的额外皮肤通路，见 `qhly_findAdditionSkins`）。
+
+### 修复：千幻 `plugins/code.js` 在开发环境报 `Cannot use import statement outside a module`
+
+- **根因**（**上游问题**，与驶舰之向无关）：`code.js` 用动态模块导入去加载 `game/codemirror6.js`；Vite 开发服务器会给**含动态导入语法**的 `.js` 注入一段指向 `/@vite/client` 的模块导入语句，而千幻是用 `lib.init.js()` 加载这个文件的，引擎那句 `//script.type = "module"` 是**注释掉的**（`library/init/index.js`）⇒ 模块语法被当经典脚本执行 ⇒ 报错。实测同一目录下 `ai.js`/`record.js`（无动态导入）不被注入，只有 `code.js` 被注入。
+- 且 `game/codemirror6.js` 在当前版本无名杀里**根本不存在**（引擎已改用 codemirror 包 + importmap，在 `ui.create.editor` 里加载），那条导入必然失败。
+- **修法**：直接删掉动态导入，走原本就写好的 `textarea` 降级分支（用户确认「使其降级，测试时不报错即可」）。
+- **同步**：`packages/extension/千幻聆音/plugins/code.js`、`apps/core/extension/千幻聆音/plugins/code.js`、`dist/extension/千幻聆音/plugins/code.js` 三处已同步为同一份（6410 字节，hash 一致）。
+- 注释里也不再出现 `import(` / `import {` 字样（Vite 是按原始文本扫描的，注释里留着同样会触发注入）。
+
+### 验证
+
+- 改动的两个 WhichWay 文件 `eslint` 0 报错；`vite build` 通过，`chunks/` 无 `from "./extension.js"` 反向引用。
+- 产物核对：`skin-PortraitLayers-shared.js` 含 `qhly_origin_setBackground` / `qh-not-replace` / `qh-must-replace` / 各白名单类名 / `__whichWayBackgroundImageGated`；`extCompatible.js` 含 `replaceAvatarDestination` / `hideSkin` / `getAdditionalSkins` / `originSkinInfo`，且**不含** `getSkinExt` / `filterDynamicSkins`。
+- `code.js` 通过 `node --check`（经典脚本语法合法），静态确认无动态导入、无 `import.meta`、无 `export` 语句。
+- **实机未验证**：千幻三种主题（`newui`/`shousha`/`jingdian`）的卡片立绘、皮肤预览格、换肤后是否即时生效，以及「代码」插件页不报错，需进游戏确认。
+
+## 2026-10-21
+
+### 修复：武将卡背景变透明（`CharacterCard` 的 `:style` 绑定把对象当字符串用）
+
+- **现象**：武将卡打开后整张卡没有背景图（透明底），只剩内部控件。
+- **根因**：上一版为「背景图加载失败回退默认背板」新增了 `const backgroundStyle = computed(() => ({ backgroundImage: ... }))`，它返回的是**对象**；但模板写成了 `:style="{ backgroundImage: backgroundStyle }"`。Vue 模板编译时，`:style` 对象字面量里的 `ref` / `computed` 会被解包成 `.value`，于是实际写入的是 `{ backgroundImage: { backgroundImage: "url(...)" } }` —— `background-image` 收到一个对象，属非法值被浏览器丢弃，`container-CC-SJZX` 就只剩透明底。
+- **为什么只有这一处坏**：其它 `.vue` 的同类写法（`PortraitLayers.vue` 的 `backdrop`、`GloriousIdeal/App.vue` 的 `backdropUrl`）返回的都是**字符串**，解包后正好是 `backgroundImage` 要的值；只有 `backgroundStyle` 返回对象。
+- **修法**：模板改为 `:style="backgroundStyle"`（整个对象交给 `:style`），与 `charImageStyle` 的既有写法一致。同时清理了同批引入的一处死代码：`refreshPreviewSkin` 假设了引擎并不存在的 `_status.prepare.players`，而选将预览本来就由 `ui.create.buttonPresets.character` 的 after 钩子重绘。
+- 构建产物核对：`chunks/characterCard-CharacterCard-shared.js` 中已是 `style: ye(r.value)`，且 `r = P(() => ({ backgroundImage: ... }))`。
+
+## 2026-10-19
+
+### 修复：皮肤存档三处配置互相覆盖（本体武将动皮重开变回原皮）
+
+- **现象**：开启驶舰之向后，给**非驶舰之向武将**（本体武将、其它扩展武将）选好动皮，重开游戏又变成原皮。
+- **根因 1（合并时把本体武将的选择删掉）**：`skin/index.ts` 的 `syncAllSkinConfig()` 是「先查本扩展皮肤表，查不到就删键」，而本扩展的皮肤表里只有驶舰之向干员，本体武将一律 `getCharacterSkin() === undefined` ⇒ `store()` 把 `lib.config.skin[key]` 删掉，随后 `skinConfig` / `qhly_skinset` 又被写成同一份（也没有这个键），玩家的选择在下次启动被彻底覆盖。
+- **根因 2（时机太早）**：原来合并发生在 `skin` 阶段（`init()` 里），那时千幻的扩展包可能还没 init，`game.saveConfig("qhly_skinset", …)` 与千幻的 `skinConfig` 写盘都会把合并结果盖掉。
+- **根因 3（只写一份）**：`syncSkin()` 只写本扩展的 `skinConfig`，千幻的 `qhly_skinset.skin` 与本体 `lib.config.skin` 停在旧值；「经典形象」又只在**本扩展**有这条存档时才删键。
+- **修法**：合并改到引擎 `onInit` 末尾（各扩展包的 init 与写盘都已结束），并且：
+  - 本扩展武将：存档里只认皮肤名，路径按本次扫描的皮肤表重新解析，解析不到就**保留原选择**（不再删键）；
+  - 非本扩展武将：原样保留（只剔除 `undefined` / `null` 路径），三份存档里任一存在的键都保留；
+  - `syncSkin()` 同步写 `lib.config.skin`、`skinConfig`、`qhly_skinset.skin` 三处，「经典形象」无条件删键；
+  - 合并后立刻重绘场上玩家（副将用 `name2`，不再拿双将合成名 `a+b/dual` 去查皮肤表）与选将预览（`_status.prepare.players`）。
+- 另外：`qhly_skinset` 里缺 `skin` 字段时 `checkSkinSetting()` 的 `??=` 补不全，首次合并会抛错，已改为逐字段补齐。
+
+### 修复：千幻聆音里「动皮对应的静皮」显示两个（png / jpg 同名）
+
+- **现象**：驶舰之向干员的动皮在千幻的皮肤选择界面里，同一张皮肤出现两张卡片（本扩展的 png + 千幻自己补的 jpg）。
+- **根因**：① 旧 `qianhuan.js` 的 `skin.standard` 指向不存在的 `illustration/skin/`，千幻自己扫不到本扩展的静皮；② 千幻 `qhly_getSkinModels` 的规则是「有动皮、但没有同名静皮就补一张 `皮肤名 + '.jpg'`」，而本扩展的静皮是 png；③ 静皮文件名常常不是皮肤名（`夏卉 FA075.png`），千幻按名字拼路径同样找不到。
+- **修法**（只动 WhichWay 一侧，不改千幻）：
+  - `skin.standard` 改为本扩展静皮目录（不带 `lib.assetURL`，千幻会自己补）；
+  - `getAdditionalSkins` 把同一张皮肤的不同形态动皮（`时遗` / `时遗2`、`于万千宇宙之中` / `…2`）归并成**一张**静皮，名字用**动皮名**（千幻按名字判断有没有同名静皮），所以不会再补 jpg；
+  - `getSkinExt` 把「名字 → 磁盘上真实文件」交给千幻（`夏卉` → `夏卉 FA075.png`），千幻补出来的同名条目也走这条校验；
+  - `filterDynamicSkins` 让千幻跳过本身没有静皮的动皮条目（`时遗2`、`远行前的野餐`、`重装芯片` 等）。
+  - 新增 `whichWayFile.initSkinFileIndex()`：启动期扫一次 `illustration/skin`，建立「干员id → 皮肤名 → 真实文件名」索引，取代按固定扩展名硬拼。
+  - **已知限制**：`时遗`、`夏卉` 这类动皮名与静皮名不一致的条目，千幻仍会**多列一张**同名卡片（千幻只会从「名字 + 扩展名枚举」拼路径，没有「名字是 A、文件是 B」的接口）。它现在显示的是正确的 `夏卉 FA075.png`，点选后实际选中的也是这张图，不再是一张 404 的空图。
+- 动态皮肤数据修正：`char_2014_nian` 的经典形象骨骼名 `dyn_illust_char_2014_nian` → `…_nian2`（目录里只有后者，原来整张动皮 404）。
+
+### 修复：`window.whichWaySkin` / `window.whichWay` 在非开发者模式下不可用
+
+- `skin/index.ts` 的 `onInit` 直接写 `window.whichWaySkin`，非开发者模式注入的是 `void 0` ⇒ `Cannot convert undefined or null to object`，整批干员的 init 卡死（部分干员没有立绘/皮肤）。
+- `file.js` / `init.js` 两处 `window.whichWay.file` 也会在非开发者模式下抛同样的错（`initSkinData`、`setBgI`），已改为走导入的实例。
+- `getCurrentSkinPath()` 对**不存在的角色**调用 `get.character(name).img` 会抛异常，已加判定。
+- 立绘重定向原先只把方舟干员的图改画进两层背景，现在**任何**有皮肤配置的武将都走同一套绘制，且绘制层不再依赖 `lib.config.skin[key][1]` 的原样值。
+
+### 修复：找不到立绘时写入必然 404 的 `.jpg`
+
+- `packs/index.ts` 注册武将时无条件写 `char.img = …{id}.jpg`：目录里没有这张图时就贴一张 404 空图（「原画空白」）。现在先查立绘索引，没有就**不写** `char.img`，让引擎回落到默认武将图；「经典形象」皮肤条目同理。
+- 武将卡的背景图增加加载失败回退（配置里的旧目录路径失效时退回默认背板，不再整卡透明）。
+
+### 构建校验
+
+- `pnpm eslint` 改动的 10 个文件 0 报错；`vite build` 通过，`chunks/` 下无 `from "./extension.js"` 反向引用。
+- 一次性脚本（已删除）核对了两件事：动态皮肤数据里 98 处 `name` 只有 `char_2027_wang/经典形象` 一处对不上文件（该武将当前未注册，属未启用数据的遗留）；用真实目录模拟千幻的「静态列表 + 额外皮肤 + 补 jpg」合并，57 位干员、95 张额外皮肤，**不再出现「同一张皮肤两张卡片」**（上面的已知限制除外）。
+
 ## 2026-10-18
+
+### 脚本：修复 `release\output` / `output-core` 导出后中文文件名乱码
+
+- **现象**：`release.bat` 导出的 `release\output`、`release\output-core` 中，`image\illustration\skin` 等目录下所有中文文件名变成 `鎶ョ.png` 之类的乱码；实际还丢失了 243 个文件（乱码名冲突互相覆盖）。
+- **根因**：`:export_tree` 原用 `git archive` 生成 tar 后再 `tar -xf`。`cmd.exe` 的 PATH 先命中 Git 自带的 GNU tar，它在没有 UTF-8 locale 时按系统 ANSI 代码页（GBK）转换 tar 里的 UTF-8 路径，把所有中文名写成 mojibake；不同原名转出的同名文件再互相覆盖。Windows 自带 bsdtar 也无法正确解析 `git archive` 为这些名字写出的 pax 头（实测报 `Invalid empty pathname` 并改名）。
+- **修复**：改为让 git 自己导出——`git read-tree <tree>` 写入私有临时 index（`%TEMP%\whichway-release\export-tree.idx`），再用 `git --work-tree=<目标> checkout-index -a -f` 落盘，名字由 git 直接写 NTFS，全程不经过 tar；导出后清空 `GIT_INDEX_FILE`，不影响 `make_dev_output` 的临时 index。
+- **修复现有产物**：用同一方法重新导出 `release\output` 与 `release\output-core`。校验：与 `git ls-tree -r output` / `output-core` 逐文件比对 3849/3849、1853/1853 全部存在，0 缺失；除合法的 `·` 外无 mojibake 名字；`skin\char_002_amiya` 恢复为 `报童.png` / `播种者.png` / `见习联结者.png`，`dynamicSkin\background` 恢复为 `叙拉古人.png` / `喀兰.png` 等。
+
+### 脚本：`release.bat` 本地压缩包新增 `--password`（AES-256）
+
+- **需求**：release 脚本自动生成的压缩包默认没有密码，新增可选密码保护；不带 `--password` 时行为完全不变。
+- **用法**：`release.bat dev [--password]`、`pack [output|core|all] [--password]`、`core <version> <baseline> [--password]`，参数顺序任意。每条命令只询问一次（隐藏输入 + 二次确认），`pack all` 的两个包共用同一密码；自动化可设 `WW_ZIP_PASSWORD` 跳过交互（值不回显、不写入命令行）。`dev --push-only` / `--no-zip` 不产包，会忽略该参数并提示。
+- **实现**：新增 `scripts/zip-encrypt.ps1`。`prompt` 模式用 `Read-Host -AsSecureString` 取密码，写入 `%TEMP%\whichway-release\zip-pass.txt`（UTF-8 无 BOM，命令结束即删）；`zip` 模式读取该文件并调用 Windows 自带 bsdtar（`System32\tar.exe`），以 `--options zip:encryption=aes256 --passphrase ...` 生成 ZIP。`zip_flat` 加密时用 `-C <src> *` 保持原有的扁平布局（并包含点文件）；`zip_wrapped` 保持 `WhichWay/` 顶层。密码含空格/引号/结尾反斜杠时由 helper 按 MSVCRT 规则自行拼参数，实测均能正确解压。
+- **失败安全**：加密路径绝不回退到无密码的 `Compress-Archive`；bsdtar 缺失、tar 返回非 0、产物为空、或 ZIP 头中找不到 AES 条目（通用标志 bit0 + method 99）都会删除半成品并以 1 退出。旧压缩包只在密码确认成功后才删除。
+- **兼容性**：AES ZIP 无法用 Windows 资源管理器自带解压打开，需 7-Zip / WinRAR / Bandizip；脚本会打印提示。
+- **顺带修正**：新增 `find_bsdtar`，显式优先 `%SystemRoot%\System32\tar.exe` 并校验 `--version` 含 `bsdtar`。此前 `where tar` 在装了 Git 的机器上会先命中 GNU tar，而 GNU tar 会把 tar 格式写成 `.zip`（实测文件头为 `./\0`），也不支持 `--options/--passphrase`；现在无密码路径同样只用 bsdtar，找不到时回退 `Compress-Archive`。
+- 校验：helper 在临时目录实测 flat/wrapped 布局、中文/空格/点文件、密码含空格/引号/结尾反斜杠、错误密码解压失败、ZIP 头 AES 标记；用临时 git 仓库实测 `pack all --password`（两包均加密、密码文件清理、退出 0）、`pack all`（无 `--password` 时不加密且忽略 `WW_ZIP_PASSWORD`）、`core v1.1 v1.0 --password`（增量内容与解压正确）；`core --password` 缺参、`core ... --password --extra`、`pack invalid --password`、`pack --password invalid` 均按预期退出 1。**未在真实 1.8G/2.1G 发布目录上跑完整打包**（避免长时间占用并覆盖既有产物）。
+
+### 脚本：`release.bat core <version> <baseline>` 新增「指定版本差分核心包」（仅本地 zip，不推送）
+
+- **需求**：按版本区间导出核心包，例如 `release.bat core v1.6 v1.5.6` 只输出 v1.5.6 → v1.6 之间新增/修改的内容；要求仅生成本地压缩包，不更新分支、不打 tag、不推送 GitHub。
+- **实现**：新增 `core` 子命令。两个参数都按 tag/commit 解析（非法时列出本地 tag 并退出 1）；复用 `make-core-index.cjs` 生成新增/修改文件清单（与 release 的 output-core 同一套逻辑：A/C/M/R/T，排除 `node_modules/`、`.github/`，删除项不包含），再用临时 index `git update-index --index-info` → `git write-tree` 组装只含增量文件的树，`:export_tree` 导出到 `release\output-core-<version>-<baseline>\`，最后以扁平布局压成 `scripts\WhichWay-<version>-<baseline>-core.zip`。包名带 baseline，避免覆盖 `pack core` 的 `WhichWay-<version>-core.zip`。
+- **安全边界**：全程只读 git 对象并写 `release\` / `scripts\`；不 `update-ref`、不打 tag、不访问远端。空 diff（含纯删除）直接 `[ERROR]` + 退出 1，不会产出空包。
+- 校验：实跑 `release.bat core v1.6 v1.5.6` 退出码 0，产出 `scripts\WhichWay-v1.6-v1.5.6-core.zip`（1,053,741,148 字节，1,812 条目 = 1,749 文件 + 63 目录）；用 .NET `ZipFile` 读出清单与 `git diff --name-only --diff-filter=ACMRT v1.5.6 v1.6`（按 helper 同样排除 `node_modules/`、`.github/`）逐项比对，1,749/1,749 完全一致；运行前后 `git show-ref` 无任何变化。错误路径 `core`（缺参）、多参、非法 ref、同版本空 diff 均退出 1。
+
+### 脚本：`release.bat pack` 无产物仍退出 0（并修正导出目录恒为空）
+
+- **现象**：`release.bat pack all` 在 `release\output` / `release\output-core` 不存在时只打印两条 WARN 就 `[DONE]`、退出码 0，`scripts\` 下没有任何 zip；按提示先跑 `release` 后目录依然是空的。
+- **根因 1（pack 静默跳过）**：`pack` 只读取 `release` 模式导出的目录，目录缺失时 `:pack_one` 直接 `exit /b 0`，于是「没有产物」被当成成功。现在 `:do_pack` 在打包前按 mode 调用新增的 `:ensure_pack_tree`：解析 `refs/heads/output` / `refs/heads/output-core`，目录缺失或为空就自动 `:export_tree`；分支缺失、导出失败、导出后仍为空都改为 `[ERROR]` + `exit /b 1`。zip 名仍取 output 上最新 `v*` tag（本次 `v1.6`），所以 `pack` 不再依赖先跑一次 `release`。
+- **根因 2（导出恒为空）**：`:export_tree` 先 `pushd <目标目录>` 再执行 `git archive <commit>`。Git 2.47 在子目录里只归档**当前子目录**；而 output / output-core 树里根本没有 `release\`、`scripts\` 这些路径，所以生成的是一个合法但 0 文件的 tar，`pack` 自然拿不到任何文件。改为 `git -C "%REPO%" archive`，始终从仓库根归档；tar 包写进目标目录后用相对名 `tar -xf export.tar` 解压（Git Bash 的 GNU tar 会把 `C:\...` 当远程主机，报 `Cannot connect to C:`）。
+- **根因 3（失败也退 0）**：`:do_pack` 原来把 ensure/pack 调用挤在同一个 `(...)` 块里，而 cmd 在同一块内多条 `call ... || exit /b 1` 失败后仍会以 0 退出（已最小复现，与最初 `[ERROR] ... EXIT=0` 吻合）。改为 `call :pack_mode` 子程序，内部用顶层 `call ... || exit /b 1`，回到 `:do_pack` 后 `if errorlevel 1 exit /b 1`。
+- **顺带**：`release.bat release vX` 在「本地 tag 已存在且正指向 output 头」时，错误信息新增提示：若这是构建完成但未推送的 release，改用 `release --push-only vX` 完成推送，不要删 tag 重建。
+- 校验：在本机（`v1.6` tag / `release\` 不存在）实跑 `release.bat pack all`，退出码 0，产出 `scripts\WhichWay-v1.6.zip`（1,301,951,245 字节，3,849 个文件 + 66 个目录项）与 `scripts\WhichWay-v1.6-core.zip`（1,161,011,493 字节，1,853 个文件 + 67 个目录项）；用 .NET `ZipFile` 读出条目、把分隔符统一后与 `refs/heads/output` / `output-core` 的 `git ls-tree -r` 逐项比对，差异为 0，`.github` / `.gitignore` 等隐藏文件也在包内。退出码重构后用已有导出目录复跑 `pack all`：`EXIT=0`，两个 zip 大小与条目数不变，文件清单再次逐项比对仍为 0 差异。另用保留 CRLF 的临时副本在 `:ensure_pack_tree` 开头强制 `exit /b 1`，`pack all` 退出码为 1（测试后已删除副本）。
 
 ### 脚本：`update-portraits.mjs` 新增 `--proxy` 代理地址（GitHub 连接不稳定时用）
 

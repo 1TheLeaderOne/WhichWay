@@ -15,7 +15,7 @@ declare module "noname" {
 		 * 判断该牌是否为单一目标牌（`selectTarget === 1`，且不是 `notarget`）
 		 * @param card 牌对象或牌名
 		 */
-		isSingle(card: Card | string): boolean;
+		isSingle(card: Card | string | VCard): boolean;
 
 		/**
 		 * 判断是否为「视为牌」：VCard 的 `cards` 与 `name` 不一致（含多张牌合成、`cards` 为空）

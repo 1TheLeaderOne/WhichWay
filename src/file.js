@@ -3,6 +3,12 @@ import { onSetDev, onContent } from "./hooks/index.js";
 import { whichWayToast } from "./toast/index.ts";
 import { whichWayUtil } from "./utill.js";
 
+/** 「经典形象」的皮肤名（定义在 `skin/portraitPos.ts`，这里只需要它的字面量，不能反向 import 皮肤模块） */
+const CLASSIC_SKIN = "经典形象";
+
+/** 皮肤目录里认作图片的扩展名 */
+const skinFileExts = ["png", "jpg", "jpeg", "webp", "gif", "bmp"];
+
 class WhichWayFile {
 	/**
 	 * 驶舰之向扩展根目录
@@ -31,7 +37,57 @@ class WhichWayFile {
 		"mod:": `${this.extDir}image/modules/`,
 		"test:": `${this.extDir}test/`,
 		"logo:": `${this.extDir}image/logo/`,
+		/**
+		 * 本扩展的「静皮目录」（`image/illustration/skin/{干员id}/`）= 千幻聆音的 `skin.standard`。
+		 *
+		 * ⚠️ 用**相对路径**（不带 `lib.assetURL`），与千幻自带皮肤包
+		 * （`DEFAULT_PACKAGE.skin.standard = 'extension/千幻聆音/sanguoskin/'`）以及它给其它扩展
+		 * 自动生成的包（`qhly_foundPackageExt`：`'extension/' + extName + '/skin/image/'`）写法一致。
+		 *
+		 * 千幻对 `skin.standard` 的消费方分两类：
+		 * - **读取**（`qhly_getSkinList` → `qhly_checkFileExist(path)` → `game.getFileList(path, …)`）：
+		 *   期望相对路径。注意 `qhly_checkFileExist`（`content.js:4491`）只实现了
+		 *   `lib.node.fs.statSync(__dirname + '/' + path)` 与 Cordova 两条分支，**Web 端恒返回 false**
+		 *   ⇒ 皮肤列表为空。这是千幻上游的缺陷，需由上游改成 `game.checkFile` 一类的实现
+		 *   （它自己的 `skinSwitch/js/core/skin-switch-core.js:56` 就是正确写法）；届时相对路径即可正常工作。
+		 * - **显示**（`img.src = lib.assetURL + file`，`content.js:11131`）：会自己补前缀，
+		 *   所以这里的路径**不能**带 `lib.assetURL`，否则是双重前缀。
+		 */
+		"qs:": `extension/WhichWay/image/illustration/skin/`,
 	};
+
+	/**
+	 * 同 `compilePath`，但结果是可以直接塞进 CSS / `<img src>` 的**绝对地址**（补上 `lib.assetURL`）。
+	 *
+	 * 已经带 `lib.assetURL` / 协议 / 根路径的结果会原样返回，不会重复补前缀。
+	 * @param { string } path
+	 * @returns { string }
+	 */
+	compileAbsolutePath(path) {
+		path = this.compilePath(path);
+		if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|\/)/i.test(path)) return path;
+		return `${lib.assetURL}${path}`;
+	}
+
+	/**
+	 * 把一个「图片路径」变成真正能加载的地址。三种来源三种写法，混用就画不出来：
+	 * - 本扩展的皮肤配置存的是**完整路径**（`illustration/skin/{id}/{文件}`，已含 `lib.assetURL`）；
+	 * - 本体武将的 `img` 是**相对路径**（`image/character/…`），要补 `lib.assetURL`；
+	 * - 其它扩展的武将常常直接写 `img: "xxx.png"`，那是相对它自己的扩展目录的，补上扩展名即可。
+	 * @param { string } src
+	 * @returns { string }
+	 */
+	toCssUrl(src) {
+		if (typeof src !== "string" || src.length === 0) return "";
+		//已经是绝对地址 / data: / blob:
+		if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|\/)/i.test(src)) return src;
+		//引擎自己的 URI scheme（`ext:` / `db:` / `mode:` …）由引擎自己展开，这里原样交回去
+		if (/^(?:ext|db|mode|img|character):/i.test(src)) return src;
+		//引擎的相对路径：相对 `lib.assetURL`
+		if (/^(?:image|audio|video|extension|font|layout|theme)\//.test(src)) return `${lib.assetURL}${src}`;
+		//其余（其它扩展武将常见的 `xxx.png`）相对本扩展目录
+		return this.compilePath(`ext:WhichWay/${src}`);
+	}
 
 	/**
 	 * 编译路径
@@ -97,6 +153,86 @@ class WhichWayFile {
 	 */
 	getCharacterPortraitPath(name) {
 		return this.compilePath(`illu:character/${this.getCharacterPortraitFile(name)}`);
+	}
+
+	/**
+	 * 皮肤目录（`illu:skin/{干员id}/`）里实际存在的文件：干员id → 皮肤名（文件名去扩展名）→ 真实文件名。
+	 *
+	 * 静皮目录里同一张皮肤可能有多种写法（`夏卉 FA075.png`、`夏卉.png`、`时遗14.png`…），
+	 * 而动皮数据用的是**短名**（`夏卉`、`时遗`）。取「动皮短名 → 静皮文件」时必须走这张索引，
+	 * 不能按「有 png 用 png、否则 jpg」的固定扩展名去猜 —— 猜不到就是一张 404 的空图。
+	 *
+	 * 与立绘索引一样在启动期扫一次（皮肤阶段 / 后端的 `rebuildSkinIndex`），因为它同样落在同步取图路径上。
+	 * @type {Record<string, Record<string, string>>}
+	 */
+	skinFileIndex = {};
+
+	/**
+	 * 扫描 `illustration/skin` 建立「干员id → 皮肤名 → 文件名」索引。
+	 *
+	 * 只认图片扩展名；重复的皮肤名（同目录下有 `.png` 与 `.jpg` 两份）按 `png > jpg > jpeg > 其它` 取一张，
+	 * 结果与旧实现的「png 优先」一致，所以换了索引的调用方看到的图不会有变化。
+	 * 当前环境没有 fs 后端时清单为空 ⇒ 索引为空，调用方一律返回 undefined。
+	 *
+	 * @param { Record<string, string> | undefined } skinData 皮肤数据（`WhichWaySkin#skinData`）；给了就顺带重建它
+	 * @returns {Promise<Record<string, Record<string, string>>>}
+	 */
+	async initSkinFileIndex(skinData) {
+		const { folders } = await this.getFileTree("skin:", 1);
+		/** @type {Record<string, Record<string, string>>} */
+		const index = {};
+		/** 扩展名优先级：同名的 png 优先于 jpg，其余格式排最后 */
+		/** @param {string} ext */
+		const rank = ext => (ext === "png" ? 0 : ext === "jpg" ? 1 : ext === "jpeg" ? 2 : 3);
+
+		for (const folder of folders) {
+			const charId = folder.name;
+			/** @type {Record<string, string>} */
+			const skins = {};
+			/** @type {Record<string, number>} */
+			const ranks = {};
+			//递归深度 1 时子目录会带自己的直接文件；扁平的旧目录（容器里直接放图）同样收
+			const files = folder.files.concat(...(folder.folders || []).map(sub => sub.files));
+			for (const file of files) {
+				const ext = this.getFileExtension(file.name).toLowerCase();
+				if (!skinFileExts.includes(ext)) continue;
+				const name = this.removeExt(file.name);
+				if (name in skins && ranks[name] <= rank(ext)) continue;
+				skins[name] = file.name;
+				ranks[name] = rank(ext);
+			}
+			index[charId] = skins;
+
+			if (!skinData) continue;
+			//皮肤数据的「经典形象」由 onInit 补，这里是重建，先把它原样留下，免得重建一次就把它冲掉
+			const classic = skinData[charId]?.skins?.[CLASSIC_SKIN];
+			/** @type {Record<string, { name: string; path: string }>} */
+			const entries = {};
+			if (classic) entries[CLASSIC_SKIN] = classic;
+			for (const name in skins) {
+				entries[name] = {
+					name: skins[name],
+					path: this.compilePath(`skin:${charId}/${skins[name]}`),
+				};
+			}
+			skinData[charId] = { name: charId, skins: entries };
+		}
+
+		this.skinFileIndex = index;
+		return index;
+	}
+
+	/**
+	 * 皮肤目录里**真实存在**的文件名（带扩展名）
+	 * @param { string } charId 干员id
+	 * @param { string } skinName 皮肤名或文件名（带不带扩展名都行）
+	 * @returns { string | undefined }
+	 */
+	getSkinFileName(charId, skinName) {
+		if (typeof charId !== "string" || typeof skinName !== "string") return;
+		const skins = this.skinFileIndex[charId];
+		if (!skins) return;
+		return skins[this.removeExt(skinName)];
 	}
 
 	/**

@@ -4,6 +4,7 @@ import { whichWayUtil } from "../utill.js";
 import { whichWayToast } from "../toast/index.ts";
 import { onSetDev } from "../hooks/index.js";
 import { whichWayFile } from "../file.js";
+import { whichWaySkin } from "./index.ts";
 
 // ============ unpackPremultipliedAlpha 支持 ============
 // 与千幻聆音同方案：为需要「预乘 alpha 上传」的动皮纹理，在 texImage2D 上传前临时打开
@@ -83,6 +84,10 @@ function resolveHost(target, container) {
 }
 
 const dycSave = window.whichWaySave.dycSave;
+
+/** 「经典形象」的皮肤名（与 `skin/portraitPos.ts` 的 `DEFAULT_SKIN_NAME` 同值，避免反向 import） */
+const CLASSIC_SKIN_NAME = "经典形象";
+
 
 class SpineWorker {
 	backgroundPath = `${lib.assetURL}extension/WhichWay/dynamicSkin/background/`;
@@ -312,8 +317,21 @@ class SpineWorker {
 						console.error(reason);
 					},
 					success: function (player) {
-						spineWorker.setSkeletonPosition(player, player.config.originalOptions);
-						spineWorker.playRandomAnimation(player.skeleton, player.animationState, player.config.weighting);
+						//先把动画挂上：`animationState` 一旦没有 current entry，spine-player 的 `drawFrame()`
+						//就会每帧在 `getCurrent(0).animation` 上抛错，控制台表现为 `xxx.js.map 404` 刷屏
+						//（引擎 `util/error.ts` 的报错处理会去拉同源 js 的 sourcemap）。
+						try {
+							//把配置里的 `action` 一并传过去：`weighting` 是与它逐项对齐的，
+							//而 `playRandomAnimation` 之前只拿全量动画随机，导致 `action` 根本不生效
+							spineWorker.playRandomAnimation(player.skeleton, player.animationState, player.config.weighting, false, player.config.animations);
+						} catch (error) {
+							console.error("[WhichWay] 播放动皮动画失败", error);
+						}
+						try {
+							spineWorker.setSkeletonPosition(player, player.config.originalOptions);
+						} catch (error) {
+							console.error("[WhichWay] 动皮定位失败", error);
+						}
 						startFit.dycLoaded = true;
 						container.show();
 					},
@@ -482,19 +500,34 @@ class SpineWorker {
 
 	/**
 	 * 播放完当前动画后，随机播放另一个动画
+	 *
+	 * ⚠️ **必须在配置的动画列表里选**，不能拿 `skeleton.data.animations` 全量随机。
+	 * 全量随机会让配置文件里的 `action` 完全失效：
+	 * - `plot_keluxiermrfz` 配了 `action: ["Introduce"]`，但骨骼里还有 `Idle`，
+	 *   于是实际播的是 `Idle`（控制台 `current anim: Idle` 可以证实），配置形同虚设；
+	 * - 反过来，配置里写了骨骼中**不存在**的动画（旧版 `["Idle", "Special", "Interact"]`）时，
+	 *   全量随机反倒「碰巧能用」，掩盖了配置错误，只在 spine-player 的校验里留一条 error。
+	 *
+	 * 现在的规则：
+	 * - 传了 `actions`（配置的 `action` 列表）⇒ **只**在它里面选，且先按骨骼实际存在的动画过滤，
+	 *   防止配置写错时 `setAnimation` 拿到不存在的名字（那条路径不会抛错，只会静默不播）；
+	 * - 没传 `actions` ⇒ 退回全量动画（兼容旧调用）；
+	 * - `weighting` 与最终候选列表**逐项对齐**：长度不符就全部记 1，而不是把错位的权重套上去。
+	 *
 	 * @param {*} skeleton - Spine 骨骼实例
 	 * @param {*} animationState - AnimationState 实例
-	 * @param {number[]} weighting - 权重
+	 * @param {number[]} weighting - 权重（与 `actions` 一一对应）
 	 * @param {boolean} [loop=false] - 是否循环播放
+	 * @param {string[]} [actions] - 允许播放的动画名（= 动皮配置里的 `action`）
 	 */
-	playRandomAnimation(skeleton, animationState, weighting, loop = false) {
+	playRandomAnimation(skeleton, animationState, weighting, loop = false, actions) {
 		animationState.addListener({
 			complete: () => {
-				play(skeleton, animationState, weighting, loop);
+				play(skeleton, animationState, weighting, loop, actions);
 			},
 		});
 
-		play(skeleton, animationState, weighting, loop);
+		play(skeleton, animationState, weighting, loop, actions);
 
 		/**
 		 * 随机播放一个动画
@@ -502,29 +535,77 @@ class SpineWorker {
 		 * @param {*} animationState
 		 * @param {number[]} weighting - 权重
 		 * @param {boolean} [loop=false]
+		 * @param {string[]} [actions] - 允许播放的动画名
 		 */
-		function play(skeleton, animationState, weighting, loop = false) {
-			const animations = skeleton.data.animations.map(anim => anim.name);
+		function play(skeleton, animationState, weighting, loop = false, actions) {
+			const available = skeleton.data.animations.map(anim => anim.name);
 
-			if (!weighting || weighting.length !== animations.length) {
-				weighting = animations.map(() => 1);
+			/**
+			 * 候选动画与对应权重：配置写了就只认配置，并按骨骼实际存在的过滤。
+			 * `actions` 与 `weighting` 按下标一一对应，所以过滤时要同步取权重。
+			 */
+			let candidates = [];
+			let weights = [];
+			const wanted = Array.isArray(actions) ? actions : null;
+			/**
+			 * 权重清洗：动皮配置里**没写** `weighting` 时，`config.weighting` 会是 `[undefined]`，
+			 * 而 `whichWayUtil.scaleToIntegerRatio()` 内部会对每项做 `x.toString()`，
+			 * 直接抛 `Cannot read properties of undefined (reading 'toString')`。
+			 * 一旦 `play()` 在 `setAnimation` 之前抛错，`animationState` 就永远没有 current entry，
+			 * 之后 spine-player 每帧 `drawFrame()` 都会在 `getCurrent(0).animation` 上再抛一次
+			 * ⇒ 控制台被 `xxx.js.map 404` 刷屏（引擎的报错处理会去拉 sourcemap）。
+			 */
+			const toWeight = value => {
+				const weight = Number(value);
+				return Number.isFinite(weight) && weight > 0 ? weight : 1;
+			};
+			if (wanted && wanted.length > 0) {
+				for (let i = 0; i < wanted.length; i++) {
+					const name = wanted[i];
+					if (!available.includes(name)) continue;
+					candidates.push(name);
+					weights.push(toWeight(Array.isArray(weighting) ? weighting[i] : 1));
+				}
+			}
+			//配置全都没命中（写错名字）或压根没配 ⇒ 退回全量，保证至少能播点什么
+			if (candidates.length === 0) {
+				candidates = available;
+				weights = Array.isArray(weighting) && weighting.length === candidates.length ? weighting.map(toWeight) : candidates.map(() => 1);
+			}
+
+			//骨骼里一个动画都没有：设空动画兜底，否则 `getCurrent(0)` 恒为 null，spine-player 每帧抛错
+			if (candidates.length === 0) {
+				animationState.setEmptyAnimation(0, 0);
+				return;
 			}
 
 			//加权随机
-			let ratio = whichWayUtil.scaleToIntegerRatio(weighting);
+			let ratio;
+			try {
+				ratio = whichWayUtil.scaleToIntegerRatio(weights);
+			} catch (error) {
+				ratio = weights.map(() => 1);
+			}
 			let population = [];
-			for (let i = 0; i < animations.length; i++) {
+			for (let i = 0; i < candidates.length; i++) {
 				let animWeight = ratio[i];
-				let animation = animations[i];
+				let animation = candidates[i];
 				population.push(...new Array(animWeight).fill(animation));
 			}
 
 			const selectedAnim = population.randomGet();
 
-			if (animations.length === 1) {
+			//只有一个候选时强制循环：单帧/单动作素材不循环就停在最后一帧，观感上是「卡住不动」
+			if (candidates.length === 1) {
 				animationState.setAnimation(0, selectedAnim, true);
 			} else {
 				animationState.setAnimation(0, selectedAnim, loop);
+			}
+
+			//最终兜底：只要 `getCurrent(0)` 或它的 `animation` 还空着，spine-player 的 `drawFrame()` 就会每帧抛错
+			const current = animationState.getCurrent(0);
+			if (!current || !current.animation) {
+				animationState.setEmptyAnimation(0, 0);
 			}
 		}
 	}
@@ -730,6 +811,144 @@ class SpineWorker {
 				wrapper.style.zIndex = "";
 			}, duration);
 		}
+	}
+
+	/**
+	 * 某个动皮是否**本身就是一个完整的皮肤**（而不是挂在另一个皮肤上的附加形态）。
+	 *
+	 * 动皮里有一类「同名的另一种形态」：`时遗2`、`于万千宇宙之中2`、`远行前的野餐`、`悠悠假日`…
+	 * 它们只是同一个皮肤的另一套动作数据，本身没有对应的静皮。把它们当成独立皮肤交给千幻，
+	 * 千幻就会按「静皮名 = 皮肤名」硬算路径，从而多出两个同名/空图的卡片（见 `getDynamicSkinEntries`）。
+	 *
+	 * 判据：与它**同一次选择**的那套静皮是否就在同一个皮肤目录里 ——
+	 * 名字完全一致，或者是「皮肤名 + 数字」（`时遗` → `时遗2`）。不靠写死的列表，新增干员自动适用。
+	 * @param {string} charName
+	 * @param {string} skinName
+	 * @returns {boolean}
+	 */
+	isStandaloneDynamicSkin(charName, skinName) {
+		if (!skinName) return false;
+		const skins = whichWaySkin.getCharacterSkin(charName) || {};
+		if (skins[skinName]) return true;
+		const base = skinName.replace(/\d+$/, "");
+		return base !== skinName && base.length > 0 && skins[base] !== undefined;
+	}
+
+	/**
+	 * 该皮肤对应的**静皮**文件名（带扩展名）。
+	 *
+	 * 静皮目录里的文件名不一定等于皮肤名（`夏卉 FA075.png`、`远行前的野餐.png`），
+	 * 而动皮数据用的是短名 ⇒ 必须查目录索引，不能拼 `{皮肤名}.png`。
+	 * 返回 undefined 表示「这个动皮没有对应的静皮文件」。
+	 * @param {string} charName
+	 * @param {string} skinName
+	 * @returns {string | undefined}
+	 */
+	getStaticSkinFileName(charName, skinName) {
+		if (!charName || !skinName) return;
+		const skins = whichWaySkin.getCharacterSkin(charName) || {};
+		//「经典形象」的图在立绘目录里，不在皮肤目录
+		if (skinName === CLASSIC_SKIN_NAME) return whichWayFile.getCharacterPortraitFile(charName);
+		let base = skinName;
+		//1) 名字完全一致（`夏卉 FA075`、`幽冥秘辛`…）
+		if (skins[base]) return whichWayFile.getSkinFileName(charName, base);
+		//2) 皮肤名是「短名 + 后缀」（`夏卉` / `夏卉 FA075`、`万重山` / `万重山 HD79`…）：
+		//   取最短的那张，这样同一张皮肤在动皮里叫 `夏卉`、在静皮里叫 `夏卉 FA075` 时也能对上
+		const candidates = Object.keys(skins).filter(name => name !== CLASSIC_SKIN_NAME && name.startsWith(base));
+		if (candidates.length > 0) {
+			candidates.sort((a, b) => a.length - b.length || (a < b ? -1 : a > b ? 1 : 0));
+			return whichWayFile.getSkinFileName(charName, candidates[0]);
+		}
+		//3) 反方向：静皮名是动皮名的前缀（动皮名带了多余后缀）
+		const shortened = base.replace(/(?:\s|_|\d).*$/, "");
+		if (shortened && shortened !== base && skins[shortened]) return whichWayFile.getSkinFileName(charName, shortened);
+		return;
+	}
+
+	/**
+	 * 上面那张「同名/前缀」静皮对应的**动皮数据里怎么称呼它**（返回动皮数据里的键）。
+	 *
+	 * 交给千幻的额外皮肤清单里必须带这个短名，而不是文件名（见 `getStaticSkinName`）。
+	 * @param {string} charName
+	 * @param {string} skinName 动皮名
+	 * @returns {string | undefined}
+	 */
+	getStaticSkinKey(charName, skinName) {
+		if (!charName || !skinName) return;
+		const skins = whichWaySkin.getCharacterSkin(charName) || {};
+		if (skinName === CLASSIC_SKIN_NAME) return skinName;
+		if (skins[skinName]) return skinName;
+		const candidates = Object.keys(skins).filter(name => name !== CLASSIC_SKIN_NAME && name.startsWith(skinName));
+		if (candidates.length > 0) {
+			candidates.sort((a, b) => a.length - b.length || (a < b ? -1 : a > b ? 1 : 0));
+			return candidates[0];
+		}
+		const shortened = skinName.replace(/(?:\s|_|\d).*$/, "");
+		if (shortened && shortened !== skinName && skins[shortened]) return shortened;
+		return;
+	}
+
+	/**
+	 * 动皮对应的静皮**在千幻里应该叫什么**（不带扩展名）。
+	 *
+	 * 千幻判断「这个动皮有没有同名静皮」用的是**去掉扩展名的名字**（`qhly_getSkinModels` 里
+	 * `dyskin = 动皮名 + '.jpg'` 再去比），所以额外皮肤的名字必须与动皮名一致，
+	 * 只是**文件**可以是别的名字（`夏卉` ↔ `夏卉 FA075.png`）。若把文件名当名字交出去，
+	 * 千幻仍然认为「动皮没有静皮」，又会自己补一张 `夏卉.jpg` —— 这正是「同名显示两个」的来源。
+	 * @param {string} charName
+	 * @param {string} skinName 动皮名
+	 * @returns {string | undefined}
+	 */
+	getStaticSkinName(charName, skinName) {
+		const key = this.getStaticSkinKey(charName, skinName);
+		if (!key) return;
+		//「经典形象」在千幻里用立绘文件名区分（立绘目录而不是皮肤目录）
+		if (key === CLASSIC_SKIN_NAME) return whichWayFile.removeExt(whichWayFile.getCharacterPortraitFile(charName));
+		return key;
+	}
+
+	/**
+	 * 该动皮是否**必须**有对应静皮：只有此时才可以按「静皮名 = 皮肤名」交给千幻。
+	 * @param {string} charName
+	 * @param {string} skinName
+	 * @returns {boolean}
+	 */
+	hasStaticSkin(charName, skinName) {
+		if (skinName === CLASSIC_SKIN_NAME) return true;
+		return this.getStaticSkinFileName(charName, skinName) !== undefined;
+	}
+
+	/**
+	 * 交给千幻作为「额外皮肤」的列表：**动皮对应的那张静皮**，且每张静皮只给一次。
+	 *
+	 * 为什么必须由本扩展提供：
+	 * - 千幻按「皮肤名 + 扩展名」自己拼路径（`skin.standard + 武将id + "/" + 皮肤名 + ext`），
+	 *   而本扩展的静皮在 `illustration/skin/{id}/` 下、且文件名常常不是皮肤名（`夏卉 FA075.png`），
+	 *   千幻自己扫不到，于是动皮在千幻里**没有图**；
+	 * - 千幻会在「有动皮、但没有同名静皮」时自己补一张 `皮肤名 + '.jpg'`（`qhly_getSkinModels`），
+	 *   而本扩展的静皮是 png ⇒ 同一张皮肤出现「png + jpg」两个卡片。
+	 *
+	 * ⚠️ `skinName` 必须是**动皮名**（`夏卉`），不是文件名：千幻按名字判断「有没有静皮」，
+	 * 名字对不上它就还会补一张 jpg（于是又变成两张）。文件本身可以由千幻的 `ext` 参数换成真实扩展名，
+	 * 取不到再由 `qianhuan.js` 的 `getSkinExt` 兜底（`夏卉` → `夏卉 FA075.png`）。
+	 * @returns {{ name: string, skinName: string }[]}
+	 */
+	getDynamicSkinEntries() {
+		const assets = dycSave.assets || {};
+		const list = [];
+		for (const charName in assets) {
+			if (window.whichWaySave?.hasChar?.(charName) !== true) continue;
+			const added = new Set();
+			for (const skinName in assets[charName]) {
+				//与具体形态无关：`时遗` / `时遗2` 共用同一张静皮
+				if (!this.isStandaloneDynamicSkin(charName, skinName)) continue;
+				const staticName = this.getStaticSkinName(charName, skinName);
+				if (!staticName || added.has(staticName)) continue;
+				added.add(staticName);
+				list.push({ name: charName, skinName: staticName });
+			}
+		}
+		return list;
 	}
 
 	async updateDyc(name, target, action = "default") {

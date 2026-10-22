@@ -38,7 +38,7 @@ let closed = false;
  * 未列出的文件会落到「其他」，摘要取文档头首行——新增脚本不会漏，只是没那么顺眼。
  */
 const CATALOG = {
-	"release.bat": { group: "发布 / 打包", summary: "构建并发布：release 全流程 / dev 同步 dev-output / pack 本地压包" },
+	"release.bat": { group: "发布 / 打包", summary: "构建并发布：release 全流程 / dev 同步 / pack 本地压包 / core 版本差分核心包（--password 加密）" },
 	"update-arknight-data.bat": { group: "游戏数据", summary: "一键更新 json/arknight 的五张明日方舟数据表" },
 	"find-arkid.bat": { group: "游戏数据", summary: "干员中文名 / id 片段 → 干员id 查询" },
 	"find-arkid.mjs": { group: "游戏数据", summary: "同 find-arkid.bat（它是实现体，可脱离 bat 直接用 node 跑）" },

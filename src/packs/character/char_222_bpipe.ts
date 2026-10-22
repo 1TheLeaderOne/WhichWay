@@ -1,16 +1,29 @@
 import { lib, game, ui, get, ai, _status } from "noname";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../hooks.ts";
+import { whichWayUtil } from "../../utill.js";
 
 character("char_222_bpipe", { pack: "legendSJZX", sex: "female", group: "weimrfz", hp: 4, skills: ["newjuntongmrfz", "newpochengmrfz"] });
 
 skill({
 	newjuntongmrfz: {
-		audio: "juntongmrfz",
+		audio: ["作战中1", "作战中2", "作战中3", "作战中4"],
 		init(player, skill) {
 			player.storage[skill] = [];
 		},
+		onremove(player, type) {
+			delete player.storage[type];
+			delete player.storage.newjuntongmrfz_extra;
+			delete player.storage.newjuntongmrfz_card;
+		},
+		mark: true,
+		intro: {
+			content(storage, player, skill) {
+				const num = player.countMark("newjuntongmrfz_extra");
+				return `·已经使用的牌:${Array.isArray(storage) && storage.length > 0 ? get.translation(storage) : "无"}${num > 0 ? `<br>·下次发动【军统①】额外摸${get.cnNumber(num)}张牌` : ""}`;
+			},
+		},
 		trigger: {
-			player: ["phaseDrawBegin", "useCard"],
+			player: ["phaseDrawBegin", "phaseJudgeBegin", "useCard"],
 			global: "roundStart",
 		},
 		filter(event, player) {
@@ -23,20 +36,46 @@ skill({
 		async content(event, trigger, player) {
 			if (trigger.name === "useCard") {
 				player.storage.newjuntongmrfz.push(get.name(trigger.card));
-			} else if (trigger.name === "phaseDraw") trigger.cancel();
-			else player.draw(3);
+				player.storage.newjuntongmrfz_card = trigger.card;
+			} else if (["phaseDraw", "phaseJudge"].includes(trigger.name)) {
+				trigger.cancel();
+				game.log(player, "跳过了", get.translation(trigger.name));
+			} else {
+				await player.draw({
+					num: 3 + player.countMark("newjuntongmrfz_extra"),
+				});
+				player.removeAllmark("newjuntongmrfz_extra", false);
+			}
 		},
 		mod: {
-			targetInRange: function (card:Card, player, target, now) {
+			targetInRange: function (card: Card, player, target, now) {
 				if (!player.storage.newjuntongmrfz.includes(get.name(card)) && (get.type(card) === "basic" || (get.isSingle(card) && get.type(card) === "trick"))) return true;
 			},
-			selectTarget: function (card:Card, player, range) {
+			selectTarget: function (card: Card, player, range) {
 				if (!player.storage.newjuntongmrfz.includes(get.name(card)) && range[1] != -1 && (get.type(card) === "basic" || (get.isSingle(card) && get.type(card) === "trick"))) range[1]++;
+			},
+		},
+		group: "newjuntongmrfz_damage",
+		subSkill: {
+			damage: {
+				audio: "newjuntongmrfz",
+				trigger: {
+					source: "damageSource",
+				},
+				filter(event, player, name, target) {
+					const card = player.storage.newjuntongmrfz_card;
+					return card && card === event.card;
+				},
+				charlotte: true,
+				forced: true,
+				async content(event, trigger, player) {
+					player.addMark("newjuntongmrfz_extra", 1, false);
+				},
 			},
 		},
 	},
 	newpochengmrfz: {
-		audio: "pochengmrfz",
+		audio: ["部署1", "部署2"],
 		trigger: {
 			player: "useCard2",
 			source: "dieAfter",
@@ -58,7 +97,7 @@ skill({
 				let prompt = "【破城】:你可以令此杀额外结算一次或额外指定一个目标";
 				if (!list.includes("额外目标")) prompt.replace("或额外指定一个目标", "");
 				const { control } = await player
-					.chooseControl({controls:list})
+					.chooseControl({ controls: list })
 					.set("prompt", prompt)
 					.set("ai", () => {
 						let list = get.event().list,
@@ -83,7 +122,7 @@ skill({
 				else {
 					const { targets } = await player
 						.chooseTarget({
-							forced:true
+							forced: true,
 						})
 						.set("prompt", `请额外选择一个目标`)
 						.set("filterTarget", (card, player, target) => {
@@ -102,7 +141,7 @@ skill({
 				}
 			} else {
 				const { control } = await player
-					.chooseControl({controls:["选项一","选项二","cancel2"]})
+					.chooseControl({ controls: ["选项一", "选项二", "cancel2"] })
 					.set("prompt", `请选择一个选项`)
 					.set("choiceList", ["发动一次【军统①】", "重置【军统②】"])
 					.set("ai", () => {
@@ -140,9 +179,16 @@ skill({
 translate({
 	char_222_bpipe: "风笛",
 	newjuntongmrfz: "军统",
-	newjuntongmrfz_info: "锁定技。<br>①每轮开始时，你摸三张牌；你跳过摸牌阶段。<br>②你首次使用的一种牌名的基本牌或单一目标的普通锦囊牌目标+1且无距离限制。",
+	newjuntongmrfz_info: "锁定技。<br>①每轮开始时，你摸三张牌；你跳过摸牌阶段和判定阶段。<br>②你首次使用的一种牌名的基本牌或单一目标的普通锦囊牌目标+1、无距离限制且此牌每造成一次伤害，你下次发动【军统①】就额外摸一张牌。",
 	newpochengmrfz: "破城",
 	newpochengmrfz_info: "①当你使用【杀】指定目标后，你可以选择令此牌额外结算一次或额外指定一个目标。<br>②当你杀死一名其他角色后，你可以发动一次【军统①】或重置【军统②】。",
 });
 
+dynamicTranslate("newjuntongmrfz", player => {
+	const num = player.countMark("newjuntongmrfz_extra");
+	return `锁定技。<br>①每轮开始时，你摸${get.cnNumber(3 + num)}${num > 0 ? whichWayUtil.colorize(`#s(3 + ${num})#`) : ""}张牌；你跳过摸牌阶段和判定阶段。<br>②你首次使用的一种牌名的基本牌或单一目标的普通锦囊牌目标+1、无距离限制且此牌每造成一次伤害，你下次发动【军统①】就额外摸一张牌。`;
+});
+
 characterIntro("char_222_bpipe", "风笛，维多利亚皇家近卫学校毕业，在维多利亚军队中服役满3年后，退役并经由陈警司介绍加入罗德岛。</br>接受过系统训练的职业军人，经过一段时间的磨合，在罗德岛的各类任务中体现出了专业的战斗技巧与战术素养。");
+
+characterTitle("char_222_bpipe", whichWayUtil.colorize("#r维多利亚之矛#"));

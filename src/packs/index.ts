@@ -145,8 +145,12 @@ class WhichWayPackManager {
 			if (Array.isArray(char)) char = get.convertedCharacter(char);
 
 			//————初始化武将图片————//
-			//立绘在 image/illustration/character/，png 与 jpg 双格式并存，由 whichWayFile 的目录索引择优
-			char.img = whichWayFile.getCharacterPortraitPath(name);
+			//立绘在 image/illustration/character/，png 与 jpg 双格式并存，由 whichWayFile 的目录索引择优；
+			//目录索引里没有这位干员（新加的还没打包 / 目录名写错）时**不要**照样写一条 `.jpg` 路径：
+			//引擎会贴一张必然 404 的图，表现为「原画空白」，而不是回落到界面默认武将图。
+			const portraitPath = whichWayFile.characterPortraitExt[name] ? whichWayFile.getCharacterPortraitPath(name) : "";
+			if (portraitPath) char.img = portraitPath;
+			else console.warn(`[WhichWay] 干员 ${name} 没有找到立绘（image/illustration/character/${name}.png|jpg），本次不写 char.img`);
 
 			//————初始化WhichWay配置————//
 			//声明态 → 初始化态：补全 whichWay / pack，**声明过的字段（含 whichWay 里的）一律保留**，

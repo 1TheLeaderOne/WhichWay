@@ -1,5 +1,5 @@
 import { get } from "noname";
-import "../file.js";
+import { whichWayFile } from "../file.js";
 const sjzxDycPath = {
 	bg: `../../../WhichWay/dynamicSkin/background/{xxx}.png`,
 	illust: `../../../WhichWay/dynamicSkin/illust/{xxx}/{yyy}/{zzz}`,
@@ -604,7 +604,7 @@ let data = {
 			background: `场景_意塑`,
 		},
 	},
-	// 年
+	// 年（`char_2014_nian`）：骨骼文件是 `dyn_illust_char_2014_nian2`，不是 `…_nian`
 	char_2014_nian: {
 		经典形象: {
 			name: "dyn_illust_char_2014_nian2",
@@ -1306,7 +1306,30 @@ let data = {
 			background: `场景_再启`,
 		},
 	},
+
+	//剧情可露希尔 live来自商店看板娘 live_007_closre
+	plot_keluxiermrfz: {
+		经典形象: {
+			name: "live_007_closre",
+			x: [0, 0.56],
+			y: [0, -0.85],
+			scale: 0.43,
+			version: "3.8",
+			action: ["Introduce","Idle"],
+			speed: 1,
+			unpackPremultipliedAlpha: true,
+			alpha: false,
+			background: `场景_执着`,
+		},
+	},
 };
+//「经典形象」的动皮与它的静皮共用同一个名字，交给千幻时统一按立绘文件名（`char_xxx.png`）处理，
+//否则千幻会去皮肤目录里找一个名为「经典形象」的图片（那里没有），白白多出一张空图卡片
 data = sjzxDycInit(data);
+for (const char in data) {
+	if (data[char] && data[char]["经典形象"]) {
+		data[char][whichWayFile.getCharacterPortraitFile(char)] = data[char]["经典形象"];
+	}
+}
 window.whichWaySave.dycSave.assets = data;
 //# sourceMappingURL=dynamicConfig.js.map

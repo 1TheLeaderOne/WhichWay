@@ -4,13 +4,16 @@ setlocal enabledelayedexpansion
 REM ============================================================
 REM  WhichWay release toolkit - build / publish / pack, one script
 REM
-REM  Three jobs in one file (they used to be three files):
+REM  Four jobs in one file (they used to be three files):
 REM    release   full release   : build + dev-output + output(tag)
 REM              + output-core + export + atomic push   (was release.bat)
 REM    dev       dev sync       : build + push dev-output only,
 REM              plus a local zip of the build tree  (was release-dev.bat)
-REM    pack      local packages : zip release\output and
-REM              release\output-core into scripts\   (was pack-local.bat)
+REM    pack      local packages : export output / output-core from their
+REM              branches when release\ is missing, then zip into scripts\
+REM              (was pack-local.bat)
+REM    core      local diff     : zip only the files added/modified between
+REM              two versions; no branch, tag, or push
 REM
 REM  Branches involved:
 REM    dev          source branch (development)
@@ -30,8 +33,9 @@ REM    WhichWay-<version>-dev.zip    source        (dev branch)
 REM
 REM  Usage:
 REM    release.bat release ^<version^> [baseline] [--push-only]
-REM    release.bat dev [--no-zip] [--push-only]
-REM    release.bat pack [output|core|all]
+REM    release.bat dev [--no-zip] [--push-only] [--password]
+REM    release.bat pack [output|core|all] [--password]
+REM    release.bat core ^<version^> ^<baseline^> [--password]
 REM
 REM    version    tag name, must start with "v", e.g. v1.5.3 (required)
 REM    baseline   tag/commit that output-core diffs against, e.g. v1.5
@@ -40,7 +44,11 @@ REM    --push-only  skip build/commit/tag and only push refs that already
 REM               exist locally. Finish a release whose push failed
 REM               (network down, proxy off, ...) without rebuilding.
 REM    --no-zip   (dev) skip the local zip of the build tree
-REM    output|core|all  (pack) which exported tree to zip; default all
+REM    output|core|all  (pack) which package to zip; default all
+REM    --password (dev/pack/core) prompt once, hidden, and AES-256 encrypt
+REM               every local zip this command writes. WW_ZIP_PASSWORD
+REM               supplies the password without a prompt (automation).
+REM               dev --push-only / --no-zip write no zip and ignore it.
 REM
 REM  Flags may appear in any order:
 REM    release.bat release v1.5.3 --push-only      works
@@ -52,7 +60,10 @@ REM    release.bat release v1.6.0 v1.5       tag v1.6.0, core: v1.5 -> v1.6.0
 REM    release.bat release --push-only v1.5.3   push existing refs only
 REM    release.bat dev                       build + zip + sync dev-output
 REM    release.bat dev --push-only           push the existing local dev-output
-REM    release.bat pack all                  zip both exported packages
+REM    release.bat pack all                  export (if needed) + zip both
+REM    release.bat pack all --password       both zips, password protected
+REM    release.bat core v1.6 v1.5.6          local diff pack v1.5.6 -^> v1.6
+REM    release.bat core v1.6 v1.5.6 --password   same, password protected
 REM
 REM  Notes:
 REM  - Uses plumbing git commands, never switches branches, never
@@ -69,13 +80,21 @@ REM    is written next to this script as WhichWay-dev-<sha7>.zip with a
 REM    WhichWay/ top level - same layout as the CI archives (drop-in install).
 REM  - release mode exports the output / output-core trees into the gitignored
 REM    release\ folder so the packages survive locally; zip them with
-REM    "release.bat pack".
+REM    "release.bat pack". pack re-exports a missing or empty folder from the
+REM    output / output-core branch, so it also works on a fresh clone; a
+REM    missing branch or a failed export is a hard error (exit code 1).
 REM  - Build output goes to apps/core/extension/WhichWay (overwritten).
 REM  - The worktree must be clean in build mode (the build reads it).
 REM  - The CI workflow is injected into the committed tree: GitHub only runs a
 REM    workflow for a tag push when that file exists at the tagged commit.
 REM  - Scratch files live in %TEMP%\whichway-release, so a failed run never
 REM    dirties the repo.
+REM  - Password mode uses Windows' own bsdtar (System32\tar.exe) with ZIP
+REM    AES-256; no extra archiver is installed or required. The password is
+REM    asked once per command and kept in a temp file only until the zips
+REM    are written.
+REM  - Windows Explorer's built-in unzip cannot open AES zips; use 7-Zip,
+REM    WinRAR or Bandizip to extract them.
 REM  - Pauses before pushing so you can review.
 REM  - Keep this file ASCII-only + CRLF (cmd batch requirement).
 REM ============================================================
@@ -98,6 +117,8 @@ set "MSGCORE=%TEMPDIR%\msg-core.txt"
 set "DESCTMP=%TEMPDIR%\describe.tmp"
 set "LSRTMP=%TEMPDIR%\ls-remote.tmp"
 set "ZIPLIST=%TEMPDIR%\ziplist.txt"
+set "ZIPPASSFILE=%TEMPDIR%\zip-pass.txt"
+del "%ZIPPASSFILE%" 2>nul
 
 cd /d "%REPO%" || (echo [ERROR] repo dir not found: %REPO% & exit /b 1)
 
@@ -117,6 +138,10 @@ if /i "%CMD%"=="dev" (
 if /i "%CMD%"=="pack" (
 	shift
 	goto :do_pack
+)
+if /i "%CMD%"=="core" (
+	shift
+	goto :do_core
 )
 echo [ERROR] unknown command "%CMD%".
 echo.
@@ -187,11 +212,21 @@ REM ---- precheck: the tag must not exist yet ----
 set "TAGEXIST="
 for /f "delims=" %%x in ('git rev-parse --verify --quiet "refs/tags/%VERSION%" 2^>nul') do set "TAGEXIST=1"
 if defined TAGEXIST (
+	set "TAGAT="
+	set "OUTAT="
+	for /f "delims=" %%x in ('git rev-parse "refs/tags/%VERSION%"') do set "TAGAT=%%x"
+	for /f "delims=" %%x in ('git rev-parse refs/heads/output 2^>nul') do set "OUTAT=%%x"
 	echo [ERROR] tag %VERSION% already exists locally. Delete it or use another version:
 	echo             git tag -d %VERSION%
 	echo         Prefer a NEW version number: the same tag may also exist on the
 	echo         remote already, and a remote tag can never be overwritten by a
 	echo         normal push.
+	if /i "!TAGAT!"=="!OUTAT!" (
+		echo.
+		echo         If this tag is YOUR finished release that never reached origin,
+		echo         do not rebuild - finish the push with:
+		echo             scripts\release.bat release --push-only %VERSION%
+	)
 	exit /b 1
 )
 
@@ -478,23 +513,36 @@ REM ============================================================
 :do_dev
 set "PUSHONLY="
 set "NOZIP="
+set "WANTPASS="
 :dev_args
 if "%~1"=="" goto :dev_args_done
 if /i "%~1"=="--push-only" (
 	set "PUSHONLY=1"
 ) else if /i "%~1"=="--no-zip" (
 	set "NOZIP=1"
+) else if /i "%~1"=="--password" (
+	set "WANTPASS=1"
 ) else (
 	echo [ERROR] unknown option: %~1
 	echo.
 	echo   release.bat dev                  build + pack zip + sync dev-output
 	echo   release.bat dev --no-zip         same, but skip the local zip
 	echo   release.bat dev --push-only      push the existing local dev-output only
+	echo   release.bat dev --password       AES-256 encrypt the local zip
 	exit /b 1
 )
 shift
 goto :dev_args
 :dev_args_done
+
+if defined PUSHONLY if defined WANTPASS (
+	echo [WARN] --password ignored: --push-only creates no zip.
+	set "WANTPASS="
+)
+if defined NOZIP if defined WANTPASS (
+	echo [WARN] --password ignored: --no-zip creates no zip.
+	set "WANTPASS="
+)
 
 REM ---- precheck: working tree must be clean (build mode only) ----
 if not defined PUSHONLY (
@@ -531,7 +579,10 @@ if defined NOZIP (
 	echo [INFO] pack build tree into a zip... skipped ^(--no-zip^)
 ) else (
 	echo [INFO] pack build tree into a zip...
-	call :zip_build || (
+	call :zip_build
+	set "ZIPERR=!ERRORLEVEL!"
+	call :zip_cleanup_password
+	if not "!ZIPERR!"=="0" (
 		echo [ERROR] packing failed. Nothing was pushed; fix it or re-run with --no-zip.
 		exit /b 1
 	)
@@ -580,10 +631,25 @@ echo        still on !ORIGBRANCH!, worktree untouched.
 goto :the_end
 
 REM ============================================================
-REM pack: zip release\output / release\output-core into scripts\
+REM pack: export (if needed) + zip release\output / output-core
 REM ============================================================
 :do_pack
-set "MODE=%~1"
+set "MODE="
+set "WANTPASS="
+:pack_args
+if "%~1"=="" goto :pack_args_done
+if /i "%~1"=="--password" (
+	set "WANTPASS=1"
+) else if "%MODE%"=="" (
+	set "MODE=%~1"
+) else (
+	echo [ERROR] too many arguments: %~1
+	echo        usage: release.bat pack [output^|core^|all] [--password]
+	exit /b 1
+)
+shift
+goto :pack_args
+:pack_args_done
 if "%MODE%"=="" set "MODE=all"
 if /i not "%MODE%"=="all" if /i not "%MODE%"=="output" if /i not "%MODE%"=="core" (
 	echo [ERROR] unknown mode "%MODE%". Use output, core, or all.
@@ -601,16 +667,69 @@ echo [INFO] mode     = %MODE%
 echo [INFO] release  = !RELDIR!
 echo.
 
-if /i "%MODE%"=="output" call :pack_one output
-if /i "%MODE%"=="core" call :pack_one core
-if /i "%MODE%"=="all" (
-	call :pack_one output
-	call :pack_one core
-)
+REM Mode dispatch lives in :pack_mode: cmd swallows the exit code of
+REM "exit /b 1" when it follows other commands inside one (...) block, so the
+REM chain is kept at top level inside a subroutine (verified on this box).
+call :pack_mode "%MODE%"
+set "PACKERR=!ERRORLEVEL!"
+call :zip_cleanup_password
+if not "!PACKERR!"=="0" exit /b 1
 
 echo.
 echo [DONE] archives are in %SCRIPTS%
 goto :the_end
+
+REM ============================================================
+REM pack_mode <output|core|all>
+REM ============================================================
+:pack_mode
+if /i "%~1"=="all" goto :pack_mode_all
+call :ensure_pack_tree "%~1" || exit /b 1
+call :pack_one "%~1" || exit /b 1
+exit /b 0
+:pack_mode_all
+call :ensure_pack_tree output || exit /b 1
+call :ensure_pack_tree core || exit /b 1
+call :pack_one output || exit /b 1
+call :pack_one core || exit /b 1
+exit /b 0
+
+REM ============================================================
+REM ensure_pack_tree <output|core>
+REM   Make sure release\<dir> exists and is non-empty. When it is missing
+REM   (fresh clone, release\ deleted, previous run cleaned up), export the
+REM   branch tree into it so "pack" no longer depends on a prior "release".
+REM   A missing branch or a failed export is fatal: pack must never report
+REM   success without producing a package.
+REM ============================================================
+:ensure_pack_tree
+if /i "%~1"=="output" (
+	set "PACKBRANCH=output"
+	set "PACKDEST=!RELDIR!\output"
+) else (
+	set "PACKBRANCH=output-core"
+	set "PACKDEST=!RELDIR!\output-core"
+)
+set "PACKSHA="
+for /f "delims=" %%s in ('git rev-parse --verify --quiet "refs/heads/!PACKBRANCH!" 2^>nul') do set PACKSHA=%%s
+if "!PACKSHA!"=="" (
+	echo [ERROR] branch !PACKBRANCH! not found locally - nothing to pack.
+	echo         Create it with "scripts\release.bat release ^<version^>".
+	exit /b 1
+)
+set "PACKTREE="
+if exist "!PACKDEST!" for /f "delims=" %%f in ('dir /b "!PACKDEST!" 2^>nul') do set PACKTREE=1
+if defined PACKTREE (
+	echo       using existing !PACKDEST!
+	exit /b 0
+)
+echo exporting !PACKBRANCH! ^( !PACKSHA! ^) into !PACKDEST! ...
+call :export_tree "!PACKSHA!" "!PACKDEST!"
+if errorlevel 1 (
+	echo [ERROR] could not export !PACKBRANCH! into !PACKDEST! - see above.
+	exit /b 1
+)
+exit /b 0
 
 REM ============================================================
 REM pack_one <output|core>: zip release\<dir> into scripts\<zip>
@@ -628,16 +747,16 @@ if /i "%~1"=="output" (
 	set "ZIP=!SCRIPTS!WhichWay-!VERSION!-core.zip"
 )
 if not exist "!SRC!" (
-	echo [WARN] !SRC! not found.
-	echo [WARN] Run "scripts\release.bat release" first to export it. Skipping.
-	exit /b 0
+	echo [ERROR] !SRC! not found after export.
+	exit /b 1
 )
 set "ANY="
 for /f "delims=" %%f in ('dir /b "!SRC!" 2^>nul') do set ANY=1
 if not defined ANY (
-	echo [WARN] !SRC! is empty. Skipping.
-	exit /b 0
+	echo [ERROR] !SRC! is empty after export.
+	exit /b 1
 )
+call :resolve_zip_password || exit /b 1
 if exist "!ZIP!" del "!ZIP!" 2>nul
 echo packing !SRC! ...
 call :zip_flat "!SRC!" "!ZIP!" || (
@@ -648,13 +767,233 @@ echo       wrote !ZIP!
 exit /b 0
 
 REM ============================================================
+REM core <version> <baseline>: local diff pack
+REM   Zip only the files added/modified between <baseline> and <version>,
+REM   taken from <version>'s tree. LOCAL ONLY: no commit, no branch update,
+REM   no tag, no push - it only writes a zip under scripts\.
+REM ============================================================
+:do_core
+set "NEWVER="
+set "OLDVER="
+set "WANTPASS="
+:core_args
+if "%~1"=="" goto :core_args_done
+if /i "%~1"=="--password" (
+	set "WANTPASS=1"
+) else if "%NEWVER%"=="" (
+	set "NEWVER=%~1"
+) else if "%OLDVER%"=="" (
+	set "OLDVER=%~1"
+) else (
+	echo [ERROR] too many arguments: %~1
+	goto :core_usage
+)
+shift
+goto :core_args
+:core_args_done
+if "%NEWVER%"=="" goto :core_usage
+if "%OLDVER%"=="" goto :core_usage
+
+set "NEWSHA="
+for /f "delims=" %%s in ('git rev-parse --verify --quiet "%NEWVER%" 2^>nul') do set NEWSHA=%%s
+if "!NEWSHA!"=="" (
+	echo [ERROR] version "%NEWVER%" is not a valid tag/commit.
+	echo.
+	echo existing tags:
+	call :list_tags
+	exit /b 1
+)
+set "OLDSHA="
+for /f "delims=" %%s in ('git rev-parse --verify --quiet "%OLDVER%" 2^>nul') do set OLDSHA=%%s
+if "!OLDSHA!"=="" (
+	echo [ERROR] baseline "%OLDVER%" is not a valid tag/commit.
+	echo.
+	echo existing tags:
+	call :list_tags
+	exit /b 1
+)
+
+REM ---- filenames must stay valid on Windows: "/" is legal in a ref ----
+set "ZIPVER=!NEWVER:/=-!"
+set "ZIPOLD=!OLDVER:/=-!"
+
+echo [INFO] repo     = %REPO%
+echo [INFO] version  = %NEWVER%  ^(!NEWSHA!^)
+echo [INFO] baseline = %OLDVER%  ^(!OLDSHA!^)
+echo [INFO] mode     = core: local diff pack %OLDVER% -^> %NEWVER%
+echo [INFO]            ^(zip only - no branch, no tag, no push^)
+echo.
+
+git merge-base --is-ancestor "%OLDVER%" "%NEWVER%" >nul 2>&1
+if errorlevel 1 (
+	echo [WARN] %OLDVER% is not an ancestor of %NEWVER%. If you swapped them,
+	echo [WARN] the diff goes the wrong way; usage is version then baseline.
+	echo.
+)
+
+if not exist "%TEMPDIR%" md "%TEMPDIR%" 2>nul
+set "DIFFIDX=%TEMPDIR%\core-diff-index.tmp"
+set "DIFFTMP=%TEMPDIR%\core-diff-tree.tmp"
+del "%DIFFIDX%" "%DIFFTMP%" 2>nul
+
+echo [1/3] collect added/modified files...
+node "%SCRIPTS%make-core-index.cjs" "!OLDSHA!" "!NEWSHA!" "%DIFFIDX%"
+if errorlevel 1 (
+	del "%DIFFIDX%" "%DIFFTMP%" 2>nul
+	echo [ERROR] make-core-index failed.
+	exit /b 1
+)
+set "CORESIZE=0"
+for %%A in ("%DIFFIDX%") do set "CORESIZE=%%~zA"
+if not defined CORESIZE set "CORESIZE=0"
+if !CORESIZE! LEQ 1 (
+	del "%DIFFIDX%" "%DIFFTMP%" 2>nul
+	echo [ERROR] no added or modified files between %OLDVER% and %NEWVER% -
+	echo         nothing to pack ^(a delete-only change yields an empty core pack^).
+	exit /b 1
+)
+
+echo [2/3] build the diff tree...
+set "GIT_INDEX_FILE=%DIFFTMP%"
+git read-tree --empty
+git update-index --index-info < "%DIFFIDX%"
+if errorlevel 1 (
+	set "GIT_INDEX_FILE="
+	del "%DIFFIDX%" "%DIFFTMP%" 2>nul
+	echo [ERROR] git update-index --index-info failed.
+	exit /b 1
+)
+set "CORETREE="
+for /f "delims=" %%t in ('git write-tree') do set CORETREE=%%t
+set "GIT_INDEX_FILE="
+del "%DIFFIDX%" "%DIFFTMP%" 2>nul
+if "!CORETREE!"=="" (
+	echo [ERROR] diff tree build failed.
+	exit /b 1
+)
+
+echo [3/3] export and zip...
+set "COREDEST=!RELDIR!\output-core-!ZIPVER!-!ZIPOLD!"
+call :export_tree "!CORETREE!" "!COREDEST!"
+if errorlevel 1 (
+	echo [ERROR] could not export the diff tree - see above.
+	exit /b 1
+)
+set "COREZIP=%SCRIPTS%WhichWay-!ZIPVER!-!ZIPOLD!-core.zip"
+call :resolve_zip_password || exit /b 1
+if exist "!COREZIP!" del "!COREZIP!" 2>nul
+echo packing !COREDEST! ...
+call :zip_flat "!COREDEST!" "!COREZIP!"
+set "ZIPERR=!ERRORLEVEL!"
+call :zip_cleanup_password
+if not "!ZIPERR!"=="0" (
+	echo [ERROR] failed to zip !COREDEST!
+	exit /b 1
+)
+for %%z in ("!COREZIP!") do set "COREZIPSIZE=%%~zz"
+echo.
+echo [DONE] core pack written: !COREZIP!  ^(!COREZIPSIZE! bytes^)
+echo        contains only files added/modified from %OLDVER% to %NEWVER%.
+echo        local only: no branch was updated, no tag created, nothing pushed.
+goto :the_end
+
+:core_usage
+echo [Usage] release.bat core ^<version^> ^<baseline^> [--password]
+echo.
+echo   release.bat core v1.6 v1.5.6
+echo       zip the files added/modified from v1.5.6 to v1.6 into
+echo       scripts\WhichWay-v1.6-v1.5.6-core.zip
+echo       ^(extracted tree: release\output-core-v1.6-v1.5.6^)
+echo   release.bat core v1.6 v1.5.6 --password
+echo       same, but AES-256 password protected
+echo   Local only: no branch update, no tag, no push.
+echo.
+echo existing tags:
+call :list_tags
+exit /b 1
+
+REM ============================================================
+REM resolve_zip_password - one hidden prompt per command
+REM   No-op unless --password was given. Sets ZIPENC=1 and writes the
+REM   password to %ZIPPASSFILE% (removed by zip_cleanup_password).
+REM   Re-entrant so "pack all" asks once and reuses the answer.
+REM ============================================================
+:resolve_zip_password
+if not defined WANTPASS exit /b 0
+if defined ZIPENC exit /b 0
+if not exist "%TEMPDIR%" md "%TEMPDIR%" 2>nul
+del "%ZIPPASSFILE%" 2>nul
+if defined WW_ZIP_PASSWORD echo [INFO] using password from WW_ZIP_PASSWORD
+set "WW_PASSFILE=%ZIPPASSFILE%"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPTS%zip-encrypt.ps1" -Mode prompt
+if errorlevel 1 (
+	echo [ERROR] no archive password was set - aborted.
+	if exist "%ZIPPASSFILE%" del "%ZIPPASSFILE%" 2>nul
+	exit /b 1
+)
+if not exist "%ZIPPASSFILE%" (
+	echo [ERROR] the password helper produced no password file.
+	exit /b 1
+)
+set "ZIPENC=1"
+echo [INFO] archive password accepted ^(AES-256^).
+echo [WARN] Windows Explorer cannot open AES zips; use 7-Zip / WinRAR / Bandizip.
+exit /b 0
+
+:zip_cleanup_password
+if exist "%ZIPPASSFILE%" del "%ZIPPASSFILE%" 2>nul
+set "ZIPENC="
+exit /b 0
+
+REM ============================================================
+REM find_bsdtar - prefer Windows' bsdtar and prove it is bsdtar
+REM   "where tar" often finds GNU tar from Git/MSYS first. GNU tar cannot
+REM   write ZIP archives (it happily makes a TAR named .zip) and has no
+REM   --options/--passphrase, so it must never be used for these packages.
+REM ============================================================
+:find_bsdtar
+set "TARBIN="
+if exist "%SystemRoot%\System32\tar.exe" set "TARBIN=%SystemRoot%\System32\tar.exe"
+if defined TARBIN (
+	"%TARBIN%" --version 2>nul | findstr /i /c:"bsdtar" >nul
+	if errorlevel 1 set "TARBIN="
+)
+if defined TARBIN exit /b 0
+for /f "delims=" %%t in ('where tar 2^>nul') do (
+	if not defined TARBIN (
+		"%%t" --version 2>nul | findstr /i /c:"bsdtar" >nul
+		if not errorlevel 1 set "TARBIN=%%t"
+	)
+)
+if defined TARBIN exit /b 0
+exit /b 1
+
+REM ============================================================
 REM zip_flat <srcDir> <zipPath>
-REM   Contents of srcDir at the root of the archive. PowerShell only, via
-REM   process env vars: a CJK path never reaches the command line, and this
-REM   keeps the layout the old stand-alone pack script always produced
-REM   (no tar dependency).
+REM   Contents of srcDir at the root of the archive. Without --password the
+REM   old Compress-Archive path is used (PowerShell only, via process env
+REM   vars: a CJK path never reaches the command line, no tar dependency).
+REM   With --password, bsdtar writes a ZIP with AES-256 encryption; the
+REM   wildcard keeps the same flat layout and includes dotfiles.
 REM ============================================================
 :zip_flat
+call :resolve_zip_password || exit /b 1
+if not defined ZIPENC goto :zip_flat_plain
+call :find_bsdtar || (
+	echo [ERROR] password-protected zips need Windows bsdtar, but no bsdtar was found.
+	exit /b 1
+)
+set "WW_LAYOUT=flat"
+set "WW_SRC=%~1"
+set "WW_ZIP=%~2"
+set "WW_PASSFILE=%ZIPPASSFILE%"
+set "WW_TAR=!TARBIN!"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPTS%zip-encrypt.ps1" -Mode zip
+if errorlevel 1 exit /b 1
+if not exist "%~2" exit /b 1
+exit /b 0
+
+:zip_flat_plain
 set "WP_SRC=%~1"
 set "WP_ZIP=%~2"
 powershell -NoProfile -ExecutionPolicy Bypass -Command "Compress-Archive -Path ($env:WP_SRC + '\*') -DestinationPath $env:WP_ZIP -CompressionLevel Optimal -Force"
@@ -674,6 +1013,7 @@ for /f "delims=" %%s in ('git rev-parse --short=7 refs/heads/dev-output') do set
 if "!SHORT!"=="" set "SHORT=local"
 set "ZIPNAME=WhichWay-dev-!SHORT!.zip"
 set "ZIPPATH=%SCRIPTS%!ZIPNAME!"
+call :resolve_zip_password || exit /b 1
 if exist "!ZIPPATH!" del "!ZIPPATH!" 2>nul
 call :zip_wrapped "%ROOT%\apps\core\extension" "WhichWay" "!ZIPPATH!" || exit /b 1
 for %%z in ("!ZIPPATH!") do set "ZIPSIZE=%%~zz"
@@ -682,21 +1022,45 @@ exit /b 0
 
 REM ============================================================
 REM zip_wrapped <parentDir> <entryName> <zipPath>
-REM   - tar.exe (bsdtar, Win10 1803+) is preferred: far faster than
-REM     Compress-Archive on asset-heavy trees. PowerShell is only a fallback
-REM     for older systems.
+REM   - Windows bsdtar is preferred: far faster than Compress-Archive on
+REM     asset-heavy trees. PowerShell is only a fallback for older systems.
 REM   - "-C parentDir entryName" gives the <entryName>/ top level the CI
 REM     archives also use (drop-in install).
+REM   - With --password the archive is AES-256 encrypted through
+REM     zip-encrypt.ps1. There is deliberately NO unencrypted fallback:
+REM     a missing bsdtar is an error, so a password request can never
+REM     silently produce an open archive.
 REM   - Sanity checks (tar path only) mirror the CI ones: every entry stays
 REM     under <entryName>/, and no CI-only .github/ or packaging scripts/
-REM     entry may appear.
+REM     entry may appear. Listing an AES zip needs no password, so the
+REM     checks also cover encrypted archives.
 REM ============================================================
 :zip_wrapped
 set "PARENT=%~1"
 set "ENTRY=%~2"
 set "TARGET=%~3"
+call :resolve_zip_password || exit /b 1
+if defined ZIPENC (
+	call :find_bsdtar || (
+		echo [ERROR] password-protected zips need Windows bsdtar, but no bsdtar was found.
+		exit /b 1
+	)
+	set "WW_LAYOUT=wrapped"
+	set "WW_PARENT=%PARENT%"
+	set "WW_ENTRY=%ENTRY%"
+	set "WW_ZIP=!TARGET!"
+	set "WW_PASSFILE=%ZIPPASSFILE%"
+	set "WW_TAR=!TARBIN!"
+	powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPTS%zip-encrypt.ps1" -Mode zip
+	if errorlevel 1 (
+		del "!TARGET!" 2>nul
+		exit /b 1
+	)
+	goto :zip_wrapped_sanity
+)
+
 set "TARBIN="
-for /f "delims=" %%t in ('where tar 2^>nul') do if not defined TARBIN set "TARBIN=%%t"
+call :find_bsdtar
 if defined TARBIN (
 	"%TARBIN%" -a -c -f "!TARGET!" -C "%PARENT%" "%ENTRY%"
 	if errorlevel 1 (
@@ -716,7 +1080,7 @@ if not exist "!TARGET!" (
 	exit /b 1
 )
 
-REM ---- sanity: list entries, then check the layout (ASCII prefixes only) ----
+:zip_wrapped_sanity
 if defined TARBIN (
 	"%TARBIN%" -tf "!TARGET!" > "%ZIPLIST%" 2>nul
 	set "ZIPLISTBYTES="
@@ -828,34 +1192,53 @@ exit /b 0
 
 REM ============================================================
 REM export_tree <tree-sha> <target-dir>
-REM   Extract a commit's tree into a fresh directory using an ASCII
-REM   tarball, so no CJK path is ever passed to git/tar (the repo lives
-REM   under a Chinese path). Leaves the output / output-core packages on
-REM   disk for "release.bat pack" to zip.
+REM   Extract a commit's tree into a fresh directory with git itself:
+REM   read-tree into a private index, then checkout-index into the
+REM   target. Git writes the NTFS names from its UTF-8 paths directly,
+REM   so CJK file names survive.
+REM
+REM   Do NOT switch this back to "git archive" + "tar -xf": GNU tar
+REM   (first "tar" on PATH, from Git) converts the UTF-8 names using the
+REM   ANSI code page (GBK) under cmd.exe, turning every Chinese name into
+REM   mojibake; Windows bsdtar cannot read the pax headers git archive
+REM   writes for those names.
+REM
+REM   Leaves the output / output-core packages on disk for
+REM   "release.bat pack" to zip. GIT_INDEX_FILE is cleared afterwards so
+REM   the release flow keeps using its own temp index.
 REM ============================================================
 :export_tree
 if "%~1"=="" exit /b 1
 if "%~2"=="" exit /b 1
 if exist "%~2" rd /s /q "%~2" 2>nul
+if exist "%~2" (
+	echo [WARN] cannot remove %~2 - export skipped.
+	exit /b 1
+)
 if not exist "%~2" md "%~2" 2>nul
-pushd "%~2" 2>nul || (
-	echo [WARN] could not enter %~2 - export skipped.
+if not exist "%~2" (
+	echo [WARN] cannot create %~2 - export skipped.
 	exit /b 1
 )
-git archive -o export.tar "%~1"
+set "EXPORTIDX=%TEMPDIR%\export-tree.idx"
+del "%EXPORTIDX%" 2>nul
+set "GIT_INDEX_FILE=%EXPORTIDX%"
+git -C "%REPO%" read-tree "%~1"
 if errorlevel 1 (
-	popd
-	echo [WARN] git archive failed for %~1 - export skipped.
+	set "GIT_INDEX_FILE="
+	del "%EXPORTIDX%" 2>nul
+	echo [WARN] read-tree failed for %~1 - export skipped.
 	exit /b 1
 )
-tar -xf export.tar
+git -C "%REPO%" --work-tree="%~2" checkout-index -a -f
 if errorlevel 1 (
-	popd
-	echo [WARN] extracting export.tar failed - is tar.exe available?
+	set "GIT_INDEX_FILE="
+	del "%EXPORTIDX%" 2>nul
+	echo [WARN] checkout-index failed for %~1 - export skipped.
 	exit /b 1
 )
-del export.tar 2>nul
-popd
+set "GIT_INDEX_FILE="
+del "%EXPORTIDX%" 2>nul
 set "EXPORTED="
 for /f "delims=" %%f in ('dir /b "%~2" 2^>nul') do set EXPORTED=1
 if not defined EXPORTED (
@@ -969,18 +1352,26 @@ REM ============================================================
 echo WhichWay release toolkit
 echo.
 echo   scripts\release.bat release ^<version^> [baseline] [--push-only]
-echo   scripts\release.bat dev [--no-zip] [--push-only]
-echo   scripts\release.bat pack [output^|core^|all]
+echo   scripts\release.bat dev [--no-zip] [--push-only] [--password]
+echo   scripts\release.bat pack [output^|core^|all] [--password]
+echo   scripts\release.bat core ^<version^> ^<baseline^> [--password]
 echo.
 echo   release   full release: build + dev-output + output(tag) + output-core
 echo             + export into release\ + atomic push of all refs and the tag
 echo   dev       build + push dev-output only, plus WhichWay-dev-^<sha7^>.zip
 echo             next to this script ^(no tag, no release, dev itself not pushed^)
-echo   pack      zip release\output and release\output-core into scripts\
-echo             ^(run "release" first - pack reads what it exported^)
+echo   pack      export output / output-core from their branches when
+echo             release\ is missing, then zip them into scripts\
+echo   core      zip only the files added/modified between baseline and
+echo             version into scripts\WhichWay-^<version^>-^<baseline^>-core.zip
+echo             ^(local only - no branch, tag, or push^)
 echo.
 echo   version   tag name starting with "v", e.g. v1.5.3
 echo   baseline  tag/commit output-core diffs against; default = latest v* on output
+echo             ^(core: required, e.g. release.bat core v1.6 v1.5.6^)
+echo   --password  (dev/pack/core) AES-256 encrypt every local zip; asks once,
+echo             hidden. Set WW_ZIP_PASSWORD to supply it non-interactively.
+echo             Explorer cannot open AES zips - use 7-Zip / WinRAR / Bandizip.
 echo   Flags may come in any order. Every mode pauses before pushing.
 echo.
 echo   Used to be three scripts: release-dev.bat and pack-local.bat are now the

@@ -10,7 +10,7 @@ character("char_4045_heidi", { pack: "epicSJZX",
 
 skill({
 	"anxinmrfz": {
-			audio: 2,
+			audio: ["作战中1","作战中2"],
 			trigger: { global: "gainEnd" },
 			filter: function (event, player) {
 				if (event.source === undefined || !event.source.isIn()) return false;
@@ -77,7 +77,7 @@ skill({
 										// gaincards,
 										// [1, tmpnum]
 										{
-											prompt:`暗信】:请你选择视为${viewCards["nature"] === undefined ? "" : get.translation(viewCards["nature"])}${get.translation(viewCards["name"])}的牌`,
+											prompt:`【暗信】:请你选择视为${viewCards["nature"] === undefined ? "" : get.translation(viewCards["nature"])}${get.translation(viewCards["name"])}的牌`,
 											cards:gaincards,
 											forced:true,
 											select:[1, tmpnum],
@@ -131,8 +131,8 @@ skill({
 							if (get.itemtype(card) == "card" && card.hasGaintag("anxinmrfz")) return num + 1;
 						},
 						cardname: function (card, player) {
-							let viewsCard = card.storage.anxinmrfz;
-							if (get.itemtype(card) == "card" && card.hasGaintag("anxinmrfz")) return viewsCard.name;
+							let viewsCard = card?.storage?.anxinmrfz;
+							if (viewsCard && get.itemtype(card) == "card" && card.hasGaintag("anxinmrfz")) return viewsCard.name;
 						},
 						cardnature(card, player) {
 							let viewsCard = card.storage.anxinmrfz;
@@ -143,7 +143,7 @@ skill({
 			},
 		},
 	"gongchoumrfz": {
-			audio: 2,
+			audio: ["作战中3","作战中4"],
 			enable: "phaseUse",
 			usable: 1,
 			filter: function (event, player) {

@@ -3,7 +3,9 @@ import { whichWayArknight } from "../arknight/index.ts";
 import { whichWayFile } from "../file.js";
 import { onContent } from "../hooks/index.js";
 import { whichWayAPIOverride } from "../override/index.js";
+import { whichWaySkin } from "./index.ts";
 import PortraitLayers from "./PortraitLayers.vue";
+import { spineWorker } from "./spineWork.js";
 import { getCover, getPosByUrl, resolvePortraitKey, type PortraitCover, type PortraitPos } from "./portraitPos.ts";
 
 /**
@@ -13,10 +15,15 @@ import { getCover, getPosByUrl, resolvePortraitKey, type PortraitCover, type Por
  * （`init/polyfill.ts` 里 `setBackgroundImage([src, lib.characterDefaultPicturePath + sex])`），
  * 明日方舟立绘带透明区域时，透出来的就是本体那张默认武将图。
  *
- * 这里劫持三处绘制入口，把明日方舟干员的立绘改画进 `PortraitLayers.vue` 的两层子元素里
+ * 这里劫持绘制入口，把明日方舟干员的立绘改画进 `PortraitLayers.vue` 的两层子元素里
  * （外层默认背板 + 裁溢出，内层是一张装着**完整原图**的画布）；其余角色一律走引擎原流程，节点上连子元素都不会多。
+ * - 原型级 `HTMLDivElement.prototype.setBackground` / `qhly_origin_setBackground`：覆盖**任何**白名单节点，
+ *   包括千幻聆音自己 `ui.create.div()` 出来的卡片容器（见 `installPrototypeRedirect`）
  * - `lib.element.player.$init` / `$reinit`：主将 `node.avatar`、副将 `node.avatar2`
  * - `ui.create.buttonPresets.character`：对话框里的武将卡按钮（选将、观战、`characterx` 也走它）
+ *
+ * ⚠️ 与 `skin/index.ts` 是循环依赖（skin → 本文件 → skin）。这里用到 `whichWaySkin` 的地方全在
+ * 函数体内（绘制、重绘钩子），那时两个模块都已求值完毕，不会踩到 TDZ。
  */
 
 /** 节点 → 挂在它上面的两层背景 */
@@ -30,6 +37,18 @@ type Layers = {
 };
 
 const layersMap = new WeakMap<HTMLDivElement, Layers>();
+
+/** 已装「外部内联样式」观察者的节点（十周年UI 出框图会直接写 style，见 `watchExternalBackground`） */
+const externalWatchers = new WeakMap<HTMLDivElement, MutationObserver>();
+
+/**
+ * 正在由**本扩展**写内联样式的节点。
+ *
+ * 本扩展会把「两层背景当前那张图」再写一份到 `node.style.backgroundImage` 当影子副本
+ * （供战报浅克隆、`smoothAvatar`、`ui.fakeme` 读取）。这份写入同样会触发 `watchExternalBackground`
+ * 的 `MutationObserver`，如果不加标记就会被误当成「外部改图」，把同一张图反复回灌。
+ */
+const selfWritingNodes = new WeakSet<HTMLDivElement>();
 
 /** 已装重定向的节点 */
 const redirectedNodes = new WeakSet<HTMLDivElement>();
@@ -119,6 +138,13 @@ export function getPortraitUrl(node: HTMLDivElement) {
  * 贴图路径的解析（皮肤配置、`ext:` / `mode:` / `img:` 前缀、国战 `gz_` 前缀、扩展名兜底）全在
  * `setBackground` 里，重写一遍必然走偏，所以借一个不入库的 div 让它自己算。
  */
+/**
+ * 借一个**离屏且不入库**的 div 让给定实现算出一份 `background-image`。
+ *
+ * ⚠️ 这个 scratch div 是裸 `document.createElement("div")`，既没有 `.avatar` 之类类名、也没进文档，
+ * 因此原型 gate 的 `isPortraitNode()` 恒为假 ⇒ 它天然不会触发双层绘制，拿到的就是原样结果。
+ * 这一点对两条调用路径都成立：`paintPortrait` 里算引擎的 `src`、以及同步千幻贴图时算 `url(...)`。
+ */
 function resolveBackgroundImage(paint: (scratch: HTMLDivElement) => void) {
 	const scratch = document.createElement("div");
 	paint(scratch);
@@ -129,6 +155,27 @@ function resolveBackgroundImage(paint: (scratch: HTMLDivElement) => void) {
 function firstLayer(backgroundImage: string) {
 	const matched = /^url\((?:"[^"]*"|'[^']*'|[^)]*)\)/.exec(backgroundImage);
 	return matched ? matched[0] : backgroundImage;
+}
+
+/**
+ * 立绘 / 皮肤路径 → 可直接用的 `url("…")`（规则见 `whichWayFile.toCssUrl`）
+ */
+const toBackgroundUrl = (src: string) => `url("${whichWayFile.toCssUrl(src)}")`;
+
+/**
+ * 写「影子副本」到节点内联样式，并标记这是本扩展的写入。
+ *
+ * 影子副本供**读不到子元素**的地方使用：`game.logv` 的战报卡头像是 `cloneNode()`（浅克隆，
+ * 只带内联样式）、`smoothAvatar` 的淡出层抄 `getComputedStyle`、`ui.fakeme` 抄内联
+ * `background-image`、十周年UI 的 `checkAndAddExperienceSuffix` 也是读内联样式判断图能不能加载。
+ *
+ * 标记的作用：`watchExternalBackground` 的 `MutationObserver` 会收到这次变化，必须放行，
+ * 否则同一张图会被反复当成「外部改图」回灌。用微任务在观察者回调之后解除标记。
+ */
+function writeInlineBackground(node: HTMLDivElement, url: string) {
+	selfWritingNodes.add(node);
+	node.style.backgroundImage = url;
+	queueMicrotask(() => selfWritingNodes.delete(node));
 }
 
 /**
@@ -173,6 +220,9 @@ function ensureLayers(node: HTMLDivElement): Layers {
 	node.prepend(host);
 
 	layersMap.set(node, layers);
+	//十周年UI 的出框图会绕过 setBackground/setBackgroundImage 直接写内联样式，
+	//挂上观察者才能把它同步进来（否则「子元素画立绘 + 内联写出框图」两层叠加）
+	watchExternalBackground(node);
 	return layers;
 }
 
@@ -190,48 +240,304 @@ function ensureLayers(node: HTMLDivElement): Layers {
  */
 function paintPortrait(node: HTMLDivElement, name: string) {
 	const layers = ensureLayers(node);
-	const url = firstLayer(resolveBackgroundImage(scratch => HTMLDivElement.prototype.setBackground.call(scratch, name, "character")));
+	const url = resolvePortraitUrl(node, name);
 	//setBackground 的 db: 分支是异步的（polyfill.ts:211-213），此刻读不到值；驶舰之向干员的立绘
 	//一律走 lib.config.skin，到不了那个分支
 	if (!url) return;
 	layers.setImage(url);
-	node.style.backgroundImage = url;
+	writeInlineBackground(node, url);
 }
 
 /**
- * 给节点装重定向：此后任何画到这个节点上的立绘都改画进两层背景。
+ * 该干员当前生效的立绘/皮肤路径。
  *
- * 除了被劫持的三个入口，`changeSkin`(player.js:3761,3800,3822)、`$reinit12/21`(3963-3978)、
- * `setAvatar`(4523-4528)、武将卡按钮的 `node.refresh`、本扩展的 `refreshSkin()`，以及干员技能里直接改
- * 头像的 `setBackgroundImage`（如 char_416_zumama）都会再画一次 —— 不重定向就会被两层背景盖住，
- * 表现为「换了皮肤没反应」。
+ * 优先用本扩展的皮肤配置（`whichWaySkin.skinPathOf`）：
+ * - 本扩展干员：没选皮肤时是立绘，选了就是皮肤目录里的真实文件；
+ * - 其它武将：**只有玩家真的选过**才给出路径，否则返回 undefined 交回引擎。
  *
- * 「是不是方舟干员」的判断放在重定向里、按每次调用时的角色名做，所以装一次就够：
- * 从普通角色换成干员、再换回来都各走各的路。
+ * 为什么不能直接用引擎算出来的那条：引擎只会拼 `lib.config.skin[name][1]`，而这一份可能
+ * - 是千幻按 `image/skin/{id}/{皮肤名}.jpg` 硬拼出来的、并不存在的路径（皮肤目录迁移之后尤其明显）；
+ * - 或者压根没有（玩家选过皮肤，但合并前的那一帧）。
+ * 本扩展的路径来自目录扫描，是真实存在的文件，所以两边都有时以本扩展为准。
+ */
+function resolvePortraitUrl(node: HTMLDivElement, name: string) {
+	const path = whichWaySkin.skinPathOf(name);
+	if (path) return toBackgroundUrl(path);
+	return firstLayer(resolveBackgroundImage(scratch => HTMLDivElement.prototype.setBackground.call(scratch, name, "character")));
+}
+
+/**
+ * 给节点装重定向 —— 现在由**原型级** gate 统一接管（见 `installPrototypeRedirect`），
+ * 本函数只保留为调用方兼容入口（`mountPortrait` 与三个绘制钩子仍在调它）。
+ *
+ * 为什么不再给节点装自有属性：那套写法只覆盖得到本扩展亲手拿到的节点（玩家头像、武将卡按钮），
+ * 覆盖不到千幻聆音运行时 `ui.create.div()` 出来的卡片容器；两套判据并存时还会互相打架
+ * （自有属性绕过 `isPortraitNode` 白名单，把 `.qh-not-replace` 的节点也抢过来）。
+ * 统一走原型 gate 之后，「哪些节点归我们画」只说一遍。
+ *
+ * 注：原型 gate 是**按节点类名**判定的，`.avatar` / `.button.character` 都在白名单里，
+ * 所以原先靠自有属性覆盖的那些节点照旧生效。
  */
 function installRedirect(node?: HTMLDivElement) {
-	if (!node || redirectedNodes.has(node)) return;
+	if (!node) return;
 	redirectedNodes.add(node);
+	installPrototypeRedirect();
+}
 
-	node.setBackground = function (name, type, ext, subfolder) {
-		if (type === "character" && isArkOperator(name)) {
-			paintPortrait(this, name);
+/**
+ * 「承载武将立绘」的节点类名白名单。
+ *
+ * 为什么要白名单而不是无条件接管：原型级 `setBackground` 会被**所有** div 调用，
+ * 无条件接管会把千幻/十周年UI 的边框、按钮、面板背景等一并画进两层 DOM（它们不需要透明底、
+ * 也不该有 `pos.json` 的位置设定），副作用面太大。这里只认「真的画着一张武将立绘」的容器。
+ *
+ * 名单来源：
+ * - 引擎：`.avatar` / `.avatar2`（旧布局）、`.primary-avatar` / `.deputy-avatar`（十周年UI 的
+ *   `player-element.js` 用这两个类建玩家头像）、`.button.character`（`get.nodeintro` 的皮肤按钮）；
+ * - 千幻聆音：`extension/content.js` 里 `ui.create.div('.xxx-avatar…')` 造出来的卡片容器
+ *   （`.qh-avatar`、`.qh-shousha-big-avatar`、`.qh-image-standard/-lutou`、
+ *   `.qh-page-skinavatarpicture/-lutou`）。
+ * 新增主题若用了别的类名，往这里补一项即可。
+ */
+const PORTRAIT_NODE_CLASSES = [
+	"avatar",
+	"avatar2",
+	"primary-avatar",
+	"deputy-avatar",
+	"qh-avatar",
+	"qh-shousha-big-avatar",
+	"qh-image-standard",
+	"qh-image-lutou",
+	"qh-page-skinavatarpicture",
+	"qh-page-skinavatarpicture-lutou",
+];
+
+/**
+ * 这个节点是否属于「武将立绘容器」。
+ *
+ * ⚠️ `.qh-not-replace` **不再一票否决**。千幻加这个类时（`content.js:10930` 等的
+ * `skinView.avatar`、`17247` 的 `skin1/2/3`）本意是「千幻自己的 setBackground 包装层别接手」，
+ * 而不是「驶舰之向也别丢剪影」；而这些皮肤预览格恰恰是最需要丢剪影的地方
+ * （它们既有 `setBackground(name, "character")`、也有 `setBackgroundImage(单层图)` 两条绘制路径）。
+ * `.qh-must-replace` 仍然表示「必须由我接管」的强意愿，保留短路。
+ */
+function isPortraitNode(node: HTMLElement): boolean {
+	const classes = node?.classList;
+	if (!classes) return false;
+	if (classes.contains("qh-must-replace")) return true;
+	//`.button` 单用太宽（普通按钮也是），必须是「武将卡按钮」这一种
+	if (classes.contains("button") && classes.contains("character")) return true;
+	return PORTRAIT_NODE_CLASSES.some(name => classes.contains(name));
+}
+
+/** 原型级重定向是否已安装（幂等） */
+let prototypeRedirectInstalled = false;
+
+/** 防止「我们的 gate ↔ 千幻的 qhly_origin_setBackground」互相调用形成死循环 */
+let setBackgroundDepth = 0;
+
+/**
+ * 安装原型级重定向：让**千幻自己创建的卡片节点**也能套上两层背景。
+ *
+ * 为什么必须是原型级：千幻的卡片容器是它运行时 `ui.create.div()` 出来的，本扩展拿不到创建时机，
+ * 逐个装自有属性（`installRedirect` 的做法）覆盖不到它们。
+ *
+ * 为什么还要接管 `qhly_origin_setBackground`：千幻把引擎原版 `setBackground` 存进了这个自有属性
+ * （`content.js:8018`），并在很多路径里**直接调它**来「按原样画」。只在 `prototype.setBackground`
+ * 上装 gate 的话，这些路径会整个绕过我们 —— 这正是「千幻卡片里照样透出
+ * `image/character/default_silhouette_female.jpg`」的直接原因。
+ *
+ * 加载顺序两种都要成立：
+ * - 千幻先加载 ⇒ `qhly_origin_setBackground` 是引擎原版，我们把它换成同一个 gate；
+ * - 千幻后加载 ⇒ 它会把我们的 gate 存成 `qhly_origin_setBackground`，其调用照样进 gate。
+ */
+function installPrototypeRedirect() {
+	if (prototypeRedirectInstalled) return;
+	prototypeRedirectInstalled = true;
+
+	const proto = HTMLDivElement.prototype as any;
+	/** 真正的引擎原版（千幻若已加载，原版被它存进了 `qhly_origin_setBackground`） */
+	const engineSetBackground = proto.qhly_origin_setBackground || proto.setBackground;
+	const previousSetBackground = proto.setBackground;
+
+	/**
+	 * 白名单命中就画两层背景，否则原样交给上一级实现。
+	 * 用 `setBackgroundDepth` 兜底：万一千幻的包装层又回调 `qhly_origin_setBackground`，
+	 * 重入时一律走引擎原版，不参与 gate，避免无限递归。
+	 */
+	function gateSetBackground(this: HTMLDivElement, name: any, type: any, ext: any, subfolder: any) {
+		if (setBackgroundDepth === 0 && type === "character" && isArkOperator(name) && isPortraitNode(this)) {
+			setBackgroundDepth++;
+			try {
+				paintPortrait(this, name);
+			} catch (error) {
+				console.error("[whichWaySkin] 双层立绘绘制失败，回落到引擎原流程", error);
+				return engineSetBackground.call(this, name, type, ext, subfolder);
+			} finally {
+				setBackgroundDepth--;
+			}
 			return this;
 		}
-		//换回普通角色：撤掉两层背景，否则引擎画在节点自身的图会被子元素盖住
-		layersOf(this)?.dispose();
-		return HTMLDivElement.prototype.setBackground.call(this, name, type, ext, subfolder);
-	};
+		//不归我们管的节点（或重入）：先撤掉可能残留的两层背景，否则会盖住引擎画的图
+		if (setBackgroundDepth === 0) layersOf(this)?.dispose();
+		setBackgroundDepth++;
+		try {
+			return previousSetBackground.call(this, name, type, ext, subfolder);
+		} finally {
+			setBackgroundDepth--;
+		}
+	}
 
-	node.setBackgroundImage = function (img) {
-		const layers = layersOf(this);
-		if (!layers) return HTMLDivElement.prototype.setBackgroundImage.call(this, img);
-		const url = resolveBackgroundImage(scratch => HTMLDivElement.prototype.setBackgroundImage.call(scratch, img));
-		layers.setImage(url);
-		//影子副本跟着走，理由见 paintPortrait
-		this.style.backgroundImage = url;
-		return this;
+	proto.setBackground = gateSetBackground;
+	//千幻的「按原样画」入口也接到同一个 gate 上；非白名单节点直接走引擎原版，不经过千幻的包装层
+	proto.qhly_origin_setBackground = function (this: HTMLDivElement, name: any, type: any, ext: any, subfolder: any) {
+		if (type === "character" && isArkOperator(name) && isPortraitNode(this)) {
+			try {
+				paintPortrait(this, name);
+				return this;
+			} catch (error) {
+				console.error("[whichWaySkin] 双层立绘绘制失败，回落到引擎原流程", error);
+			}
+		}
+		return engineSetBackground.call(this, name, type, ext, subfolder);
 	};
+}
+
+/**
+ * 这张图是不是「某位**官方**方舟干员的立绘/皮肤」——`setBackgroundImage` 要不要接管的判据。
+ *
+ * 为什么要这道判据（而不是「白名单节点就接管」）：`setBackgroundImage` 的调用方远多于
+ * `setBackground`，绝大多数只想贴一张单层装饰图 —— 游戏背景、千幻的装饰底板、边框、角标…
+ * 它们同样可能挂在白名单节点上（或压根不在），一律接管会把两层 DOM 铺到不该铺的地方。
+ *
+ * 判据复用 `resolvePortraitKey`（它内部只认 `whichWayArknight.isArknght()`，即
+ * `character_table` + `patchChars` 里的官方 uid），因此：
+ * - 官方干员的立绘/皮肤目录路径 ⇒ true；
+ * - **本扩展自造 id**（`acemrfz`、`plot_keluxiermrfz`…）⇒ false：它们没有官方立绘，
+ *   也就没有「透明区透出保底图」的问题，本来就不需要两层绘制；
+ * - 本体武将 `image/skin/…`、千幻自带皮肤包 `sanguoskin/…`、各种装饰图 ⇒ false。
+ *
+ * 数组入参直接判 false：那是引擎 `setBackground(name, "character")` 内部拼好的
+ * `[立绘, 保底图]`，应该交给 `setBackground` 那条 gate 处理，这里再接管会重复绘制。
+ */
+function isOperatorImage(img: unknown): boolean {
+	if (Array.isArray(img)) return false;
+	if (typeof img !== "string" || img.length === 0) return false;
+	return resolvePortraitKey(img) !== undefined;
+}
+
+/**
+ * 把千幻「直接贴图」与十周年UI「出框图」的路径同步到两层背景上。
+ *
+ * 两个来源都会**绕过 `setBackground`**、直接写节点背景：
+ * - 千幻：`skinView2.qhly_origin_setBackgroundImage(file)` / `currentSkinView.setBackgroundImage(...)`
+ *   （`content.js:16685`、`14545` 等），只写单层图；
+ * - 十周年UI：`outcropAvatar.js` 在 `setBackground` 之后用 `setTimeout(() => c(name, node))` 把
+ *   **出框图**直接写进 `node.style.backgroundImage`，同样不经过这里。
+ *
+ * 我们的两层背景是**子元素**、会盖在节点自身背景之上，所以不跟着同步就会一直显示旧图
+ * （表现为「换了皮肤没反应」或「出框图不生效」）。
+ *
+ * 接管条件是「白名单节点 + 图确实是官方干员的立绘/皮肤」（见 `isOperatorImage`），
+ * 因此装饰图、背景图一律原样透传，不扩大接管面。
+ */
+function installPrototypeBackgroundImageRedirect() {
+	const proto = HTMLDivElement.prototype as any;
+	if (proto.__whichWayBackgroundImageGated) return;
+	proto.__whichWayBackgroundImageGated = true;
+
+	const previous = proto.setBackgroundImage;
+	proto.setBackgroundImage = function (this: HTMLDivElement, img: any) {
+		if (!isPortraitNode(this) || !isOperatorImage(img)) {
+			return previous.call(this, img);
+		}
+		try {
+			//先让原实现算一遍（它负责拼 lib.assetURL、处理数组、URL.canParse 等），再取出第一层
+			const url = firstLayer(resolveBackgroundImage(scratch => previous.call(scratch, img)));
+			if (!url) return previous.call(this, img);
+			const layers = layersOf(this) ?? ensureLayers(this);
+			layers.setImage(url);
+			writeInlineBackground(this, url);
+			return this;
+		} catch (error) {
+			console.error("[whichWaySkin] 同步皮肤图失败，回落到引擎原流程", error);
+			return previous.call(this, img);
+		}
+	};
+}
+
+/**
+ * 让「外部直接写内联样式」的图也能落到两层背景上（十周年UI 出框图优先，方案 A）。
+ *
+ * 十周年UI 的 `outcropAvatar.js` 是这么做的（`setupOutcropAvatar()` 里）：
+ * ```js
+ * const y = HTMLDivElement.prototype.setBackground;      // 保存"当时"的实现
+ * HTMLDivElement.prototype.setBackground = function (name, type) {
+ *     const result = y.call(this, name, type);
+ *     if (type === "character") setTimeout(() => c(name, this), 0);  // c 内部：
+ *     //   node.style.backgroundImage = `url("…出框图…")`   ← 绕过 setBackgroundImage
+ *     return result;
+ * };
+ * ```
+ * 也就是说它**只写内联样式**，我们在 `setBackground` / `setBackgroundImage` 上装的门都拦不到，
+ * 结果是「子元素还画着立绘、内联样式已经换成出框图」⇒ 两层叠加，正是要消除的「影子」。
+ *
+ * 处理办法（尊重出框图，不夺它的优先级）：
+ * - 用 `MutationObserver` 盯 `style` 变化。观察到内联 `background-image` 已经**不等于**我们
+ *   两层背景当前那张图时，把这张图同步进两层背景；
+ * - 同步时把节点内联样式清掉（置空）—— 图已经画进子元素了，内联那份留着就是叠影；
+ * - 只对「已经套了两层背景」的节点生效（`layersOf` 存在），所以装饰节点、普通节点不受影响。
+ *
+ * 为什么用 `MutationObserver` 而不是改写 `style` 的 setter：`backgroundImage` 是 CSSStyleDeclaration
+ * 的属性，逐个包 setter 既覆盖不全（`cssText`、`setProperty`、`style.background` 都会绕过），
+ * 也会和其它扩展（十周年UI 自己、千幻）的劫持互相踩。观察属性变化是唯一稳妥的入口。
+ */
+function watchExternalBackground(node: HTMLDivElement) {
+	if (externalWatchers.has(node)) return;
+	const layers = layersOf(node);
+	if (!layers) return;
+
+	const observer = new MutationObserver(() => {
+		const current = layersOf(node);
+		if (!current) return;
+		//这一轮内联样式是我们自己写的影子副本（paintPortrait / setBackgroundImage 同步），
+		//不是外部改动 —— 直接忽略，否则会把「我们画的图」又当成外部图回灌一遍。
+		if (selfWritingNodes.has(node)) return;
+		const inline = node.style.backgroundImage;
+		if (!inline || inline === "none") return;
+		const external = firstLayer(inline);
+		//和我们画的是同一张（含仅引号/序列化差异）：不用处理
+		if (!external || external === current.url) return;
+		//外部改成了别的图（十周年UI 出框图、千幻预览图…）：以它为准，同步进两层背景
+		selfWritingNodes.add(node);
+		try {
+			current.setImage(external);
+			//清掉内联那份，否则会和子元素叠成两层
+			node.style.backgroundImage = "";
+		} finally {
+			//MutationObserver 是异步批送的：等这一批回调走完再解除标记
+			queueMicrotask(() => selfWritingNodes.delete(node));
+		}
+	});
+
+	observer.observe(node, { attributes: true, attributeFilter: ["style"] });
+	externalWatchers.set(node, observer);
+}
+
+/**
+ * 立绘重绘钩子：凡是本扩展画上去的立绘，都先确认一下动皮层是不是与当前皮肤一致。
+ *
+ * 为什么放在绘制入口而不是换肤函数里：换肤、同步存档、开局这几个时机的顺序并不固定
+ * （皮肤面板可能在选将界面、可能在局内，存档同步又发生在引擎 init 末尾），
+ * 而「画一次」是它们唯一的公共动作 —— 挂在这里，任何一次重绘都会把动皮状态带正。
+ */
+function ensureDynamicSkin(node: HTMLDivElement | undefined, name: string) {
+	if (!node || typeof name !== "string" || !layersOf(node)) return;
+	try {
+		spineWorker.updateDyc(name, node);
+	} catch (error) {
+		console.error("[whichWaySkin] 更新动皮失败", error);
+	}
 }
 
 /**
@@ -255,18 +561,31 @@ export function mountPortrait(node: HTMLElement | null | undefined, image: strin
 	const url = image.startsWith("url(") ? image : `url("${whichWayFile.compilePath(image)}")`;
 	ensureLayers(node).setImage(url, pos);
 	//影子副本：战报浅克隆、smoothAvatar、ui.fakeme 读的都是节点自身的背景
-	node.style.backgroundImage = url;
+	writeInlineBackground(node, url);
 	return true;
 }
 
 onContent({
 	name: "whichWaySkinAvatarBackground",
 	fn: () => {
+		//必须在最前面：引擎与千幻的绘制发生在对局里，晚一步装不上原型就覆盖不到千幻自己建的卡片节点。
+		//两者都幂等，重复调用无副作用。
+		installPrototypeRedirect();
+		installPrototypeBackgroundImageRedirect();
+
 		whichWayAPIOverride.appendHook("lib.element.player.$init", {
 			before(this: any) {
 				//头像节点从建好到销毁都不会被换掉，这里装一次即可覆盖后续所有绘制路径
 				installRedirect(this.node.avatar);
 				installRedirect(this.node.avatar2);
+			},
+			after(this: any, result: any, character: string, character2?: string) {
+				//主将的静态立绘由 $init 自己那次 setBackground 画好了（重定向拦下来了）；这里补的是动皮：
+				//两条绘制入口（引擎的 $init / 本扩展的 updateDyc）谁先谁后并不固定，
+				//等整局初始化走完再确认一次，才不会出现「开局显示立绘、动皮没挂上」
+				ensureDynamicSkin(this.node?.avatar, character);
+				if (character2) ensureDynamicSkin(this.node?.avatar2, character2);
+				return result;
 			},
 		});
 
@@ -275,6 +594,11 @@ onContent({
 				//$init 已经装过，这里是幂等的兜底：万一头像节点被别的代码换掉，重定向还在
 				installRedirect(this.node.avatar);
 				installRedirect(this.node.avatar2);
+			},
+			after(this: any, result: any, character: string, character2?: string) {
+				ensureDynamicSkin(this.node?.avatar, character);
+				if (character2) ensureDynamicSkin(this.node?.avatar2, character2);
+				return result;
 			},
 		});
 

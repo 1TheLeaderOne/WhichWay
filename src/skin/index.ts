@@ -31,7 +31,6 @@ class WhichWaySkin {
 				//立绘位置设定要先于任何一次绘制就位，否则首帧会按默认值画一遍再跳一次
 				await loadPos();
 				await this.autoUpdateSkinData();
-				this.syncAllSkinConfig();
 			})
 			.then(({ duration }) => {
 				if (whichWayUtil.isDeveloperMode()) console.log(`[whichWaySkin] init skin time ${duration}ms`);
@@ -59,7 +58,10 @@ class WhichWaySkin {
 						skins: {},
 					};
 
-					//为了让经典形象在皮肤列表的最前面
+					//为了让经典形象在皮肤列表的最前面。
+					//⚠️ 不能靠 `getCharacterPortraitFile()` 兜底的 `.jpg`：目录里没有这位干员的立绘时，
+					//那会得到一条必然 404 的路径。索引里没有就干脆不加这条（皮肤列表里只剩真实存在的皮肤）。
+					if (!whichWayFile.characterPortraitExt[name]) continue;
 					this.skinData[name].skins = {
 						经典形象: {
 							name: whichWayFile.getCharacterPortraitFile(name),
@@ -68,6 +70,18 @@ class WhichWaySkin {
 						...this.skinData[name].skins,
 					};
 				}
+
+				//皮肤配置的合并必须赶在第一次绘制之前：
+				//引擎的 `setBackground` 只认 `lib.config.skin[name]`（数组形态），千幻只认
+				//`lib.config.qhly_skinset.skin[name]`（字符串形态）。在本体 init 末尾（各扩展包的 init
+				//都已跑完、`saveConfig` 也都落盘完）合并一次，两种形态才是一致的、当场绘制也才是对的。
+				//⚠️ 不能放进 `init()`：那时千幻的扩展包可能还没 init，搬过去的 `qhly_skinset` 会被它的默认值覆盖。
+				this.syncAllSkinConfig();
+
+				//同步后立刻把当前对局里的立绘刷一遍（已经上场的玩家）。
+				//选将预览不需要单独处理：它的每个候选都是 `ui.create.buttonPresets.character` 建出来的，
+				//`avatarBackground.ts` 在该预设的 after 钩子里会按当前皮肤重画。
+				this.refreshSkin();
 			},
 		});
 
@@ -270,21 +284,9 @@ class WhichWaySkin {
 	 * 初始化皮肤数据（只会读取本扩展的）
 	 */
 	async initSkinData() {
-		const { folders } = await whichWayFile.getFileTree("skin:");
-		for (const folder of folders) {
-			this.skinData[folder.name] = {
-				name: folder.name,
-				skins: {},
-			};
-			if (folder.files.length > 0) {
-				for (const file of folder.files) {
-					this.skinData[folder.name].skins[whichWayFile.removeExt(file.name)] = {
-						name: file.name,
-						path: file.path,
-					};
-				}
-			}
-		}
+		//文件名不一定是「皮肤名.png」（`夏卉 FA075.png`、`时遗14.png` 之类），
+		//所以皮肤列表与文件名索引必须来自同一次目录扫描
+		await whichWayFile.initSkinFileIndex(this.skinData);
 	}
 
 	/**
@@ -363,7 +365,28 @@ class WhichWaySkin {
 			return result;
 		}
 		//皮肤名既可能是条目名，也可能是带扩展名的文件名，两种都认
-		return data.skins[skin] ?? data.skins[whichWayFile.removeExt(skin)];
+		const entry = data.skins[skin] ?? data.skins[whichWayFile.removeExt(skin)];
+		if (entry) return entry;
+		//皮肤目录里真实存在的文件兜底：条目丢了（缓存过期、条目名与文件名不一致）也不至于切不过去
+		const fileName = whichWayFile.getSkinFileName(name, skin);
+		return fileName ? { name: fileName, path: whichWayFile.compilePath(`skin:${name}/${fileName}`) } : undefined;
+	}
+
+	/**
+	 * 皮肤名 → 皮肤目录里**真实存在**的文件名（带扩展名）。
+	 *
+	 * 静皮目录里有不少文件名不是「皮肤名.png」（`时遗14.png`、`远行前的野餐.png` 之类），
+	 * 而动皮数据用的是短名；这里按目录扫描出来的索引取，**取不到就返回 undefined**，
+	 * 绝不硬拼一个 `{皮肤名}.png`（那在改名过的皮肤上必然 404）。
+	 * @param name 干员id
+	 * @param skin 皮肤名或文件名（带不带扩展名都行）
+	 */
+	getSkinFileName(name: string, skin: string): string | undefined {
+		const fileName = whichWayFile.getSkinFileName(name, skin);
+		if (fileName) return fileName;
+		const base = whichWayFile.removeExt(skin ?? "");
+		const entry = base ? this.skinData[name]?.skins?.[base] : undefined;
+		return entry?.name;
 	}
 
 	/**
@@ -413,8 +436,10 @@ class WhichWaySkin {
 	 */
 	setCharacterSkin(name: string, skin: string): boolean {
 		if (whichWayUtil.isDeveloperMode()) console.log(`[whichWaySkin] setCharacterSkin ${name} ${skin}`);
-		if (skin === "经典形象" && whichWaySkin._skinStore[name]) {
-			this.syncSkin({key:name,del:true});
+		if (skin === DEFAULT_SKIN_NAME) {
+			//「经典形象」一律按「删键」处理（引擎落到 `char.img`）：即使本扩展此刻没有这条存档也要执行，
+			//否则千幻那边的字符串存档会原样留着，下次启动 `syncAllSkinConfig` 又把它搬回来
+			this.syncSkin({ key: name, del: true });
 			return true;
 		}
 		const skinData = this.getCharacterSkin(name, skin);
@@ -422,44 +447,86 @@ class WhichWaySkin {
 			console.warn(`[whichWaySkin] 找不到皮肤「${skin}」（角色：${name}），本次切换已忽略`);
 			return false;
 		}
-		this.syncSkin({key:name,value:[skinData.name,skinData.path]});
+		this.syncSkin({ key: name, value: [skinData.name, skinData.path] });
 		return true;
 	}
 
-	syncSkin({key, value,del}: {key:string,value?:[string,string],del?:boolean}){
-		if(del === true){
+	/**
+	 * 写一条皮肤配置，并把**同一条选择**同步到千幻与本体存档。
+	 *
+	 * 三处配置是三个消费者各看各的：引擎看 `lib.config.skin`（数组）、千幻看 `qhly_skinset.skin`（字符串）、
+	 * 本扩展看自己的 `skinConfig`。只写自己那一份的话，下一次启动 `syncAllSkinConfig()` 会拿另外两份
+	 * （其中还停留在旧选择）来覆盖，表现出来就是「换了皮肤，重开又变回去了」。
+	 */
+	syncSkin({ key, value, del }: { key: string; value?: [string, string]; del?: boolean }) {
+		lib.config.skin ??= {};
+		this.checkSkinSetting();
+		if (del === true) {
 			delete this._skinStore[key];
 			delete window.whichWaySave.skinConfig[key];
 			delete lib.config.skin[key];
-			whichWayUtil.saveConfig("skin", lib.config.skin, undefined);
-			whichWayUtil.saveConfig("skinConfig", window.whichWaySave.skinConfig);
-		}else{
-			if(value === void 0) throw new Error("value is undefined");
+			delete lib.config.qhly_skinset.skin[key];
+		} else {
+			if (value === void 0) throw new Error("value is undefined");
 			this._skinStore[key] = value;
 			window.whichWaySave.skinConfig[key] = value[0];
 			lib.config.skin[key] = value;
-			whichWayUtil.saveConfig("skin", lib.config.skin, undefined);
-			whichWayUtil.saveConfig("skinConfig", window.whichWaySave.skinConfig);
+			lib.config.qhly_skinset.skin[key] = value[0];
 		}
+		whichWayUtil.saveConfig("skin", lib.config.skin, undefined);
+		whichWayUtil.saveConfig("skinConfig", window.whichWaySave.skinConfig);
+		whichWayUtil.saveConfig("qhly_skinset", lib.config.qhly_skinset, undefined);
 	}
 
+	/**
+	 * 按当前皮肤配置重绘场上的玩家。
+	 *
+	 * 引擎的 `setBackground` 只管「角色 id → 立绘」，对干员来说皮肤是另一套配置（`lib.config.skin`），
+	 * 所以换肤/同步之后必须重新贴一次图。副将走 `name2`：`player.name` 在双将时是 `a+b/dual` 这种合成名，
+	 * 拿它去查皮肤表永远查不到。
+	 */
 	refreshSkin() {
 		const allPlayers = game.players.concat(game.dead);
 		if (allPlayers.length === 0) return;
 		for (const player of allPlayers) {
-			player.node.avatar.setBackground(player.name1, "character");
-			if (player.name2) player.node.avatar2.setBackground(player.name2, "character");
-			spineWorker.updateDyc(player.name, player);
+			const name1 = player.name1 || player.name;
+			if (name1 && player.node?.avatar) {
+				player.node.avatar.setBackground(name1, "character");
+				spineWorker.updateDyc(name1, player);
+			}
+			if (player.name2 && player.node?.avatar2) {
+				player.node.avatar2.setBackground(player.name2, "character");
+				spineWorker.updateDyc(player.name2, player);
+			}
 		}
 	}
 
 	/**
 	 * 获取角色的当前皮肤
+	 * @param name 干员id
+	 * @param igExt 是否去掉扩展名（返回值形态：`夏卉 FA075` / `夏卉 FA075.png`）
 	 */
 	getCurentSkin(name: string, igExt: boolean = true): string {
 		let skin = this._skinStore?.[name]?.[0];
-		if (!skin) skin = "经典形象.jpg";
+		if (!skin) skin = `${DEFAULT_SKIN_NAME}.jpg`;
 		return igExt ? whichWayFile.removeExt(skin) : skin;
+	}
+
+	/**
+	 * 「某个武将在本扩展的皮肤配置里应该显示哪张图」—— 与 `getCurrentSkinPath` 的区别在于：
+	 * **没有选择时返回 undefined**，把「没有配置」与「配置里是一张坏图」分开。
+	 *
+	 * 给绘制层用：有结果就用它（本扩展解析的路径最可靠），没有就走引擎自己的 `setBackground`。
+	 * - 本扩展武将没有选择 ⇒ 立绘（经典形象）；
+	 * - 其它武将没有选择 ⇒ undefined（交回引擎，`char.img` 之类由引擎处理）；
+	 * - 其它武将**有**选择 ⇒ 存档里的路径（玩家在千幻/本体里换过动皮/皮肤）。
+	 * @param name 武将id
+	 */
+	skinPathOf(name: string): string | undefined {
+		const selected = this._skinStore?.[name]?.[1];
+		if (typeof selected === "string" && selected.length > 0) return selected;
+		if (window.whichWaySave?.hasChar?.(name) === true) return whichWayFile.getCharacterPortraitPath(name);
+		return undefined;
 	}
 
 	/**
@@ -468,9 +535,10 @@ class WhichWaySkin {
 	getCurrentSkinPath(name: string): string {
 		let skin = this._skinStore?.[name]?.[1];
 		if (!skin) {
-			if (window.whichWaySave.hasChar(name)) skin = whichWayFile.getCharacterPortraitPath(name);
-			else {
+			//非本扩展武将：走引擎的 `img` / `trashBin` / 默认图，路径也是相对 `lib.assetURL` 的
+			if (!window.whichWaySave.hasChar(name)) {
 				const char = get.character(name);
+				if (!char) return `image/character/${name}.jpg`;
 				if (char.img !== undefined) return char.img;
 				else if (char.trashBin) {
 					for (let any of char.trashBin) {
@@ -481,6 +549,7 @@ class WhichWaySkin {
 				}
 				return `image/character/${name}.jpg`;
 			}
+			skin = whichWayFile.getCharacterPortraitPath(name);
 		}
 		return skin;
 	}
@@ -489,6 +558,8 @@ class WhichWaySkin {
 	 * 检查皮肤设置,不全的自动补全,并且判断是否需要同步
 	 */
 	checkSkinSetting() {
+		//逐字段补齐：千幻读过一次配置后会把 `qhly_skinset` 建出来，但未必带齐 `skin` 等字段
+		//（`??=` 只在整体是 undefined 时才赋值），缺字段时后面 `qhly_skinset.skin[key] = …` 会直接抛
 		lib.config.qhly_skinset ??= {
 			skin: {
 				//key-value方式，存放武将皮肤名
@@ -522,6 +593,17 @@ class WhichWaySkin {
 		});
 	}
 
+	/**
+	 * 合并三份皮肤存档（本扩展 / 本体 / 千幻），并写回三处。
+	 *
+	 * 合并规则（`skinOverride` 配置决定「谁排最后」，排最后的源赢）：
+	 * - **本扩展武将**：以本扩展的皮肤表为准。干员的皮肤由本扩展提供，存档里只需记住**皮肤名**，
+	 *   路径一律按名字从本次扫描出的皮肤表重新解析 —— 存盘里的旧路径（目录迁移、改名）不能压住真实位置。
+	 *   解析不到就**保留原选择**而不是删键：删键等于把玩家选好的皮肤悄悄退回「经典形象」。
+	 * - **非本扩展武将**：原样保留，只剔除 `undefined`/`null` 的路径。
+	 *   以前这里是「解析不到就删键」，而本扩展的皮肤表里根本没有本体武将 ——
+	 *   于是本体武将的动皮选择在每次启动时都被删掉，再被本扩展的存档覆盖成「经典形象」（重开即丢）。
+	 */
 	syncAllSkinConfig() {
 		if (this._isSyncing) return;
 		this._isSyncing = true;
@@ -529,42 +611,44 @@ class WhichWaySkin {
 
 		const self = this;
 
+		/** 干员id → { 皮肤名, 路径 }（本次合并的结果） */
+		const resolved: Record<string, [string, string]> = {};
+
 		/**
-		 * 写入一条皮肤配置；**路径解析不出来时删键，绝不留下 `undefined`**。
+		 * 记一条皮肤配置。
 		 *
+		 * 本扩展武将走 `resolveOwnSkin`：路径按皮肤名重新解析，解析不到就沿用存档里的路径（而不是删键）——
 		 * 引擎的 `setBackground` 只看 `lib.config.skin[name]` 这个键在不在（`init/polyfill.ts:205-206`），
-		 * 键在就无条件取 `[1]`，不再回落到武将数据上的 `img`；`setBackgroundImage` 又是字符串拼接
-		 * （`polyfill.ts:250-262`），于是 `[皮肤名, undefined]` 会被贴成 `url("<assetURL>undefined")` ——
-		 * 立绘画空，还把本来有效的 `char.img`（即本扩展注册时写好的「经典形象」立绘）挤掉。
-		 * 删键后引擎走 `nameinfo.img` 那条分支；下面的 `lib.config.skin = full` 与各处 `saveConfig`
-		 * 会把这条失效存档一并清掉，重启后不会复现。
+		 * 键被删就等于「没人选过皮肤」，回落到经典形象；而 `[皮肤名, undefined]` 又会被贴成 `url("…undefined")`。
+		 * 两种坏结果都避开：只会写入非空字符串路径。
 		 */
-		const store = (key: string, skinName: string, path: unknown) => {
-			if (typeof path === "string" && path.length > 0) {
-				self._skinStore[key] = [skinName, path];
+		const store = (key: string, skinName: unknown, path: unknown) => {
+			if (typeof skinName !== "string" || skinName.length === 0) return;
+			const own = window.whichWaySave?.hasChar?.(key) === true;
+			if (own) {
+				const resolvedPath = self.getCharacterSkin(key, skinName)?.path ?? (typeof path === "string" && path.length > 0 ? path : undefined);
+				if (resolvedPath === undefined) {
+					console.warn(`[whichWaySkin] 皮肤「${skinName}」（干员：${key}）在本扩展的皮肤表里找不到，且存档中没有可用路径，本条已丢弃`);
+					return;
+				}
+				resolved[key] = [skinName, resolvedPath];
 				return;
 			}
-			console.warn(`[whichWaySkin] 皮肤「${skinName}」（角色：${key}）解析不到图片路径，本条配置已丢弃，回落到经典形象`);
-			delete self._skinStore[key];
+			if (typeof path === "string" && path.length > 0) resolved[key] = [skinName, path];
+			else console.warn(`[whichWaySkin] 皮肤「${skinName}」（角色：${key}）没有有效的图片路径，本条已丢弃`);
 		};
 
-		const loadFrom = (obj: Record<string, any>, isTransformed: boolean) => {
-			for (const key in obj) {
-				const val = obj[key];
+		const loadFrom = (obj: unknown, isTransformed: boolean) => {
+			if (!obj || typeof obj !== "object") return;
+			for (const key in obj as Record<string, any>) {
+				const val = (obj as Record<string, any>)[key];
 				if (isTransformed) {
-					if (typeof val === "string") {
-						//@ts-ignore
-						store(key, val, self.getCharacterSkin(key, whichWayFile.removeExt(val))?.path ?? self._skinStore[key]?.[1]);
-					}
-				} else {
-					if (Array.isArray(val) && val.length >= 1 && typeof val[0] === "string") {
-						//路径按皮肤名重新解析：皮肤目录整体迁移后，存档里烙着的旧路径要让位给
-						//本次扫描到的真实路径；解析不到（如本体/其它扩展的皮肤）才沿用原值。
-						store(key, val[0], self.getCharacterSkin(key, whichWayFile.removeExt(val[0]))?.path ?? val[1]);
-					} else if (typeof val === "string") {
-						//@ts-ignore
-						store(key, val, self.getCharacterSkin(key, whichWayFile.removeExt(val))?.path);
-					}
+					if (typeof val === "string") store(key, val, self.getCharacterSkin(key, whichWayFile.removeExt(val))?.path);
+				} else if (Array.isArray(val) && typeof val[0] === "string") {
+					store(key, val[0], val[1]);
+				} else if (typeof val === "string") {
+					//旧格式：本体皮肤配置里直接存皮肤名字符串
+					store(key, val, `image/skin/${key}/${val}.jpg`);
 				}
 			}
 		};
@@ -580,12 +664,40 @@ class WhichWaySkin {
 			tasks.push(...tasks.splice(idx, 1));
 		}
 
-		tasks.forEach(t => t.run());
-
 		try {
-			const full = { ...this._skinStore };
+			tasks.forEach(t => t.run());
+
+			//三处存档里**已经生效**的键必须保留：合并只负责补齐/修正路径，不能把一份存档里
+			//另一份没有的条目（例如玩家在千幻里给本体武将挑的皮肤）顺手清掉。
+			for (const source of [window.whichWaySave?.skinConfig, lib.config.qhly_skinset?.skin]) {
+				if (!source || typeof source !== "object") continue;
+				for (const key in source) {
+					const val = source[key];
+					if (typeof val === "string" && val.length > 0 && !(key in resolved)) {
+						store(key, val, self.getCharacterSkin(key, whichWayFile.removeExt(val))?.path);
+					}
+				}
+			}
+			const current = lib.config.skin;
+			if (current && typeof current === "object") {
+				for (const key in current) {
+					const val = current[key];
+					if (Array.isArray(val) && typeof val[0] === "string" && val[0].length > 0 && !(key in resolved)) {
+						store(key, val[0], val[1]);
+					}
+				}
+			}
+
+			const full: Record<string, [string, string]> = {};
+			for (const [key, val] of Object.entries(this._skinStore)) {
+				//内存里的活引用优先（换肤刚写过、还没合并到的条目）
+				if (Array.isArray(val) && typeof val[0] === "string" && typeof val[1] === "string" && val[1].length > 0) full[key] = val;
+			}
+			Object.assign(full, resolved);
+
 			const simple = this.transformSkinData(full);
 
+			this._skinStore = full;
 			lib.config.skin = full;
 			lib.config.qhly_skinset.skin = simple;
 			window.whichWaySave.skinConfig = simple;
@@ -655,7 +767,8 @@ class WhichWaySkin {
 	}
 
 	/**
-	 * 皮肤数据
+	 * 皮肤数据：干员id → { name, skins: { 皮肤名 → { name: 文件名, path: 绝对路径 } } }
+	 * 由 `initSkinData()`（= `whichWayFile.initSkinFileIndex()`）重建，缓存里存的就是这个形状。
 	 */
 	private skinData: Record<
 		string,

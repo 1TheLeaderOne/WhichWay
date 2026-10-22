@@ -1,5 +1,5 @@
 <template>
-	<div class="container-CC-SJZX" :style="{ backgroundImage: `url('${backgroundUrl}')` }">
+	<div class="container-CC-SJZX" :style="backgroundStyle">
 		<!-- 势力 logo（明日方舟图标反色；没有图标就显示势力文字） -->
 		<div class="camplogo-wrapper">
 			<div class="img-def" :class="{ arknightCamp: camp.useFilter }" :style="camp.logoUrl ? { backgroundImage: `url('${camp.logoUrl}')` } : null">
@@ -162,7 +162,20 @@ const props = defineProps({
 const DEFAULT_BACKGROUND = "ui:background/default.png";
 const background = ref(whichWayUtil.config("characterCardBackground") || DEFAULT_BACKGROUND);
 const shownBackground = ref(background.value);
+
+/**
+ * 背景图是否真的加载得出来。
+ *
+ * 配置里存的可能是**旧目录**下的文件名（`image/background/` 迁移过一次），或者玩家手动改过存档，
+ * 这时 `background-image` 指向一张 404 的图 —— 浏览器什么都不画，整张武将卡就只剩透明底，
+ * 看起来就是「武将卡背景丢了」。加载失败就退回默认背板。
+ */
+const backgroundBroken = ref(false);
 const backgroundUrl = computed(() => whichWayFile.compilePath(shownBackground.value));
+const backgroundStyle = computed(() => {
+	const url = backgroundBroken.value ? whichWayFile.compilePath(DEFAULT_BACKGROUND) : backgroundUrl.value;
+	return { backgroundImage: `url("${url}")` };
+});
 
 /** 当前右侧面板：skill / skin / mode / background / resume */
 const panel = ref("skill");
@@ -284,6 +297,7 @@ async function onSkinChange({ skinName: name, path }) {
 function onBackgroundSelect(value) {
 	if (value === background.value) return;
 	background.value = value;
+	backgroundBroken.value = false;
 	whichWayUtil.saveConfig("characterCardBackground", value);
 	const image = new Image();
 	image.decoding = "async";
@@ -311,6 +325,14 @@ function close() {
 }
 
 onMounted(async () => {
+	//预检一次背景图：配置里的路径可能是旧目录的残留（或玩家改过存档），加载失败就退回默认背板
+	if (shownBackground.value !== DEFAULT_BACKGROUND) {
+		const probe = new Image();
+		probe.onerror = () => {
+			if (shownBackground.value !== DEFAULT_BACKGROUND) backgroundBroken.value = true;
+		};
+		probe.src = backgroundUrl.value;
+	}
 	refreshDynamicSkin();
 	await mountDyc();
 });
