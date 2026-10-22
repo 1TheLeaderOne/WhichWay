@@ -1,16 +1,16 @@
 import { lib as d, get as i, _status as h, game as c, ui as _ } from "noname";
 import { whichWayUtil as P } from "./utill.js";
 import { whichWayTips as G } from "./tips.js";
-import { whichWayToast as Dr } from "./toast.js";
-import { s as de } from "./nonameEx-custom-skill-shared.js";
-import { VideoPlayer as Hr } from "./videoPlayer.js";
+import { whichWayToast as Ur } from "./toast.js";
+import { s as me } from "./nonameEx-custom-skill-shared.js";
+import { VideoPlayer as Xr } from "./videoPlayer.js";
 import { whichWayFile as te } from "./file.js";
-import { onSetDev as Qe, onBeforeInit as Ur } from "./hooks.js";
-import { defineComponent as Xr, ref as nr, onMounted as Br, openBlock as Be, createElementBlock as Ne, createElementVNode as _e, toDisplayString as Je, Fragment as Nr, renderList as Jr, unref as Zr, createApp as Gr } from "vue";
-import { _ as Lr } from "./_plugin-vue_export-helper.js";
-import { g as Ir, d as Ze, a as Fr } from "./packs-base-characterDesigner-shared.js";
-import { whichWayArknight as ir } from "./arknight.js";
-class re {
+import { onSetDev as er, onBeforeInit as Br } from "./hooks.js";
+import { defineComponent as Nr, ref as ir, onMounted as Jr, openBlock as Ne, createElementBlock as Je, createElementVNode as be, toDisplayString as Ze, Fragment as Zr, renderList as Gr, unref as Lr, createApp as Ir } from "vue";
+import { _ as Fr } from "./_plugin-vue_export-helper.js";
+import { g as Vr, d as Ge, a as Wr } from "./packs-base-characterDesigner-shared.js";
+import { whichWayArknight as or } from "./arknight.js";
+class ne {
   constructor() {
     this._generateHooks();
   }
@@ -59,23 +59,23 @@ class re {
   };
   _generateHooks() {
     this._hooks = {}, this._execute = {};
-    for (const t of re._STRING_HOOKS)
+    for (const t of ne._STRING_HOOKS)
       this._hooks[t] = [], this._execute[t] = [], this[t] = ((...e) => {
         this._registerTypedHook(t, e, "string");
       }), this.pendingRun.push(() => this._runHooks(t));
-    for (const t of re._ARRAY_HOOKS)
+    for (const t of ne._ARRAY_HOOKS)
       this._hooks[t] = [], this._execute[t] = [], this[t] = ((...e) => {
         this._registerTypedHook(t, e, "array");
       }), this.pendingRun.push(() => this._runHooks(t));
-    for (const t of re._OBJECT_HOOKS)
+    for (const t of ne._OBJECT_HOOKS)
       this._hooks[t] = [], this._execute[t] = [], this[t] = ((...e) => {
         this._registerTypedHook(t, e, "object");
       }), this.pendingRun.push(() => this._runHooks(t));
-    for (const t of re._FUNCTION_HOOKS)
+    for (const t of ne._FUNCTION_HOOKS)
       this._hooks[t] = [], this._execute[t] = [], this[t] = ((...e) => {
         this._registerTypedHook(t, e, "function");
       }), this.pendingRun.push(() => this._runHooks(t));
-    for (const t of re._CARD_HOOKS) {
+    for (const t of ne._CARD_HOOKS) {
       this._hooks[t] = [], this._execute[t] = [];
       const e = t === "cardTranslate" ? "string" : "object";
       this[t] = ((...a) => {
@@ -167,20 +167,20 @@ ${n[a]}`
   }
   pendingRun = [];
 }
-const pe = new re(), {
+const _e = new ne(), {
   skill: y,
   character: k,
   translate: b,
   characterIntro: v,
-  characterTitle: C,
-  characterReplace: Ar,
-  dynamicTranslate: ne,
+  characterTitle: S,
+  characterReplace: Er,
+  dynamicTranslate: ae,
   card: J,
   cardSkill: F,
   cardTranslate: N,
-  pendingRun: Vr,
-  registerExecute: or
-} = pe;
+  pendingRun: Yr,
+  registerExecute: sr
+} = _e;
 k("acemrfz", { pack: "plotSJZX", sex: "male", group: "luomrfz", hp: 4, maxHp: 6, skills: ["sizhanmrfz", "guanyongmrfz"] });
 y({
   sizhanmrfz: {
@@ -321,9 +321,9 @@ b({
   guanyongmrfz: "冠勇",
   guanyongmrfz_info: "出牌阶段，当你使用的【杀】指定目标时，你弃置其一张牌，若此牌为基本牌，则此【杀】不可被【闪】响应，否则，你摸两张牌，然后本回合使用杀的次数+1（若不处于因【死战】而获得的回合，则至多+2）。"
 });
-C("acemrfz", "<font color='red'>巴别塔之盾</font>");
+S("acemrfz", "<font color='red'>巴别塔之盾</font>");
 v("acemrfz", "罗德岛精英干员Ace，参与切尔诺伯格行动，因掩护博士救援小队撤退而阵亡。</br></br><span class=firetext>罗德岛会铭记您的贡献。</span>");
-const Wr = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Kr = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("aiguozhemrfz", {
@@ -372,7 +372,7 @@ y({
         const z = [], p = (T, j) => {
           const M = z.indexOf(T), q = z.indexOf(j), O = T.link;
           T.link = j.link, j.link = O, T.innerHTML = "<span>" + l(T.link) + "</span>", j.innerHTML = "<span>" + l(j.link) + "</span>", [s[M], s[q]] = [s[q], s[M]], T.classList.remove("bluebg"), j.classList.remove("bluebg");
-        }, x = function() {
+        }, w = function() {
           if (h.dragged || h.justdragged) return;
           if (h.tempNoButton = !0, setTimeout(function() {
             h.tempNoButton = !1;
@@ -386,13 +386,13 @@ y({
         };
         s.forEach((T) => {
           const j = _.create.div(".shadowed.reduce_radius.pointerdiv.tdnode");
-          j.link = T, j.innerHTML = "<span>" + l(T) + "</span>", j.addEventListener(d.config.touchscreen ? "touchend" : "click", x), z.push(j), m.appendChild(j);
+          j.link = T, j.innerHTML = "<span>" + l(T) + "</span>", j.addEventListener(d.config.touchscreen ? "touchend" : "click", w), z.push(j), m.appendChild(j);
         }), g.content.appendChild(m), g.add("  "), g.open();
-        let w = !1;
-        const S = () => {
-          w || (w = !0, f._result || (f._result = {}), f._result.phases2 = s, g.close(), f.control && f.control.close(), c.resume(), h.imchoosing = !1, u && u(!0));
+        let x = !1;
+        const C = () => {
+          x || (x = !0, f._result || (f._result = {}), f._result.phases2 = s, g.close(), f.control && f.control.close(), c.resume(), h.imchoosing = !1, u && u(!0));
         };
-        f.switchToAuto = S, f.control = _.create.control("ok", S), c.pause();
+        f.switchToAuto = C, f.control = _.create.control("ok", C), c.pause();
       };
       r.isMine() ? await new Promise((s) => {
         a(t.phaseList, s);
@@ -411,9 +411,9 @@ b({
   youjimrfz: "游击",
   youjimrfz_info: "锁定技，回合开始时，你选择以任意顺序执行本回合的所有阶段。"
 });
-C("aiguozhemrfz", "永恒行军");
+S("aiguozhemrfz", "永恒行军");
 v("aiguozhemrfz", "摘自PRTS的梗概</br>爱国者，本名博卓卡斯替，整合运动干部，霜星的养父。属于萨卡兹中的古老分支——温迪戈，且是最后一位纯血温迪戈。与凯尔希和特蕾西娅是旧识。曾与赫拉格同为乌萨斯军官，后不幸感染矿石病并隐瞒了病情。因在镇压感染者暴动中误杀自己的儿子格罗瓦兹尔而决定放弃军官身份组成游击队，在乌萨斯的雪原上游走，保护感染者。在雪原上的矿场救下即将被处死的霜星。后在塔露拉的邀请下加入整合运动。对下属整合运动军纪要求十分严格。非常尊敬赫拉格，并与其达成了互不开战的承诺。在守卫切尔诺伯格核心城时固执地与罗德岛发生战斗，最终以自己的阵亡反抗命运。");
-const Yr = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Qr = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("baocunzhemrfz", {
@@ -619,7 +619,7 @@ b({
   shouwangmrfz2: "保存"
 });
 v("baocunzhemrfz", "摘自PRTS的梗概</br>‘保存者’，前人类文明休眠计划的人格模拟，也是特雷弗·弗里斯顿。在4,765,403天的时光中践行着前文明的计划守望者庞大的石棺群，但在漫长的等待与空寂中失去了希望，直到克丽斯腾来访后的对谈让他对泰拉重新燃起了信心，决定以石棺中所有人永远沉睡的代价将最后的前文明能源供给为克丽斯腾突破天空屏障的巨炮。知晓凯尔希的本质，通过“辩论”的方式了解了博士与凯尔希的决心，最后请求凯尔希删去他这万年来的记忆，但在最后一刻被误入的霍尔海雅当作“神明”，被其存储记忆的源石技艺抢救下来，在保存了弗里斯顿最基础记忆的情况下被转制成为罗德岛“自研作业平台”Friston-3。");
-const Kr = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const et = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("ceshimrfz", {
@@ -644,7 +644,7 @@ b({
   ceshiSkillmrfz: "测试",
   ceshiSkillmrfz_info: "测试喵"
 });
-const Qr = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const rt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_002_amiya", { pack: "epicSJZX", sex: "female", group: "luomrfz", hp: 3, skills: ["newtongganmrfz", "shijiemrfz", "qinghemrfz"], isZhugong: !0 });
@@ -783,9 +783,9 @@ b({
   // tongganmrfz_info: "锁定技，每回合每项限三次：①当其他角色从牌堆摸牌后，你摸一张牌；②当其他角色有牌进入弃牌堆后，你弃置一张牌。",
   // tonggan_discardmrfz: "同感",
 });
-C("char_002_amiya", "<font color=#00868B>魔王</font>");
+S("char_002_amiya", "<font color=#00868B>魔王</font>");
 v("char_002_amiya", "阿米娅，罗德岛的公开领袖，在内部拥有最高执行权。虽然，从外表上看起来仅仅是个不成熟的少女，实际上，她却是深受大家信任的合格的领袖。现在，阿米娅正带领着罗德岛，为了感染者的未来，为了让这片大地挣脱矿石病的阴霾而不懈努力。");
-const et = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const tt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_003_kalts", {
@@ -973,9 +973,9 @@ b({
   m3mrfz: "M3",
   m3mrfz_info: "主公技，限定技，当你进入濒死状态时，你可以弃置区域内所有牌并复原武将牌、失去【重构】、减少一点体力上限，将体力恢复至2点，然后其他所有角色选择是否弃置一张牌并令你摸一张牌。"
 });
-C("char_003_kalts", "<font color=rgb(255,45,62)>旧日残影</font>");
+S("char_003_kalts", "<font color=rgb(255,45,62)>旧日残影</font>");
 v("char_003_kalts", "凯尔希，罗德岛高层管理人员之一，罗德岛医疗项目领头人。在冶金工业、社会学、源石技艺、考古学、历史系谱学、经济学、植物学、地质学等领域皆拥有渊博学识。于罗德岛部分行动中作为医务人员提供医学理论协助与应急医疗器械，同时也作为罗德岛战略指挥系统的重要组成人员活跃在各项目中。");
-const rt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const at = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_010_chen", {
@@ -1154,7 +1154,7 @@ b({
   newjingsimrfz_info: "主公技，每回合限一次，你的回合外，当其他角色成为【杀】或【决斗】的唯一目标时且使用者不是你，其可以请求将目标转移至你，若你接受，你摸一张牌并获得一个‘胆’。"
 });
 v("char_010_chen", "陈，龙门高级警司，龙门近卫局特别督察组组长，毕业于维多利亚皇家近卫学校，成绩优异，表现突出。在龙门近卫局供职期间，力主取缔龙门境内非法活动，对抗暴力犯罪和有组织犯罪，追缉武装逃犯与国际重犯等行动，并取得多项重大成果。</br>现作为特别人员协助罗德岛行动，并为现场提供战术指挥支援。");
-const tt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const nt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_017_huang", {
@@ -1269,7 +1269,7 @@ b({
   newfeixuemrfz_info: "当你于回合内使用伤害类牌选择目标后，你可以跳过本回合下个没有被跳过的阶段，然后你摸一张牌且此牌的目标角色需要打出一张【闪】，否则其无法响应此牌。"
 });
 v("char_017_huang", "煌，罗德岛精英干员，在机动作战、歼灭战与突袭作战中体现出了专业的战斗技巧与战术素养。现由阿米娅带领，作为攻坚战的战术核心之一发挥作用。");
-const at = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const it = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1001_amiya2", {
@@ -1381,9 +1381,9 @@ b({
   newjueyingmrfz: "绝影",
   newjueyingmrfz_info: "限定技，任意角色的回合结束时，若本回合有两种颜色的【杀】进入弃牌堆，你可以选择一名你攻击范围内的其他角色，然后你依次视为使用你技能中包含的牌名。"
 });
-C("char_1001_amiya2", "<font color=#00868B>争斗在此止歇</font>");
+S("char_1001_amiya2", "<font color=#00868B>争斗在此止歇</font>");
 v("char_1001_amiya2", "阿米娅，罗德岛的公开领袖，在内部拥有最高执行权。虽然，从外表上看起来仅仅是个不成熟的少女，实际上，她却是深受大家信任的合格的领袖。</br>现在，阿米娅正带领着罗德岛，为了感染者的未来，为了让这片大地挣脱矿石病的阴霾而不懈努力。</br>史载，萨卡兹君王奎隆的佩剑，长度约在0.9到1.2米之间，宽约5厘米，材质不明，通体呈黑色，剑身铭刻萨卡兹传统文字，释作“争斗在此止歇”。");
-const nt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ot = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1012_skadi2", { pack: "legendSJZX", sex: "female", group: "haimrfz", hp: 4, skills: ["newqianximrfz", "haixuanmrfz"] });
@@ -1471,9 +1471,9 @@ b({
   haixuanmrfz: "海漩",
   haixuanmrfz_info: "其他角色的准备阶段，你可以令其对你发动一次【黩武】(若其手牌不足则全弃)，然后你获得其因此弃置的非伤害类牌，若你没有因此获得相同花色的牌，你回复一点体力值。"
 });
-C("char_1012_skadi2", "<font color='#6495ed'>大群</font>");
+S("char_1012_skadi2", "<font color='#6495ed'>大群</font>");
 v("char_1012_skadi2", "照这个方向发展下去，就不会有人关心她究竟是什么了。不是斯卡蒂的问题，一个人也不能改变什么。我说的是，这种生理状态，以及该类生物性物质表现出的最终状态，可能会摧毁我们社会、历史与科学的所有度量衡。希望我们简陋的医疗科研条件现在还够使上点劲......");
-const it = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const st = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1013_chen2", {
@@ -1564,7 +1564,7 @@ b({
   jianfengmrfz_info: "当你使用【杀】结算完成后，你可以进行判定，若为♠，你获得此杀且此杀不计入次数限制。"
 });
 v("char_1013_chen2", "陈，前龙门高级警司，前龙门近卫局特别督察组组长，毕业于维多利亚皇家近卫学校，成绩优异，表现突出。在龙门近卫局供职期间，力主取缔龙门境内非法活动，对抗暴力犯罪和有组织犯罪，追缉武装逃犯与国际重犯等行动，并取得多项重大成果。</br>现辞去职务，正式成为罗德岛的一员。依本人意愿，任务多以外派为主，为各地外派干员提供有力支援以及现场指导。");
-const ot = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ut = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1014_nearl2", {
@@ -1777,24 +1777,24 @@ b({
   zhuguangmrfz2: "逐光",
   zhuguangmrfz3: "逐光"
 });
-C("char_1014_nearl2", "<font color=#00868B>长夜临光</font>");
+S("char_1014_nearl2", "<font color=#00868B>长夜临光</font>");
 v("char_1014_nearl2", "耀骑士临光，卡西米尔耀骑士。在掩护己方队员、机动作战、歼灭战与开阔地带作战中体现出极高的战斗技巧和个人军事素养。</br>在重返卡西米尔并夺得第二十四届骑士特别锦标赛决斗赛冠军之后，留在卡西米尔处理后续事务。作为合作干员为罗德岛驻卡瓦莱利亚基办事处提供战术支援，必要时也会去往其他地区协助本舰展开各项行动。");
-const st = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const lt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), ae = "char_1015_aglna2";
-k(ae, {
+}, Symbol.toStringTag, { value: "Module" })), ie = "char_1015_aglna2";
+k(ie, {
   hp: 3,
   pack: "legendSJZX",
   group: "luomrfz",
   skills: ["feijianmrfz", "zhixingmrfz"],
   sex: "female"
 });
-v(ae, "安洁莉娜，服务于罗德岛的资深信使，足迹遍布迄今为止已知的大多数国家。同时，她也作为资深术师干员，利用其独特的源石技艺为罗德岛提供帮助。");
-C(ae, P.colorize("#y不一样的愿景#"));
-Ar(ae, [ae, "char_291_aglina"]);
+v(ie, "安洁莉娜，服务于罗德岛的资深信使，足迹遍布迄今为止已知的大多数国家。同时，她也作为资深术师干员，利用其独特的源石技艺为罗德岛提供帮助。");
+S(ie, P.colorize("#y不一样的愿景#"));
+Er(ie, [ie, "char_291_aglina"]);
 b({
-  [ae]: "予愿安洁莉娜",
-  [`${ae}_prefix`]: "予愿",
+  [ie]: "予愿安洁莉娜",
+  [`${ie}_prefix`]: "予愿",
   feijianmrfz: "飞笺",
   feijianmrfz_info: "使命技，每种类型的牌限一次，你可以视为使用你手牌中的一张基本牌或普通锦囊牌并将此牌交给一名其他角色，获得此牌的角色选择令你模一张牌或弃置此牌。<br>成功：你因【飞笺】而摸至少两次牌：回复一点体力。",
   feijianmrfz_draw: "invisible"
@@ -1935,7 +1935,7 @@ y({
     }
   }
 });
-const ut = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ft = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1016_agoat2", {
@@ -1988,7 +1988,7 @@ y({
       o.bool && c.broadcastAll(
         function(f, u) {
           var l = function(p) {
-            return p.map((x) => x.length === 0 || typeof x[0] == "string" ? x : x.map((w) => w[2]));
+            return p.map((w) => w.length === 0 || typeof w[0] == "string" ? w : w.map((x) => x[2]));
           }, f = f.slice(1);
           f = l(f), u.storage.lvmengmrfz = {
             beifeng: [],
@@ -2165,9 +2165,9 @@ b({
   rechenmrfz: "热忱",
   rechenmrfz_info: "锁定技，出牌阶段，当你使用的牌和你本回合上一张使用的牌的花色相同，则此牌无次数且无距离限制。"
 });
-C("char_1016_agoat2", "<font color=#DC143C>登山者</font>");
+S("char_1016_agoat2", "<font color=#DC143C>登山者</font>");
 v("char_1016_agoat2", "艾雅法拉，火山学家，天灾信使。近年参与拍摄多部火山纪录片，并参与撰写出版火山相关书籍。现于罗德岛继续接受治疗，并视需求参与包括天灾研究在内的多项活动。");
-const lt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ct = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1019_siege2", {
@@ -2231,12 +2231,12 @@ y({
             h.weinaData[z].result.content,
             h.weinaData[z].result.content.key
           )[0][h.weinaData[z].result.content.key].content;
-          var x = c.createEvent("weinaNext");
-          x.player = m, x.name = z, x.weinaData = {
+          var w = c.createEvent("weinaNext");
+          w.player = m, w.name = z, w.weinaData = {
             num: h.weinaData[z].random.num.num(f, m),
             name: h.weinaData[z].random.name,
             phase: h.weinaData[z].random.phase
-          }, x.setContent(p);
+          }, w.setContent(p);
         },
         ai: {
           threaten: 0.8
@@ -2320,9 +2320,9 @@ b({
   wangximrfz: "王息",
   wangximrfz_info: "当你或与你距离为1的角色受到伤害时，你可以失去一个技能，令受伤角色摸两张牌并令此伤害无效。"
 });
-C("char_1019_siege2", "<font color=#C0C0C0>再缔荣光</font>");
+S("char_1019_siege2", "<font color=#C0C0C0>再缔荣光</font>");
 v("char_1019_siege2", "维娜·维多利亚,最初以格拉斯哥帮头领身份登记为罗德岛干员的推进之王，于伦蒂尼姆战争期间又以典范军领袖身份与罗德岛协同行动，现在则以伦蒂尼姆议会议长身份，和罗德岛保持合作关系。罗德岛为伦蒂尼姆的医疗建设提供了支持，维娜·维多利亚也承诺未来将在更多领域与罗德岛展开合作。");
-const ft = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const gt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1020_reed2", { pack: "legendSJZX", sex: "female", group: "shenmrfz", hp: 3, skills: ["gongximrfz", "huamianmrfz"] });
@@ -2481,8 +2481,8 @@ b({
   newminghuomrfz_info: "锁定技，每回合限一次，当有角色因你而脱离濒死状态后，或有角色因你回复体力值后体力值与体力上限相等，你于此回合结束后执行一个额外的回合。"
 });
 v("char_1020_reed2", "苇草，驻留罗德岛的维多利亚南部办事处期间，曾提出撤离申请，近期再次成功与罗德岛建立联络。目前正以深池名义带领小股部队在维多利亚境内活动，以救助被暴力胁迫的塔拉人为主要行动目标。");
-C("char_1020_reed2", P.colorize("#b止戈铸犁#"));
-const ct = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+S("char_1020_reed2", P.colorize("#b止戈铸犁#"));
+const dt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1022_flwr2", {
@@ -2624,9 +2624,9 @@ b({
   biaodaomrfz: "镳道",
   biaodaomrfz_info: "锁定技。<br>①你视为拥有【岸然】;<br>②当你失去一张牌后，若你的手牌数小于首次成为【诱嗔】的角色，你重置【岸然】，且其须令你与其获得一点护甲或互相计算与对方的距离+1（至多为3）。"
 });
-C("char_1022_flwr2", "<font color = green>百里香</font>");
+S("char_1022_flwr2", "<font color = green>百里香</font>");
 v("char_1022_flwr2", "调香师莱娜，在与博士和罗德岛医疗部沟通后，将疗养庭院暂时交予干员波登可负责，并主动申请外派至米诺斯地区，担任新建立的雅赛努斯办事处的负责人，为当地建立感染者医疗体系。");
-const gt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const mt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1023_ghost2", {
@@ -2764,9 +2764,9 @@ b({
   shensuimrfz: "深邃",
   shensuimrfz_info: "锁定技，当你流失至少两点体力后，若你没有护甲，你获得等量的护甲；每轮开始时，若你的【拥我】为阴，则你转化之"
 });
-C("char_1023_ghost2", "<font color=#00868B>未尽之美</font>");
+S("char_1023_ghost2", "<font color=#00868B>未尽之美</font>");
 v("char_1023_ghost2", "幽灵鲨，本名劳伦缇娜，阿戈尔军事团体“深海猎人”成员，在对抗大型生物与破坏硬目标等行动中展现出极强的技巧。</br>“愚人号”事件后，其精神状态趋于稳定，记忆恢复，情绪趋于稳定。");
-const dt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ht = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1024_hbisc2", {
@@ -2877,9 +2877,9 @@ b({
   zhuoxinmrfz: "濯心",
   zhuoxinmrfz_info: "准备阶段，你可以视为对所有与你距离不大于2的其他角色使用一张【推心置腹】。"
 });
-C("char_1024_hbisc2", "<font color='#db7093'>无名之花</font>");
+S("char_1024_hbisc2", "<font color='#db7093'>无名之花</font>");
 v("char_1024_hbisc2", "芙蓉，经过系统的医疗理论培训以及长时间的临床实践训练后，已经由实习医生转为正式医疗干员，并且成为了医疗部的主治医师之一。芙蓉不仅在医疗外勤任务上有相当丰富的经验，在健康管理以及病后护理的理论研究方面也颇有建树。");
-const mt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const zt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1026_gvial2", {
@@ -3050,7 +3050,7 @@ b({
   juximrfz2: "锯袭"
 });
 v("char_1026_gvial2", "嘉维尔，现在仍是罗德岛医疗部的一员，但在罗德岛需要她发挥自己的战斗力而非医学素养的时候，她也会拿起战斧，冲锋陷阵。");
-const ht = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const pt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1028_texas2", {
@@ -3125,9 +3125,9 @@ b({
   laoyingmrfz: "烙印",
   laoyingmrfz_info: "出牌阶段限一次，当你使用的牌造成伤害后，你可以获得此牌，若此牌是基本牌，本回合你使用【杀】的次数+1，反之，本回合你使用的下一张普通锦囊牌不可响应。"
 });
-C("char_1028_texas2", "<font color=rgb(255,25,22)>破斩桎梏</font>");
+S("char_1028_texas2", "<font color=rgb(255,25,22)>破斩桎梏</font>");
 v("char_1028_texas2", "缄默德克萨斯，企鹅物流员工，最后的德克萨斯家族成员，单兵作战能力出类拔萃。罗德岛的老朋友。当德克萨斯带着后来成为伺夜与斥罪的两人踏入罗德岛时，许多人都是震惊的。毕竟，从着装上就能判断，不必说伺夜与斥罪，光是她的身上，就散发着浓厚的叙拉古气息。她回叙拉古了。对她有所了解的干员，对于这个结论都有些惊疑不定，毕竟，关于德克萨斯的一个共识是——她和叙拉古有关，但没有人知道她的过去是怎样的。所幸，紧跟其后的企鹅物流众人打消了这种疑虑。毕竟，有关德克萨斯的另一个共识是——只要和企鹅物流在一起，她就始终是那个德克萨斯。当然，等到众人得知，德克萨斯在叙拉古经历了什么，并且又为罗德岛带来了怎样的两位人物后，一个新的共识诞生了——德克萨斯真可怕。");
-const zt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const _t = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1029_yato2", {
@@ -3264,7 +3264,7 @@ b({
   luanwumrfza: "乱舞"
 });
 v("char_1029_yato2", "<span class=firetext>联动：怪物猎人</span></br>夜刀，经过短暂的治疗后，从东国回到岗位，继续履行罗德岛A4行动组组长的职责。换上了由艾露猫打造的全新装备，她将会承担更多高难度的攻坚行动，而她的意志也比以往都要强大。");
-const pt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const bt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_102_texas", {
@@ -3412,7 +3412,7 @@ b({
   sudimrfz_info: "每轮开始时，你可以摸两张牌并将这两张牌分配给任意角色。"
 });
 v("char_102_texas", "德克萨斯，企鹅物流员工，单兵作战能力出类拔萃。</br>于合约期内任企鹅物流驻罗德岛联络人员，同时为罗德岛的多项行动提供协助。");
-const _t = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const kt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1030_noirc2", {
@@ -3487,7 +3487,7 @@ y({
     },
     // @ts-ignore
     async content(r, t, e) {
-      e.when("useCardAfter").filter((w, S) => w.card === t.card).then(async (w, S, T) => {
+      e.when("useCardAfter").filter((x, C) => x.card === t.card).then(async (x, C, T) => {
         T.removeMark("lianqimrfz", 1);
       });
       let a = d.config.sjzxDenglongData || {
@@ -3510,13 +3510,13 @@ y({
         height: 0,
         bodyRect: null,
         init() {
-          const w = this.element.getBoundingClientRect(), S = document.body.getBoundingClientRect();
-          this.x = w.left, this.y = w.top, this.width = w.width, this.height = w.height, this.bodyRect = S, this.dx = (Math.random() * 3 + 0.5) * (Math.random() > 0.5 ? 1 : -1), this.dy = (Math.random() * 3 + 0.5) * (Math.random() > 0.5 ? 1 : -1);
+          const x = this.element.getBoundingClientRect(), C = document.body.getBoundingClientRect();
+          this.x = x.left, this.y = x.top, this.width = x.width, this.height = x.height, this.bodyRect = C, this.dx = (Math.random() * 3 + 0.5) * (Math.random() > 0.5 ? 1 : -1), this.dy = (Math.random() * 3 + 0.5) * (Math.random() > 0.5 ? 1 : -1);
         },
         update() {
           this.x += this.dx, this.y += this.dy, (this.x <= 0 || this.x + this.width >= this.bodyRect.width) && (this.dx *= -1, this.x = Math.max(0, Math.min(this.x, this.bodyRect.width - this.width))), this.y <= 0 && (this.dy *= -1, this.y = 0);
-          const w = 1.2 * (this.bodyRect.height - u.getBoundingClientRect().y);
-          this.y + this.height >= this.bodyRect.height - w && (this.dy *= -1, this.y = this.bodyRect.height - this.height - w), this.element.style.left = `${this.x}px`, this.element.style.top = `${this.y}px`;
+          const x = 1.2 * (this.bodyRect.height - u.getBoundingClientRect().y);
+          this.y + this.height >= this.bodyRect.height - x && (this.dy *= -1, this.y = this.bodyRect.height - this.height - x), this.element.style.left = `${this.x}px`, this.element.style.top = `${this.y}px`;
         }
       }, f = {
         element: u,
@@ -3531,40 +3531,40 @@ y({
         clickCount: 0,
         hasMoved: !1,
         //@ts-ignore
-        init(w = this.element) {
-          this.element = w, this.x = this.element.offsetLeft, this.y = this.element.offsetTop;
-          function S(T) {
+        init(x = this.element) {
+          this.element = x, this.x = this.element.offsetLeft, this.y = this.element.offsetTop;
+          function C(T) {
             const j = T.clientX - f.element.offsetWidth / 2, M = T.clientY - f.element.offsetHeight / 2;
             f.setTarget(j, M);
           }
-          this.listen.push(S), setTimeout(function() {
-            document.addEventListener("click", S);
+          this.listen.push(C), setTimeout(function() {
+            document.addEventListener("click", C);
           }, 1e3);
         },
-        setTarget(w, S) {
-          this.targetX = w, this.targetY = S, this.moving = !0, this.startTimestamp = null;
+        setTarget(x, C) {
+          this.targetX = x, this.targetY = C, this.moving = !0, this.startTimestamp = null;
         },
         update() {
           if (!this.moving || this.targetX === null || this.targetY === null)
             return;
-          const w = performance.now();
-          this.startTimestamp || (this.startTimestamp = w);
-          const S = w - this.startTimestamp, T = Math.min(S / this.duration, 1), j = this.x, M = this.y;
+          const x = performance.now();
+          this.startTimestamp || (this.startTimestamp = x);
+          const C = x - this.startTimestamp, T = Math.min(C / this.duration, 1), j = this.x, M = this.y;
           this.x += (this.targetX - this.x) * T, this.y += (this.targetY - this.y) * T, this.element.style.left = `${Math.round(this.x)}px`, this.element.style.top = `${Math.round(this.y)}px`, (Math.abs(this.x - j) > 1 || Math.abs(this.y - M) > 1) && (this.hasMoved = !0), T >= 1 && (this.moving = !1, this.startTimestamp = null, this.hasMoved && (this.clickCount++, this.hasMoved = !1));
         }
       };
       f.init(), l.init(), p();
       function g() {
-        a.total++, o.show(), e.show(), s.delete(), u.delete(), f.listen.forEach((w) => {
-          document.removeEventListener("click", w);
+        a.total++, o.show(), e.show(), s.delete(), u.delete(), f.listen.forEach((x) => {
+          document.removeEventListener("click", x);
         }), c.resume();
       }
       function m() {
         g(), a.success++, t.getParent().effectCount++, e.say("黑龙歼灭刀大人登龙成功！其他武器原地纳刀敬礼！");
       }
       function z() {
-        const w = f.element, S = l.element;
-        return x(w, S);
+        const x = f.element, C = l.element;
+        return w(x, C);
       }
       function p() {
         if (f.update(), l.update(), z()) {
@@ -3572,13 +3572,13 @@ y({
           return;
         }
         if (f.clickCount >= 1) {
-          g(), c.saveConfig("sjzxDenglongData", a), e.say("力竭倒下"), Dr.showToast("🦐太刀侠", 2e3), n !== 0 && n <= 0.5 && o.chat("玩太刀玩的");
+          g(), c.saveConfig("sjzxDenglongData", a), e.say("力竭倒下"), Ur.showToast("🦐太刀侠", 2e3), n !== 0 && n <= 0.5 && o.chat("玩太刀玩的");
           return;
         }
         requestAnimationFrame(p);
       }
-      function x(w, S) {
-        const T = w.getBoundingClientRect(), j = S.getBoundingClientRect();
+      function w(x, C) {
+        const T = x.getBoundingClientRect(), j = C.getBoundingClientRect();
         return !(T.top > j.bottom || T.bottom < j.top || T.right < j.left || T.left > j.right);
       }
     }
@@ -3618,9 +3618,9 @@ b({
   juhemrfz: "居合",
   juhemrfz_info: "当其他角色使用的牌被你抵消后，你获得一个“气刃”标记，然后你可以视为对被抵消牌的角色使用一张【杀】。"
 });
-C("char_1030_noirc2", "<font color = #a52a2a>太刀天尊</font>");
+S("char_1030_noirc2", "<font color = #a52a2a>太刀天尊</font>");
 v("char_1030_noirc2", "从东国完成任务归来的黑角，换上了由艾露猫打造的全新装备。尽管放下盾牌，挥舞起威风凛凛的太刀，黑角仍是那个最值得大家信赖的依靠，冲在最前线为队友扫清障碍。");
-const bt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const yt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1031_slent2", {
@@ -3822,9 +3822,9 @@ b({
   renbenmrfz3: "人本",
   dizhumrfzx: "夜灯"
 });
-C("char_1031_slent2", "<font color=#4EEE94>伦理坚守者</font>");
+S("char_1031_slent2", "<font color=#4EEE94>伦理坚守者</font>");
 v("char_1031_slent2", "赫默，《特里蒙科学伦理联合宣言》发起人，莱茵生命总辖构件科执行顾问，在医疗事务方面与罗德岛展开了深度合作。</br>本人拥有丰富的医学临床经验，在罗德岛接受矿石病相关治疗的同时，为罗德岛提供医学支持。");
-const kt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const vt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1032_excu2", {
@@ -4014,9 +4014,9 @@ b({
   shengcaimrfz: "圣裁",
   shengcaimrfz_info: "①出牌阶段限一次，当你使用一张带有伤害类标签的牌选择目标后，若你本回合使用过带有伤害类标签的牌，你可以令该牌的造成的伤害+1。</br>②回合结束时，你可以对本回合受到过伤害的角色造成一点伤害。"
 });
-C("char_1032_excu2", "<font color=#f1ca13>圣徒</font>");
+S("char_1032_excu2", "<font color=#f1ca13>圣徒</font>");
 v("char_1032_excu2", "送葬人，拉特兰公证所法定专业执行者，适用于拉特兰一至十三项公民权益，由现任拉特兰教宗伊万杰利斯塔十一世亲自授予“圣徒”封号。</br>拉特兰并未限制这位特殊的“圣徒”与我们的接触，公证所与罗德岛的合作关系正日趋紧密。干员送葬人现仍旧依合约为罗德岛提供服务，执行拉特兰公民权益相关任务。");
-const yt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const xt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1033_swire2", {
@@ -4224,9 +4224,9 @@ b({
   mianzaimrfz: "免灾",
   mianzaimrfz_info: "锁定技，当你进入濒死阶段时，你展示牌堆顶6张牌，若其点数之和不大于你累计使用的牌的点数之和，你将体力回复至3点，手牌补至3张，然后重置你累计使用的牌的点数之和。"
 });
-C("char_1033_swire2", "<font color=#e44997>万民安生</font>");
+S("char_1033_swire2", "<font color=#e44997>万民安生</font>");
 v("char_1033_swire2", "诗怀雅，龙门近卫局局长。</br>于汐斯塔度假归来，目前仅以私人身份视情况为罗德岛工作提供协助。</br>龙门近卫局委任状</br>经会议决定，兹任命碧翠克斯·施怀雅为近卫局局长。</br>望日后长定龙门，护一方平安，万民安生。</br>此状</br>龙门总督魏彦吾</br></br>诗怀雅捏着这张薄薄的委任状，郑重地收进抽屉里。纸张之轻、之薄，字之简约，在她手中却仿佛重若千钧。");
-const vt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const wt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1034_jesca2", {
@@ -4436,7 +4436,7 @@ b({
   weihumrfz_info: "①锁定技，每轮开始时，若你没有护甲，你获得一点护甲；当你有护甲时，手牌上限+1。②出牌阶段结束时，你可以失去至少一点护甲，然后令等量+1名没有护甲的其他角色获得一点护甲。"
 });
 v("char_1034_jesca2", "杰西卡·布林雷，因私人原因离开黑钢基地后，选择去往拓荒地，成为了一名治安官。现作为当地办事处的合作干员为罗德岛提供帮助与支持。");
-const xt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const St = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1035_wisdel", {
@@ -4582,9 +4582,9 @@ b({
   shezumrfz: "射祖",
   shezumrfz_info: "当你不因此技能造成伤害后，你可以弃置一张‘死魂灵’，然后选择一名与受伤角色距离不大于3的角色（不能是你或受伤角色），对其造成一点火焰伤害。"
 });
-C("char_1035_wisdel", "<font color=#00868B>卡兹戴尔的黎明</font>");
+S("char_1035_wisdel", "<font color=#00868B>卡兹戴尔的黎明</font>");
 v("char_1035_wisdel", '<span style="text-decoration:line-through">丁真戴尔</span>维什戴尔，萨卡兹雇佣兵领袖W，现正式更名为维什戴尔。于伦蒂尼姆战争期间，与罗德岛伦蒂尼姆特别行动队紧密合作，数度阻遏军事委员会的行动。<br>【权限记录】<br>我们紧急更新了与维什戴尔的战略合作条款，具体条目您可以考虑是否亲自一一核对。您一定已经很清楚，我们未来与她的合作只会越来越紧密。这绝不仅仅关乎她自己。');
-const wt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ct = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1036_fang2", {
@@ -4713,7 +4713,7 @@ b({
   zhishoumrfz_info: "你的回合[内/外]，你可以将本轮出牌阶段内获得的牌当作[【杀】/【闪】]使用或打出，当你不于摸牌阶段获得牌后，你本轮杀的使用次数+1（不可叠加）。"
 });
 v("char_1036_fang2", "芬，经历刻苦训练与多次外勤任务后，芬如愿通过考核，成为罗德岛正式干员。她在历练中磨练了自己的心智和能力，掌握了战场指挥的要点和一线工作必需的沟通技巧。面对危机时，芬已不再急躁，她有足够的能力和耐心解决问题。");
-const St = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const jt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1037_amiya3", {
@@ -4816,9 +4816,9 @@ b({
   cibeimrfz: "慈悲",
   cibeimrfz_info: "当你失去除手牌区以外的牌后，你可以令一名攻击范围内的角色或你回复一点体力或摸一张牌。"
 });
-C("char_1037_amiya3", "<font color=#00868B>万千愿景</font>");
+S("char_1037_amiya3", "<font color=#00868B>万千愿景</font>");
 v("char_1037_amiya3", '罗德岛的公开领袖，在内部拥有最高执行权。虽然，从外表上看起来仅仅是个不成熟的少女，实际上，她却是深受大家信任的合格的领袖。<br>现在，阿米娅正带领着罗德岛，为了感染者的未来，为了让这片大地挣脱矿石病的阴霾而不懈努力。<br>"但有时，我也会想，这艘船是否能在某一天......实现殿下的愿望。"');
-const Ct = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Tt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1038_whitw2", { pack: "legendSJZX", sex: "female", group: "xumrfz", hp: 3, skills: ["shilangmrfz", "toulangmrfz", "kuanglangmrfz"] });
@@ -5009,9 +5009,9 @@ b({
   kuanglangmrfz: "狂狼",
   kuanglangmrfz_info: "你可以将场上或明置的牌当作一张基本牌或单一目标的普通锦囊使用。"
 });
-C("char_1038_whitw2", "<font color='#8b008b'>恣意英杰</font>");
+S("char_1038_whitw2", "<font color='#8b008b'>恣意英杰</font>");
 v("char_1038_whitw2", "拉普兰德，无业，叙拉古萨卢佐家族现任家主阿尔贝托的独女，目前已从家族脱离。拉普兰德擅长单兵作战，经常在战术攻坚与肃清作战中为罗德岛提供协助。");
-const jt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Mt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1039_thorn2", {
@@ -5193,9 +5193,9 @@ b({
   fanyangmrfz: "帆扬",
   fanyangmrfz_info: "当你受到一点伤害后，你可以弃置一张牌，然后直到你的回合结束时，[你/其他角色]计算与[其他角色/你]的距离[-1/+1]。"
 });
-C("char_1039_thorn2", "<font color='#00008b'>帆扬海疆</font>");
+S("char_1039_thorn2", "<font color='#00008b'>帆扬海疆</font>");
 v("char_1039_thorn2", "棘刺，前罗德岛前线作战干员，如今以独立探险船兼科考船兼捕鳞船兼货运船兼海盗船——宝宝摇篮号船长的身份，与罗德岛保持合作关系。罗德岛定期为宝宝摇篮号提供医疗与物资支持，棘刺则为罗德岛提供诸多与海洋相关的便利，以及接触伊比利亚土地上许多不受审判庭管辖的偏远聚落的渠道。");
-const Tt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Pt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_103_angel", {
@@ -5270,7 +5270,7 @@ b({
   guozaimrfz_info: "出牌阶段限一次，你可以展示牌堆顶X+1张牌，然后选择一名其他角色，对其使用其中的【杀】，你可以获得其中一张不是【杀】的牌，然后你弃置剩余的牌。（X=你的体力上限）"
 });
 v("char_103_angel", "能天使，拉特兰公民，适用拉特兰一至十三项公民权益。企鹅物流公司成员。从事秘密联络，武装押运等非公开活动，推测身份：信使。于合约期内任企鹅物流驻罗德岛联络人员，同时为罗德岛多项行动提供协助。");
-const Mt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const At = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1040_blaze2", {
@@ -5476,9 +5476,9 @@ b({
   liaoyuanmrfz: "燎原",
   liaoyuanmrfz_info: "出牌阶段限一次，你可以流失一点体力并视为使用一张目标数+X的【火攻】，且当此牌结算完毕后，若此牌造成伤害，你获得所有角色手牌区中因此牌展示的牌，然后你可以将其中任意张牌当作指定等量目标的【火·万箭齐发】使用。（X=你已损失的体力值，至少为1）"
 });
-C("char_1040_blaze2", "<font color='red'>燎原之愿</font>");
+S("char_1040_blaze2", "<font color='red'>燎原之愿</font>");
 v("char_1040_blaze2", "本名顾烛煌，代号煌，罗德岛精英干员，其施放的法术在破坏力与攻击范围上均达较高标准。兼任近卫干员与术师干员，在攻坚、防守、突袭等多种类型的作战任务中，作为战术核心之一发挥作用。");
-const Pt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const qt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1041_angel2", { pack: "legendSJZX", sex: "female", group: "lamrfz", hp: 3, skills: ["youhuomrfz", "letianmrfz"] });
@@ -5558,9 +5558,9 @@ b({
   letianmrfz: "乐天",
   letianmrfz_info: "锁定技，任意角色回合结束时，若你所有手牌与本回合开始时的手牌交集为空集，你将手牌补至4张。"
 });
-C("char_1041_angel2", "<font color='#6495ed'>圣城趣事通</font>");
+S("char_1041_angel2", "<font color='#6495ed'>圣城趣事通</font>");
 v("char_1041_angel2", "能天使，拉特兰公民，适用拉特兰一至十三项公民权益。在合约期间，于秘密联络、武装押运等多项行动中为罗德岛提供帮助。现应本人要求，将其登记的合作身份更新为：企鹅物流资深员工，拉特兰新创物流公司“苹果派物流”老板。");
-const At = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Et = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1042_phatm2", {
@@ -5779,9 +5779,9 @@ b({
   zhanwangmrfz: "谵妄",
   zhanwangmrfz_info: "锁定技，你始终成为你使用的普通锦囊和基本牌的目标;当你成为伤害类牌的目标时，你本回合手牌上限+1（可叠加）。"
 });
-C("char_1042_phatm2", "<font color='#124FFF'>戏中人</font>");
+S("char_1042_phatm2", "<font color='#124FFF'>戏中人</font>");
 v("char_1042_phatm2", "酒神，曾以独立刺客的身份受雇于罗德岛，担任特种干员。结束蓝卡坞的拍摄归来时，干员傀影已经实现自己最早来罗德岛的目的。在同博士协商后，他决定继续保留与罗德岛的合作关系，在游历泰拉的旅程中，以辅助干员的身份为落脚地附近的办事处提供相应支持。");
-const qt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Rt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1043_leizi2", {
@@ -5893,11 +5893,11 @@ b({
   zhengningmrfz: "震佞",
   zhengningmrfz_info: "结束阶段，你可以弃置任意张【影】、横置至多等量角色并摸等量张牌，然后你令一名被横置的角色进行判定，若你手牌中有与判定牌花色相同的牌，你可以弃置之并对其造成一点雷属性伤害，若其受到伤害，你可以重复此流程。"
 });
-C("char_1043_leizi2", "<font color = #6495ed>行道修远</font>");
+S("char_1043_leizi2", "<font color = #6495ed>行道修远</font>");
 v("char_1043_leizi2", "麟青砚，曾官居炎国大理寺少卿，现已辞去官职，回到天师府研修雷法。游历途中暂居罗德岛，参与部分外勤任务。");
-const Et = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ot = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), be = window.whichWaySave.tmpSave;
+}, Symbol.toStringTag, { value: "Module" })), ke = window.whichWaySave.tmpSave;
 k("char_1044_hsgma2", {
   pack: "legendSJZX",
   sex: "female",
@@ -5922,7 +5922,7 @@ y({
     init(r) {
       r._hp = r.hp, r._maxHp = r.maxHp;
       let t = !1, e = !1;
-      de.defineAccessor(
+      me.defineAccessor(
         r,
         ["hp", "maxHp"],
         //@ts-ignore
@@ -5949,9 +5949,9 @@ y({
     updateHp(r) {
       let t = r.countMark("wozhimrfz");
       const e = r.querySelector(".hp");
-      let a = r.querySelector(".hpClone") || be.spxingxiong_clone;
+      let a = r.querySelector(".hpClone") || ke.spxingxiong_clone;
       if (a?.children?.length !== r.maxHp && a) {
-        a.remove(), delete be.spxingxiong_clone, d.skill.wozhimrfz.updateHp(r);
+        a.remove(), delete ke.spxingxiong_clone, d.skill.wozhimrfz.updateHp(r);
         return;
       }
       if (r.hp <= 0) {
@@ -5960,7 +5960,7 @@ y({
           u.style.zIndex = "114514", u.dataset.condition = "low";
           for (let l = 0; l < r.maxHp; l++)
             _.create.div(u);
-          a = u, be.spxingxiong_clone = a;
+          a = u, ke.spxingxiong_clone = a;
         }
         e.style.display = "none";
         let o = Array.from(a.childNodes);
@@ -5968,7 +5968,7 @@ y({
         for (let s = 0; s < o.length; s++)
           s < t ? o[s].classList.remove("lost") : o[s].classList.add("lost");
       } else
-        e.style.display = "", a !== void 0 && (a.remove(), delete be.spxingxiong_clone), r.update();
+        e.style.display = "", a !== void 0 && (a.remove(), delete ke.spxingxiong_clone), r.update();
     },
     filter(r, t) {
       return t.hp <= 0 && r.num < 0;
@@ -6182,9 +6182,9 @@ b({
   zhanyemrfz: "斩业",
   zhanyemrfz_info: "使命技，锁定技。<br>①游戏开始时，你令一名其他角色获得“业”标记。<br>②你对有“业”标记的角色使用牌无次数和距离限制。<br>成功：当你对有“业”标记的角色造成伤害后，若其体力值为1，你修改“我执”和“鬼势”;<br>失败：当有角色死亡时，你执行5次“视为对除你之外体力值最小的角色使用一张【杀】”，然后你失去两点体力上限。"
 });
-C("char_1044_hsgma2", "<font color = #a52a2a>斩金执义</font>");
+S("char_1044_hsgma2", "<font color = #a52a2a>斩金执义</font>");
 v("char_1044_hsgma2", "星熊，现任龙门近卫局特别督察组组长。仍作为重装干员协助罗德岛行动，主要职能维持不变。<br>顺带一提，在星熊向博士讲述了她早年在东国度过的时光，并默许博士将其中一部分转述给我们之后，我们调整了她基础档案中战斗经验的时间。");
-const Rt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const $t = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1045_svash2", {
@@ -6378,9 +6378,9 @@ b({
   muzhimrfz: "幕治",
   muzhimrfz_info: "锁定技，牌堆底4张牌始终对你可见。你可以如手牌般使用或打出牌堆底4张牌中弃牌堆中有的牌名。"
 });
-C("char_1045_svash2", "<font color = blue>变革已致</font>");
+S("char_1045_svash2", "<font color = blue>变革已致</font>");
 v("char_1045_svash2", "恩希欧迪斯，喀兰贸易公司前董事长，希瓦艾什家族现任族长。在经济贸易、国际政治、外交手腕与战术策划上有独到见解。<br>鉴于其身份的极端特殊性以及谢拉格如今复杂的局势，建议谨慎选择与其合作的姿态以杜绝额外风险。");
-const Ot = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Dt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1046_sbell2", {
@@ -6445,7 +6445,7 @@ y({
         });
         for (let l = 0; l < u.length; l++) {
           let f = u[l];
-          f.addPromptSJZX(`第${l + 1}张`), de.invisableJiZhan(f, n);
+          f.addPromptSJZX(`第${l + 1}张`), me.invisableJiZhan(f, n);
         }
         n.directgains(u, null, "shengweimrfz_pile");
       }
@@ -6613,9 +6613,9 @@ b({
   fulingmrfz: "覆岭",
   fulingmrfz_info: "每轮开始时，你可以摸至多三张牌，且本轮至多执行下列等量项，若本轮结束时，执行下列选项的数量少于你摸的牌数，你失去一点体力：<br>1.你本轮首次对其他角色造成伤害后：发动一次【放逐】;<br>2.你本轮首次使用装备牌后：发动一次【兴学】;<br>3.你本轮没有因弃置而失去过牌：发动一次【晏如】。"
 });
-C("char_1046_sbell2", "<font color = blue>雪镜归心</font>");
+S("char_1046_sbell2", "<font color = blue>雪镜归心</font>");
 v("char_1046_sbell2", "初雪，谢拉格出身，喀兰圣女，全谢拉格的宗教领袖。在谢拉格的发展与变革历程中扮演着重要的角色，如今正着手建设谢拉格境内的基础教育系统。据部分信息报告，其在谢拉格境内曾成功驱散过一场即将降临的天灾。");
-const $t = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ht = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1047_halo2", {
@@ -6756,9 +6756,9 @@ b({
   sulimrfz: "溯理",
   sulimrfz_info: "出牌阶段，你可以弃置至多两张本阶段未以此法弃置过的类型的牌,#r并执行下列选项:<br>1.#若弃置的牌类型均不为你手牌中唯一最多的类型,你摸X张牌#r;<br>2.若你因此失去了所有的手牌，你修改“迂理”、减少一点体力上限并删除本技能所有红色的描述#。（X=你手牌中没有的类型的数量）"
 });
-C("char_1047_halo2", "<font color = green>溯光求源</font>");
+S("char_1047_halo2", "<font color = green>溯光求源</font>");
 v("char_1047_halo2", "莱茵生命能量科研究员，埃琳娜·乌比卡博士，如今作为谢拉格观测站的能量组组长活跃在研究一线。谢拉格天灾事件的主要调查者之一。");
-const Dt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ut = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1048_orchd2", {
@@ -6769,7 +6769,7 @@ k("char_1048_orchd2", {
   hp: 3,
   pack: "legendSJZX"
 });
-C("char_1048_orchd2", "<font color = #2718c7>幽静射手</font>");
+S("char_1048_orchd2", "<font color = #2718c7>幽静射手</font>");
 v("char_1048_orchd2", "梓兰，行动预备组A6的队长，罗德岛人事部办公室年度人物，舰内时尚杂志《Orchid》创办人。经由本人的申请，现变更为狙击干员。在保留了战场辅助能力的同时，于进攻性方面也有了长足的进步。不仅如此，在执行各项任务期间，还会时常主动提出一些建设性意见。");
 b({
   char_1048_orchd2: "焰狐龙梓兰",
@@ -6786,7 +6786,7 @@ y({
       player: "useCardAfter"
     },
     filter(r, t) {
-      const e = sr(t, r);
+      const e = ur(t, r);
       return e && e.card && !i.tag(e.card, "damage");
     },
     frequent: !0,
@@ -6808,7 +6808,7 @@ y({
       player: "useCard"
     },
     filter(r, t, e, a) {
-      const n = sr(t, r), { targets: o, card: s } = r;
+      const n = ur(t, r), { targets: o, card: s } = r;
       return !n || !n.card || i.tag(n.card, "damage") > 0 ? !1 : s && i.tag(s, "damage") && o.length > 0 && o.some((u) => u.countCards("h") > 0);
     },
     async cost(r, t, e) {
@@ -6866,11 +6866,11 @@ y({
     }
   }
 });
-function sr(r, t) {
+function ur(r, t) {
   let e = r.getAllHistory("useCard"), a;
   return t ? a = e.indexOf(t) - 1 : a = e.length - 1, a >= 0 ? e[a] : !1;
 }
-const Ht = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Xt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1049_catap2", {
@@ -6880,7 +6880,7 @@ k("char_1049_catap2", {
   hp: 4,
   pack: "epicSJZX"
 });
-C("char_1049_catap2", "<font color = blue>兴之所至</font>");
+S("char_1049_catap2", "<font color = blue>兴之所至</font>");
 v("char_1049_catap2", "空爆，行动预备组A6成员，在本人意愿下变更为近卫干员，并展现出极强的近身搏斗和使用重型近战武器的天赋。在A6小队的日常任务之外，她也常以个人名义参与各种需要前往险地的外勤任务。<br>大家都说那个过去总是喜欢偷懒耍滑头的空爆完全变了，对于这种评价，她不置可否。");
 b({
   char_1049_catap2: "雷狼龙S空爆",
@@ -6951,7 +6951,7 @@ y({
       player: "useCardEnd"
     },
     filter(r, t, e, a) {
-      return Ut(t) % 3 === 0 && i.name(r.card) === "sha";
+      return Bt(t) % 3 === 0 && i.name(r.card) === "sha";
     },
     intro: {
       content(r, t, e) {
@@ -6995,10 +6995,10 @@ y({
     }
   }
 });
-function Ut(r) {
+function Bt(r) {
   return r.getAllHistory("useCard", (t) => t.card && i.name(t.card) === "sha").length;
 }
-const Xt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Nt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1050_chen3", {
@@ -7009,7 +7009,7 @@ k("char_1050_chen3", {
   group: "yanmrfz",
   sex: "female"
 });
-C("char_1050_chen3", P.colorize("#r当明则明#"));
+S("char_1050_chen3", P.colorize("#r当明则明#"));
 b({
   char_1050_chen3: "赤刃明霄陈",
   char_1050_chen3_prefix: "赤刃明霄",
@@ -7023,10 +7023,10 @@ y({
     audio: ["部署2", "选中干员2"],
     trigger: { player: "useCardAfter" },
     filter(r, t, e, a) {
-      return r.card && r.cards && r.cards.length > 0 && Array.isArray(ur(r.card));
+      return r.card && r.cards && r.cards.length > 0 && Array.isArray(lr(r.card));
     },
     async cost(r, t, e) {
-      const a = ur(t.card)?.filter((u) => e.hasUseTarget(u, !0, !1));
+      const a = lr(t.card)?.filter((u) => e.hasUseTarget(u, !0, !1));
       if (!Array.isArray(a) || a.length < 1) return;
       if (a.length < 2) {
         const u = await e.chooseBool().set("prompt", `【霄式】:是否视为使用一张${i.translation(a[0])}(无距离次数限制)？`).set("ai", () => {
@@ -7070,26 +7070,26 @@ y({
     limited: !0,
     trigger: { global: "phaseJieshuAfter" },
     filter(r, t, e, a) {
-      return Ge(t, !0) > 2;
+      return Le(t, !0) > 2;
     },
     prompt2(r, t) {
-      return `可使用的牌:${i.translation(Ge(t))}`;
+      return `可使用的牌:${i.translation(Le(t))}`;
     },
     skillAnimation: !1,
     async content(r, t, e) {
-      e.awakenSkill(r.name), c.pause2(), new Hr({
+      e.awakenSkill(r.name), c.pause2(), new Xr({
         src: "tiankuimrfz",
         async onEnded() {
           c.resume2();
         }
       });
-      const a = Ge(e), n = [...a];
+      const a = Le(e), n = [...a];
       for (const o of a)
         await e.chooseUseTarget(o).set("addCount", !1).set("nodistance", !0).set("prompt", `【天喟】:你可以视为使用一张${i.translation(o)}(无距离次数限制)？`).set("prompt2", `待使用的牌:${i.translation(n)}`), n.remove(o), c.trySkillAudio("tiankuimrfz", e);
     }
   }
 });
-function Ge(r, t = !1) {
+function Le(r, t = !1) {
   const e = [], a = r.getHistory("useCard", (o) => o.card !== void 0);
   let n = 0;
   for (const o of d.inpile)
@@ -7101,7 +7101,7 @@ function Ge(r, t = !1) {
     }
   return t ? n : e.map((o) => new d.element.VCard("none", void 0, o.name, o.nature));
 }
-function ur(r) {
+function lr(r) {
   const t = [["sha", "fire"], "tao", ["sha", "thunder"], ["sha", "ice"], "sha", "jiu", "shan"], { name: e, nature: a } = r;
   let n;
   for (let s = 0; s < t.length; s++) {
@@ -7123,7 +7123,7 @@ function ur(r) {
     return Array.isArray(s) ? new d.element.VCard("none", void 0, s[0], s[1]) : new d.element.VCard("none", void 0, s);
   }
 }
-const Bt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Jt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1051_headb2", {
@@ -7133,7 +7133,7 @@ k("char_1051_headb2", {
   pack: "legendSJZX",
   hp: 5
 });
-C("char_1051_headb2", "<font color = red>万众巨潮</font>");
+S("char_1051_headb2", "<font color = red>万众巨潮</font>");
 v("char_1051_headb2", "凛冬，乌萨斯学生自治团团长，加入罗德岛后长期担任作战小队队长，并在近期协助罗德岛于圣骏堡建立办事处，作出重要贡献。凛冬在长期训练和高频次战斗中精进自身实力，形成了独特且成熟的战斗风格，现作为近卫干员参与罗德岛在乌萨斯的行动。");
 b({
   char_1051_headb2: "怒潮凛冬",
@@ -7168,7 +7168,7 @@ y({
         const l = Math.pow(2, u.storage.fuchaomrfz);
         let f = 0, g = 0, m = [];
         if (u.storage.fuchaomrfz = 0, u.removeTip("fuchaomrfz_tips"), u.countCards("he") >= l) {
-          const x = await u.chooseCard({
+          const w = await u.chooseCard({
             position: "he",
             filterCard: () => !0,
             selectCard() {
@@ -7177,68 +7177,68 @@ y({
             prompt: `【负潮】:请选择${l}张牌当【戮力同心】使用`,
             forced: !0
           }).forResult();
-          if (!x.cards) return;
-          await z(x.cards);
+          if (!w.cards) return;
+          await z(w.cards);
           return;
         } else
           f += 1, m.push(...u.getCards("he"));
         u.link(!0);
-        for (let x of c.players)
-          x.isLinked() && (g += x.countCards("he"));
+        for (let w of c.players)
+          w.isLinked() && (g += w.countCards("he"));
         if (g >= l) {
-          for (let x of c.players)
-            if (x.isLinked() && x !== u && x.countCards("he") > 0) {
-              const w = await u.chooseCard({
+          for (let w of c.players)
+            if (w.isLinked() && w !== u && w.countCards("he") > 0) {
+              const x = await u.chooseCard({
                 forced: !0,
                 position: "he",
                 selectCard() {
-                  const S = i.player(), T = i.event().currentNum, j = i.event().targetNum;
-                  return T + S.getCards("he").length > j ? j - T : S.getCards("he").length;
+                  const C = i.player(), T = i.event().currentNum, j = i.event().targetNum;
+                  return T + C.getCards("he").length > j ? j - T : C.getCards("he").length;
                 },
-                ai(S) {
-                  return -i.value(S);
+                ai(C) {
+                  return -i.value(C);
                 },
                 prompt: `【负潮】:请选择${g}张牌，${i.translation(u)}将这些牌当作【戮力同心】使用`
               }).set("currentNum", l).set("targetNum", m.length).forResult();
-              w.cards && w.cards.length > 0 && m.push(...w.cards);
+              x.cards && x.cards.length > 0 && m.push(...x.cards);
             }
           await z(m), await p(f);
           return;
         } else {
           f += 1;
-          for (let x of c.players)
-            x !== u && x.isLinked() && m.push(...x.getCards("he"));
+          for (let w of c.players)
+            w !== u && w.isLinked() && m.push(...w.getCards("he"));
         }
         if (m.length + _.cardPile.childNodes.length >= l) {
-          const x = l - m.length;
-          m.push(...i.cards(x)), await z(m), await p(f);
+          const w = l - m.length;
+          m.push(...i.cards(w)), await z(m), await p(f);
         } else
           f += 1;
         await u.chooseUseTarget({
           card: i.autoViewAs({ name: "lulitongxin" }),
           forced: !0
         }), await p(f);
-        async function z(x) {
+        async function z(w) {
           return await u.chooseUseTarget({
             card: i.autoViewAs({ name: "lulitongxin" }),
-            cards: x,
+            cards: w,
             forced: !0
           });
         }
-        async function p(x) {
-          if (x < 1) return;
-          const w = await u.chooseTarget({
-            prompt: `【负潮】：分配至多${i.cnNumber(x)}点火焰伤害，且自己必须是目标之一`,
+        async function p(w) {
+          if (w < 1) return;
+          const x = await u.chooseTarget({
+            prompt: `【负潮】：分配至多${i.cnNumber(w)}点火焰伤害，且自己必须是目标之一`,
             forced: !0,
             filterTarget: () => !0,
-            selectTarget: x,
-            ai(S) {
+            selectTarget: w,
+            ai(C) {
               const T = i.player();
-              return S === T ? 1145141919810 : i.damageEffect(S, T, T, "fire");
+              return C === T ? 1145141919810 : i.damageEffect(C, T, T, "fire");
             }
           }).set("filterOk", () => _.selected.targets.includes(i.player())).forResult();
-          w.targets && w.targets.forEach((S) => {
-            S.damage({
+          x.targets && x.targets.forEach((C) => {
+            C.damage({
               source: u,
               num: 1,
               nature: "fire"
@@ -7256,7 +7256,7 @@ y({
     }
   }
 });
-const Nt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Zt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1052_kalts2", {
@@ -7267,8 +7267,8 @@ k("char_1052_kalts2", {
   pack: "legendSJZX"
 });
 v("char_1052_kalts2", "凯尔希，罗德岛制药公司的创立者之一，同时担任医疗部负责人。曾多次主导罗德岛的大型战略行动，并负责罗德岛的对外沟通工作，为罗德岛的运营发展以及矿石病研究做出了重要贡献。现主要以医疗专家的身份参与罗德岛的矿石病药物研发项目。");
-C("char_1052_kalts2", "<font color = #1876d4>遗尘守望</font>");
-Ar("char_1052_kalts2", ["char_1052_kalts2", "char_003_kalts"]);
+S("char_1052_kalts2", "<font color = #1876d4>遗尘守望</font>");
+Er("char_1052_kalts2", ["char_1052_kalts2", "char_003_kalts"]);
 b({
   char_1052_kalts2: "守望者凯尔希",
   char_1052_kalts2_prefix: "守望者",
@@ -7307,7 +7307,7 @@ y({
             if (s.hp > 1 && l === s.hp - 1)
               return 0;
             {
-              const f = lr(u, s.hp);
+              const f = fr(u, s.hp);
               if (f && f.length > 1)
                 return 1;
             }
@@ -7325,7 +7325,7 @@ y({
             prompt: "【偏振】:请选择弃置的手牌",
             selectCard: 2,
             ai(s) {
-              const u = i.player(), l = Array.from(new Set(u.getCards("h").map((g) => i.suit(g)))), f = lr(l, u.hp);
+              const u = i.player(), l = Array.from(new Set(u.getCards("h").map((g) => i.suit(g)))), f = fr(l, u.hp);
               return f ? _.selected.cards.length < 1 ? i.suit(s) === f[0][0] ? 114514 - i.value(s) : -1 : i.suit(s) === f[0][1] ? 114514 - i.value(s) : -1 : Math.random();
             },
             forced: !0
@@ -7410,7 +7410,7 @@ y({
     }
   }
 });
-function lr(r, t) {
+function fr(r, t) {
   if (r.length < 2) return !1;
   const e = {};
   for (const z of r)
@@ -7423,8 +7423,8 @@ function lr(r, t) {
     p === 1 && u.push(z), p === 2 && l.push(z), p >= 2 && f.push(z), p >= 3 && g.push(z);
   }
   function m(z, p) {
-    const x = z <= p ? [z, p] : [p, z], w = `${x[0]}|${x[1]}`;
-    s.has(w) || (s.add(w), o.push(x));
+    const w = z <= p ? [z, p] : [p, z], x = `${w[0]}|${w[1]}`;
+    s.has(x) || (s.add(x), o.push(w));
   }
   if (n === 0) {
     for (const z of g)
@@ -7444,7 +7444,7 @@ function lr(r, t) {
         m(u[z], u[p]);
   return o.sort((z, p) => z[0] < p[0] ? -1 : z[0] > p[0] ? 1 : z[1] < p[1] ? -1 : z[1] > p[1] ? 1 : 0), o.length > 0 ? o : !1;
 }
-const Jt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Gt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_106_franka", { pack: "epicSJZX", sex: "female", group: "gemrfz", hp: 3, skills: ["jifengmrfz", "xiqiaomrfz"] });
@@ -7581,7 +7581,7 @@ b({
   // shuangzimrfz_info: "①锁定技，你使用的牌在进入弃牌堆或造成伤害时之前视为无对应实体牌、无点数和无花色的牌；当你的手牌数少于你的体力上限时，你获得等同于你体力上限与手牌数之差的【影】；当你造成伤害后，若对应的实体牌为【影】，则令其回复等同于此次伤害数的体力，然后其展示所有手牌且不可响应下一张指定其为目标的【杀】。<br>②每回合限一次，你可以将一张【影】当作任意基本牌和普通锦囊牌使用，你以此法使用的【杀】不计入次数限制。",
 });
 v("char_106_franka", "芙兰卡，黑钢国际生化防护相应人员安全保障专员，在行动护卫、战术突击、战术协同方面拥有丰富经验与强悍战力。</br>现于罗德岛接受矿石病治疗，并作为黑钢行动干员为罗德岛提供专业安保服务。");
-const Zt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Lt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_112_siege", {
@@ -7646,7 +7646,7 @@ b({
   fensuimrfz_info: "锁定技，当与你距离不大于1的其他角色进入濒死状态时，你摸一张牌。"
 });
 v("char_112_siege", "推进之王，本名维娜，维多利亚公民，大部分履历缺失。存在数项未被证实的指控记录。在歼灭战、攻坚战、对抗硬目标等任务中表现出色。于多个测试中皆获得优异成绩，遂获准加入罗德岛。现作为先锋人员，于罗德岛某作战小队担任队长。");
-const Gt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const It = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_113_cqbw", {
@@ -7754,7 +7754,7 @@ b({
   zhumengmrfz3_info: "每轮开始时，你可以进行判定，然后当你本轮前X次使用或打出与判定牌类别一致的牌时，你可以摸一张牌。（X=判定牌的点数）"
 });
 v("char_113_cqbw", "萨卡兹佣兵头目，W。曾参与卡兹戴尔漫长的内战，其小队以残暴而高效的作战手段闻名。在切尔诺伯格事件中与罗德岛发生冲突，后因为某些原因叛出整合运动，在凯尔希医生亲自进行了充分交涉后，与罗德岛签订战略合作条款。");
-const Lt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ft = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_115_headbr", {
@@ -7858,20 +7858,20 @@ b({
   xianlingmrfz_info: "每轮开始时，你可以使用一张牌（无距离限制），若你手牌中没有能够使用的牌，你摸一张牌，你重复这个流程直到有能使用的牌。若不为第一轮，你可以令一名其他角色也执行一次此流程。"
 });
 v("char_115_headbr", "凛冬，切尔诺伯格事变前于切城某中学就读，在校期间已表现出对战斗与突击行为的热情。在多项测试中表现出乌萨斯人与生俱来的强健力量和坚实体质。</br>现作为先锋干员担任作战小队队长。");
-const It = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Vt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), Pe = "char_122_beagle";
-k(Pe, {
+}, Symbol.toStringTag, { value: "Module" })), Ae = "char_122_beagle";
+k(Ae, {
   sex: "female",
   group: "luomrfz",
   skills: ["beagle_jiandunmrfz", "hengxinmrfz"],
   pack: "normalSJZX",
   hp: 3
 });
-C(Pe, "<font color = #1188d2>坚盾继任者</font>");
-v(Pe, "<font color = red>米格鲁</font>，行动预备组A1前卫队员。与芬以及克洛丝一起来到罗德岛。虽然有不成熟的一面，但也逐渐展现出了专业和不认输的一面以及极强的天赋，慢慢成为了被更多人认可的可靠干员。");
+S(Ae, "<font color = #1188d2>坚盾继任者</font>");
+v(Ae, "<font color = red>米格鲁</font>，行动预备组A1前卫队员。与芬以及克洛丝一起来到罗德岛。虽然有不成熟的一面，但也逐渐展现出了专业和不认输的一面以及极强的天赋，慢慢成为了被更多人认可的可靠干员。");
 b({
-  [Pe]: "米格鲁",
+  [Ae]: "米格鲁",
   beagle_jiandunmrfz: "坚盾",
   beagle_jiandunmrfz_info: "任意角色的准备阶段，你可以弃置X+1张手牌并令当前回合角色获得一点护甲，然后你与其摸X张牌。（X = 你的护甲数）",
   hengxinmrfz: "恒心",
@@ -7954,12 +7954,12 @@ y({
     }
   }
 });
-const Ft = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Wt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_128_plosis", { pack: "epicSJZX", sex: "female", group: "lymrfz", hp: 3, skills: ["gushimrfz", "shouzhongmrfz"] });
 v("char_128_plosis", "......</br>已在20593个搜索结果中，为您选择了相对精准的答案。</br>白面鸮，前莱茵生命公司，数据维护专员。在医疗类源石技艺领域取得不菲成就，于医疗数据维护，常规医疗方案应用，多项目医疗行为等相关领域，拥有丰富经验。</br>现于罗德岛担任医疗干员，亦就职于医疗部门，某临床实验小组，项目领头人：赫默医生。同时，为罗德岛提供若干项医疗项目的相关辅助工作。</br>......");
-C("char_128_plosis", P.colorize("#r循迹之鸮#"));
+S("char_128_plosis", P.colorize("#r循迹之鸮#"));
 b({
   char_128_plosis: "白面鸮",
   gushimrfz: "估势",
@@ -8035,7 +8035,7 @@ y({
     }
   }
 });
-const Vt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Yt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_129_bluep", {
@@ -8134,8 +8134,8 @@ b({
   picaimrfz: "披彩",
   picaimrfz_info: "每回合限一次，当你受到伤害时，你可以展示一张与伤害牌花色相同的牌并令此伤害-1，然后你展示伤害来源一张手牌并标记为“毒”。"
 });
-C("char_129_bluep", "<font color = #a52a2a>美丽毒物</font>");
-const Wt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+S("char_129_bluep", "<font color = #a52a2a>美丽毒物</font>");
+const Kt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_134_ifrit", {
@@ -8307,7 +8307,7 @@ b({
   huishenmrfz_info: "出牌阶段限一次，当你使用的牌指定其他角色为目标时，你可以令成为此牌目标的角色选择令你摸一张牌或弃置一张手牌。"
 });
 v("char_134_ifrit", "伊芙利特，前莱茵生命医疗对象，重度感染者。拥有极高的源石适应性，伴随有多发性点火现象。进入莱茵生命前的履历缺失。</br>现于罗德岛接受治疗，由医疗干员赫默担任监护与担保人。");
-const Yt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Qt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_135_halo", {
@@ -8416,7 +8416,7 @@ b({
   gewumrfz_info: "锁定技，每当其他角色获得你的牌后，你的手牌上限+1（至多为5），然后你记录此牌的牌名（每种牌名的牌仅记录一次）；每当你【格物】记录的牌名的牌的数量是[2/4]的整数倍时，[你摸一张牌/你的摸牌阶段额定摸牌数+1]。"
 });
 v("char_135_halo", "星源，本名埃琳娜·乌比卡，莱茵生命能量科研究员。在罗德岛驻留期间则使用其原名作为代号以示区分。</br>使用自制法杖以极具特色的源石技艺制衡敌人，但比起前线作战，本人更希望在后方承接专业研究及器械维护方面的工作。");
-const Kt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ea = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_136_hsguma", {
@@ -8643,7 +8643,7 @@ b({
   xinyizhongmrfz_info: "①锁定技，准备阶段，若你的手牌上限不小于你的当前体力值，你的手牌上限+X。（X=你没有被废除的装备栏数-1）</br>②锁定技，当你受到来自于有“般若”标记的角色的伤害后，你失去【般若】。"
 });
 v("char_136_hsguma", "星熊，龙门近卫局特别任务组精英干员。</br>存在数项指控记录。</br>经龙门总督魏彦吾交涉，龙门近卫局依星熊的优异能力与良好表现，破格将其吸纳进近卫局特别督察组。在处理高危险性犯罪事件、要员保护、灾害紧急救援等领域表现出较高专业性。</br>现作为重装干员协助罗德岛行动，并为现场提供战术执行与指挥支援。</br>现作为特别人员协助罗德岛行动，并为现场提供战术指挥支援。");
-const Qt = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ra = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_144_red", { pack: "epicSJZX", sex: "female", group: "luomrfz", hp: 4, skills: ["qunlangmrfz", "cigumrfz", "qingchumrfz"], hasHiddenSkill: !0 });
@@ -8893,7 +8893,7 @@ b({
   qingchumrfz_info: "你的回合外，你获得如下效果：</br>1.你可以将【闪】当【杀】，【杀】当【闪】使用或打出;</br>2.当你使用或打出【杀】后，你可以弃置当前回合角色的一张牌，若此牌与你使用或打出的【杀】花色相同，你重复这个流程。"
 });
 v("char_144_red", "红，身份不明，履历缺失，由凯尔希医生接收、监护并担保。于机动作战，特种作战与隐秘作战中表现出极高天赋，成绩斐然。</br>现于凯尔希医生的指导下，作为特种干员为罗德岛提供服务。");
-const ea = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ta = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_147_shining", {
@@ -9058,7 +9058,7 @@ b({
   yubimrfz_info: "锁定技，场上所有角色的手牌上限+X。（X为其的护盾值，X至多为5）"
 });
 v("char_147_shining", "闪灵，萨卡兹医师，前萨卡兹医疗组织“赦罪师”成员，感染者援助团体“使徒”的一员。于源石技艺、战场急救、医学理论、临床医学等领域拥有渊博知识。</br>现作为医疗干员为罗德岛医疗部门提供源石技艺理论，并为多项行动提供战场医疗救护服务。");
-const ra = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const aa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_148_nearl", {
@@ -9299,7 +9299,7 @@ b({
   chongyaomrfz_info: "觉醒技，当你发动过至少五次【互持】后，你减少一点体力上限并获得【逐光】。"
 });
 v("char_148_nearl", "临光，前卡西米尔耀骑士，感染者援助团体“使徒”的一员。在掩护己方队员、机动作战、歼灭战与开阔地带作战中体现出极高的战斗技巧和个人军事素养。</br>现于罗德岛作为重装干员行动，并于现场提供战术指挥支援。");
-const ta = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const na = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_1502_crosly", {
@@ -9458,12 +9458,12 @@ b({
   weimingmrfz: "威名",
   weimingmrfz_info: "锁定技，防具栏为空的角色不能响应你使用的牌；坐骑栏为空的角色受到你的伤害后须交给你一张牌；武器栏为空的角色使用伤害类锦囊牌不能指定你为目标。"
 });
-C("char_1502_crosly", "<font color='#d2691e'>尘烟蔽目</font>");
+S("char_1502_crosly", "<font color='#d2691e'>尘烟蔽目</font>");
 v("char_1502_crosly", "弑君者，柳德米拉·伊里尼奇娜，原整合运动干部，从事潜伏活动与突袭暗杀行动，擅长近身攻击及突破防御阵线进行奇袭，于切尔诺伯格-龙门事件之后脱离整合运动，1100年末主动与罗德岛接洽，现正在监督下接受矿石病治疗。");
-const aa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ia = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), er = "char_151_myrtle";
-k(er, {
+}, Symbol.toStringTag, { value: "Module" })), rr = "char_151_myrtle";
+k(rr, {
   sex: "female",
   group: "luomrfz",
   pack: "rareSJZX",
@@ -9471,8 +9471,8 @@ k(er, {
   hp: 3,
   designer: ["禾"]
 });
-C(er, "<font color = blue>大将军？</font>");
-v(er, "桃金娘，杜林族出身的少女，根据本人强烈要求，记录此前履历为：大将军。<br>外表与性格有孩子气的成分，但在战场上表现出颇强的感染力和相当的指挥水准，能够在提振其他干员士气的同时，为他们提供一定的治疗，十分可靠。");
+S(rr, "<font color = blue>大将军？</font>");
+v(rr, "桃金娘，杜林族出身的少女，根据本人强烈要求，记录此前履历为：大将军。<br>外表与性格有孩子气的成分，但在战场上表现出颇强的感染力和相当的指挥水准，能够在提振其他干员士气的同时，为他们提供一定的治疗，十分可靠。");
 b({
   char_151_myrtle: "桃金娘",
   yuyimrfz: "愈翼",
@@ -9501,17 +9501,17 @@ y({
             l[i.type2(p)] && l[i.type2(p)].push(p);
           if (!s.hasSkill("yaojinmrfz")) {
             if (s.getExpansions("yuyimrfz").length > 0) return "cancel2";
-            let p = "cancel2", x = 0;
-            for (let w in l) {
-              const S = fr(l[w]);
-              S <= x && (x = S, p = w);
+            let p = "cancel2", w = 0;
+            for (let x in l) {
+              const C = cr(l[x]);
+              C <= w && (w = C, p = x);
             }
             return p;
           }
           let f = null;
           for (let p in l) {
-            const x = l[p].length;
-            x >= (f || 0) && x <= 3 && (f = x);
+            const w = l[p].length;
+            w >= (f || 0) && w <= 3 && (f = w);
           }
           if (f === null)
             return u.randomGet();
@@ -9520,8 +9520,8 @@ y({
             l[p].length === f && g.push(p);
           let m = "cancel2", z = 0;
           for (let p of g) {
-            const x = fr(l[p]);
-            x <= z && (z = x, m = p);
+            const w = cr(l[p]);
+            w <= z && (z = w, m = p);
           }
           return m;
         }
@@ -9722,14 +9722,14 @@ y({
     }
   }
 });
-function fr(r) {
+function cr(r) {
   const t = r.slice().map((a) => i.value(a));
   let e = 0;
   for (let a of t)
     e += a;
   return e;
 }
-const na = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const oa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_155_tiger", {
@@ -9850,7 +9850,7 @@ b({
   huquanmrfz_info: "每回合限一次，当你需要使用【闪】或【无懈可击】时，你可以将一张点数不小于6的手牌当作【闪】或【无懈可击】使用或打出，然后你选择一项：1.删除【碎甲】中[ ]内的描述直到你下个回合结束;2.令【碎甲】中{ }内的数字+1直到你下个回合结束。"
 });
 v("char_155_tiger", "因陀罗，维多利亚格拉斯哥帮武斗派头目。推进之王的下属之一。在罗德岛担任推进之王的直属护卫，偶尔会被邀请参与一些实战指导的工作（其实就是实战训练的对手）。");
-const ia = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const sa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_164_nightm", {
@@ -9860,10 +9860,10 @@ k("char_164_nightm", {
   hp: 3,
   skills: ["biaolimrfz", "ymkongwomrfz"]
 });
-let cr = !1;
-function oa() {
-  if (cr) return;
-  cr = !0;
+let gr = !1;
+function ua() {
+  if (gr) return;
+  gr = !0;
   const r = d.card.tao.enable, t = d.card.tao.selectTarget, e = d.card.tao.filterTarget;
   d.card.tao.enable = function(a, n) {
     return n.storage.biaolimrfz && n.storage.biaolimrfz == "red" && n.isPhaseUsing() ? a.storage.biaolimrfz ? !0 : n.hp < n.maxHp : r(a, n);
@@ -9914,7 +9914,7 @@ y({
           return r.name != "phase" || c.phaseNumber == 0;
         },
         async content(r, t, e) {
-          oa();
+          ua();
         }
       },
       nocount: {
@@ -9949,16 +9949,16 @@ y({
       var n = i.cards(2);
       c.cardsGotoOrdering(n);
       const { moved: o } = await e.chooseToMove().set("list", [["牌堆顶", n], ["牌堆底"]]).set("prompt", "点击将牌移动到牌堆顶或牌堆底").set("processAI", function(m) {
-        var z = m[0][1], p = h.event.player, x = [], w;
+        var z = m[0][1], p = h.event.player, w = [], x;
         for (z.sort(function(T, j) {
           var M = i.color(T, p) == "red" ? 3 : 5, q = i.color(j, p) == "red" ? 3 : 5, O = p.hp;
           return O < 3 && (i.color(T, p) == "red", i.color(j, p) == "red"), q - M;
         }); z.length; ) {
-          var S = 0;
-          if (p.hp < 3 ? i.color(z[0], p) == "red" && S++ : i.color(z[0], p) == "black" && S++, S <= 0) break;
-          x.unshift(z.shift());
+          var C = 0;
+          if (p.hp < 3 ? i.color(z[0], p) == "red" && C++ : i.color(z[0], p) == "black" && C++, C <= 0) break;
+          w.unshift(z.shift());
         }
-        return w = z, [x, w];
+        return x = z, [w, x];
       }).forResult();
       if (!o) return;
       var s = o[0], u = o[1];
@@ -9982,9 +9982,9 @@ b({
   ymkongwomrfz: "控我",
   ymkongwomrfz_info: "摸牌阶段结束时，你可以弃置一张牌，然后观看牌堆顶两张牌，并以任意的顺序将其置于牌堆顶或牌堆底。"
 });
-C("char_164_nightm", "<font color=#efd02a>双生花</font>");
+S("char_164_nightm", "<font color=#efd02a>双生花</font>");
 v("char_164_nightm", "夜魔，维多利亚公民，登记姓名为瑞贝尔·帕斯贝莱蒂·葛罗莉亚，于罗德岛正式任职前为高校学生，进修课程：进阶医疗法术与心理学干预。在医疗法术和破坏性法术领域均展现出较强的控制力。现于罗德岛某调理机构中担任职员。<br>备注：该干员适用于特殊监护管理办法，协议已由监护者莱娜签字确认，现已生效。");
-const sa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const la = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_166_skfire", {
@@ -10125,7 +10125,7 @@ b({
   yihuomrfz_info: "锁定技。</br>①每回合限两次，当其他角色受到火焰伤害后，你摸两张牌。</br>②当你于一次获得了至少两张牌后，你选择其中一张牌，你将此牌视为火【杀】，若这些牌颜色全部相同，你摸一张牌。</br>③当你受到火焰伤害时，你摸三张牌并防止此次伤害。"
 });
 v("char_166_skfire", "天火，隶属民间源石技艺研究会“狐尾”的核心团体“王者之杖”。拥有地质学与源石地质学双学位，维多利亚高等职业术师，在源石技艺及理论研究方面皆有杰出造诣。</br>现任王者之杖驻罗德岛首席术师，与罗德岛签署合作协议，并为罗德岛的源石理论研究，歼灭战作战等多项任务提供协助。");
-const ua = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const fa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_172_svrash", {
@@ -10179,15 +10179,15 @@ y({
         function(f, g, m, z) {
           var p = _.create.dialog(i.translation(z) + "发动了【雪变】", g);
           p.videoId = m;
-          for (var x = function(j) {
+          for (var w = function(j) {
             if (j._tempTranslate) return j._tempTranslate;
             var M = j.name;
             return d.translate[M + "_ab"] ? d.translate[M + "_ab"] : i.translation(M);
-          }, w = 0; w < f.length; w++) {
-            w === 0 && (r.cards1 = a[w].cards), w === 1 && (r.cards2 = a[w].cards), w === 2 && (r.cards3 = a[w].cards);
-            for (var S = 0; S < a[w].cards.length; S++) {
-              var T = S;
-              w === 1 ? T += a[w - 1].cards.length : w === 2 && (T += a[w - 2].cards.length + a[w - 1].cards.length), p.buttons[T].querySelector(".info").innerHTML = x(f[w]), i.color(a[w].cards[S]) === "red" ? u++ : u--;
+          }, x = 0; x < f.length; x++) {
+            x === 0 && (r.cards1 = a[x].cards), x === 1 && (r.cards2 = a[x].cards), x === 2 && (r.cards3 = a[x].cards);
+            for (var C = 0; C < a[x].cards.length; C++) {
+              var T = C;
+              x === 1 ? T += a[x - 1].cards.length : x === 2 && (T += a[x - 2].cards.length + a[x - 1].cards.length), p.buttons[T].querySelector(".info").innerHTML = w(f[x]), i.color(a[x].cards[C]) === "red" ? u++ : u--;
             }
           }
         },
@@ -10325,7 +10325,7 @@ b({
   new_xinbangmrfz_info: "出牌阶段，当你使用的牌结算完毕后，若你是于此阶段第一次使用此种类型的牌，你可以摸一张牌，若你手牌中没有与你摸的牌的花色相同的牌，你摸一张牌。"
 });
 v("char_172_svrash", "银灰，谢拉格军阀，喀兰贸易公司董事长，希瓦艾什家族现任族长。在经济贸易、国际政治、外交手腕与战术策划上有独到见解。于罗德岛的部分行动中提供战略支援。鉴于其实际目的不明、合作态度暧昧等理由，建议在交流中持保守态度以杜绝额外风险。");
-const la = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ca = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_173_slchan", {
@@ -10378,7 +10378,7 @@ b({
   yabengmrfz_info: "锁定技，当你进入濒死状态时，你重置【凌顶】并摸X张牌。（X=【凌顶】记录的牌的数量，X至多为2）"
 });
 v("char_173_slchan", "崖心，谢拉格出身，现罗德岛干员。攀岩与登山方面的专家，能熟练使用各种攀爬工具。现于罗德岛接受矿石病治疗。");
-const fa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ga = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_174_slbell", { pack: "epicSJZX", sex: "female", group: "xiemrfz", hp: 3, skills: ["shengnvmrfz", "shenshemrfz"] });
@@ -10526,9 +10526,9 @@ b({
   shenshemrfz: "神慑",
   shenshemrfz_info: "锁定技。<br>①结束阶段，若你没有明置的手牌，你明置你的手牌<br>②当你成为其他角色使用的带有伤害类标签的牌的目标后，若此牌的点数不大于你明置的牌中点数最大的一张牌，则其须弃置手牌区和装备区内各一张牌。"
 });
-C("char_174_slbell", "<font color=#C0C0C0>谢拉格的圣女</font>");
+S("char_174_slbell", "<font color=#C0C0C0>谢拉格的圣女</font>");
 v("char_174_slbell", "初雪，谢拉格出身，喀兰圣女，全谢拉格的宗教领袖。运用神赐的圣铃，呼唤风雪的力量。现通过保密途径来到罗德岛，具体担任事务与驻留时间不便公开。");
-const ca = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const da = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_179_cgbird", {
@@ -10654,7 +10654,7 @@ b({
   newpolongmrfz_info: "准备阶段，你可以令一名角色A与角色B(角色B不能为你)拼点，若角色A赢，你将判定区的牌翻面，然后摸2X张牌，且你因此获得的牌本回合无距离次数限制。（X=你因此翻面的牌数）"
 });
 v("char_179_cgbird", "夜莺，萨卡兹人，感染者援助团体“使徒”的一员，其它履历缺失。于源石技艺、战场急救、临床医学等领域具备高超天赋。</br>现于罗德岛接受治疗，同时为罗德岛提供战场医疗救护、源石技艺援护等服务。");
-const ga = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ma = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_180_amgoat", {
@@ -10815,7 +10815,7 @@ b({
   qingyanmrfz_info: "每轮限一次，出牌阶段结束时，若你于本阶段使用过三种类型的牌，你可以在本回合结束后额外执行一个回合。"
 });
 v("char_180_amgoat", "艾雅法拉，火山学家，天灾信使。于高等源石技艺、高能量法术释放等领域展现出了卓越的天赋。现于罗德岛接受治疗，同时为罗德岛提供天灾研究、环境观察与评估、危险地形航行保障等相关服务。");
-const da = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ha = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_188_helage", { pack: "legendSJZX", sex: "male", group: "wumrfz", hp: 4, skills: ["yingkuimrfz", "cangfengmrfz", "yuexiangmrfz"] });
@@ -10992,7 +10992,7 @@ b({
   yingkuimrfza: "盈亏"
 });
 v("char_188_helage", "赫拉格，曾隶属于乌萨斯帝国近卫军，切尔诺伯格感染者地下诊所“阿撒兹勒”的现任管理者，其他相关履历缺失。拥有成熟的军事理论体系知识，战斗技巧几乎能满足绝大部分类型作战的需求。现正依合作协议长驻罗德岛，为罗德岛提供战术指挥支援。");
-const ma = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const za = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_193_frostl", {
@@ -11161,20 +11161,20 @@ b({
   bingrenmrfz_info: "当你[不因此技能而使用【杀】选择目标后/成为【杀】的目标后]，你可以流失一点体力，然后你视为对[目标角色/杀的使用者]使用一张冰【杀】（不计入次数限制），若此杀造成伤害，[目标角色/杀的使用者]须弃置两张牌或翻面。"
 });
 v("char_193_frostl", "霜叶，前哥伦比亚少年兵，所属部队覆灭后被“退役”。在随后的流浪佣兵生活中和罗德岛建立关系，经过一段时间合作后被吸收进入罗德岛。</br>拥有非常丰富的战场经验，本身的战斗技巧也不容小觑，对罗德岛来说，是不可多得的优秀战力。");
-const ha = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const pa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), Ae = "char_194_leto";
-k(Ae, {
+}, Symbol.toStringTag, { value: "Module" })), qe = "char_194_leto";
+k(qe, {
   sex: "female",
   group: "wumrfz",
   hp: 5,
   skills: ["hanshumrfz"],
   pack: "epicSJZX"
 });
-C(Ae, P.colorize("#r一呼百应#"));
-v(Ae, "烈夏，本名罗莎琳·塔季扬诺夫娜·拉里娜，切尔诺伯格事变前于切城某中学就读，在校期间与干员凛冬皆为学生中的领军人物。现作为外勤小组的成员，多负责中长线的外勤任务。");
+S(qe, P.colorize("#r一呼百应#"));
+v(qe, "烈夏，本名罗莎琳·塔季扬诺夫娜·拉里娜，切尔诺伯格事变前于切城某中学就读，在校期间与干员凛冬皆为学生中的领军人物。现作为外勤小组的成员，多负责中长线的外勤任务。");
 b({
-  [Ae]: "烈夏",
+  [qe]: "烈夏",
   hanshumrfz: "撼树",
   hanshumrfz_info: "出牌阶段开始时，你可以展示一名其他角色至少一张手牌且你获得其中一张牌，并令你本阶段使用【杀】的次数+X，然后你的弃牌阶段结束时，若你耗尽【杀】的使用次数，你摸2的X次方张牌并回复一点体力，否则你失去X点体力并摸X张牌。（X=展示牌的花色数）"
 });
@@ -11272,7 +11272,7 @@ y({
     }
   }
 });
-const za = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const _a = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_197_poca", {
@@ -11369,7 +11369,7 @@ b({
   rusuimrfz_info: "当你使用【杀】对一名其他角色造成伤害时，每满足下列一项你可令该角色弃置一张牌，若全部满足，则此【杀】伤害+1：</br>1.手牌数不小于体力值；</br>2.已损失体力不大于其体力值：</br>3.装备栏有牌。"
 });
 v("char_197_poca", "早露，切尔诺伯格事变前于切城某中学就读，并担任学生会长。</br>事变后加入罗德岛，隶属后勤部门，工作期间风评极佳。现经本人申请，作为狙击干员转入前线。");
-const pa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ba = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_2012_typhon", {
@@ -11478,9 +11478,9 @@ b({
   lieqiongmrfz: "裂穹",
   lieqiongmrfz_info: `锁定技，当你使用【杀】时，若此杀对应的实体牌的颜色有:<br>红色：此杀${i.poptip("sjzx_enchanting")}“挽弓”<br>黑色：此杀${i.poptip("sjzx_enchanting")}“烈弓”。`
 });
-C("char_2012_typhon", "<font color=2942BA>永恒狩猎</font>");
+S("char_2012_typhon", "<font color=2942BA>永恒狩猎</font>");
 v("char_2012_typhon", "提丰，活跃于萨米的萨卡兹，以猎人自居，对萨米的自然环境和潜在威胁有着充足的知识储备和应对技巧。现应干员麦哲伦邀请与罗德岛进行合作，协助罗德岛在萨米及无尽冰原地区的事务。");
-const _a = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ka = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_2013_cerber", {
@@ -11614,7 +11614,7 @@ b({
   baokemrfz_info: "出牌阶段限一次，当你对一名其他角色造成伤害后，若此次伤害是属性伤害或该角色防具栏不为空，你可以额外对其造成一点伤害。"
 });
 v("char_2013_cerber", "刻俄柏，流浪者，从有意识开始就在四处流浪，在流浪途中被野外恶劣环境感染，凭着常人所不具备的直觉和意志一直撑到了现在。</br>现已被罗德岛救助并顺利通过干员测试，成为罗德岛的一员。");
-const ba = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ya = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_2014_nian", {
@@ -11747,9 +11747,9 @@ b({
   tieyumrfz: "铁御",
   tieyumrfz_info: "每轮限两次，当一名其他角色使用装备牌时，你可以令其回复一点体力（若其已损失体力值为0，则改为获得一点护甲），本轮获得以下效果:使用【杀】的次数+1;受到大于1的伤害时，将此伤害改为1。"
 });
-C("char_2014_nian", "<font color=#FFA500>地生五金</font>");
+S("char_2014_nian", "<font color=#FFA500>地生五金</font>");
 v("char_2014_nian", "年，无业游民，熟习各类金属工艺，拥有与身份不符的渊博冶金知识。现凭访客身份逗留于罗德岛，偶尔为罗德岛的金属加工项目提供建议。声称自己擅长音像娱乐工作，经常提供一些罗德岛干员普遍不太喜爱的音像产品。");
-const ka = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const va = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_2015_dusk", {
@@ -11960,9 +11960,9 @@ b({
   cangjuanmrfz: "藏卷",
   cangjuanmrfz_info: "锁定技，你每轮前三次获得牌于本轮不计入手牌上限。"
 });
-C("char_2015_dusk", "<font color=#f6b3fa>工笔入画</font>");
+S("char_2015_dusk", "<font color=#f6b3fa>工笔入画</font>");
 v("char_2015_dusk", "夕，炎国画家，待业。在留舰人员年的积极行动下，被以访客身份挟持至罗德岛。擅长绘画，尤其是炎国传统绘画。现寓居罗德岛某偏僻走道的墙内。");
-const ya = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const xa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_2023_ling", {
@@ -12280,9 +12280,9 @@ b({
   haojiumrfz: "好酒",
   haojiumrfz_info: "锁定技，当你使用【酒】时，你回复一点体力；你使用【酒】无次数限制。"
 });
-C("char_2023_ling", "<font color=#BFEFFF>千年一梦</font>");
+S("char_2023_ling", "<font color=#BFEFFF>千年一梦</font>");
 v("char_2023_ling", "令，寓居尚蜀的诗人，与炎国司岁台等政府部门均有联系，在尚蜀事件中接触罗德岛，现通过审核，以访客身份驻留本舰。");
-const va = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const wa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_2024_chyue", { pack: "legendSJZX", sex: "male", group: "suimrfz", hp: 3, skills: ["shubianmrfz", "wubenmrfz", "wowumrfz"] });
@@ -12340,23 +12340,23 @@ y({
     mark: !0,
     intro: {
       content(r, t, e) {
-        return Y(t) ? `<span class=firetext>【气收秋毫平】</span></br>·已累计使用/打出${ke(t, i.event(), "all")}张牌` : `<span class=firetext>【劲发江潮落】</span></br>·已累计使用${ke(t, i.event(), "useCard")}张牌<br>·已累计使用${t.getAllHistory("useSkill", (a) => a.skill === "wowumrfz").length}次【我无】`;
+        return K(t) ? `<span class=firetext>【气收秋毫平】</span></br>·已累计使用/打出${ye(t, i.event(), "all")}张牌` : `<span class=firetext>【劲发江潮落】</span></br>·已累计使用${ye(t, i.event(), "useCard")}张牌<br>·已累计使用${t.getAllHistory("useSkill", (a) => a.skill === "wowumrfz").length}次【我无】`;
       }
     },
     filter(r, t, e, a) {
       const n = i.autoViewAs({ name: "sha" });
-      return Y(t) ? t.hasUseTarget(n, !1, !1) && ke(t, r, "all") % 3 === 0 : r.name === "useCard" && t.hasUseTarget(n, !0, !1) && ke(t, r, "useCard") % 3 === 0;
+      return K(t) ? t.hasUseTarget(n, !1, !1) && ye(t, r, "all") % 3 === 0 : r.name === "useCard" && t.hasUseTarget(n, !0, !1) && ye(t, r, "useCard") % 3 === 0;
     },
     prompt2(r, t) {
-      return Y(t) ? "视为使用一张无距离限制且不计入次数的【杀】，然后你摸一张牌" : "视为使用一张不计入次数的【杀】，若此【杀】造成了伤害，你摸一张牌";
+      return K(t) ? "视为使用一张无距离限制且不计入次数的【杀】，然后你摸一张牌" : "视为使用一张不计入次数的【杀】，若此【杀】造成了伤害，你摸一张牌";
     },
     async content(r, t, e) {
       const a = i.autoViewAs({ name: "sha", storage: { wowumrfz: !0 }, isCard: !0 });
       await e.chooseUseTarget({
         card: a,
         forced: !0,
-        prompt: Y(e) ? "视为使用一张无距离限制且不计入次数的【杀】，然后你摸一张牌" : "视为使用一张不计入次数的【杀】，若此【杀】造成了伤害，你摸一张牌"
-      }).set("addCount", !1).set("nodistance", !Y(e)), Y(e) && (e.draw(), e.logSkill("wowumrfz"));
+        prompt: K(e) ? "视为使用一张无距离限制且不计入次数的【杀】，然后你摸一张牌" : "视为使用一张不计入次数的【杀】，若此【杀】造成了伤害，你摸一张牌"
+      }).set("addCount", !1).set("nodistance", !K(e)), K(e) && (e.draw(), e.logSkill("wowumrfz"));
     },
     group: ["wowumrfz_draw", "wowumrfz_change"],
     subSkill: {
@@ -12366,7 +12366,7 @@ y({
           source: "damageSource"
         },
         filter(r, t, e, a) {
-          return r.card && r.card.name === "sha" && r.card.storage.wowumrfz && !Y(t);
+          return r.card && r.card.name === "sha" && r.card.storage.wowumrfz && !K(t);
         },
         charlotte: !0,
         forced: !0,
@@ -12381,7 +12381,7 @@ y({
           player: "wowumrfzAfter"
         },
         filter(r, t, e, a) {
-          return !Y(t) && t.getAllHistory("useSkill", (n) => n.skill === "wowumrfz").length >= 5;
+          return !K(t) && t.getAllHistory("useSkill", (n) => n.skill === "wowumrfz").length >= 5;
         },
         async content(r, t, e) {
           e.logSkill("wowumrfz"), e.popup("修改【我无】"), e.storage.wowumrfz = !0;
@@ -12443,17 +12443,17 @@ b({
   shubianmrfz: "戍边",
   shubianmrfz_info: "当你受到其他角色造成的伤害后，你可以令伤害来源本回合手牌上限+2（不可叠加）且无法使用手牌中的伤害类牌，然后你可以弃置伤害来源装备区的一张牌。"
 });
-ne("wowumrfz", (r) => Y(r) ? "<span class=firetext>【气收秋毫平】</span></br>每当你累计使用或打出三张牌时，你可以视为使用一张【杀】（不计入次数且无距离限制），然后你摸一张牌。" : "<span class=firetext>【劲发江潮落】</span></br>①你的回合内，你每使用三张牌可视为使用一张【杀】（不计入次数），若此【杀】造成了伤害，你摸一张牌。<br>②锁定技，当你本局游戏累计发动5次【我无】时，修改此技能。");
-C("char_2024_chyue", "<font color=#FFF68F>玉门戍卫</font>");
+ae("wowumrfz", (r) => K(r) ? "<span class=firetext>【气收秋毫平】</span></br>每当你累计使用或打出三张牌时，你可以视为使用一张【杀】（不计入次数且无距离限制），然后你摸一张牌。" : "<span class=firetext>【劲发江潮落】</span></br>①你的回合内，你每使用三张牌可视为使用一张【杀】（不计入次数），若此【杀】造成了伤害，你摸一张牌。<br>②锁定技，当你本局游戏累计发动5次【我无】时，修改此技能。");
+S("char_2024_chyue", "<font color=#FFF68F>玉门戍卫</font>");
 v("char_2024_chyue", "重岳，留舰人员年、夕、令的兄长，与炎国兵部、司岁台等政府部门往来密切，此前担任移动城市玉门的武术教官，已卸任。因探视亲属来到罗德岛，经过审核，暂时凭访客身份驻留本舰。重岳具有丰富的战场经验，为罗德岛提供过独特的作战建议，但应凯尔希医生要求，重岳本人较少直接参加任务。");
-function Y(r) {
+function K(r) {
   return r.storage.wowumrfz === !0;
 }
-function ke(r, t, e) {
+function ye(r, t, e) {
   const a = [];
   return e === "useCard" ? a.push("useCard") : e === "respond" ? a.push("respond") : a.push("useCard", "respond"), c.getAllGlobalHistory("everything", (o) => a.includes(o.name) && o.player == r, t).length;
 }
-const xa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Sa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_2025_shu", { pack: "legendSJZX", sex: "female", group: "suimrfz", hp: 3, skills: ["kenyemrfz", "heyingmrfz", "rancuimrfz"] });
@@ -12668,9 +12668,9 @@ b({
   liangtianmrfz: "良田",
   liangtianmrfz_info: "锁定技，每阶段限一次，当你不因此技能而摸牌后，你摸一张牌。"
 });
-C("char_2025_shu", "<font color=#42b983>百谷长青</font>");
+S("char_2025_shu", "<font color=#42b983>百谷长青</font>");
 v("char_2025_shu", "黍，炎国农业天师，天师府授业天师。曾于炎国北部农业基地大荒城从事农业研究多年且已有丰富的科研成果。现因访问亲属，以访客身份暂驻罗德岛。");
-const wa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ca = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_2026_yu", {
@@ -12698,10 +12698,10 @@ y({
             let z = 1;
             s.storage && typeof s.storage.extraChooseNum == "number" && (z += s.storage.extraChooseNum);
             const p = o.chooseButton(!0);
-            p.set("ai", (x) => {
-              const w = h.event.player, S = x.link;
-              let T = i.value(S, w);
-              return i.tag(S, "recover") && (T += c.countPlayer((j) => j.hp < 2 && i.attitude(w, j) > 0 && d.filter.cardSavable(S, w, j)), w.hp <= 2 && c.checkMod(S, w, "unchanged", "cardEnabled2", w) && (T *= 2)), T;
+            p.set("ai", (w) => {
+              const x = h.event.player, C = w.link;
+              let T = i.value(C, x);
+              return i.tag(C, "recover") && (T += c.countPlayer((j) => j.hp < 2 && i.attitude(x, j) > 0 && d.filter.cardSavable(C, x, j)), x.hp <= 2 && c.checkMod(C, x, "unchanged", "cardEnabled2", x) && (T *= 2)), T;
             }), p.set("selectButton", z), p.set("dialog", t.preResult), p.set("closeDialog", !1), p.set("dialogdisplay", !0), n = await p.forResult();
           } else
             t.directButton = t.dialog.buttons;
@@ -12719,18 +12719,18 @@ y({
           for (let z = 0; z < u.buttons.length; z++)
             l.includes(u.buttons[z].link) && (f = u.buttons[z], f.querySelector(".info").innerHTML = ((p) => {
               if (p._tempTranslate) return p._tempTranslate;
-              const x = p.name;
-              return d.translate[x + "_ab"] ? d.translate[x + "_ab"] : i.translation(x);
+              const w = p.name;
+              return d.translate[w + "_ab"] ? d.translate[w + "_ab"] : i.translation(w);
             })(o), g.push(f));
           u.buttons.remove(...g);
           const m = i.translation(o) + "选择了" + i.translation(g.map((z) => z.link));
           l && l.length > 0 && (await o.gain(l, "visible"), o.$gain2(l), c.broadcast(
-            function(z, p, x, w) {
-              var S = i.idDialog(p);
-              if (S) {
-                S.content.firstChild.innerHTML = w;
-                for (var T = 0; T < S.buttons.length; T++)
-                  z.includes(S.buttons[T].link) && (S.buttons[T].querySelector(".info").innerHTML = x, S.buttons.splice(T--, 1));
+            function(z, p, w, x) {
+              var C = i.idDialog(p);
+              if (C) {
+                C.content.firstChild.innerHTML = x;
+                for (var T = 0; T < C.buttons.length; T++)
+                  z.includes(C.buttons[T].link) && (C.buttons[T].querySelector(".info").innerHTML = w, C.buttons.splice(T--, 1));
               }
             },
             l,
@@ -12839,9 +12839,9 @@ b({
   qizaomrfz: "起灶",
   qizaomrfz_info: "当你使用一张牌后，若你判定区中没有与此牌花色相同牌，你可以摸一张牌并进行一次蓄谋。"
 });
-C("char_2026_yu", "<font color='#b8860b'>灶里乾坤</font>");
+S("char_2026_yu", "<font color='#b8860b'>灶里乾坤</font>");
 v("char_2026_yu", "余，炎国厨师，拥有丰富的烹饪经验。现通过审核，以访客身份驻留罗德岛以便探亲访友，同时也为罗德岛提供烹饪支持。");
-const Sa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ja = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_202_demkni", {
@@ -12876,8 +12876,8 @@ y({
         i.distance(e, u) > 1 || u.countCards("h") < 1 || u != e && (s = s.concat(u.getCards("h")));
       s.length > 0 ? (n.add("与你距离不大于1的其他角色的手牌"), o.add("选项三")) : n.add('<span style="opacity:0.5">与你距离不大于1的其他角色的手牌(不可选:你距离不大于1的其他角色没有手牌）</span>');
       const { control: l } = await e.chooseControl(o, "cancel2").set("choiceList", n).set("ai", function() {
-        var w = h.event.list, S = h.event.player, T = h.event.hd;
-        return (c.countPlayer((j) => S != j && i.distance(S, j) <= 1 && i.distance(S, j) < 0) < 1 || T.length < 3) && w.remove("选项三"), w.length == 0 ? "cancel2" : w.randomGet();
+        var x = h.event.list, C = h.event.player, T = h.event.hd;
+        return (c.countPlayer((j) => C != j && i.distance(C, j) <= 1 && i.distance(C, j) < 0) < 1 || T.length < 3) && x.remove("选项三"), x.length == 0 ? "cancel2" : x.randomGet();
       }).set("list", o).set("hd", s).forResult();
       if (!l || l == "cancel2") {
         a.goto(0);
@@ -12893,26 +12893,26 @@ y({
             var m = _.discardPile.removeChild(_.discardPile.firstChild);
             m.original = "d", f.push(m);
           }
-          for (let w = f.length - 1; w >= 0; w--)
-            _.discardPile.insertBefore(f[w], _.discardPile.firstChild);
+          for (let x = f.length - 1; x >= 0; x--)
+            _.discardPile.insertBefore(f[x], _.discardPile.firstChild);
           break;
         case "选项三":
           f = s;
           break;
       }
-      const { links: z } = await e.chooseButton(["【钙化】:选择要" + (a.name == "chooseToUse" ? "使用" : "打出") + "的牌", f]).set("filterButton", function(w) {
-        return h.event.player, h.event, h.event.cards.includes(w.link);
+      const { links: z } = await e.chooseButton(["【钙化】:选择要" + (a.name == "chooseToUse" ? "使用" : "打出") + "的牌", f]).set("filterButton", function(x) {
+        return h.event.player, h.event, h.event.cards.includes(x.link);
       }).set(
         "cards",
-        f.filter(function(w) {
-          return i.type(w) != "basic" ? !1 : a.filterCard(w, a.player, a);
+        f.filter(function(x) {
+          return i.type(x) != "basic" ? !1 : a.filterCard(x, a.player, a);
         })
-      ).set("ai", function(w) {
-        var S = h.event.getParent(3);
-        if (S && S.ai) {
+      ).set("ai", function(x) {
+        var C = h.event.getParent(3);
+        if (C && C.ai) {
           var T = h.event;
-          h.event = S;
-          var j = (S.ai || r.ai1)(w.link, h.event.player, S);
+          h.event = C;
+          var j = (C.ai || r.ai1)(x.link, h.event.player, C);
           return h.event = T, j;
         }
         return 1;
@@ -12921,24 +12921,24 @@ y({
         a.goto(0);
         return;
       }
-      var p = z[0], x = z[0].name;
+      var p = z[0], w = z[0].name;
       if (h.currentPhase == e && e.addTempSkill("newgaihuamrfz_ban", {
         global: "phaseBeginStart"
       }), a.name == "chooseToUse") {
         c.broadcastAll(
-          function(S, T) {
+          function(C, T) {
             d.skill.newgaihuamrfz_backup.viewAs = {
               name: T,
-              cards: [S],
+              cards: [C],
               isCard: !0
             };
           },
           p,
-          x
+          w
         );
-        let w = r.getParent(2);
-        if (!w) return;
-        w.set("_backupevent", "newgaihuamrfz_backup"), w.set("openskilldialog", "请选择" + i.translation(p) + "的目标"), w.backup("newgaihuamrfz_backup"), e.logSkill("gaihuamrfz");
+        let x = r.getParent(2);
+        if (!x) return;
+        x.set("_backupevent", "newgaihuamrfz_backup"), x.set("openskilldialog", "请选择" + i.translation(p) + "的目标"), x.backup("newgaihuamrfz_backup"), e.logSkill("gaihuamrfz");
       } else {
         delete a.result.skill, delete a.result.used, a.result.card = i.autoViewAs(p), a.result.cards = [p], e.logSkill("gaihuamrfz"), a.redo();
         return;
@@ -12997,9 +12997,9 @@ b({
   panshimrfz: "磐石",
   panshimrfz_info: "锁定技，你不能成为每回合第一张牌的目标；你每回合使用的第一张牌不可被其他角色响应。"
 });
-C("char_202_demkni", "<font color=#FFF68F>守望者</font>");
+S("char_202_demkni", "<font color=#FFF68F>守望者</font>");
 v("char_202_demkni", "塞雷娅，前莱茵生命防卫科主任。于生命科学、微生物学、源石技艺等领域皆有建树，同时于歼灭战、要员保全、异常事态处理等任务中表现出强大实力。</br>目前与罗德岛在科研等多个领域皆有合作，同时，正与罗德岛针对深入合作计划进行磋商。");
-const Ca = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ta = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_204_platnm", { pack: "epicSJZX", sex: "female", group: "kamrfz", hp: 3, skills: ["xujimrfz", "shiyumrfz"] });
@@ -13140,7 +13140,7 @@ b({
   shiyumrfz_info: "觉醒技，当你一次造成至少两点伤害后，你获得如下效果并令【蓄击】中[ ]内的数字+1：</br>1.攻击距离+1；</br>2.攻击范围内的其他角色的手牌均对你可见。"
 });
 v("char_204_platnm", "白金，卡西米尔无胄盟刺客，其他履历缺失。在机动作战、歼灭战与巷战中皆表现出极高的战斗技巧与特殊的战术素养。</br>现于凯尔希医生的指导下，作为狙击干员为罗德岛提供服务。");
-const ja = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ma = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_206_gnosis", {
@@ -13160,13 +13160,13 @@ y({
       player: "useCardAfter"
     },
     filter(r, t, e, a) {
-      return t.isPhaseUsing() && !gr(t, r).includes(i.suit(r.card));
+      return t.isPhaseUsing() && !dr(t, r).includes(i.suit(r.card));
     },
     ai: () => !0,
     mark: !0,
     intro: {
       content(r, t, e) {
-        return t.isPhaseUsing() ? `·本回合已使用的花色：${i.translation(gr(t, i.event()))}` : "·不是你的出牌阶段";
+        return t.isPhaseUsing() ? `·本回合已使用的花色：${i.translation(dr(t, i.event()))}` : "·不是你的出牌阶段";
       }
     },
     prompt2(r, t) {
@@ -13246,8 +13246,8 @@ y({
     }
   }
 });
-C("char_206_gnosis", P.colorize("#gray#俯瞰风雪#"));
-function gr(r, t) {
+S("char_206_gnosis", P.colorize("#gray#俯瞰风雪#"));
+function dr(r, t) {
   const e = r.getHistory("useCard", (n) => n !== t && !!n.card), a = [];
   for (let n of e) {
     const o = i.suit(n.card);
@@ -13263,7 +13263,7 @@ b({
   newsiyongmrfz_info: "当你于出牌阶段首次使用的一种花色的牌结算完成后，你可以从牌堆中随机获得一张与此牌点数相同的牌。"
 });
 v("char_206_gnosis", "灵知，前喀兰贸易首席技术执行官。通过喀兰贸易与罗德岛的特别协议，作为干员加入罗德岛。主导了喀兰贸易众多核心技术的开发以及工业设施的设计，同时在喀兰贸易时期就已对源石有相当深入的研究。现作为罗德岛主要研究室的一员，活跃于科研一线。");
-const Ta = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Pa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_213_mostma", {
@@ -13381,7 +13381,7 @@ b({
   shishimrfz_info: "当你于你的出牌阶段或摸牌阶段摸牌时，你可以令此次摸牌数+X，然后你于弃牌阶段开始时弃X-1张牌。（X=本回合你发动此技能的次数+1）"
 });
 v("char_213_mostma", "莫斯提马，企鹅物流员工，总是单独行动，此前履历不详。");
-const Ma = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Aa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_215_mantic", {
@@ -13524,7 +13524,7 @@ b({
   lijimrfz_info: "锁定技，你使用的【杀】需要X张【闪】才可抵消。（X=本回合你使用的牌的花色数）"
 });
 v("char_215_mantic", "狮蝎，履历大部分缺失，已知其入职前曾从事指定对象清除工作，推测身份：杀手。在潜伏、侵扰、突袭敌军阵线等行动中均表现出过硬的战斗技巧。<br>现作为特种干员，为罗德岛提供特别行动服务。");
-const Pa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const qa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_218_cuttle", {
@@ -13614,9 +13614,9 @@ b({
   ruijuemrfz: "锐觉",
   ruijuemrfz_info: "当你[因弃置而失去牌/于摸牌阶段外获得牌]后，你可以[重铸任意张牌/使用一张牌（无距离限制且不计入次数限制）]。"
 });
-C("char_218_cuttle", "<font color='#6495ed'>缄默的杀手</font>");
+S("char_218_cuttle", "<font color='#6495ed'>缄默的杀手</font>");
 v("char_218_cuttle", "安哲拉，伊比利亚出身，干员白炽的保镖，与白炽一同接受罗德岛的雇佣。拥有良好的狙击素养，接受专业培训后，作为狙击干员活跃在各类任务中。");
-const Aa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ea = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_219_meteo", {
@@ -13865,9 +13865,9 @@ b({
   zhimingmrfz_info: "每回合限一次，你可以将一张牌当作与本局游戏中你获得过的‘铭’的同名牌（装备牌和延时锦囊牌除外）使用或打出。"
 });
 v("char_219_meteo", "陨星，前“守林人”组织成员，现自由佣兵，此外履历不详。</br>现作为狙击干员为罗德岛服务，使用手中的弩炮发挥出卓越的范围杀伤力。");
-const qa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ra = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), K = "char_220_grani", rr = [
+}, Symbol.toStringTag, { value: "Module" })), Q = "char_220_grani", tr = [
   {
     //哥本哈根 威灵顿公爵战马
     id: "Copenhagen",
@@ -13962,7 +13962,7 @@ const qa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
       },
       filter(t, e) {
         const a = c.getAllGlobalHistory("everything", (n) => n.player === e && n.name === "phaseJudge").length;
-        return Oa(a);
+        return Da(a);
       },
       async cost(t, e, a) {
         a.storage[r] = (a.storage[r] ?? 0) + 1;
@@ -14047,16 +14047,16 @@ const qa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
       }
     })
   }
-], Ea = rr.map((r) => `${r.id}_skill_${K}`);
-function Ra(r) {
-  const t = `${r.id}_${K}`, e = `${r.id}_skill_${K}`;
+], Oa = tr.map((r) => `${r.id}_skill_${Q}`);
+function $a(r) {
+  const t = `${r.id}_${Q}`, e = `${r.id}_skill_${Q}`;
   J(t, {
     image: te.compilePath(`img:card/${t}.png`),
     type: "equip",
     subtype: `equip${r.slot}`,
     distance: r.slot === 3 ? { globalTo: 1 } : { globalFrom: -1 },
     skills: [e],
-    source: [K],
+    source: [Q],
     ai: {
       equipValue: r.equipValue
     }
@@ -14072,7 +14072,7 @@ function Ra(r) {
     ...r.skill(e)
   });
 }
-k(K, {
+k(Q, {
   sex: "female",
   group: "weimrfz",
   hp: 4,
@@ -14080,10 +14080,10 @@ k(K, {
   skills: ["qishumrfz", "feijumrfz"],
   llm: "Qwen-3.8-Flash"
 });
-C(K, P.colorize("#r永不后退#"));
-v(K, "格拉尼，维多利亚骑警，在突袭战，机动作战，纵深作战等高速运动战领域表现出了较高的天赋。<br>现以合约干员身份为罗德岛各行动组提供支援，并主动承担罗德岛及周边地区的义务巡逻与防卫协助等工作。");
+S(Q, P.colorize("#r永不后退#"));
+v(Q, "格拉尼，维多利亚骑警，在突袭战，机动作战，纵深作战等高速运动战领域表现出了较高的天赋。<br>现以合约干员身份为罗德岛各行动组提供支援，并主动承担罗德岛及周边地区的义务巡逻与防卫协助等工作。");
 b({
-  [K]: "格拉尼",
+  [Q]: "格拉尼",
   qishumrfz: "骑术",
   qishumrfz_info: "①当你使用的【杀】造成伤害后，若你的进攻马栏不为空，你可以将一张手牌当【杀】对一名因此【杀】受到伤害的角色的上家或下家使用（目标须合法）。<br>②锁定技，若你的防御马栏不为空，其他角色只能使用无点数或点数大于你防御马栏中所有牌点数之和的【杀】指定你为目标。",
   feijumrfz: "飞驹",
@@ -14095,7 +14095,7 @@ y({
       targetEnabled(r, t, e) {
         if (t === e || i.name(r) !== "sha" || e.hasEmptySlot(3))
           return;
-        const a = e.getEquips(3).map((o) => i.number(o)).reduce((o, s) => dr(o) + dr(s), 0), n = i.number(r);
+        const a = e.getEquips(3).map((o) => i.number(o)).reduce((o, s) => mr(o) + mr(s), 0), n = i.number(r);
         if (typeof n == "number" && n <= a)
           return !1;
       }
@@ -14105,17 +14105,17 @@ y({
       source: "damageSource"
     },
     filter(r, t, e, a) {
-      return r.card && i.name(r.card) === "sha" && !t.hasEmptySlot(4) && ye(t, [r.player]).length > 0 && t.countCards("h") > 0;
+      return r.card && i.name(r.card) === "sha" && !t.hasEmptySlot(4) && ve(t, [r.player]).length > 0 && t.countCards("h") > 0;
     },
     ai() {
       const r = i.player();
-      return ye(r, [i.event().player]).reduce((t, e) => t + i.effect(e, "sha", r, r), 0);
+      return ve(r, [i.event().player]).reduce((t, e) => t + i.effect(e, "sha", r, r), 0);
     },
     prompt2(r, t) {
-      return `你可以将一张手牌当【杀】对${i.translation(ye(t, [r.player]))}使用`;
+      return `你可以将一张手牌当【杀】对${i.translation(ve(t, [r.player]))}使用`;
     },
     async content(r, t, e) {
-      const a = ye(e, [t.player]), n = await e.chooseCardTarget({
+      const a = ve(e, [t.player]), n = await e.chooseCardTarget({
         filterCard(o, s, u) {
           return !0;
         },
@@ -14146,7 +14146,7 @@ y({
       }
     },
     audio: ["作战中4", "完成高难行动"],
-    derivation: Ea,
+    derivation: Oa,
     trigger: {
       global: "phaseBefore",
       player: "enterGame"
@@ -14156,7 +14156,7 @@ y({
       return r.name != "phase" || c.phaseNumber == 0;
     },
     async content(r, t, e) {
-      const a = rr.map((o) => c.createCard(`${o.id}_${K}`, o.suit, o.number)), n = await e.chooseFakeCard({
+      const a = tr.map((o) => c.createCard(`${o.id}_${Q}`, o.suit, o.number)), n = await e.chooseFakeCard({
         tagName: "飞驹",
         cards: a,
         selectCard() {
@@ -14176,7 +14176,7 @@ y({
     }
   }
 });
-function Oa(r) {
+function Da(r) {
   if (typeof r != "number" || !Number.isInteger(r) || r <= 1)
     return !1;
   if (r <= 3)
@@ -14189,10 +14189,10 @@ function Oa(r) {
       return !1;
   return !0;
 }
-function dr(r) {
+function mr(r) {
   return typeof r == "number" ? r : 0;
 }
-function ye(r, t) {
+function ve(r, t) {
   const e = [];
   for (const a of t) {
     const n = a.getPrevious();
@@ -14202,20 +14202,30 @@ function ye(r, t) {
   }
   return e;
 }
-for (const r of rr)
-  Ra(r);
-const $a = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+for (const r of tr)
+  $a(r);
+const Ha = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_222_bpipe", { pack: "legendSJZX", sex: "female", group: "weimrfz", hp: 4, skills: ["newjuntongmrfz", "newpochengmrfz"] });
 y({
   newjuntongmrfz: {
-    audio: "juntongmrfz",
+    audio: ["作战中1", "作战中2", "作战中3", "作战中4"],
     init(r, t) {
       r.storage[t] = [];
     },
+    onremove(r, t) {
+      delete r.storage[t], delete r.storage.newjuntongmrfz_extra, delete r.storage.newjuntongmrfz_card;
+    },
+    mark: !0,
+    intro: {
+      content(r, t, e) {
+        const a = t.countMark("newjuntongmrfz_extra");
+        return `·已经使用的牌:${Array.isArray(r) && r.length > 0 ? i.translation(r) : "无"}${a > 0 ? `<br>·下次发动【军统①】额外摸${i.cnNumber(a)}张牌` : ""}`;
+      }
+    },
     trigger: {
-      player: ["phaseDrawBegin", "useCard"],
+      player: ["phaseDrawBegin", "phaseJudgeBegin", "useCard"],
       global: "roundStart"
     },
     filter(r, t) {
@@ -14223,7 +14233,9 @@ y({
     },
     forced: !0,
     async content(r, t, e) {
-      t.name === "useCard" ? e.storage.newjuntongmrfz.push(i.name(t.card)) : t.name === "phaseDraw" ? t.cancel() : e.draw(3);
+      t.name === "useCard" ? (e.storage.newjuntongmrfz.push(i.name(t.card)), e.storage.newjuntongmrfz_card = t.card) : ["phaseDraw", "phaseJudge"].includes(t.name) ? (t.cancel(), c.log(e, "跳过了", i.translation(t.name))) : (await e.draw({
+        num: 3 + e.countMark("newjuntongmrfz_extra")
+      }), e.removeAllmark("newjuntongmrfz_extra", !1));
     },
     mod: {
       targetInRange: function(r, t, e, a) {
@@ -14232,10 +14244,28 @@ y({
       selectTarget: function(r, t, e) {
         !t.storage.newjuntongmrfz.includes(i.name(r)) && e[1] != -1 && (i.type(r) === "basic" || i.isSingle(r) && i.type(r) === "trick") && e[1]++;
       }
+    },
+    group: "newjuntongmrfz_damage",
+    subSkill: {
+      damage: {
+        audio: "newjuntongmrfz",
+        trigger: {
+          source: "damageSource"
+        },
+        filter(r, t, e, a) {
+          const n = t.storage.newjuntongmrfz_card;
+          return n && n === r.card;
+        },
+        charlotte: !0,
+        forced: !0,
+        async content(r, t, e) {
+          e.addMark("newjuntongmrfz_extra", 1, !1);
+        }
+      }
     }
   },
   newpochengmrfz: {
-    audio: "pochengmrfz",
+    audio: ["部署1", "部署2"],
     trigger: {
       player: "useCard2",
       source: "dieAfter"
@@ -14294,12 +14324,17 @@ y({
 b({
   char_222_bpipe: "风笛",
   newjuntongmrfz: "军统",
-  newjuntongmrfz_info: "锁定技。<br>①每轮开始时，你摸三张牌；你跳过摸牌阶段。<br>②你首次使用的一种牌名的基本牌或单一目标的普通锦囊牌目标+1且无距离限制。",
+  newjuntongmrfz_info: "锁定技。<br>①每轮开始时，你摸三张牌；你跳过摸牌阶段和判定阶段。<br>②你首次使用的一种牌名的基本牌或单一目标的普通锦囊牌目标+1、无距离限制且此牌每造成一次伤害，你下次发动【军统①】就额外摸一张牌。",
   newpochengmrfz: "破城",
   newpochengmrfz_info: "①当你使用【杀】指定目标后，你可以选择令此牌额外结算一次或额外指定一个目标。<br>②当你杀死一名其他角色后，你可以发动一次【军统①】或重置【军统②】。"
 });
+ae("newjuntongmrfz", (r) => {
+  const t = r.countMark("newjuntongmrfz_extra");
+  return `锁定技。<br>①每轮开始时，你摸${i.cnNumber(3 + t)}${t > 0 ? P.colorize(`#s(3 + ${t})#`) : ""}张牌；你跳过摸牌阶段和判定阶段。<br>②你首次使用的一种牌名的基本牌或单一目标的普通锦囊牌目标+1、无距离限制且此牌每造成一次伤害，你下次发动【军统①】就额外摸一张牌。`;
+});
 v("char_222_bpipe", "风笛，维多利亚皇家近卫学校毕业，在维多利亚军队中服役满3年后，退役并经由陈警司介绍加入罗德岛。</br>接受过系统训练的职业军人，经过一段时间的磨合，在罗德岛的各类任务中体现出了专业的战斗技巧与战术素养。");
-const Da = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+S("char_222_bpipe", P.colorize("#r维多利亚之矛#"));
+const Ua = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_225_haak", { pack: "legendSJZX", sex: "male", group: "limrfz", hp: 3, maxHp: 4, hujia: 1, skills: ["guaijiemrfz", "guaiyaomrfz", "qizhenmrfz"] });
@@ -14467,7 +14502,7 @@ b({
   guaiyaomrfz_info: "锁定技，当你对其他角色造成伤害时，你随机执行下列选项的一项:①回复两点体力（已损失体力值为0则改为获得一点护甲）；②受伤的角色弃置一张牌；③受伤的角色下个摸牌阶段摸牌数-1；④你摸一张牌；⑤受伤角色跳过下个出牌阶段和弃牌阶段（概率最低）。"
 });
 v("char_225_haak", "阿，经龙门鲤氏侦探事务所所长老鲤推荐而来的医疗人员，曾是活跃于龙门灰色地带的知名黑医生。</br>在加入后，展现出了惊人的医疗理论知识储备以及临床经验，但也表现出让人担忧的医疗风格。</br>不过根据凯尔希医生的综合评估，被暂时推荐到医疗装备科和技术开发组。");
-const Ha = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Xa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_242_otter", {
@@ -14657,7 +14692,7 @@ b({
   mihuomrfz_info: "当你受到伤害时，你可以令伤害来源展示你的一张手牌，若此牌有‘咪啵’标记，弃置之，然后此伤害-1。"
 });
 v("char_242_otter", "梅尔，哥伦比亚出身，莱茵生命研究室所属成员，线控机械装置“咪波”的创造者。能力出众，科研能力极强，经营着个人工作室“鲁特拉”。现与罗德岛合作，在建筑、设计、开发方面提供援助。");
-const Ua = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ba = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_245_cello", {
@@ -14779,25 +14814,25 @@ b({
   kongwomrfz: "空我",
   kongwomrfz_info: "锁定技，当你摸牌时，改为从弃牌堆中随机获得等量的牌（不能是本回合你因失去而进入弃牌堆的牌）；出牌阶段，当其他角色因使用而失去牌时，若此牌不是装备牌且你本阶段没有以此法获得过相同牌名的牌，你获得其中至少一张牌。"
 });
-C("char_245_cello", "<font color=#DC143C>感性与自由</font>");
+S("char_245_cello", "<font color=#DC143C>感性与自由</font>");
 v("char_245_cello", "塑心，本名阿尔图罗·吉亚洛，出身于拉特兰、活跃于泰拉大地的著名音乐家。受莱塔尼亚帝国宫廷、拉特兰教皇厅委托，罗德岛与两方签署协议确认，在受相应人员的严格监管下，允许其以干员“塑心”身份暂留罗德岛。");
-const Xa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Na = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_248_mgllan", { pack: "legendSJZX", sex: "female", group: "lymrfz", hp: 3, skills: ["kanchamrfz", "longtengmrfz"] });
-const Ba = {
+const Ja = {
   basic: "mrfz_LTF",
   trick: "mrfz_LTL",
   equip: "mrfz_LTA"
 };
-function mr(r) {
+function hr(r) {
   return r.cards2.filter((t) => i.position(t, r.hs.includes(t) ? r.player : !1) === "d");
 }
-function hr(r, t, e) {
+function zr(r, t, e) {
   const a = h.event, n = a.player;
   return a.targets.includes(e) || n.canUse(a.card, e, !0) === !1 ? !1 : d.filter.targetEnabled2(a.card, n, e);
 }
-function zr(r) {
+function pr(r) {
   const t = h.event;
   return i.effect(r, t.card, t.player, t.player);
 }
@@ -14866,11 +14901,11 @@ y({
     },
     // ① 不在弃牌阶段因弃置而失去牌
     filter: function(r, t) {
-      return t.isPhase("phaseDiscard", !1) || r.type != "discard" || r.getlx === !1 ? !1 : mr(r.getl(t)).length > 0;
+      return t.isPhase("phaseDiscard", !1) || r.type != "discard" || r.getlx === !1 ? !1 : hr(r.getl(t)).length > 0;
     },
     direct: !0,
     async content(r, t, e) {
-      const a = mr(t.getl(e));
+      const a = hr(t.getl(e));
       if (!a.length) return;
       let n = a;
       if (a.length > 1) {
@@ -14900,7 +14935,7 @@ y({
         trigger: { player: "longtengmrfzAfter" },
         async content(r, t, e) {
           e.removeSkill("longtengmrfz_changeI");
-          for (const [a, n] of Object.entries(Ba))
+          for (const [a, n] of Object.entries(Ja))
             if (e.isTypeExpansions("longtengmrfz", a)) {
               e.changeMarkImage("longtengmrfz", n);
               break;
@@ -14946,8 +14981,8 @@ y({
              * "【龙腾】:你可以为此牌 (" + get.translation(trigger.card) + ") 额外指定一个目标", longtengCanAddTarget
              */
             prompt: "【龙腾】:你可以为此牌 (" + i.translation(t.card) + ") 额外指定一个目标",
-            filterTarget: hr
-          }).set("ai", zr).set("targets", t.targets).set("card", t.card).forResult();
+            filterTarget: zr
+          }).set("ai", pr).set("targets", t.targets).set("card", t.card).forResult();
           if (!a?.targets?.length) return;
           !r.isMine() && !r.isOnline() && await c.delayx();
           const n = a.targets;
@@ -14991,8 +15026,8 @@ y({
                     return [1, 2];
                   },
                   prompt: "【龙腾】:你可以为此牌 (" + i.translation(a) + ") 额外指定两个目标",
-                  filterTarget: hr
-                }).set("ai", zr).set("targets", t.targets).set("card", a).forResult();
+                  filterTarget: zr
+                }).set("ai", pr).set("targets", t.targets).set("card", a).forResult();
                 for (const u of s?.targets ?? [])
                   t.targets.push(u), e.line(u);
                 break;
@@ -15030,157 +15065,171 @@ b({
   longtengmrfz_info: "①当你不在弃牌阶段因弃置而失去牌时，你可以将其中一张牌置于一名武将牌上没有“龙腾”角色的武将牌上，此牌称之为“龙腾”；拥有“龙腾”的角色根据“龙腾”牌的类型获得对应的效果：</br>1.基本牌：锁定技，摸牌阶段摸牌数-1，出牌阶段结束时摸一张牌。</br>2.锦囊牌：当你使用一张单一目标的普通锦囊牌时，你可以令此牌的目标+1，若此牌带有伤害标签，你可以令此牌造成的伤害+1，然后本回合此技能失效。</br>3.装备牌：当你使用一张基本牌选择目标后，你可以令此牌的目标+2、伤害基数+1或此牌不计入使用次数。</br>②锁定技，你的准备阶段或你死亡时，你移除全场所有的“龙腾”。"
 });
 v("char_248_mgllan", "麦哲伦，莱茵生命实验室外勤专员，在合作协议的作用下，暂计划以罗德岛为据点，开始新一轮的探索活动。擅长操控高度模块化无人机，因地制宜进行攻击或支援友军。");
-C("char_248_mgllan", "探索者");
-const Na = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+S("char_248_mgllan", "探索者");
+const Za = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
-k("char_249_mlyss", {
-  pack: "legendSJZX",
-  sex: "female",
-  group: "lymrfz",
-  hp: 3,
-  skills: ["yuanliumrfz", "shuilingmrfz", "xinjingshuimrfz"]
-});
+k("char_249_mlyss", { pack: "legendSJZX", sex: "female", group: "lymrfz", hp: 3, skills: ["yuanliumrfz", "shuilingmrfz", "xinjingshuimrfz"] });
+const Y = "yuanliumrfz";
 y({
   yuanliumrfz: {
-    audio: "kaiyuanmrfz",
+    audio: ["部署1", "部署2"],
     trigger: {
       player: "enterGame",
       global: "phaseBefore"
     },
-    direct: !0,
-    locked: !1,
+    forced: !0,
     markimage: "extension/WhichWay/image/skill/miumiuliuxingmrfz.png",
     intro: {
       name: "流形",
       content: "#/3"
     },
+    onremove: !0,
     filter: function(r, t) {
       return r.name != "phase" || c.phaseNumber == 0;
     },
     async content(r, t, e) {
-      let a;
-      if (a = await e.chooseControl().set("choiceList", ["令一名角色摸两张牌", "获得一个‘流形’"]).set("ai", () => [0, 1].randomGet()).forResult(), a.index === 0)
-        a = await e.chooseTarget(!0, "【源流】：令一名角色摸两张牌").set("ai", (n) => i.attitude(e, n) > 2).forResult(), a.targets && (await a.targets[0].draw(2), e.logSkill("kaiyuanmrfz"));
-      else {
-        e.logSkill("kaiyuanmrfz"), e.addMark("yuanliumrfz");
-        return;
-      }
-    },
-    mod: {
-      maxHandcard: function(r, t) {
-        return t + r.countMark("yuanliumrfz");
-      }
+      const n = (await e.chooseTarget({
+        prompt: "【源流】:令一名角色摸两张牌，或选择“取消”令自己获得一个“流形”",
+        ai(o) {
+          return i.attitude2(o) < 0 ? -1 : Math.random() > 0.95 ? 1 : -1;
+        }
+        // forced:true
+      }).forResult()).targets?.[0];
+      n ? await n.draw(2) : e.addMark(Y);
     },
     group: "yuanliumrfz_get",
     subSkill: {
       get: {
-        direct: !0,
+        audio: "yuanliumrfz",
+        forced: !0,
         trigger: {
           player: "phaseUseEnd"
         },
         filter: function(r, t) {
-          return t.getHistory("useCard", function(e) {
-            return e.getParent("phaseUse") == r;
-          }).length > 0 && t.countMark("yuanliumrfz") < 3;
+          return t.countMark(Y) < 3 && _r() > 0;
         },
         async content(r, t, e) {
-          const a = [], n = e.countMark("yuanliumrfz");
-          e.getHistory("useCard", function(o) {
-            return o.getParent("phaseUse") == t && a.add(i.type2(o.card)), !1;
-          }), n + a.length > 3 ? e.addMark("yuanliumrfz", 3 - n) : e.addMark("yuanliumrfz", a.length), e.logSkill("yuanliumrfz");
+          const a = _r(), n = e.countMark(Y), o = a + n > 3 ? 3 - n : a;
+          e.addMark(Y, o);
         }
       }
     }
   },
   xinjingshuimrfz: {
-    audio: "jingshuimrfz",
+    audio: ["作战中1", "作战中2", "作战中3", "作战中4"],
     trigger: {
       player: "useCardToPlayered"
     },
     usable: 1,
     filter: function(r, t) {
       const e = r.getParent("phaseUse"), a = i.type(r.card);
-      return a != "basic" && a != "trick" || !e || e.player != t || !t.hasMark("yuanliumrfz") ? !1 : r.targets && r.targets.length == 1;
+      return a != "basic" && a != "trick" || !e || e.player != t || !t.hasMark(Y) ? !1 : r.targets && r.targets.length == 1;
     },
     prompt: function(r, t) {
-      return "是否移除所有‘源流’并令【" + i.translation(r.card.name) + "】额外结算" + t.countMark("yuanliumrfz") + "次？";
+      return "是否移除所有‘源流’并令【" + i.translation(r.card.name) + "】额外结算" + t.countMark(Y) + "次？";
     },
     check: function(r, t) {
       return !i.tag(r.card, "norepeat");
     },
     async content(r, t, e) {
-      var a = e.countMark("yuanliumrfz");
-      t.getParent().effectCount += a, e.removeMark("yuanliumrfz", 1145141919810, !1);
+      let a = e.countMark(Y);
+      t.getParent().effectCount += a, await e.draw(a), e.removeAllmark(Y);
     }
   },
   shuilingmrfz: {
-    audio: "liuxingmrfz",
+    mod: {
+      maxHandcard(r, t) {
+        return t += r.countMark(Y);
+      }
+    },
+    audio: ["精英化晋升2", "观看作战记录"],
     forced: !0,
     trigger: { player: "damageBegin3" },
     filter: function(r, t) {
-      return t.hasSkill("shuilingmrfz_ban") ? !1 : !r.nature && t.countCards("h") >= t.hp;
+      return !r.nature && t.countCards("h") >= t.hp;
     },
     async content(r, t, e) {
-      t.num--, e.addTempSkill("shuilingmrfz_ban", "phaseEnd");
+      t.num--, e.disableSkill("shuilingmrfz_used", "shuilingmrfz"), e.addTempSkill("shuilingmrfz_tips", "phaseEnd");
     },
     subSkill: {
-      ban: {
+      tips: {
         charlotte: !0,
         mark: !0,
         intro: {
-          content: "本回合已发动过【水灵】"
-        }
-      }
-    }
-  },
-  kaiyuanmrfz: {
-    audio: 2,
-    trigger: {
-      global: "roundStart"
-    },
-    firstDo: !0,
-    filter: function(r, t) {
-      return c.roundNumber == 1;
-    },
-    direct: !0,
-    async content(r, t, e) {
-      let a;
-      if (a = await e.chooseTarget("【开源】:请选择一名角色令其摸两张牌且本局游戏使用【杀】的次数 +1，若该角色是你，你摸一张牌", !0).set("ai", (n) => i.attitude(e, n) > 0).forResult(), a.targets) {
-        const n = a.targets[0];
-        await n.draw(2), n.addSkill("kaiyuanmrfz_buff"), n === e ? (await e.draw(), e.logSkill("kaiyuanmrfz")) : e.logSkill("kaiyuanmrfz", n);
-      }
-    },
-    subSkill: {
-      buff: {
-        mark: !0,
-        intro: {
-          content: "使用【杀】的次数+1"
+          content: "·【水灵】失效"
         },
-        charlotte: !0,
-        mod: {
-          cardUsable: function(r, t, e) {
-            if (r.name == "sha") return e + 1;
-          }
+        onremove(r, t) {
+          r.enableSkill("shuilingmrfz_used");
         }
       }
     }
   }
+  //已废弃
+  // kaiyuanmrfz: {
+  // 	audio: 2,
+  // 	trigger: {
+  // 		global: "roundStart",
+  // 	},
+  // 	firstDo: true,
+  // 	filter: function (event, player) {
+  // 		return game.roundNumber == 1;
+  // 	},
+  // 	direct: true,
+  // 	async content(event, trigger, player) {
+  // 		let result;
+  // 		result = await player
+  // 			.chooseTarget("【开源】:请选择一名角色令其摸两张牌且本局游戏使用【杀】的次数 +1，若该角色是你，你摸一张牌", true)
+  // 			.set("ai", target => {
+  // 				return get.attitude(player, target) > 0;
+  // 			})
+  // 			.forResult();
+  // 		if (result.targets) {
+  // 			const target = result.targets[0];
+  // 			await target.draw(2);
+  // 			target.addSkill("kaiyuanmrfz_buff");
+  // 			if (target === player) {
+  // 				await player.draw();
+  // 				player.logSkill("kaiyuanmrfz");
+  // 			} else {
+  // 				player.logSkill("kaiyuanmrfz", target);
+  // 			}
+  // 		}
+  // 	},
+  // 	subSkill: {
+  // 		buff: {
+  // 			mark: true,
+  // 			intro: {
+  // 				content: "使用【杀】的次数+1",
+  // 			},
+  // 			charlotte: true,
+  // 			mod: {
+  // 				cardUsable: function (card, player, num) {
+  // 					if (card.name == "sha") return num + 1;
+  // 				},
+  // 			},
+  // 		},
+  // 	},
+  // },
 });
+function _r() {
+  return new Set(i.discarded().filterInD("d").map((r) => i.type2(r))).size;
+}
 b({
   char_249_mlyss: "缪尔赛思",
   yuanliumrfz: "源流",
-  yuanliumrfz_info: "①锁定技，游戏开始时，你选择一项：1.令一名角色摸2张牌；2.获得一个“流形”。②锁定技，出牌阶段结束时，你获得X个“流形”（至多为3）。（X=出牌阶段你使用牌的类型）③锁定技，你的手牌上限+X。（X=你的“流形”数）",
+  yuanliumrfz_info: `锁定技，游戏开始时，你令一名角色摸两张牌或令你获得一个“流形”;出牌阶段结束时，你获得X个“流形”标记（至多为3）。（X=${i.poptip("sjzx_centralArea")}内牌的类型数）`,
   xinjingshuimrfz: "净水",
-  xinjingshuimrfz_info: "当你于出牌阶段第一次使用非延时锦囊牌或基本牌指定唯一目标后，你可以令此牌额外结算X次，然后你移除你所有的“流形”。（X=你拥有的“流形”数）",
+  xinjingshuimrfz_info: "当你于出牌阶段使用的普通锦囊牌或基本牌指定唯一目标后，你可以令此牌额外结算Y次，然后你移除你所有的“流形”并摸Y张牌。（Y=你拥有的“流形”数）",
   shuilingmrfz: "水灵",
-  shuilingmrfz_info: "锁定技，每回合限一次，若你的手牌不大于你的体力值，你受到的非属性伤害-1。",
-  kaiyuanmrfz: "源流",
-  kaiyuanmrfz_info: "锁定技，第一轮游戏开始时，你令一名角色摸两张牌且其本局游戏使用【杀】的次数+1，若该角色为你，你额外摸一张牌。"
+  shuilingmrfz_info: "锁定技，当你非属性受到伤害时，若你的手牌数不小于你的体力值，此伤害-1，然后【水灵】本回合失效;你的手牌上限+Y。（Y=你拥有的“流形”数）"
+  //已废弃
+  // kaiyuanmrfz: "源流",
+  // kaiyuanmrfz_info: "锁定技，第一轮游戏开始时，你令一名角色摸两张牌且其本局游戏使用【杀】的次数+1，若该角色为你，你额外摸一张牌。",
 });
-C("char_249_mlyss", "<font color=#6575f1>孑然水灵</font>");
+S("char_249_mlyss", "<font color=#6575f1>孑然水灵</font>");
 v("char_249_mlyss", "缪尔赛思，莱茵生命生态科主任，哥伦比亚生命科学与环境科学领域专家，在特里蒙事件中与罗德岛取得联系，后与罗德岛签订长期合作条款，与生物工程研究室开展多项联合科研项目，并作为先锋干员参与相关作战任务。");
-const Ja = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ga = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_250_phatom", {
@@ -15331,7 +15380,7 @@ b({
   huanxiangmrfz_info: "当你使用或打出一张【闪】或【无懈可击】结算完成后，你可以摸一张牌。"
 });
 v("char_250_phatom", "独自行动于维多利亚及周边地区的刺客傀影，过去行踪难以查定，背景履历尚未完全实证。</br>现作为特种干员加入罗德岛，作战能力优秀，但仍需谨慎对待。");
-const Za = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const La = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_252_bibeak", {
@@ -15460,20 +15509,13 @@ b({
   shehunmrfz_info: "锁定技，你使用【杀】的次数+X。（X=你本局游戏造成伤害的数量，X至多为5）"
 });
 v("char_252_bibeak", "柏喙，雷神工业装备设计师之女，遭遇工厂工人暴动而不幸感染矿石病。</br>现作为医疗救助对象加入罗德岛，依照本人的意愿，允许调入作战部门，她的剑术如同她纺线一般优雅而有韵律。");
-const Ga = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ia = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
-k("char_263_skadi", {
-  pack: "legendSJZX",
-  sex: "female",
-  group: "liemrfz",
-  hp: 4,
-  skills: ["jingliemrfz", "shulangmrfz", "tongmaimrfz"],
-  clans: ["深海猎人"]
-});
+k("char_263_skadi", { pack: "legendSJZX", sex: "female", group: "liemrfz", hp: 4, skills: ["jingliemrfz", "shulangmrfz", "tongmaimrfz"], clans: ["深海猎人"] });
 y({
   jingliemrfz: {
-    audio: 2,
+    audio: ["作战中1", "作战中2"],
     trigger: {
       player: "phaseZhunbeiBegin"
     },
@@ -15481,11 +15523,8 @@ y({
       return c.hasPlayer((e) => e != t && e.countCards("h") > 0);
     },
     async cost(r, t, e) {
-      const a = await e.chooseTarget().set("prompt", i.prompt("shulangmrfz")).set(
-        "prompt2",
-        "你可以观看一名其他角色的手牌并选择其中一张牌，然后该角色选择一项：<br>①失去一点体力，令你获得此牌。<br>②令你视为使用此牌，然后本回合结束阶段你发动一次【鲸猎】。<br>③对你使用一张【杀】，若此杀造成伤害，你翻面，反之执行其他两项。"
-      ).set("filterTarget", (n, o, s) => o != s && s.countCards("h") > 0).set("ai", (n) => {
-        var o = i.event().player, s = i.attitude(o, n), u = 0;
+      const a = await e.chooseTarget().set("prompt", i.prompt("jingliemrfz")).set("prompt2", i.skillInfoTranslation("jingliemrfz")).set("filterTarget", (n, o, s) => o != s && s.countCards("h") > 0).set("ai", (n) => {
+        let o = i.event().player, s = i.attitude(o, n), u = 0;
         return s >= 0 ? u += 2 : u += 5 + n.getDamagedHp(), u += n.countCards("h") / 2;
       }).forResult();
       r.result = a;
@@ -15493,82 +15532,79 @@ y({
     async content(r, t, e) {
       let a = r.targets[0];
       a.countCards("h") == 1 && e.viewHandcards(a);
-      const { links: n } = await e.choosePlayerCard(a, !0, "visible").set("prompt", "【鲸猎】:请选择一张牌").set("position", "h").set("ai", (f) => {
-        var g = i.event().player, m = i.value(f);
+      const { links: n } = await e.choosePlayerCard({
+        target: a,
+        forced: !0,
+        visible: !0
+      }).set("prompt", "【鲸猎】:请选择一张牌").set("position", "h").set("ai", (f) => {
+        let g = i.event().player, m = i.value(f);
         return g.hasUseTarget(f, !1) && (m += 10), i.tag(f, "damage") && (m += 2), i.type2(f) == "equip" && (m -= 10), m;
       }).forResult();
       if (!n) return;
-      let o = [
-        `失去一点体力，令${i.translation(e)}获得${i.translation(n[0])}`,
-        `令${i.translation(e)}视为使用${i.translation(n[0])}，若此牌不能被${i.translation(e)}使用，则改为摸一张牌，然后本回合结束阶段时${i.translation(e)}发动一次【鲸猎】`,
-        `对${i.translation(e)}使用一张【杀】，若此杀造成伤害，${i.translation(e)}翻面，反之执行其他两项`
-      ], s = ["选项一", "选项二"];
+      let o = [`失去一点体力，令${i.translation(e)}获得${i.translation(n[0])}`, `令${i.translation(e)}视为使用${i.translation(n[0])}并摸一张牌，然后本回合结束阶段时${i.translation(e)}发动一次【鲸猎】`, `对${i.translation(e)}使用一张【杀】，若此杀造成伤害，${i.translation(e)}翻面，反之执行其他两项`], s = ["选项一", "选项二"];
       a.hasSha() && a.canUse({ name: "sha" }, e, !1) ? s.push("选项三") : o[2] = '<span style="opacity:0.5">' + o[2] + "（没有或无法使用【杀】）</span>";
-      const { index: u } = await a.chooseControl(s).set("choiceList", o).set("ai", () => {
-        var f = i.event().player, g = h.event.targetx, m = h.event.list, z = h.event.cardx;
+      const { index: u } = await a.chooseControl({ controls: s }).set("choiceList", o).set("ai", () => {
+        let f = i.event().player, g = h.event.targetx, m = h.event.list, z = h.event.cardx;
         if (i.attitude(f, g) > 0) return 1;
         if (!g.hasUseTarget(z, !1)) return 1;
         if (m.length > 2 && g.mayHaveShan(
           f,
           "use",
-          g.getCards("h", (x) => x.hasGaintag("sha_notshan"))
+          g.getCards("h", (p) => p.hasGaintag("sha_notshan"))
         ) && Math.random() > 0.5) {
-          for (var p of f.getCards("h", "sha"))
+          for (let p of f.getCards("h", "sha"))
             if (i.effect(g, p, f, f) > 0) return 2;
         }
         return f.hp == 1 ? 1 : 0;
       }).set("targetx", e).set("list", s).set("cardx", n[0]).forResult();
-      if (typeof u == "number") {
-        var l = c.createEvent("jingliemrfz_after");
-        l.player = e, l.target_jingliemrfz = a, l.card_jingliemrfz = n[0], l.setContent(d.skill.jingliemrfz["index_" + u]);
-      }
+      if (typeof u != "number") return;
+      let l = c.createEvent("jingliemrfz_after");
+      l.player = e, l.target_jingliemrfz = a, l.card_jingliemrfz = n[0], l.setContent(d.skill.jingliemrfz["index_" + u]);
     },
     async index_0(r, t, e) {
       let a = r.target_jingliemrfz, n = r.card_jingliemrfz;
-      await e.gain(n, "gain2"), a.loseHp();
+      await e.gain({
+        cards: [n],
+        animate: "gain2"
+      }), a.loseHp();
     },
     async index_1(r, t, e) {
       r.target_jingliemrfz;
       let a = r.card_jingliemrfz;
-      e.hasUseTarget(a, !1) ? e.chooseUseTarget(
-        {
-          name: a.name,
-          suit: a.suit,
-          number: a.number
-        },
-        !1
-      ) : e.draw(), e.when("phaseJieshuBegin").then(async (n, o, s) => {
-        if (s.hasSkill("jingliemrfz_ban") || !c.hasPlayer((g) => d.skill.jingliemrfz.filter(n, s))) return;
+      e.hasUseTarget(a, !1) && (await e.chooseUseTarget({
+        card: i.autoViewAs({ name: a.name, suit: a.suit, number: a.number }),
+        addCount: !1,
+        nodistance: !0
+      }), await e.draw()), e.when("phaseJieshuBegin").then(async (n, o, s) => {
+        const u = d.skill.jingliemrfz.filter;
+        if (s.hasSkill("jingliemrfz_ban") || !u(n, s)) return;
         s.addTempSkill("jingliemrfz_ban", "phaseJieshuEnd");
-        const u = await s.chooseTarget().set("prompt", i.prompt("jingliemrfz")).set(
-          "prompt2",
-          "你可以观看一名其他角色的手牌并选择其中一张牌，然后该角色选择一项：<br>①失去一点体力，令你获得此牌。<br>②令你视为使用此牌，然后本回合结束阶段你发动一次【鲸猎】。<br>③对你使用一张【杀】，若此杀造成伤害，你翻面，反之执行其他两项。"
-        ).set("filterTarget", (g, m, z) => m != z && z.countCards("h") > 0).set("ai", (g) => {
-          var m = i.event().player, z = i.attitude(m, g), p = 0;
-          return z >= 0 ? p += 2 : p += 5 + g.getDamagedHp(), p += g.countCards("h") / 2;
+        const l = await s.chooseTarget().set("prompt", i.prompt("jingliemrfz")).set("prompt2", i.skillInfoTranslation("jingliemrfz")).set("filterTarget", (f, g, m) => g != m && m.countCards("h") > 0).set("ai", (f) => {
+          let g = i.event().player, m = i.attitude(g, f), z = 0;
+          return m >= 0 ? z += 2 : z += 5 + f.getDamagedHp(), z += f.countCards("h") / 2;
         }).forResult();
-        if (u.targets) {
-          var l = u.targets[0];
-          s.logSkill("jingliemrfz", l);
-          var f = c.createEvent("jingliemrfz_phaseJieshu");
-          f.player = s, f.targets = u.targets, f.setContent(d.skill.jingliemrfz.content);
+        if (l.targets) {
+          let f = l.targets[0];
+          s.logSkill("jingliemrfz", f);
+          let g = c.createEvent("jingliemrfz_phaseJieshu");
+          g.player = s, g.targets = l.targets, g.setContent(d.skill.jingliemrfz.content);
         }
       });
     },
     async index_2(r, t, e) {
       let a = r.target_jingliemrfz, n = r.card_jingliemrfz;
       if (await a.chooseToUse(
-        function(u, l, f) {
-          return i.name(u) == "sha";
+        function(o, s, u) {
+          return i.name(o) == "sha";
         },
         "【鲸猎】:对" + i.translation(e) + "使用一张杀"
-      ).set("forced", !0).set("targetRequired", !0).set("complexSelect", !0).set("filterTarget", function(u, l, f) {
-        return f != h.event.sourcex && !_.selected.targets.includes(h.event.sourcex) ? !1 : l.canUse({ name: "sha" }, f, !1);
-      }).set("sourcex", e), a.hasHistory("useCard", (u) => u.getParent(2) == r && a.hasHistory("sourceDamage", (l) => u.card == l.card)))
+      ).set("forced", !0).set("targetRequired", !0).set("complexSelect", !0).set("filterTarget", function(o, s, u) {
+        return u != h.event.sourcex && !_.selected.targets.includes(h.event.sourcex) ? !1 : s.canUse({ name: "sha" }, u, !1);
+      }).set("sourcex", e), a.hasHistory("useCard", (o) => o.getParent(2) == r && a.hasHistory("sourceDamage", (s) => o.card == s.card)))
         e.turnOver();
       else
-        for (var o = 0; o < 2; o++) {
-          var s = c.createEvent("jingliemrfz_noDamage");
+        for (let o = 0; o < 2; o++) {
+          let s = c.createEvent("jingliemrfz_noDamage");
           s.player = e, s.target_jingliemrfz = a, s.card_jingliemrfz = n, s.setContent(d.skill.jingliemrfz["index_" + o]);
         }
     },
@@ -15579,15 +15615,18 @@ y({
     }
   },
   shulangmrfz: {
-    audio: "zhangenmrfz",
+    audio: ["作战中4", "作战中3"],
     trigger: {
       target: "useCardToTargeted"
+    },
+    onremove(r, t) {
+      delete r.storage.shulangmrfz_round, r.unmarkSkill("shulangmrfz_round");
     },
     filter(r, t) {
       return r.card && r.card.name == "sha" && t.hasSha() && d.filter.targetEnabled({ name: "sha" }, t, r.player);
     },
     check(r, t) {
-      for (var e of t.getCards("hes", "sha"))
+      for (let e of t.getCards("hes", "sha"))
         if (i.effect(r.player, e, t, t) > 0 && i.attitude(t, r.player) < 0)
           return !0;
       return !1;
@@ -15596,14 +15635,50 @@ y({
       return "你可以对" + i.translation(r.player) + "使用一张杀";
     },
     async content(r, t, e) {
-      await e.chooseToUse(function(a, n, o) {
-        return i.name(a) == "sha";
-      }, "请使用一张【杀】").set("forced", !0).set("targetRequired", !0).set("complexSelect", !0).set("shulangmrfz_card", !0).set("filterTarget", function(a, n, o) {
+      await e.chooseToUse({
+        filterCard(a, n, o) {
+          return i.name(a) == "sha";
+        },
+        prompt: "请使用一张【杀】"
+      }).set("forced", !0).set("targetRequired", !0).set("complexSelect", !0).set("shulangmrfz_card", !0).set("filterTarget", function(a, n, o) {
         return o != h.event.sourcex && !_.selected.targets.includes(h.event.sourcex) ? !1 : n.canUse({ name: "sha" }, o, !1);
-      }).set("sourcex", t.player).forResult(), e.hasHistory("useCard", (a) => a && a.card && a.name == "useCard" && e.hasHistory("sourceDamage", (n) => a.card == n.card)) && (t.getParent().excluded.addArray(t.targets), t.player.countGainableCards(e, "he") && e.gainPlayerCard("he", t.player, !0).set("target", t.player).set("complexSelect", !1).set("ai", d.card.shunshou.ai.button));
+      }).set("sourcex", t.player).forResult(), e.hasHistory("useCard", (a) => a && a.card && a.name == "useCard" && e.hasHistory("sourceDamage", (n) => a.card == n.card)) && (t.getParent().excluded.addArray(t.targets), t.player.countGainableCards(e, "he") && e.gainPlayerCard({
+        position: "he",
+        target: t.player,
+        forced: !0
+      }).set("complexSelect", !1).set("ai", d.card.shunshou.ai.button));
     },
-    group: "shulangmrfz_need",
+    group: ["shulangmrfz_need", "shulangmrfz_round", "shulangmrfz_clear"],
     subSkill: {
+      clear: {
+        charlotte: !0,
+        silent: !0,
+        trigger: {
+          global: "roundStart"
+        },
+        firstDo: !0,
+        async content(r, t, e) {
+          e.unmarkSkill("shulangmrfz_round"), e.storage.shulangmrfz_round = !1;
+        }
+      },
+      round: {
+        mod: {
+          cardname(r, t, e) {
+            if (r.name === "shan" && t.storage.shulangmrfz_round === !0) return "sha";
+          }
+        },
+        audio: "shulangmrfz",
+        trigger: {
+          global: "roundStart"
+        },
+        intro: {
+          content: "·你手牌中的【闪】视为【杀】直到本轮结束"
+        },
+        prompt2: "你可以令你手牌中的【闪】视为【杀】直到本轮结束",
+        async content(r, t, e) {
+          e.storage.shulangmrfz_round = !0, e.markSkill("shulangmrfz_round");
+        }
+      },
       need: {
         trigger: { player: "useCardToPlayered" },
         filter(r, t) {
@@ -15621,12 +15696,13 @@ y({
 b({
   char_263_skadi: "斯卡蒂",
   jingliemrfz: "鲸猎",
-  jingliemrfz_info: "准备阶段，你可以观看一名其他角色的手牌并选择其中一张牌，然后该角色选择一项：<br>①失去一点体力，令你获得此牌。<br>②令你视为使用此牌，若你不能使用此牌，则改为摸一张牌，然后本回合结束阶段你发动一次【鲸猎】。<br>③对你使用一张【杀】，若此杀造成伤害，你翻面，反之执行其他两项。",
+  jingliemrfz_info: "准备阶段，你可以观看一名其他角色的手牌并选择其中一张牌，然后该角色选择一项：<br>①失去一点体力，令你获得此牌。<br>②令你视为使用此牌并摸一张牌，然后本回合结束阶段你发动一次【鲸猎】。<br>③对你使用一张【杀】，若此杀造成伤害，你翻面，反之执行其他两项。",
   shulangmrfz: "倏浪",
-  shulangmrfz_info: "①当你成为【杀】的目标时，你可以对使用者使用一张【杀】（不计入使用次数且需要两张【闪】才可抵消），若此【杀】造成伤害，你取消此杀的所有目标并且获得其一张牌。"
+  shulangmrfz_info: "①当你成为【杀】的目标时，你可以对使用者使用一张【杀】（不计入使用次数且需要两张【闪】才可抵消），若此【杀】造成伤害，你取消此杀的所有目标并且获得其一张牌。②每轮开始时，你可以令你手牌中的【闪】视为【杀】直到本轮结束。"
 });
 v("char_263_skadi", "斯卡蒂，赏金猎人，现为罗德岛所雇佣。在过去完成的赏金任务中，于对抗大型生物，破坏硬目标，攻坚战，歼灭战等多类行动中展现出强劲实力，推测与其过往战斗经验相关。成为赏金猎人之前的履历缺失。现于罗德岛某攻坚小队供职，同时身兼单兵任务预备执行干员一职。......");
-const La = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+S("char_263_skadi", P.colorize("#b深海掠食者#"));
+const Fa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_264_f12yin", {
@@ -15650,13 +15726,13 @@ y({
       let a = e.getCards("h", (l) => i.tag(l, "damage"));
       if (!a.length) return;
       const { moved: n } = await e.chooseToMove().set("list", [["牌堆底", a], ["弃牌堆"]]).set("processAI", (l) => {
-        var f = h.event.player, g = l[0][1], m = g.filter((j) => f.hasUseTarget(j)), z = [], p = [], x = 0, w = 0;
-        for (var S of m) {
-          var T = i.color(S);
-          if (T) T == "red" ? x += i.value(S) : w += i.value(S);
+        var f = h.event.player, g = l[0][1], m = g.filter((j) => f.hasUseTarget(j)), z = [], p = [], w = 0, x = 0;
+        for (var C of m) {
+          var T = i.color(C);
+          if (T) T == "red" ? w += i.value(C) : x += i.value(C);
           else continue;
         }
-        return x > w ? z = m.slice().filter((j) => i.color(j) == "red") : z = m.slice().filter((j) => i.color(j) == "black"), z.sort(function(j, M) {
+        return w > x ? z = m.slice().filter((j) => i.color(j) == "red") : z = m.slice().filter((j) => i.color(j) == "black"), z.sort(function(j, M) {
           return i.value(M, f) - i.value(j, f);
         }), p = g.slice().filter((j) => !z.includes(j)), [z, p];
       }).forResult();
@@ -15707,7 +15783,7 @@ b({
   yubianmrfz_info: "结束阶段，你可以使用牌堆底的牌（必须合法），若你因此的使用颜色均相同，你重复这个流程。"
 });
 v("char_264_f12yin", "山，哥伦比亚某建筑业龙头公司CEO之子，举家被竞争对手陷害而入狱，离开监狱后，加入罗德岛。</br>拥有几乎天生为战斗而生的体魄，现作为近卫干员活跃于各种任务的第一线。");
-const Ia = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Va = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_274_astesi", {
@@ -15848,7 +15924,7 @@ b({
   bingmingmrfz_info: "锁定技，第二轮开始时，若场上有星源，你将手牌和手牌上限调整至与其一致。"
 });
 v("char_274_astesi", "星极，哥伦比亚某神秘学组织的会员，经由合作协议被派驻至莱茵生命，职位为文献学顾问。由于共发性矿石病与妹妹一起来到罗德岛，在进行矿石病治疗期间通过测试成为干员。可使用独特的剑技，对近战目标造成类似法术的攻击效果。");
-const Fa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Wa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_285_medic2", {
@@ -15908,9 +15984,9 @@ b({
   linyuanmrfz: "临援",
   linyuanmrfz_info: "每轮开始时，你可以视为使用指定任意目标的【五谷丰登】、【桃园结义】和【以逸待劳】。"
 });
-C("char_285_medic2", "<font color = #b7229c66>一喷起效</font>");
+S("char_285_medic2", "<font color = #b7229c66>一喷起效</font>");
 v("char_285_medic2", "Lancet-2是可露希尔客制化后的雷神存在者™S Typer 62六轮作业平台，圆形的外观让人觉得很可爱所以成为了某种意义上的吉祥物。虽然她说话有时候很消极，但是大家都很喜欢她。<br>Lancet-2在经过可露希尔的改造后，得以满足更多罗德岛内的医疗需求，其器械设备也更注重于消毒和应对源石污染");
-const Va = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ya = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_286_cast3", {
@@ -15975,9 +16051,9 @@ b({
   chongcimrfz: "冲刺",
   chongcimrfz_info: "锁定技，当你防具/防御马栏为空时，你视为拥有“铁骑”/“夷灭”。"
 });
-C("char_286_cast3", "<font color = #b7229c66>冲刺！冲刺！</font>");
+S("char_286_cast3", "<font color = #b7229c66>冲刺！冲刺！</font>");
 v("char_286_cast3", "Castle-3是可露希尔客制化后的雷神存在者™Plus六轮作业平台。受人喜爱，也是吉祥物一般的存在不过因为性格比较正常所以没有获得那么多关注。<br>Castle-3方方正正的形象给人以坚定可靠的感觉。<br>身上的标记可能代表着杀敌数，但是他自己没有手，所以是谁刻上去的呢？");
-const Wa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ka = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_291_aglina", { pack: "legendSJZX", sex: "female", group: "xumrfz", hp: 3, skills: ["xinshimrfz", "fanzhongmrfz"] });
@@ -16173,7 +16249,7 @@ b({
   xinshimrfz_info: "①当你累计获得来自其他角色的两张牌时，你可以从牌堆中获得一张你指定类型的牌；②出牌阶段，你可以选择一张手牌并交给一名其他角色（不能选择相同类型的牌且不能指定相同的角色），当你本回合因此：1.交出一张牌，摸一张牌：2.交出两张牌，获得你牌的角色交给你一张手牌，然后其摸一张牌；3.交出三张牌，你分配一个‘反重’标记给任意其他角色。③锁定技，你因【信使①】获得的牌本回合不计入手牌上限。"
 });
 v("char_291_aglina", "安洁莉娜，本名安心院安洁莉娜。于叙拉古从事情报递送、货物运输等公开活动，推测身份：信使。</br>现作为实习术师干员，为罗德岛提供后勤保障、战场辅助与战术协同等服务。");
-const Ya = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Qa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_293_thorns", {
@@ -16318,7 +16394,7 @@ b({
   re_chaoshengmrfz_info: "结束阶段，若你本回合没有造成过伤害，你可以摸两张牌并恢复一点体力。"
 });
 v("char_293_thorns", "精通剑术与药剂制作的罗德岛前线作战干员，棘刺。出身于伊比利亚腹地，于当地宗教局势动荡中离开家乡，在脱离伊比利亚地区后，受邀来到罗德岛。</br>以上关于伊比利亚境内局势的部分为棘刺自述，尚未完全经过考证。");
-const Ka = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const en = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_300_phenxi", {
@@ -16369,7 +16445,7 @@ b({
   shunanmrfz_info: "①锁定技，你的手牌数不小于你的体力值时，你造成的伤害+<span class=thundertext>1</span>且摸牌阶段额外摸<span class=thundertext>1</span>张牌，若你已损失的体力值不大于你体力上限的一半，有颜色的数字翻倍。②结束阶段，若你的体力值大于1，你失去一点体力。"
 });
 v("char_300_phenxi", "菲亚梅塔，拉特兰公证所高级特派员，职务名经本人强烈要求，不予记录。现依据罗德岛与拉特兰教廷的合作协议，从罗德岛获得补给，并提供相关服务。</br>天启惩罚者？每个月还会更新？让我把这些玩意输进终端归档不如直接杀了我。");
-const Qa = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const rn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_306_leizi", {
@@ -16474,7 +16550,7 @@ b({
   zheqimrfz_info: "锁定技，每回合限一次，当有角色受到雷属性伤害后，当前回合角色获得下列效果直到回合结束：1.使用牌无次数限制；2.使用或打出一张非装备牌时，其须弃置一张手牌。然后此回合结束后，你选择获得其本回合因弃置而进入弃牌堆的牌（每种类型限一张）。"
 });
 v("char_306_leizi", "惊蛰，炎国大理寺所属官员，与罗德岛签署搜查协议后暂居于罗德岛。身具久经训练的战斗技巧与独特的源石技艺，在歼灭战、阵地战中表现优异，但因其身份特殊、动机暧昧，建议在交流中采用被动不合作态度。");
-const en = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const tn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_311_mudrok", {
@@ -16545,7 +16621,7 @@ b({
   sutumrfz_info: "当你使用非转化且非虚拟的牌后，若你的手牌数等于你的当前体力值，你可以视为使用一张基本牌或非延时锦囊牌。"
 });
 v("char_311_mudrok", "萨卡兹雇佣兵泥岩，随军加入整合运动后，由于意见不合而带领小队成员远离了乌萨斯。完全没有参与整合运动在切尔诺伯格及龙门的行动。为了寻找落脚点，泥岩带队前往莱塔尼亚，在当地吸纳了大量莱塔尼亚的感染者后，泥岩被众人推崇为领袖，开始以“泥岩小队”的名号被人所知。尽管泥岩多次试图避免与其他势力发生冲突，但她们依旧一次又一次地被卷入纷争，为了避免更多无意义的牺牲，泥岩选择逃往卡兹戴尔。在卡兹戴尔境内与精英干员Logos接触，随后者前往罗德岛。");
-const rn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const an = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_322_lmlee", {
@@ -16728,7 +16804,7 @@ b({
   jixiongmrfz2: "吉凶"
 });
 v("char_322_lmlee", "老鲤，私家侦探，龙门鲤氏侦探事务所的创办者。在罗德岛于龙门发展业务的过程中与罗德岛相识，随后建立合作关系。为罗德岛提供关于龙门本地信息的咨询服务，也向罗德岛引荐过一些人才。");
-const tn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const nn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_326_glacus", {
@@ -16862,7 +16938,7 @@ b({
   ganraomrfz_info: "每名角色每回合限一次，当你对一名其他角色造成伤害时，你可以声明一张牌，然后其本回合不能使用与你声明的牌相同牌名的牌。"
 });
 v("char_326_glacus", "格劳克斯出生于阿戈尔地区，却早早离开家园四处流浪。机缘巧合下加入罗德岛，现为雷神工业先端武器测评师。除了对尖端武器进行研究调整之外，格劳克斯也会在需求对空特化的任务中亲自出击。");
-const an = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const on = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_332_archet", {
@@ -16978,7 +17054,7 @@ b({
   baofengmrfz_info: "当你使用的有色【杀】造成伤害后，你可以视为使用一张点数与此牌相同的无色【杀】（不计入次数限制）。"
 });
 v("char_332_archet", "设计：今天整点什么、林登万<br>空弦，来自兰登修道院的修士，本名席德佳。出于某些商业合作目的暂留罗德岛，并积极提出各项合作条款，敦促双方展开友好商业来往。同时在各项行动中均展现出极优秀的作战技巧，经本人要求，现作为罗德岛狙击干员活跃于各项任务中。");
-const nn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const sn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_336_folivo", {
@@ -17037,9 +17113,9 @@ y({
       const { links: s } = await e.chooseButton(["稀音", [o, "vcard"]], !0).set("ai", function(m) {
         var z = h.event.target;
         h.event.list;
-        var p = { name: m.link[2] }, x = [];
-        for (var w of z.getCards("e")) x.push(i.name(w));
-        return x.includes(p.name) ? 0 : i.subtype(p) == "equip2" ? 5 : i.subtype(p) == "equip1" ? 4 : i.subtype(p) == "equip5" ? 3 : i.subtype(p) == "equip3" || i.subtype(p) == "equip3" ? 2 : 1;
+        var p = { name: m.link[2] }, w = [];
+        for (var x of z.getCards("e")) w.push(i.name(x));
+        return w.includes(p.name) ? 0 : i.subtype(p) == "equip2" ? 5 : i.subtype(p) == "equip1" ? 4 : i.subtype(p) == "equip5" ? 3 : i.subtype(p) == "equip3" || i.subtype(p) == "equip3" ? 2 : 1;
       }).set("target", a[0]).set("list", n).forResult();
       if (s) {
         for (var u, l = ["heart", "club", "spade", "spade", "diamond"], f = 0; f < n.length; f++)
@@ -17139,7 +17215,7 @@ b({
   chaozaimrfz_info: "准备阶段，你可以弃置场上所有的【镜头】并摸等量的牌，然后因此失去【镜头】的角色获得以下效果直到你的回合开始：<br>1.每回合第一次受到的伤害+1；<br>2.任意角色对其使用牌无次数和距离限制。"
 });
 v("char_336_folivo", "稀音，摄影师，擅长以摄影辅助设备“镜头”为主的机器人小队勘察战场，传达图像信息，同时为罗德岛提供野地考察与战场侦察服务。不过，干员稀音的运动能力十分低下，辅助工作的后勤干员必不可少。");
-const on = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const un = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_338_iris", {
@@ -17174,8 +17250,8 @@ y({
         }
       ).set("ai", function(o) {
         let s = o.link[2], u = h.event.list.map((z) => z[2]), l = h.event.player, f = h.event.getTrigger(), g = f.player, m = (z, p) => {
-          let x = f.getTempCache("alsmengxiangmrfz", p.id + z);
-          return typeof x == "number" || (x = p.getUseValue({ name: z }), f.putTempCache("alsmengxiangmrfz", p.id + z, x)), x;
+          let w = f.getTempCache("alsmengxiangmrfz", p.id + z);
+          return typeof w == "number" || (w = p.getUseValue({ name: z }), f.putTempCache("alsmengxiangmrfz", p.id + z, w)), w;
         };
         if (i.attitude(l, g) < 0) {
           if (!u.includes(s)) return 0;
@@ -17275,9 +17351,9 @@ b({
   rumianmrfz: "入眠",
   rumianmrfz_info: "当你受到伤害后，或你的弃牌阶段结束时，你可以令一名角色在其结束阶段开始时执行一个出牌阶段。"
 });
-C("char_338_iris", "<font color=#77be6a>梦境守护者</font>");
+S("char_338_iris", "<font color=#77be6a>梦境守护者</font>");
 v("char_338_iris", "爱丽丝，罗德岛临时干员，为了归还某位干员的寄存物而来到罗德岛的维多利亚术师，在处理完相关事项前，她会暂留罗德岛。</br>使用着特殊的源石技艺，能够引人沉眠并适当操控梦的内容。");
-const sn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ln = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_340_shwaz", { pack: "legendSJZX", sex: "female", group: "ximrfz", hp: 4, skills: ["heishimrfz", "ruitongmrfz", "junumrfz"] });
@@ -17426,9 +17502,9 @@ b({
   junumrfz: "巨弩",
   junumrfz_info: "限定技，准备阶段，你可以令你本回合获得如下效果：①使用的【杀】无距离限制、使用次数和目标+1；②修改【黑矢】。"
 });
-C("char_340_shwaz", "暮眼锐瞳");
+S("char_340_shwaz", "暮眼锐瞳");
 v("char_340_shwaz", "黑，前汐斯塔市市长SP兼城市治安局局长，随干员锡兰共同加入罗德岛。</br>在隐秘行动、侦察与反侦察、野外求生、弩使用等技能上拥有卓越的造诣。在担任博士护卫的同时，负责一部分罗德岛基层干员的训练工作。");
-const un = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const fn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_350_surtr", {
@@ -17561,7 +17637,7 @@ b({
   mojianmrfz_info: "锁定技，你的非雷属性【杀】均视为火属性【杀】，你的雷属性【杀】均视为普通【杀】；出牌阶段限两次，当你造成火焰伤害后，你摸两张牌。"
 });
 v("char_350_surtr", "史尔特尔，神秘的萨卡兹少女，或因矿石病影响导致缺失性记忆障碍，其情况在矿石病病理中也极其少见，现于罗德岛接受治疗中。</br>在测试过程中展现出了原因不详的强大战斗能力，很快成为了作战干员。");
-const ln = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const cn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_358_lisa", {
@@ -17645,7 +17721,7 @@ b({
   newhemingmrfz_info: "每回合限一次，当你造成伤害后，若此次的伤害为0，你可以令至多两名角色摸X张牌。（X=你攻击范围内的角色数/2，向上取整）"
 });
 v("char_358_lisa", "铃兰，本名丽萨，姓氏应监护人要求隐去。铃兰小姐年纪尚小，但血统使她拥有了优秀的源石技艺天赋。在罗德岛接受治疗的同时，也在接受凯尔希医生的指导。在铃兰小姐主动提出申请后，被批准在有其他干员随行的情况下参与一些低难度任务。");
-const fn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const gn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_362_saga", { pack: "legendSJZX", sex: "female", group: "dongmrfz", hp: 4, skills: ["huanyoumrfz", "wenxinmrfz"] });
@@ -17737,7 +17813,7 @@ y({
       achieve: {
         audio: !0,
         logAudio() {
-          return de.getSkillAudioPath("wenxinmrfz", 1);
+          return me.getSkillAudioPath("wenxinmrfz", 1);
         },
         forced: !0,
         skillAnimation: !0,
@@ -17764,7 +17840,7 @@ y({
       turnOver: {
         audio: !0,
         logAudio() {
-          return de.getSkillAudioPath("wenxinmrfz", 3);
+          return me.getSkillAudioPath("wenxinmrfz", 3);
         },
         trigger: {
           player: "useCardAfter"
@@ -17784,7 +17860,7 @@ y({
       fail: {
         audio: !0,
         logAudio() {
-          return de.getSkillAudioPath("wenxinmrfz", 2);
+          return me.getSkillAudioPath("wenxinmrfz", 2);
         },
         forced: !0,
         trigger: {
@@ -17945,9 +18021,9 @@ b({
   dunkongmrfz: "遁空",
   dunkongmrfz_info: "出牌阶段限一次，你可以令“千相”失效直到回合结束，然后你摸X张牌，且令本回合出【杀】次数+X；你计算与他角色距离-X；手牌上限+X，并于回合结束时随机移除“千相”中记录的一张牌。（X为“千相”记录牌名且至多为5）"
 });
-C("char_362_saga", "<font color = #a52a2a>空即有</font>");
+S("char_362_saga", "<font color = #a52a2a>空即有</font>");
 v("char_362_saga", "嵯峨，东国出身的云游僧人。部分经历不明。原本只是因迷路而误入罗德岛办事处，经询问本人也有求职意向，于是随后通过测试加入罗德岛。在此之前似乎已与罗德岛干员炎熔建立关系。</br>十分善用随身的薙刀，身手矫健，作为先锋干员活跃在前线。");
-const cn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const dn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_376_therex", {
@@ -17999,9 +18075,9 @@ b({
   nuanrenmrfz: "暖人",
   nuanrenmrfz_info: "准备阶段，你可以对自己和一名其他角色造成相当于各自体力值一半（向下取整，至少为1）的伤害。"
 });
-C("char_376_therex", "<font color = #b7229c66>炙热冲击！</font>");
+S("char_376_therex", "<font color = #b7229c66>炙热冲击！</font>");
 v("char_376_therex", "Thermal-EX（型号亦作THRM-EX）是梅尔与可露希尔共同客制化后的雷神挑衅者™熔岩猫魔鬼高性能版作业平台，其中梅尔主要负责他的武器与储能装置的制作和改进。有着非常特别的存在感，对人非常热情，这点很讨周围部分人的喜欢，也有很多人对此不能适应。不过，Thermal-EX仍然无所畏惧，今天也在这个冰冷的世界用光明的自己去温暖他人。<br><br>由于是新型号，独特的具有侵略性的外形让人感觉到有些畏惧，但是Thermal-EX却对此并不介意。无论是谁，在还没看清楚他模样的距离，就会听到Thermal-EX对他的热情问候。不过好像言语中有关“热”的字眼用得实在太多了......");
-const gn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const mn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_377_gdglow", { pack: "legendSJZX", sex: "female", group: "luomrfz", hp: 3, skills: ["dianshanmrfz", "shidemrfz"] });
@@ -18083,7 +18159,7 @@ b({
   shidemrfz_info: "锁定技，当你使用或打出，或因弃置失去一张牌时，若你的武将牌没有被横置，则横置之，反之重置之；当你武将牌被重置时，你摸一张牌。"
 });
 v("char_377_gdglow", "澄闪，罗德岛后勤干员，主要工作地点为罗德岛理发室，一般情况下不作为外勤干员派遣。使用特殊形制的法杖，操控“浮标”对敌人进行打击。");
-const dn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const hn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_391_rosmon", { pack: "legendSJZX", sex: "female", group: "luomrfz", hp: 3, skills: ["zhangyimrfz", "chongjimrfz", "nianshoumrfz"] });
@@ -18348,15 +18424,15 @@ b({
   chongjimrfz: "冲击",
   chongjimrfz_info: "当你使用的【杀】造成伤害后，你可以对与受伤角色座次相邻的其他角色造成一点伤害，然后其弃置X张手牌。（X=本次你造成的伤害数）"
 });
-C("char_391_rosmon", "<font color=#f91c01>勿忘我</font>");
+S("char_391_rosmon", "<font color=#f91c01>勿忘我</font>");
 v("char_391_rosmon", "迷迭香，罗德岛精英干员，熟练掌握极稀有的源石技艺，于对抗大型生物，破坏硬目标，设施紧急制动与中断小规模冲突等任务中表现出色，并于攻坚战、阵地战与歼灭战中体现出极强的战场掌控力与显著的战术价值。现由凯尔希指派，作为歼灭战的核心发起人之一发挥作用。</br><span class=firetext>迷迭香的所有其他档案皆移入高权限资料库。</span>");
-const mn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const zn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), Le = ["weiyimrfz_handcard", "weiyimrfz_draw"], Ye = [
+}, Symbol.toStringTag, { value: "Module" })), Ie = ["weiyimrfz_handcard", "weiyimrfz_draw"], Ke = [
   { tier: 3, skill: "jsrgbahu", name: "跋扈" },
   { tier: 4, skill: "jsrghuozhong", name: "惑众" }
 ];
-function hn() {
+function pn() {
   const r = {};
   for (const t in d.character) {
     const e = d.character[t];
@@ -18368,28 +18444,28 @@ function hn() {
   }
   return r;
 }
-function Ce(r) {
+function je(r) {
   return r.getSkills().filter((t) => t != "weiyimrfz" && d.skill[t] && d.skill[t].zhuSkill === !0);
 }
-function pr(r, t) {
+function br(r, t) {
   return r.hasSkill("weiyimrfz") && (r.storage.weiyimrfz || 0) >= t;
 }
-function zn(r) {
+function _n(r) {
   const t = r.storage.weiyimrfz || 0, e = r.storage.weiyimrfz_granted || (r.storage.weiyimrfz_granted = []);
   let a = !1;
-  for (const n of Ye) {
+  for (const n of Ke) {
     const o = t >= n.tier && !!d.skill[n.skill], s = e.includes(n.skill);
     o && !s ? (r.addSkill(n.skill), e.push(n.skill), a = !0) : !o && s && (r.removeSkill(n.skill), e.remove(n.skill), a = !0);
   }
   a && r.syncStorage("weiyimrfz_granted");
 }
-function he(r) {
-  r.storage.weiyimrfz = Ce(r).length, r.syncStorage("weiyimrfz"), zn(r), r.hasSkill("weiyimrfz") && r.markSkill("weiyimrfz");
+function ze(r) {
+  r.storage.weiyimrfz = je(r).length, r.syncStorage("weiyimrfz"), _n(r), r.hasSkill("weiyimrfz") && r.markSkill("weiyimrfz");
 }
-function Ie(r) {
+function Fe(r) {
   r.hasSkill("guizhoumrfz") && r.markSkill("guizhoumrfz");
 }
-function pn(r, t) {
+function bn(r, t) {
   c.broadcastAll((e, a) => {
     const n = d.skill[e];
     if (!n || (n.guizhouGroup = a, n.guizhouWrapped)) return;
@@ -18408,7 +18484,7 @@ function pn(r, t) {
     };
   }, r, t);
 }
-async function _r(r) {
+async function kr(r) {
   const t = c.filterPlayer();
   if (!t.length) return;
   let e;
@@ -18419,7 +18495,7 @@ async function _r(r) {
     ai: (n) => (n.isDamaged() ? 1 : 0) + i.attitude(r, n) / 2
   }).forResult())?.targets?.[0], e && (await e.chooseDrawRecover({ target: e, forced: !0, num1: 2, num2: 1, logSkill: "guizhoumrfz" }), e != r && await r.chooseDrawRecover({ target: r, forced: !0, num1: 2, num2: 1, logSkill: "guizhoumrfz" }));
 }
-const _n = (r = "char_393_toledo") => {
+const kn = (r = "char_393_toledo") => {
   k(r, {
     hp: 3,
     sex: "female",
@@ -18428,7 +18504,7 @@ const _n = (r = "char_393_toledo") => {
     pack: "epicSJZX",
     designer: ["Flandre"],
     llm: "Qwen-3.8-Flash"
-  }), C(r, P.colorize("#blue#“贵胄血脉”#")), v(r, "自称伊比利亚王室海军将领后裔、失落的贵族——德·托莱多家族成员，在伊比利亚各地招揽了一大批拥护者。但由于该干员口述的经历与审判庭档案记录严重不符，她的职业在人事部重新登记时，被划定为自由职业。德·托莱多由干员艾丽妮推荐加入罗德岛。她的口才和对伊比利亚的了解，足以辅助伊比利亚办事处的干员完成基础工作。"), b({
+  }), S(r, P.colorize("#blue#“贵胄血脉”#")), v(r, "自称伊比利亚王室海军将领后裔、失落的贵族——德·托莱多家族成员，在伊比利亚各地招揽了一大批拥护者。但由于该干员口述的经历与审判庭档案记录严重不符，她的职业在人事部重新登记时，被划定为自由职业。德·托莱多由干员艾丽妮推荐加入罗德岛。她的口才和对伊比利亚的了解，足以辅助伊比利亚办事处的干员完成基础工作。"), b({
     [r]: "托莱多",
     guizhoumrfz: "贵胄",
     guizhoumrfz_info: "锁定技，游戏开始时，你从每个势力中随机获得两个主公技；你发动主公技时，无视其发动条件中的身份和势力限制;当你失去主公技后，你令一名角色选择摸两张牌或回复一点体力，若该角色不是你，你执行一次相同的效果。",
@@ -18445,7 +18521,7 @@ const _n = (r = "char_393_toledo") => {
         content: function(t, e) {
           const a = e.storage.guizhoumrfz;
           if (!a || typeof a != "object") return "尚未获得主公技";
-          const n = Ce(e);
+          const n = je(e);
           return n.length ? `现有${i.cnNumber(n.length)}个主公技：<br>${n.map((o) => i.translation(o)).join("、")}` : "已失去全部主公技";
         }
       },
@@ -18455,18 +18531,18 @@ const _n = (r = "char_393_toledo") => {
         return (t.name != "phase" || c.phaseNumber == 0) && e.storage.guizhoumrfz === void 0;
       },
       async content(t, e, a) {
-        const n = {}, o = hn(), s = d.group.filter((l) => typeof l == "string" && !!l);
+        const n = {}, o = pn(), s = d.group.filter((l) => typeof l == "string" && !!l);
         for (const l of s) {
           const f = (o[l] || []).filter((g) => !a.hasSkill(g));
           for (const g of f.randomGets(2)) n[g] = l;
         }
         a.storage.guizhoumrfz = n, a.hasSkill("weiyimrfz") || a.addSkill("weiyimrfz");
         const u = Object.keys(n);
-        for (const l of u) pn(l, n[l]);
+        for (const l of u) bn(l, n[l]);
         for (const l of u) a.addSkill(l);
-        for (const l of Le.concat("guizhoumrfz_check"))
+        for (const l of Ie.concat("guizhoumrfz_check"))
           a.skills.includes(l) || a.addSkill(l);
-        he(a), a.syncStorage("guizhoumrfz"), Ie(a), u.length && c.log(a, "获得了主公技", ...u.map((l) => i.translation(l)));
+        ze(a), a.syncStorage("guizhoumrfz"), Fe(a), u.length && c.log(a, "获得了主公技", ...u.map((l) => i.translation(l)));
       },
       onremove: function(t) {
         const e = t.storage.guizhoumrfz;
@@ -18477,7 +18553,7 @@ const _n = (r = "char_393_toledo") => {
         if (Array.isArray(a))
           for (const n of a) t.removeSkill(n);
         delete t.storage.weiyimrfz_granted;
-        for (const n of Le.concat("guizhoumrfz_check")) t.removeSkill(n);
+        for (const n of Ie.concat("guizhoumrfz_check")) t.removeSkill(n);
         t.unmarkSkill("guizhoumrfz");
       },
       group: ["guizhoumrfz_check"],
@@ -18497,9 +18573,9 @@ const _n = (r = "char_393_toledo") => {
             let o = 0;
             for (const s of Object.keys(n))
               a.hasSkill(s) || (delete n[s], o++);
-            a.syncStorage("guizhoumrfz"), Ie(a);
-            for (let s = 0; s < o; s++) await _r(a);
-            he(a);
+            a.syncStorage("guizhoumrfz"), Fe(a);
+            for (let s = 0; s < o; s++) await kr(a);
+            ze(a);
           }
         }
       }
@@ -18509,10 +18585,10 @@ const _n = (r = "char_393_toledo") => {
       forced: !0,
       trigger: { player: "phaseUseBegin" },
       filter: function(t, e) {
-        return Ce(e).length > 0 || e.maxHp > 1;
+        return je(e).length > 0 || e.maxHp > 1;
       },
       async content(t, e, a) {
-        const n = Ce(a), o = n.map((f) => `失去主公技【${i.translation(f)}】`);
+        const n = je(a), o = n.map((f) => `失去主公技【${i.translation(f)}】`);
         a.maxHp > 1 && o.push("失去1点体力上限");
         let s = 0;
         if (o.length > 1) {
@@ -18526,9 +18602,9 @@ const _n = (r = "char_393_toledo") => {
         }
         if (s < n.length) {
           const f = n[s], g = a.storage.guizhoumrfz;
-          g && typeof g == "object" && delete g[f], a.removeSkill(f, !0), a.syncStorage("guizhoumrfz"), Ie(a), he(a), await _r(a);
+          g && typeof g == "object" && delete g[f], a.removeSkill(f, !0), a.syncStorage("guizhoumrfz"), Fe(a), ze(a), await kr(a);
         } else
-          await a.loseMaxHp(), he(a);
+          await a.loseMaxHp(), ze(a);
         const u = c.filterPlayer((f) => f != a);
         if (!u.length) return;
         let l;
@@ -18546,21 +18622,21 @@ const _n = (r = "char_393_toledo") => {
       forced: !0,
       mark: !0,
       onremove: !0,
-      derivation: Ye.map((t) => t.skill),
+      derivation: Ke.map((t) => t.skill),
       intro: {
         content: function(t, e) {
-          const a = e.storage.weiyimrfz || 0, n = ["手牌上限+1", "额定摸牌数+1"].concat(Ye.map((o) => d.translate[o.skill] || o.name));
+          const a = e.storage.weiyimrfz || 0, n = ["手牌上限+1", "额定摸牌数+1"].concat(Ke.map((o) => d.translate[o.skill] || o.name));
           return `当前有${i.cnNumber(a)}个主公技：<br>${n.slice(0, a).join("、") || "无效果"}`;
         }
       },
       trigger: { global: "roundStart" },
-      group: Le,
+      group: Ie,
       subSkill: {
         handcard: {
           charlotte: !0,
           mod: {
             maxHandcard(t, e) {
-              if (pr(t, 1)) return e + 1;
+              if (br(t, 1)) return e + 1;
             }
           }
         },
@@ -18571,7 +18647,7 @@ const _n = (r = "char_393_toledo") => {
           forced: !0,
           trigger: { player: "phaseDrawBegin2" },
           filter: function(t, e) {
-            return !t.numFixed && pr(e, 2);
+            return !t.numFixed && br(e, 2);
           },
           async content(t, e, a) {
             e.num++;
@@ -18579,13 +18655,13 @@ const _n = (r = "char_393_toledo") => {
         }
       },
       async content(t, e, a) {
-        he(a);
+        ze(a);
       }
     }
   });
 };
-_n();
-const bn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+kn();
+const yn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_394_hadiya", { pack: "epicSJZX", sex: "female", group: "samrfz", hp: 4, skills: ["juetumrfz"] });
@@ -18633,9 +18709,9 @@ b({
   juetumrfz: "攫土",
   juetumrfz_info: "出牌阶段限一次，你可以摸#r3#张牌，并与一名其他角色进行拼点，没有赢的角色受到一点伤害，若你首次以该点数拼点获胜，本技能红色数字+1，反之若你没赢，本技能红色数字-1（红色数字至少为1）。"
 });
-C("char_394_hadiya", "<font color = #be9b1c66>再造剑角</font>");
+S("char_394_hadiya", "<font color = #be9b1c66>再造剑角</font>");
 v("char_394_hadiya", "哈蒂娅，萨尔贡裔哥伦比亚人，沙漠传奇战士部族剑角的后代。为学习战斗技巧于萨尔贡主动加入罗德岛，现作为罗德岛驻萨尔贡办事处干员，接受战斗训练的同时参与各类外勤任务。");
-const kn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const vn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4009_irene", {
@@ -18778,7 +18854,7 @@ b({
   liechaomrfz_info: "当你造成伤害时，若其没有牌，则你可以令此伤害+1。"
 });
 v("char_4009_irene", "艾丽妮，前伊比利亚审判官，大审判官达里奥的学生。对伊比利亚历史、律法、人文地理等知识十分了解。在“愚人号”事件后，辞去审判官职务，经凯尔希亲自推荐，现以审判庭信使的身份与罗德岛签订合作协议，为应对来自海洋的威胁而做准备。");
-const yn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const xn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_400_weedy", {
@@ -18877,7 +18953,7 @@ b({
   jiangpaomrfz_info: "摸牌阶段，你可以额外摸等同于你有牌的区域数张牌。"
 });
 v("char_400_weedy", "温蒂，生物工程学专家，伊比利亚科研世家出身，罗德岛成立之初就加入的研究者。</br>经过本人长期调整与测试，最终完成了为自己量身定做的武器。并根据自身意愿成为干员，在战场上为同僚提供远程支援。");
-const vn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const wn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4010_etlchi", {
@@ -19053,9 +19129,9 @@ b({
   beinuomrfz: "悖诺",
   beinuomrfz_info: "每回合限三次，你可以将你手牌中最后获得的牌当做手牌中最先获得的牌使用，若这两张牌类别不同，你摸两张牌，然后你可以将一张手牌视为你最先获得的牌。"
 });
-C("char_4010_etlchi", "<font color='#db7093'>玫瑰河畔的引渡人</font>");
+S("char_4010_etlchi", "<font color='#db7093'>玫瑰河畔的引渡人</font>");
 v("char_4010_etlchi", "隐德来希，作为卡兹戴尔情报组织玫瑰河畔的成员，曾为巴别塔提供过情报。伦蒂尼姆战争期间，隐德来希主动与罗德岛取得联系，现以访客身份留舰。<br>需注意，隐德来希与罗德岛并非正式的合约关系，她与罗德岛的一切合作，均视作私人委托。");
-const xn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Sn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4011_lessng", {
@@ -19179,9 +19255,9 @@ b({
   lirenmrfz_info: "准备阶段，你可以弃置你判定区的所有牌，然后流失一点体力。"
 });
 v("char_4011_lessng", "止颂，本名莱辛·梅耶尔，莱塔尼亚路德维格大学旁听生，随干员黑键一同来到罗德岛。经过充分沟通，莱辛与罗德岛签订了合作协议，为罗德岛在莱塔尼亚境内的行动提供协助。");
-const wn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Cn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), ze = window.whichWaySave;
+}, Symbol.toStringTag, { value: "Module" })), pe = window.whichWaySave;
 k("char_4013_kjera", {
   pack: "epicSJZX",
   sex: "female",
@@ -19210,7 +19286,7 @@ y({
     },
     audio: ["任命队长", "行动出发"],
     onremove(r, t) {
-      r.getCards("s", (e) => e.hasGaintag("shengshimrfz_pile")).forEach((e) => e.delete()), r.playerid && (ze[r.playerid].observer_shengshimrfz.disconnect(), ze[r.playerid].observer_shengshimrfz.takeRecords(), ze[r.playerid].observer_shengshimrfz = null);
+      r.getCards("s", (e) => e.hasGaintag("shengshimrfz_pile")).forEach((e) => e.delete()), r.playerid && (pe[r.playerid].observer_shengshimrfz.disconnect(), pe[r.playerid].observer_shengshimrfz.takeRecords(), pe[r.playerid].observer_shengshimrfz = null);
     },
     init(r, t) {
       d.translate.shengshimrfz_pile = "牌堆顶";
@@ -19229,7 +19305,7 @@ y({
           });
           for (let l = 0; l < u.length; l++) {
             let f = u[l];
-            G.addPrompt(f, `第${l + 1}张`, "shengshimrfz_pile"), de.invisableJiZhan(f, r);
+            G.addPrompt(f, `第${l + 1}张`, "shengshimrfz_pile"), me.invisableJiZhan(f, r);
           }
           r.directgains(u, null, "shengshimrfz_pile");
         }
@@ -19237,7 +19313,7 @@ y({
       a.observe(_.cardPile, {
         childList: !0,
         subtree: !1
-      }), r.playerid && (ze[r.playerid] ??= {}, ze[r.playerid].observer_shengshimrfz = a);
+      }), r.playerid && (pe[r.playerid] ??= {}, pe[r.playerid].observer_shengshimrfz = a);
     },
     trigger: {
       player: "chooseToDiscardBegin"
@@ -19357,9 +19433,9 @@ b({
   xueweimrfz: "雪威",
   xueweimrfz_info: "出牌阶段限一次，你可以将一张手牌当作指定至多X名角色且造成冰属性伤害的【火攻】使用，然后你可以重复发动此技能。（X=本回合上次使用【火攻】造成的伤害数，若你本回合没有使用过【火攻】，则X为3）"
 });
-C("char_4013_kjera", "<font color = blue>谢拉格的守护神</font>");
+S("char_4013_kjera", "<font color = blue>谢拉格的守护神</font>");
 v("char_4013_kjera", "谢拉格圣女，恩雅·希瓦艾什，也就是干员初雪的侍女长，作为圣女的代表加入罗德岛。<br>负责初雪秘密访问罗德岛的诸多对接事宜，除此之外，本人也十分享受干员生活，现作为术师干员活跃于各种任务中。");
-const Sn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const jn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("fengwan_zhioumrfz", {
@@ -19374,7 +19450,7 @@ k("fengwan_zhioumrfz", {
 b({
   fengwan_zhioumrfz: "纸偶"
 });
-C("fengwan_zhioumrfz", "<font color='yellow'>栩栩如生</font>");
+S("fengwan_zhioumrfz", "<font color='yellow'>栩栩如生</font>");
 k("char_4016_kazema", {
   pack: "epicSJZX",
   sex: "female",
@@ -19652,8 +19728,8 @@ b({
   huayingmrfz: "化影",
   huayingmrfz_info: "当你进入濒死状态时，你可以切换一个“纸偶”和你当前的武将牌。"
 });
-C("char_4016_kazema", "<font color = #8b008b>折纸生花</font>");
-const Cn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+S("char_4016_kazema", "<font color = #8b008b>折纸生花</font>");
+const Tn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4023_rfalcn", { pack: "epicSJZX", sex: "female", group: "samrfz", hp: 4, skills: ["chihenmrfz", "haomingmrfz"] });
@@ -19833,7 +19909,7 @@ b({
   haomingmrfz_info: "①当你于回合内第一次造成伤害后，你可以从牌堆中获得一张指定类型的牌。<br>②结束阶段，你可以视为一张【决斗】，受到伤害的角色须弃置一半的手牌（向上取整）且其使用牌不能指定有“护”的角色为目标直到其回合结束。<br>③出牌阶段限一次，你可以弃置任意张手牌，然后从牌堆中获得一张牌名字数等同于弃置的牌数的牌。"
 });
 v("char_4023_rfalcn", "红隼，萨尔贡人，舒巴特-阿尔萨兰地区前部落战士，曾与她的兄弟姐妹们一起被当地王酋军强制奴役。在一次逃离后与罗德岛相遇，重返矿场解救了与自己一同受难的工友，后主动申请加入罗德岛。现作为罗德岛萨尔贡办事处干员，接受治疗的同时参与各类外勤任务。");
-const jn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Mn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4026_vulpis", {
@@ -19955,9 +20031,9 @@ b({
   zhuixiongmrfz: "追凶",
   zhuixiongmrfz_info: "出牌阶段限一次，你可以视为对一名在你攻击范围内的其他角色使用一张不可被【无懈可击】响应的【决斗】，此决斗的造成的伤害+Y（Y=因此决斗而打出的【杀】）。"
 });
-C("char_4026_vulpis", "<font color='#d2691e'>完美主义杀手</font>");
+S("char_4026_vulpis", "<font color='#d2691e'>完美主义杀手</font>");
 v("char_4026_vulpis", "忍冬，本名英格丽，铃兰干员的母亲，曾为叙拉古灰厅十二家族之一——威尼斯家族的核心成员，多执行暗杀任务，擅长歼灭战与突袭战，后因故从家族脱离。现以罗德岛驻舰干员身份活动。");
-const Tn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Pn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" })), V = window.whichWaySave.tmpSave;
 k("char_4027_heyak", {
@@ -20150,35 +20226,35 @@ y({
       const { promise: a, resolve: n } = Promise.withResolvers();
       let { draw: o, sha: s, attack: u } = e.storage.tanxianmrfz, l = ["请选择你要交换的数字<br>(选择两个数字即可交换)", "你的额定摸牌数为", [[o], "tdnodes"], "出牌阶段【杀】的使用次数+", [[s], "tdnodes"], "你的基础攻击范围为", [[u], "tdnodes"]], f = _.create.dialog(...l, "hidden"), g = [], m = [], z = f.querySelector(".content"), p;
       r.sort = [];
-      const x = function() {
+      const w = function() {
         if (!(h.dragged || h.justdragged))
           if (!p)
             p = this, this.classList.add("bluebg");
           else if (p === this)
             p.classList.remove("bluebg"), p = null;
           else {
-            const w = p.querySelector("span"), S = this.querySelector("span");
-            [w.textContent, S.textContent] = [S.textContent, w.textContent], [p.link, this.link] = [this.link, p.link], r.sort = Array.from(z.querySelectorAll(".buttons")).map((T) => T.childNodes[0]), p.classList.remove("bluebg"), this.classList.remove("bluebg"), p = null;
+            const x = p.querySelector("span"), C = this.querySelector("span");
+            [x.textContent, C.textContent] = [C.textContent, x.textContent], [p.link, this.link] = [this.link, p.link], r.sort = Array.from(z.querySelectorAll(".buttons")).map((T) => T.childNodes[0]), p.classList.remove("bluebg"), this.classList.remove("bluebg"), p = null;
           }
       };
-      for (let w of Array.from(z.children))
-        if (w.innerHTML !== l[0]) {
-          if (w.classList.contains("caption"))
-            g.push(w);
+      for (let x of Array.from(z.children))
+        if (x.innerHTML !== l[0]) {
+          if (x.classList.contains("caption"))
+            g.push(x);
           else {
-            let S = w.childNodes[0];
-            m.push(w), r.sort.push(S), S.addEventListener("click", x);
+            let C = x.childNodes[0];
+            m.push(x), r.sort.push(C), C.addEventListener("click", w);
           }
-          w.remove();
+          x.remove();
         }
-      for (let w = 0; w < g.length; w++) {
-        let S = _.create.div(".specialDialogWrapper", z);
-        S.appendChild(g[w]), S.appendChild(m[w]);
+      for (let x = 0; x < g.length; x++) {
+        let C = _.create.div(".specialDialogWrapper", z);
+        C.appendChild(g[x]), C.appendChild(m[x]);
       }
       return r.dialog = f, f.open(), r.switchToAuto = function() {
         r.dialog.close(), r.control.close(), c.resume(), h.imchoosing = !1;
       }, r.control = _.create.control("ok", function() {
-        r.dialog.close(), r.control.close(), r.sort = r.sort.map((w) => w.link), c.resume(), h.imchoosing = !1, n(r.sort);
+        r.dialog.close(), r.control.close(), r.sort = r.sort.map((x) => x.link), c.resume(), h.imchoosing = !1, n(r.sort);
       }), c.pause(), a;
     },
     group: "tanxianmrfz_exchange",
@@ -20244,11 +20320,11 @@ y({
             z.push([j, d.translate[f[j]]]);
           for (var p = 0; p < Math.ceil(z.length / 4); p++)
             g.push([z.slice(m, m + 4 >= z.length ? z.length : m + 4), "tdnodes"]), m += 4;
-          const x = await e.chooseButton(g).set("forced", !0).forResult();
-          let w = f[x.buttons[0].link], S = Object.values(d.characterSort[l][w]);
-          for (let j of S)
+          const w = await e.chooseButton(g).set("forced", !0).forResult();
+          let x = f[w.buttons[0].link], C = Object.values(d.characterSort[l][x]);
+          for (let j of C)
             i.character(j)?.skills && i.character(j).skills.forEach((M) => e.addSkill(M));
-          c.log(e, "获得了武将包", `#y${T(l)}`, "的", `#y${d.translate[w]}`, "中所有武将的技能");
+          c.log(e, "获得了武将包", `#y${T(l)}`, "的", `#y${d.translate[x]}`, "中所有武将的技能");
           function T(j) {
             return d.translate[`${j}_character_config`];
           }
@@ -20268,9 +20344,9 @@ b({
   yushenmrfz: "羽神",
   yushenmrfz_info: "锁定技。<br>①当你死亡时，若牌堆中有牌，你销毁之，然后你防止死亡，将体力值调整至1。<br>②回合开始时，你选择获得一个武将包中的所有武将的技能。"
 });
-C("char_4027_heyak", "<font color=#00868B>但为求索</font>");
+S("char_4027_heyak", "<font color=#00868B>但为求索</font>");
 v("char_4027_heyak", "投稿来源：涵涵<br>霍尔海雅，前梅兰德基金会所属特工，在凯尔希医生与博士的引荐下加入罗德岛。</br>擅长单兵作战，并且能够应对各种极端环境，在各类隐秘行动中发挥了重大价值。");
-const Mn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const An = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4031_liesel", {
@@ -20280,7 +20356,7 @@ k("char_4031_liesel", {
   hp: 4,
   pack: "epicSJZX"
 });
-C("char_4031_liesel", P.colorize("#r职业经理#"));
+S("char_4031_liesel", P.colorize("#r职业经理#"));
 b({
   char_4031_liesel: "复奏",
   mutuanmrfz: "募团",
@@ -20289,7 +20365,7 @@ b({
   hengzoumrfz_info: "锁定技，你明置的手牌：<br>1.造成伤害后从牌堆中获得一张黑色牌且此牌的已使用次数-1;<br>2.相同牌名的牌于弃牌阶段计算手牌上限时仅计算一次。"
 });
 window.whichWaySave.tmpSave.hengzoumrfz_discard ??= [];
-let ve = window.whichWaySave.tmpSave.hengzoumrfz_discard;
+let xe = window.whichWaySave.tmpSave.hengzoumrfz_discard;
 y({
   hengzoumrfz: {
     audio: ["作战中3", "作战中4"],
@@ -20313,15 +20389,15 @@ y({
           player: "phaseDiscardBegin"
         },
         async content(r, t, e) {
-          ve = Array.from(new Set(e.getCards("h", (a) => i.is.shownCard(a)).map((a) => a.name)));
+          xe = Array.from(new Set(e.getCards("h", (a) => i.is.shownCard(a)).map((a) => a.name)));
         }
       }
     },
     mod: {
       ignoredHandcard(r, t, e) {
-        if (ve.includes(r.name))
-          return ve.remove(r.name), !1;
-        if (i.is.shownCard(r) && !ve.includes(r.name))
+        if (xe.includes(r.name))
+          return xe.remove(r.name), !1;
+        if (i.is.shownCard(r) && !xe.includes(r.name))
           return !0;
       }
     }
@@ -20362,7 +20438,7 @@ y({
     }
   }
 });
-const Pn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const qn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4037_demetr", {
@@ -20372,7 +20448,7 @@ k("char_4037_demetr", {
   skills: ["huozhimrfz", "qingsuanmrfz"],
   sex: "male"
 });
-C("char_4037_demetr", "<font color = 'blue'>贝洛内家的家主</font>");
+S("char_4037_demetr", "<font color = 'blue'>贝洛内家的家主</font>");
 v("char_4037_demetr", "叙拉古贝洛内家族目前的家主，经干员伺夜介绍，代表贝洛内家族与罗德岛展开情报交换、商品贸易等多项合作。");
 b({
   char_4037_demetr: "贝洛内",
@@ -20406,7 +20482,7 @@ y({
       const a = r.cards;
       await e.loseHp(a.length), await e.discard({ cards: a });
       const n = await e.draw(a.length).forResult();
-      n.cards && An(e, n.cards);
+      n.cards && En(e, n.cards);
     },
     subSkill: {
       effect: {
@@ -20417,10 +20493,10 @@ y({
           player: "loseAfter"
         },
         filter(r, t) {
-          return kr(t).some((e) => r.cards.includes(e));
+          return vr(t).some((e) => r.cards.includes(e));
         },
         async content(r, t, e) {
-          let a = t.cards.filter((o) => kr(e).includes(o)), n = a.length;
+          let a = t.cards.filter((o) => vr(e).includes(o)), n = a.length;
           for (a.forEach((o) => G.removePrompt(o, "huozhimrfz_effect")); n--; )
             await e.draw(2), e.when({ global: "phaseAfter" }).step(async (o, s, u) => {
             }).assign({
@@ -20447,10 +20523,10 @@ y({
       global: "phaseJieshuAfter"
     },
     filter(r, t) {
-      return t.storage.qingsuanmrfz_changed === !0 && br(t) > 0;
+      return t.storage.qingsuanmrfz_changed === !0 && yr(t) > 0;
     },
     async content(r, t, e) {
-      const a = br(e);
+      const a = yr(e);
       await e.recover({ num: a });
       const { targets: n } = await e.chooseTarget({
         prompt: `【清算】:对至多${a}名其他角色造成一点伤害`,
@@ -20487,23 +20563,23 @@ y({
     }
   }
 });
-function br(r) {
+function yr(r) {
   return new Set(r.getHistory("useCard").map((t) => t.cards.map((e) => i.type2(e))).flat()).size;
 }
-let Fe = !1;
-function kr(r) {
+let Ve = !1;
+function vr(r) {
   return r.storage.huozhimrfz ??= [], r.storage.huozhimrfz;
 }
-function An(r, t) {
-  Fe === !1 && r.when({ global: "phaseAfter" }).step(async (e, a, n) => {
-    Fe = !1;
+function En(r, t) {
+  Ve === !1 && r.when({ global: "phaseAfter" }).step(async (e, a, n) => {
+    Ve = !1;
     const o = [];
     c.players.forEach((s) => o.push(...s.getCards("hesx"))), o.forEach((s) => G.removePrompt(s, "huozhimrfz_effect")), n.storage.huozhimrfz = [];
-  }), Fe = !0, r.hasSkill("huozhimrfz_effect") || r.addTempSkill("huozhimrfz_effect", { global: "phaseAfter" }), r.storage.huozhimrfz ??= [], r.storage.huozhimrfz.push(...t), t.forEach((e) => {
+  }), Ve = !0, r.hasSkill("huozhimrfz_effect") || r.addTempSkill("huozhimrfz_effect", { global: "phaseAfter" }), r.storage.huozhimrfz ??= [], r.storage.huozhimrfz.push(...t), t.forEach((e) => {
     G.addPrompt(e, "失去后摸牌", "huozhimrfz_effect");
   });
 }
-const qn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Rn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4039_horn", { pack: "legendSJZX", sex: "female", group: "weimrfz", hp: 4, skills: ["xuezhanmrfz", "dunpaomrfz", "biaohaomrfz"] });
@@ -20677,9 +20753,9 @@ b({
   xuezhanmrfz: "血战",
   xuezhanmrfz_info: "锁定技，当你首次即将死亡时，取消之，然后你将体力值和体力上限调整至2、弃置你的区域内所有牌、摸4张牌并重置你的武将牌。"
 });
-C("char_4039_horn", "<font color=#ed7e78>维多利亚的白狼</font>");
+S("char_4039_horn", "<font color=#ed7e78>维多利亚的白狼</font>");
 v("char_4039_horn", "号角，毕业于维多利亚皇家近卫学校，现为维多利亚风暴突击队第二分队指挥官。于伦蒂尼姆事件中与罗德岛协同作战，经精英干员Misery介绍，与罗德岛签订战略合作条款。");
-const En = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const On = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4042_lumen", {
@@ -20820,7 +20896,7 @@ b({
   yingjimrfz_info: "每轮限一次，其他角色成为延时锦囊牌的唯一目标时，你可以令其恢复一点体力并摸一张牌。"
 });
 v("char_4042_lumen", "流明，经由极境以及凯尔希引荐，现作为罗德岛驻伊比利亚干员，协助罗德岛执行伊比利亚地区感染者的医疗救护工作。同时，流明也会列席罗德岛、阿戈尔、审判庭三方的一系列会议，基于自己的视角提出建议，与各方一起寻找一种协同合作、面对未来的可能。");
-const Rn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const $n = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4045_heidi", {
@@ -20832,7 +20908,7 @@ k("char_4045_heidi", {
 });
 y({
   anxinmrfz: {
-    audio: 2,
+    audio: ["作战中1", "作战中2"],
     trigger: { global: "gainEnd" },
     filter: function(r, t) {
       return r.source === void 0 || !r.source.isIn() || r.source != t || !r.cards ? !1 : r.cards.length > 0;
@@ -20855,8 +20931,8 @@ y({
             nature: m.link[3]
           };
           h.event.player;
-          let p = h.event.target, x = h.event.att, w = p.getUseValue(z, void 0, !0);
-          return z.name == "jiedao" && x < 0 && (w -= 10), (z.name == "tao" || z.name == "shan") && x < 0 && (w -= 5), w * x;
+          let p = h.event.target, w = h.event.att, x = p.getUseValue(z, void 0, !0);
+          return z.name == "jiedao" && w < 0 && (x -= 10), (z.name == "tao" || z.name == "shan") && w < 0 && (x -= 5), x * w;
         }).set("target", t.player).set("att", i.attitude(t.player, e) > 0 ? 1 : -1).forResult(), u = s.links;
         if (!u) continue;
         let l = {
@@ -20870,7 +20946,7 @@ y({
           // gaincards,
           // [1, tmpnum]
           {
-            prompt: `暗信】:请你选择视为${l.nature === void 0 ? "" : i.translation(l.nature)}${i.translation(l.name)}的牌`,
+            prompt: `【暗信】:请你选择视为${l.nature === void 0 ? "" : i.translation(l.nature)}${i.translation(l.name)}的牌`,
             cards: f,
             forced: !0,
             select: [1, g]
@@ -20908,8 +20984,8 @@ y({
             if (i.itemtype(t) == "card" && t.hasGaintag("anxinmrfz")) return e + 1;
           },
           cardname: function(r, t) {
-            let e = r.storage.anxinmrfz;
-            if (i.itemtype(r) == "card" && r.hasGaintag("anxinmrfz")) return e.name;
+            let e = r?.storage?.anxinmrfz;
+            if (e && i.itemtype(r) == "card" && r.hasGaintag("anxinmrfz")) return e.name;
           },
           cardnature(r, t) {
             let e = r.storage.anxinmrfz;
@@ -20920,7 +20996,7 @@ y({
     }
   },
   gongchoumrfz: {
-    audio: 2,
+    audio: ["作战中3", "作战中4"],
     enable: "phaseUse",
     usable: 1,
     filter: function(r, t) {
@@ -21001,9 +21077,9 @@ b({
   yinshimrfz: "隐市",
   yinshimrfz_info: "锁定技，你的回合外，你不能成为任意角色于本回合使用的前X张牌的目标。（X=你有牌的区域数）"
 });
-C("char_4045_heidi", "<font color=#DC143C>风暴中的信使</font>");
+S("char_4045_heidi", "<font color=#DC143C>风暴中的信使</font>");
 v("char_4045_heidi", "海蒂，以小说家的名义在维多利亚活动，同时已担任凯尔希的私人信使多年。因参与市民自救军的行动而遭萨卡兹军抓捕，在罗德岛进入伦蒂尼姆时被救出，随后正式以干员身份加入罗德岛。");
-const On = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Dn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4046_ebnhlz", {
@@ -21156,9 +21232,9 @@ b({
   newjiyinmrfz: "寂音",
   newjiyinmrfz_info: "锁定技，当你使用【杀】指定目标后，其每满足下列一项，其抵消此【杀】所需要的【闪】的数量+1，此【杀】对其造成的伤害+1：<br>①手牌数为全场最多；<br>②体力值为全场最多；<br>③装备区为全场最多。"
 });
-C("char_4046_ebnhlz", "乐理阐释者");
+S("char_4046_ebnhlz", "乐理阐释者");
 v("char_4046_ebnhlz", "黑键，莱塔尼亚平民，于维谢海姆事件中感染矿石病，经干员芙蓉介绍来罗德岛治疗，在源石技艺方面展现出不凡天赋。经考核后，作为外勤干员加入罗德岛。");
-const $n = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Hn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4048_doroth", {
@@ -21244,9 +21320,9 @@ b({
   newmengxiangmrfz: "梦想",
   newmengxiangmrfz_info: "锁定技，你使用与上一次你因弃置而失去的手牌的手牌类型相同的牌无次数和距离限制。"
 });
-C("char_4048_doroth", "<font color=#13a022>绿野幻梦</font>");
+S("char_4048_doroth", "<font color=#13a022>绿野幻梦</font>");
 v("char_4048_doroth", "多萝西，莱茵生命源石技艺应用科主任，在罗德岛选择使用自己的本名作为代号。</br>多萝西·弗兰克斯小姐以“莱茵生命与罗德岛的合作项目负责人”这一身份加入我们，将会在许多研究项目上为罗德岛提供帮助。身为源石技艺应用科的主任，她对源石技艺本身的理解毋庸置疑，而在源石技艺的应用上更是炉火纯青。");
-const Dn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Un = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4051_akkord", {
@@ -21375,9 +21451,9 @@ b({
   tiaoxiemrfz: "调协",
   tiaoxiemrfz_info: "你可以将一张牌当你手牌中其他花色的普通锦囊或基本牌(每轮每种花色限一次)使用。"
 });
-C("char_4051_akkord", "<font color = #8b9dda66>绝对音准</font>");
+S("char_4051_akkord", "<font color = #8b9dda66>绝对音准</font>");
 v("char_4051_akkord", "协律，本名托妮娅·克朗，来自莱塔尼亚偏远小镇的调谐师。于一场暴风雪导致的声场核心过载事故中不慎感染上矿石病，后来经介绍来到罗德岛，接受治疗的同时，致力于为罗德岛的音乐环境提供力所能及的支持与辅助，并作为术师干员协助战斗。");
-const Hn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Xn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4052_surfer", {
@@ -21490,9 +21566,9 @@ b({
   dongximrfz: "洞悉",
   dongximrfz_info: "出牌阶段每名角色限一次，你可以与一名攻击距离内的其他角色各重铸一至两张牌，若重铸的牌均没有花色相同的牌，你对其造成X点伤害并获得其X张手牌，反之，此技能失效直到本阶段结束。（X=其重铸的牌数）"
 });
-C("char_4052_surfer", "<font color='#00008b'>幽灵探险者</font>");
+S("char_4052_surfer", "<font color='#00008b'>幽灵探险者</font>");
 v("char_4052_surfer", "黑钢先遣小组队员蒂拉，代号寻澜。工作能力极强，现由本人申请，以合作干员的身份于罗德岛就职，拓展黑钢与罗德岛合作的前期情报搜集工作。");
-const Un = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Bn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4055_bgsnow", { pack: "legendSJZX", sex: "female", group: "luomrfz", hp: 4, skills: ["ruibimrfz", "sujimrfz"] });
@@ -21618,7 +21694,7 @@ b({
   sujimrfz2_info: ""
 });
 v("char_4055_bgsnow", "鸿雪，自称阿芙朵嘉·锐笔。可确认阿芙朵嘉为其本名，但本人不愿透露真实姓氏。在风险研判后，人事部决定不进行进一步的询问。");
-const Xn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Nn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4056_titi", {
@@ -21772,9 +21848,9 @@ b({
   canshimrfz: "残势",
   canshimrfz_info: "锁定技。<br>①你的手牌上限+X;<br>②其他角色的回合内，若你在其他角色的攻击范围内，其使用的第X张伤害类牌只能指定你为目标。<br>（X = 与你势力相同的角色数）"
 });
-C("char_4056_titi", "<font color = #a52a2a>拂扫除垢</font>");
+S("char_4056_titi", "<font color = #a52a2a>拂扫除垢</font>");
 v("char_4056_titi", "法尔贾万达巴德博物馆现任馆长梅捷缇克缇，只有朋友才可以称她“缇缇”。现以外勤干员的身份与罗德岛展开合作。她也希望能尽自己的全力，修复萨尔贡与米诺斯的关系。");
-const Bn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Jn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4058_pepe", { pack: "legendSJZX", sex: "female", group: "samrfz", hp: 3, skills: ["boqingmrfz", "kuisuimrfz", "lianwenmrfz"] });
@@ -21793,15 +21869,15 @@ y({
       }).set("processAI", (g) => {
         let m = [[], [], []], z = g[0][1], p = i.event().originalHandCards.slice();
         h.currentPhase, i.event().evt;
-        let x = i.player(), w = [...z, ...g[2][1]];
-        w.sort(function(S, T) {
-          return i.value(T, x) - i.value(S, x);
+        let w = i.player(), x = [...z, ...g[2][1]];
+        x.sort(function(C, T) {
+          return i.value(T, w) - i.value(C, w);
         });
-        for (let S = 0; S < p.length; S++)
-          m[2].push(w.shift());
-        for (; w && !(i.value(w[0], x) <= 5); )
-          m[1].push(w.shift());
-        return m[0].addArray(w), m;
+        for (let C = 0; C < p.length; C++)
+          m[2].push(x.shift());
+        for (; x && !(i.value(x[0], w) <= 5); )
+          m[1].push(x.shift());
+        return m[0].addArray(x), m;
       }).set("filterOk", (g) => {
         let m = i.event().originalHandCards;
         return g[2].length == m.length;
@@ -21921,9 +21997,9 @@ b({
   lianwenmrfz: "莲纹",
   lianwenmrfz_info: "每回合限一次，当你受到伤害时，你可以进行判定，若为红色，此伤害-1且伤害来源手牌上限-1直到其回合结束。"
 });
-C("char_4058_pepe", "<font color=#00868B>往昔传承</font>");
+S("char_4058_pepe", "<font color=#00868B>往昔传承</font>");
 v("char_4058_pepe", "佩佩，萨尔贡知名的历史学者，身世显赫，是萨尔贡一位尊贵帕夏的长女。现作为外勤干员协助罗德岛在萨尔贡当地进行一系列考古勘察。");
-const Nn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Zn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4064_mlynar", {
@@ -22099,7 +22175,7 @@ b({
   xingyimrfz_info: "其他角色的回合结束阶段，你可以受到一点伤害，并令一名本回合受到过伤害的其他角色回复一点体力。"
 });
 v("char_4064_mlynar", "设计：落尘星河/林登万<br>玛恩纳·临光，临光家前家主，干员临光与瑕光的叔叔，迄今并未获得过任何形式的骑士封号。于特锦赛后约两个月，接受罗德岛的合作邀请，协助罗德岛处理卡西米尔地区的各项事务。");
-const Jn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Gn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4065_judge", { pack: "legendSJZX", sex: "female", group: "xumrfz", hp: 4, skills: ["newzhidianmrfz", "newpijimrfz"] });
@@ -22291,9 +22367,9 @@ b({
   newpijimrfz: "辟棘",
   newpijimrfz_info: "锁定技，被横置的其他角色不能响应你使用的牌；当你造成伤害后，若该角色被横置，你对所有被横置的角色造成一点伤害。"
 });
-C("char_4065_judge", "<font color=#8F3ED7>斩棘卫法</font>");
+S("char_4065_judge", "<font color=#8F3ED7>斩棘卫法</font>");
 v("char_4065_judge", "斥罪，原为叙拉古城邦法官，通过干员德克萨斯与罗德岛建立联系。于后勤部工作，担任罗德岛法律顾问一职。");
-const Zn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ln = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4066_highmo", {
@@ -22377,9 +22453,9 @@ b({
   paoyingmrfz: "泡影",
   paoyingmrfz_info: "锁定技，准备阶段，若你的手牌数大于你的体力值且你已受伤，你将你的手牌调整至与你体力值一致，然后回复等同于你弃置的牌的数量（至多为2）点体力。"
 });
-C("char_4066_highmo", "<font color=#8ccfcc>归于海潮</font>");
+S("char_4066_highmo", "<font color=#8ccfcc>归于海潮</font>");
 v("char_4066_highmo", "海沫，在某次针对伊比利亚地区的行动中受到波及，作为伤员被带回本舰施行救治。经考察并结合测试结果，批准其成为外勤干员，于伊比利亚地区周边支援各项任务。");
-const Gn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const In = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4071_peper", {
@@ -22422,11 +22498,11 @@ y({
         let g = l[0][1].slice(), m = f.getCards("h");
         if (m.length === 0)
           return [g, []];
-        let z = Math.max(...g.map((S) => i.value(S))), p = Math.min(...m.map((S) => i.value(S))), x = 0, w = i.event().num;
-        for (; p < z && x < w; ) {
-          x++;
-          let S = g.map((j) => i.value(j)).indexOf(z), T = m.map((j) => i.value(j)).indexOf(p);
-          [g[S], m[T]] = [m[T], g[S]], z = Math.max(...g.map((j) => i.value(j))), p = Math.min(...m.map((j) => i.value(j)));
+        let z = Math.max(...g.map((C) => i.value(C))), p = Math.min(...m.map((C) => i.value(C))), w = 0, x = i.event().num;
+        for (; p < z && w < x; ) {
+          w++;
+          let C = g.map((j) => i.value(j)).indexOf(z), T = m.map((j) => i.value(j)).indexOf(p);
+          [g[C], m[T]] = [m[T], g[C]], z = Math.max(...g.map((j) => i.value(j))), p = Math.min(...m.map((j) => i.value(j)));
         }
         return [g, m];
       }).set("num", e.storage.suozemrfz.length).set("cardsh", e.getCards("h")).forResult(), s = e.getCards("h", (l) => o[0].includes(l)), u = n.filter((l) => o[1].includes(l));
@@ -22467,9 +22543,9 @@ b({
   youyimrfz: "游移",
   youyimrfz_info: "锁定技，结束阶段，你选择移除‘索赜’中一半（向上取整）被记录的牌的名字，然后你视为使用被移除牌中的一张牌。"
 });
-C("char_4071_peper", "<font color=#DC143C>蹒跚求索</font>");
+S("char_4071_peper", "<font color=#DC143C>蹒跚求索</font>");
 v("char_4071_peper", "明椒，萨卡兹雇佣兵中的一员，自哥伦比亚被曼弗雷德召集至伦蒂尼姆，后因理念不合而带小队脱离原本阵营，受袭途中被搭救。<br>现接受罗德岛雇佣，为作战小队提供战场医疗支援。");
-const Ln = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Fn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4072_ironmn", { pack: "legendSJZX", sex: "male", group: "weimrfz", hp: 4, skills: ["jigongmrfz", "jiefeimrfz"] });
@@ -22624,7 +22700,7 @@ b({
   jiefeimrfz_info: "①当【支援装备】被移出游戏时，你可以进行判定，若为红色，你摸一张牌并可令一名角色装备与此次被移出游戏的【支援装备】类型相同的【支援装备】。②锁定技，[任意角色的回合结束阶段，若其装备区有【支援装备】/【支援装备】进入弃牌堆时]，将此牌[置入弃牌堆/移出游戏]。"
 });
 v("char_4072_ironmn", "白铁，机械工程师，伦蒂尼姆市民自救军十一小队队长。于伦蒂尼姆事件中与罗德岛协同作战，后与罗德岛签订长期合作条款，作为工程干员与行动队成员活跃在维多利亚地区的各项任务中。");
-const In = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Vn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4079_haini", {
@@ -22747,9 +22823,9 @@ b({
   cehuimrfz: "测绘",
   cehuimrfz_info: "一名角色的结束阶段，若你的手牌数与本回合开始时你的手牌数不一样，你可以用本回合因弃置而进入弃牌堆的牌与一名其他角色拼点，若你赢，你展示牌堆顶3张牌并使用之。"
 });
-C("char_4079_haini", "<font color=#00868B>山静水流开画景</font>");
+S("char_4079_haini", "<font color=#00868B>山静水流开画景</font>");
 v("char_4079_haini", "海霓，本名卢契拉，阿戈尔人，隶属技术院设施管理所，于穹顶系统担任穹顶管理员与洋流测绘员。阿戈尔与陆地建立联系后，卢契拉出于个人兴趣，以个人名义与罗德岛达成合作，不定期前来进行文化交流。<br>现以“海霓”为代号，登记为罗德岛合作干员。");
-const Fn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Wn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4080_lin", {
@@ -22922,7 +22998,7 @@ b({
   zhenzamrfz_rewrite_info: "①锁定技，游戏开始时你获得一个‘壁’标记；当有角色获得‘壁’标记时，若其没有护甲，其获得一点护甲；每轮各限两次，每名角色的准备阶段或有其他角色因你造成的伤害而进入濒死状态时，若你没有‘壁’标记，你获得一个‘壁’标记。②有‘壁’标记的角色受到伤害后，若其因此伤害触发过护甲且没有护甲，其可以随机获得攻击范围内一名其他角色的两张牌并对其造成一点伤害。"
 });
 v("char_4080_lin", "林，本名林雨霞，龙门人。本职工作不明，本人提供的档案资料信息十分有限，同样存疑。</br>于“玉门事件”后，主动提出与罗德岛正式建立合作。为罗德岛在龙门收治感染者的工作提供帮助。");
-const Vn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Yn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4081_warmy", {
@@ -23099,7 +23175,7 @@ b({
   nuanxiangmrfz_info: "每回合限一次，当你使用或打出的一张转化牌结算完毕后，你可以令至多X名角色摸一张牌。（X=该牌对应的实体牌数）"
 });
 v("char_4081_warmy", "温米，出生于雷姆必拓的一座矿业小镇，虽年纪尚小，却在烹饪、机械修理等技术领域展露出了出色的天分。经干员暴行推荐，在监护人阿兰娜的陪同下来到罗德岛接受治疗，同时在舰上学习源石技艺基础课程。");
-const Wn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Kn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4082_qiubai", {
@@ -23245,9 +23321,9 @@ b({
   wenxuemrfz: "问雪",
   wenxuemrfz_info: "当你使用【杀】选择目标后，你可以令至多2名被横置的角色或判定区内有牌的角色（目标必须合法）成为此【杀】的目标；同一回合，每当你对其他角色累计使用2的X倍张的非虚拟【杀】时，你可以视为使用X张【杀】（不计入次数限制）。"
 });
-C("char_4082_qiubai", "<font color=#1885f2>春江逢雪</font>");
+S("char_4082_qiubai", "<font color=#1885f2>春江逢雪</font>");
 v("char_4082_qiubai", "仇白，剑客，出生于炎国姜齐城附近的水寨，后因家庭变故离开故乡，常年行走于炎国各地，并无固定居所与工作。</br>经调查，仇白曾在不同事件中与多位干员有过接触，后接受罗德岛的合作邀请，为罗德岛在炎国境内的各项事务提供支持。");
-const Yn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Qn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4087_ines", {
@@ -23534,7 +23610,7 @@ b({
   yingshaomrfz_info: "①当你脱离濒死状态时，若场上没有‘影哨’标记，你可以令使你进入濒死状态的角色获得一个‘影哨’标记；锁定技，拥有‘影哨’标记的角色手牌上限-1，每回合至多使用1张杀。②锁定技，当你进入濒死状态时，若场上有‘影哨’，你移去‘影哨’标记并对拥有‘影哨’标记的角色造成一点伤害，然后你将体力值回复至2并失去【影哨】。"
 });
 v("char_4087_ines", "伊内丝，前萨卡兹佣兵头目。曾短暂参与卡兹戴尔的混乱内战，直到切尔诺伯格事件时，她借助假死彻底消失在所有人的视野中。此后，伊内丝隐藏了自己的踪迹，但通过最近的伦蒂尼姆事件，她正式与罗德岛恢复了联系。期间她经历了什么无从查验，最后在阿斯卡纶的担保下与罗德岛签订了战略合作条款。");
-const Kn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ei = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4088_hodrer", {
@@ -23755,7 +23831,7 @@ b({
   siyanmrfz_info: "出牌阶段，当你使用【杀】选择唯一目标后，若该角色上回合轮对你造成过伤害或你本回合对其造成过伤害，你可以流失一点体力，令其流失一点体力并选择一项：1.无法响应此【杀】；2.弃置两张手牌，然后若此牌造成了伤害且此牌花色为♦，你回复一点体力。"
 });
 v("char_4088_hodrer", "赫德雷，前萨卡兹佣兵头目。早期履历不详，曾作为护卫部队的一员参与了巴别塔的转移，在巴别塔解体后离开。此后曾以整合运动所属萨卡兹雇佣兵的身份与伊内丝、W一起出现在切尔诺伯格，并在切尔诺伯格事件后消失。再次出现时，赫德雷已在伦蒂尼姆的军事委员会中任职。在取得重要情报后，赫德雷离开军事委员会，同罗德岛重新取得联系。在与阿米娅沟通后，赫德雷再次和罗德岛签订了战略合作条款。");
-const Qn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ri = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4093_frston", {
@@ -23835,7 +23911,7 @@ b({
   shantanmrfz_info: "①当有其他角色获得牌后，你可以摸一张牌，然后若你手牌是全场唯一最多的，本轮【善谈①】失效。</br>②每回合限一次，当其他角色有牌因弃置进入弃牌堆时，你可以弃置一张牌，令其获得其弃置的牌。"
 });
 v("char_4093_frston", "S-C型四轮作业平台Friston-3，罗德岛智能作业平台研发团队正式成立后的首个成果。Friston-3由可露希尔亲自主持概念设计、落地组装与测试应用，依托于PRTS，实现了从底层代码到外部模块的全面革新。相比罗德岛上的其他改型作业平台，他更加轻便，却拥有更为全面也更为稳定的性能，现作为重装干员参与相关作战任务。</br>【权限记录】</br>有关Friston-3核心代码的来源、编写思路及更多的设计细节，暂不向各位干员开放查询权限，如有疑问可直接咨询可露希尔。");
-const ei = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ti = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4098_vvana", {
@@ -24018,9 +24094,9 @@ b({
   yunjiaomrfz: "韵脚",
   yunjiaomrfz_info: "锁定技，出牌阶段，当你使用牌时，若此牌的牌名与你本局游戏使用的上一张牌的牌名押韵，你重置武将牌上的技能。"
 });
-C("char_4098_vvana", "<font color=#efd02a>金盏花</font>");
+S("char_4098_vvana", "<font color=#efd02a>金盏花</font>");
 v("char_4098_vvana", "薇薇安娜·德罗斯特，莱塔尼亚施彤领选帝侯霍赫贝格家族后裔，前卡西米尔人气竞技骑士。经耀骑士临光举荐，在罗德岛登记为合作干员。</br>擅长使用光影类源石技艺，配以华丽的剑术技巧，能在战场上灵活御敌。驻留本舰期间将为罗德岛提供战术与外勤任务支援。");
-const ri = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ai = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4100_caper", { pack: "rareSJZX", sex: "female", group: "bomrfz", hp: 4, skills: ["xiyumrfz"] });
@@ -24108,7 +24184,7 @@ b({
   xiyumrfz_info: "出牌阶段限一次，你可以将一张手牌交给一名其他角色，然后你对其视为使用一张【杀】（不计入次数限制），于此杀结算完毕后，你获得其手牌中与你交给其的牌花色相同的牌和与此杀结算过程中其使用或打出过的牌花色相同的牌。"
 });
 v("char_4100_caper", "跃跃，本名卡莉·兰德，活跃于玻利瓦尔境内冲突频发的地区，承接各方势力的短期雇佣，暗中给敌对势力制造混乱。</br>为寻求新工作主动接触了当地的罗德岛办事处，对外勤干员的工作表现出浓厚兴趣，双方彼此了解后签订了合作协议。");
-const ti = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ni = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4102_threye", {
@@ -24231,7 +24307,7 @@ b({
   jieshimrfz_info: "一名角色的出牌阶段开始时，你可以弃置一张牌，然后猜测其本阶段前三张牌分别使用的类型（对其不可见），当其本阶段使用的第一、二和三张牌结算完毕后，若你猜测正确，你摸X张牌，然后你可以对其造成X-1（至多为1）点伤害。（X=你此次猜对的次数）"
 });
 v("char_4102_threye", "干员设计：今天整点什么，林登万<br>干员凛视，隐居于萨米北部冬牙群山的独眼巨人族群的一员，据称该族群拥有能预见未来的源石技艺。<br>为了其预见的某种未来，正在积极主动地向各方寻求合作，现与罗德岛达成协议，为罗德岛在萨米及其北方冰原上的相关事务提供帮助。");
-const ai = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ii = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4110_delphn", { pack: "epicSJZX", sex: "female", group: "weimrfz", hp: 3, skills: ["zhuofengmrfz", "qianggongmrfz"] });
@@ -24336,9 +24412,9 @@ b({
   qianggongmrfz: "抢攻",
   qianggongmrfz_info: "锁定技，你每阶段使用的第一张【杀】获得如下效果：<br>1.无距离限制；<br>2.伤害基数+1；<br>3.造成伤害后重置你武将牌上的一个技能。"
 });
-C("char_4110_delphn", "<font color=#FFF68F>濯洗剑锋</font>");
+S("char_4110_delphn", "<font color=#FFF68F>濯洗剑锋</font>");
 v("char_4110_delphn", "戴菲恩，曾作为情报人员在诺伯特区活动多年，后以典范军成员的身份参与了伦蒂尼姆周边的一系列战役。在维多利亚事件结束后，同罗德岛达成了一系列战略合作条款，为罗德岛驻维多利亚办事处提供协助。");
-const ni = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const oi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4116_blkkgt", {
@@ -24472,7 +24548,7 @@ b({
   zhiwumrfz_info: "锁定技，</br>①你使用有颜色的【杀】不能被与此【杀】相同颜色的牌响应。</br>②你于出牌阶段使用的转化杀不计入次数限制。</br>③你的普通锦囊牌视为【杀】。<br>④当你对一名角色于每轮首次造成伤害后，你摸一张牌。"
 });
 v("char_4116_blkkgt", "锏，前卡西米尔骑士竞赛三届冠军，喀兰贸易总裁恩希欧迪斯的贴身保镖。基于博士与恩希欧迪斯签订的合同，无限期作为干员加入罗德岛。</br>现作为近卫干员活跃于各种任务之中，以其强大无比的战斗力为其他干员开辟道路。</br></br>我收到一些反馈，说大部分任务有她在的话，和野营没什么区别。这确实不怪博士，她主动去的，而且看起来她还挺乐在其中的。呃，那我也没什么理由反对，不是吗？</br>——■■■");
-const ii = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const si = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4117_ray", {
@@ -24608,7 +24684,7 @@ b({
   tankuangmrfz_info: "每回合限X次，当你使用的牌结算完毕后，你可以展示牌堆顶一张牌，每满足一项你摸一张牌：1.展示的牌与你使用的牌颜色相同；2.展示的牌与你使用的牌类型相同；3.展示的牌的点数不小于你使用的牌，若均不满足，你失去一点体力且你失去本技能直到回合结束，若均满足，你将体力回复至体力上限。（X=在你攻击范围内的其他角色数，X至少为2）"
 });
 v("char_4117_ray", "莱伊，雷姆必拓人，无稳定职业，较常从事在雷姆必拓被称为“探井人”的矿井安保工作。偶遇故地重游的阿米娅、博士与暴行后，主动申请加入罗德岛。现作为罗德岛驻舰干员参与各类安保、战斗及勘探任务。");
-const oi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ui = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4119_wanqin", {
@@ -24657,8 +24733,8 @@ y({
               g.removeSkill(z[0]), l.finish();
             else {
               const { control: p } = await g.chooseControl(z).set("prompt", "【应风】:请选择失去一个技能").set("ai", function() {
-                var x = h.event.list;
-                return x.includes("yingfengmrfz") && x.length > 1 && x.remove("yingfengmrfz"), x.randomGet();
+                var w = h.event.list;
+                return w.includes("yingfengmrfz") && w.length > 1 && w.remove("yingfengmrfz"), w.randomGet();
               }).set("list", z).forResult();
               p && (g.removeSkill(p), c.log(g, `失去了技能<span class="yellowtext">【${i.translation(p)}】</span>`));
             }
@@ -24681,9 +24757,9 @@ b({
   yingfengmrfz: "应风",
   yingfengmrfz_info: "回合开始时，你可以选择跳过本回合前任意个阶段，并于回合结束后令至多等量名角色摸等量/2（向下取整）张牌，若选择跳过的阶段大于4，你失去一个技能。"
 });
-C("char_4119_wanqin", "<font color=#C0C0C0>牵风者</font>");
+S("char_4119_wanqin", "<font color=#C0C0C0>牵风者</font>");
 v("char_4119_wanqin", "万顷，本名禾生，炎国天师府学徒，担任农业天师一职。在大荒城多项育种实验中取得了重要的成果。经黍介绍，来到罗德岛访学交流，兼任后勤干员。");
-const si = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const li = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4121_zuole", {
@@ -24816,9 +24892,9 @@ b({
   bingzhumrfz: "秉烛",
   bingzhumrfz_info: "①出牌阶段限一次，你选择你手牌中一种花色的所有手牌，并将这些牌分成任意组并置于等量名其他角色的武将牌上，称为“司”。<br>②有“司”的角色使用或打出与“司”相同花色的基本或锦囊牌或相同牌名的牌指定目标后，你可以弃置其一张相同花色或相同牌名的“司”，并令此牌对一名目标角色无效，然后你摸一张牌。"
 });
-C("char_4121_zuole", "<font color=#DC143C>心系苍生</font>");
+S("char_4121_zuole", "<font color=#DC143C>心系苍生</font>");
 v("char_4121_zuole", "设计：今天整点什么/林登万<br>左乐，隶属炎国处理巨兽问题的秘密组织“司岁台”，任秉烛人之职。现因监督代理人之故于罗德岛暂驻，并定期返回炎国述职。兼职罗德岛外勤干员，参与部分外勤任务。");
-const ui = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const fi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4122_grabds", {
@@ -24861,9 +24937,9 @@ b({
   mushoumrfz: "牧兽",
   mushoumrfz_info: "当一名其他角色回合结束时，你可以使用其本回合因弃置而进入弃牌堆的牌。"
 });
-C("char_4122_grabds", "<font color=#42b983>竹笛飞声</font>");
+S("char_4122_grabds", "<font color=#42b983>竹笛飞声</font>");
 v("char_4122_grabds", "小满，来自炎国北部农业重镇大荒城的普通女孩，在管理牧兽方面颇有心得。跟随黍以访客身份暂居罗德岛。");
-const li = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ci = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4123_ela", { pack: "legendSJZX", sex: "female", group: "othermrfz", hp: 3, skills: ["leimingmrfz", "zuzhimrfz"] });
@@ -25054,7 +25130,7 @@ b({
   leimingmrfz_info: "每轮开始时，你可以记录一种牌名、花色和类型（仅对你可见），然后本轮当有其他角色使用与你记录的牌名、花色或类型相同的牌时，你可以视为对其使用一张任意颜色的雷【杀】，并清除对应的一个记录。"
 });
 v("char_4123_ela", "艾拉是彩虹小队成员之一，独立、叛逆，适应能力强，同时具备相当的领导能力。<br>艾拉习惯用被她称为“雷鸣地雷”的装置在战斗中获取优势。这种爆炸物通过巨响和震荡干扰敌人行动，乃至使其失能，是一种极为实用的非致命性武器。");
-const fi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const gi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4124_iana", {
@@ -25131,16 +25207,16 @@ b({
   sheguomrfz: "设彀",
   sheguomrfz_info: "当你受到伤害后，你可以展示一张可以响应对你造成伤害的牌的牌，然后你选择一项:<br>1.视为对伤害来源使用一张【杀】;<br>2.本回合此技能失效、摸两张牌并回复一点体力。"
 });
-C("char_4124_iana", "<font color = #db7093>情报专家</font>");
+S("char_4124_iana", "<font color = #db7093>情报专家</font>");
 v("char_4124_iana", "双月是彩虹小队成员之一，自信、坚决，极富探索精神。<br>除了随身携带的武器之外，双月擅长使用被称为“双子分身复制器”的装置。该装置能制造与双月<br>外形上完全一致的全息投影，既能搜集情报，也能欺骗敌人。");
-const ci = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const di = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4125_rdoc", { pack: "epicSJZX", sex: "male", group: "othermrfz", hp: 4, skills: ["yizhemrfz", "zhulimrfz"] });
-let yr = !1;
-function gi() {
-  if (yr) return;
-  yr = !0;
+let xr = !1;
+function mi() {
+  if (xr) return;
+  xr = !0;
   const r = d.card.tao.enable, t = d.card.tao.selectTarget, e = d.card.tao.filterTarget;
   d.card.tao.enable = function(a, n) {
     return n.hasSkill("yizhemrfz") ? !0 : r(a, n);
@@ -25168,7 +25244,7 @@ y({
       }
     },
     init() {
-      gi();
+      mi();
     },
     audio: 2,
     trigger: {
@@ -25257,9 +25333,9 @@ b({
   zhulimrfz: "铸犁",
   zhulimrfz_info: "锁定技，结束阶段，若你本回合造成过伤害，你弃置一张牌，反之，你摸两张牌且其中的♡2-9视为【桃】。"
 });
-C("char_4125_rdoc", "<font color=#DC143C>利他主义</font>");
+S("char_4125_rdoc", "<font color=#DC143C>利他主义</font>");
 v("char_4125_rdoc", "医生是彩虹小队成员之一，为人亲和体贴，乐于助人，极受队友们的信任。<br>医生随身携带一把MPD-0激素手枪。该武器可以从远距离向目标注射具有急救功能的药剂，为受伤的队友提供可靠的救助。");
-const di = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const hi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4130_luton", { pack: "rareSJZX", sex: "female", group: "bomrfz", hp: 4, skills: ["zhengyimrfz", "daosimrfz"] });
@@ -25348,9 +25424,9 @@ b({
   daosimrfz: "悼思",
   daosimrfz_info: "若弃牌堆顶的牌不为装备牌，你可以将一张牌当做与弃牌堆顶牌同名的牌使用或打出。"
 });
-C("char_4130_luton", "<font color=#00868B>止戈胜悼</font>");
+S("char_4130_luton", "<font color=#00868B>止戈胜悼</font>");
 v("char_4130_luton", "露托，曾在玻利瓦尔各交战地区活动，不从属于任何当地组织，以战场打扫工作为生。现今在本舰接受治疗，并与后勤部签订合作协议，偶尔以战场环境顾问的身份支援外勤任务。");
-const mi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const zi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4132_ascln", { pack: "legendSJZX", sex: "female", group: "luomrfz", hp: 3, skills: ["dunyingmrfz", "niximrfz"] });
@@ -25473,7 +25549,7 @@ b({
   niximrfz_info: "一名其他角色的结束阶段，你可以对其使用一张【杀】，若此【杀】没有造成伤害，你可以将你的座次移动至其下家。"
 });
 v("char_4132_ascln", "阿斯卡纶，巴别塔时期担任情报官，后作为S.W.E.E.P.负责人，为罗德岛负责反渗透工作。");
-const hi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const pi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4133_logos", {
@@ -25622,9 +25698,9 @@ b({
   yuhuimrfz: "语汇",
   yuhuimrfz_info: "每回合每种牌名限一次，你可以将一张牌当作牌名字数不大于此牌的任意基本牌或普通锦囊牌使用。"
 });
-C("char_4133_logos", "<font color=#00868B>女妖之主</font>");
+S("char_4133_logos", "<font color=#00868B>女妖之主</font>");
 v("char_4133_logos", "逻各斯，罗德岛精英术师干员，咒术大师，女妖河谷年轻的“女主人”。曾作为巴别塔核心成员参与卡兹戴尔内战，并于罗德岛建立之初成为首批精英干员之一。逻各斯着手制定了干员源石技艺适应性测试的标准及流程。这套评估系统展现了巨大的价值，令罗德岛得以准确地评估每一位干员的施术潜能。<br>现根据罗德岛决议，逻各斯继续担任外勤小队指挥，参与术师干员的测试与选拔，负责敏感情报的破译及加密工作。");
-const zi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const _i = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4134_cetsyr", {
@@ -25913,9 +25989,9 @@ b({
   canxiangmrfz: "残响",
   canxiangmrfz_info: "锁定技，你和【断章】选择的角色获得如下效果：<br>1.属性伤害对你无效；<br>2.你不能成为延时锦囊牌的目标。"
 });
-C("char_4134_cetsyr", "<font color=#00868B>文明的存续</font>");
+S("char_4134_cetsyr", "<font color=#00868B>文明的存续</font>");
 v("char_4134_cetsyr", "特蕾西娅，卡兹戴尔移动城市的建立者，卡兹戴尔军事委员会创始人之一，巴别塔组织的创立者，曾是卡兹戴尔的最高领袖。执政期间，她致力于推进医疗、教育、城市基础建设等事业，多次带领萨卡兹击退了外敌的入侵，并且在外交工作中颇有建树。后于卡兹戴尔与维多利亚的战争中身亡。<br>该人事档案留存在罗德岛人事部封存的资料库中。");
-const pi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const bi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4136_phonor", {
@@ -25960,9 +26036,9 @@ b({
   songgemrfz: "颂歌",
   songgemrfz_info: "当你受到伤害后，或出牌阶段开始时，你可以进行判定并获得判定牌，然后你可以重复这个流程直到出现重复花色或牌名的判定牌。"
 });
-C("char_4136_phonor", "<font color = #b7229c66>悠远河谷的齐唱</font>");
+S("char_4136_phonor", "<font color = #b7229c66>悠远河谷的齐唱</font>");
 v("char_4136_phonor", "R&V型巫术作业平台PhonoR-0，罗德岛首款且唯一一款搭载女妖咒言法器的智能作业平台。与其他客制化的雷神工业作业平台不同，她的诞生离不开罗德岛干员的顶尖技术与女妖们之间的默契。从其运行机构、传动系统及核心的巫术元件的设计来看，比起轮式作业平台，PhonoR-0更像一座移动的巫术祭坛。作为尖端工业技术与萨卡兹巫术结合的产物，PhonoR-0的基本性能并不出众，但她易于部署，能随时对行动干员进行支援，现作为辅助干员参与相关作战任务。");
-const _i = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ki = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4137_udflow", {
@@ -26040,9 +26116,9 @@ b({
   yanhuimrfz: "延辉",
   yanhuimrfz_info: "锁定技，出牌阶段开始时，你将牌堆顶的一张牌当作【兵临城下】置入你的判定区，然后你摸X张牌并流失一点体力。（X = 你当前的体力值，X至多为5）"
 });
-C("char_4137_udflow", "<font color=#DC143C>执者失之</font>");
+S("char_4137_udflow", "<font color=#DC143C>执者失之</font>");
 v("char_4137_udflow", "深巡，原名西昆妲，前深海猎人计划研究员，现服役于阿戈尔军团系统，担任海巡队指挥官。在阿戈尔向陆上诸国发出合作邀请后，西昆妲以阿戈尔对陆接洽代表的身份与罗德岛达成合作协议，以罗德岛为媒介与陆上诸国建立交流关系。<br>现以“深巡”为代号，登记为罗德岛合作干员。");
-const bi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const yi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4138_narant", {
@@ -26100,9 +26176,9 @@ b({
   shafeimrfz: "沙匪",
   shafeimrfz_info: "任意角色的准备阶段，你可以获得其手牌中所有的明置牌。"
 });
-C("char_4138_narant", "<font color=#00868B>征踏天途</font>");
+S("char_4138_narant", "<font color=#00868B>征踏天途</font>");
 v("char_4138_narant", "娜仁图亚，曾是足迹遍布萨尔贡大半地区的沙盗，现作为外勤干员长期驻留罗德岛，凭借自己丰富的自然知识与生存技巧，活跃于各种野外行动。");
-const ki = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const vi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4139_papyrs", {
@@ -26212,20 +26288,20 @@ y({
       const a = e.storage.lanjuanmrfz, { control: n } = await e.chooseControl("自动选择", "手动选择").set("prompt", "【行路】:是否让系统自动为你提供方案？").set("ai", () => "自动选择").forResult();
       if (n === "自动选择") {
         let f = d.skill.xinglumrfz.getResult(a);
-        const g = f.map((x) => e.getUseValue(x)).indexOf(Math.max(...f.map((x) => e.getUseValue(x))));
+        const g = f.map((w) => e.getUseValue(w)).indexOf(Math.max(...f.map((w) => e.getUseValue(w))));
         if (f.length < 1) {
           e.popup("没有符合条件的组合");
           return;
         }
         let m = [];
-        for (let x = 0; x < f.length; x++)
-          m.push([x, `第${i.cnNumber(x + 1, !0)}组`]);
+        for (let w = 0; w < f.length; w++)
+          m.push([w, `第${i.cnNumber(w + 1, !0)}组`]);
         let z = [
           `【行路】:请选择一个组合<br>推荐选择第${i.cnNumber(g + 1, !0)}组(${i.translation(f[g])})`,
           [m, "tdnodes"]
         ];
-        for (let x = 0; x < f.length; x++)
-          z.addArray([`第${i.cnNumber(x + 1, !0)}组`, f[x]]);
+        for (let w = 0; w < f.length; w++)
+          z.addArray([`第${i.cnNumber(w + 1, !0)}组`, f[w]]);
         const p = r.isMine() ? await e.chooseButton().set("createDialog", z).set("cards", f).forResult() : { links: [g] };
         if (!p || !p.links) return;
         e.gain(f[p.links[0]], "gain2", "log");
@@ -26267,9 +26343,9 @@ b({
   xinglumrfz: "行路",
   xinglumrfz_info: "出牌阶段限一次，你可以选择【览卷】中记录的牌名、点数和花色各一个，然后你获得牌堆中所有与你选择的牌名、点数和花色均一致的牌。"
 });
-C("char_4139_papyrs", "<font color=#DC143C>读万卷致千里</font>");
+S("char_4139_papyrs", "<font color=#DC143C>读万卷致千里</font>");
 v("char_4139_papyrs", "莎草，本名阿娜特，曾任萨尔贡法尔贾万达巴德博物馆的代理馆长，怀揣着游历大地这一理想的她，在经历了博物馆的变故后踏上巡游大地的旅程。现以“莎草”为代号，作为外勤干员与罗德岛驻萨尔贡办事处展开合作，为罗德岛在当地的历史研究活动提供理论支持和指导。");
-const yi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const xi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4141_marcil", {
@@ -26436,9 +26512,9 @@ b({
   cangshumrfz: "藏书",
   cangshumrfz_info: "出牌阶段结束时，若X不小于1，你可以令你下个出牌阶段开始时执行一项：<br>1.摸X张牌;2.本阶段使用【杀】的次数+1。<br>（X=本阶段你剩余可以使用【杀】的次数，X至多为你的体力上限）"
 });
-C("char_4141_marcil", "<font color=#00868B>建校以来第一才女</font>");
+S("char_4141_marcil", "<font color=#00868B>建校以来第一才女</font>");
 v("char_4141_marcil", "玛露西尔，莱欧斯小队的魔法师。<br>自称在迷宫中尝试救回朋友法琳时意外来到泰拉，现于罗德岛寻找返回原本所在地的方法，并为罗德岛提供医疗、法术方面的协助。");
-const vi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const wi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4142_laios", {
@@ -26559,9 +26635,9 @@ b({
   shimomrfz: "识魔",
   shimomrfz_info: "锁定技，当你获得过至少[2/3/4]次同名牌时，你令此牌获得“[富甲→目标+1/空巢→摸一张牌/残躯→伤害+1]”。"
 });
-C("char_4142_laios", '<font color="#8b008b">迷宫魔物专家</font>');
+S("char_4142_laios", '<font color="#8b008b">迷宫魔物专家</font>');
 v("char_4142_laios", "莱欧斯，莱欧斯小队的队长，拥有丰富的“迷宫”（注：我们也不知道所谓“迷宫”到底是什么）探索经验。虽然充满谜团，但是莱欧斯的贡献毋庸置疑。在执行野外任务时，他总能为罗德岛提供不少作战帮助。");
-const xi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Si = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4143_sensi", {
@@ -26738,9 +26814,9 @@ b({
   pengcaimrfz: "烹材",
   pengcaimrfz_info: "出牌阶段限一次，你可以将两张不同类型的牌当作指定至多4名角色的【五谷丰登】使用，若所有角色因此获得的牌类型均不同，则视为对相同角色使用一张【五谷丰登】。因此技能而获得的牌均获得所有的应变效果且可无条件发动。"
 });
-C("char_4143_sensi", "<font color='#d2691e'>资深魔物料理人</font>");
+S("char_4143_sensi", "<font color='#d2691e'>资深魔物料理人</font>");
 v("char_4143_sensi", "森西是莱欧斯小队的成员之一，具有丰富的野外生存经验，对饮食有固执的坚持，在小队中担任厨师。<br>森西以为小队提供健康伙食为己任，随身携带的锅具和菜刀是用珍贵材料精制的厨具。");
-const wi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ci = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4144_chilc", {
@@ -26873,26 +26949,26 @@ y({
           e.popup("探索失败"), c.broadcastAll("closeDialog", r.videoId);
           return;
         }
-        let x = p.filter((j) => typeof j == "number")[0], w = p.filter((j) => i.itemtype(j) == "card")[0];
+        let w = p.filter((j) => typeof j == "number")[0], x = p.filter((j) => i.itemtype(j) == "card")[0];
         c.broadcastAll(
           function(j, M, q, O) {
             d.skill.tangongmrfz.addCard(j, M, q), d.skill.tangongmrfz.changePrompt(i.translation(O) + "放置了" + i.translation(j), M);
           },
-          w,
-          r.videoId,
           x,
+          r.videoId,
+          w,
           e
         );
-        let { promise: S, resolve: T } = Promise.withResolvers();
+        let { promise: C, resolve: T } = Promise.withResolvers();
         if (setTimeout(() => {
           T(!0);
-        }, 1e3), await S, l.push([w, x]), s.remove(w), l.length > 8) {
+        }, 1e3), await C, l.push([x, w]), s.remove(x), l.length > 8) {
           c.broadcastAll("closeDialog", r.videoId);
           break;
         }
       }
       const f = l.map((z) => [i.suit(z[0]), z[1]]), g = Array.from({ length: 3 }, () => Array(3));
-      if (f.forEach(([z, p]) => g[Math.floor(p / 3)][p % 3] = z), !g.some((z, p) => new Set(z).size < 3 || new Set(g.map((x) => x[p])).size < 3)) {
+      if (f.forEach(([z, p]) => g[Math.floor(p / 3)][p % 3] = z), !g.some((z, p) => new Set(z).size < 3 || new Set(g.map((w) => w[p])).size < 3)) {
         const z = t.name === "draw", { control: p } = await e.chooseControl("减半", "翻倍").set("prompt", `令${t.name === "draw" ? "摸牌数" : "伤害值"}(${t.num})翻倍或减半`).set("ai", () => i.event().isDraw ? "翻倍" : "减半").set("isDraw", z).forResult();
         t.num = p === "翻倍" ? t.num * 2 : Math.floor(t.num / 2);
       }
@@ -26941,9 +27017,9 @@ b({
   ruiganmrfz: "锐感",
   ruiganmrfz_info: "锁定技，你不能成为其他角色使用的牌名字数等同于你的手牌数的牌的目标。"
 });
-C("char_4144_chilc", "<font color='#b8860b'>资深陷阱专家</font>");
+S("char_4144_chilc", "<font color='#b8860b'>资深陷阱专家</font>");
 v("char_4144_chilc", "齐尔查克在莱欧斯小队中负责以敏锐的五感探寻各类陷阱，保障小队的生命安全。现来罗德岛寻找返回原本所在地的方法，并在罗德岛作战任务中提供地形探查、陷阱感知等帮助。");
-const Si = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ji = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4145_ulpia", { pack: "legendSJZX", sex: "male", group: "a_groupmrfz", hp: 4, skills: ["guqianmrfz", "piweimrfz", "tongmaimrfz"], clans: ["深海猎人"] });
@@ -27128,9 +27204,9 @@ b({
   tongmaimrfz: "同脉",
   tongmaimrfz_info: "宗族技，每轮每项限一次，当你于回合外造成伤害后，你可以令一名深海猎人角色回复一点体力或复原武将牌。"
 });
-C("char_4145_ulpia", "<font color=#00868B>阴影中的求路人</font>");
+S("char_4145_ulpia", "<font color=#00868B>阴影中的求路人</font>");
 v("char_4145_ulpia", "乌尔比安，阿戈尔人，阿戈尔前技术院执政官，科研项目深海猎人计划负责人，阿戈尔军事团体“深海猎人”作战指挥官之一。登陆时间地点俱不明。在罗德岛处理海洋相关事务时提供支持。<br>经本人与相关人员确认，乌尔比安的所有档案移入高权限资料库。");
-const Ci = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ti = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4146_nymph", {
@@ -27247,9 +27323,9 @@ b({
   kuixinmrfz: "溃心",
   kuixinmrfz_info: "当你对一名其他角色造成伤害后，你可以令其所有的[明置/暗置]牌[暗置/明置]，然后其弃置两张暗置的牌。"
 });
-C("char_4146_nymph", "<font color=#00868B>耀阳映友</font>");
+S("char_4146_nymph", "<font color=#00868B>耀阳映友</font>");
 v("char_4146_nymph", "妮芙，卡兹戴尔市民，通过罗德岛驻卡兹戴尔办事处加入罗德岛外勤部门。<br>擅长使用心灵相关的源石技艺，配合其笞心魔的天赋，可在诸多领域发挥特长。");
-const ji = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Mi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4148_philae", { pack: "epicSJZX", sex: "female", group: "samrfz", hp: 5, skills: ["qianxiumrfz", "mingzhoumrfz"] });
@@ -27342,9 +27418,9 @@ b({
   mingzhoumrfz: "冥咒",
   mingzhoumrfz_info: "锁定技，当你于回合外获得牌后，你弃置等量的牌。"
 });
-C("char_4148_philae", "<font color='#b8860b'>灵河守卫</font>");
+S("char_4148_philae", "<font color='#b8860b'>灵河守卫</font>");
 v("char_4148_philae", "菲莱，来自萨尔贡的神庙守卫，信仰“生命之河”。如今以虔修者的身份在各地游历。<br>在修习之旅中结识了驻萨尔贡办事处的干员，并与办事处建立长期合作关系，为罗德岛的安保、救灾工作提供援助，兼任外勤重装干员。");
-const Ti = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Pi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4151_tinman", {
@@ -27354,7 +27430,7 @@ k("char_4151_tinman", {
   hp: 4,
   skills: ["suximrfz", "sanzhongmrfz"]
 });
-const ie = {
+const oe = {
   basic: "tao",
   trick: "shunshou",
   equip: "wuzhong"
@@ -27398,13 +27474,13 @@ y({
     audio: 2,
     enable: "chooseToUse",
     hiddenCard: function(r, t) {
-      const e = ie;
+      const e = oe;
       if (!Object.values(e).includes(t)) return !1;
       for (let a in e)
         if (t == e[a] && r.countCards("hes", { type: a }) > 0) return !0;
     },
     filter(r, t) {
-      const e = Object.entries(t.storage.sanzhongmrfz).filter(([n, o]) => o === !1).map(([n, o]) => n), a = ie;
+      const e = Object.entries(t.storage.sanzhongmrfz).filter(([n, o]) => o === !1).map(([n, o]) => n), a = oe;
       if (e.length < 1) return !1;
       for (let n of e)
         if (!(t.countCards("hes", { type: n }) < 1 || !r.filterCard(i.autoViewAs({ name: a[n] }, "unsure"), t, r)))
@@ -27412,7 +27488,7 @@ y({
     },
     chooseButton: {
       dialog: function(r, t) {
-        const e = ie, a = {};
+        const e = oe, a = {};
         Object.keys(e).forEach((o) => {
           a[e[o]] = o;
         });
@@ -27433,7 +27509,7 @@ y({
         return {
           filterCard(e) {
             i.player();
-            const a = ie, n = {};
+            const a = oe, n = {};
             return Object.keys(a).forEach((o) => {
               n[a[o]] = o;
             }), i.type2(e) == n[r[0][2]];
@@ -27447,7 +27523,7 @@ y({
           viewAs: { name: r[0][2] },
           card: r[0][2],
           precontent: async function(e, a, n) {
-            const o = ie, s = {};
+            const o = oe, s = {};
             Object.keys(o).forEach((f) => {
               s[o[f]] = f;
             });
@@ -27458,7 +27534,7 @@ y({
         };
       },
       prompt: function(r, t) {
-        const e = {}, a = ie, n = r[0][2];
+        const e = {}, a = oe, n = r[0][2];
         return Object.keys(a).forEach((o) => {
           e[a[o]] = o;
         }), `将一张${i.translation(e[n])}牌当做${i.translation(n)}使用`;
@@ -27493,9 +27569,9 @@ b({
   sanzhongmrfz: "三众",
   sanzhongmrfz_info: "每回合每项限一次，你可以将一张[基本/锦囊/装备]牌当做[【桃】/【顺手牵羊】/【无中生有】]使用。"
 });
-C("char_4151_tinman", "<font color=#00868B>凋敝魂灵</font>");
+S("char_4151_tinman", "<font color=#00868B>凋敝魂灵</font>");
 v("char_4151_tinman", "锡人，哥伦比亚侦探，梅兰德基金会高级特工，曾在特里蒙与罗德岛有过数次接触。<br>罗德岛与梅兰德基金会已经正式展开合作，不过锡人先生并不负责专门的对接工作。尽管他偶尔也会在梅兰德一侧的接洽人员不方便时临时顶替，但这只是特殊情况，并非常规，请多加注意。");
-const Mi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ai = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4155_talr", {
@@ -27584,9 +27660,9 @@ b({
   mingjiangmrfz: "名匠",
   mingjiangmrfz_info: "出牌阶段开始时，你可以摸一张牌，然后将一张牌当任意装备牌置入一名防具栏为空的角色的装备区内。"
 });
-C("char_4155_talr", "<font color='#00008b'>量体裁衣</font>");
+S("char_4155_talr", "<font color='#00008b'>量体裁衣</font>");
 v("char_4155_talr", "裁度，本名卢奇诺·德蒙塔诺，叙拉古裁缝名店德蒙塔诺现任主理人，经由叙拉古办事处推介至罗德岛交流访问，留舰期间暂时分配至后勤部，为罗德岛提供各项支持。");
-const Pi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const qi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4162_cathy", {
@@ -27709,9 +27785,9 @@ b({
   duantiemrfz: "锻铁",
   duantiemrfz_info: "出牌阶段限一次，你可以弃置两种不同类型的牌，然后将你的武将牌替换为“爬行号”并且当你进入濒死状态时，你将武将牌替换回原武将牌，并将体力回复至两点。"
 });
-C("char_4162_cathy", "<font color=#00868B>群工之首</font>");
+S("char_4162_cathy", "<font color=#00868B>群工之首</font>");
 v("char_4162_cathy", "凯瑟琳，维多利亚工人代表。于伦蒂尼姆事件期间参与市民自救军的抵抗运动，与罗德岛协同行动。<br>在凯瑟琳的协调下，伦蒂尼姆的多家工厂及工人团体先后与罗德岛达成合作，在源石污染善后、矿石病预防与医疗救治等领域共同展开行动。");
-const Ai = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ei = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4163_rosesa", {
@@ -27887,9 +27963,9 @@ b({
   xiadumrfz: "黠度",
   xiadumrfz_info: "锁定技，每轮开始时，你失去一点护甲并弃置因此获得的牌，然后你摸两张牌并获得一点护甲。"
 });
-C("char_4163_rosesa", "<font color='#b8860b'>狡黠医生</font>");
+S("char_4163_rosesa", "<font color='#b8860b'>狡黠医生</font>");
 v("char_4163_rosesa", "瑰盐，伊比利亚地区的流浪草药医生，人脉资源丰富，涵盖当地各阶层人士，现为罗德岛提供伊比利亚相关情报及工作开展前期的调研支持。");
-const qi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ri = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4164_tecno", {
@@ -27999,9 +28075,9 @@ b({
   suoumrfz: "塑偶",
   suoumrfz_info: "当你对一名其他角色造成伤害后，若该角色与其下家之间没有“木偶舞者”且该角色不为“木偶舞者”，你可以在该角色与其下家之间放置一个“木偶舞者”（你失去此技能或死亡后自动死亡），其获得该角色武将牌上的一个技能并摸三张牌，然后你与所有“木偶舞者”摸一张牌。<br>木偶舞者：①死亡后自动移除游戏；②由你控制；③不能获得“塑偶”。"
 });
-C("char_4164_tecno", "<font color='#b8860b'>制偶艺术家</font>");
+S("char_4164_tecno", "<font color='#b8860b'>制偶艺术家</font>");
 v("char_4164_tecno", "特克诺，多索雷斯街头艺术社区成员，曾卷入克里斯达尔艺术馆的恐怖袭击事件，因暴露于大量源石粉尘之中，感染加重。经干员龙舌兰介绍，特克诺来到罗德岛寻求医疗援助。病情稳定后，她主动提出加入罗德岛。现已通过相关培训和测试，作为外勤干员常驻于多索雷斯。");
-const Ei = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Oi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4165_ctrail", {
@@ -28093,9 +28169,9 @@ b({
   mijianmrfz: "弥坚",
   mijianmrfz_info: "当你[出牌阶段开始时/受到伤害后]，你可以(界)制衡X/摸X+1张牌。（X=本回合此技能发动的次数+1）"
 });
-C("char_4165_ctrail", "<font color='#6495ed'>鼯击长空</font>");
+S("char_4165_ctrail", "<font color='#6495ed'>鼯击长空</font>");
 v("char_4165_ctrail", "云迹，出生于哥伦比亚的飞行冒险家，为进行飞行实验而旅居各地，对于飞行动力装备的开发与改良颇有心得，如今为治疗矿石病来到罗德岛，并为罗德岛工程部的机动装置研发项目提供技术支持。");
-const Ri = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const $i = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4166_varkis", { pack: "epicSJZX", sex: "male", group: "mimrfz", hp: 4, skills: ["wenchoumrfz"] });
@@ -28165,9 +28241,9 @@ b({
   wenchoumrfz: "问仇",
   wenchoumrfz_info: "你的任意阶段开始时，你可以重铸一张牌，若你重铸的牌是：<br>①【杀】或武器牌：令包含你在内的至多两名角色将手牌调整至#r4#并跳过此阶段；<br>②非伤害类基本牌：你视为使用一张无距离和次数限制的【杀】，然后此技能本回合失效，并令此技能中的红色数字-1。"
 });
-C("char_4166_varkis", "<font color = #a52a2a>血色旧往</font>");
+S("char_4166_varkis", "<font color = #a52a2a>血色旧往</font>");
 v("char_4166_varkis", "赞索斯，移动城市雅赛努斯中特尔斐运河的前任渡口管理者，河流的摆渡人。在第一神殿的文物交换仪式之后辞去了这一职务，经干员调香师介绍来到罗德岛接受矿石病的治疗，以近卫干员的身份为罗德岛提供服务。");
-const Oi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Di = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_416_zumama", {
@@ -28411,7 +28487,7 @@ b({
   tieyimrfz_append: '<span style="font-family: yuanli">快看，是我方的一名铁驭，我们有救了！</span>'
 });
 v("char_416_zumama", "森蚺，嘉维尔的故乡——阿卡胡拉中某部族的族长，经过干员测试后加入罗德岛，同时接受治疗。</br>拥有不输于嘉维尔的身体素质，目前和她的伙伴“暴躁铁皮”共同活跃在战场上。");
-const $i = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Hi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4171_wulfen", {
@@ -28472,9 +28548,9 @@ b({
   cangshimrfz: "藏石",
   cangshimrfz_info: "锁定技，游戏开始时，你选择一种花色，然后当你不因此技能而获得这种花色的牌后，你摸两张牌，然后你重复这个流程。"
 });
-C("char_4171_wulfen", "<font color='#8a2be2'>矿石收藏家</font>");
+S("char_4171_wulfen", "<font color='#8a2be2'>矿石收藏家</font>");
 v("char_4171_wulfen", "钼铅，探险家，矿石收藏家，同时也是哥伦比亚城际网络中颇为知名的社交媒体视频创作者。在地质考察过程中，不慎感染矿石病，来到罗德岛接受治疗。其后，经过交涉，作为特种干员加入罗德岛，以丰富的地质学知识和荒野求生经验，为罗德岛诸多队伍的野外探索任务提供支持。");
-const Di = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ui = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4172_xingzh", {
@@ -28741,9 +28817,9 @@ b({
   zhizhumrfz: "止著",
   zhizhumrfz_info: "每种花色每轮限一次，当你使用的牌结算完毕后，若在此牌结算过程中其他角色手牌数发生变化，你可以将此牌当作“帙”置于你的武将牌上。"
 });
-C("char_4172_xingzh", "<font color='#b8860b'>行止于坊</font>");
+S("char_4172_xingzh", "<font color='#b8860b'>行止于坊</font>");
 v("char_4172_xingzh", "行箸，就任于炎国太史阁的历史研究者，畅销美食类散记《百灶食珍录》作者。经干员煌介绍，以访客身份来到罗德岛。");
-const Hi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Xi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4173_nowell", {
@@ -28801,9 +28877,9 @@ b({
   buximrfz: "不息",
   buximrfz_info: "当你脱离濒死状态时，你可以视为使用一张【桃】。"
 });
-C("char_4173_nowell", "<font color='#8b008b'>无证的配镜师</font>");
+S("char_4173_nowell", "<font color='#8b008b'>无证的配镜师</font>");
 v("char_4173_nowell", "诺威尔，维多利亚配镜师。在与九及其领导的新整合运动短暂同行前，曾于泰拉多地游历寻人，同时以为当地人配镜维持生计。伦蒂尼姆事件结束后，诺威尔与往日的一位顾客重遇，经其引荐，开始与罗德岛接触。");
-const Ui = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Bi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4177_brigid", {
@@ -28921,9 +28997,9 @@ b({
   dongqumrfz: "冬去",
   dongqumrfz_info: "每轮开始时，你可以令至多Y名角色重铸一张手牌，若重铸的牌点数之和大于21，这些角色回复一点体力。（Y=你的体力上限）"
 });
-C("char_4177_brigid", "<font color='#8b008b'>火与生命</font>");
+S("char_4177_brigid", "<font color='#8b008b'>火与生命</font>");
 v("char_4177_brigid", "水灯心，本名布莉吉，游牧民。据称来自塔拉某支古老的游牧部族，其成员长久以来在平原、丘陵地区从事游牧活动，兼领天灾预警、传信相关职责。现经干员苇草推荐与罗德岛合作，在接受矿石病治疗的同时，作为狙击干员协助战斗。");
-const Xi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ni = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4178_alanna", {
@@ -29048,9 +29124,9 @@ b({
   qixiemrfz: "奇械",
   qixiemrfz_info: "出牌阶段每种类型的牌限一次，你可以将一张手牌按照如下规则转化成任意类型的装备牌并置入你或你攻击范围内的任意角色的装备区：<br>1.此装备牌的技能为随机一个包含此牌名的技能（无对应技能则无法创建）；<br>2.若此牌为武器牌，攻击距离为3，若此牌为[进攻/防御]马，[攻击/防御]距离[-/+]1；<br>3.此牌离开你的装备区时，销毁之。"
 });
-C("char_4178_alanna", "<font color='#00008b'>能工巧匠</font>");
+S("char_4178_alanna", "<font color='#00008b'>能工巧匠</font>");
 v("char_4178_alanna", "阿兰娜，原雷姆必拓比格皮勒自治州运载车驾驶员，熟练掌握多种机械操控与维修技巧，现就职于罗德岛工程部第三维修工坊，参与由可露希尔主持的各类新型设备的研发与调试工作。");
-const Bi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ji = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4179_monstr", {
@@ -29138,9 +29214,9 @@ b({
   ronghuimrfz: "融毁",
   ronghuimrfz_info: "出牌阶段限一次，你可以交换手牌和弃牌堆，令你本阶段每种牌名的牌最多使用次数的基数为1且因使用而进入弃牌堆的牌改为置于牌堆底，然后你于弃牌阶段开始时交换你的手牌和弃牌堆。"
 });
-C("char_4179_monstr", "<font color='#8b008b'>旧日重拾</font>");
+S("char_4179_monstr", "<font color='#8b008b'>旧日重拾</font>");
 v("char_4179_monstr", "Mon3tr，在生命科学、矿石病诊疗、历史系谱学等诸多领域具备渊博学识，拥有丰富的移动作战经验，为罗德岛重建工作提供了至关重要的帮助，现为罗德岛医疗部、工程部、外勤部特别顾问。");
-const Ni = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Zi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4182_oblvns", {
@@ -29309,9 +29385,9 @@ b({
   wuweimrfz: "毋畏",
   wuweimrfz_info: `宗族技（${i.poptip("sjzx_AveMujica")}），当你重铸牌后，你可以将本技能句号之后的描述移至同族武将的武将牌上任意一个技能直到本轮结束。（X=你本轮触发过的${i.poptip("sjzx_cardUseType")}数）`
 });
-C("char_4182_oblvns", "<font color = #db7093>毋畏遗忘</font>");
+S("char_4182_oblvns", "<font color = #db7093>毋畏遗忘</font>");
 v("char_4182_oblvns", "Ave Mujica的键盘手丰川祥子。与其他成员一起暂居罗德岛，在此期间，积极参与舰上的各项工作。不管是音乐上的造诣，还是行为礼仪，都彰显了她不折不扣的名门大小姐身份。");
-const Ji = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Gi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4183_mortis", {
@@ -29422,8 +29498,8 @@ y({
           }), z.when({
             player: "useCard",
             global: "phaseEnd"
-          }).filter((p, x) => p.name !== "useCard" ? !0 : !p.card?.storage?.pojianmrfz && p.card !== s).then(async (p, x, w) => {
-            w.unmarkSkill("pojianmrfz"), x.name === "useCard" && numx > 0 && (x.effectCount += numx);
+          }).filter((p, w) => p.name !== "useCard" ? !0 : !p.card?.storage?.pojianmrfz && p.card !== s).then(async (p, w, x) => {
+            x.unmarkSkill("pojianmrfz"), w.name === "useCard" && numx > 0 && (w.effectCount += numx);
           }).vars({
             numx: d.skill.wuweimrfz.getNum(g, "pojianmrfz"),
             damageCard: s
@@ -29472,9 +29548,9 @@ b({
   pojianmrfz: "破茧",
   pojianmrfz_info: `每回合限三次，当你受到伤害后，你可以将一张牌${i.poptip("sjzx_byRecast")}当目标数至多为X（至少为1）的【桃园结义】使用，然后因此回复体力值的角色摸X张牌，反之其本回合使用的下一张牌额外结算X次。`
 });
-C("char_4183_mortis", "<font color = #db7093>毋畏死亡</font>");
+S("char_4183_mortis", "<font color = #db7093>毋畏死亡</font>");
 v("char_4183_mortis", "Ave Mujica的吉他手若叶睦。沉默寡言的她在罗德岛上大多时候负责一些简单的工作。除此以外，她还在疗养庭院承包了一小块区域，用作果蔬的栽培。");
-const Zi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Li = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4184_dolris", {
@@ -29531,9 +29607,9 @@ b({
   weiquanmrfz: "伪全",
   weiquanmrfz_info: "锁定技，当你受到实体牌的伤害时，若此牌的点数大于3X，此伤害+1，反之此伤害-1。"
 });
-C("char_4184_dolris", "<font color = #db7093>毋畏悲伤</font>");
+S("char_4184_dolris", "<font color = #db7093>毋畏悲伤</font>");
 v("char_4184_dolris", "Ave Mujica的主唱兼吉他手三角初华。既是Mujica的成员，也是著名偶像组合sumimi的一员。拥有出众的个人魅力，爱好观星，总是把祥子挂在嘴边。");
-const Gi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ii = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4185_amoris", {
@@ -29641,9 +29717,9 @@ b({
   jiaoyingmrfz: "校音",
   jiaoyingmrfz_info: `出牌阶段开始或结束时，你可以${i.poptip("sjzx_zhiheng")}X。`
 });
-C("char_4185_amoris", "<font color = #db7093>毋畏爱意</font>");
+S("char_4185_amoris", "<font color = #db7093>毋畏爱意</font>");
 v("char_4185_amoris", "Ave Mujica的鼓手祐天寺若麦。一直积极辅助舰内各种沟通任务，是个率直的人。平时喜欢与澄闪一起为干员们化妆，深受大家喜爱。");
-const Li = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Fi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4186_tmoris", { pack: "epicSJZX", sex: "female", group: "othermrfz", hp: 3, skills: ["chendiemrfz", "umiri_chenxianmrfz", "wuweimrfz"], clans: ["AveMujica"] });
@@ -29730,9 +29806,9 @@ b({
   umiri_chenxianmrfz: "陈弦",
   umiri_chenxianmrfz_info: "锁定技，你于回合内获得的牌的应变效果可无视条件直接生效，若这些牌没有应变效果，你令这些牌随机获得X+1个应变效果。"
 });
-C("char_4186_tmoris", "<font color = #db7093>毋畏恐惧</font>");
+S("char_4186_tmoris", "<font color = #db7093>毋畏恐惧</font>");
 v("char_4186_tmoris", "Ave Mujica的贝斯手八幡海铃。不管是演奏中还是作战中，她总是能展现出极高的专业度。");
-const Ii = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Vi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4187_graceb", {
@@ -29854,9 +29930,9 @@ b({
   qiancimrfz: "虔赐",
   qiancimrfz_info: "出牌阶段限一次，你可以将一张手牌交给一名其他角色，并展示其三张手牌，对其造成X点伤害，然后若你因此:<br>1.造成了伤害，你回复一点体力；<br>2.杀死了一名角色，你令本技能出牌阶段可发动的次数+1。<br>（X=展示的牌中伤害类牌的数量）"
 });
-C("char_4187_graceb", "<font color='#6495ed'>至虔修女</font>");
+S("char_4187_graceb", "<font color='#6495ed'>至虔修女</font>");
 v("char_4187_graceb", "聆音，来自玻利瓦尔的修女，经干员信仰搅拌机推荐加入罗德岛，目前已经返回家乡玻利瓦尔，于当地办事处担任近卫干员。");
-const Fi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Wi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4191_tippi", { pack: "epicSJZX", sex: "female", group: "gemrfz", hp: 4, skills: ["penhuimrfz"] });
@@ -29920,7 +29996,7 @@ y({
           g: 128,
           b: 128
         });
-        const e = r.querySelector(".content-container .content"), n = w(t.r, t.g, t.b).v, o = {
+        const e = r.querySelector(".content-container .content"), n = x(t.r, t.g, t.b).v, o = {
           width: 150,
           height: 75
         }, s = _.create.div(
@@ -29936,14 +30012,14 @@ y({
         ), u = document.createElement("canvas");
         u.width = o.width, u.height = o.height;
         const l = u.getContext("2d");
-        for (let S = 0; S < o.width; S++)
+        for (let C = 0; C < o.width; C++)
           for (let T = 0; T < o.height; T++) {
-            const j = S / o.width * 360, M = T / o.height, q = x(j, M, n), O = l.createImageData(1, 1), Z = O.data;
-            Z[0] = q.r, Z[1] = q.g, Z[2] = q.b, Z[3] = 255, l.putImageData(O, S, T);
+            const j = C / o.width * 360, M = T / o.height, q = w(j, M, n), O = l.createImageData(1, 1), Z = O.data;
+            Z[0] = q.r, Z[1] = q.g, Z[2] = q.b, Z[3] = 255, l.putImageData(O, C, T);
           }
         s.appendChild(u);
-        function f(S, T, j) {
-          const M = w(S, T, j), q = M.h / 360 * o.width, O = M.s * o.height;
+        function f(C, T, j) {
+          const M = x(C, T, j), q = M.h / 360 * o.width, O = M.s * o.height;
           return { x: q, y: O };
         }
         const g = f(t.r, t.g, t.b);
@@ -30008,29 +30084,29 @@ y({
           e
         );
         p.appendChild(z), p.innerHTML += `RGB(${t.r}, ${t.g}, ${t.b})`;
-        function x(S, T, j) {
-          let M = (q, O = (q + S / 60) % 6) => j - j * T * Math.max(Math.min(O, 4 - O, 1), 0);
+        function w(C, T, j) {
+          let M = (q, O = (q + C / 60) % 6) => j - j * T * Math.max(Math.min(O, 4 - O, 1), 0);
           return {
             r: Math.round(M(5) * 255),
             g: Math.round(M(3) * 255),
             b: Math.round(M(1) * 255)
           };
         }
-        function w(S, T, j) {
-          S /= 255, T /= 255, j /= 255;
-          let M = Math.max(S, T, j), q = Math.min(S, T, j), O, Z, E = M, R = M - q;
+        function x(C, T, j) {
+          C /= 255, T /= 255, j /= 255;
+          let M = Math.max(C, T, j), q = Math.min(C, T, j), O, Z, E = M, R = M - q;
           if (Z = M === 0 ? 0 : R / M, M === q)
             O = 0;
           else {
             switch (M) {
-              case S:
+              case C:
                 O = (T - j) / R + (T < j ? 6 : 0);
                 break;
               case T:
-                O = (j - S) / R + 2;
+                O = (j - C) / R + 2;
                 break;
               case j:
-                O = (S - T) / R + 4;
+                O = (C - T) / R + 4;
                 break;
             }
             O /= 6;
@@ -30141,9 +30217,9 @@ b({
   penhuimrfz: "喷绘",
   penhuimrfz_info: "锁定技，①游戏开始时，你创建一个2D颜色选择器，默认为青绿色（RGB（64，128，128））。②当你使用一张牌后，根据牌的类型、点数和颜色执行一次RGB计算：<br>颜色：红色~加法;黑色~减法<br>类型：基本~R;锦囊~G;装备~B<br>点数：值~此牌的点数的10倍。<br>然后根据当前颜色距离下列最近的颜色执行对应的效果:<br>绿色~下一张使用的牌无距离限制;<br>红色~对一名其他角色造成一点伤害;<br>蓝色~摸一张牌。"
 });
-C("char_4191_tippi", "<font color='#6495ed'>场景喷绘师</font>");
+S("char_4191_tippi", "<font color='#6495ed'>场景喷绘师</font>");
 v("char_4191_tippi", "蒂比，蓝卡坞场景喷绘师。由本人主动联系，希望推动罗德岛与蓝卡坞双方，就为蓝卡坞感染者员工和演员提供医疗服务的问题，建立相关合作关系，同时根据本人意愿，作为特种干员为罗德岛提供服务。");
-const Vi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Yi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4193_lemuen", {
@@ -30298,8 +30374,8 @@ y({
           g.videoId = s;
           for (var m = function(p) {
             if (p._tempTranslate) return p._tempTranslate;
-            var x = p.name;
-            return d.translate[x + "_ab"] ? d.translate[x + "_ab"] : i.translation(x);
+            var w = p.name;
+            return d.translate[w + "_ab"] ? d.translate[w + "_ab"] : i.translation(w);
           }, z = 0; z < l.length; z++)
             g.buttons[z].querySelector(".info").innerHTML = m(l[z]);
           setTimeout(() => {
@@ -30381,9 +30457,9 @@ b({
   zhuijimrfz: "追缉",
   zhuijimrfz_info: "出牌阶段开始时，你可以展示你攻击范围外所有角色的一张牌，所有因此展示了非黑桃牌的角色本阶段成为你使用牌的目标时，你可以对其造成一点伤害或摸一张牌（每项每名角色每阶段限一次），且你对这些角色使用牌无次数限制。"
 });
-C("char_4193_lemuen", "<font color='#6495ed'>第七枢机</font>");
+S("char_4193_lemuen", "<font color='#6495ed'>第七枢机</font>");
 v("char_4193_lemuen", "蕾缪安，拉特兰公民，适用于拉特兰一至十三项公民权益，现任拉特兰教皇厅第七厅枢机。<br>蕾缪安本人称自己来到罗德岛可以被视作干员家属来舰探亲，但她的到访在程序上仍需被认定为拉特兰代表对罗德岛的正式访问。访问期间，蕾缪安将依照协议为罗德岛提供各种形式的协助。");
-const Wi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ki = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4194_rmixer", { pack: "legendSJZX", sex: "male", group: "lamrfz", hp: 4, skills: ["daoweimrfz", "chongzhoumrfz", "shiyimrfz"] });
@@ -30574,9 +30650,9 @@ b({
   shiyimrfz: "拾遗",
   shiyimrfz_info: "觉醒技，当你进入濒死状态或失去所有手牌时，你失去一点体力上限并恢复一点体力值，失去“蹈卫”，获得“享乐”，然后你令你的额定摸牌数和手牌上限+Y，摸Y张牌。（Y= 5 - 你发动“蹈卫”的次数，Y至少为1）"
 });
-C("char_4194_rmixer", "<font color='#6495ed'>律法守卫</font>");
+S("char_4194_rmixer", "<font color='#6495ed'>律法守卫</font>");
 v("char_4194_rmixer", "帕特里奇昂，拉特兰公民，拉特兰目前任职时间最长的铳骑，适用于拉特兰一至十三项公民权益，熟练掌握所有种类铳械的使用方式。现因拉特兰教皇厅与罗德岛友好协议，以“信仰搅拌机”为代号，作为合作干员为罗德岛提供协助。");
-const Yi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Qi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4195_radian", { pack: "legendSJZX", sex: "female", group: "luomrfz", hp: 4, skills: ["gandianmrfz"] });
@@ -30647,7 +30723,7 @@ y({
           global: "phaseBefore"
         }).then(async (l, f, g) => {
           if (f.name === "phaseUse") {
-            let m = g.countCards("h", (x) => x.hasGaintag("gandianmrfz_shu")), z = g.countCards("h", (x) => x.hasGaintag("gandianmrfz_zhou")), p = Math.min(m, z, 5);
+            let m = g.countCards("h", (w) => w.hasGaintag("gandianmrfz_shu")), z = g.countCards("h", (w) => w.hasGaintag("gandianmrfz_zhou")), p = Math.min(m, z, 5);
             p > 0 && (g.draw(p), g.logSkill("gandianmrfz"));
           }
         });
@@ -30733,9 +30809,9 @@ b({
   gandianmrfz: "感电",
   gandianmrfz_info: "锁定技。<br>①所有角色只能用“小树”响应“小轴”。<br>②每轮开始时，你选择令一种颜色的牌称之为“小轴”，其余颜色的牌则称之为“小树”，然后你弃置N-1张牌并令N名角色不受【感电①】的影响且本轮第一个出牌阶段开始时摸X张牌（X=其手牌中“小树”的数量和“小轴”的数量中的最小值，X至多为5）。<br>③其他角色的手牌对你可见。"
 });
-C("char_4195_radian", "<font color = #6495ed>无言的慈爱</font>");
+S("char_4195_radian", "<font color = #6495ed>无言的慈爱</font>");
 v("char_4195_radian", "电弧，罗德岛精英干员。曾为巴别塔提供通讯支援，主导罗德岛早期的通讯系统建设，为相关通讯工作提供了必要的框架支持。");
-const Ki = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const eo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4196_reckpr", {
@@ -30904,9 +30980,9 @@ b({
   baizhaomrfz: "百招",
   baizhaomrfz_info: "你可以将一张【影】当作你因【录武】而获得过的牌使用。"
 });
-C("char_4196_reckpr", "<font color = #a52a2a>何须剑</font>");
+S("char_4196_reckpr", "<font color = #a52a2a>何须剑</font>");
 v("char_4196_reckpr", "云青萍，曾就任炎国录武官一职，为军队将士记录武功、编撰书籍。现经干员左乐介绍，作为司岁台编外文职暂驻罗德岛，负责辅助对岁兽代理人的观察与记录，并兼任罗德岛后勤干员。");
-const Qi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ro = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4198_christ", {
@@ -31095,9 +31171,9 @@ b({
   yashimrfz: "雅食",
   yashimrfz_info: "出牌阶段，你可以将4/3/2张不同花色/类别/颜色的“绪”置入弃牌堆，然后摸等量张牌，若你仍有“绪”，你将所有的“绪”置入弃牌堆、模一张牌并回复一点体力。"
 });
-C("char_4198_christ", "<font color = #a52a2a>黑猫传说</font>");
+S("char_4198_christ", "<font color = #a52a2a>黑猫传说</font>");
 v("char_4198_christ", "Miss.Christine，时常出现在干员傀影身边的美丽生物，经推测可能为“兽主”之一。现出于自我意愿加入罗德岛，目前并未分配任何相关职务。");
-const eo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const to = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4199_makiri", {
@@ -31175,9 +31251,9 @@ b({
   xianchoumrfz: "先筹",
   xianchoumrfz_info: "当你不因此技能而于本轮首次使用一种类型的牌后，你可以令一名角色视为使用X张【无中生有】、弃置X张牌并令至多X张手牌本轮使用无次数限制。(X=本技能本轮发动的次数)"
 });
-C("char_4199_makiri", "<font color = gray>见微知著</font>");
+S("char_4199_makiri", "<font color = gray>见微知著</font>");
 v("char_4199_makiri", "松桐，本名森内彻，酒保、关东煮摊摊主，同时也是锻冶町周边情报交易的核心人物，从事多种职业，广泛涉足各类人际网络，尤其擅长处理东国方面的信息流通事务。由本人主动联系，希望就情报交流及业务扩展等方面与罗德岛建立合作关系，同时根据本人意愿，作为先锋干员为罗德岛提供服务。");
-const ro = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ao = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4202_haruka", {
@@ -31214,7 +31290,7 @@ y({
       }
     },
     async content(r, t, e) {
-      let { cards: a, targets: n } = r, o = [], s = [], u = (z, p) => Array.from(new Set(z.map((x) => i[p](x))));
+      let { cards: a, targets: n } = r, o = [], s = [], u = (z, p) => Array.from(new Set(z.map((w) => i[p](w))));
       a.length < 3 && o.push(...i.cards(3 - a.length)), s = [...a, ...o];
       let l = [];
       u(s, "number").length === 3 && l.push("number"), u(s, "suit").length === 3 && l.push("suit"), u(s, "type2").length === 3 && l.push("type");
@@ -31266,24 +31342,24 @@ y({
       const a = Math.min(5, Math.max(c.countMark("fuyingmrfz"), 1));
       let n = [...d.suit], o = ["basic", "trick", "equip"], s = [], u = i.cards(a);
       for (let m of o) {
-        let z = d.inpile.filter((x) => i.type2(x) === m).randomGet(), p = n.randomGet();
+        let z = d.inpile.filter((w) => i.type2(w) === m).randomGet(), p = n.randomGet();
         n.remove(p), s.push(c.createCard(z, p, [1, 3, 5, 8, 12].randomGet()));
       }
       let { moved: l } = await e.chooseToMove().set("list", [
         ["牌堆顶", u],
         ["游戏外的牌", s]
       ]).set("prompt", "你可以将游戏外随机的三张不同花色、类型的牌（进入弃牌堆后销毁之）插入到这些牌之中").set("filterMove", (m, z, p) => {
-        let x = i.event().pileCards, w = [p[0].slice(), p[1].slice()];
+        let w = i.event().pileCards, x = [p[0].slice(), p[1].slice()];
         if (typeof z != "number") {
-          let j = T(w, m.link), M = T(w, z.link);
-          j && M && ([w[j.arrayIndex][j.elementIndex], w[M.arrayIndex][M.elementIndex]] = [
-            w[M.arrayIndex][M.elementIndex],
-            w[j.arrayIndex][j.elementIndex]
+          let j = T(x, m.link), M = T(x, z.link);
+          j && M && ([x[j.arrayIndex][j.elementIndex], x[M.arrayIndex][M.elementIndex]] = [
+            x[M.arrayIndex][M.elementIndex],
+            x[j.arrayIndex][j.elementIndex]
           ]);
         } else
-          w[0].includes(m.link) && w[0].remove(m.link), w[1].includes(m.link) && w[1].remove(m.link), w[z].push(m.link);
-        let S = w[0].filter((j) => x.includes(j));
-        return JSON.stringify(x) === JSON.stringify(S);
+          x[0].includes(m.link) && x[0].remove(m.link), x[1].includes(m.link) && x[1].remove(m.link), x[z].push(m.link);
+        let C = x[0].filter((j) => w.includes(j));
+        return JSON.stringify(w) === JSON.stringify(C);
         function T(j, M) {
           for (let q = 0; q < j.length; q++) {
             let O = j[q].indexOf(M);
@@ -31295,18 +31371,18 @@ y({
       }).set("filterOk", () => {
         let m = i.event().outCards;
         return Array.from(i.event().buttonss[0].children).concat(Array.from(i.event().buttonss[1].children)).forEach((p) => {
-          let x = p.link;
-          if (!m.includes(x)) {
-            let w = p.querySelector(".info");
-            w && (w.innerHTML = "不可改变顺序");
+          let w = p.link;
+          if (!m.includes(w)) {
+            let x = p.querySelector(".info");
+            x && (x.innerHTML = "不可改变顺序");
           }
         }), !0;
       }).set("processAI", (m) => {
         i.event().player;
         let z = [...m[0][1]], p = [...m[1][1]];
-        for (let w of p) {
-          let S = z.findIndex((T) => i.value(T) < i.value(w));
-          S === -1 ? z.push(w) : z.insert(S, w, !1);
+        for (let x of p) {
+          let C = z.findIndex((T) => i.value(T) < i.value(x));
+          C === -1 ? z.push(x) : z.insert(C, x, !1);
         }
         return [z, p];
       }).set("outCards", s).set("pileCards", u).forResult();
@@ -31360,9 +31436,9 @@ b({
   fuyingmrfz: "浮影",
   fuyingmrfz_info: "锁定技，当有角色进入濒死状态时，若其有“沫”标记，则所有有沫标记的角色须弃置Z张花色不同的牌或失去Z点体力，然后其移除所有的“沫”标记。（Z=该角色“沫”标记的数量）"
 });
-C("char_4202_haruka", "<font color = red>浮生若梦</font>");
+S("char_4202_haruka", "<font color = red>浮生若梦</font>");
 v("char_4202_haruka", "紫野遥，在东国南院有相当名气的艺人。艺名羽生萌萌香。受干员星熊推荐，与罗德岛签订合约，负责罗德岛与东国的交流工作。鉴于本人的要求，也会参与一部分外勤任务。");
-const to = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const no = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4203_kichi", {
@@ -31491,9 +31567,9 @@ b({
   tiandingmrfz: "天定",
   tiandingmrfz_info: "每回合限两次，任意阶段开始时，你可以进行一次判定并获得判定牌，若判定牌为红，你本回合使用【杀】的次数和攻击距离+1且本技能本回合发动次数+1，反之你跳过此阶段。"
 });
-C("char_4203_kichi", "<font color = #a52a2a>命由天定</font>");
+S("char_4203_kichi", "<font color = #a52a2a>命由天定</font>");
 v("char_4203_kichi", "吉星，活跃在锻冶町的珠宝鉴定师，杂货铺“吉星”的所有者，在金石会事件后失去了店铺与家，经介绍来到罗德岛接受矿石病治疗，现作为狙击干员为罗德岛提供服务。");
-const ao = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const io = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4204_mantra", {
@@ -31688,9 +31764,9 @@ b({
   qinyinmrfz: "侵音",
   qinyinmrfz_info: "出牌阶段限一次，或每轮结束时，你可以以弃置的方式把一名角色的手牌当无距离限制的【顺手牵羊】使用。"
 });
-C("char_4204_mantra", "<font color = #128985ff>噤声限域</font>");
+S("char_4204_mantra", "<font color = #128985ff>噤声限域</font>");
 v("char_4204_mantra", "真言，罗德岛精英干员。受凯尔希邀请加入巴别塔，曾参与卡兹戴尔内战，后成为罗德岛首批精英干员之一。<br>真言长期担任特殊行动第三小队领队，能与通讯员配合，在难以建立稳定通讯或需要秘密行动的情况下，使用源石技艺维持沟通和协调各方，是任务中不可或缺的存在。");
-const no = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const oo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4207_branch", {
@@ -31857,12 +31933,12 @@ b({
   hanshengmrfz: "寒生",
   hanshengmrfz_info: "当你需要使用【桃】时，你可以令一名其他角色选择交给你X张牌，若其交给你牌，你视为使用一张【桃】，反之此技能本回合失效。（X=本局游戏此技能发动的次数 + 1）"
 });
-C("char_4207_branch", "<font color = #103b58ff>苔原吹哨人</font>");
+S("char_4207_branch", "<font color = #103b58ff>苔原吹哨人</font>");
 v("char_4207_branch", "折桠，常用名别乔克，曾为乌萨斯远北中心矿区工人，现于罗德岛接受治疗，同时根据本人意愿，接受标准强度的战斗训练，作为罗德岛的外勤干员参与感染者救助工作。");
-const io = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const so = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
-class oo {
+class uo {
   /**
    * 计算数值数组的算术平均数
    * @param values - 数值数组，不能为空且所有元素必须为有限数字
@@ -31896,13 +31972,13 @@ class oo {
     return Math.sqrt(o);
   }
 }
-const ee = new oo();
-Qe({
+const re = new uo();
+er({
   name: "whichWayMath_dev",
   //@ts-ignore
-  fn: () => window.whichWayMath = ee
+  fn: () => window.whichWayMath = re
 });
-window.whichWay.register("math", ee);
+window.whichWay.register("math", re);
 k("char_4208_wintim", { pack: "rareSJZX", sex: "female", group: "wumrfz", hp: 3, skills: ["gelimrfz"] });
 y({
   gelimrfz: {
@@ -31914,7 +31990,7 @@ y({
     filter(r, t) {
       let e = Array.from(_.discardPile.childNodes).map((o) => i.number(o)).filter((o) => ![null, "unsure", void 0].includes(o));
       if (e.length < 1) return !1;
-      let a = ee.mean(e), n = ee.std(e);
+      let a = re.mean(e), n = re.std(e);
       return i.number(r.card) > a + n || i.number(r.card) < a - n;
     },
     mark: !0,
@@ -31922,7 +31998,7 @@ y({
       content() {
         let r = Array.from(_.discardPile.childNodes).map((n) => i.number(n)).filter((n) => ![null, "unsure", void 0].includes(n));
         if (r.length < 1) return "弃牌堆中没有牌!";
-        let t = ee.mean(r), e = ee.std(r), a = [];
+        let t = re.mean(r), e = re.std(r), a = [];
         for (let n = 1; n < 4; n++)
           a.push(`正负${n}个标准差:(${t - n * e} , ${t + n * e})`);
         return a.join("<br>");
@@ -31930,7 +32006,7 @@ y({
     },
     // @ts-ignore
     async content(r, t, e) {
-      let a = Array.from(_.discardPile.childNodes).map((l) => i.number(l)).filter((l) => ![null, "unsure", void 0].includes(l)), n = ee.mean(a), o = ee.std(a), s = i.number(t.card), u = 0;
+      let a = Array.from(_.discardPile.childNodes).map((l) => i.number(l)).filter((l) => ![null, "unsure", void 0].includes(l)), n = re.mean(a), o = re.std(a), s = i.number(t.card), u = 0;
       for (let l = 1; l < 4; l++)
         (s > n + l * o || s < n - l * o) && (u = l);
       u > 0 && e.draw(u);
@@ -31942,9 +32018,9 @@ b({
   gelimrfz: "格理",
   gelimrfz_info: "锁定技，当你使用一张牌后，若X∉(M-N∂,M+N∂)，你摸N张牌。（X为此牌点数，N=1/2/3，M和∂为以弃牌堆中牌对应的点数为样本的平均值和标准差）"
 });
-C("char_4208_wintim", "<font color = red>循理归因</font>");
+S("char_4208_wintim", "<font color = red>循理归因</font>");
 v("char_4208_wintim", "冬时，本名科谢尼娅·马尔科芙娜·涅留朵娃，原乌萨斯远北中心矿区研究所研究员，现入职罗德岛，继续其在乌萨斯从事的部分研究。");
-const so = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const lo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_420_flamtl", {
@@ -32059,7 +32135,7 @@ b({
   hongsongmrfz_info: "①锁定技，当你响应牌后，若场上‘红松’标记小于3，你获得一个‘红松’标记；拥有‘红松’标记的角色或你需要使用或打出【闪】时，其可以进行判定，若不为♥，其视为使用或打出一张【闪】并获得判定牌，然后若该角色不为你，其移除‘红松’标记。②回合开始时，若你有‘红松’标记，你可以将任意个‘红松’标记交给任意名其他角色。"
 });
 v("char_420_flamtl", "焰尾，卡西米尔的感染者骑士，同时也是自发组建的感染者骑士团“红松”的实际领袖。于卡西米尔合作期间与罗德岛接触，并主动寻求罗德岛的治疗。");
-const uo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const fo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4211_snhunt", {
@@ -32161,9 +32237,9 @@ b({
   liexuemrfz: "裂雪",
   liexuemrfz_info: "锁定技。<br>①当你使用的【杀】指定唯一目标后，目标角色与你之间的所有角色均成为此牌的目标。<br>②座次与你相邻的角色无法响应你使用的【杀】且你使用的【杀】对其伤害+1。"
 });
-C("char_4211_snhunt", "<font color = #1a3cac66>虔信猎人</font>");
+S("char_4211_snhunt", "<font color = #1a3cac66>虔信猎人</font>");
 v("char_4211_snhunt", "雪猎，出身于谢拉格佩尔罗契家迁入雪山生活的一支，祖辈以在山中捕猎为生，雕刻耶拉冈德像的手艺代代相传。<br>雪猎擅长在雪山中狩猎，身体素质极佳，不幸在一次捕猎中感染了矿石病，现于罗德岛接受治疗，并根据个人意愿成为一名外勤干员。");
-const lo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const co = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4212_nasti", {
@@ -32236,9 +32312,9 @@ b({
   tadimrfz: "踏地",
   tadimrfz_info: "锁定技，你的体力值发生变化后，若当前体力值为你本轮首次达到，你摸一张牌。"
 });
-C("char_4212_nasti", "<font color = #2263b766>悬于天际</font>");
+S("char_4212_nasti", "<font color = #2263b766>悬于天际</font>");
 v("char_4212_nasti", "娜斯提·鲁诺瑞伊，莱茵生命工程科主任，哥伦比亚工程科学领域的专家，在应用语言学方面也有一定造诣。经塞雷娅介绍，现与罗德岛签订长期合作条款，作为工程部特聘顾问，为罗德岛多个项目提供支持。");
-const fo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const go = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4213_skybx", {
@@ -32302,11 +32378,11 @@ b({
   tiankonghe_zhenlimrfz: "真理",
   tiankonghe_zhenlimrfz_info: "每回合限一次，当你亮出拼点牌时,若你的拼点牌点数不是拼点牌中唯一最大的,你可以视为对一名参与此次拼点的其他角色使用一张【杀】，若此【杀】造成了伤害，你令点数+1908。"
 });
-C("char_4213_skybx", "<font color = #2263b766>管理局突击中</font>");
+S("char_4213_skybx", "<font color = #2263b766>管理局突击中</font>");
 v("char_4213_skybx", "高登·谭农，哥伦比亚人，在“螺旋桨天堂”事件后，升任哥伦比亚烟酒施术单元以及源石制品管理局探员总管，并恢复“螺旋桨天堂”总长官身份。现与罗德岛达成合作，既以管理局的名义帮助罗德岛打通矿石病药物进入哥伦比亚市场的合法渠道，也以“螺旋桨天堂”的名义与罗德岛共同进行天空相关的科研。");
-const co = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const mo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), xe = window.whichWaySave.tmpSave;
+}, Symbol.toStringTag, { value: "Module" })), we = window.whichWaySave.tmpSave;
 k("char_4214_cairn", {
   pack: "epicSJZX",
   sex: "female",
@@ -32422,11 +32498,11 @@ y({
         const s = a[n];
         let u = i.info(s);
         const l = `${e.playerid}_pozemrfz`;
-        xe[l] == null && (xe[l] = { name: s, info: { ...u } }), ["forced", "locked", "zhuanhuanji", "juexingji", "limited", "dutySkill"].forEach((g) => {
+        we[l] == null && (we[l] = { name: s, info: { ...u } }), ["forced", "locked", "zhuanhuanji", "juexingji", "limited", "dutySkill"].forEach((g) => {
           u[g] && (o++, g === "limited" && e.restoreSkill(s), delete u[g]);
         }), o > 0 && e.draw(o), e.when({ player: "phaseEnd", global: "phaseEnd" }).step(async (g, m, z) => {
-          const p = xe[l];
-          p && Object.keys(p).length > 0 && (d.skill[p.name] = p.info, delete xe[l]);
+          const p = we[l];
+          p && Object.keys(p).length > 0 && (d.skill[p.name] = p.info, delete we[l]);
         });
       }
     }
@@ -32439,11 +32515,11 @@ b({
   pozemrfz: "破则",
   pozemrfz_info: "限定技，出牌阶段限一次，你可以删除你武将牌上其中一个技能的所有标签直到本回合结束，然后你摸X张牌。（X=你此次删除的标签数）"
 });
-C("char_4214_cairn", "<font color = #a52a2a>特殊渠道顾问</font>");
+S("char_4214_cairn", "<font color = #a52a2a>特殊渠道顾问</font>");
 v("char_4214_cairn", "费尔南·伯恩，哥伦比亚人，经营着一家以“哪儿都能去”闻名的独立旅行社。除了已故的荣誉社员马丁·伯恩，费尔南便是该社的唯一成员。<br>接受治疗的同时，费尔南也与罗德岛达成了合作，以“响石”为代号，在各类外勤任务中行使向导职责。");
-const go = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ho = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), mo = function(r = "char_4217_makoto") {
+}, Symbol.toStringTag, { value: "Module" })), zo = function(r = "char_4217_makoto") {
   k(r, {
     skills: ["bujimrfz", "fuanmrfz"],
     sex: "male",
@@ -32458,7 +32534,7 @@ const go = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
     pack: "legendSJZX",
     llm: "Qwen-3.8-Flash",
     designer: ["Flandre"]
-  }), C(r, P.colorize("#blue#开辟明日之人#")), v(r, "结城理，1102年3月于中庭公证所登记为拉特兰公民亲属，根据拉特兰公民权利章程附录第三十四条，由圣马尔索综合学校接收入学。<br>教师评语：结城理同学处事冷静，团结同学，尊敬师长，积极参加社会实践活动，在志愿实践中获得了一致赞赏。望持之以恒，再接再厉，百尺竿头，更进一步。");
+  }), S(r, P.colorize("#blue#开辟明日之人#")), v(r, "结城理，1102年3月于中庭公证所登记为拉特兰公民亲属，根据拉特兰公民权利章程附录第三十四条，由圣马尔索综合学校接收入学。<br>教师评语：结城理同学处事冷静，团结同学，尊敬师长，积极参加社会实践活动，在志愿实践中获得了一致赞赏。望持之以恒，再接再厉，百尺竿头，更进一步。");
   const t = `转换技，当你脱离濒死状态后，你令至多X（X = 你的[①体力值;②已损失体力值])名角色[①进行三次${i.poptip("shandian")}判定;②弃一张手牌并受到一点伤害]。本技能的状态切换条件改为进入濒死状态时切换且你失去此技能不会重置此技能的状态。`, e = "转换技，回合结束时，你令至多[①Y;②一]名角色各回复[①一;②Y]点体力，且溢出的体力值改为摸等量张牌（Y = 你的[①体力值;②已损失体力值]）。本技能的状态切换条件改为进入濒死状态时切换且你失去此技能不会重置此技能的状态。";
   b({
     [r]: "结城理",
@@ -32471,14 +32547,14 @@ const go = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
     fuanmrfz: "赴暗",
     fuanmrfz_info: "锁定技，当你进入濒死状态时，你将牌堆顶3-Z张牌置于你的武将牌上，称之为“坚”，然后若你的“坚”中有相同点数的牌，你将其置入弃牌堆，否则你将体力调整至1。（Z=你的“人格面具”数）"
   });
-  const a = ["bujimrfz_handcard", "thanatos_mrfz", "orpheus_mrfz"], n = ["thanatos_mrfz", "orpheus_mrfz"], o = (m, z) => z === 1 ? m.hp : m.getDamagedHp(), s = (m, z) => m.storage[z] === 2 ? 2 : 1, u = (m) => 3 - n.filter((z) => m.hasSkill(z)).length, l = (m, z) => m.replace(/\[①([^;\]]*);②([^\]]*)\]/g, (p, x, w) => z === 1 ? `#r①${x}#;#s②${w}#` : `#s①${x}#;#r②${w}#`), f = (m) => {
-    const z = s(m, "thanatos_mrfz"), p = Math.max(0, o(m, z)), x = z === 1 ? `进行三次${i.poptip("shandian")}判定` : "弃一张手牌并受到一点伤害";
-    return P.colorize(`#r${z === 1 ? "①X=体力值" : "②X=已损失体力值"}=${i.cnNumber(p)}：你令至多${i.cnNumber(p)}名角色${x}#`);
+  const a = ["bujimrfz_handcard", "thanatos_mrfz", "orpheus_mrfz"], n = ["thanatos_mrfz", "orpheus_mrfz"], o = (m, z) => z === 1 ? m.hp : m.getDamagedHp(), s = (m, z) => m.storage[z] === 2 ? 2 : 1, u = (m) => 3 - n.filter((z) => m.hasSkill(z)).length, l = (m, z) => m.replace(/\[①([^;\]]*);②([^\]]*)\]/g, (p, w, x) => z === 1 ? `#r①${w}#;#s②${x}#` : `#s①${w}#;#r②${x}#`), f = (m) => {
+    const z = s(m, "thanatos_mrfz"), p = Math.max(0, o(m, z)), w = z === 1 ? `进行三次${i.poptip("shandian")}判定` : "弃一张手牌并受到一点伤害";
+    return P.colorize(`#r${z === 1 ? "①X=体力值" : "②X=已损失体力值"}=${i.cnNumber(p)}：你令至多${i.cnNumber(p)}名角色${w}#`);
   }, g = (m) => {
-    const z = s(m, "orpheus_mrfz"), p = Math.max(0, o(m, z)), x = z === 1 ? `至多${i.cnNumber(p)}名角色各回复一点体力` : `一名角色回复${i.cnNumber(p)}点体力`;
-    return P.colorize(`#r${z === 1 ? "①Y=体力值" : "②Y=已损失体力值"}=${i.cnNumber(p)}：${x}，溢出的体力值改为摸等量张牌#`);
+    const z = s(m, "orpheus_mrfz"), p = Math.max(0, o(m, z)), w = z === 1 ? `至多${i.cnNumber(p)}名角色各回复一点体力` : `一名角色回复${i.cnNumber(p)}点体力`;
+    return P.colorize(`#r${z === 1 ? "①Y=体力值" : "②Y=已损失体力值"}=${i.cnNumber(p)}：${w}，溢出的体力值改为摸等量张牌#`);
   };
-  ne({
+  ae({
     thanatos_mrfz(m) {
       const z = s(m, "thanatos_mrfz");
       return P.colorize(l(t, z)) + "<br>" + f(m);
@@ -32498,7 +32574,7 @@ const go = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
         global: "roundStart"
       },
       async cost(m, z, p) {
-        const x = await p.chooseNumbers({
+        const w = await p.chooseNumbers({
           list: [
             {
               min: 1,
@@ -32506,19 +32582,19 @@ const go = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
               prompt: `你可以流失N（N∈[1,你的体力上限-1]）点体力，摸N张牌、本轮手牌上限+N并且本轮获得前N个“${i.poptip("sjzx_persona")}”。`
             }
           ],
-          processAI(w) {
-            const S = i.player();
-            return ["buqu", "fuanmrfz"].some((T) => S.hasSkill(T)) ? S.hp > 2 ? [2] : Math.random() >= 0.2 ? [2] : !1 : S.hp > 2 ? [1] : !1;
+          processAI(x) {
+            const C = i.player();
+            return ["buqu", "fuanmrfz"].some((T) => C.hasSkill(T)) ? C.hp > 2 ? [2] : Math.random() >= 0.2 ? [2] : !1 : C.hp > 2 ? [1] : !1;
           }
         }).forResult();
-        x.bool && (m.result = {
+        w.bool && (m.result = {
           bool: !0,
-          cost_data: x.numbers[0]
+          cost_data: w.numbers[0]
         });
       },
       async content(m, z, p) {
-        const x = m.cost_data;
-        x >= 1 && p.addSkill("thanatos_mrfz"), x >= 2 && p.addSkill("orpheus_mrfz"), await p.draw(x), p.addMark("bujimrfz_handcard", x, !1), p.markSkill("bujimrfz_handcard"), p.addSkill("bujimrfz_handcard"), await p.loseHp(x);
+        const w = m.cost_data;
+        w >= 1 && p.addSkill("thanatos_mrfz"), w >= 2 && p.addSkill("orpheus_mrfz"), await p.draw(w), p.addMark("bujimrfz_handcard", w, !1), p.markSkill("bujimrfz_handcard"), p.addSkill("bujimrfz_handcard"), await p.loseHp(w);
       },
       group: "bujimrfz_clear",
       subSkill: {
@@ -32547,11 +32623,11 @@ const go = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
             global: "roundStart"
           },
           firstDo: !0,
-          filter(m, z, p, x) {
-            return a.some((w) => z.hasSkill(w));
+          filter(m, z, p, w) {
+            return a.some((x) => z.hasSkill(x));
           },
           async content(m, z, p) {
-            p.removeSkill(a.filter((x) => p.hasSkill(x)));
+            p.removeSkill(a.filter((w) => p.hasSkill(w)));
           }
         }
       }
@@ -32583,32 +32659,32 @@ const go = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
       zhuanhuanji(m, z) {
         m.storage[z] = m.storage[z] === 1 ? 2 : 1, m.syncStorage(z);
       },
-      filter(m, z, p, x) {
-        const w = s(z, "thanatos_mrfz");
-        return o(z, w) < 1 ? !1 : w === 1 ? c.hasPlayer((T) => d.filter.judge(i.autoViewAs({ name: "shandian" }), z, T)) : w === 2;
+      filter(m, z, p, w) {
+        const x = s(z, "thanatos_mrfz");
+        return o(z, x) < 1 ? !1 : x === 1 ? c.hasPlayer((T) => d.filter.judge(i.autoViewAs({ name: "shandian" }), z, T)) : x === 2;
       },
       async cost(m, z, p) {
-        const x = s(p, "thanatos_mrfz"), w = o(p, x);
+        const w = s(p, "thanatos_mrfz"), x = o(p, w);
         m.result = await p.chooseTarget({
           prompt: i.prompt("thanatos_mrfz"),
           prompt2: f(p),
           selectTarget() {
-            return [1, w];
+            return [1, x];
           },
-          ai(S) {
-            return i.attitude2(S) < 0 ? [1, 2, 3].randomGet() : -1;
+          ai(C) {
+            return i.attitude2(C) < 0 ? [1, 2, 3].randomGet() : -1;
           },
-          filterTarget(S, T, j) {
-            return x === 1 ? d.filter.judge(i.autoViewAs({ name: "shandian" }), T, j) : !0;
+          filterTarget(C, T, j) {
+            return w === 1 ? d.filter.judge(i.autoViewAs({ name: "shandian" }), T, j) : !0;
           }
         }).forResult();
       },
       async content(m, z, p) {
-        const x = m.targets, w = s(p, "thanatos_mrfz");
-        for (let T of x)
-          if (w === 1)
+        const w = m.targets, x = s(p, "thanatos_mrfz");
+        for (let T of w)
+          if (x === 1)
             for (let j of [0, 1, 2])
-              T.isAlive() && await S(T);
+              T.isAlive() && await C(T);
           else
             T.countCards("h") > 0 && await T.chooseToDiscard({
               prompt: "【塔纳托斯】:请弃置一张手牌",
@@ -32620,7 +32696,7 @@ const go = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
               num: 1,
               source: p
             });
-        async function S(T) {
+        async function C(T) {
           const j = await T.judge({
             judge(M) {
               return d.card.shandian.judge(M);
@@ -32674,15 +32750,15 @@ const go = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
       zhuanhuanji(m, z) {
         m.storage[z] = m.storage[z] === 1 ? 2 : 1, m.syncStorage(z);
       },
-      filter(m, z, p, x) {
+      filter(m, z, p, w) {
         return o(z, s(z, "orpheus_mrfz")) >= 1;
       },
       async cost(m, z, p) {
-        const x = s(p, "orpheus_mrfz"), w = o(p, x), S = x === 1 ? w : 1;
+        const w = s(p, "orpheus_mrfz"), x = o(p, w), C = w === 1 ? x : 1;
         m.result = await p.chooseTarget({
           prompt: i.prompt("orpheus_mrfz"),
           prompt2: g(p),
-          selectTarget: [1, S],
+          selectTarget: [1, C],
           ai(T) {
             return i.attitude2(T) < 0 ? -1 : 1;
           },
@@ -32693,10 +32769,10 @@ const go = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
         }).forResult();
       },
       async content(m, z, p) {
-        const x = s(p, "orpheus_mrfz"), w = x === 1 ? 1 : o(p, x);
-        for (let S of m.targets) {
-          const T = Math.max(0, Math.min(w, S.getDamagedHp())), j = w - T;
-          T > 0 && await S.recover({ num: T, source: p }), j > 0 && await S.draw(j);
+        const w = s(p, "orpheus_mrfz"), x = w === 1 ? 1 : o(p, w);
+        for (let C of m.targets) {
+          const T = Math.max(0, Math.min(x, C.getDamagedHp())), j = x - T;
+          T > 0 && await C.recover({ num: T, source: p }), j > 0 && await C.draw(j);
         }
       },
       group: "orpheus_mrfz_change",
@@ -32734,21 +32810,21 @@ const go = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
         const p = m.getExpansions(z);
         p.length && m.loseToDiscardpile({ cards: p });
       },
-      filter(m, z, p, x) {
+      filter(m, z, p, w) {
         return z.isDying() && u(z) > 0;
       },
       async content(m, z, p) {
-        const x = p.addToExpansion({
+        const w = p.addToExpansion({
           /**
            * get.cards(fuanCount(player)), "gain2"
            */
           cards: i.cards(u(p)),
           animate: "gain2"
         });
-        x.gaintag.add("fuanmrfz"), await x;
-        const w = p.getExpansions("fuanmrfz"), S = w.filter((T) => w.filter((j) => i.number(j) == i.number(T)).length > 1);
-        if (S.length) {
-          await p.loseToDiscardpile({ cards: S });
+        w.gaintag.add("fuanmrfz"), await w;
+        const x = p.getExpansions("fuanmrfz"), C = x.filter((T) => x.filter((j) => i.number(j) == i.number(T)).length > 1);
+        if (C.length) {
+          await p.loseToDiscardpile({ cards: C });
           return;
         }
         await p.recoverTo(1);
@@ -32756,11 +32832,11 @@ const go = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
     }
   });
 };
-mo();
-const ho = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+zo();
+const po = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), qe = "char_4218_aigis";
-k(qe, {
+}, Symbol.toStringTag, { value: "Module" })), Ee = "char_4218_aigis";
+k(Ee, {
   skills: ["zhenyingmrfz", "kailaimrfz"],
   sex: "female",
   hp: 3,
@@ -32774,10 +32850,10 @@ k(qe, {
   pack: "epicSJZX",
   llm: "Qwen-3.8-Flash"
 });
-v(qe, "埃癸斯，1102年3月于中庭公证所登记为第三类驻留人员，根据拉特兰公民权利章程附录第三十六条、入境人员管理条例第二章第五条，由圣马尔索综合学校接收入学。<br>教师评语：埃癸斯同学聪明好学，认真严谨，富有责任心，自我要求严格，在类铳型武装系列课程中取得了不俗的成绩。望能敞开心扉，更多地尝试集体活动，在学习进步之余，亦能享受美好的校园生活。");
-C(qe, P.colorize("#r战车#"));
+v(Ee, "埃癸斯，1102年3月于中庭公证所登记为第三类驻留人员，根据拉特兰公民权利章程附录第三十六条、入境人员管理条例第二章第五条，由圣马尔索综合学校接收入学。<br>教师评语：埃癸斯同学聪明好学，认真严谨，富有责任心，自我要求严格，在类铳型武装系列课程中取得了不俗的成绩。望能敞开心扉，更多地尝试集体活动，在学习进步之余，亦能享受美好的校园生活。");
+S(Ee, P.colorize("#r战车#"));
 b({
-  [qe]: "埃癸斯",
+  [Ee]: "埃癸斯",
   zhenyingmrfz: "镇影",
   zhenyingmrfz_info: "锁定技，游戏开始时，你将一张手牌（称为牌A）随机置入牌堆，然后获得下列效果：<br>1.当牌A离开牌堆时，你移除【镇影】给予的所有效果、失去一点体力并发动一次【镇影】;<br>2.你不能使用手牌中与牌A相同牌名的牌;<br>3.与牌A类别相同的牌不计入手牌上限。",
   kailaimrfz: "开来",
@@ -32839,7 +32915,7 @@ y({
       }).set("insert_index", () => {
         const n = _.cardPile.childNodes.length;
         return _.cardPile.childNodes[i.rand(0, n)];
-      }), e.storage.zhenyingmrfz = a[0], c.updateRoundNumber(), vr(e));
+      }), e.storage.zhenyingmrfz = a[0], c.updateRoundNumber(), wr(e));
     },
     group: ["zhenyingmrfz_refresh", "zhenyingmrfz_leavePile"],
     subSkill: {
@@ -32850,7 +32926,7 @@ y({
           player: ["loseAfter", "gainAfter", "loseAsyncAfter"]
         },
         async content(r, t, e) {
-          vr(e);
+          wr(e);
         }
       },
       /**
@@ -32892,23 +32968,23 @@ y({
       const { cards: o } = await e.chooseToDiscard({
         prompt: `【开来】:请弃置一张牌，若你弃置的牌的花色[是/不是]${P.colorize(`#b${i.translation(i.suit(a))}#`)}，你[使用/改为使用]弃置的牌。`,
         forced: !0,
-        filterCard(z, p, x) {
-          const w = i.event().cards;
-          for (let S of p.getCards("h")) {
-            if (w.includes(S)) {
-              S.addPromptSJZX("已使用此牌", "kailaimrfz_prompt");
+        filterCard(z, p, w) {
+          const x = i.event().cards;
+          for (let C of p.getCards("h")) {
+            if (x.includes(C)) {
+              C.addPromptSJZX("已使用此牌", "kailaimrfz_prompt");
               continue;
             }
-            const { name: T, suit: j, nature: M, storage: q, number: O } = S;
-            p.hasUseTarget({ name: T, suit: j, nature: M, storage: q, number: O }) || S.addPromptSJZX(P.colorize("#r无合法目标#"), "kailaimrfz_prompt");
+            const { name: T, suit: j, nature: M, storage: q, number: O } = C;
+            p.hasUseTarget({ name: T, suit: j, nature: M, storage: q, number: O }) || C.addPromptSJZX(P.colorize("#r无合法目标#"), "kailaimrfz_prompt");
           }
-          return !w.includes(z);
+          return !x.includes(z);
         },
         ai(z) {
-          const p = i.player(), x = i.event().cardx;
-          let w = i.value(z) - i.value(x);
-          const { name: S, suit: T, nature: j, storage: M, number: q } = x;
-          return p.hasUseTarget({ name: S, suit: T, nature: j, storage: M, number: q }) || (w -= 10), i.suit(z) === i.suit(x) && (w += 8), w;
+          const p = i.player(), w = i.event().cardx;
+          let x = i.value(z) - i.value(w);
+          const { name: C, suit: T, nature: j, storage: M, number: q } = w;
+          return p.hasUseTarget({ name: C, suit: T, nature: j, storage: M, number: q }) || (x -= 10), i.suit(z) === i.suit(w) && (x += 8), x;
         },
         chooseonly: !0
       }).set("cardx", a).set("cards", n).forResult();
@@ -32922,15 +32998,15 @@ y({
     }
   }
 });
-function vr(r) {
+function wr(r) {
   if (r.removePromptSJZX("zhenyingmrfz_prompt"), !r.storage.zhenyingmrfz) return;
   const t = i.type2(r.storage.zhenyingmrfz);
   for (let e of r.getCards("h"))
     i.type2(e) === t && e.addPromptSJZX("不计入手牌上限", "zhenyingmrfz_prompt");
 }
-const zo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const _o = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), po = function(r = "char_4219_yukari") {
+}, Symbol.toStringTag, { value: "Module" })), bo = function(r = "char_4219_yukari") {
   k(r, {
     sex: "female",
     hp: 3,
@@ -32945,7 +33021,7 @@ const zo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
         camp: "persona"
       }
     }
-  }), C(r, P.colorize("#r恋人#")), v(r, "岳羽由加莉，1102年3月于中庭公证所登记为第三类驻留人员，根据拉特兰公民权利章程附录第三十六条、入境人员管理条例第二章第五条，由圣马尔索综合学校接收入学。<br>教师评语：岳羽由加莉同学聪慧友善，温柔开朗，善于沟通，有很强的独立意识。在类铳型武装系列课程中，岳羽同学的弓术给任课教师留下了深刻的印象。希望岳羽同学在面对困难时，亦不妨接受来自师长同学的帮助，与大家一同建设互帮互助、温暖和谐的班集体。"), b({
+  }), S(r, P.colorize("#r恋人#")), v(r, "岳羽由加莉，1102年3月于中庭公证所登记为第三类驻留人员，根据拉特兰公民权利章程附录第三十六条、入境人员管理条例第二章第五条，由圣马尔索综合学校接收入学。<br>教师评语：岳羽由加莉同学聪慧友善，温柔开朗，善于沟通，有很强的独立意识。在类铳型武装系列课程中，岳羽同学的弓术给任课教师留下了深刻的印象。希望岳羽同学在面对困难时，亦不妨接受来自师长同学的帮助，与大家一同建设互帮互助、温暖和谐的班集体。"), b({
     [r]: "岳羽由加莉",
     longjuanmrfz: "龙卷",
     longjuanmrfz_info: `当你受到伤害后，你可以摸一张牌并与一名其他角色议事，若议事结果为：<br><b>无结果</b>:所有参与议事的角色对其他参与议事角色造成一点伤害;<br><b>${P.colorize("#r红色#")}</b>:所有参与议事的角色将手牌调整至与所有议事角色中手牌数最多的角色一致;<br><b>${P.colorize("#black#黑色#")}</b>:所有议事角色将体力值调整至与所有议事角色中体力值最少的角色一致`,
@@ -32997,9 +33073,9 @@ const zo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
             for (let l of o.targets)
               u !== l && (u.line(l), l.damage({ source: u }));
         function s(u, l, f) {
-          const [g, m] = [f.countCards("h"), l.countCards("h")], [z, p] = [f.hp, l.hp], x = Math.abs(g - m), w = Math.abs(z - p), S = i.attitude2(f) > 0;
+          const [g, m] = [f.countCards("h"), l.countCards("h")], [z, p] = [f.hp, l.hp], w = Math.abs(g - m), x = Math.abs(z - p), C = i.attitude2(f) > 0;
           let T = i.rand(1, 3);
-          return i.color(u) === "red" && (g === m ? S && (T += 5) : g > m ? S ? T += x * 0.8 : l.hp < 2 ? T += x * 0.1 : T -= x * 0.8 : S ? T += x * 0.6 : l.hp < 2 ? T += x * 0.1 : T -= x * 0.8), i.color(u) === "black" && (S ? w === 0 ? T += 5 : T -= w * 1.2 : z > p ? T += w * 0.9 : z < p ? T -= w * 0.8 : T += i.rand(-5, 5)), T;
+          return i.color(u) === "red" && (g === m ? C && (T += 5) : g > m ? C ? T += w * 0.8 : l.hp < 2 ? T += w * 0.1 : T -= w * 0.8 : C ? T += w * 0.6 : l.hp < 2 ? T += w * 0.1 : T -= w * 0.8), i.color(u) === "black" && (C ? x === 0 ? T += 5 : T -= x * 1.2 : z > p ? T += x * 0.9 : z < p ? T -= x * 0.8 : T += i.rand(-5, 5)), T;
         }
       }
     },
@@ -33099,8 +33175,8 @@ const zo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
     }
   });
 };
-po();
-const _o = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+bo();
+const ko = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_421_crow", {
@@ -33263,10 +33339,10 @@ b({
   rujingmrfz_info: "①锁定技，当你使用牌后，你记录此牌的点数和花色。②出牌阶段每项限一次，当你使用牌时，若【入境①】中包含此牌的[①点数/②花色]，你可以令此牌额外结算一次，然后你清除【入境①】中记录的该[①点数/②花色]且此牌的点数和花色不能被【入境①】记录。"
 });
 v("char_421_crow", "羽毛笔，真正玻利瓦尔人某中尉之女，父亲死后被父亲战友潘乔收养，成为其养女，而后一同辗转至多索雷斯。</br>多索雷斯事件后，与龙舌兰一同来到罗德岛，由于身份特殊，经过会议审查，最终同意其加入罗德岛。");
-const bo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const yo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), Ee = "char_4220_kormr";
-k(Ee, {
+}, Symbol.toStringTag, { value: "Module" })), Re = "char_4220_kormr";
+k(Re, {
   sex: "male",
   hp: 5,
   skills: ["huangyaomrfz", "liequanmrfz"],
@@ -33281,10 +33357,10 @@ k(Ee, {
     }
   }
 });
-C(Ee, P.colorize("#r刚毅#"));
-v(Ee, "虎狼丸，本班学生结城理的同伴，受到班级成员一致认可，特别登记为班级荣誉学生。<br>根据同伴的介绍，虎狼丸是一位佩洛兽亲。拉特兰当地人鲜少见到像虎狼丸这样愿意长时间与人相伴的兽亲，虎狼丸的聪慧和善解人意也给许多师生留下了深刻的印象。尤为特别的是，埃癸斯同学与虎狼丸情谊深厚，她能够听懂虎狼丸叫声的含义，帮助虎狼丸与他人交流。虎狼丸于是迅速融入了班级，并显示出了对于棋类游戏的兴趣。他在一场班级友谊棋赛中积极观战，得到了“能带来胜利的虎狼丸”的称誉。");
+S(Re, P.colorize("#r刚毅#"));
+v(Re, "虎狼丸，本班学生结城理的同伴，受到班级成员一致认可，特别登记为班级荣誉学生。<br>根据同伴的介绍，虎狼丸是一位佩洛兽亲。拉特兰当地人鲜少见到像虎狼丸这样愿意长时间与人相伴的兽亲，虎狼丸的聪慧和善解人意也给许多师生留下了深刻的印象。尤为特别的是，埃癸斯同学与虎狼丸情谊深厚，她能够听懂虎狼丸叫声的含义，帮助虎狼丸与他人交流。虎狼丸于是迅速融入了班级，并显示出了对于棋类游戏的兴趣。他在一场班级友谊棋赛中积极观战，得到了“能带来胜利的虎狼丸”的称誉。");
 b({
-  [Ee]: "虎狼丸",
+  [Re]: "虎狼丸",
   huangyaomrfz: "荒咬",
   huangyaomrfz_info: "锁定技，任意有对应实体牌的牌结算完成后，若上一张使用的有对应实体牌的牌颜色与此牌相同且你不是此牌的使用者，你选择一项：<br>1.视为对此牌的使用者使用一张【杀】（无次数限制），若此【杀】未造成伤害，你失去一点体力，然后修改【荒咬】直到下次使用【荒咬】;<br>2.摸一张牌，然后令【荒咬】本轮失效。",
   liequanmrfz: "猎犬",
@@ -33292,7 +33368,7 @@ b({
   huangyaomrfz_rewirte: "荒咬·修改",
   huangyaomrfz_rewirte_info: "锁定技，任意牌结算完成后，若你不是此牌的使用者，你选择一项：<br>1.视为对此牌的使用者使用一张【杀】（无次数限制），若此【杀】造成伤害，你摸等同于你已损失体力值张牌;<br>2.摸一张牌，然后令【荒咬】本轮失效。"
 });
-ne("huangyaomrfz", (r) => i.skillInfoTranslation(r.hasSkill("huangyaomrfz_changed") ? "huangyaomrfz_rewirte" : "huangyaomrfz"));
+ae("huangyaomrfz", (r) => i.skillInfoTranslation(r.hasSkill("huangyaomrfz_changed") ? "huangyaomrfz_rewirte" : "huangyaomrfz"));
 y({
   huangyaomrfz: {
     audio: ["作战中1", "作战中2", "作战中3", "作战中4"],
@@ -33304,8 +33380,8 @@ y({
     filter(r, t, e, a) {
       if (r.player === t) return !1;
       if (t.hasSkill("huangyaomrfz_changed")) return !0;
-      const n = ko(r);
-      return !!n && i.color(n) === i.color(r.card) && qr(r.card);
+      const n = vo(r);
+      return !!n && i.color(n) === i.color(r.card) && Rr(r.card);
     },
     async cost(r, t, e) {
       const a = [];
@@ -33419,18 +33495,18 @@ y({
     }
   }
 });
-function qr(r) {
+function Rr(r) {
   return i.itemtype(r) === "card" || Array.isArray(r?.cards) && r.cards.length > 0;
 }
-function ko(r) {
+function vo(r) {
   const t = c.getAllGlobalHistory("useCard"), e = t.lastIndexOf(r);
   for (let a = (e >= 0 ? e : t.length + 1) - 1; a >= 0; a--) {
     const n = t[a].card;
-    if (qr(n))
+    if (Rr(n))
       return n;
   }
 }
-const yo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const xo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4221_ju", {
@@ -33441,7 +33517,7 @@ k("char_4221_ju", {
   group: "yanmrfz",
   sex: "male"
 });
-C("char_4221_ju", "<font color = #2263b766>巧器</font>");
+S("char_4221_ju", "<font color = #2263b766>巧器</font>");
 v(
   "char_4221_ju",
   "矩，炎国乡野间的无业游历者，经历丰富，见识广博。作为特殊的存在，本人有较高的历史研究价值。现受邀于博士，以工程技术顾问的身份暂驻罗德岛，支持日常工程建设。"
@@ -33492,7 +33568,7 @@ y({
       e.addTip("qiaoqimrfz_tips", `巧器 ${a.map((o) => i.translation(o)).join(" ")}`, !0);
       const n = await e.chooseControl("牌堆顶", "牌堆底", "弃牌堆顶", "弃牌堆底", "cancel2").set(
         "prompt",
-        `【巧器】:你可以将【${i.translation(t.card)}】置于牌堆顶或底、或弃牌堆顶或底，然后若弃牌堆（${xr(_.cardPile.childNodes.length)}）和牌堆数（${xr(_.discardPile.childNodes.length)}）的个位数相等，你摸一张牌。`
+        `【巧器】:你可以将【${i.translation(t.card)}】置于牌堆顶或底、或弃牌堆顶或底，然后若弃牌堆（${Sr(_.cardPile.childNodes.length)}）和牌堆数（${Sr(_.discardPile.childNodes.length)}）的个位数相等，你摸一张牌。`
       ).set("ai", () => {
         const o = i.player(), s = i.event().card;
         if (o.hasSkill("feigongmrfz") && h.currentPhase === o) {
@@ -33542,11 +33618,11 @@ y({
     }
   }
 });
-function xr(r) {
+function Sr(r) {
   const t = r.toString();
   return t.length === 1 ? Number(t) : Number(t.charAt(t.length - 1));
 }
-const vo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const wo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4222_taraxa", {
@@ -33557,7 +33633,7 @@ k("char_4222_taraxa", {
   group: "samrfz",
   sex: "male"
 });
-C("char_4222_taraxa", P.colorize("#b何处着#"));
+S("char_4222_taraxa", P.colorize("#b何处着#"));
 b({
   char_4222_taraxa: "风絮",
   fengxumrfz_youyimrfz: "游医",
@@ -33585,11 +33661,11 @@ y({
     },
     filter(r, t) {
       const e = t.storage.fengxumrfz_youyimrfz;
-      return r.cards && r.cards.some((a) => e.includes(oe(a))) && r.player !== t;
+      return r.cards && r.cards.some((a) => e.includes(se(a))) && r.player !== t;
     },
     async content(r, t, e) {
       if (t.cards.forEach((a) => {
-        e.storage.fengxumrfz_youyimrfz.includes(oe(a)) && (e.storage.fengxumrfz_youyimrfz.remove(oe(a)), a.removeGaintag("eternal_fengxumrfz_youyimrfz_mark"));
+        e.storage.fengxumrfz_youyimrfz.includes(se(a)) && (e.storage.fengxumrfz_youyimrfz.remove(se(a)), a.removeGaintag("eternal_fengxumrfz_youyimrfz_mark"));
       }), await e.draw(), c.hasPlayer((a) => a.getDamagedHp() > 0 && a !== e)) {
         const { targets: [a] = [] } = await e.chooseTarget().set("prompt", "【游医】:你可以令一名其他角色回复一点体力、模一张牌且使用一张牌").set("filterTarget", (n, o, s) => o !== s && s.getDamagedHp() > 0).set("ai", (n) => {
           const o = i.player();
@@ -33607,11 +33683,11 @@ y({
         trigger: { player: "gainAfter" },
         filter(r, t) {
           const e = t.storage.fengxumrfz_youyimrfz;
-          return r.cards && r.cards.some((a) => !e.includes(oe(a)));
+          return r.cards && r.cards.some((a) => !e.includes(se(a)));
         },
         async content(r, t, e) {
-          t.cards.filter((a) => !e.storage.fengxumrfz_youyimrfz.includes(oe(a))).forEach((a) => {
-            e.storage.fengxumrfz_youyimrfz.push(oe(a)), a.addGaintag("eternal_fengxumrfz_youyimrfz_mark");
+          t.cards.filter((a) => !e.storage.fengxumrfz_youyimrfz.includes(se(a))).forEach((a) => {
+            e.storage.fengxumrfz_youyimrfz.push(se(a)), a.addGaintag("eternal_fengxumrfz_youyimrfz_mark");
           });
         }
       }
@@ -33621,13 +33697,13 @@ y({
     audio: ["进驻设施", "行动出发", "观看作战记录"],
     trigger: { global: "phaseEnd" },
     filter(r, t) {
-      return Ve(t) !== void 0 && _.discardPile.children.length > 0;
+      return We(t) !== void 0 && _.discardPile.children.length > 0;
     },
     prompt2(r, t) {
-      return P.colorize(`你可以展示弃牌堆顶的#r${Ve(t)}#张牌，任意角色可选择展示其手牌中与展示的牌同名的牌，然后你与其摸一张牌并将展示牌中与此同名的牌插入牌堆中。`);
+      return P.colorize(`你可以展示弃牌堆顶的#r${We(t)}#张牌，任意角色可选择展示其手牌中与展示的牌同名的牌，然后你与其摸一张牌并将展示牌中与此同名的牌插入牌堆中。`);
     },
     async content(r, t, e) {
-      const a = Ve(e), n = [];
+      const a = We(e), n = [];
       for (let s = 0; s < a; s++)
         if (_.discardPile.children.length > 0) {
           let u = i.discardPile(!0, "top");
@@ -33650,13 +33726,13 @@ y({
     }
   }
 });
-function oe(r) {
+function se(r) {
   return r.cardid;
 }
-function Ve(r) {
+function We(r) {
   return r.getHistory("useCard", (e) => typeof e.card.number == "number").length < 1 ? void 0 : r.getHistory("useCard", (e) => typeof e.card.number == "number")[r.getHistory("useCard", (e) => typeof e.card.number == "number").length - 1].card.number;
 }
-const xo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const So = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4223_botany", {
@@ -33674,7 +33750,7 @@ b({
   yingshengmrfz_info: "当你获得一名其他角色的手牌后，你可以视为对其使用一张【决斗】或【刮骨疗毒】，然后你与其之中体力值没有发生变化的角色摸一张牌。"
 });
 v("char_4223_botany", "伯塔尼，原名季申娜·维克托罗夫娜·别利亚耶娃，曾就读于圣骏堡的帝国理工大学，肄业，经凛冬干员介绍加入罗德岛，继续学习和研究源石通讯技术，并参与外勤任务。");
-C("char_4223_botany", "<font color = #dfdcb1>昨日今日明日</font>");
+S("char_4223_botany", "<font color = #dfdcb1>昨日今日明日</font>");
 y({
   lingshengmrfz: {
     audio: ["选中干员1", "选中干员2", "部署1", "部署2"],
@@ -33738,7 +33814,7 @@ y({
           const l = i.event().targetx;
           return i.attitude(u, l) > 0 && u.canUse("guaguliaodu", l) ? "刮骨疗毒" : i.effect(l, i.autoViewAs({ name: "juedou" }), u, u) > 0 && u.canUse("juedou", l) ? "决斗" : "cancel2";
         }
-      }).set("targetx", a).set("canUseTao", wo).forResult();
+      }).set("targetx", a).set("canUseTao", Co).forResult();
       r.result = {
         ...o,
         cost_data: o
@@ -33786,14 +33862,14 @@ y({
     }
   }
 });
-function wo(r, t) {
+function Co(r, t) {
   if ([t, r].includes(void 0))
     return !1;
   const e = new d.element.Card().build("noclick").init(i.autoViewAs({ name: "tao" }));
   let a = c.checkMod(e, r, t, "unchanged", "playerEnabled", r);
   return a == !1 ? !1 : (a = c.checkMod(e, r, t, "unchanged", "targetEnabled", t), a !== "unchanged" ? a ?? !1 : t.isDamaged());
 }
-const So = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const jo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4224_turdus", {
@@ -33813,7 +33889,7 @@ b({
   nijimrfz_info: "当你于每轮第一次受到一名角色的伤害后，你可以摸三张牌，然后本回合当其对你造成伤害时，取消之。"
 });
 v("char_4224_turdus", "乌啾，曾作为地下组织“无缚者同盟”成员在乌萨斯圣骏堡活动，后经干员凛冬介绍加入罗德岛驻圣骏堡办事处，参与情报搜集及急救工作。按照其监护人烈夏要求，乌啾定期前往罗德岛总部接受矿石病治疗及通识教育。");
-C("char_4224_turdus", "<font color = #236ccc66>我最好的朋友</font>");
+S("char_4224_turdus", "<font color = #236ccc66>我最好的朋友</font>");
 y({
   // tatumrfz:{
   //     audio:["任命队长","选中干员2"],
@@ -33967,7 +34043,7 @@ y({
       }
     },
     filter(r, t, e, a) {
-      return !Co(t).includes(r.source);
+      return !To(t).includes(r.source);
     },
     async content(r, t, e) {
       e.draw(3), e.storage.nijimrfz ??= [], e.storage.nijimrfz.add(t.source);
@@ -34000,13 +34076,13 @@ y({
     }
   }
 });
-function Co(r) {
+function To(r) {
   const t = r.getRoundHistory("damage", (a) => a.player === r && !!a.source).map((a) => a.source), e = /* @__PURE__ */ new Map();
   for (const a of t)
     e.set(a, (e.get(a) || 0) + 1);
   return [...new Set(t)].filter((a) => (e.get(a) ?? 0) > 1);
 }
-const jo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Mo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4225_tanya", {
@@ -34017,7 +34093,7 @@ k("char_4225_tanya", {
   pack: "epicSJZX"
 });
 v("char_4225_tanya", "裂响，本名瑭雅，原乌萨斯泽尔格勒工人，曾在泽尔格勒以“整合运动”名号发起反抗运动，后经弑君者介绍来到罗德岛接受治疗，并以正式干员身份参与罗德岛外勤任务。");
-C("char_4225_tanya", "<font color = #e81490>血钻</font>");
+S("char_4225_tanya", "<font color = #e81490>血钻</font>");
 b({
   char_4225_tanya: "裂响",
   xuekuangmrfz: "血矿",
@@ -34126,7 +34202,7 @@ y({
     }
   }
 });
-const To = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Po = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4226_veen", {
@@ -34137,7 +34213,7 @@ k("char_4226_veen", {
   sex: "male"
 });
 v("char_4226_veen", "斯乔帕·拉辛，乌萨斯独立战术兵团“谢钦”的首领兼总指挥官，自由民领袖。1102年初带队脱离乌萨斯军方管辖，并于圣骏堡事变后彻底独立。后经办事处干员介绍，开始代表“谢钦”与罗德岛接触。");
-C("char_4226_veen", "<font color = #236ccc66>自呼号生发</font>");
+S("char_4226_veen", "<font color = #236ccc66>自呼号生发</font>");
 b({
   char_4226_veen: "维伊",
   chibeimrfz: "驰备",
@@ -34240,18 +34316,18 @@ y({
     }
   }
 });
-const Mo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ao = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), tr = "char_4227_gallus";
-k(tr, {
+}, Symbol.toStringTag, { value: "Module" })), ar = "char_4227_gallus";
+k(ar, {
   group: "luomrfz",
   sex: "female",
   skills: ["jibaomrfz"],
   hp: 4,
   pack: "mediocreSJZX"
 });
-C(tr, "<font color = #2463d0>电流相生</font>");
-v(tr, "自称“GALLUS²”的特异存在，其主体为金属与玻璃构成的小屋，由爪状的金属足支撑，小屋背侧及足后侧缀有少量生物质羽毛。发现于泽尔格勒的石棺核心，经确认为石棺产出的特殊生命形态，携带着万余年前的完整记忆，其中大部分与凯尔希有关。从泽尔格勒撤离后跟随凯尔希回到罗德岛，作为历史顾问、生物学顾问，以及外勤干员协助工作。");
+S(ar, "<font color = #2463d0>电流相生</font>");
+v(ar, "自称“GALLUS²”的特异存在，其主体为金属与玻璃构成的小屋，由爪状的金属足支撑，小屋背侧及足后侧缀有少量生物质羽毛。发现于泽尔格勒的石棺核心，经确认为石棺产出的特殊生命形态，携带着万余年前的完整记忆，其中大部分与凯尔希有关。从泽尔格勒撤离后跟随凯尔希回到罗德岛，作为历史顾问、生物学顾问，以及外勤干员协助工作。");
 b({
   char_4227_gallus: "GALLUS²",
   jibaomrfz: "鸡煲",
@@ -34313,7 +34389,7 @@ y({
       if (n.length > 3) {
         const o = n.slice(0, n.length - 3);
         for (let s of o)
-          e.storage.jibaomrfz.remove(s), await e.loseToDiscardpile({ cards: [s] }), await wr(s, e, "jifa");
+          e.storage.jibaomrfz.remove(s), await e.loseToDiscardpile({ cards: [s] }), await Cr(s, e, "jifa");
       }
     },
     group: ["jibaomrfz_round", "jibaomrfz_hujiaCount"],
@@ -34345,13 +34421,13 @@ y({
           const a = e.storage.jibaomrfz_hujia || 0;
           a > 0 && e.hujia > 0 && e.changeHujia(-a, "lose"), e.storage.jibaomrfz_hujia = 0;
           for (let n of e.storage.jibaomrfz)
-            await wr(n, e, "beidong");
+            await Cr(n, e, "beidong");
         }
       }
     }
   }
 });
-async function wr(r, t, e) {
+async function Cr(r, t, e) {
   if (["trick", "basic", "equip"].includes(i.type(r)))
     if (i.type(r) === "basic") {
       const a = await t.chooseTarget({
@@ -34373,7 +34449,7 @@ async function wr(r, t, e) {
       t.changeHujia(a, "gain"), t.storage.jibaomrfz_hujia += a;
     }
 }
-const Po = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const qo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4228_closur", {
@@ -34384,9 +34460,9 @@ k("char_4228_closur", {
   group: "bamrfz",
   sex: "female"
 });
-C("char_4228_closur", "<font color = #2263b766>总工程师</font>");
+S("char_4228_closur", "<font color = #2263b766>总工程师</font>");
 v("char_4228_closur", "可露希尔，罗德岛总工程师，采购部负责人，兼管其他多个部门的事务。<br>我就在采购部等着各位，想了解我，还用得着看我的档案吗？<br>——可露希尔");
-const ue = {
+const le = {
   supports: {
     resupply: {
       audio: "support",
@@ -34700,9 +34776,9 @@ const ue = {
           }), g = !0;
           return;
         }
-        const p = s[m], x = t[p];
-        for (const w of x)
-          f.has(w) || (f.add(w), z.push(w), n(m + 1, z), z.pop(), f.delete(w));
+        const p = s[m], w = t[p];
+        for (const x of w)
+          f.has(x) || (f.add(x), z.push(x), n(m + 1, z), z.pop(), f.delete(x));
       };
       const o = this.supports[a], s = this.compileCode(o.code), u = {};
       for (const m of s)
@@ -34729,7 +34805,7 @@ const ue = {
     P.playSound(n.path);
   }
 };
-P.isDeveloperMode() && (window.stratagemSupport = ue);
+P.isDeveloperMode() && (window.stratagemSupport = le);
 b({
   char_4228_closur: "可露希尔",
   jiongtumrfz: "迥途",
@@ -34782,7 +34858,7 @@ y({
       return t.countCards("hej") > 0;
     },
     async cost(r, t, e) {
-      const a = ue.findMatchingCards(e.getCards("hej")), n = a[Math.floor(Math.random() * a.length)] || [];
+      const a = le.findMatchingCards(e.getCards("hej")), n = a[Math.floor(Math.random() * a.length)] || [];
       let o = "";
       for (let s of a)
         o += `${s.name}(${s.cards.slice(0).map((u) => i.translation(i.suit(u))).join("")})：${s.intro}<br>`;
@@ -34803,10 +34879,10 @@ y({
       await e.discard({
         cards: a
       }), await e.draw({ num: a.length });
-      for (let n in ue.supports) {
-        const o = ue.supports[n];
-        if (ue.codeFilter(o.code, a) && (o.filter === void 0 || o.filter(r, e))) {
-          ue.playAudio(o.audio), await o.content(t, e);
+      for (let n in le.supports) {
+        const o = le.supports[n];
+        if (le.codeFilter(o.code, a) && (o.filter === void 0 || o.filter(r, e))) {
+          le.playAudio(o.audio), await o.content(t, e);
           break;
         }
       }
@@ -34827,10 +34903,10 @@ y({
     }
   }
 });
-const Ao = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Eo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), Re = "char_4229_aphris";
-k(Re, {
+}, Symbol.toStringTag, { value: "Module" })), Oe = "char_4229_aphris";
+k(Oe, {
   sex: "female",
   hp: 3,
   maxHp: 4,
@@ -34839,10 +34915,10 @@ k(Re, {
   pack: "legendSJZX",
   llm: "DeepSeek-4.1-Flash"
 });
-C(Re, P.colorize("#r绕动之谬#"));
-v(Re, "谬因，哥伦比亚人，常居玻利瓦尔。原哥伦比亚卢米内斯大学（拉乌尼达分校）副教授，在应用源石学、信息与计算科学领域造诣颇深。于玻利瓦尔大行军事件后辞去教学职务，现以术师干员身份供职于罗德岛。");
+S(Oe, P.colorize("#r绕动之谬#"));
+v(Oe, "谬因，哥伦比亚人，常居玻利瓦尔。原哥伦比亚卢米内斯大学（拉乌尼达分校）副教授，在应用源石学、信息与计算科学领域造诣颇深。于玻利瓦尔大行军事件后辞去教学职务，现以术师干员身份供职于罗德岛。");
 b({
-  [Re]: "谬因",
+  [Oe]: "谬因",
   miuyuanmrfz: "谬源",
   miuyuanmrfz_info: "出牌阶段限一次，你可以将一张牌置于牌堆顶，并令一名其他角色选择一项：<br>1.令你摸两张牌;<br>2.摸一张牌，然后交给你两张牌，<br>然后因此摸牌的角色使用下一张基本牌或普通锦囊牌选择目标时，你为此牌额外指定一名角色作为目标。",
   zhengguomrfz: "正果",
@@ -35019,10 +35095,10 @@ y({
     }
   }
 });
-const qo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ro = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), Oe = "char_4230_mcnist", U = "SP_jixieshimrfz", je = U;
-k(Oe, {
+}, Symbol.toStringTag, { value: "Module" })), $e = "char_4230_mcnist", U = "SP_jixieshimrfz", Te = U;
+k($e, {
   hp: 4,
   group: "luomrfz",
   sex: "male",
@@ -35031,13 +35107,13 @@ k(Oe, {
   designer: ["Flandre"],
   llm: "DeepSeek-4.1-Flash"
 });
-v(Oe, "机械师，罗德岛精英干员，主导罗德岛的武器装备、工程设施及实验器材的研发、制造及维护工作，为罗德岛各部门干员提供必要的硬件支持。");
-C(Oe, "<font color = #316dd5>机械之心</font>");
-const We = i.poptip(U);
+v($e, "机械师，罗德岛精英干员，主导罗德岛的武器装备、工程设施及实验器材的研发、制造及维护工作，为罗德岛各部门干员提供必要的硬件支持。");
+S($e, "<font color = #316dd5>机械之心</font>");
+const Ye = i.poptip(U);
 b({
-  [Oe]: "机械师",
+  [$e]: "机械师",
   xiefangmrfz: "协防",
-  xiefangmrfz_info: `锁定技，准备阶段，若你的装备区内没有${We}，你将${We}置入你的装备区，你可将置于${We}下的牌如手牌般使用。`,
+  xiefangmrfz_info: `锁定技，准备阶段，若你的装备区内没有${Ye}，你将${Ye}置入你的装备区，你可将置于${Ye}下的牌如手牌般使用。`,
   juleimrfz: "聚类",
   juleimrfz_info: "当你使用的牌结算完成后，若该类型的牌是你手牌中最多的类型，你可以对一名角色造成一点伤害，反之你摸一张牌。"
 });
@@ -35066,10 +35142,10 @@ y({
         popup: !1,
         trigger: { global: "loseEnd" },
         filter(r, t) {
-          return !r.ss || !r.ss.length ? !1 : r.ss.some((e) => (r.gaintag_map?.[e.cardid] || []).includes(je));
+          return !r.ss || !r.ss.length ? !1 : r.ss.some((e) => (r.gaintag_map?.[e.cardid] || []).includes(Te));
         },
         async content(r, t, e) {
-          const a = t.ss.filter((n) => (t.gaintag_map?.[n.cardid] || []).includes(je));
+          const a = t.ss.filter((n) => (t.gaintag_map?.[n.cardid] || []).includes(Te));
           if (a.length) {
             for (const n of c.players.concat(c.dead ?? []))
               for (const o of n.getVCards("e"))
@@ -35092,7 +35168,7 @@ y({
     },
     async cost(r, t, e) {
       const a = i.type(t.card, "trick"), n = e.getCards("h");
-      a === Eo(n) ? r.result = await e.chooseTarget({
+      a === Oo(n) ? r.result = await e.chooseTarget({
         prompt: i.prompt("juleimrfz"),
         prompt2: "你可以对一名角色造成一点伤害",
         ai(o) {
@@ -35114,7 +35190,7 @@ y({
     }
   }
 });
-function Eo(r, t) {
+function Oo(r, t) {
   const e = r.map((s) => i.type2(s)), a = {};
   for (let s of e)
     a[s] ? a[s] += 1 : a[s] = 1;
@@ -35164,7 +35240,7 @@ J(U, {
         m && (f.has(m) || f.set(m, []), f.get(m).push(g));
       }
       for (const [g, m] of f)
-        await g.lose(m, _.discardPile), c.log(a, "掉落了", m), m.forEach((z) => z.removeGaintag(je));
+        await g.lose(m, _.discardPile), c.log(a, "掉落了", m), m.forEach((z) => z.removeGaintag(Te));
       l.length = 0;
     }
     n.destroyed = !0, n.selfDestroy(r);
@@ -35221,7 +35297,7 @@ F({
       const a = e.getEquip(U);
       if (!a) return;
       const n = (r.cards ?? []).slice();
-      n.length && ((a.storage.saveCards ?? (a.storage.saveCards = [])).addArray(n), await e.lose({ cards: n, position: _.special }), e.directgains(n, null, je), c.log(e, "将", n, "置于", a, "下"));
+      n.length && ((a.storage.saveCards ?? (a.storage.saveCards = [])).addArray(n), await e.lose({ cards: n, position: _.special }), e.directgains(n, null, Te), c.log(e, "将", n, "置于", a, "下"));
       const s = (await e.chooseTarget({
         prompt: `是否将【${i.translation(U)}】置于一名其他角色的装备区内并对其造成1点伤害？`,
         ai(u) {
@@ -35272,9 +35348,9 @@ F({
     }
   }
 });
-const Ro = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const $o = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), Oo = (r) => {
+}, Symbol.toStringTag, { value: "Module" })), Do = (r) => {
   k(r, {
     sex: "female",
     hp: 3,
@@ -35282,7 +35358,7 @@ const Ro = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
     skills: ["zhenchaomrfz", "xiulingmrfz"],
     group: "a_groupmrfz",
     pack: "legendSJZX"
-  }), C(r, P.colorize("#b挽澜交邦#")), v(r, "克莱门莎，阿戈尔荣誉军团长、荣誉执政官、荣誉总战争设计师，负责阿戈尔已经或计划在陆上开展的一切项目。现以合作姿态协助罗德岛在伊比利亚及阿戈尔开展工作，并希望通过罗德岛与更多陆上政治实体建立合作关系。"), b({
+  }), S(r, P.colorize("#b挽澜交邦#")), v(r, "克莱门莎，阿戈尔荣誉军团长、荣誉执政官、荣誉总战争设计师，负责阿戈尔已经或计划在陆上开展的一切项目。现以合作姿态协助罗德岛在伊比利亚及阿戈尔开展工作，并希望通过罗德岛与更多陆上政治实体建立合作关系。"), b({
     [r]: "克莱门莎",
     zhenchaomrfz: "镇潮",
     zhenchaomrfz_info: "每回合每项限一次，[①当你成为【杀】的目标后;②当你使用【杀】指定目标后]，你可以摸一张牌并和[①【杀】的使用者;②【杀】的目标之一]拼点，若你赢，此【杀】[①对你无效;②无视防具]，然后你获得其一张牌并对其造成一点伤害。",
@@ -35464,10 +35540,10 @@ const Ro = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
     }, ["zhenchaomrfz_tipsIndex_1", "zhenchaomrfz_tipsIndex_0"].forEach((o) => a.removeTip(o));
   }
 };
-Oo("char_4231_clemnt");
-const $o = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+Do("char_4231_clemnt");
+const Ho = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), Do = function(r = "char_4232_hbound") {
+}, Symbol.toStringTag, { value: "Module" })), Uo = function(r = "char_4232_hbound") {
   k(r, {
     sex: "male",
     hp: 4,
@@ -35476,7 +35552,7 @@ const $o = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
     group: "yimrfz",
     llm: "Qwen-3.8-Flash",
     designer: ["Flandre"]
-  }), C(r, P.colorize("#r捡海者#")), v(r, "纳乔，阿戈尔岛民，精通水文测绘及地理建模。港都打捞工程结束后，经由克莱门莎引荐加入罗德岛，作为合作干员常驻伊比利亚，协助罗德岛进行伊比利亚沿海地区的水文观测与气候监测等工作。"), b({
+  }), S(r, P.colorize("#r捡海者#")), v(r, "纳乔，阿戈尔岛民，精通水文测绘及地理建模。港都打捞工程结束后，经由克莱门莎引荐加入罗德岛，作为合作干员常驻伊比利亚，协助罗德岛进行伊比利亚沿海地区的水文观测与气候监测等工作。"), b({
     [r]: "旅骨",
     zuoqianmrfz: "座浅",
     zuoqianmrfz_info: "出牌阶段限一次，若场上有已受伤的角色，你可摸场上已受伤角色数张牌且你因此摸的牌本轮不计入手牌上限。",
@@ -35555,8 +35631,8 @@ const $o = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
         for (const f of h.globalHistory[h.globalHistory.length - 1].everything) {
           if (!["changeHp", "gainMaxHp", "loseMaxHp"].includes(f.name) || f.player != o)
             continue;
-          const { originalHp: g, originalMaxHp: m, changedHp: z, changedMaxHp: p } = f, x = i.hpColor({ hp: g + z, maxHp: m + p }), w = i.hpColor({ hp: g, maxHp: m });
-          if (!(x == w || l.includes(x)) && (l.add(x), x == s && f == a))
+          const { originalHp: g, originalMaxHp: m, changedHp: z, changedMaxHp: p } = f, w = i.hpColor({ hp: g + z, maxHp: m + p }), x = i.hpColor({ hp: g, maxHp: m });
+          if (!(w == x || l.includes(w)) && (l.add(w), w == s && f == a))
             return !0;
         }
         return !1;
@@ -35575,8 +35651,8 @@ const $o = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
           choiceList: u.map((m) => f[m]),
           controls: [...u.map((m) => l[m]), "cancel2"],
           choice: (() => {
-            const m = c.filterPlayer((S) => S !== o && i.attitude(o, S) < 0), z = m.filter((S) => S.getDamagedHp() > 0), p = u.indexOf("loseHp"), x = u.indexOf("trick"), w = u.indexOf("beishui");
-            return w >= 0 && o.hp >= 2 && z.length >= 2 ? w : x >= 0 && m.length >= 2 ? x : p >= 0 && o.hp >= 4 ? p : 0;
+            const m = c.filterPlayer((C) => C !== o && i.attitude(o, C) < 0), z = m.filter((C) => C.getDamagedHp() > 0), p = u.indexOf("loseHp"), w = u.indexOf("trick"), x = u.indexOf("beishui");
+            return x >= 0 && o.hp >= 2 && z.length >= 2 ? x : w >= 0 && m.length >= 2 ? w : p >= 0 && o.hp >= 4 ? p : 0;
           })()
         }).forResult();
         typeof g.index == "number" && g.control !== "cancel2" && u[g.index] && (a.result = {
@@ -35604,12 +35680,12 @@ const $o = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
             selectTarget: -1,
             forced: !0,
             prompt: "【奋身】:视为你使用一张多目标锦囊牌",
-            filterTarget: (z, p, x) => !!z && p.canUse(z, x),
+            filterTarget: (z, p, w) => !!z && p.canUse(z, w),
             ai1: (z) => {
-              const p = c.filterPlayer((w) => w !== o && i.attitude(o, w) < 0), x = c.filterPlayer((w) => w !== o && i.attitude(o, w) > 0 && w.getDamagedHp() > 0);
+              const p = c.filterPlayer((x) => x !== o && i.attitude(o, x) < 0), w = c.filterPlayer((x) => x !== o && i.attitude(o, x) > 0 && x.getDamagedHp() > 0);
               switch (z.name) {
                 case "taoyuan":
-                  return x.length >= p.length ? 5 : 0;
+                  return w.length >= p.length ? 5 : 0;
                 case "wanjian":
                 case "nanman":
                   return p.length >= 2 ? 4 : 0;
@@ -35658,11 +35734,11 @@ const $o = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
     }
   });
 };
-Do();
-const Ho = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+Uo();
+const Xo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), $e = "char_4234_pedro";
-k($e, {
+}, Symbol.toStringTag, { value: "Module" })), De = "char_4234_pedro";
+k(De, {
   sex: "male",
   group: "bomrfz",
   pack: "epicSJZX",
@@ -35670,15 +35746,15 @@ k($e, {
   designer: ["Flandre"],
   skills: ["funanmrfz"]
 });
-C($e, P.colorize("#s觉悟的游击手#"));
-v($e, "佩德洛，玻利瓦尔人。曾被数支不同的真正玻利瓦尔人部队征召，通常以游击队员或情报人员的身份参与作战。在玻利瓦尔大行军事件后离开真正玻利瓦尔人部队，现与罗德岛合作，协助部分情报工作。");
-const Sr = P.colorize("#g一#");
+S(De, P.colorize("#s觉悟的游击手#"));
+v(De, "佩德洛，玻利瓦尔人。曾被数支不同的真正玻利瓦尔人部队征召，通常以游击队员或情报人员的身份参与作战。在玻利瓦尔大行军事件后离开真正玻利瓦尔人部队，现与罗德岛合作，协助部分情报工作。");
+const jr = P.colorize("#g一#");
 b({
-  [$e]: "佩德洛",
+  [De]: "佩德洛",
   funanmrfz: "赴难",
-  funanmrfz_info: `转换技，出牌阶段限一次或受到伤害后，你可以：<br>阳：摸一张牌并对一名角色造成${Sr}点伤害;<br>阴：回复一点体力并弃置一名角色${Sr}张牌。<br>然后若场上没有其他角色与你的体力值和手牌数相同，本回合【赴难】描述中绿色的数字+1。`
+  funanmrfz_info: `转换技，出牌阶段限一次或受到伤害后，你可以：<br>阳：摸一张牌并对一名角色造成${jr}点伤害;<br>阴：回复一点体力并弃置一名角色${jr}张牌。<br>然后若场上没有其他角色与你的体力值和手牌数相同，本回合【赴难】描述中绿色的数字+1。`
 });
-ne("funanmrfz", (r) => Er(r));
+ae("funanmrfz", (r) => Or(r));
 y({
   funanmrfz: {
     audio: ["作战中1", "作战中2", "作战中3", "作战中4"],
@@ -35692,7 +35768,7 @@ y({
     },
     intro: {
       content(r, t, e) {
-        return `·${Er(t)}`;
+        return `·${Or(t)}`;
       }
     },
     init(r, t) {
@@ -35774,14 +35850,14 @@ y({
     }
   }
 });
-function Er(r) {
+function Or(r) {
   const t = i.cnNumber(1 + (r.storage.funanmrfz_extra || 0)), e = P.colorize(`#g${t}#`);
   return r?.storage?.funanmrfz === !1 ? `转换技，出牌阶段限一次或受到伤害后，你可以：<br>阳：摸一张牌并对一名角色造成${e}点伤害${P.colorize(`#s;<br>阴：回复一点体力并弃置一名角色${e}张牌#`)}。<br>然后若场上没有其他角色与你的体力值和手牌数相同，本回合【赴难】描述中绿色的数字+1。` : `转换技，出牌阶段限一次或受到伤害后，你可以：<br>${P.colorize(`#s阳：摸一张牌并对一名角色造成${e}点伤害;#`)}<br>阴：回复一点体力并弃置一名角色${e}张牌。<br>然后若场上没有其他角色与你的体力值和手牌数相同，本回合【赴难】描述中绿色的数字+1。`;
 }
-const Uo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Bo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), De = "char_4235_thumpy";
-k(De, {
+}, Symbol.toStringTag, { value: "Module" })), He = "char_4235_thumpy";
+k(He, {
   hp: 3,
   group: "leimrfz",
   sex: "female",
@@ -35789,10 +35865,10 @@ k(De, {
   skills: ["feiyuanmrfz", "zhixingmrfz"],
   designer: ["Flandre"]
 });
-v(De, "珊比，来自雷姆必拓大涌泉镇，前来罗德岛接受矿石病治疗，并经由干员安洁莉娜的推荐，以及根据本人意愿，加入外勤部作为重装干员为罗德岛提供帮助。");
-C(De, P.colorize("#b不一样的遗愿#"));
+v(He, "珊比，来自雷姆必拓大涌泉镇，前来罗德岛接受矿石病治疗，并经由干员安洁莉娜的推荐，以及根据本人意愿，加入外勤部作为重装干员为罗德岛提供帮助。");
+S(He, P.colorize("#b不一样的遗愿#"));
 b({
-  [De]: "珊比",
+  [He]: "珊比",
   feiyuanmrfz: "飞愿",
   feiyuanmrfz_info: `使命技，回合开始时，你可以与一名其他角色各摸一张牌并拼点，赢的角色获得所有的拼点牌并可使用其中一张牌，若你没赢，你下次拼点的点数+2且本技能可于本回合结束阶段额外发动一次。<br>成功：拼点获胜：获得${i.poptip("xinfu_guanchao")}直到你的出牌阶段结束。`
 });
@@ -35899,10 +35975,10 @@ y({
     }
   }
 });
-const Xo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const No = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), He = "char_4236_tmslot", A = "tower_shiximrfz", D = window.whichWaySave.tmpSave;
-k(He, {
+}, Symbol.toStringTag, { value: "Module" })), Ue = "char_4236_tmslot", A = "tower_shiximrfz", D = window.whichWaySave.tmpSave;
+k(Ue, {
   sex: "female",
   group: "leimrfz",
   hp: 3,
@@ -35910,13 +35986,13 @@ k(He, {
   skills: ["feishengmrfz", "zhixingmrfz"],
   llm: "DeepSeek-4.1-Flash"
 });
-C(He, P.colorize("#b不一样的梦想#"));
-v(He, "时隙,通讯技术工程师，其研究成果已应用于雷姆必拓远程通讯系统。现加入罗德岛工程部，为罗德岛基地远程通讯提供技术支持。");
-const ce = i.poptip(`${A}_skill`);
+S(Ue, P.colorize("#b不一样的梦想#"));
+v(Ue, "时隙,通讯技术工程师，其研究成果已应用于雷姆必拓远程通讯系统。现加入罗德岛工程部，为罗德岛基地远程通讯提供技术支持。");
+const ge = i.poptip(`${A}_skill`);
 b({
-  [He]: "时隙",
+  [Ue]: "时隙",
   feishengmrfz: "飞声",
-  feishengmrfz_info: `使命技，出牌阶段开始时，你可以将一张手牌作为${ce}置入你或与装备${ce}的角色距离为1的角色的装备区。<br>成功：回合结束时，场上存在${ce}：摸X张牌。（X=场上拥有${ce}角色的数量，X至多为你的体力上限）`
+  feishengmrfz_info: `使命技，出牌阶段开始时，你可以将一张手牌作为${ge}置入你或与装备${ge}的角色距离为1的角色的装备区。<br>成功：回合结束时，场上存在${ge}：摸X张牌。（X=场上拥有${ge}角色的数量，X至多为你的体力上限）`
 });
 y({
   feishengmrfz: {
@@ -35927,16 +36003,16 @@ y({
       player: "phaseUseBegin"
     },
     filter(r, t, e, a) {
-      return t.countCards("h") > 0 && Tr(t).length > 0;
+      return t.countCards("h") > 0 && Pr(t).length > 0;
     },
     async cost(r, t, e) {
       const a = await e.chooseCardTarget({
         prompt: i.prompt("feishengmrfz"),
-        prompt2: `你可以将一张手牌作为${ce}置入你或与装备${ce}的角色距离为1的角色的装备区`,
+        prompt2: `你可以将一张手牌作为${ge}置入你或与装备${ge}的角色距离为1的角色的装备区`,
         position: "h",
         filterCard: () => !0,
         filterTarget(n, o, s) {
-          return Tr(o).includes(s) && s.canEquip(A);
+          return Pr(o).includes(s) && s.canEquip(A);
         },
         ai1(n) {
           return 8 - i.value(n);
@@ -35994,9 +36070,9 @@ J(A, {
         const n = a.slice();
         a.length = 0, n.forEach((o) => o.removeGaintag(A)), await c.cardsDiscard(n), e.$throw(n, 1e3), e.popup(A), c.log(e, "的【通讯塔】被销毁，置于其上的牌被弃置", n);
       }
-      delete D[A][e.playerid], e.unmarkSkill(`${A}_skill`), Ue();
+      delete D[A][e.playerid], e.unmarkSkill(`${A}_skill`), Xe();
     }
-    D[A] && Object.keys(D[A]).length === 0 && Rr();
+    D[A] && Object.keys(D[A]).length === 0 && $r();
   },
   destroy: !0,
   ai: {
@@ -36005,50 +36081,50 @@ J(A, {
     }
   }
 });
-let ge = null, me = null;
-const we = /* @__PURE__ */ new WeakSet();
-function Bo() {
-  if (ge?.alive) return;
+let de = null, he = null;
+const Se = /* @__PURE__ */ new WeakSet();
+function Jo() {
+  if (de?.alive) return;
   D[A] ??= {};
   const r = D[A], t = {
     set(a, n, o) {
-      return Reflect.set(a, n, o), Se(), !0;
+      return Reflect.set(a, n, o), Ce(), !0;
     },
     deleteProperty(a, n) {
       const o = Reflect.deleteProperty(a, n);
-      return Se(), o;
+      return Ce(), o;
     }
   }, e = {
     set(a, n, o) {
-      return Array.isArray(o) && !we.has(o) ? (we.add(o), Reflect.set(a, n, new Proxy(o, t))) : Reflect.set(a, n, o), Se(), !0;
+      return Array.isArray(o) && !Se.has(o) ? (Se.add(o), Reflect.set(a, n, new Proxy(o, t))) : Reflect.set(a, n, o), Ce(), !0;
     },
     deleteProperty(a, n) {
       const o = Reflect.deleteProperty(a, n);
-      return Se(), o;
+      return Ce(), o;
     }
   };
   for (const a in r) {
     const n = r[a];
-    Array.isArray(n) && !we.has(n) && (we.add(n), r[a] = new Proxy(n, t));
+    Array.isArray(n) && !Se.has(n) && (Se.add(n), r[a] = new Proxy(n, t));
   }
-  D[A] = new Proxy(r, e), ge = { raw: r, alive: !0 };
+  D[A] = new Proxy(r, e), de = { raw: r, alive: !0 };
 }
-function Rr() {
-  me !== null && (clearTimeout(me), me = null), ge?.alive && (D[A] = ge.raw, ge.alive = !1, ge = null);
+function $r() {
+  he !== null && (clearTimeout(he), he = null), de?.alive && (D[A] = de.raw, de.alive = !1, de = null);
 }
-function Se() {
-  me === null && (me = window.setTimeout(() => {
-    me = null, Ue();
+function Ce() {
+  he === null && (he = window.setTimeout(() => {
+    he = null, Xe();
   }, 30));
 }
-function Or() {
+function Dr() {
   const r = [];
   if (!D[A]) return r;
   for (const t in D[A])
     r.addArray(D[A][t]);
   return r;
 }
-function No(r) {
+function Zo(r) {
   if (D[A])
     for (const t in D[A]) {
       const e = D[A][t];
@@ -36058,10 +36134,10 @@ function No(r) {
       }
     }
 }
-function Cr(r) {
-  return Or().includes(r);
+function Tr(r) {
+  return Dr().includes(r);
 }
-function Jo(r) {
+function Go(r) {
   const t = r._cardid;
   if (!(!t || !D[A]))
     for (const e in D[A]) {
@@ -36069,10 +36145,10 @@ function Jo(r) {
       if (n) return n;
     }
 }
-function jr(r, t) {
+function Mr(r, t) {
   return r.hasGaintag(A) ? !0 : t?.gaintag_map?.[r.cardid || ""]?.includes(A);
 }
-function Ue() {
+function Xe() {
   if (!c || !c.players) return;
   for (const t of c.players.slice().concat(c.dead))
     t.getCards("hs", (e) => e.hasGaintag(A)).forEach((e) => e.delete());
@@ -36115,7 +36191,7 @@ F({
       return !1;
     },
     init(r, t) {
-      D[A] ??= {}, D[A][r.playerid] ??= [], r.markSkill(`${A}_skill`), Bo(), Ue();
+      D[A] ??= {}, D[A][r.playerid] ??= [], r.markSkill(`${A}_skill`), Jo(), Xe();
     },
     forced: !0,
     async content(r, t, e) {
@@ -36124,7 +36200,7 @@ F({
       o.length && (h.discarded?.removeArray?.(o), await c.cardsGotoSpecial(o, !1), o.forEach((s) => s.addGaintag(A)), a.push(...o));
     },
     onremove(r, t) {
-      D[A] && r.playerid !== void 0 && (D[A][r.playerid]?.length || delete D[A][r.playerid]), D[A] && Object.keys(D[A]).length === 0 && Rr();
+      D[A] && r.playerid !== void 0 && (D[A][r.playerid]?.length || delete D[A][r.playerid]), D[A] && Object.keys(D[A]).length === 0 && $r();
     }
   }
 });
@@ -36139,20 +36215,20 @@ F({
     delay: !1,
     filter(r, t) {
       if (!r.ss || !r.ss.length) return !1;
-      const e = Or();
-      return e.length ? r.ss.some((a) => jr(a, r) || e.includes(a)) : !1;
+      const e = Dr();
+      return e.length ? r.ss.some((a) => Mr(a, r) || e.includes(a)) : !1;
     },
     async content(r, t, e) {
-      const a = t.getl(e), n = (t.ss || []).filter((o) => jr(o, a) || Cr(o));
+      const a = t.getl(e), n = (t.ss || []).filter((o) => Mr(o, a) || Tr(o));
       for (const o of n) {
         G.removePrompt(o);
         const s = o._cardid || o.cardid;
         for (const l of c.players.concat(c.dead))
           l.getCards("hs", (f) => f.hasGaintag(A) && (f._cardid === s || f.cardid === s)).forEach((f) => f.delete());
-        const u = Cr(o) ? o : Jo(o);
-        u && (No(u), i.position(u, !0) == "s" && u.delete());
+        const u = Tr(o) ? o : Go(o);
+        u && (Zo(u), i.position(u, !0) == "s" && u.delete());
       }
-      Ue();
+      Xe();
     }
   }
 });
@@ -36164,14 +36240,14 @@ N({
   [`${A}_skill7`]: "通讯塔",
   [`${A}_skill7_info`]: "锁定技，当你不在弃牌阶段因弃置的牌进入弃牌堆后，你将弃置的牌置于此牌之上，所有装备区有【通讯塔】的角色可将此牌当做手牌使用；当此牌离开你的装备区时，弃置置于此牌上的所有牌并销毁此牌。"
 });
-function Tr(r) {
+function Pr(r) {
   const t = /* @__PURE__ */ new Set();
   r.countCards("e", (e) => i.name(e) === A) < 1 && t.add(r);
   for (let e of c.players.slice())
     e.countCards("e", (a) => i.name(a) === A) && c.filterPlayer((a) => i.distance(a, e) <= 1).forEach((a) => t.add(a));
   return Array.from(t);
 }
-const Zo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Lo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_4237_jcinta", {
@@ -36182,7 +36258,7 @@ k("char_4237_jcinta", {
   sex: "female",
   llm: "DeepSeek-4.1-Flash"
 });
-C("char_4237_jcinta", P.colorize("#r不一样的旷野#"));
+S("char_4237_jcinta", P.colorize("#r不一样的旷野#"));
 v("char_4237_jcinta", "嘉辛塔，雷姆必拓知名矿业大亨坎贝尔夫妇的千金，前来罗德岛接受矿石病治疗。根据本人意愿，现作为先锋干员为罗德岛提供帮助。");
 b({
   char_4237_jcinta: "嘉辛塔",
@@ -36191,8 +36267,8 @@ b({
   zhixingmrfz: "咫行",
   zhixingmrfz_info: `锁定技。①当你不因【咫行】而摸牌后，你令所有拥有【咫行】的角色${i.poptip("sjzx_zhiheng")}1；②当你使命技成功后，你重置该技能。`
 });
-ne("feilvmrfz", (r) => {
-  const t = (Ke(r) || 0) + 1;
+ae("feilvmrfz", (r) => {
+  const t = (Qe(r) || 0) + 1;
   return `使命技，回合结束时，你可以将一张牌当做本回合第一张使用的牌使用，若你未因此使用过此牌，你摸两张牌。<br>成功：本局游戏使用过3X(${P.colorize(`#r${3 * t}#`)})张牌：摸2张牌。(X=本技能的成功次数+1)`;
 });
 y({
@@ -36210,7 +36286,7 @@ y({
     intro: {
       content(r, t, e) {
         const a = t.storage.feilvmrfz_used;
-        return `·当前已使用${t.getAllHistory("useCard").length}张牌<br>·已因此技能而使用的牌名：${Array.isArray(a) && a.length > 0 ? i.translation(a) : "无"}<br>成功的次数：${Ke(t) || 0}`;
+        return `·当前已使用${t.getAllHistory("useCard").length}张牌<br>·已因此技能而使用的牌名：${Array.isArray(a) && a.length > 0 ? i.translation(a) : "无"}<br>成功的次数：${Qe(t) || 0}`;
       }
     },
     onremove(r, t) {
@@ -36262,7 +36338,7 @@ y({
         forced: !0,
         trigger: { player: "useCardAfter" },
         filter(r, t, e, a) {
-          return ((Ke(t) || 0) + 1) * 3 <= t.getAllHistory("useCard").length;
+          return ((Qe(t) || 0) + 1) * 3 <= t.getAllHistory("useCard").length;
         },
         async content(r, t, e) {
           c.log(e, "成功完成使命"), e.awakenSkill("feilvmrfz"), await e.draw({ num: 2 });
@@ -36317,10 +36393,10 @@ y({
     }
   }
 });
-function Ke(r) {
+function Qe(r) {
   return r.getAllHistory("useSkill", (t) => t.skill === "feilvmrfz_achieve").length;
 }
-const Go = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Io = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_423_blemsh", {
@@ -36529,7 +36605,7 @@ b({
   jiandunmrfz_info: "你可以将锦囊牌当任意基本牌使用或打出。"
 });
 v("char_423_blemsh", "瑕光，本名玛莉娅·临光，来自卡西米尔的年轻骑士，干员临光的妹妹，曾有骑士竞技经验，在各项测试中均展露出优秀的作战素质。应本人期望，与干员临光共同作为重装干员行动。");
-const Lo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Fo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_426_billro", { pack: "legendSJZX", sex: "female", group: "laimrfz", hp: 3, skills: ["shazhenmrfz", "shacanmrfz", "shahuanmrfz"] });
@@ -36708,7 +36784,7 @@ b({
   shahuanmrfz_info: "出牌阶段，你可以令一名没有‘噬’标记的其他角色获得一个‘噬’。"
 });
 v("char_426_billro", "卡涅利安，出身萨尔贡深处不受王酋管辖的某个古老部族，目前外出游学中。因接受莱塔尼亚霍恩洛厄伯爵的雇佣，作为其侍从长期停留于莱塔尼亚地区。现与罗德岛达成合作关系，作为干员为罗德岛执行莱塔尼亚境内的相关任务。");
-const Io = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Vo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_427_vigil", {
@@ -36878,7 +36954,7 @@ b({
   qunxingmrfz_info: "①锁定技，你对有‘群仇’标记的角色使用牌无距离限制且其无法响应你使用的牌；当你对有‘群仇’的角色造成伤害后，你摸X张牌，然后其移去所有‘群仇’标记（X=其‘群仇’标记数）。②当你成为其他角色使用牌的目标时，你可以令其获得一个‘群仇’标记（最多为6）。"
 });
 v("char_427_vigil", "伺夜，叙拉古贝洛内家族最后一任领袖，叙拉古特别行政城市新沃尔西尼市长候补之一，通过干员德克萨斯，代表所属城市与罗德岛建立合作关系。</br>擅长中距离战斗，并且在种种任务上展现出了相当的谋略与领导力。");
-const Fo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Wo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_430_fartth", {
@@ -37027,7 +37103,7 @@ b({
   bingximrfz_info: "锁定技，你的回合外，若你手牌数不小于你的体力值，你的攻击范围视为0。"
 });
 v("char_430_fartth", "“远牙”骑士查丝汀娜，于特锦赛上打响名气，目前隶属于由感染者骑士组建的红松骑士团，是一名在卡西米尔拥有相当程度知名度的感染者骑士。在卡西米尔本届特锦赛及一系列风波之后，红松骑士团与罗德岛达成合作关系，远牙骑士也作为合作者来到罗德岛，接受矿石病相关治疗，并为罗德岛提供战斗支援。");
-const Vo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Yo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_437_mizuki", {
@@ -37135,7 +37211,7 @@ b({
   jinghuamrfz2: "镜花"
 });
 v("char_437_mizuki", "水月于玻利瓦尔的多索雷斯城与我们的部分干员有所接触，并随行至本舰，经相关干员初步问询考察后批准其暂时留舰。</br>其学习能力较为优秀，现阶段已经能协助完成相当一部分的文职工作内容，或可考虑往干员的方向培养。经调查与评估后批准其长期留舰。");
-const Wo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ko = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_445_wscoot", { pack: "rareSJZX", sex: "male", group: "yanmrfz", hp: 3, skills: ["xiadaomrfz", "qunxiamrfz"] });
@@ -37318,9 +37394,9 @@ b({
   qunxiamrfz: "群侠",
   qunxiamrfz_info: "①当你于每轮首次使用一种花色的牌时，你可以令其他角色不可响应此牌。<br>②你可以将每轮你没有使用过的花色的牌当【杀】使用。"
 });
-C("char_445_wscoot", "<font color='#db7093'>抢亦有道</font>");
+S("char_445_wscoot", "<font color='#db7093'>抢亦有道</font>");
 v("char_445_wscoot", "镖客骋风，常年在炎国尚蜀及周边地区走镖。因矿石病来罗德岛就医，为拓展镖局业务，主动与罗德岛签订了合作协议，为罗德岛提供药物运输服务及引荐人才。");
-const Yo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Qo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_450_necras", {
@@ -37350,39 +37426,39 @@ y({
     async content(r, t, e) {
       let { targets: a } = r;
       function n(p) {
-        let x = p.getCards("h");
-        if (x.length < 2) return x;
-        let w = x.slice().sort((M, q) => i.number(q, p) - i.number(M, p)), S = x.slice().sort((M, q) => i.value(q, p) - i.value(M, p)), T = w[0], j = w[w.length - 1];
+        let w = p.getCards("h");
+        if (w.length < 2) return w;
+        let x = w.slice().sort((M, q) => i.number(q, p) - i.number(M, p)), C = w.slice().sort((M, q) => i.value(q, p) - i.value(M, p)), T = x[0], j = x[x.length - 1];
         if (e.countCards("h", { color: "red" }) < 1)
-          return [T, S[S.length - 1]];
+          return [T, C[C.length - 1]];
         if (e.countCards("h", { color: "black" }) < 1)
-          return [j, S[S.length - 1]];
+          return [j, C[C.length - 1]];
         if (Math.random() > 0.5) {
-          let M = x.filter((q) => i.color(q) === "black" && q !== T);
-          return [T, M.length > 0 ? M.randomGet() : x.filter((q) => q !== T).randomGet()];
+          let M = w.filter((q) => i.color(q) === "black" && q !== T);
+          return [T, M.length > 0 ? M.randomGet() : w.filter((q) => q !== T).randomGet()];
         } else {
-          let M = x.filter((q) => i.color(q) === "red" && q !== j);
-          return [j, M.length > 0 ? M.randomGet() : x.filter((q) => q !== j).randomGet()];
+          let M = w.filter((q) => i.color(q) === "red" && q !== j);
+          return [j, M.length > 0 ? M.randomGet() : w.filter((q) => q !== j).randomGet()];
         }
       }
       let o = [];
       for (let p of [...a, e]) {
-        let x;
-        const w = await p.chooseCard().set("forced", !0).set("prompt", "【刈诈】：请选择一张手牌进行拼点").set("type", "compare").set("ai", (j) => (i.player(), i.event().aiChooseResult[0] === j)).set("aiChooseResult", n(p)).forResult();
-        if (!w || !w.cards) return;
-        w.skill ? x = d.skill[w.skill].onCompare(p)[0] : x = w.cards[0];
-        const { cards: S } = await p.chooseCard().set("forced", !0).set("type", "debate").set("source", e).set("prompt", "【刈诈】：请选择一张手牌进行议事").set("filterCard", (j, M, q) => {
+        let w;
+        const x = await p.chooseCard().set("forced", !0).set("prompt", "【刈诈】：请选择一张手牌进行拼点").set("type", "compare").set("ai", (j) => (i.player(), i.event().aiChooseResult[0] === j)).set("aiChooseResult", n(p)).forResult();
+        if (!x || !x.cards) return;
+        x.skill ? w = d.skill[x.skill].onCompare(p)[0] : w = x.cards[0];
+        const { cards: C } = await p.chooseCard().set("forced", !0).set("type", "debate").set("source", e).set("prompt", "【刈诈】：请选择一张手牌进行议事").set("filterCard", (j, M, q) => {
           let O = i.event().banCard;
           return j !== O;
-        }).set("complexCard", !0).set("ai", (j) => (i.player(), i.event().aiChooseResult[0] === j)).set("aiChooseResult", n(p)).set("banCard", x).forResult();
-        if (!S) return;
-        const T = S[0];
-        o.push([p, [x, T]]);
+        }).set("complexCard", !0).set("ai", (j) => (i.player(), i.event().aiChooseResult[0] === j)).set("aiChooseResult", n(p)).set("banCard", w).forResult();
+        if (!C) return;
+        const T = C[0];
+        o.push([p, [w, T]]);
       }
       let s = {}, u = [];
       for (let p of o)
         s[p[0].playerid] = p[1][0], p[1] && p[1][1] && u.push([p[0], p[1][1]]);
-      let l = a.filter((p) => Object.keys(s).includes(p.playerid)), f = a.filter((p) => u.map((x) => x[0]).includes(p)), g = await e.chooseToCompare(l).set("fixedResult", s).forResult(), m = await e.chooseToDebate().set("list", [...f, e]).set("fixedResult", u).forResult();
+      let l = a.filter((p) => Object.keys(s).includes(p.playerid)), f = a.filter((p) => u.map((w) => w[0]).includes(p)), g = await e.chooseToCompare(l).set("fixedResult", s).forResult(), m = await e.chooseToDebate().set("list", [...f, e]).set("fixedResult", u).forResult();
       [...f, e].forEach((p) => p.removeGaintag("yizhamrfz_tip2"));
       let z = {
         win: [],
@@ -37397,13 +37473,13 @@ y({
         for (let p of z.win)
           p.countDiscardableCards(e, "he") && await e.discardPlayerCard(p, !0, 2, "he").set("ai", d.card.guohe.ai.button);
       else {
-        const { targets: p } = await e.chooseTarget().set("prompt", "【刈诈】：你可以对任意名角色造成一点伤害").set("selectTarget", [1, 1 / 0]).set("ai", (x) => {
-          let w = i.player();
-          return i.damageEffect(x, w, w) > 0;
+        const { targets: p } = await e.chooseTarget().set("prompt", "【刈诈】：你可以对任意名角色造成一点伤害").set("selectTarget", [1, 1 / 0]).set("ai", (w) => {
+          let x = i.player();
+          return i.damageEffect(w, x, x) > 0;
         }).forResult();
         if (p)
-          for (let x of p)
-            x.damage({ source: e }), e.line(x);
+          for (let w of p)
+            w.damage({ source: e }), e.line(w);
         e.draw(2);
       }
     },
@@ -37456,9 +37532,9 @@ b({
   kumianmrfz: "枯冕",
   kumianmrfz_info: "锁定技，结束阶段结束时，你执行至N项：<br>1.摸一张牌<br>2.获得【奸雄】；<br>3.获得【擅专】；<br>4.获得【造王】。<br>(你以此法获得的技能于你的下个结束阶段开始时失去之)<br>(N=本回合因弃置而进入弃牌堆牌的类别的数量与你造成的伤害数之和)"
 });
-C("char_450_necras", "<font color='#8b008b'>何以丕平</font>");
+S("char_450_necras", "<font color='#8b008b'>何以丕平</font>");
 v("char_450_necras", "死芒，本名爱布拉娜·都柏林，前“深池”领袖，该组织现已不复存在。在谨慎权衡之后，罗德岛有条件地同意与其建立一定程度的合作关系。经医疗部、人事部和博士共同确认，死芒的所有档案移入高权限资料库。");
-const Ko = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const es = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_456_ash", {
@@ -37558,7 +37634,7 @@ b({
   baigeimrfz_info: "锁定技，出牌阶段结束时，若你已执行了五个出牌阶段，你须将手牌弃置至手牌上限。"
 });
 v("char_456_ash", "<span class=firetext>联动：彩虹六号:围攻</span></br>灰烬，彩虹小队成员之一，暂时担当小队队长职务，严于律己，恪尽职守，为整个小队谋划行动方针。</br>灰烬使用一把M120CREM爆破弹发射器，可以对重装目标造成伤害，也可破开障碍物，为小队行动增加战术选择。");
-const Qo = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const rs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_457_blitz", {
@@ -37660,7 +37736,7 @@ b({
   chuandunmrfz_append: "THX,Ubi"
 });
 v("char_457_blitz", "闪击，彩虹小队的成员之一，为人幽默和蔼，擅长在室内与街巷环境作战。</br>以手枪为主要武器，同时携带经G52型闪光战术护盾，一旦在近战中开启，将能致盲几米内的作战目标，为整个小队提供战术优势。");
-const es = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ts = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_458_rfrost", {
@@ -37780,7 +37856,7 @@ b({
   xinjimrfz_info: "准备阶段，你可以用任意数量的手牌交换‘踏垫’。"
 });
 v("char_458_rfrost", "霜华，彩虹小队成员之一，坚定、专注、充满活力，擅长在野外环境作战。</br>除了自身携带的枪械外，霜华携带了SterlingMK2机械夹板“迎宾踏垫”，通过精妙布设，对敌方造成阻碍，为整个小队提供战术支持。");
-const rs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const as = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_459_tachak", {
@@ -37857,7 +37933,7 @@ b({
   qingxiemrfz_info: "摸牌阶段结束后，若你的出牌阶段将不会被跳过，你可以选择攻击范围内的一名其他角色，然后你进行三次判定，你对其使用等同于判定结果为红色的次数张【杀】（不计入次数限制），若你因此使用了至少两张【杀】，你跳过出牌阶段。"
 });
 v("char_459_tachak", "战车，彩虹小队成员之一，强韧、爽朗且冷静，极为擅长阵地战。</br>主要武器为DP-28轻机枪以及SHUMIKHALAUNCHER“喧闹”发射器，他是整个小队的火力中心，毋庸置疑的战场主宰。");
-const ts = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ns = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_469_indigo", {
@@ -37973,17 +38049,17 @@ y({
     async content(r, t, e) {
       let a = c.players.slice().filter((l) => e.inRange(l) || e == l), n = a.map((l) => l.name), { moved: o } = await e.chooseToMove(`【迷踪】:请为${i.cnNumber(a.length, !0)}名角色分配效果`).set("list", [["你攻击范围内的角色", [n, "character"]], ["直到该角色的出牌阶段<font color = red>开始时</font>，所有当前时机<font color = red>可以使用</font>的牌随机视为当前时机<font color = red>不可使用</font>的牌"], ["直到该角色的出牌阶段<font color = red>结束时</font>，所有当前时机<font color = red>不可以使用</font>的牌随机视为当前时机<font color = red>可使用</font>的牌"]]).set("processAI", (l) => {
         let f = [[], [], []], g = i.player(), m = l[0][1][0].map(
-          (x) => (
+          (w) => (
             // @ts-ignore
-            h.event.chars.find((w) => w.name === x)
+            h.event.chars.find((x) => x.name === w)
           )
-        ), z = function(x) {
-          let w = x.getPrevious();
-          for (; w && w !== g && w !== x; ) {
-            if (i.attitude(g, w) <= 2) return !1;
-            w = w.getPrevious();
+        ), z = function(w) {
+          let x = w.getPrevious();
+          for (; x && x !== g && x !== w; ) {
+            if (i.attitude(g, x) <= 2) return !1;
+            x = x.getPrevious();
           }
-          return w === g;
+          return x === g;
         };
         for (var p of m)
           p === g ? f[2].push(p) : i.attitude(p, g) < 2 ? f[1].push(p) : z(p) && f[2].push(p);
@@ -38066,9 +38142,9 @@ b({
   mizongmrfz: "迷踪",
   mizongmrfz_info: "出牌阶段限一次，你可以令你攻击范围内的任意角色或你获得其中一个效果：<br>1.直到该角色的出牌阶段开始时，所有当前时机可以使用的牌随机视为当前时机不可使用的牌（装备牌除外）；<br>2.直到该角色的出牌阶段结束时，所有当前时机不可以使用的牌随机视为当前时机可使用的牌（装备牌除外）。"
 });
-C("char_469_indigo", "<font color=#00E68A>灯塔守卫者</font>");
+S("char_469_indigo", "<font color=#00E68A>灯塔守卫者</font>");
 v("char_469_indigo", "深靛，来自伊比利亚的流浪术师。曾经是一座海滨灯塔的见习看守人。在游历期间，与正执行外勤任务的蓝毒和格劳克斯相识。后经蓝毒介绍，入职罗德岛。");
-const as = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const is = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_472_pasngr", {
@@ -38239,7 +38315,7 @@ b({
   leibaomrfz_info: "<span class=firetext>神将会降下神罚处罚冒犯神之人</span></br>出牌阶段限一次，你可以弃置[两张装备牌/一张【闪电】]，然后选择一名除你以外的角色中体力值最高或之一，或有‘仇敌’标记的其他角色并对其造成两点[伤害/雷电伤害]。"
 });
 v("char_472_pasngr", "<span class=firetext>客门，我以最谦卑的姿态恳求您借我一点点力量</span></br>哥伦比亚出身的干员异客，曾在十三岁时就以极其优异的成绩跳级毕业，随后被源石工程与应用学专家索恩教授相中提拔为研究助手，进入布莱恩创生科技的研究所学习。于近二十余年前随某项目深入萨尔贡，之后销声匿迹。之后以伊巴特地区黑市主要成员的身份与罗德岛接触，并在脱离黑市后，单纯以感染者身份来到罗德岛接受治疗，并以工程部干员的身份活跃在各项行动中。");
-const ns = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const os = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_474_glady", { pack: "legendSJZX", sex: "female", group: "liemrfz", hp: 3, maxHp: 4, skills: ["quliemrfz", "newxunxiangmrfz", "xueshuomrfz", "tongmaimrfz"], clans: ["深海猎人"] });
@@ -38387,9 +38463,9 @@ b({
   xueshuomrfz: "血槊",
   xueshuomrfz_info: "当你对手牌数不大于你的角色造成伤害时，你可以令此伤害+1。"
 });
-C("char_474_glady", "<font color=rgb(1,255,22)>执政官</font>");
+S("char_474_glady", "<font color=rgb(1,255,22)>执政官</font>");
 v("char_474_glady", "歌蕾蒂娅，阿戈尔人，阿戈尔技术执政官、荣誉军团长，阿戈尔军事团体“深海猎人”总战争设计师之一。登陆时间地点俱不明。于对抗大型生物，破坏硬目标，攻坚战，歼灭战，机动战与谍报战等多类行动中展现出非凡实力。现以合作姿态协助罗德岛、辅助罗德岛部分工作，在保留阿戈尔国家职能身份的同时，兼任罗德岛的阿戈尔事务负责人。");
-const is = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ss = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_479_sleach", {
@@ -38629,7 +38705,7 @@ b({
   butuimrfz_info: "拥有‘军旗’标记的角色回合开始时，其可以选择跳过本回合的判定阶段并弃两张牌或摸一张牌。"
 });
 v("char_479_sleach", "琴柳，前维多利亚仪仗队执旗手，服役于维多利亚小丘郡地方部队，经历战乱后，由小丘郡办事处负责人引荐，成为罗德岛合作干员。接受过维多利亚军的基础训练，体能优异，在各类任务中展现出了强大的支援能力。");
-const os = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const us = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_485_pallas", { pack: "legendSJZX", sex: "female", group: "mimrfz", hp: 4, skills: ["yingzhumrfz", "yingdanmrfz", "yingfenmrfz"] });
@@ -38867,9 +38943,9 @@ b({
   yingfenmrfz: "英奋",
   yingfenmrfz_info: "当你使用的【桃】结算完成后，你可以令一名已受伤的角色回复一点体力。"
 });
-C("char_485_pallas", P.colorize("#b赫里亚之辉#"));
+S("char_485_pallas", P.colorize("#b赫里亚之辉#"));
 v("char_485_pallas", "帕拉斯，曾在米诺斯担任祭司职务。在离开雅赛努斯城邦去往阿克罗蒂村任职期间，带领当地民众进行了对萨尔贡周边部落长年侵扰的反抗，并在当地推行旅游及文化产业的发展。后因矿石病病况恶化，来到罗德岛进行秘密治疗。");
-const ss = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ls = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_486_takila", {
@@ -38920,7 +38996,7 @@ b({
   pianfengmrfz_info: "当你对其他角色造成伤害后，若有对应的实体牌，你可以令其回复一点体力，并展示其X张牌，若展示的牌中有与对其造成的伤害的牌类型相同的牌，其弃置展示的牌，然后其流失X点体力，反之你摸X张牌。（X=其本回合受到对其造成伤害牌的相同牌名的牌的次数+1）"
 });
 v("char_486_takila", "龙舌兰，本名埃内斯托·萨拉斯，前多索雷斯国际贸易管理部副主任，于多索雷斯城内暴乱事件中被革职，后经由干员陈引荐，通过测试加入罗德岛。<br>被数日前刚与自己发生过冲突的对象带上罗德岛，在这样尴尬的情况之下依然表现得若无其事，并一路维持着友好爽朗的社交氛围，干员龙舌兰确实不愧为多索雷斯市长女士手下不可多得的外交人才。");
-const us = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const fs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_487_bobb", { pack: "epicSJZX", sex: "male", group: "gemrfz", hp: 4, skills: ["qingtingmrfz", "qingtanmrfz"] });
@@ -39016,9 +39092,9 @@ b({
   qingtanmrfz: "倾谈",
   qingtanmrfz_info: "出牌阶段限一次，你可以选择一名其他角色，你与其互相观看手牌，并各选择两张类型不同的手牌，然后你与其各获得对方选择的牌，在此流程结束后， 若双方手牌不一致，你与其手牌上限+1（上限为1）或摸一张牌。"
 });
-C("char_487_bobb", "<font color=#b8860b>倾听者</font>");
+S("char_487_bobb", "<font color=#b8860b>倾听者</font>");
 v("char_487_bobb", "波卜,赤心医疗员工埃利西奥，作为组织代表前来罗德岛交流学习。<br>现以“波卜”为代号，以罗德岛合作干员身份参与外勤任务，主要参与沟通、谈判、事故救援与情感安抚等事务。");
-const ls = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const cs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("char_494_vendla", { pack: "epicSJZX", sex: "female", group: "weimrfz", hp: 3, skills: ["huabumrfz", "shixinmrfz"] });
@@ -39121,10 +39197,10 @@ b({
   shixinmrfz_info: "每回合限一次，当你于回合外获得牌后，你可以观看当前回合角色的手牌。"
 });
 v("char_494_vendla", "刺玫，本名玛格达尔·肖，布伦特伍德镇上血魔大君仪式的幸存者，小镇近乎大半被夷为废墟，她所珍爱的家传温室也被彻底摧毁。</br>受伦蒂尼姆市民自救军成员洛洛与费斯特的邀请，玛格达尔加入自救军，以后勤人员的身份提供帮助，后加入罗德岛。伦蒂尼姆事件结束之后，玛格达尔主动申请回到维多利亚重建家乡，并担任当地罗德岛办事处的联络员。");
-const fs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const gs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), Xe = "char_497_ctable";
-k(Xe, {
+}, Symbol.toStringTag, { value: "Module" })), Be = "char_497_ctable";
+k(Be, {
   hp: 3,
   skills: ["guanhuomrfz", "fuguangmrfz", "wanquanmrfz"],
   group: "bomrfz",
@@ -39132,10 +39208,10 @@ k(Xe, {
   pack: "epicSJZX",
   designer: ["培嵩"]
 });
-C(Xe, P.colorize("#r不发声者#"));
-v(Xe, "晓歌，罗德岛驻玻利瓦尔办事处在难民区解救出来的矿石病患者，转交本舰进行后续治疗。根据本人意愿，于半年后以正式干员身份加入罗德岛。");
+S(Be, P.colorize("#r不发声者#"));
+v(Be, "晓歌，罗德岛驻玻利瓦尔办事处在难民区解救出来的矿石病患者，转交本舰进行后续治疗。根据本人意愿，于半年后以正式干员身份加入罗德岛。");
 b({
-  [Xe]: "晓歌",
+  [Be]: "晓歌",
   guanhuomrfz: "观火",
   guanhuomrfz_info: "你使用牌指定其他角色为目标时，若其没有被本技能记录，你可以记录之，然后你获得其一张牌。",
   fuguangmrfz: "浮光",
@@ -39149,7 +39225,7 @@ y({
     trigger: { player: "useCardToPlayer" },
     filter(r, t) {
       const e = r.target;
-      return !se(t).includes(e) && t !== e;
+      return !ue(t).includes(e) && t !== e;
     },
     init(r, t) {
       r.storage[t] = [];
@@ -39158,11 +39234,11 @@ y({
     mark: !0,
     intro: {
       mark(r, t, e, a, n) {
-        if (se(e).length < 1) {
+        if (ue(e).length < 1) {
           r.addText("·无记录角色");
           return;
         }
-        r.addText("·已记录角色"), r.addSmall([se(e).map((o) => o.name), "character"]);
+        r.addText("·已记录角色"), r.addSmall([ue(e).map((o) => o.name), "character"]);
       }
     },
     prompt2(r, t) {
@@ -39172,7 +39248,7 @@ y({
       return 114514 - i.attitude(r.player, t);
     },
     async content(r, t, e) {
-      se(e).add(t.target), await e.gainPlayerCard({
+      ue(e).add(t.target), await e.gainPlayerCard({
         target: t.target,
         position: "h",
         ai(a) {
@@ -39184,7 +39260,7 @@ y({
   fuguangmrfz: {
     mod: {
       targetInRange(r, t) {
-        if (!le(t).includes(i.suit(r)))
+        if (!fe(t).includes(i.suit(r)))
           return !0;
       }
     },
@@ -39203,18 +39279,18 @@ y({
       player: ["useCardAfter", "damageBegin4"]
     },
     filter(r, t, e, a) {
-      return r.name === "useCard" ? t.isPhaseUsing() && !le(t).includes(i.suit(r.card) || "") : h.currentPhase !== t && !gs(t);
+      return r.name === "useCard" ? t.isPhaseUsing() && !fe(t).includes(i.suit(r.card) || "") : h.currentPhase !== t && !ms(t);
     },
     mark: !0,
     intro: {
       content(r, t, e) {
-        return `·已记录的花色:${i.translation(le(t))}`;
+        return `·已记录的花色:${i.translation(fe(t))}`;
       }
     },
     async content(r, t, e) {
       if (t.name === "useCard") {
         const a = t.card;
-        le(e).add(i.suit(t.card)), e.getStat("card")?.[a.name] && (e.getStat("card")[a.name] -= 1), e.when({ player: "useCardAfter" }).step(async (n, o, s) => {
+        fe(e).add(i.suit(t.card)), e.getStat("card")?.[a.name] && (e.getStat("card")[a.name] -= 1), e.when({ player: "useCardAfter" }).step(async (n, o, s) => {
           s.getHistory("sourceDamage", (u) => u.card ? u.card === o.card : !1).length < 1 && s.draw();
         });
         return;
@@ -39231,7 +39307,7 @@ y({
         },
         lastDo: !0,
         async content(r, t, e) {
-          cs(e);
+          ds(e);
         }
       },
       clear_tips: {
@@ -39286,7 +39362,7 @@ y({
           if (!l.hasSkill("fuguangmrfz")) return "guanhuomrfz";
           if (!l.hasSkill("guanhuomrfz")) return "fuguangmrfz";
           let f = 0;
-          return f += le(l).length * 0.8, f -= se(l).length * 0.6, c.countPlayer() <= 3 && se(l).length > 0 && (f -= 0.5), f === 0 ? ["fuguangmrfz", "guanhuomrfz"].randomGet() : f > 0 ? "fuguangmrfz" : "guanhuomrfz";
+          return f += fe(l).length * 0.8, f -= ue(l).length * 0.6, c.countPlayer() <= 3 && ue(l).length > 0 && (f -= 0.5), f === 0 ? ["fuguangmrfz", "guanhuomrfz"].randomGet() : f > 0 ? "fuguangmrfz" : "guanhuomrfz";
         }
       }).forResult();
       n.control && {
@@ -39302,22 +39378,22 @@ y({
     }
   }
 });
-function cs(r) {
+function ds(r) {
   r.removePromptSJZX("fuguangmrfz_prompt");
   const t = r.getCards("h");
   for (let e of t)
-    le(r).includes(i.suit(e)) || e.addPromptSJZX("浮光·未记录", "fuguangmrfz_prompt");
+    fe(r).includes(i.suit(e)) || e.addPromptSJZX("浮光·未记录", "fuguangmrfz_prompt");
 }
-function se(r) {
+function ue(r) {
   return Array.isArray(r.storage.guanhuomrfz) || (r.storage.guanhuomrfz = []), r.storage.guanhuomrfz;
 }
-function le(r) {
+function fe(r) {
   return r.storage.fuguangmrfz || d.skill.fuguangmrfz.init(r, "fuguangmrfz"), r.storage.fuguangmrfz.suits;
 }
-function gs(r) {
+function ms(r) {
   return r.storage.fuguangmrfz || d.skill.fuguangmrfz.init(r, "fuguangmrfz"), r.storage.fuguangmrfz.damaged;
 }
-const ds = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const hs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("doushitalulamrfz", {
@@ -39432,9 +39508,9 @@ b({
   zhuoximrfz: "灼息",
   zhuoximrfz_info: "每回合每种类型的牌各限一次，当你使用一张牌后，你可以对一名与你距离为X的其他角色造成1点火焰伤害（X=你的体力值）。"
 });
-C("doushitalulamrfz", "<font color=#be260e>诅咒缠身</font>");
+S("doushitalulamrfz", "<font color=#be260e>诅咒缠身</font>");
 v("doushitalulamrfz", "摘自PRST的梗概</br>塔露拉，全名塔露拉·雅特利亚斯，种族德拉克。整合运动领袖兼发言人，性格坚定而富有感染力。使用火焰系源石技艺。爱德华的遗腹子。幼年时与陈相伴，后被科西切公爵掳走并受其教育。为防止科西切利用自己，将一小块源石结晶刺进自己的胳膊，成为了感染者，后将科西切杀死。为了自己的理想在乌萨斯的雪原上建立了感染者组织“整合运动”。但在到达雪原上的某个村庄时，目睹了人们对感染者残酷对待的现实并对自己的信念产生怀疑。受科西切留下的法术的影响，其身体被科西切的意识控制。随后将整合运动单纯地用作工具。与阿米娅和陈于切尔诺伯格核心城的指挥塔塔顶决战后，在两人的劝说下回归其原本人格，被罗德岛收监。后被九劫走。目前扣押于新整合并与其一同活跃于维多利亚，由于其被黑蛇掌控时的作为并不被维多利亚人所知，因此作为新整合用以拉拢维多利亚感染者的旗帜。");
-const ms = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const zs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 b({
@@ -39495,12 +39571,12 @@ b({
   pengcaimrfzx: "<font color='red'>吃饱了！</font>",
   xingzhumrfz_tag: "帙"
 });
-ne({
+ae({
   senrantieyumrfz: function(r) {
     return "<font color=`#FF1111`>" + ["浪人", "帝王", "强力", "离子", "军团", "烈焰", "先锋"].randomGet() + "</font>森蚺";
   }
 });
-const hs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ps = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("jiemrfz", {
@@ -39510,7 +39586,7 @@ k("jiemrfz", {
   pack: "plotSJZX",
   skills: ["lanshimrfz", "lushimrfz"]
 });
-C("jiemrfz", "<font color = #eb156766>刚正凌俗</font>");
+S("jiemrfz", "<font color = #eb156766>刚正凌俗</font>");
 b({
   jiemrfz: "颉",
   lanshimrfz: "览史",
@@ -39528,7 +39604,7 @@ b({
   "#lushimrfz2": "“秉笔直书”，说起来简单，却是十分深奥艰难的学问。",
   "#jiemrfz:die": "我本以为，随着年岁的增长，我愈发能够掌握这一份力量。可不知为什么，最近这些年来，自己仿佛变得越来越不像自己了"
 });
-ne("lushimrfz", (r) => {
+ae("lushimrfz", (r) => {
   const t = {
     0: "➀手牌上限+1",
     1: "➁攻击距离+1",
@@ -39547,15 +39623,15 @@ y({
       player: "phaseAfter"
     },
     filter(r, t, e, a) {
-      const n = Q(t);
+      const n = ee(t);
       return n !== null && n.length > 0 && n[0].card && t.hasUseTarget(n[0].card, !1, !1);
     },
     prompt2(r, t) {
-      const { name: e, nature: a, suit: n, number: o } = Q(t)[0].card, s = new d.element.VCard(n, o, e, a, t);
+      const { name: e, nature: a, suit: n, number: o } = ee(t)[0].card, s = new d.element.VCard(n, o, e, a, t);
       return `你可以视为使用${i.translation(s)}`;
     },
     async content(r, t, e) {
-      const { name: a, nature: n, suit: o, number: s } = Q(e)[0].card, u = new d.element.VCard(o, s, a, n, e);
+      const { name: a, nature: n, suit: o, number: s } = ee(e)[0].card, u = new d.element.VCard(o, s, a, n, e);
       e.chooseUseTarget().set("card", u).set("forced", !0).set("addCount", !1);
     },
     group: "lanshimrfz_phaseBefore",
@@ -39566,15 +39642,15 @@ y({
           player: "phaseBefore"
         },
         filter(r, t) {
-          const e = Q(t);
+          const e = ee(t);
           return e !== null && e.length > 0 && e[e.length - 1].card && t.hasUseTarget(e[e.length - 1].card, !1, !1);
         },
         prompt2(r, t) {
-          const e = Q(t), { name: a, nature: n, suit: o, number: s } = Q(t)[e.length - 1].card, u = new d.element.VCard(o, s, a, n, t);
+          const e = ee(t), { name: a, nature: n, suit: o, number: s } = ee(t)[e.length - 1].card, u = new d.element.VCard(o, s, a, n, t);
           return `你可以视为使用${i.translation(u)}`;
         },
         async content(r, t, e) {
-          const a = Q(e), { name: n, nature: o, suit: s, number: u } = Q(e)[a.length - 1].card, l = new d.element.VCard(s, u, n, o, e);
+          const a = ee(e), { name: n, nature: o, suit: s, number: u } = ee(e)[a.length - 1].card, l = new d.element.VCard(s, u, n, o, e);
           e.chooseUseTarget().set("card", l).set("forced", !0).set("addCount", !1);
         }
       }
@@ -39652,11 +39728,11 @@ y({
     }
   }
 });
-function Q(r) {
+function ee(r) {
   const t = r.getLastHistory("useCard");
   return Array.isArray(t) ? t.filter((e) => e?.card?.cards.length > 0) : null;
 }
-const zs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const _s = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("kelisitengmrfz", {
@@ -39905,9 +39981,9 @@ b({
   jiexiangmrfz: "揭相",
   jiexiangmrfz_info: "锁定技，当你死亡后，你摸X张牌并将你的牌依次分配给其他角色（每名角色至少分配一张牌），然后全场体力上限+1并回复一点体力。（X=你本局游戏因重铸获得的牌，X至少为存活角色数）"
 });
-C("kelisitengmrfz", "<font color=#DC143C>先驱者</font>");
+S("kelisitengmrfz", "<font color=#DC143C>先驱者</font>");
 v("kelisitengmrfz", "摘自PRTS的梗概</br>克里斯滕·莱特，莱茵生命总辖构件科主任兼联合创始人，特里蒙理工大学高能物理博士，出身于著名的莱特家族。塞雷娅称呼其为“总辖”。</br>与塞雷娅是大学同学，又是最要好的朋友，心有灵犀，互相认为对方是唯一理解自己的人。两人一拍即合，一同创建了莱茵生命。但在炎魔事件后，克丽斯腾被塞雷娅指出其行为越过了她的底线，导致塞雷娅与克丽斯腾决裂，离开莱茵生命。</br>359号基地事件期间，斐尔迪南企图架空克丽斯腾的权力，但在塞雷娅与克丽斯腾的磋商下，斐尔迪南的图谋最终失败。");
-const ps = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const bs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("minermrfz", {
@@ -39978,14 +40054,14 @@ y({
                   };
                 },
                 dialog(f, g) {
-                  let m = g.storage[s] ? d.inpile.filter((S) => i.type(S) === "basic") : ["sha", "shan"];
+                  let m = g.storage[s] ? d.inpile.filter((C) => i.type(C) === "basic") : ["sha", "shan"];
                   var z = [];
                   for (var p of m) {
-                    var x = { name: p, isCard: !0 };
-                    f.filterCard(x, g, f) && z.push(["基本", "", p]);
+                    var w = { name: p, isCard: !0 };
+                    f.filterCard(w, g, f) && z.push(["基本", "", p]);
                   }
-                  var w = _.create.dialog("卫境", [z, "vcard"], "hidden");
-                  return w.direct = !0, w;
+                  var x = _.create.dialog("卫境", [z, "vcard"], "hidden");
+                  return x.direct = !0, x;
                 }
               }
             });
@@ -40009,7 +40085,7 @@ b({
   xunkaimrfz_info: "锁定技，游戏开始时，或你进入濒死状态时，若你的体力上限大于1，你获得技能“绝境”和“卫境”（均可重复获得），然后减少一点体力上限，将体力值恢复至1，反之，你将获得的一个“卫境”的描述修改为：“每轮限一次，当你需要使用基本牌时，你可以视为使用之”。"
 });
 v("minermrfz", "矿工们自发组织的反抗队伍，成员多是青壮年。他们并非失去理智的暴民，他们只是想保护仍躲在地下的亲人。");
-const _s = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ks = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("muouwuzhemrfz", {
@@ -40024,7 +40100,7 @@ b({
   muouwuzhemrfz: "木偶舞者"
 });
 v("muouwuzhemrfz", "一个脸颊烧焦的小木偶，圆溜溜的眼睛让你想起特克诺撒娇时的样子。");
-const bs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ys = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("paxinghaomrfz", {
@@ -40091,9 +40167,9 @@ b({
   jushoumrfz: "巨兽",
   jushoumrfz_info: "每回合限一次，当你造成伤害时，若其当前勾玉为绿色，你令其将体力值调整至使得其当前勾玉变成红色的值，然后你摸等同于其调整的值张牌。"
 });
-C("paxinghaomrfz", "<font color=#00868B>战争巨兽</font>");
+S("paxinghaomrfz", "<font color=#00868B>战争巨兽</font>");
 v("paxinghaomrfz", "由白铁制作的钢铁巨兽‘爬行者’");
-const ks = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const vs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("plot_keluxiermrfz", {
@@ -40219,9 +40295,9 @@ b({
   kuorongmrfz: "扩容",
   kuorongmrfz_info: "锁定技，游戏开始时，你获得15个“镜像”，然后若你此时足够幸运，你获得【中流】。"
 });
-C("plot_keluxiermrfz", "<font color='red'>Ctrl+C && Ctrl+V</font>");
+S("plot_keluxiermrfz", "<font color='red'>Ctrl+C && Ctrl+V</font>");
 v("plot_keluxiermrfz", "萨卡兹中的血魔，“巴别塔”组织成员，现罗德岛舰船总工程师，兼任罗德岛采购部负责人一职，与凯尔希关系紧密。权限等级：42，但依旧有未访问或无法访问的罗德岛舰船部分。加入前便是知名黑客，因特蕾西娅寻找人才上门而同意加入巴别塔。巴别塔解体后成为罗德岛建立最初的人员之一，亲手将罗德岛本舰设计改造成如今的状态。自称“42星干员”，偶尔会恶作剧，有一点点贪财，但始终都是值得信赖的罗德岛总工程师。平时总在自己的总控室里做自己想做的事，而她想做的事一般是看电影、玩游戏、写程序。基本不插手罗德岛的运营和政治事务，但并非对这些不了解，她会在自己认为必要的时候做出相应的行动。博士苏醒并从切城回归后带领博士熟悉舰船，后参与进入维多利亚伦蒂尼姆的行动。");
-const ys = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const xs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("puruisaisimrfz", { pack: "plotSJZX", sex: "female", group: "qianmrfz", hp: 3, skills: ["qianmianmrfz", "neihuamrfz"] });
@@ -40380,8 +40456,8 @@ y({
         for (let B = 0; B < H; B++)
           X.push(B);
         for (let B = 0; B < R; B++) {
-          let L = Math.floor(Math.random() * X.length), $r = X[L];
-          $.push(E[$r]), X.splice(L, 1);
+          let L = Math.floor(Math.random() * X.length), Hr = X[L];
+          $.push(E[Hr]), X.splice(L, 1);
         }
         return $;
       }
@@ -40418,35 +40494,35 @@ y({
       let g = [], m = d.skill.bianyimrfz.GetAllSkills(e);
       for (let E in m)
         g.push(m[E]);
-      let z, p, x = 0;
-      for (; ++x <= 200; ) {
+      let z, p, w = 0;
+      for (; ++w <= 200; ) {
         let E = a(d.skill.bianyimrfz.GetAllSkills(e), 100), R = [];
         for (let X of E)
           R.add(i.translation(X));
         let $ = n(R);
         if (z = o($, Math.min($.length, 50)), p = s(g, z), p.length > 15) break;
       }
-      let w = [];
+      let x = [];
       for (let E = 0; E < z.length; E++)
-        w[E] = [E, z[E]];
-      if (w.length == 0) {
+        x[E] = [E, z[E]];
+      if (x.length == 0) {
         e.popup("纳尼？没有技能了？！");
         return;
       }
-      let S = (E) => o(E, Math.floor(E.length * (75 / 100)));
+      let C = (E) => o(E, Math.floor(E.length * (75 / 100)));
       c.broadcastAll(function(E) {
         E.forceCountChoose = { chooseButton: 30 };
       }, e);
       let T = ["编译:请选择至少两个汉字（推荐选两个汉字）"], j = 0;
-      for (let E = 0; E < Math.ceil(w.length / 10); E++)
-        T.push([w.slice(j, j + 10 >= w.length ? w.length : j + 10), "tdnodes"]), j += 10;
+      for (let E = 0; E < Math.ceil(x.length / 10); E++)
+        T.push([x.slice(j, j + 10 >= x.length ? x.length : j + 10), "tdnodes"]), j += 10;
       T.push(`存在有${p.length}个技能`);
-      const { links: M } = r.isMine() == !1 ? { links: l(w, p) } : await e.chooseButton({ createDialog: T }).set("forced", !0).set("selectButton", [2, 1 / 0]).set("filterButton", function(E) {
+      const { links: M } = r.isMine() == !1 ? { links: l(x, p) } : await e.chooseButton({ createDialog: T }).set("forced", !0).set("selectButton", [2, 1 / 0]).set("filterButton", function(E) {
         let R = h.event.cannot;
         return !!(R.length == 0 || R.includes(E.link));
       }).set("ai", () => {
         h.tmp_PRTS_endTime = !0;
-      }).set("cannot", S(f(w, p))).forResult();
+      }).set("cannot", C(f(x, p))).forResult();
       c.broadcastAll(function(E) {
         delete E.forceCountChoose;
       }, e);
@@ -40458,7 +40534,7 @@ y({
         return;
       }
       for (let E of M)
-        q = q + w[E][1];
+        q = q + x[E][1];
       let Z = u(m, q);
       if (Z != null) {
         let E = [];
@@ -40482,9 +40558,9 @@ b({
   bianyimrfz: "编译",
   bianyimrfz_info: "每轮开始时或你造成伤害后，你可以随机抽取100个技能名，从这100个技能名随机抽取50个汉字，然后你在30秒内从这些汉字中选择两个汉字，使其组成一个技能名，若此技能名存在于技能库中，你获得此技能。"
 });
-C("puruisaisimrfz", "<font color=#77be6a>女祭司</font>");
+S("puruisaisimrfz", "<font color=#77be6a>女祭司</font>");
 v("puruisaisimrfz", "博士面对石棺的回忆中的神秘女性人物，是源石的起点，曾与博士亲密无间。");
-const vs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ws = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("qiaojiakelifumrfz", {
@@ -40596,7 +40672,7 @@ b({
   leitingmrfz_info: "限定技，出牌阶段开始时，你可以消耗6枚“弹药”，选择一名角色，视为对其使用6张雷杀，若其本回合死亡，你重置此技能。"
 });
 v("qiaojiakelifumrfz", "设计：落尘星河<br>‘桥夹’克里夫，原名鲁伯特，黑钢国际的创始人，猎人伍德洛·比安奇的旧友。曾领导若干人离开拉特兰远赴哥伦比亚参加独立战争。期间在某次次营救计划中派遣伍德洛的队伍作诱兵，但因为各种原因无法按原计划行动导致伍德洛被俘。派遣B.P.R.S.前往达维镇前委托杰西卡将克里夫与伍德洛某位战友遗物的一枚子弹交予伍德洛。巴伦基地接驳达维镇，克里夫与伍德洛前后会面两次，在二人的第二次对峙中认输，但被伍德洛以“应背之罪”的理由和解，在安排好伍德洛的后续事项后与银行行长达成交易，填补资金空缺的同时收获了平台。");
-const xs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ss = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("shuangwangmrfz", {
@@ -40871,9 +40947,9 @@ b({
   datongmrfz: "大同",
   datongmrfz_info: "锁定技，你始终横置，所有被横置的角色手牌上限+X；被你杀死的角色复活、将手牌和体力值调整至2和将身份替换成与你一致（仅限身份模式）。（X=你的技能数）"
 });
-C("shuangwangmrfz", "<font color='#00008b'>千年之愿</font>");
+S("shuangwangmrfz", "<font color='#00008b'>千年之愿</font>");
 v("shuangwangmrfz", "或许我们能走向不同的结局...");
-const ws = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Cs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("talaidingzhenmrfz", {
@@ -40925,7 +41001,7 @@ b({
   xuebaomrfz_info: "锁定技，游戏开始时，你令其他所有角色失去技能描述大于50个字的技能，然后所有没有技能的角色和你获得【乱击】。"
 });
 v("talaidingzhenmrfz", "‘今天我很荣幸，作为一个卡兹戴尔的孩子，能来到伦蒂尼姆，讲我和萨卡兹朋友们的故事。<br>我的村庄叫巴别塔，小小的，但是军委会和十王庭却很大。<br>这个世界不但属于我，也属于我的萨卡兹朋友们。<br>我们魔族佬说，一条死魂灵中都有十万个祖宗。<br>我最近一直在努力学习，在书本中学习，也在战场上学习。我想告诉大家，特蕾西娅可以教会我们很多很多。<br>我希望大家，特别是小朋友们，能来到卡兹戴尔的大自然中学习，让我的萨卡兹朋友们来教会你们。’");
-const Ss = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const js = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("teleixisimrfz", {
@@ -41031,14 +41107,14 @@ y({
       if (!a) return;
       let n = c.players.slice().remove(e);
       for (var o = function(g, m, z) {
-        let p = [], x = [
+        let p = [], w = [
           "弃置一张牌，本回合你下次受到的伤害+1",
           `交给${i.translation(m)}一张牌，本回合${i.translation(m)}使用【杀】的次数+1`,
           `令${i.translation(m)}摸一张牌，本回合${i.translation(m)}下次造成的伤害+1`
         ];
-        return z.countCards("h") > 0 ? (p.push("选项一"), p.push("选项二")) : (x[0] = '<span style="opacity:0.5; ">' + x[0] + "（你没有牌）</span>", x[1] = '<span style="opacity:0.5; ">' + x[1] + "（你没有牌）</span>"), p.push("选项三"), {
+        return z.countCards("h") > 0 ? (p.push("选项一"), p.push("选项二")) : (w[0] = '<span style="opacity:0.5; ">' + w[0] + "（你没有牌）</span>", w[1] = '<span style="opacity:0.5; ">' + w[1] + "（你没有牌）</span>"), p.push("选项三"), {
           list: p,
-          chooseList: x
+          chooseList: w
         };
       }; n.length > 0; ) {
         var s = n[0];
@@ -41050,7 +41126,7 @@ y({
           break;
         var u = o(r, e, s).list, l = o(r, e, s).chooseList, { control: a } = await s.chooseControl(u).set("choiceList", l).set("prompt", "请选择一项").set("ai", () => {
           var m = h.event.list, z = h.event.player, p = h.event.target;
-          return i.attitude(z, p) > 0 ? m.includes("选项二") ? ["选项二", "选项三"].randomGet() : "选项三" : m.includes("选项二") && z.getCards("h").filter((x) => i.value(x) < 6) ? "选项二" : m.includes("选项一") ? "选项一" : m.randomGet();
+          return i.attitude(z, p) > 0 ? m.includes("选项二") ? ["选项二", "选项三"].randomGet() : "选项三" : m.includes("选项二") && z.getCards("h").filter((w) => i.value(w) < 6) ? "选项二" : m.includes("选项一") ? "选项一" : m.randomGet();
         }).set("list", u).set("target", e).forResult();
         if (!a) {
           n.shift();
@@ -41062,8 +41138,8 @@ y({
             break;
           case "选项二":
             var { cards: f } = await s.chooseCard("h", `【焚舟】:请交给${i.translation(e)}一张手牌`, !0).set("ai", (m) => {
-              var z = h.event.player, p = h.event.target, x = i.value(m), w = i.attitude(z, p);
-              return i.tag(m, "damage") && (x += (w > 0 ? 1 : -1) * i.value(m)), (w > 0 ? 1 : -1) * i.value(m);
+              var z = h.event.player, p = h.event.target, w = i.value(m), x = i.attitude(z, p);
+              return i.tag(m, "damage") && (w += (x > 0 ? 1 : -1) * i.value(m)), (x > 0 ? 1 : -1) * i.value(m);
             }).set("target", e).forResult();
             f && s.give(f, e), e.addMark("fenzhoumrfz_eff2", 1, !1), e.addTempSkill("fenzhoumrfz_eff2", { player: "phaseEnd" });
             break;
@@ -41141,9 +41217,9 @@ b({
   fenzhoumrfz: "焚舟",
   fenzhoumrfz_info: '出牌阶段限一次，你可以废除你的一个装备栏，然后所有其他角色选择一项：1.弃置一张牌，本回合其下次受到的伤害+1；2.交给你一张牌，本回合你使用【杀】的次数+1；3.令你摸一张牌，本回合你下次造成的伤害+1。<br><span style="font-family: yuanli">"秦伯伐晋，济河焚舟。"</span>'
 });
-C("teleixisimrfz", "<font color=#00868B>执剑斩棘</font>");
+S("teleixisimrfz", "<font color=#00868B>执剑斩棘</font>");
 v("teleixisimrfz", "特雷西斯，特蕾西娅的兄长，卡兹戴尔的摄政王，萨卡兹的利刃，一位坚韧的英雄，一个孤独的梦想。道路被他的利刃劈开，代价是他的未来。");
-const Cs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ts = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("teleixiyamrfz", {
@@ -41195,24 +41271,24 @@ y({
             g
           );
           p.videoId = m;
-          for (var x = function(j) {
+          for (var w = function(j) {
             if (j._tempTranslate) return j._tempTranslate;
             var M = j.name;
             return d.translate[M + "_ab"] ? d.translate[M + "_ab"] : i.translation(M);
-          }, w = 0; w < f.length; w++) {
-            var S = x(f[w]), T = i.color(g[w]);
+          }, x = 0; x < f.length; x++) {
+            var C = w(f[x]), T = i.color(g[x]);
             switch (T) {
               case "red":
-                S = "<font color=#FF0000>" + S + "</font>";
+                C = "<font color=#FF0000>" + C + "</font>";
                 break;
               case "black":
-                S = "<font color=#000000>" + S + "</font>";
+                C = "<font color=#000000>" + C + "</font>";
                 break;
               default:
-                S = "<font color=#FFFAFA>" + S + "</font>";
+                C = "<font color=#FFFAFA>" + C + "</font>";
                 break;
             }
-            T == z.storage.bojimrfz.color ? S = S + "<font color=#00FF00>√</font>" : S = S + "×", p.buttons[w].querySelector(".info").innerHTML = S;
+            T == z.storage.bojimrfz.color ? C = C + "<font color=#00FF00>√</font>" : C = C + "×", p.buttons[x].querySelector(".info").innerHTML = C;
           }
         },
         //@ts-ignore
@@ -41482,9 +41558,9 @@ b({
   caijianmrfz: "裁剪",
   caijianmrfz_info: '锁定技，当你死亡时，杀死你的角色弃置区域内所有牌、失去武将牌上的所有技能并且复原武将牌，然后其随机获得场上角色武将牌上的两个技能并摸3张牌。<br><span style="font-family: yuanli">"你葬送我的未来，我剪断你的过去。"</span>'
 });
-C("teleixiyamrfz", "<font color=#00868B>瑰丽理想</font>");
+S("teleixiyamrfz", "<font color=#00868B>瑰丽理想</font>");
 v("teleixiyamrfz", "特蕾西娅，特雷西斯的妹妹，巴别塔的领袖，萨卡兹的魔王，一位谦卑的英雄，一个瑰丽的梦想。未来在她眼中凝聚，道路在她脚下消散。");
-const js = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ms = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("xierdamrfz", {
@@ -41608,9 +41684,9 @@ b({
   lanshengmrfz: "览生",
   lanshengmrfz_info: "当你造成或受到伤害后,你可以重铸至多X张牌，若你重铸的牌的牌名中有你获得过的“神赐”的牌名，此次重铸的摸牌数+1。（X=你获得过的“神赐”的花色数）"
 });
-C("xierdamrfz", "<font color = red>神祇代理人</font>");
+S("xierdamrfz", "<font color = red>神祇代理人</font>");
 v("xierdamrfz", "一路在伦蒂尼姆救助难民，最后死于矿石病的感染者少女。被前文明语言学家普瑞赛斯以源石信息重构为宇宙投影。她在“罗德岛”内化宇宙中窥见文明墓碑与毁灭真理，仍选择回归泰拉。被普瑞赛斯赋予“消除源石痛苦”的权柄，治愈了几名矿工。");
-const Ts = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ps = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 k("yizumikemrfz", {
@@ -41659,13 +41735,13 @@ y({
       }, u = async function(f, g, m) {
         const z = h.event;
         z._result || (z._result = {}), z._result.skills = [];
-        const p = z._result.skills, x = _.create.dialog("请获得一个技能", [f, "character"], "hidden");
-        z.dialog = x;
-        const w = document.createElement("div");
-        w.classList.add("add-setting"), w.style.margin = "0", w.style.width = "100%", w.style.position = "relative";
-        for (let S = 0; S < g.length; S++) {
+        const p = z._result.skills, w = _.create.dialog("请获得一个技能", [f, "character"], "hidden");
+        z.dialog = w;
+        const x = document.createElement("div");
+        x.classList.add("add-setting"), x.style.margin = "0", x.style.width = "100%", x.style.position = "relative";
+        for (let C = 0; C < g.length; C++) {
           const T = _.create.div(".shadowed.reduce_radius.pointerdiv.tdnode");
-          T.link = g[S], w.appendChild(T), T.innerHTML = "<span>" + i.translation(g[S]) + "</span>", T.addEventListener(d.config.touchscreen ? "touchend" : "click", function() {
+          T.link = g[C], x.appendChild(T), T.innerHTML = "<span>" + i.translation(g[C]) + "</span>", T.addEventListener(d.config.touchscreen ? "touchend" : "click", function() {
             if (h.dragged || h.justdragged) return;
             h.tempNoButton = !0, setTimeout(function() {
               h.tempNoButton = !1;
@@ -41679,13 +41755,13 @@ y({
             }
           });
         }
-        x.content.appendChild(w), x.add("  "), x.open(), z.switchToAuto = function() {
+        w.content.appendChild(x), w.add("  "), w.open(), z.switchToAuto = function() {
           z.dialog.close(), z.control.close(), c.resume(), h.imchoosing = !1;
-        }, z.control = _.create.control("ok", function(S) {
+        }, z.control = _.create.control("ok", function(C) {
           z.dialog.close(), z.control.close(), c.resume(), h.imchoosing = !1, m && m(!0);
         });
-        for (let S = 0; S < z.dialog.buttons.length; S++)
-          z.dialog.buttons[S].classList.add("selectable");
+        for (let C = 0; C < z.dialog.buttons.length; C++)
+          z.dialog.buttons[C].classList.add("selectable");
         c.pause(), c.countChoose();
       };
       r.isMine() ? await new Promise((f) => {
@@ -41716,10 +41792,10 @@ b({
   chanshimrfz_info: "每回合限一次，每轮开始时或你造成伤害后，你可以从两张武将牌中选择并获得其中一个技能。"
 });
 v("yizumikemrfz", "临近进化奇点的完美生物，大群的建言者与引领者，“后生的初生”，海嗣。");
-const Ms = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const As = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
-class Ps {
+class qs {
   _data = {};
   _listeners = /* @__PURE__ */ new Map();
   get(t) {
@@ -41747,19 +41823,19 @@ class Ps {
         await n(e, t);
   }
 }
-const W = new Ps();
+const W = new qs();
 window.whichWay.register("dataManager", W);
-Qe({
+er({
   name: "whichWayDataManager_dev",
   fn: () => {
     window.whichWayDataManager = W;
   }
 });
-const As = { class: "control-container" }, qs = { class: "title" }, Es = { class: "item-container" }, Rs = ["onClick"], Os = ["src"], $s = { class: "item-text" }, Ds = /* @__PURE__ */ Xr({
+const Es = { class: "control-container" }, Rs = { class: "title" }, Os = { class: "item-container" }, $s = ["onClick"], Ds = ["src"], Hs = { class: "item-text" }, Us = /* @__PURE__ */ Nr({
   __name: "control",
   setup(r) {
-    const t = nr([]), e = nr("");
-    Br(() => {
+    const t = ir([]), e = ir("");
+    Jr(() => {
       const n = W.get("list").map((o) => [
         o[0],
         o[1],
@@ -41771,25 +41847,25 @@ const As = { class: "control-container" }, qs = { class: "title" }, Es = { class
       const o = n[0];
       return W.set("selected", o), o;
     };
-    return (n, o) => (Be(), Ne("div", As, [
-      _e("div", qs, Je(e.value), 1),
-      _e("div", Es, [
-        (Be(!0), Ne(Nr, null, Jr(t.value, (s, u) => (Be(), Ne("div", {
+    return (n, o) => (Ne(), Je("div", Es, [
+      be("div", Rs, Ze(e.value), 1),
+      be("div", Os, [
+        (Ne(!0), Je(Zr, null, Gr(t.value, (s, u) => (Ne(), Je("div", {
           key: u,
           class: "control-item",
           onClick: (l) => a(s)
         }, [
-          _e("img", {
+          be("img", {
             src: s[2],
             class: "item-bg",
             alt: ""
-          }, null, 8, Os),
-          _e("span", $s, Je(Zr(i).translation(s[0])) + " - " + Je(s[1]), 1)
-        ], 8, Rs))), 128))
+          }, null, 8, Ds),
+          be("span", Hs, Ze(Lr(i).translation(s[0])) + " - " + Ze(s[1]), 1)
+        ], 8, $s))), 128))
       ])
     ]));
   }
-}), Hs = /* @__PURE__ */ Lr(Ds, [["__scopeId", "data-v-694583f2"]]);
+}), Xs = /* @__PURE__ */ Fr(Us, [["__scopeId", "data-v-694583f2"]]);
 k("char_2027_wang", {
   sex: "male",
   group: "suimrfz",
@@ -41797,8 +41873,8 @@ k("char_2027_wang", {
   hp: 4,
   pack: "legendSJZX"
 });
-C("char_2027_wang", "<font color = #2263b766>胜天半子</font>");
-const Us = {
+S("char_2027_wang", "<font color = #2263b766>胜天半子</font>");
+const Bs = {
   shuomrfz: "朔",
   shuomrfz_info: "对此牌的一名目标角色造成一点伤害。",
   wangmrfz: "望",
@@ -41825,15 +41901,15 @@ const Us = {
   char_2026_yu_info: "从牌堆中获得任意类型的一张牌。"
 };
 b({
-  ...Object.fromEntries(Object.entries(Us).map(([r, t]) => [`char_2027_wang_${r}`, t])),
+  ...Object.fromEntries(Object.entries(Bs).map(([r, t]) => [`char_2027_wang_${r}`, t])),
   char_2027_wang: "望",
   qushimrfz: "取势",
   qushimrfz_info: `锁定技,当你首次使用一种牌名的普通锦囊牌时，你为该种牌名的牌选择一个效果，你对应的牌获得对应的效果：<br>朔：对此牌的一名目标角色造成一点伤害;<br>望：视为使用一张刺【杀】（无距离次数限制）;<br>令：结算完毕后视为使用一张【酒】;<br>均：无法被其他角色响应;<br>颉：视为使用一张你本回合使用过的基本牌（无次数限制）;<br>黍：下次摸牌数翻倍;<br>绩：将手牌补至手牌上限（至多为5）;<br>易：${i.poptip("sjzx_zhiheng")}3;<br>年：随机获得一个武器牌的技能直到回合结束;<br>夕：额外结算一次;<br>方：回复体力至体力上限;<br>余：选择从牌堆中获得任意类型的一张牌。`,
   dingshengmrfz: "定胜",
   dingshengmrfz_info: "限定技，出牌阶段，你可以从牌堆或弃牌堆中获得本局游戏你使用过的普通锦囊牌各一张，且令其他角色从牌堆或弃牌堆中获得你未因此获得的一张普通锦囊牌。"
 });
-let fe = {};
-const Te = {
+let ce = {};
+const Me = {
   shuomrfz: {
     audio: "wowumrfz",
     filter(r, t) {
@@ -41942,10 +42018,10 @@ const Te = {
   },
   char_2014_nian: {
     filter(r, t) {
-      return Mr(t).length > 0;
+      return Ar(t).length > 0;
     },
     async content(r, t, e) {
-      const a = Mr(e).randomGet();
+      const a = Ar(e).randomGet();
       e.addTempSkill(a, { player: "phaseEnd" }), c.log(e, `获得 ${i.translation(a)} 直到回合结束`);
     }
   },
@@ -41978,13 +42054,13 @@ const Te = {
     }
   }
 };
-for (const r in Te) {
-  const t = Te[r];
+for (const r in Me) {
+  const t = Me[r];
   t.audio || (t.audio = "qushimrfz"), t.trigger || (t.trigger = {
     player: "useCard1"
   }), t.charlotte = !0, t.forced = !0;
   const e = t.filter;
-  t.filter = (a, n, o, s) => !a.card || fe[`char_2027_wang_${r}`] !== a.card.name ? !1 : e ? e.bind(void 0)(a, n, o, s) : !0;
+  t.filter = (a, n, o, s) => !a.card || ce[`char_2027_wang_${r}`] !== a.card.name ? !1 : e ? e.bind(void 0)(a, n, o, s) : !0;
 }
 y({
   qushimrfz: {
@@ -41994,10 +42070,10 @@ y({
     },
     filter(r, t) {
       return r.card && //@ts-ignore
-      i.type(r.card) === "trick" && !Object.values(fe).includes(r.card.name) && Object.keys(fe).length < 12;
+      i.type(r.card) === "trick" && !Object.values(ce).includes(r.card.name) && Object.keys(ce).length < 12;
     },
     async content(r, t, e) {
-      const a = Object.keys(Te).filter((o) => !fe[`char_2027_wang_${o}`]).map((o) => [`char_2027_wang_${o}`, i.skillInfoTranslation(`char_2027_wang_${o}`)]);
+      const a = Object.keys(Me).filter((o) => !ce[`char_2027_wang_${o}`]).map((o) => [`char_2027_wang_${o}`, i.skillInfoTranslation(`char_2027_wang_${o}`)]);
       if (r.isMine()) {
         c.pause2();
         const o = _.create.div(
@@ -42012,13 +42088,13 @@ y({
           },
           document.body
         );
-        W.set("list", a), W.set("prompt", `【取势】:为${i.translation(t.card)}分配一个效果`), Gr(Hs).mount(o), W.on("selected", async (s, u) => {
+        W.set("list", a), W.set("prompt", `【取势】:为${i.translation(t.card)}分配一个效果`), Ir(Xs).mount(o), W.on("selected", async (s, u) => {
           c.resume2(), o.remove(), W.offAll("selected"), W.remove(["list", "prompt", "selected"]), s && n(s);
         });
       } else
         n(a.map((o) => o[0]).randomGet());
       function n(o) {
-        fe[o] = t.card.name, c.log(`将${i.translation(t.card)}的效果分配给${i.translation(o)}`), e.addSkill(o);
+        ce[o] = t.card.name, c.log(`将${i.translation(t.card)}的效果分配给${i.translation(o)}`), e.addSkill(o);
       }
     }
   },
@@ -42029,7 +42105,7 @@ y({
     mark: !0,
     intro: {
       content(r, t) {
-        const e = Pr(t), a = d.inpile.filter((n) => i.type(n) === "trick" && !e.includes(n));
+        const e = qr(t), a = d.inpile.filter((n) => i.type(n) === "trick" && !e.includes(n));
         return `·已使用的锦囊牌：${i.translation(e)}<br>·未使用的锦囊牌：${i.translation(a)}<br>·${r === !0 ? "已" : "未"}发动限定技`;
       }
     },
@@ -42037,7 +42113,7 @@ y({
       return t.getStorage("dingshengmrfz") !== !0;
     },
     async content(r, t, e) {
-      const a = Pr(e), n = d.inpile.filter((u) => i.type(u) === "trick" && !a.includes(u)), o = [];
+      const a = qr(e), n = d.inpile.filter((u) => i.type(u) === "trick" && !a.includes(u)), o = [];
       for (let u of a) {
         let l = i.cardPile(u);
         l ? o.push(l) : e.chat(`没有${i.translation(u)}了！`);
@@ -42062,18 +42138,18 @@ y({
       order: 1,
       result: {
         player(r, t) {
-          return Object.keys(fe).length >= 4;
+          return Object.keys(ce).length >= 4;
         }
       }
     }
   },
-  ...Object.fromEntries(Object.entries(Te).map(([r, t]) => [`char_2027_wang_${r}`, t]))
+  ...Object.fromEntries(Object.entries(Me).map(([r, t]) => [`char_2027_wang_${r}`, t]))
 });
 v(
   "char_2027_wang",
   "望，曾担任炎国军事顾问，现为无业棋手。年、夕、令等人的兄长，重岳的弟弟。经重岳先生介绍来到罗德岛养病，偶尔会为作战任务提供建议。"
 );
-function Mr(r) {
+function Ar(r) {
   const t = Object.keys(d.card).filter((n) => i.subtype(n) === "equip1"), e = [], a = r.getSkills();
   for (let n of t) {
     const o = d.card[n];
@@ -42083,11 +42159,11 @@ function Mr(r) {
   }
   return e;
 }
-function Pr(r) {
+function qr(r) {
   const t = r.getAllHistory("useCard", (e) => e.card && i.type(e.card) === "trick");
   return Array.from(new Set(t.map((e) => e.card.name)));
 }
-const Xs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ns = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 J("DP27mrfz", {
@@ -42161,7 +42237,7 @@ N({
   DP27mrfz_skill: "DP27",
   DP27mrfz_info: "①锁定技，若你于本回合使用过【杀】，则你的非属性【杀】均视为火【杀】。②锁定技，你的属性杀无视防具且伤害基数+1。"
 });
-const Bs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Js = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 J("baitiemrfzcard1", {
@@ -42190,7 +42266,7 @@ N({
   baitiemrfzcard1_skill: "援备",
   baitiemrfzcard1_info: "当你造成至少两点伤害时，你可以令此伤害+1。"
 });
-const Ns = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Zs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 J("baitiemrfzcard2", {
@@ -42217,7 +42293,7 @@ N({
   baitiemrfzcard2_skill: "援备",
   baitiemrfzcard2_info: "锁定技，弃牌阶段开始时，你摸一张牌并额外执行一个出牌阶段。"
 });
-const Js = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Gs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 J("baitiemrfzcard3", {
@@ -42267,7 +42343,7 @@ N({
   baitiemrfzcard3_skill: "援备",
   baitiemrfzcard3_info: "出牌阶段你可以弃置X张带有伤害类标签的牌，然后选择一名你攻击范围内的其他角色，对其造成一点伤害（X=此技能本回合使用数+1）。"
 });
-const Zs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ls = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 J("cuoe_huanyoumrfzCard", {
@@ -42298,7 +42374,7 @@ N({
   cuoe_huanyoumrfzCard: "幻有",
   cuoe_huanyoumrfzCard_info: "如真似幻，扑朔迷离。"
 });
-const Gs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Is = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 J("dazijimrfz", {
@@ -42378,7 +42454,7 @@ N({
   dazijimrfz: "打字机",
   dazijimrfz_info: "当你使用【杀】指定目标时，你可以令此【杀】结算两次。（此装备离开你的装备区时，销毁之）"
 });
-const Ls = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Fs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 J("jianzhumrfz", {
@@ -42445,7 +42521,7 @@ N({
   jianzhumrfz_skill: "剑助",
   jianzhumrfz_info: "锁定技，使用带有应变效果的牌可无视条件直接生效；当你受到伤害后或此牌离开了你的装备区时，你将【剑助】销毁之。"
 });
-const Is = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Vs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 J("jingtouE1mrfz", {
@@ -42489,7 +42565,7 @@ N({
   jingtouE1mrfz: "镜头",
   jingtouE1mrfz_info: "锁定技，你的手牌始终明置；你始终视为在其他角色的攻击范围内；此牌离开你的装备区时，销毁之。"
 });
-const Fs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ws = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 J("jingtouE2mrfz", {
@@ -42530,7 +42606,7 @@ N({
   jingtouE2mrfz: "镜头",
   jingtouE2mrfz_info: "锁定技，你的手牌始终明置；你始终视为在其他角色的攻击范围内；此牌离开你的装备区时，销毁之。"
 });
-const Vs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ys = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 J("jingtouE3mrfz", {
@@ -42574,7 +42650,7 @@ N({
   jingtouE3mrfz: "镜头",
   jingtouE3mrfz_info: "锁定技，你的手牌始终明置；你始终视为在其他角色的攻击范围内；此牌离开你的装备区时，销毁之。"
 });
-const Ws = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Ks = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 J("jingtouE4mrfz", {
@@ -42618,7 +42694,7 @@ N({
   jingtouE4mrfz: "镜头",
   jingtouE4mrfz_info: "锁定技，你的手牌始终明置；你始终视为在其他角色的攻击范围内；此牌离开你的装备区时，销毁之。"
 });
-const Ys = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Qs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 J("jingtouE5mrfz", {
@@ -42659,7 +42735,7 @@ N({
   jingtouE5mrfz: "镜头",
   jingtouE5mrfz_info: "锁定技，你的手牌始终明置；你始终视为在其他角色的攻击范围内；此牌离开你的装备区时，销毁之。"
 });
-const Ks = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const eu = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 J("ksl_lulitongxinmrfz", {
@@ -42733,7 +42809,7 @@ N({
   ksl_lulitongxinmrfz: "勠力同心",
   ksl_lulitongxinmrfz_info: "出牌阶段：<br>①你可以令X名没有被横置的角色横置，然后所有被横置的角色将手牌补至4张并明置所有手牌。（X=场上势力数）<br>②你可以令所有被横置的角色解除横置状态、弃置一张手牌，并暗置所有手牌。"
 });
-const Qs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const ru = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 J("shadishoumrfz", {
@@ -42799,7 +42875,7 @@ N({
   shadishoumrfz_skill: "沙地兽",
   shadishoumrfz_info: "①锁定技，当此牌不因交换装备或移动离开你的装备区时，销毁之。②出牌阶段限一次，你可以弃置一张手牌并弃置此牌。"
 });
-const eu = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const tu = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 F("jingtoumrfz_skill", {
@@ -42830,7 +42906,7 @@ N({
   jingtoumrfz_skill: "镜头",
   visible_jingtoumrfz: "明置"
 });
-const ru = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const au = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
 J("sjzx_zhuihuomrfz", {
@@ -42873,13 +42949,13 @@ N({
   sjzx_zhuihuomrfz: "天坠之火",
   sjzx_zhuihuomrfz_info: "因【坠火】而置入判定区的牌可重复存在。判定阶段开始时，你须选择弃置两张牌或受到一点火焰伤害，然后将此牌置入弃牌堆。"
 });
-const tu = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const nu = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
-}, Symbol.toStringTag, { value: "Module" })), au = (r) => {
+}, Symbol.toStringTag, { value: "Module" })), iu = (r) => {
   const t = r.whichWay ??= {};
   return t.designer = t.designer === void 0 ? [] : Array.isArray(t.designer) ? t.designer : [t.designer], t.arknight ??= {}, r.pack ??= "specialSJZX", r;
 };
-class Me {
+class Pe {
   static CHARACTER_PACKS = ["epicSJZX", "legendSJZX", "especialSJZX", "plotSJZX", "specialSJZX", "rareSJZX", "mediocreSJZX", "normalSJZX"];
   /**
    * 干员模块清单（构建期由 import.meta.glob 静态确定，eager 求值）。
@@ -42907,9 +42983,9 @@ class Me {
    * 目录 index.ts > 目录 index.js。
    */
   characterModules = {
-    .../* @__PURE__ */ Object.assign({ "./character/acemrfz.ts": Wr, "./character/aiguozhemrfz.ts": Yr, "./character/baocunzhemrfz.ts": Kr, "./character/ceshimrfz.ts": Qr, "./character/char_002_amiya.ts": et, "./character/char_003_kalts.ts": rt, "./character/char_010_chen.ts": tt, "./character/char_017_huang.ts": at, "./character/char_1001_amiya2.ts": nt, "./character/char_1012_skadi2.ts": it, "./character/char_1013_chen2.ts": ot, "./character/char_1014_nearl2.ts": st, "./character/char_1015_aglna2.ts": ut, "./character/char_1016_agoat2.ts": lt, "./character/char_1019_siege2.ts": ft, "./character/char_1020_reed2.ts": ct, "./character/char_1022_flwr2.ts": gt, "./character/char_1023_ghost2.ts": dt, "./character/char_1024_hbisc2.ts": mt, "./character/char_1026_gvial2.ts": ht, "./character/char_1028_texas2.ts": zt, "./character/char_1029_yato2.ts": pt, "./character/char_102_texas.ts": _t, "./character/char_1030_noirc2.ts": bt, "./character/char_1031_slent2.ts": kt, "./character/char_1032_excu2.ts": yt, "./character/char_1033_swire2.ts": vt, "./character/char_1034_jesca2.ts": xt, "./character/char_1035_wisdel.ts": wt, "./character/char_1036_fang2.ts": St, "./character/char_1037_amiya3.ts": Ct, "./character/char_1038_whitw2.ts": jt, "./character/char_1039_thorn2.ts": Tt, "./character/char_103_angel.ts": Mt, "./character/char_1040_blaze2.ts": Pt, "./character/char_1041_angel2.ts": At, "./character/char_1042_phatm2.ts": qt, "./character/char_1043_leizi2.ts": Et, "./character/char_1044_hsgma2.ts": Rt, "./character/char_1045_svash2.ts": Ot, "./character/char_1046_sbell2.ts": $t, "./character/char_1047_halo2.ts": Dt, "./character/char_1048_orchd2.ts": Ht, "./character/char_1049_catap2.ts": Xt, "./character/char_1050_chen3.ts": Bt, "./character/char_1051_headb2.ts": Nt, "./character/char_1052_kalts2.ts": Jt, "./character/char_106_franka.ts": Zt, "./character/char_112_siege.ts": Gt, "./character/char_113_cqbw.ts": Lt, "./character/char_115_headbr.ts": It, "./character/char_122_beagle.ts": Ft, "./character/char_128_plosis.ts": Vt, "./character/char_129_bluep.ts": Wt, "./character/char_134_ifrit.ts": Yt, "./character/char_135_halo.ts": Kt, "./character/char_136_hsguma.ts": Qt, "./character/char_144_red.ts": ea, "./character/char_147_shining.ts": ra, "./character/char_148_nearl.ts": ta, "./character/char_1502_crosly.ts": aa, "./character/char_151_myrtle.ts": na, "./character/char_155_tiger.ts": ia, "./character/char_164_nightm.ts": sa, "./character/char_166_skfire.ts": ua, "./character/char_172_svrash.ts": la, "./character/char_173_slchan.ts": fa, "./character/char_174_slbell.ts": ca, "./character/char_179_cgbird.ts": ga, "./character/char_180_amgoat.ts": da, "./character/char_188_helage.ts": ma, "./character/char_193_frostl.ts": ha, "./character/char_194_leto.ts": za, "./character/char_197_poca.ts": pa, "./character/char_2012_typhon.ts": _a, "./character/char_2013_cerber.ts": ba, "./character/char_2014_nian.ts": ka, "./character/char_2015_dusk.ts": ya, "./character/char_2023_ling.ts": va, "./character/char_2024_chyue.ts": xa, "./character/char_2025_shu.ts": wa, "./character/char_2026_yu.ts": Sa, "./character/char_202_demkni.ts": Ca, "./character/char_204_platnm.ts": ja, "./character/char_206_gnosis.ts": Ta, "./character/char_213_mostma.ts": Ma, "./character/char_215_mantic.ts": Pa, "./character/char_218_cuttle.ts": Aa, "./character/char_219_meteo.ts": qa, "./character/char_220_grani.ts": $a, "./character/char_222_bpipe.ts": Da, "./character/char_225_haak.ts": Ha, "./character/char_242_otter.ts": Ua, "./character/char_245_cello.ts": Xa, "./character/char_248_mgllan.ts": Na, "./character/char_249_mlyss.ts": Ja, "./character/char_250_phatom.ts": Za, "./character/char_252_bibeak.ts": Ga, "./character/char_263_skadi.ts": La, "./character/char_264_f12yin.ts": Ia, "./character/char_274_astesi.ts": Fa, "./character/char_285_medic2.ts": Va, "./character/char_286_cast3.ts": Wa, "./character/char_291_aglina.ts": Ya, "./character/char_293_thorns.ts": Ka, "./character/char_300_phenxi.ts": Qa, "./character/char_306_leizi.ts": en, "./character/char_311_mudrok.ts": rn, "./character/char_322_lmlee.ts": tn, "./character/char_326_glacus.ts": an, "./character/char_332_archet.ts": nn, "./character/char_336_folivo.ts": on, "./character/char_338_iris.ts": sn, "./character/char_340_shwaz.ts": un, "./character/char_350_surtr.ts": ln, "./character/char_358_lisa.ts": fn, "./character/char_362_saga.ts": cn, "./character/char_376_therex.ts": gn, "./character/char_377_gdglow.ts": dn, "./character/char_391_rosmon.ts": mn, "./character/char_393_toledo.ts": bn, "./character/char_394_hadiya.ts": kn, "./character/char_4009_irene.ts": yn, "./character/char_400_weedy.ts": vn, "./character/char_4010_etlchi.ts": xn, "./character/char_4011_lessng.ts": wn, "./character/char_4013_kjera.ts": Sn, "./character/char_4016_kazema.ts": Cn, "./character/char_4023_rfalcn.ts": jn, "./character/char_4026_vulpis.ts": Tn, "./character/char_4027_heyak.ts": Mn, "./character/char_4031_liesel.ts": Pn, "./character/char_4037_demetr.ts": qn, "./character/char_4039_horn.ts": En, "./character/char_4042_lumen.ts": Rn, "./character/char_4045_heidi.ts": On, "./character/char_4046_ebnhlz.ts": $n, "./character/char_4048_doroth.ts": Dn, "./character/char_4051_akkord.ts": Hn, "./character/char_4052_surfer.ts": Un, "./character/char_4055_bgsnow.ts": Xn, "./character/char_4056_titi.ts": Bn, "./character/char_4058_pepe.ts": Nn, "./character/char_4064_mlynar.ts": Jn, "./character/char_4065_judge.ts": Zn, "./character/char_4066_highmo.ts": Gn, "./character/char_4071_peper.ts": Ln, "./character/char_4072_ironmn.ts": In, "./character/char_4079_haini.ts": Fn, "./character/char_4080_lin.ts": Vn, "./character/char_4081_warmy.ts": Wn, "./character/char_4082_qiubai.ts": Yn, "./character/char_4087_ines.ts": Kn, "./character/char_4088_hodrer.ts": Qn, "./character/char_4093_frston.ts": ei, "./character/char_4098_vvana.ts": ri, "./character/char_4100_caper.ts": ti, "./character/char_4102_threye.ts": ai, "./character/char_4110_delphn.ts": ni, "./character/char_4116_blkkgt.ts": ii, "./character/char_4117_ray.ts": oi, "./character/char_4119_wanqin.ts": si, "./character/char_4121_zuole.ts": ui, "./character/char_4122_grabds.ts": li, "./character/char_4123_ela.ts": fi, "./character/char_4124_iana.ts": ci, "./character/char_4125_rdoc.ts": di, "./character/char_4130_luton.ts": mi, "./character/char_4132_ascln.ts": hi, "./character/char_4133_logos.ts": zi, "./character/char_4134_cetsyr.ts": pi, "./character/char_4136_phonor.ts": _i, "./character/char_4137_udflow.ts": bi, "./character/char_4138_narant.ts": ki, "./character/char_4139_papyrs.ts": yi, "./character/char_4141_marcil.ts": vi, "./character/char_4142_laios.ts": xi, "./character/char_4143_sensi.ts": wi, "./character/char_4144_chilc.ts": Si, "./character/char_4145_ulpia.ts": Ci, "./character/char_4146_nymph.ts": ji, "./character/char_4148_philae.ts": Ti, "./character/char_4151_tinman.ts": Mi, "./character/char_4155_talr.ts": Pi, "./character/char_4162_cathy.ts": Ai, "./character/char_4163_rosesa.ts": qi, "./character/char_4164_tecno.ts": Ei, "./character/char_4165_ctrail.ts": Ri, "./character/char_4166_varkis.ts": Oi, "./character/char_416_zumama.ts": $i, "./character/char_4171_wulfen.ts": Di, "./character/char_4172_xingzh.ts": Hi, "./character/char_4173_nowell.ts": Ui, "./character/char_4177_brigid.ts": Xi, "./character/char_4178_alanna.ts": Bi, "./character/char_4179_monstr.ts": Ni, "./character/char_4182_oblvns.ts": Ji, "./character/char_4183_mortis.ts": Zi, "./character/char_4184_dolris.ts": Gi, "./character/char_4185_amoris.ts": Li, "./character/char_4186_tmoris.ts": Ii, "./character/char_4187_graceb.ts": Fi, "./character/char_4191_tippi.ts": Vi, "./character/char_4193_lemuen.ts": Wi, "./character/char_4194_rmixer.ts": Yi, "./character/char_4195_radian.ts": Ki, "./character/char_4196_reckpr.ts": Qi, "./character/char_4198_christ.ts": eo, "./character/char_4199_makiri.ts": ro, "./character/char_4202_haruka.ts": to, "./character/char_4203_kichi.ts": ao, "./character/char_4204_mantra.ts": no, "./character/char_4207_branch.ts": io, "./character/char_4208_wintim.ts": so, "./character/char_420_flamtl.ts": uo, "./character/char_4211_snhunt.ts": lo, "./character/char_4212_nasti.ts": fo, "./character/char_4213_skybx.ts": co, "./character/char_4214_cairn.ts": go, "./character/char_4217_makoto.ts": ho, "./character/char_4218_aigis.ts": zo, "./character/char_4219_yukari.ts": _o, "./character/char_421_crow.ts": bo, "./character/char_4220_kormr.ts": yo, "./character/char_4221_ju.ts": vo, "./character/char_4222_taraxa.ts": xo, "./character/char_4223_botany.ts": So, "./character/char_4224_turdus.ts": jo, "./character/char_4225_tanya.ts": To, "./character/char_4226_veen.ts": Mo, "./character/char_4227_gallus.ts": Po, "./character/char_4228_closur.ts": Ao, "./character/char_4229_aphris.ts": qo, "./character/char_4230_mcnist.ts": Ro, "./character/char_4231_clemnt.ts": $o, "./character/char_4232_hbound.ts": Ho, "./character/char_4234_pedro.ts": Uo, "./character/char_4235_thumpy.ts": Xo, "./character/char_4236_tmslot.ts": Zo, "./character/char_4237_jcinta.ts": Go, "./character/char_423_blemsh.ts": Lo, "./character/char_426_billro.ts": Io, "./character/char_427_vigil.ts": Fo, "./character/char_430_fartth.ts": Vo, "./character/char_437_mizuki.ts": Wo, "./character/char_445_wscoot.ts": Yo, "./character/char_450_necras.ts": Ko, "./character/char_456_ash.ts": Qo, "./character/char_457_blitz.ts": es, "./character/char_458_rfrost.ts": rs, "./character/char_459_tachak.ts": ts, "./character/char_469_indigo.ts": as, "./character/char_472_pasngr.ts": ns, "./character/char_474_glady.ts": is, "./character/char_479_sleach.ts": os, "./character/char_485_pallas.ts": ss, "./character/char_486_takila.ts": us, "./character/char_487_bobb.ts": ls, "./character/char_494_vendla.ts": fs, "./character/char_497_ctable.ts": ds, "./character/doushitalulamrfz.ts": ms, "./character/extratranslatemrfz.ts": hs, "./character/jiemrfz.ts": zs, "./character/kelisitengmrfz.ts": ps, "./character/minermrfz.ts": _s, "./character/muouwuzhemrfz.ts": bs, "./character/paxinghaomrfz.ts": ks, "./character/plot_keluxiermrfz.ts": ys, "./character/puruisaisimrfz.ts": vs, "./character/qiaojiakelifumrfz.ts": xs, "./character/shuangwangmrfz.ts": ws, "./character/talaidingzhenmrfz.ts": Ss, "./character/teleixisimrfz.ts": Cs, "./character/teleixiyamrfz.ts": js, "./character/xierdamrfz.ts": Ts, "./character/yizumikemrfz.ts": Ms }),
+    .../* @__PURE__ */ Object.assign({ "./character/acemrfz.ts": Kr, "./character/aiguozhemrfz.ts": Qr, "./character/baocunzhemrfz.ts": et, "./character/ceshimrfz.ts": rt, "./character/char_002_amiya.ts": tt, "./character/char_003_kalts.ts": at, "./character/char_010_chen.ts": nt, "./character/char_017_huang.ts": it, "./character/char_1001_amiya2.ts": ot, "./character/char_1012_skadi2.ts": st, "./character/char_1013_chen2.ts": ut, "./character/char_1014_nearl2.ts": lt, "./character/char_1015_aglna2.ts": ft, "./character/char_1016_agoat2.ts": ct, "./character/char_1019_siege2.ts": gt, "./character/char_1020_reed2.ts": dt, "./character/char_1022_flwr2.ts": mt, "./character/char_1023_ghost2.ts": ht, "./character/char_1024_hbisc2.ts": zt, "./character/char_1026_gvial2.ts": pt, "./character/char_1028_texas2.ts": _t, "./character/char_1029_yato2.ts": bt, "./character/char_102_texas.ts": kt, "./character/char_1030_noirc2.ts": yt, "./character/char_1031_slent2.ts": vt, "./character/char_1032_excu2.ts": xt, "./character/char_1033_swire2.ts": wt, "./character/char_1034_jesca2.ts": St, "./character/char_1035_wisdel.ts": Ct, "./character/char_1036_fang2.ts": jt, "./character/char_1037_amiya3.ts": Tt, "./character/char_1038_whitw2.ts": Mt, "./character/char_1039_thorn2.ts": Pt, "./character/char_103_angel.ts": At, "./character/char_1040_blaze2.ts": qt, "./character/char_1041_angel2.ts": Et, "./character/char_1042_phatm2.ts": Rt, "./character/char_1043_leizi2.ts": Ot, "./character/char_1044_hsgma2.ts": $t, "./character/char_1045_svash2.ts": Dt, "./character/char_1046_sbell2.ts": Ht, "./character/char_1047_halo2.ts": Ut, "./character/char_1048_orchd2.ts": Xt, "./character/char_1049_catap2.ts": Nt, "./character/char_1050_chen3.ts": Jt, "./character/char_1051_headb2.ts": Zt, "./character/char_1052_kalts2.ts": Gt, "./character/char_106_franka.ts": Lt, "./character/char_112_siege.ts": It, "./character/char_113_cqbw.ts": Ft, "./character/char_115_headbr.ts": Vt, "./character/char_122_beagle.ts": Wt, "./character/char_128_plosis.ts": Yt, "./character/char_129_bluep.ts": Kt, "./character/char_134_ifrit.ts": Qt, "./character/char_135_halo.ts": ea, "./character/char_136_hsguma.ts": ra, "./character/char_144_red.ts": ta, "./character/char_147_shining.ts": aa, "./character/char_148_nearl.ts": na, "./character/char_1502_crosly.ts": ia, "./character/char_151_myrtle.ts": oa, "./character/char_155_tiger.ts": sa, "./character/char_164_nightm.ts": la, "./character/char_166_skfire.ts": fa, "./character/char_172_svrash.ts": ca, "./character/char_173_slchan.ts": ga, "./character/char_174_slbell.ts": da, "./character/char_179_cgbird.ts": ma, "./character/char_180_amgoat.ts": ha, "./character/char_188_helage.ts": za, "./character/char_193_frostl.ts": pa, "./character/char_194_leto.ts": _a, "./character/char_197_poca.ts": ba, "./character/char_2012_typhon.ts": ka, "./character/char_2013_cerber.ts": ya, "./character/char_2014_nian.ts": va, "./character/char_2015_dusk.ts": xa, "./character/char_2023_ling.ts": wa, "./character/char_2024_chyue.ts": Sa, "./character/char_2025_shu.ts": Ca, "./character/char_2026_yu.ts": ja, "./character/char_202_demkni.ts": Ta, "./character/char_204_platnm.ts": Ma, "./character/char_206_gnosis.ts": Pa, "./character/char_213_mostma.ts": Aa, "./character/char_215_mantic.ts": qa, "./character/char_218_cuttle.ts": Ea, "./character/char_219_meteo.ts": Ra, "./character/char_220_grani.ts": Ha, "./character/char_222_bpipe.ts": Ua, "./character/char_225_haak.ts": Xa, "./character/char_242_otter.ts": Ba, "./character/char_245_cello.ts": Na, "./character/char_248_mgllan.ts": Za, "./character/char_249_mlyss.ts": Ga, "./character/char_250_phatom.ts": La, "./character/char_252_bibeak.ts": Ia, "./character/char_263_skadi.ts": Fa, "./character/char_264_f12yin.ts": Va, "./character/char_274_astesi.ts": Wa, "./character/char_285_medic2.ts": Ya, "./character/char_286_cast3.ts": Ka, "./character/char_291_aglina.ts": Qa, "./character/char_293_thorns.ts": en, "./character/char_300_phenxi.ts": rn, "./character/char_306_leizi.ts": tn, "./character/char_311_mudrok.ts": an, "./character/char_322_lmlee.ts": nn, "./character/char_326_glacus.ts": on, "./character/char_332_archet.ts": sn, "./character/char_336_folivo.ts": un, "./character/char_338_iris.ts": ln, "./character/char_340_shwaz.ts": fn, "./character/char_350_surtr.ts": cn, "./character/char_358_lisa.ts": gn, "./character/char_362_saga.ts": dn, "./character/char_376_therex.ts": mn, "./character/char_377_gdglow.ts": hn, "./character/char_391_rosmon.ts": zn, "./character/char_393_toledo.ts": yn, "./character/char_394_hadiya.ts": vn, "./character/char_4009_irene.ts": xn, "./character/char_400_weedy.ts": wn, "./character/char_4010_etlchi.ts": Sn, "./character/char_4011_lessng.ts": Cn, "./character/char_4013_kjera.ts": jn, "./character/char_4016_kazema.ts": Tn, "./character/char_4023_rfalcn.ts": Mn, "./character/char_4026_vulpis.ts": Pn, "./character/char_4027_heyak.ts": An, "./character/char_4031_liesel.ts": qn, "./character/char_4037_demetr.ts": Rn, "./character/char_4039_horn.ts": On, "./character/char_4042_lumen.ts": $n, "./character/char_4045_heidi.ts": Dn, "./character/char_4046_ebnhlz.ts": Hn, "./character/char_4048_doroth.ts": Un, "./character/char_4051_akkord.ts": Xn, "./character/char_4052_surfer.ts": Bn, "./character/char_4055_bgsnow.ts": Nn, "./character/char_4056_titi.ts": Jn, "./character/char_4058_pepe.ts": Zn, "./character/char_4064_mlynar.ts": Gn, "./character/char_4065_judge.ts": Ln, "./character/char_4066_highmo.ts": In, "./character/char_4071_peper.ts": Fn, "./character/char_4072_ironmn.ts": Vn, "./character/char_4079_haini.ts": Wn, "./character/char_4080_lin.ts": Yn, "./character/char_4081_warmy.ts": Kn, "./character/char_4082_qiubai.ts": Qn, "./character/char_4087_ines.ts": ei, "./character/char_4088_hodrer.ts": ri, "./character/char_4093_frston.ts": ti, "./character/char_4098_vvana.ts": ai, "./character/char_4100_caper.ts": ni, "./character/char_4102_threye.ts": ii, "./character/char_4110_delphn.ts": oi, "./character/char_4116_blkkgt.ts": si, "./character/char_4117_ray.ts": ui, "./character/char_4119_wanqin.ts": li, "./character/char_4121_zuole.ts": fi, "./character/char_4122_grabds.ts": ci, "./character/char_4123_ela.ts": gi, "./character/char_4124_iana.ts": di, "./character/char_4125_rdoc.ts": hi, "./character/char_4130_luton.ts": zi, "./character/char_4132_ascln.ts": pi, "./character/char_4133_logos.ts": _i, "./character/char_4134_cetsyr.ts": bi, "./character/char_4136_phonor.ts": ki, "./character/char_4137_udflow.ts": yi, "./character/char_4138_narant.ts": vi, "./character/char_4139_papyrs.ts": xi, "./character/char_4141_marcil.ts": wi, "./character/char_4142_laios.ts": Si, "./character/char_4143_sensi.ts": Ci, "./character/char_4144_chilc.ts": ji, "./character/char_4145_ulpia.ts": Ti, "./character/char_4146_nymph.ts": Mi, "./character/char_4148_philae.ts": Pi, "./character/char_4151_tinman.ts": Ai, "./character/char_4155_talr.ts": qi, "./character/char_4162_cathy.ts": Ei, "./character/char_4163_rosesa.ts": Ri, "./character/char_4164_tecno.ts": Oi, "./character/char_4165_ctrail.ts": $i, "./character/char_4166_varkis.ts": Di, "./character/char_416_zumama.ts": Hi, "./character/char_4171_wulfen.ts": Ui, "./character/char_4172_xingzh.ts": Xi, "./character/char_4173_nowell.ts": Bi, "./character/char_4177_brigid.ts": Ni, "./character/char_4178_alanna.ts": Ji, "./character/char_4179_monstr.ts": Zi, "./character/char_4182_oblvns.ts": Gi, "./character/char_4183_mortis.ts": Li, "./character/char_4184_dolris.ts": Ii, "./character/char_4185_amoris.ts": Fi, "./character/char_4186_tmoris.ts": Vi, "./character/char_4187_graceb.ts": Wi, "./character/char_4191_tippi.ts": Yi, "./character/char_4193_lemuen.ts": Ki, "./character/char_4194_rmixer.ts": Qi, "./character/char_4195_radian.ts": eo, "./character/char_4196_reckpr.ts": ro, "./character/char_4198_christ.ts": to, "./character/char_4199_makiri.ts": ao, "./character/char_4202_haruka.ts": no, "./character/char_4203_kichi.ts": io, "./character/char_4204_mantra.ts": oo, "./character/char_4207_branch.ts": so, "./character/char_4208_wintim.ts": lo, "./character/char_420_flamtl.ts": fo, "./character/char_4211_snhunt.ts": co, "./character/char_4212_nasti.ts": go, "./character/char_4213_skybx.ts": mo, "./character/char_4214_cairn.ts": ho, "./character/char_4217_makoto.ts": po, "./character/char_4218_aigis.ts": _o, "./character/char_4219_yukari.ts": ko, "./character/char_421_crow.ts": yo, "./character/char_4220_kormr.ts": xo, "./character/char_4221_ju.ts": wo, "./character/char_4222_taraxa.ts": So, "./character/char_4223_botany.ts": jo, "./character/char_4224_turdus.ts": Mo, "./character/char_4225_tanya.ts": Po, "./character/char_4226_veen.ts": Ao, "./character/char_4227_gallus.ts": qo, "./character/char_4228_closur.ts": Eo, "./character/char_4229_aphris.ts": Ro, "./character/char_4230_mcnist.ts": $o, "./character/char_4231_clemnt.ts": Ho, "./character/char_4232_hbound.ts": Xo, "./character/char_4234_pedro.ts": Bo, "./character/char_4235_thumpy.ts": No, "./character/char_4236_tmslot.ts": Lo, "./character/char_4237_jcinta.ts": Io, "./character/char_423_blemsh.ts": Fo, "./character/char_426_billro.ts": Vo, "./character/char_427_vigil.ts": Wo, "./character/char_430_fartth.ts": Yo, "./character/char_437_mizuki.ts": Ko, "./character/char_445_wscoot.ts": Qo, "./character/char_450_necras.ts": es, "./character/char_456_ash.ts": rs, "./character/char_457_blitz.ts": ts, "./character/char_458_rfrost.ts": as, "./character/char_459_tachak.ts": ns, "./character/char_469_indigo.ts": is, "./character/char_472_pasngr.ts": os, "./character/char_474_glady.ts": ss, "./character/char_479_sleach.ts": us, "./character/char_485_pallas.ts": ls, "./character/char_486_takila.ts": fs, "./character/char_487_bobb.ts": cs, "./character/char_494_vendla.ts": gs, "./character/char_497_ctable.ts": hs, "./character/doushitalulamrfz.ts": zs, "./character/extratranslatemrfz.ts": ps, "./character/jiemrfz.ts": _s, "./character/kelisitengmrfz.ts": bs, "./character/minermrfz.ts": ks, "./character/muouwuzhemrfz.ts": ys, "./character/paxinghaomrfz.ts": vs, "./character/plot_keluxiermrfz.ts": xs, "./character/puruisaisimrfz.ts": ws, "./character/qiaojiakelifumrfz.ts": Ss, "./character/shuangwangmrfz.ts": Cs, "./character/talaidingzhenmrfz.ts": js, "./character/teleixisimrfz.ts": Ts, "./character/teleixiyamrfz.ts": Ms, "./character/xierdamrfz.ts": Ps, "./character/yizumikemrfz.ts": As }),
     .../* @__PURE__ */ Object.assign({}),
-    .../* @__PURE__ */ Object.assign({ "./character/char_2027_wang/index.ts": Xs }),
+    .../* @__PURE__ */ Object.assign({ "./character/char_2027_wang/index.ts": Ns }),
     .../* @__PURE__ */ Object.assign({})
   };
   /**
@@ -42918,14 +42994,14 @@ class Me {
    * 共享技能放入 shared.ts。index.ts 为旧组装器入口，会被跳过。
    */
   cardModules = {
-    .../* @__PURE__ */ Object.assign({ "./card/DP27mrfz.ts": Bs, "./card/baitiemrfzcard1.ts": Ns, "./card/baitiemrfzcard2.ts": Js, "./card/baitiemrfzcard3.ts": Zs, "./card/cuoe_huanyoumrfzCard.ts": Gs, "./card/dazijimrfz.ts": Ls, "./card/jianzhumrfz.ts": Is, "./card/jingtouE1mrfz.ts": Fs, "./card/jingtouE2mrfz.ts": Vs, "./card/jingtouE3mrfz.ts": Ws, "./card/jingtouE4mrfz.ts": Ys, "./card/jingtouE5mrfz.ts": Ks, "./card/ksl_lulitongxinmrfz.ts": Qs, "./card/shadishoumrfz.ts": eu, "./card/shared.ts": ru, "./card/sjzx_zhuihuomrfz.ts": tu }),
+    .../* @__PURE__ */ Object.assign({ "./card/DP27mrfz.ts": Js, "./card/baitiemrfzcard1.ts": Zs, "./card/baitiemrfzcard2.ts": Gs, "./card/baitiemrfzcard3.ts": Ls, "./card/cuoe_huanyoumrfzCard.ts": Is, "./card/dazijimrfz.ts": Fs, "./card/jianzhumrfz.ts": Vs, "./card/jingtouE1mrfz.ts": Ws, "./card/jingtouE2mrfz.ts": Ys, "./card/jingtouE3mrfz.ts": Ks, "./card/jingtouE4mrfz.ts": Qs, "./card/jingtouE5mrfz.ts": eu, "./card/ksl_lulitongxinmrfz.ts": ru, "./card/shadishoumrfz.ts": tu, "./card/shared.ts": au, "./card/sjzx_zhuihuomrfz.ts": nu }),
     .../* @__PURE__ */ Object.assign({})
   };
   /**
    * 初始化
    */
   async init() {
-    this.pendingRun = Vr, await this.initCharacterPack(), await this.initCardPack(), or("translate", (t, e) => (e.endsWith("_prefix") && (t = this.setNamePrefix(t).name || t), t = P.colorize(t), t)), Ur({
+    this.pendingRun = Yr, await this.initCharacterPack(), await this.initCardPack(), sr("translate", (t, e) => (e.endsWith("_prefix") && (t = this.setNamePrefix(t).name || t), t = P.colorize(t), t)), Br({
       name: "whichWayPackManager_init",
       fn: async () => {
         for (const t of this.pendingRun)
@@ -42938,14 +43014,14 @@ class Me {
     this.register();
     const o = performance.now() - n, s = a + o;
     s > 300 && (console.groupCollapsed(`%c[WhichWay·packs] initCharacterPack ${s.toFixed(0)}ms`, "color:#e67e22;"), console.log(`  清单收集:  ${a.toFixed(0)}ms  (${e.length} 模块 / 单 chunk)`), console.log(`  register:  ${o.toFixed(0)}ms`), console.groupEnd());
-    for (const u of Me.CHARACTER_PACKS) {
+    for (const u of Pe.CHARACTER_PACKS) {
       d.characterPack[u] ??= {};
       let l = d.config.extension_WhichWay_compatibleMode === !0 ? `驶舰:${this.getPackTranslation(u)}` : "<img style='width:90px;height:25px;' src=" + d.assetURL + `extension/WhichWay/image/decoration/${this.getPackTranslation(u, 1)}.png>`;
       d.translate[`${u}_character_config`] = l;
     }
     if (!d.config.extension_WhichWay_characterPackDefaulted) {
       let u = !1;
-      for (const l of Me.CHARACTER_PACKS)
+      for (const l of Pe.CHARACTER_PACKS)
         d.config.characters.includes(l) || (d.config.characters.push(l), u = !0);
       if (u)
         try {
@@ -42955,22 +43031,24 @@ class Me {
         }
       c.saveConfig("extension_WhichWay_characterPackDefaulted", !0);
     }
-    or("character", (u, l) => {
-      Array.isArray(u) && (u = i.convertedCharacter(u)), u.img = te.getCharacterPortraitPath(l);
-      const f = au(u);
-      if (f.whichWay.reallyGroup ??= u.group, f.whichWay.charId ??= l, d.config.extension_WhichWay_characters_enable !== !1 && d.config.characters.includes(f.pack) ? (
+    sr("character", (u, l) => {
+      Array.isArray(u) && (u = i.convertedCharacter(u));
+      const f = te.characterPortraitExt[l] ? te.getCharacterPortraitPath(l) : "";
+      f ? u.img = f : console.warn(`[WhichWay] 干员 ${l} 没有找到立绘（image/illustration/character/${l}.png|jpg），本次不写 char.img`);
+      const g = iu(u);
+      if (g.whichWay.reallyGroup ??= u.group, g.whichWay.charId ??= l, d.config.extension_WhichWay_characters_enable !== !1 && d.config.characters.includes(g.pack) ? (
         // 整体“仅点将可用”（引擎扩展包 tab：forbidai_user_mode_extension_WhichWay）
         (d.config.forbidai_user_mode_extension_WhichWay === !0 || // 子包“仅点将可用”（forbidai_user_<子包>）
-        d.config[`forbidai_user_${f.pack}`] === !0) && (d.config.forbidai.includes(l) || d.config.forbidai.add(l))
-      ) : u.isUnseen = !0, d.characterPack[f.pack] || (console.warn(`[WhichWay] 武将 ${l} 声明了未注册的武将包「${f.pack}」，已按新包建表`), d.characterPack[f.pack] = {}), d.characterPack[f.pack][l] ??= u, u.designer ? f.whichWay.designer = Array.isArray(u.designer) ? u.designer : [u.designer] : f.whichWay.designer?.length || (f.whichWay.designer = Ir(u, !1, !0)), f.whichWay.designer?.length && (Ze[l] ??= [], Ze[l].push(...f.whichWay.designer.filter((m) => !Ze[l].includes(m)))), P.config("unityGroup"))
+        d.config[`forbidai_user_${g.pack}`] === !0) && (d.config.forbidai.includes(l) || d.config.forbidai.add(l))
+      ) : u.isUnseen = !0, d.characterPack[g.pack] || (console.warn(`[WhichWay] 武将 ${l} 声明了未注册的武将包「${g.pack}」，已按新包建表`), d.characterPack[g.pack] = {}), d.characterPack[g.pack][l] ??= u, u.designer ? g.whichWay.designer = Array.isArray(u.designer) ? u.designer : [u.designer] : g.whichWay.designer?.length || (g.whichWay.designer = Vr(u, !1, !0)), g.whichWay.designer?.length && (Ge[l] ??= [], Ge[l].push(...g.whichWay.designer.filter((z) => !Ge[l].includes(z)))), P.config("unityGroup"))
         u.group = "sjzx_group", d.translate.sjzx_group || (d.translate.sjzx_group = "泰拉"), d.group.includes("sjzx_group") || d.group.push("sjzx_group");
       else if (this._addedGroup === !1) {
         this._addedGroup = !0;
-        let m = Fr;
-        for (let z in m)
-          d.group.push(z), d.groupnature[z] = z, d.translate[z] = m[z].group, d.translate[z + "2"] = m[z].group;
+        let z = Wr;
+        for (let p in z)
+          d.group.push(p), d.groupnature[p] = p, d.translate[p] = z[p].group, d.translate[p + "2"] = z[p].group;
       }
-      return ir.addShcema(l), ir.initCharArknight(f), u;
+      return or.addShcema(l), or.initCharArknight(g), u;
     });
   }
   /**
@@ -42986,13 +43064,13 @@ class Me {
    * 无需修改任何文件。共享技能（多卡共用的）请放入 shared.ts。
    */
   async initCardPack() {
-    const t = performance.now(), e = this.collectCardModuleNames(), a = performance.now() - t, n = performance.now(), o = pe.getHooks("card"), s = pe.getHooks("cardSkill"), u = pe.getHooks("cardTranslate"), l = {}, f = {}, g = {};
-    for (const x of o) l[x.key] = x.obj;
-    for (const x of s) f[x.key] = x.obj;
-    for (const x of u) g[x.key] = x.obj;
-    for (const x of Object.keys(l)) {
-      const w = `${x}_info`;
-      g[w] === void 0 && (g[w] = g[x] ?? x);
+    const t = performance.now(), e = this.collectCardModuleNames(), a = performance.now() - t, n = performance.now(), o = _e.getHooks("card"), s = _e.getHooks("cardSkill"), u = _e.getHooks("cardTranslate"), l = {}, f = {}, g = {};
+    for (const w of o) l[w.key] = w.obj;
+    for (const w of s) f[w.key] = w.obj;
+    for (const w of u) g[w.key] = w.obj;
+    for (const w of Object.keys(l)) {
+      const x = `${w}_info`;
+      g[x] === void 0 && (g[x] = g[w] ?? w);
     }
     const m = { name: "mrfzcard", connect: !0, card: l, skill: f, translate: g, list: [] };
     d.translate.mrfzcard_card_config = "驶舰之向", d.config.extension_WhichWay_cardPackDefaulted || (d.config.cards.includes("mrfzcard") || (d.config.cards.push("mrfzcard"), c.saveConfig("cards", d.config.cards)), c.saveConfig("extension_WhichWay_cardPackDefaulted", !0)), await c.import("card", () => m);
@@ -43089,17 +43167,17 @@ class Me {
   }
   pendingRun = [];
   _addedGroup = !1;
-  _hooks = pe;
+  _hooks = _e;
 }
-const ar = new Me();
-await ar.init();
-window.whichWay.register("packManager", ar);
-Qe({
+const nr = new Pe();
+await nr.init();
+window.whichWay.register("packManager", nr);
+er({
   name: "whichWayPackManager_Dev",
   fn: () => {
-    window.whichWayPackManager = ar;
+    window.whichWayPackManager = nr;
   }
 });
 export {
-  ar as whichWayPackManager
+  nr as whichWayPackManager
 };

@@ -1,36 +1,36 @@
 import { get as p } from "noname";
-import "./file.js";
-const i = {
+import { whichWayFile as h } from "./file.js";
+const s = {
   bg: "../../../WhichWay/dynamicSkin/background/{xxx}.png",
   illust: "../../../WhichWay/dynamicSkin/illust/{xxx}/{yyy}/{zzz}"
 };
-function h(l) {
-  for (let _ in l) {
-    const t = l[_];
-    for (let r in t) {
-      const e = t[r];
-      if (e.background && (e.background = i.bg.replace("{xxx}", e.background)), e.name && (e.name = i.illust.replace("{xxx}", _).replace("{yyy}", r).replace("{zzz}", e.name)), e.alpha === void 0 && (e.alpha = !0), e.speed === void 0 && (e.speed = 1.5), Array.isArray(e.x) || (e.x = [0, 0]), Array.isArray(e.y) || (e.y = [0, 0]), e.scale === void 0 && (e.scale = 0), e.action === void 0 && (e.action = "Idle"), e.version === void 0 && (e.version = "3.8"), e.weighting === void 0) {
+function u(n) {
+  for (let r in n) {
+    const t = n[r];
+    for (let i in t) {
+      const e = t[i];
+      if (e.background && (e.background = s.bg.replace("{xxx}", e.background)), e.name && (e.name = s.illust.replace("{xxx}", r).replace("{yyy}", i).replace("{zzz}", e.name)), e.alpha === void 0 && (e.alpha = !0), e.speed === void 0 && (e.speed = 1.5), Array.isArray(e.x) || (e.x = [0, 0]), Array.isArray(e.y) || (e.y = [0, 0]), e.scale === void 0 && (e.scale = 0), e.action === void 0 && (e.action = "Idle"), e.version === void 0 && (e.version = "3.8"), e.weighting === void 0) {
         e.weighting = [8];
-        let n = Array.isArray(e.action) ? e.action : [e.action];
+        let c = Array.isArray(e.action) ? e.action : [e.action];
         if (e.action.length > 1) {
-          let a = 2 / (n.length - 1);
-          for (let c = 0; c < n.length - 1; c++)
+          let a = 2 / (c.length - 1);
+          for (let _ = 0; _ < c.length - 1; _++)
             e.weighting.push(a);
         } else e.weighting = [1];
       }
-      for (let n in e) {
-        const a = e[n];
+      for (let c in e) {
+        const a = e[c];
         if (p.is.object(a)) {
           if (window.whichWaySave.dycOtherEffect !== !0) {
-            delete l[_][r][n];
+            delete n[r][i][c];
             continue;
           }
-          if (a.name ? a.name = i.illust.replace("{xxx}", _).replace("{yyy}", r).replace("{zzz}", a.name) : a.name = e.name, a.alpha === void 0 && (a.alpha = !1), a.speed === void 0 && (a.speed = 1.5), Array.isArray(a.x) || (a.x = [0, 0]), Array.isArray(a.y) || (a.y = [0, 0]), a.scale === void 0 && (a.scale = 0), a.version === void 0 && (a.version = "3.8"), n === "gongji" && a.action === void 0 && (a.action = "Special"), n === "chuchang" && a.action === void 0 && (a.action = "Interact"), n === "teshu" && a.action === void 0 && (a.action = "Special"), a.weighting === void 0) {
+          if (a.name ? a.name = s.illust.replace("{xxx}", r).replace("{yyy}", i).replace("{zzz}", a.name) : a.name = e.name, a.alpha === void 0 && (a.alpha = !1), a.speed === void 0 && (a.speed = 1.5), Array.isArray(a.x) || (a.x = [0, 0]), Array.isArray(a.y) || (a.y = [0, 0]), a.scale === void 0 && (a.scale = 0), a.version === void 0 && (a.version = "3.8"), c === "gongji" && a.action === void 0 && (a.action = "Special"), c === "chuchang" && a.action === void 0 && (a.action = "Interact"), c === "teshu" && a.action === void 0 && (a.action = "Special"), a.weighting === void 0) {
             a.weighting = [8];
-            let c = Array.isArray(a.action) ? a.action : [a.action];
+            let _ = Array.isArray(a.action) ? a.action : [a.action];
             if (a.action.length > 1) {
-              let o = 2 / (c.length - 1);
-              for (let d = 0; d < c.length - 1; d++)
+              let o = 2 / (_.length - 1);
+              for (let d = 0; d < _.length - 1; d++)
                 a.weighting.push(o);
             } else a.weighting = [1];
           }
@@ -38,9 +38,9 @@ function h(l) {
       }
     }
   }
-  return l;
+  return n;
 }
-let s = {
+let l = {
   //近卫阿米娅
   char_1001_amiya2: {
     于万千宇宙之中: {
@@ -578,7 +578,7 @@ let s = {
       background: "场景_意塑"
     }
   },
-  // 年
+  // 年（`char_2014_nian`）：骨骼文件是 `dyn_illust_char_2014_nian2`，不是 `…_nian`
   char_2014_nian: {
     经典形象: {
       name: "dyn_illust_char_2014_nian2",
@@ -1279,7 +1279,24 @@ let s = {
       alpha: !0,
       background: "场景_再启"
     }
+  },
+  //剧情可露希尔 live来自商店看板娘 live_007_closre
+  plot_keluxiermrfz: {
+    经典形象: {
+      name: "live_007_closre",
+      x: [0, 0.56],
+      y: [0, -0.85],
+      scale: 0.43,
+      version: "3.8",
+      action: ["Introduce", "Idle"],
+      speed: 1,
+      unpackPremultipliedAlpha: !0,
+      alpha: !1,
+      background: "场景_执着"
+    }
   }
 };
-s = h(s);
-window.whichWaySave.dycSave.assets = s;
+l = u(l);
+for (const n in l)
+  l[n] && l[n].经典形象 && (l[n][h.getCharacterPortraitFile(n)] = l[n].经典形象);
+window.whichWaySave.dycSave.assets = l;
