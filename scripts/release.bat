@@ -43,6 +43,9 @@ REM               default: latest v* tag reachable from output branch
 REM    --push-only  skip build/commit/tag and only push refs that already
 REM               exist locally. Finish a release whose push failed
 REM               (network down, proxy off, ...) without rebuilding.
+REM               A release tag that was never created is recreated on the
+REM               output head first (a local-only object, no build needed),
+REM               so a run that died before step [3/6] can still be finished.
 REM    --no-zip   (dev) skip the local zip of the build tree
 REM    output|core|all  (pack) which package to zip; default all
 REM    --password (dev/pack/core) prompt once, hidden, and AES-256 encrypt
@@ -244,7 +247,23 @@ git rev-parse --verify --quiet "%BASELINE%" >nul 2>&1 || (
 	echo [ERROR] baseline "%BASELINE%" is not a valid tag/commit.
 	exit /b 1
 )
+
 echo [INFO] baseline = %BASELINE%   ^(output-core will contain the diff %BASELINE% -^> %VERSION%^)
+
+REM ---- warn when the explicit baseline is older than the previous release ----
+REM output-core is exactly "git diff BASELINE VERSION", so an older baseline
+REM drags every intermediate release into the incremental pack. Not an error (a
+REM deliberately wider baseline is legitimate), but easy to do by accident: v1.6
+REM was released with baseline v1.5 instead of v1.5.6, so its core pack carried
+REM 1853 files instead of 1749.
+if defined PUSHONLY goto :baseline_checked
+call :describe_output_tag
+if not defined DESCRIBE goto :baseline_checked
+if /i "!DESCRIBE!"=="%BASELINE%" goto :baseline_checked
+echo [WARN] %BASELINE% is not the newest release tag on output: !DESCRIBE!
+echo [WARN] the core pack diffs against %BASELINE%, so it will also carry every
+echo [WARN] change made since %BASELINE%. Pass !DESCRIBE! to pack only this release.
+:baseline_checked
 
 REM ---- early check: has this version been released already? ----
 REM Cheap remote probe BEFORE the (slow) build. A version that already exists
@@ -379,6 +398,13 @@ if defined PUSHONLY (
 		exit /b 1
 	)
 )
+
+REM ---- the release tag must resolve locally before it enters the ref list ----
+REM --push-only skips step [3/6], the only place that creates the tag, so a run
+REM that died before tagging would reach the atomic push with a tag name git
+REM cannot resolve ("src refspec ... does not match any") - and only after the
+REM confirm prompt. Recreate it here instead.
+call :ensure_release_tag || exit /b 1
 
 REM ---- leave the packages on disk: export the output / output-core trees ----
 echo [INFO] exporting local packages into the release folder...
@@ -1259,6 +1285,65 @@ set "DESCRIBE="
 git describe --tags --abbrev=0 --match=v* --exclude=*-core --exclude=*-dev output > "%DESCTMP%" 2>nul
 for /f "usebackq delims=" %%t in ("%DESCTMP%") do set DESCRIBE=%%t
 del "%DESCTMP%" 2>nul
+exit /b 0
+
+REM ============================================================
+REM ensure_release_tag - refs/tags/%VERSION% must exist before the push
+REM
+REM   A full run creates the tag in step [3/6] on the output merge commit.
+REM   --push-only deliberately skips build/commit/tag, so a run that died
+REM   before that step leaves the tag missing while %PUSHTAG% still names it -
+REM   the atomic push then aborts with the very unhelpful
+REM       error: src refspec v1.6.1 does not match any
+REM   after the confirm prompt. A tag is a purely local object, so there is
+REM   nothing to build: recreate it on the output head.
+REM
+REM   missing -> recreate on output (what step [3/6] would have done)
+REM   present -> keep it, but refuse when it does not point at output:
+REM              publishing both would ship a tag that disagrees with the
+REM              output branch (and GitHub would serve the wrong archive).
+REM ============================================================
+:ensure_release_tag
+set "TAGEXIST="
+for /f "delims=" %%x in ('git rev-parse --verify --quiet "refs/tags/%VERSION%" 2^>nul') do set "TAGEXIST=1"
+if not defined TAGEXIST goto :ensure_release_tag_create
+
+set "TAGAT="
+for /f "delims=" %%x in ('git rev-parse "refs/tags/%VERSION%"') do set "TAGAT=%%x"
+if /i "!TAGAT!"=="!MERGE!" exit /b 0
+echo.
+echo [ERROR] tag %VERSION% and refs/heads/output disagree:
+echo           tag    : !TAGAT!
+echo           output : !MERGE!
+echo [ERROR] Pushing both would publish a release whose tag points at a
+echo [ERROR] different commit than the branch it was built from.
+echo.
+echo   1^) The tag is stale - put it on output, then push again:
+echo          git tag -d %VERSION%
+echo          scripts\release.bat release --push-only %VERSION%
+echo   2^) output moved by mistake - re-run the full release as a NEW version:
+echo          scripts\release.bat release vX.Y.Z
+echo.
+exit /b 1
+
+:ensure_release_tag_create
+if not defined MERGE (
+	echo [ERROR] tag %VERSION% is missing and refs/heads/output could not be read,
+	echo         so it cannot be recreated automatically. Nothing was pushed.
+	exit /b 1
+)
+if not defined PUSHONLY (
+	echo [ERROR] tag %VERSION% is missing even though this is a full run - step [3/6]
+	echo         should have created it. Nothing was pushed.
+	exit /b 1
+)
+echo [WARN] tag %VERSION% does not exist locally - recreating it on output ^(!MERGE!^)
+git tag %VERSION% !MERGE!
+if errorlevel 1 (
+	echo [ERROR] git tag %VERSION% failed. Nothing was pushed.
+	exit /b 1
+)
+echo [INFO] tag %VERSION% -^> !MERGE!
 exit /b 0
 
 REM ============================================================

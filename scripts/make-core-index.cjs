@@ -29,6 +29,12 @@ function git(args) {
 const IGNORED_PREFIXES = ['node_modules/', '.github/'];
 const isIgnored = (p) => IGNORED_PREFIXES.some((pre) => p === pre.slice(0, -1) || p.startsWith(pre));
 
+// 强制清单：无论 diff 里有没有变化，都必须进增量包。
+// 入口 extension.js 是「装没装上 / 指向哪套 chunk」的唯一锚点：只改素材的
+// release（extension.js 内容没变）如果不在包里，核心包就成了一个没有入口的
+// 补丁（实测 v1.5.1 -> v1.5.2 的 ACMRT 条目数是 0），用户覆盖安装后无法确认生效。
+const ALWAYS_INCLUDE = ['extension.js'];
+
 // 1. 基线→目标的新增/变动文件（ACMRT：Added/Copied/Modified/Renamed/Type-changed），不含删除
 const changedRaw = git(['diff', '--name-only', '-z', '--diff-filter=ACMRT', baseline, target]);
 const changed = changedRaw.split('\0').filter((p) => p && !isIgnored(p));
@@ -53,15 +59,24 @@ for (const entry of treeRaw.split('\0')) {
 // 3. 组装 index-info 行
 const out = [];
 let missing = 0;
-for (const path of changed) {
+const emitted = new Set();
+const emit = (path) => {
 	const e = map.get(path);
-	if (!e) {
-		// 目标 tree 里没有（例如 rename 的旧路径），跳过
-		missing++;
-		continue;
-	}
+	if (!e) return false; // 目标 tree 里没有（例如 rename 的旧路径）
 	out.push(`${e.mode} ${e.sha} 0\t${path}`);
+	emitted.add(path);
+	return true;
+};
+for (const path of changed) {
+	if (!emit(path)) missing++;
+}
+
+// 4. 强制项：entry 文件永远带上（见文件头的 ALWAYS_INCLUDE 说明）
+let forced = 0;
+for (const path of ALWAYS_INCLUDE) {
+	if (emitted.has(path) || !map.has(path)) continue;
+	if (emit(path)) forced++;
 }
 
 fs.writeFileSync(outFile, out.join('\n') + '\n');
-console.log(`已生成 ${out.length} 个增量条目（${deleted.length} 个删除项不含在内，${missing} 个在目标中不存在已跳过）`);
+console.log(`已生成 ${out.length} 个增量条目（其中强制入口 ${forced} 个；${deleted.length} 个删除项不含在内，${missing} 个在目标中不存在已跳过）`);
