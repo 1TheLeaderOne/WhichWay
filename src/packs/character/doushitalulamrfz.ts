@@ -1,5 +1,5 @@
 import { lib, game, ui, get, ai, _status } from "noname";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { character, skill, translate, characterTitle, characterIntro, line } from "../hooks.ts";
 
 /**
  * 斗士塔露拉
@@ -524,6 +524,15 @@ translate({
 	fenfengmrfz_info: "准备阶段，你可以弃置你区域内一张牌，并明置一名没有明置手牌角色的一张手牌，然后若场上其他角色明置的手牌数不小于暗置的手牌数，你对一名有明置手牌角色造成一点火属性伤害。",
 	furimrfz: "覆日",
 	furimrfz_info: "结束阶段，你可以弃置场上所有明置的手牌并对因此弃牌的角色造成一点火属性伤害，若除你以外有角色没有因此弃牌，这些角色各对你造成一点伤害。",
+});
+
+line({
+	yinghuomrfz1:"斗士没有名字。你只要记得，在你最冷的时候，有人替你点过火。",
+	yinghuomrfz2:"一盏灯照不穿乌萨斯的夜——那就再点一盏。总有人要先亮起来。",
+	fenfengmrfz1:"萤火盖不过太阳，我知道。可太阳不照雪原的时候，总得有什么东西烧着。",
+	fenfengmrfz2:"烧死自己也无妨。灰烬落在哪里，哪里就会长出下一个春天。",
+	furimrfz1:"我们感染者怎么活、怎么死，只该我们自己决定——什么时候轮到你来定？",
+	furimrfz2:"被逼上山顶的风，越过去就是热风。你们最好祈祷，它永远不要越过来。"
 });
 
 characterTitle("doushitalulamrfz", "<font color=#be260e>烛火覆日</font>");
