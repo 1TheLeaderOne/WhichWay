@@ -14,7 +14,7 @@ import { confictedSkin } from "./confictedSkin.ts";
 import { mountPortrait } from "./avatarBackground.ts";
 import { DEFAULT_SKIN_NAME, flushSave, getPos, getPosData, loadPos, type PortraitPos } from "./portraitPos.js";
 import { togglePortraitDragging } from "./portraitDrag.js";
-import { adoptOwnSkins, applyAll, bindSkinSync, installSkinSync, normalize } from "./skinSync.ts";
+import { adoptOwnSkins, applyAll, bindSkinSync, installSkinSync, normalize, qhlySentinelMode } from "./skinSync.ts";
 
 /** v1.6 清缓存的标记位（与 arkidMigrated 同一套一次性开关写法，落库为 extension_WhichWay_ 前缀） */
 const SKIN_CACHE_CLEARED_KEY = "skinCacheClearedV16";
@@ -756,9 +756,10 @@ class WhichWaySkin {
 		const skinConfig = window.whichWaySave.skinConfig;
 		//千幻接管时 `lib.config.skin` 是 `{qhly_config:'yes'}` 这个哨兵对象，不是「武将 → 皮肤」映射：
 		//直接当映射用会读出 undefined，冲突检测就永远认为「本体没有选皮肤」。这里显式退化成空表。
+		//判据统一走 `qhlySentinelMode()`（它同时要求千幻此刻真的启用）：千幻被关掉之后哨兵会
+		//永久残留在存档里，只按形态判断会让冲突检测一直读到空表。
 		const skinRaw = lib.config.skin;
-		const skin: Record<string, any> =
-			skinRaw && typeof skinRaw === "object" && !Array.isArray(skinRaw) && (skinRaw as any).qhly_config === "yes" ? {} : skinRaw || {};
+		const skin: Record<string, any> = qhlySentinelMode() ? {} : skinRaw || {};
 		const qhly_skinset = lib.config.qhly_skinset?.skin || {};
 		const selected = this.confictedSkins.selected;
 

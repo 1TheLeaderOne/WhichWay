@@ -299,7 +299,234 @@ function foldRealHand(player, fakes) {
 	return restore;
 }
 
+/**
+ * `player.ext.chooseCard` / `player.ext.chooseCardTarget` 的判定区假牌 gaintag。
+ *
+ * 判定区的牌（`player.judging`）在本体的选牌流程里点不到（`Check.card` 只迭代手/装/特殊区），
+ * 所以这里把判定牌复制成假牌塞进特殊区（`s`）让玩家可点，并用这个 tag 在牌面上标注来源。
+ */
+const EXT_JUDGE_TAG = "ExtChooseCardTargetJudgeGainTag";
+
+/**
+ * 给「判定区假牌」注册显示名。
+ *
+ * 引擎会把 gaintag 的翻译渲染在牌角（`card.addGaintag` → `lib.translate[tag]`），
+ * 所以写「判定区」能让玩家一眼看出这张牌来自判定区、而不是手牌。
+ */
+function ensureExtJudgeTagTranslate() {
+	game.broadcastAll((tag: string) => {
+		lib.translate[tag] = "判定区";
+	}, EXT_JUDGE_TAG);
+}
+
+/**
+ * 判断 `position` 是否包含判定区。
+ * @param {string | undefined} position 形如 `"hej"` / `"j"` / `"h"`
+ */
+function positionHasJudge(position) {
+	return typeof position === "string" && position.includes("j");
+}
+
+/**
+ * 把判定区的牌复制成假牌放进特殊区，供 `ext.chooseCard` / `ext.chooseCardTarget` 选择。
+ *
+ * **为什么要复制而不是直接让玩家点判定牌**：本体的 `chooseCard` 只扫 `position` 里的
+ * `h` / `e` / `s`，判定区（`j`）压根不在迭代范围内，所以 `position: "hej"` 时判定牌永远点不到
+ * —— 这正是【焚风】选不到判定区牌的根因。
+ *
+ * 复制出来的假牌带 {@link EXT_JUDGE_TAG}，并且：
+ * - 用 `directgains` 放进特殊区（带 gaintag + glows），**不触发获得事件**，
+ *   也不会被 `countCards("h")` / 手牌上限 / 弃牌结算算作真牌；
+ * - 按假牌对象记映射，选择结束后由调用方把结果还原成**真实判定牌**。
+ *
+ * @param {Player} player 发起选择的角色
+ * @param {Card[]} judgeCards 判定区的牌
+ * @returns {{ fakes: Card[], fakeToReal: Map<Card, Card> }} 假牌数组与「假牌 → 真实判定牌」映射
+ */
+function createJudgeFakes(player, judgeCards) {
+	/** @type {Card[]} */
+	const fakes = [];
+	/** @type {Map<Card, Card>} */
+	const fakeToReal = new Map();
+	if (!judgeCards.length) return { fakes, fakeToReal };
+
+	const created = game.createFakeCards(judgeCards);
+	created.forEach((fake, index) => {
+		//`createFakeCards` 用源牌 `cardid` 作 `_cardid`，而 `deleteFakeCards` 只认 `_cardid` 为真的假牌；
+		//判定牌一定有 cardid，这里只是兜底，避免残留
+		if (!fake._cardid) fake._cardid = `whichWayJudgeFake_${index}_${get.id()}`;
+		fakeToReal.set(fake, judgeCards[index]);
+		fakes.push(fake);
+	});
+	//directgains(cards, broadcast, gaintag)：进特殊区 + 打 tag + 加 glows
+	player.directgains(fakes, null, EXT_JUDGE_TAG);
+	return { fakes, fakeToReal };
+}
+
+/**
+ * 从原生 `result.cards` 里把「判定区假牌」换回真实判定牌。
+ *
+ * 其余来源（手牌 / 装备区 / 特殊区）的牌原样保留 —— 它们本来就是真实牌。
+ *
+ * @param {Card[]} cards 引擎返回的选中牌
+ * @param {Map<Card, Card>} fakeToReal 假牌 → 真实判定牌
+ * @returns {Card[]} 替换后的真实牌数组
+ */
+function restoreJudgeCards(cards, fakeToReal) {
+	return (cards || []).map(card => fakeToReal.get(card) || card);
+}
+
+/**
+ * 把调用方参数透传给内层引擎事件。
+ *
+ * 只搬「引擎认识」的字段，避免把 `position`（这里要自己改写）、`glow_result`（自己处理）等
+ * 与本函数语义冲突的键传下去。
+ */
+function pickPassthrough(event, keys) {
+	/** @type {Record<string, any>} */
+	const params = {};
+	for (const key of keys) {
+		if (event[key] != null) params[key] = event[key];
+	}
+	return params;
+}
+
 export const ContentExt = {
+	/**
+	 * 选牌（`player.ext.chooseCard()` 的 content）：支持判定区。
+	 *
+	 * 流程：
+	 * 1. 从 `position` 里剥掉 `j`（判定牌不能交给引擎直接迭代），把剩下部分交给内层 `chooseCard`；
+	 * 2. 若原 `position` 含 `j` 且判定区有牌，复制成假牌放进特殊区，并把 `s` 加进内层 `position`，
+	 *    同时把内层 `filterCard` 包一层：**允许本次假牌** 或 原本的 `filterCard` 通过；
+	 * 3. 选完后把假牌换回真实判定牌，写进 `result.cards` 与 `result.links`；
+	 * 4. finally 里删除假牌。
+	 *
+	 * @type { ContentFuncByAll[] }
+	 */
+	extChooseCard: [
+		async function (event, trigger, player) {
+			event.result = { bool: false, cards: [], targets: [], buttons: [], links: [], confirm: "ok" };
+			const originPosition = typeof event.position === "string" ? event.position : "h";
+			const judgeCards = positionHasJudge(originPosition) ? player.getCards("j") : [];
+			/** @type {Card[]} */
+			let fakes = [];
+			/** @type {Map<Card, Card>} */
+			let fakeToReal = new Map();
+			try {
+				if (judgeCards.length) {
+					ensureExtJudgeTagTranslate();
+					const created = createJudgeFakes(player, judgeCards);
+					fakes = created.fakes;
+					fakeToReal = created.fakeToReal;
+				}
+
+				//内层 position：剥掉 j；有假牌时补上 s（特殊区）
+				let innerPosition = originPosition.replace(/j/g, "");
+				if (fakes.length && !innerPosition.includes("s")) innerPosition += "s";
+				if (!innerPosition) innerPosition = fakes.length ? "s" : "h";
+
+				/** @type {Record<string, any>} */
+				const params = { position: innerPosition };
+				//透传其余 chooseCard 参数
+				Object.assign(params, pickPassthrough(event, PASSTHROUGH_KEYS));
+				const userFilter = event.filterCard;
+				if (fakes.length) {
+					const fakeSet = new Set(fakes);
+					params.filterCard = (card, current, currentEvent) => {
+						if (fakeSet.has(card)) return true;
+						return userFilter ? userFilter(card, current, currentEvent) : true;
+					};
+				} else if (userFilter != null) {
+					params.filterCard = userFilter;
+				}
+
+				const inner = (await player.chooseCard(params).forResult()) || {};
+				const realCards = restoreJudgeCards(inner.cards || [], fakeToReal);
+				event.result = {
+					...inner,
+					bool: inner.bool ?? false,
+					cards: realCards,
+					links: realCards,
+				};
+				if (event.glow_result) realCards.forEach(card => card?.classList?.add("glow"));
+			} finally {
+				if (fakes.length) game.deleteFakeCards(fakes);
+			}
+		},
+	],
+
+	/**
+	 * 选牌 + 选目标（`player.ext.chooseCardTarget()` 的 content）：支持判定区。
+	 *
+	 * 与 `extChooseCard` 完全同构，区别只有两点：
+	 * - 底层委托本体 `chooseCardTarget`（因此目标侧的 `filterTarget` / `selectTarget` / `ai1` / `ai2`
+	 *   等语义全部沿用引擎实现）；
+	 * - 结果里额外保留 `result.targets`。
+	 *
+	 * ⚠️ `filterTarget` 收到的是「内层选中的那张牌」，若是判定假牌会先换成真实判定牌，
+	 * 这样调用方写的 `filterTarget(card, …)` 拿到的始终是真实牌。
+	 *
+	 * @type { ContentFuncByAll[] }
+	 */
+	extChooseCardTarget: [
+		async function (event, trigger, player) {
+			event.result = { bool: false, cards: [], targets: [], links: [], confirm: "ok" };
+			const originPosition = typeof event.position === "string" ? event.position : "h";
+			const judgeCards = positionHasJudge(originPosition) ? player.getCards("j") : [];
+			/** @type {Card[]} */
+			let fakes = [];
+			/** @type {Map<Card, Card>} */
+			let fakeToReal = new Map();
+			try {
+				if (judgeCards.length) {
+					ensureExtJudgeTagTranslate();
+					const created = createJudgeFakes(player, judgeCards);
+					fakes = created.fakes;
+					fakeToReal = created.fakeToReal;
+				}
+
+				let innerPosition = originPosition.replace(/j/g, "");
+				if (fakes.length && !innerPosition.includes("s")) innerPosition += "s";
+				if (!innerPosition) innerPosition = fakes.length ? "s" : "h";
+
+				/** @type {Record<string, any>} */
+				const params = { position: innerPosition };
+				Object.assign(params, pickPassthrough(event, TARGET_PASSTHROUGH_KEYS));
+				const userFilterTarget = event.filterTarget;
+				if (userFilterTarget != null) {
+					params.filterTarget = (card, current, target) => {
+						const real = fakeToReal.get(card) || card;
+						return userFilterTarget(real, current, target);
+					};
+				}
+				const userFilterCard = event.filterCard;
+				if (fakes.length) {
+					const fakeSet = new Set(fakes);
+					params.filterCard = (card, current, currentEvent) => {
+						if (fakeSet.has(card)) return true;
+						return userFilterCard ? userFilterCard(card, current, currentEvent) : true;
+					};
+				} else if (userFilterCard != null) {
+					params.filterCard = userFilterCard;
+				}
+
+				const inner = (await player.chooseCardTarget(params).forResult()) || {};
+				const realCards = restoreJudgeCards(inner.cards || [], fakeToReal);
+				event.result = {
+					...inner,
+					bool: inner.bool ?? false,
+					cards: realCards,
+					targets: inner.targets || [],
+					links: realCards,
+				};
+				if (event.glow_result) realCards.forEach(card => card?.classList?.add("glow"));
+			} finally {
+				if (fakes.length) game.deleteFakeCards(fakes);
+			}
+		},
+	],
+
 	/**
 	 * 假牌选牌（`player.chooseFakeCard()` 的 content）。
 	 *

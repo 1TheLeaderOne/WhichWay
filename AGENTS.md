@@ -196,7 +196,24 @@ translate({ beiluoneimrfz: "贝洛内", huozhimrfz: "货殖", huozhimrfz_info: "
 skill({ huozhimrfz: { /* lib.skill 标准技能对象 */ } });
 ```
 
-3. 其余可用的注册函数：`characterReplace`（角色替换）、`dynamicTranslate`（动态翻译）。
+3. 其余可用的注册函数：`characterReplace`（角色替换）、`dynamicTranslate`（动态翻译）、`line`（台词）。
+
+#### `line()`：为配音添加台词
+
+引擎的台词约定是「`lib.translate` 里以 `#音频地址` 为键」（见根目录 `docs/audio-guide.md` 的「台词配对」）：技能音频地址就是技能名，`audio: true` 对应 `#技能名`、`audio: 2` 对应 `#技能名1`/`#技能名2`。`line()` 就是这条约定的语法糖，内部转交给 `translate()` 队列，因此与普通翻译共用同一套流程（`pendingRun` 缓冲、`onBeforeInit` 落库、`colorize` 预处理、重复键报错）。
+
+```ts
+import { line } from "../hooks.ts";
+
+line("lanshimrfz", "这一册册史书构成了人们对过往的认知……"); // → lib.translate["#lanshimrfz"]
+line({ lushimrfz: "执笔者再怎么追求公正……" });                  // 批量，同样自动补 #
+line("#lanshimrfz1", "……多段配音时自己写编号", false);           // 第三个参数 false ⇒ 键原样生效
+line({ "#lushimrfz1": "……", "#lushimrfz2": "……" }, false);      // 批量 + 不自动补 #
+```
+
+- 形态：`line(技能名, 台词, autoPrefix?)` 或 `line({ 技能名: 台词 }, autoPrefix?)`。
+- `autoPrefix` 缺省 `true`，自动补 `#`；已带 `#` 的键不会重复补齐。传 `false` 时第一个参数**原样**当作 `lib.translate` 的键，用于带编号（`#技能名1`）或带音频路径（`#ext:WhichWay/audio/skill/xxx`）的场合。
+- 同一键重复注册会直接抛错（而不是静默覆盖）：一个音频地址只能对应一条台词，要先 `audio: 2` 这类多段配音，请用带编号的键且 `autoPrefix` 传 `false`。
 
 `WhichWayPackManager`（`src/packs/index.ts`）用 `import.meta.glob("./character/*mrfz.{ts,js}")` 与 `import.meta.glob("./character/*mrfz/index.{ts,js}")`（`card/` 同构）在**构建期**确定模块清单：新增干员/卡牌仍然是「丢文件即可」，无需改任何代码，但必须重新 `build`。这些模块在 `packs/index.ts` 被 import 时（即 `packs(新)` 阶段）全部求值，并被 rollup 合并进**单个 chunk**（`chunks/packs-*.js`），因此启动期不再有 267 次模块请求。
 

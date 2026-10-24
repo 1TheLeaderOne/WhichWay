@@ -22,6 +22,12 @@
  * }
  */
 export const groupData = {
+	ReunionMovement:{
+		group:"整",
+		sort:"剧情-整合运动",
+		reallyGroup:"ReunionMovement",
+		logo:"ReunionMovement",
+	},
 	persona:{
 		group:"女",
 		sort:"联动-女神异闻录",

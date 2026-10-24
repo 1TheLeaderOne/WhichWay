@@ -40,6 +40,83 @@ class WhichWayPackHooks {
 		return this._hooks[hookName] || [];
 	}
 
+	// ===== 台词钩子（line） =====
+	/**
+	 * 为配音添加台词。
+	 *
+	 * 引擎的约定是「在 `lib.translate` 里以 `#音频地址` 为键存台词」（见 `docs/audio-guide.md`
+	 * 的「台词配对」一节）；技能音频的地址就是技能名，所以 `audio: 2` 的技能对应
+	 * `#技能名1`、`#技能名2` 两个键，`audio: true` 对应 `#技能名`。
+	 *
+	 * 本钩子因此是 `translate()` 的语法糖：把「技能名」拼上 `#` 后交给 translate 队列，
+	 * 从而与普通翻译共用同一套流程——缓冲进 `pendingRun`、由 `onBeforeInit` 统一落库、
+	 * 重复键报错、`colorize` 预处理。
+	 *
+	 * 两种调用形态（`autoPrefix` 缺省均为 `true`）：
+	 * - `line(技能名, 台词, autoPrefix?)`：为单个技能加台词
+	 * - `line({ 技能名: 台词, ... }, autoPrefix?)`：批量加台词
+	 *
+	 * `autoPrefix` 为 `true` 时自动补 `#`：`line("lanshimrfz", "……")` 落库为
+	 * `lib.translate["#lanshimrfz"]`。为 `false` 时第一个参数原样当作键，便于自行书写
+	 * 带编号或带音频路径的键（如 `"#lanshimrfz1"`、`"#ext:WhichWay/audio/skill/xxx"`）。
+	 * 传入的键已带 `#` 时不会重复补齐。
+	 */
+	public line = (skillOrLines: string | Record<string, string>, lineOrAutoPrefix?: string | boolean, autoPrefix?: boolean): void => {
+		const register = (skill: string, content: string, auto: boolean): void => {
+			if (typeof skill !== "string" || !skill) {
+				throw new Error(`[line] Skill name must be a non-empty string, got ${typeof skill === "string" ? JSON.stringify(skill) : typeof skill}`);
+			}
+			if (typeof content !== "string") {
+				throw new Error(`[line] Line for skill "${skill}" must be string, got ${typeof content}`);
+			}
+			const key = auto && !skill.startsWith("#") ? `#${skill}` : skill;
+			this._assertLineUnique(key);
+			this.translate(key, content);
+		};
+
+		// 批量注册: line({ skill: line, ... }, autoPrefix?)
+		if (typeof skillOrLines === "object" && skillOrLines !== null && !Array.isArray(skillOrLines)) {
+			if (lineOrAutoPrefix !== undefined && typeof lineOrAutoPrefix !== "boolean") {
+				throw new Error(`[line] Second argument of batch form must be boolean (autoPrefix), got ${typeof lineOrAutoPrefix}`);
+			}
+			const auto = lineOrAutoPrefix ?? true;
+			for (const skill in skillOrLines) {
+				if (Object.prototype.hasOwnProperty.call(skillOrLines, skill)) {
+					register(skill, skillOrLines[skill], auto);
+				}
+			}
+			return;
+		}
+
+		// 单条注册: line(skill, line, autoPrefix?)
+		if (typeof skillOrLines === "string") {
+			if (typeof lineOrAutoPrefix !== "string") {
+				throw new Error(`[line] Line for skill "${skillOrLines}" must be string, got ${typeof lineOrAutoPrefix}`);
+			}
+			register(skillOrLines, lineOrAutoPrefix, autoPrefix ?? true);
+			return;
+		}
+
+		throw new Error(`[line] Invalid invocation. Expected:\n  line("skill", "台词", autoPrefix?)\n  line({ skill1: "台词1", skill2: "台词2" }, autoPrefix?)`);
+	};
+
+	/**
+	 * 台词的重复校验：与 `_runHooks` 的「禁止覆盖已有属性」保持同一口径，
+	 * 但提前到注册时抛出，避免错误堆栈指向 pendingRun 的落库现场。
+	 */
+	private _assertLineUnique(key: string): void {
+		const duplicated =
+			(this._hooks["translate"] ?? []).some(hook => hook.key === key) ||
+			//@ts-ignore lib.translate 为引擎字典，索引签名未覆盖任意字符串键
+			lib.translate?.[key] !== undefined;
+		if (duplicated) {
+			throw new Error(
+				`[line] Duplicate line key "${key}". 同一配音地址只能有一条台词；` +
+					`若同一技能要配多条，请用带编号的键，如 line({ ${key.replace(/^#/, "")}1: "…", ${key.replace(/^#/, "")}2: "…" })。`
+			);
+		}
+	}
+
 	// ===== 新增：注册 execute 预处理函数 =====
 	/**
 	 * 为指定 hook 注册预处理函数
@@ -309,6 +386,10 @@ class WhichWayPackHooks {
 		key: string | Record<string, string>,
 		content?: string
 	) => void;
+
+	// ===== 台词钩子声明 =====
+	//`line` 有真实实现（见上方 public line），这里不能用 declare 重声明，否则
+	//TypeScript 会报「标识符重复」；两种调用形态的类型由该属性的参数类型（联合类型）覆盖。
 }
 
 export const packHooks = new WhichWayPackHooks();
@@ -324,6 +405,7 @@ export const {
 	card,
 	cardSkill,
 	cardTranslate,
+	line,
 	pendingRun,
 	registerExecute
 } = packHooks;

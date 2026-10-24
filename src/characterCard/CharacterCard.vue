@@ -84,7 +84,7 @@
 		<div v-if="dycShown" class="charDycWrapper">
 			<div ref="charDycEl" class="charDyc"></div>
 		</div>
-		<div v-else class="charImageWrapper">
+		<div v-else class="charImageWrapper" :class="{ 'charImageWrapper-plot': isPlotChar }">
 			<div ref="charImageEl" class="charImage" :style="charImageStyle"></div>
 		</div>
 		<!-- 动皮开关：与两个容器平级。放进 charDycWrapper 里会在关闭动皮时随它一起被卸载，按钮就没机会再打开了 -->
@@ -238,6 +238,15 @@ const charImageStyle = computed(() => {
 	const url = skinPath.value;
 	return { backgroundImage: url.startsWith("url") ? url : `url("${url}")` };
 });
+
+/**
+ * 是否「驶舰之向角色，但不是明日方舟实装干员」（剧情干员 `plot_*`、自创干员 `*mrfz` 等）。
+ *
+ * 这类角色的立绘是社区/自制素材，**规格完全没统一**（长宽比从 1:2 到 1:1 都有、四周还常带底色），
+ * 直接按实装干员那套 `.charImage`（50% 宽 + `contain`）画出来会比动皮大一圈、边缘也是硬切。
+ * 为真时改用与动皮完全相同的几何与遮罩（见 `.charImageWrapper-plot` 的样式注释）。
+ */
+const isPlotChar = computed(() => window.whichWaySave.hasChar(props.name) && !whichWayArknight.isArknght(props.name));
 
 /** 动皮：该皮肤有没有动皮数据、以及是否已开启 */
 const hasDynamicSkin = ref(false);
@@ -737,6 +746,31 @@ const LLM_icon = computed(() => {
 	background-size: contain;
 	background-position: center center;
 	background-repeat: no-repeat;
+}
+
+/* 非实装干员（剧情 / 自创）：几何与遮罩**完全照搬 `.charDyc`**。
+   理由：这类立绘是自制素材，长宽比与四周留白都不统一，实装干员那套「50% 宽 + contain」
+   画出来会比动皮明显大一圈，而且边缘是硬切（本色/白底直接露在背板上）。
+   这里把它收进动皮的框（30% 宽、right:42%、2/3 比例）并套同一个 radial-gradient：
+   `contain` 保证整张图不裁掉（自制素材主体位置不固定，用 cover 会切头切脚），
+   渐变遮罩把四边吃掉，两张皮在武将卡里就长得一样了。 */
+.charImageWrapper-plot {
+	width: 30%;
+	right: 42%;
+}
+
+.charImageWrapper-plot > .charImage {
+	width: 100%;
+	/* 高度交给 aspect-ratio，与 `.charDyc` 的 2/3 对齐；父容器是 90% 高，这里不能再写 100% */
+	height: auto;
+	aspect-ratio: 2/3;
+	background-size: contain;
+	mask-image: radial-gradient(circle at center, rgba(255, 255, 255, 1) 60%, rgba(255, 255, 255, 0) 80%);
+	mask-repeat: no-repeat;
+	mask-size: 100% 100%;
+	-webkit-mask-image: radial-gradient(circle at center, rgba(255, 255, 255, 1) 60%, rgba(255, 255, 255, 0) 80%);
+	-webkit-mask-repeat: no-repeat;
+	-webkit-mask-size: 100% 100%;
 }
 
 /* 动皮开关：从 charImageWrapper 里提到根容器下（与两个立绘/动皮容器平级），

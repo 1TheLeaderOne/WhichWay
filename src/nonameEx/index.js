@@ -45,6 +45,34 @@ onBeforeContent({
 		nonameEx["ContentExt"] = ContentExt;
 		Object.assign(lib.element.content, ContentExt);
 
+		/**
+		 * 挂载 `player.ext`（增强版选牌接口，支持判定区）。
+		 *
+		 * ⚠️ 不能只靠 `patchPrototypeWhichWay`：它只注入**函数**（`typeof descriptor.value !== "function"`
+		 * 直接 continue），而 `ext` 是个对象，会被跳过。所以这里单独 define 到 Player 原型上
+		 * （用 getter 让每个实例拿到同一个对象，避免每个玩家各建一份）。
+		 */
+		if (!("ext" in lib.element.player)) {
+			Object.defineProperty(lib.element.player, "ext", {
+				enumerable: false,
+				configurable: true,
+				get() {
+					//懒挂载：首次访问时把 ext 里的方法绑定到当前实例上，
+					//这样 `player.ext.chooseCard(...)` 内部的 `this` 就是该玩家
+					if (!this._whichWayExtCache) {
+						Object.defineProperty(this, "_whichWayExtCache", {
+							enumerable: false,
+							configurable: true,
+							writable: true,
+							value: buildPlayerExt(this),
+						});
+					}
+					return this._whichWayExtCache;
+				},
+			});
+			nonameEx["PlayerExtChooser"] = { mounted: true };
+		}
+
 		// nonameEx["CardExt"] = CardExt.prototype;
 		// Object.assign(lib.element.card, nonameEx["CardExt"]);
 
@@ -54,6 +82,46 @@ onBeforeContent({
 		await import("./custom/override.js");
 	},
 });
+
+/**
+ * 为一个玩家实例构建 `player.ext`（增强版选牌接口）。
+ *
+ * 为什么按实例构建而不是挂共享对象：`player.ext.chooseCard(...)` 里的 `this` 必须是
+ * 发起选择的那个玩家（内部要 `this.getCards("j")`、`this.chooseCard(...)`），
+ * 共享对象会让 `this` 指向共享对象自己。
+ *
+ * @param {any} player 玩家实例
+ * @returns {{ chooseCardTarget: Function, chooseCard: Function }}
+ */
+function buildPlayerExt(player) {
+	/**
+	 * 选牌 + 选目标（支持判定区）。
+	 * @param {Record<string, any>} [params] 与本体 `chooseCardTarget` 相同
+	 */
+	const chooseCardTarget = (params = {}) => {
+		const next = game.createEvent("extChooseCardTarget");
+		next.player = player;
+		Object.assign(next, params);
+		next.setContent("extChooseCardTarget");
+		next._args = [params];
+		return next;
+	};
+
+	/**
+	 * 选牌（支持判定区），不选目标。
+	 * @param {Record<string, any>} [params] 与本体 `chooseCard` 相同
+	 */
+	const chooseCard = (params = {}) => {
+		const next = game.createEvent("extChooseCard");
+		next.player = player;
+		Object.assign(next, params);
+		next.setContent("extChooseCard");
+		next._args = [params];
+		return next;
+	};
+
+	return { chooseCardTarget, chooseCard };
+}
 
 function patchPrototypeWhichWay(ExtensionClass, NativePrototype, BasePrototype) {
 	BasePrototype = BasePrototype || Object.getPrototypeOf(NativePrototype);

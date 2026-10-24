@@ -1,5 +1,18 @@
 # 瑰丽理想 WhichWay 更新日志
 
+## 2026-10-24
+
+### 新增：武将包钩子 `line()`，用于给配音添加台词
+
+- **背景**：引擎的台词约定是「`lib.translate` 里以 `#音频地址` 为键」（`docs/audio-guide.md` 的「台词配对」）。技能音频地址就是技能名，所以 `audio: 2` 的技能要写 `#技能名1`、`#技能名2` 两条，`audio: true` 写 `#技能名`。此前只能借 `translate()` 手写 `#` 前缀，容易漏、也看不出「这是台词」。
+- **实现**（`src/packs/hooks.ts`）：新增 `line()`，是 `translate()` 的语法糖——拼好 `#` 前缀后直接 `this.translate(key, content)`，因此**完全复用**既有链路：缓冲进 `pendingRun`、`onBeforeInit` 统一落库、`translate` 的 `colorize` 预处理、`_runHooks` 的重复键拦截。
+  - `line(技能名, 台词, autoPrefix?)`：单条；
+  - `line({ 技能名: 台词, ... }, autoPrefix?)`：批量；
+  - `autoPrefix` 缺省 `true` 自动补 `#`；传 `false` 时第一个参数**原样**当键（用于 `#技能名1` 这种多段配音、或 `#ext:WhichWay/audio/skill/xxx` 这种带路径的场合）；传入的键本身已带 `#` 时不重复补。
+  - 新增 `_assertLineUnique()`：注册时即检查 `translate` 队列与已落库的 `lib.translate`，重复键直接抛错（与 `_runHooks` 的「禁止覆盖」同口径，但把错误提前到调用现场）。参数带校验：非空字符串技能名、字符串台词、批量第二参必须是布尔。
+- **不再需要**手写 `"#lanshimrfz1": "…"` 这类键；`jiemrfz.ts` 等既有写法保持不变即可（两种方式并存，`line` 只是更明确的入口）。
+- 验证：`npx tsc --noEmit`（本项目 tsconfig）对 `packs/hooks.ts` 0 报错、`npx eslint src/packs/hooks.ts` 0 报错、`WW_SKIP_STATIC_COPY=1 npx vite build` 通过（产物 `chunks/packs.js` 内已可见 `[line]` 报错文案）。另用 esbuild + stub 的 `noname` 模块跑了 5 个正常用例与 5 个错误用例，落库结果符合 `#技能名` 约定。**实机未验证**：进游戏看技能悬停面板的「技能台词」段落是否正常显示。
+
 ## 2026-10-22
 
 ### 修复：千幻聆音读不到驶舰之向的皮肤（皮肤列表为空）

@@ -167,7 +167,56 @@ declare global {
 }
 
 declare module "@/library/element" {
+	/**
+	 * `player.ext`：增强版选牌接口。
+	 *
+	 * 与本体 `chooseCard` / `chooseCardTarget` 的唯一区别是**支持判定区（`j`）**：
+	 * 本体那套只迭代手牌 / 装备区 / 特殊区，判定区的牌（`player.judging`）点不到，
+	 * 所以 `position: "hej"` 在需要选判定牌时是失效的。
+	 *
+	 * `player.ext` 在 `position` 含 `j` 且判定区有牌时，把判定牌复制成假牌放进特殊区供选择，
+	 * 假牌带 gaintag `ExtChooseCardTargetJudgeGainTag`（翻译为「判定区」），
+	 * 选完后 `result.cards` 里给回**真实判定牌**。
+	 */
+	interface PlayerExtChooseApi {
+		/**
+		 * 选牌 + 选目标（支持判定区）。
+		 *
+		 * 参数与本体 `chooseCardTarget` 完全相同（`EventChooseCardTargetParams`）；
+		 * `position` 出现 `j` 时判定牌也会变成可选项。
+		 *
+		 * `result.cards` / `result.links` 中来自判定区的项是**真实判定牌**（不是假牌），
+		 * `result.targets` 为选中的角色。
+		 *
+		 * @example
+		 * ```js
+		 * const result = await player
+		 * 	.ext.chooseCardTarget({
+		 * 		position: "hej",
+		 * 		selectCard: 1,
+		 * 		filterCard: () => true,
+		 * 		filterTarget: (card, player, target) => target != player,
+		 * 		prompt: "请弃置你区域内一张牌，并选择一名角色",
+		 * 	})
+		 * 	.forResult();
+		 * ```
+		 */
+		chooseCardTarget(params?: Record<string, any>): GameEvent;
+
+		/**
+		 * 选牌（支持判定区），不选目标。
+		 *
+		 * 参数与本体 `chooseCard` 相同（`EventChooseCardParams`）；
+		 * `position` 出现 `j` 时判定牌也会变成可选项，
+		 * `result.cards` / `result.links` 里给回**真实判定牌**。
+		 */
+		chooseCard(params?: Record<string, any>): GameEvent;
+	}
+
 	interface Player {
+		/** 增强版选牌接口，见 {@link PlayerExtChooseApi} */
+		ext: PlayerExtChooseApi;
+
 		/**
 		 * 从传入的牌中选牌（假牌版）。
 		 *

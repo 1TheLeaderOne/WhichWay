@@ -123,12 +123,20 @@ export function mode(): SyncMode {
 }
 
 /**
- * 千幻是否已经把本体的 `lib.config.skin` 换成了哨兵对象。
+ * 千幻是否已经把本体的 `lib.config.skin` 换成了哨兵对象**并且此刻仍在接管**。
  *
  * 是 ⇒ 本体那份**归千幻管**（它会自己按 `qhly_skinset` 贴图），我们只读不写，
  * 既不拆它的标志位，也不会把 `qhly_config` 这个假键当成武将条目。
+ *
+ * ⚠️ 必须同时要求 {@link qhlyEnabled}：哨兵是**持久化在存档里**的
+ * （`lib.config.skin = {qhly_config:'yes'}` 会被 `game.saveConfig` 写盘），
+ * 而千幻被关掉之后**没有任何代码会把它拆掉**。只看配置形态的话，
+ * 关掉千幻的用户会永久停留在「哨兵模式」：本体那份永远不写 ⇒
+ * 走本体绘制的角色（非官方干员、本体武将、其它扩展角色）换肤后
+ * 场上立绘永远不刷新（只有淌舰之向自己接管绘制的官方干员不受影响）。
  */
 export function qhlySentinelMode(): boolean {
+	if (!qhlyEnabled()) return false;
 	const skin = lib.config?.skin;
 	return !!skin && typeof skin === "object" && !Array.isArray(skin) && skin[QHLY_SENTINEL] === "yes";
 }
