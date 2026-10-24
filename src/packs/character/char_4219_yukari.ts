@@ -7,7 +7,7 @@ const resigter = function (name = "char_4219_yukari") {
 		sex: "female",
 		hp: 3,
 		skills: ["longjuanmrfz", "mingjinmrfz"],
-		pack: "mediocreSJZX",
+		pack: "epicSJZX",
 		group: "persona",
 		designer: ["Flandre"],
 		llm: "Qwen-3.8-Flash",
