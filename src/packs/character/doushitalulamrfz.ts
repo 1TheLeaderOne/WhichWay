@@ -130,6 +130,7 @@ character("doushitalulamrfz", {
 			camp: "ReunionMovement",
 		},
 	},
+	llm:"DeepSeek-4.1-Flash"
 });
 
 skill({
