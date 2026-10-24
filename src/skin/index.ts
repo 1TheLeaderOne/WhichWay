@@ -1,7 +1,7 @@
 import { createApp } from "vue";
 import { lib, game, ui, get, ai, _status } from "noname";
 import { whichWayFile } from "../file.js";
-import { onArenaReady, onConfig, onContent, onInit, onPrecontent, onSetDev } from "../hooks/index.js";
+import { onArenaReady, onConfig, onContent, onInit, onSetDev } from "../hooks/index.js";
 import { whichWayAPIOverride } from "../override/index.js";
 import { whichWayToast } from "../toast/index.ts";
 import { whichWayUtil } from "../utill.js";
@@ -14,6 +14,7 @@ import { confictedSkin } from "./confictedSkin.ts";
 import { mountPortrait } from "./avatarBackground.ts";
 import { DEFAULT_SKIN_NAME, flushSave, getPos, getPosData, loadPos, type PortraitPos } from "./portraitPos.js";
 import { togglePortraitDragging } from "./portraitDrag.js";
+import { adoptOwnSkins, applyAll, bindSkinSync, installSkinSync, normalize } from "./skinSync.ts";
 
 /** v1.6 清缓存的标记位（与 arkidMigrated 同一套一次性开关写法，落库为 extension_WhichWay_ 前缀） */
 const SKIN_CACHE_CLEARED_KEY = "skinCacheClearedV16";
@@ -91,6 +92,7 @@ class WhichWaySkin {
 				if (!spineWorker.needEnable()) return;
 				let mode = whichWayUtil.config("WhichWayDynamicSkinSwitch");
 				if (mode === "sjzx") {
+					//`sjzx` 模式**不注入**动皮资产：本扩展自己渲染，注入只会让千幻重复接管同一批动皮。
 					whichWayAPIOverride.appendHook("lib.element.player.init", {
 						before(character, character2) {
 							// @ts-ignore
@@ -131,26 +133,12 @@ class WhichWaySkin {
 						},
 					});
 				} else if (mode === "piqie") {
-					//{ ...lib.config.sjzxDycAssets } 只是浅拷贝，下面那句 skin.action = skin.action[0]
-					//写在嵌套的 { 皮肤: { action } } 上 ⇒ 直接改到了 lib.config 里那份存盘的原始数据，
-					//数组形态被永久削成字符串。这里改成深拷贝，归一化只作用于本次要广播出去的副本。
-					let piqieData = structuredClone(lib.config.sjzxDycAssets ?? {});
-					for (let charName in piqieData) {
-						let char = piqieData[charName];
-						for (let skinName in char) {
-							let skin = char[skinName];
-							if (Array.isArray(skin.action)) skin.action = skin.action[0];
-						}
-					}
-					// @ts-ignore
-					if (!decadeUI.dynamicSkin) decadeUI.dynamicSkin = {};
-					// @ts-ignore
-					Object.assign(decadeUI.dynamicSkin, piqieData);
-
-					// @ts-ignore
-					if (!skinSwitch.saveSkinParams) skinSwitch.saveSkinParams = {};
-					// @ts-ignore
-					Object.assign(skinSwitch.saveSkinParams, piqieData);
+					//「皮肤切换」那套：本扩展**不挂渲染钩子**，动皮交给皮肤切换 / 千幻播。
+					//
+					//资产注入不在这里做 —— 那是「对外适配」，归 `extCompatible/skinSwitch.js`
+					//（`skinSwitchtCompatible`，在 `arenaReady` 执行）。放到那边的原因：
+					//数据形状、消费方、时机全都由皮肤切换/千幻定义，`skin/` 只负责产出
+					//`dycSave.assets`，不该反向依赖它们。
 				}
 			},
 		});
@@ -459,23 +447,22 @@ class WhichWaySkin {
 	 * （其中还停留在旧选择）来覆盖，表现出来就是「换了皮肤，重开又变回去了」。
 	 */
 	syncSkin({ key, value, del }: { key: string; value?: [string, string]; del?: boolean }) {
-		lib.config.skin ??= {};
 		this.checkSkinSetting();
 		if (del === true) {
 			delete this._skinStore[key];
 			delete window.whichWaySave.skinConfig[key];
-			delete lib.config.skin[key];
-			delete lib.config.qhly_skinset.skin[key];
 		} else {
 			if (value === void 0) throw new Error("value is undefined");
 			this._skinStore[key] = value;
 			window.whichWaySave.skinConfig[key] = value[0];
-			lib.config.skin[key] = value;
-			lib.config.qhly_skinset.skin[key] = value[0];
 		}
-		whichWayUtil.saveConfig("skin", lib.config.skin, undefined);
 		whichWayUtil.saveConfig("skinConfig", window.whichWaySave.skinConfig);
-		whichWayUtil.saveConfig("qhly_skinset", lib.config.qhly_skinset, undefined);
+
+		//同一条选择镜像到千幻与本体，交给同步层统一决定「写哪几份、经典形象怎么表示、哨兵模式要不要跳过」。
+		//递归在这里收口：`applyAll` 开头的 `writeDepth > 0` 会让「applyAll → writeOwnStore → 本函数 → applyAll」
+		//这一圈在内层立刻返回，所以本函数被同步层调用时是幂等的。
+		const selection = del === true ? normalize(key, undefined) : normalize(key, value?.[0]);
+		if (selection) applyAll(key, selection, "whichWay");
 	}
 
 	/**
@@ -577,6 +564,9 @@ class WhichWaySkin {
 		lib.config.qhly_skinset.audioReplace ??= {};
 		lib.config.qhly_skinset.djtoggle ??= {};
 
+		//⚠️ 只在「本体存档缺席」时建空表；千幻已经开始接管时它是一个 `{qhly_config:'yes'}` 哨兵对象，
+		//`??=` 对非 undefined 不生效所以这里本来就安全 —— 但别改成 `if (!lib.config.skin)`：
+		//那对任何假值都会重建，等于把哨兵拆了 ⇒ 千幻下次启动又重新「没收」一遍本体存档。
 		lib.config.skin ??= {};
 
 		this._skinStore = this._skinStore || {};
@@ -627,20 +617,23 @@ class WhichWaySkin {
 			const own = window.whichWaySave?.hasChar?.(key) === true;
 			if (own) {
 				const resolvedPath = self.getCharacterSkin(key, skinName)?.path ?? (typeof path === "string" && path.length > 0 ? path : undefined);
-				if (resolvedPath === undefined) {
-					console.warn(`[whichWaySkin] 皮肤「${skinName}」（干员：${key}）在本扩展的皮肤表里找不到，且存档中没有可用路径，本条已丢弃`);
-					return;
-				}
+				//解析不到就**什么都不做**：以前是 console.warn 后丢弃（不写键），但更早的版本是直接删键 ——
+				//删键等于把玩家选好的皮肤悄悄退回「经典形象」，这就是「换了皮肤、重开又变回去」的第 1 条根因。
+				if (resolvedPath === undefined) return;
 				resolved[key] = [skinName, resolvedPath];
 				return;
 			}
+			//非本扩展武将：本扩展没有它的皮肤表，路径只可能是别处给的。有就用，没有就原样保留（不推断、不删键）
 			if (typeof path === "string" && path.length > 0) resolved[key] = [skinName, path];
-			else console.warn(`[whichWaySkin] 皮肤「${skinName}」（角色：${key}）没有有效的图片路径，本条已丢弃`);
 		};
 
 		const loadFrom = (obj: unknown, isTransformed: boolean) => {
 			if (!obj || typeof obj !== "object") return;
 			for (const key in obj as Record<string, any>) {
+				//千幻把本体的 `lib.config.skin` 换成 `{qhly_config:'yes'}` 当哨兵（`千幻/content.js:729-732`），
+				//那不是武将条目。不跳过的话它会落进下面的「旧格式」分支，变成
+				//`qhly_config: ['yes', 'image/skin/qhly_config/yes.jpg']` 并被写进千幻存档。
+				if (key === "qhly_config") continue;
 				const val = (obj as Record<string, any>)[key];
 				if (isTransformed) {
 					if (typeof val === "string") store(key, val, self.getCharacterSkin(key, whichWayFile.removeExt(val))?.path);
@@ -681,6 +674,7 @@ class WhichWaySkin {
 			const current = lib.config.skin;
 			if (current && typeof current === "object") {
 				for (const key in current) {
+					if (key === "qhly_config") continue;
 					const val = current[key];
 					if (Array.isArray(val) && typeof val[0] === "string" && val[0].length > 0 && !(key in resolved)) {
 						store(key, val[0], val[1]);
@@ -698,12 +692,21 @@ class WhichWaySkin {
 			const simple = this.transformSkinData(full);
 
 			this._skinStore = full;
-			lib.config.skin = full;
-			lib.config.qhly_skinset.skin = simple;
 			window.whichWaySave.skinConfig = simple;
 
-			whichWayUtil.saveConfig("skin", full, undefined);
-			whichWayUtil.saveConfig("qhly_skinset", lib.config.qhly_skinset, undefined);
+			/**
+			 * ⚠️ 这里**不再整体替换** `lib.config.skin` 与 `lib.config.qhly_skinset.skin`。
+			 *
+			 * 旧实现是 `lib.config.skin = full; lib.config.qhly_skinset.skin = simple;` 再各自落盘，三个后果：
+			 * 1. `simple` 里没有的键（玩家在千幻里给**本体武将**挑的皮肤）被一并抹掉；
+			 * 2. 千幻接管后用 `{qhly_config:'yes'}` 当哨兵，整体替换等于把标志位拆掉 ⇒ 它每次启动都重新
+			 *    「没收」一次本体存档，并把当时的 `lib.config.skin` 错记成「官方设置」备份；
+			 * 3. `full` 里的「经典形象」被 `transformSkinData` 转成 `立绘图名` 写进千幻，
+			 *    千幻会去 `skin/{id}/` 找那张图 ⇒ 必然 404，还会覆盖掉它自己的经典形象分支。
+			 *
+			 * 现在改成「只对**本扩展干员**逐键 patch」，且「经典形象」在千幻/本体两侧都按删键处理。
+			 */
+			adoptOwnSkins(full);
 			whichWayUtil.saveConfig("skinConfig", window.whichWaySave.skinConfig);
 		} finally {
 			this._isSyncing = false;
@@ -711,19 +714,26 @@ class WhichWaySkin {
 	}
 
 	/**
-	 * 将本体皮肤数据格式转变为千幻、驶舰之向数据格式
-	 * - 若值为 [string, string] 数组，则取第一个元素；
-	 * - 否则保留原始值不变。
+	 * 将「本扩展内存存档」（`干员id → [文件名, 路径]`）转成**字符串形态**（`干员id → 文件名`）。
+	 *
+	 * 这一形态同时喂给 `window.whichWaySave.skinConfig` 与千幻的 `qhly_skinset.skin`，所以必须与它们
+	 * 对「经典形象」的约定一致：**删键**，不是写一个值。
+	 *
+	 * 为什么：本扩展内存里「经典形象」是 `[char_002_amiya.png, 立绘路径]`，直接转字符串就会变成
+	 * `qhly_skinset.skin[干员] = 'char_002_amiya.png'`，千幻会去 `skin/{id}/char_002_amiya.png` 找 ⇒ 必然 404，
+	 * 而且 `qhly_getSkin()` 拿到非空值后不再走它的「经典形象」分支。
 	 */
 	transformSkinData(data: Record<string, unknown>): Record<string, string> {
-		return Object.fromEntries(
-			Object.entries(data).map(([key, value]) => {
-				if (Array.isArray(value) && value.length > 0 && typeof value[0] === "string") {
-					return [key, value[0]];
-				}
-				return [key, String(value)];
-			})
-		);
+		const out: Record<string, string> = {};
+		for (const [key, value] of Object.entries(data)) {
+			const fileName = Array.isArray(value) && typeof value[0] === "string" ? value[0] : "";
+			if (!fileName) continue;
+			//经典形象：两家都按「没有这个键」表示
+			if (whichWayFile.removeExt(fileName) === DEFAULT_SKIN_NAME) continue;
+			if (whichWayFile.removeExt(fileName) === whichWayFile.removeExt(whichWayFile.getCharacterPortraitFile(key))) continue;
+			out[key] = fileName;
+		}
+		return out;
 	}
 
 	/**
@@ -744,8 +754,12 @@ class WhichWaySkin {
 		this.checkSkinSetting();
 
 		const skinConfig = window.whichWaySave.skinConfig;
-		const skin = lib.config.skin;
-		const qhly_skinset = lib.config.qhly_skinset.skin;
+		//千幻接管时 `lib.config.skin` 是 `{qhly_config:'yes'}` 这个哨兵对象，不是「武将 → 皮肤」映射：
+		//直接当映射用会读出 undefined，冲突检测就永远认为「本体没有选皮肤」。这里显式退化成空表。
+		const skinRaw = lib.config.skin;
+		const skin: Record<string, any> =
+			skinRaw && typeof skinRaw === "object" && !Array.isArray(skinRaw) && (skinRaw as any).qhly_config === "yes" ? {} : skinRaw || {};
+		const qhly_skinset = lib.config.qhly_skinset?.skin || {};
 		const selected = this.confictedSkins.selected;
 
 		for (const key in skinConfig) {
@@ -808,6 +822,16 @@ class WhichWaySkin {
 export const whichWaySkin = new WhichWaySkin();
 
 await whichWaySkin.init();
+
+/**
+ * 装上「三向皮肤存档同步层」（驶舰之向 ⇄ 千幻聆音 ⇄ 无名杀本体）。
+ *
+ * 必须在 `init()` 之后：那时 `skinData` 已扫完、三条 `onXxx` 钩子也已注册，
+ * 同步层的 `normalize()` 才解析得出「皮肤名 → 磁盘上真实文件」。
+ * 两个实例用**注入**而不是让 `skinSync.ts` 反向 import —— 否则三个模块互相 import 成环。
+ */
+bindSkinSync({ skin: whichWaySkin, spine: spineWorker });
+installSkinSync();
 
 onSetDev({
 	name: "WhichWaySkin_dev",

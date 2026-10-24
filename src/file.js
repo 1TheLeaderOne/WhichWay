@@ -37,23 +37,7 @@ class WhichWayFile {
 		"mod:": `${this.extDir}image/modules/`,
 		"test:": `${this.extDir}test/`,
 		"logo:": `${this.extDir}image/logo/`,
-		/**
-		 * 本扩展的「静皮目录」（`image/illustration/skin/{干员id}/`）= 千幻聆音的 `skin.standard`。
-		 *
-		 * ⚠️ 用**相对路径**（不带 `lib.assetURL`），与千幻自带皮肤包
-		 * （`DEFAULT_PACKAGE.skin.standard = 'extension/千幻聆音/sanguoskin/'`）以及它给其它扩展
-		 * 自动生成的包（`qhly_foundPackageExt`：`'extension/' + extName + '/skin/image/'`）写法一致。
-		 *
-		 * 千幻对 `skin.standard` 的消费方分两类：
-		 * - **读取**（`qhly_getSkinList` → `qhly_checkFileExist(path)` → `game.getFileList(path, …)`）：
-		 *   期望相对路径。注意 `qhly_checkFileExist`（`content.js:4491`）只实现了
-		 *   `lib.node.fs.statSync(__dirname + '/' + path)` 与 Cordova 两条分支，**Web 端恒返回 false**
-		 *   ⇒ 皮肤列表为空。这是千幻上游的缺陷，需由上游改成 `game.checkFile` 一类的实现
-		 *   （它自己的 `skinSwitch/js/core/skin-switch-core.js:56` 就是正确写法）；届时相对路径即可正常工作。
-		 * - **显示**（`img.src = lib.assetURL + file`，`content.js:11131`）：会自己补前缀，
-		 *   所以这里的路径**不能**带 `lib.assetURL`，否则是双重前缀。
-		 */
-		"qs:": `extension/WhichWay/image/illustration/skin/`,
+		"skill:":`${this.extDir}image/skill/`
 	};
 
 	/**

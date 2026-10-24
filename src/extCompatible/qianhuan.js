@@ -34,7 +34,7 @@ import { spineWorker } from "../skin/spineWork.js";
  */
 
 /** 皮肤目录（**相对路径**，千幻会自己补 `lib.assetURL`，见上） */
-const extSkinBase = whichWayFile.compilePath("qs:");
+const extSkinBase = "extension/WhichWay/image/illustration/skin/";
 
 const config = {
 	isExt: true,
@@ -82,8 +82,14 @@ const config = {
 		if (!window.whichWaySave.hasChar(name)) return undefined;
 		if (typeof skin !== "string" || skin.length === 0) return undefined;
 		const base = whichWayFile.removeExt(skin);
-		//「经典形象」用立绘，落盘位置不在皮肤目录里
-		if (base === "经典形象") return `extension/WhichWay/image/illustration/character/${whichWayFile.getCharacterPortraitFile(name)}`;
+		//「经典形象」用立绘，落盘位置不在皮肤目录里。
+		//
+		// ⚠️ 千幻传进来的**不一定是** `'经典形象'`：它的动皮列表里「经典形象」那条用 `i + '.jpg'` 命名，
+		// `i` 是 `decadeUI.dynamicSkin[干员]` 的键 —— 本扩展注入的是立绘图名（`char_002_amiya`）。
+		// 只判 `'经典形象'` 时这条分支是死代码，经典形象 + 动皮那条路必然 404。
+		if (base === "经典形象" || base === whichWayFile.removeExt(whichWayFile.getCharacterPortraitFile(name))) {
+			return `extension/WhichWay/image/illustration/character/${whichWayFile.getCharacterPortraitFile(name)}`;
+		}
 		const fileName = spineWorker.getStaticSkinFileName(name, base);
 		if (!fileName) return undefined;
 		return `extension/WhichWay/image/illustration/skin/${name}/${fileName}`;
@@ -116,9 +122,15 @@ const config = {
 	 */
 	skininfo: function (name, skinName) {
 		if (typeof skinName !== "string" || skinName.length === 0) return undefined;
+		const base = whichWayFile.removeExt(skinName);
 		//「经典形象」的动皮由立绘文件名区分（`char_xxx.png`），千幻那边它本来就叫「经典形象」
-		if (skinName === whichWayFile.removeExt(whichWayFile.getCharacterPortraitFile(name))) {
+		if (base === "经典形象" || base === whichWayFile.removeExt(whichWayFile.getCharacterPortraitFile(name))) {
 			return { translation: "经典形象", info: "" };
+		}
+		//只有动作数据、没有同名静皮的动皮（`时遗2`）：卡片名仍用动皮名，
+		//但底图要回落到它的基皮，否则千幻给它补的 `皮肤名.jpg` 必然 404
+		if (!spineWorker.getStaticSkinFileName(name, base) && spineWorker.isStandaloneDynamicSkin(name, base)) {
+			return { translation: base, info: "" };
 		}
 		return undefined;
 	},
@@ -137,6 +149,7 @@ const config = {
 
 //@ts-ignore
 if (!lib.qhlypkg) {
+	//@ts-ignore
 	lib.qhlypkg = [];
 }
 

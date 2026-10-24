@@ -88,6 +88,21 @@ const dycSave = window.whichWaySave.dycSave;
 /** 「经典形象」的皮肤名（与 `skin/portraitPos.ts` 的 `DEFAULT_SKIN_NAME` 同值，避免反向 import） */
 const CLASSIC_SKIN_NAME = "经典形象";
 
+/**
+ * 动皮开关的**外部判据**（由 `skinSync.ts` 注入）。
+ *
+ * 为什么用注入而不是直接 import：`skinSync` 要读本文件的 `isStandaloneDynamicSkin` / `getStaticSkinName`，
+ * 反过来本文件又要读「这个皮肤是不是被千幻切成了静皮」—— 直接互相 import 就成环了。
+ * 同步层在 `installSkinSync()` 里把 `isDynamicDisabled` 交过来，本文件只认这一个函数。
+ * @type {((char: string, skinId: string) => boolean) | null}
+ */
+let dynamicDisabledProbe = null;
+
+/** @param {(char: string, skinId: string) => boolean} probe */
+export function setDynamicDisabledProbe(probe) {
+	dynamicDisabledProbe = typeof probe === "function" ? probe : null;
+}
+
 
 class SpineWorker {
 	backgroundPath = `${lib.assetURL}extension/WhichWay/dynamicSkin/background/`;
@@ -103,6 +118,10 @@ class SpineWorker {
 
 	/**
 	 * 切换动皮开启与关闭
+	 *
+	 * 登录后写两处：本扩展的 `banSkinSJZX` 与千幻的 `qhly_skinset.djtoggle`（同步层负责镜像，
+	 * 见 `skinSync.ts` 的 `game.saveConfig` 钩子）。本函数只写自己那份，镜像交给同步层 ——
+	 * 这样「在千幻里点静皮」与「在本扩展里关动皮」走的是同一条落库路径，不会出现两套真值。
 	 * @param {String | Player} name 玩家名
 	 * @param {String} skinName 皮肤名
 	 */
@@ -133,7 +152,10 @@ class SpineWorker {
 		//@ts-ignore
 		if (get.itemtype(name) === "player") name = name.name;
 		//@ts-ignore
-		return !this.banSkin?.[name]?.[skinName];
+		if (this.banSkin?.[name]?.[skinName]) return false;
+		//千幻那边把这张皮肤切成「静皮」了也算关掉（两边是同一个意思，见 skinSync.ts 的 isDynamicDisabled）
+		if (dynamicDisabledProbe?.(name, skinName) === true) return false;
+		return true;
 	}
 
 	/**
@@ -235,6 +257,8 @@ class SpineWorker {
 		let dynamicName = `${charName}_${skinName}`;
 
 		if (this.banSkin?.[charName]?.[skinName] === true) return;
+		//千幻切成静皮了：`updateDyc` 会拦，但 `loadDyc` 也可能被别处直接调用，这里再兜一次
+		if (dynamicDisabledProbe?.(charName, skinName) === true) return;
 
 		dycSave.startFit = {
 			dycLoaded: false,
@@ -908,6 +932,29 @@ class SpineWorker {
 	}
 
 	/**
+	 * **资产目录名 → 动皮名**的反查。
+	 *
+	 * 为什么需要：「皮肤切换」选动皮时写的是 `skin.skinName + '.jpg'`（`skinSwitch/js/modules/dynamic.js:507`），
+	 * 而本扩展的动皮条目里**没有 `skinName` 字段**（只有 `name`，那是素材目录名，如
+	 * `dyn_illust_char_1012_skadi2_boc4`）。千幻小窗那边回落成 `skins[name].skinName || name`
+	 * （`skinSwitch/js/modules/qhly-open-small.js:211`），于是传出去的可能是纯素材名。
+	 * 若不反查，这个值会被当成皮肤名写进 `qhly_skinset.skin` 与本体存档，拼出的图必然 404。
+	 *
+	 * @param {string} charName 干员id
+	 * @param {string} assetName 素材目录名（不带扩展名）
+	 * @returns {string | undefined} 对应的动皮名（皮肤名）；对不上时返回 undefined
+	 */
+	getSkinNameByAssetName(charName, assetName) {
+		if (!charName || !assetName) return;
+		const skins = (dycSave.assets || {})[charName];
+		if (!skins) return;
+		for (const skinName in skins) {
+			if (skins[skinName]?.name === assetName) return skinName;
+		}
+		return;
+	}
+
+	/**
 	 * 该动皮是否**必须**有对应静皮：只有此时才可以按「静皮名 = 皮肤名」交给千幻。
 	 * @param {string} charName
 	 * @param {string} skinName
@@ -974,6 +1021,8 @@ class SpineWorker {
 		});
 
 		if (this.banSkin?.[name]?.[skinName] === true) return;
+		//千幻把这张皮肤切成「静皮」了：与上面同一个出口，别再往上叠动皮
+		if (dynamicDisabledProbe?.(name, skinName) === true) return;
 
 		if (cache.has(dynamicName)) {
 			if (get.itemtype(target) === "player" && cache.get(dynamicName)?.[target.playerid]?.[action]) {

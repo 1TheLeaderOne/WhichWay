@@ -237,10 +237,13 @@ function ensureLayers(node: HTMLDivElement): Layers {
  * 副本是**未调位的原样**：画布的放大与偏移只加在内层子元素上，加到节点自身就会连带动到
  * `.name`/`.hp` 等兄弟层。所以内层一旦偏移，透出来的副本就不完全重合 ——
  * 这是既有取舍（改动之前副本也从来不带内层那个默认缩放），换来的是上面三处不空白。
+ *
+ * @param forceClassic 调用方明确要「经典形象」（引擎的 `setBackground(name, type, "noskin")`）：
+ *   此时**必须**画立绘，不能画当前皮肤。
  */
-function paintPortrait(node: HTMLDivElement, name: string) {
+function paintPortrait(node: HTMLDivElement, name: string, forceClassic = false) {
 	const layers = ensureLayers(node);
-	const url = resolvePortraitUrl(node, name);
+	const url = resolvePortraitUrl(node, name, forceClassic);
 	//setBackground 的 db: 分支是异步的（polyfill.ts:211-213），此刻读不到值；驶舰之向干员的立绘
 	//一律走 lib.config.skin，到不了那个分支
 	if (!url) return;
@@ -259,8 +262,31 @@ function paintPortrait(node: HTMLDivElement, name: string) {
  * - 是千幻按 `image/skin/{id}/{皮肤名}.jpg` 硬拼出来的、并不存在的路径（皮肤目录迁移之后尤其明显）；
  * - 或者压根没有（玩家选过皮肤，但合并前的那一帧）。
  * 本扩展的路径来自目录扫描，是真实存在的文件，所以两边都有时以本扩展为准。
+ *
+ * ⚠️ 但有**两类节点必须画立绘、不能画当前皮肤**：
+ *
+ * 1. `ext === "noskin"`：引擎约定的「忽略皮肤配置，画角色原图」标记（`init/polyfill.ts:145-149、205`）。
+ *    引擎「更改皮肤」里的「经典形象」按钮、音频试听按钮都靠它要原图。
+ * 2. **千幻的皮肤预览格**（带 `qh-not-replace`）：那里的「经典形象」是用
+ *    `setBackground(name, "character")` 画的，**不带 `noskin`**
+ *    （`qhly_newView.js:884`、`qhly_shoushaSkinCards.js:261`、`qhly_xiaochuangkouCommon.js:299`、
+ *    `qhly-open-small.js:752` …）。它们本来能画对，是因为引擎会落到 `char.img` ——
+ *    而干员的 `char.img` 就是立绘。
+ *
+ *    这些格子里**有皮肤的格子走的是 `setBackgroundImage(qhly_getSkinFile(…))`**
+ *    （见 `qhly_newView.js:882` 的 `if (skinId)`），根本不会进到这里；所以凡是
+ *    「带 `qh-not-replace` 的节点 + `setBackground(name, "character")`」就一定是经典形象那一格。
+ *
+ *    注意：这不是把 `qh-not-replace` 还原成「一票否决」——`isPortraitNode()` 仍然忽略它，
+ *    双层绘制照旧接管、剪影照旧去掉；**只是换用「立绘」这条解析口径**。
+ *    也不能靠「借引擎算一遍」来得到立绘：引擎的 `setBackground` 会优先读
+ *    `lib.config.skin[name][1]`（`polyfill.ts:205-206`），而我们恰恰会把干员的选择写进那里，
+ *    于是绕一圈又拿回当前皮肤 —— 这正是本 bug 的成因。所以这里直接取立绘路径。
  */
-function resolvePortraitUrl(node: HTMLDivElement, name: string) {
+function resolvePortraitUrl(node: HTMLDivElement, name: string, forceClassic = false) {
+	if (forceClassic || node.classList.contains("qh-not-replace")) {
+		return toBackgroundUrl(whichWayFile.getCharacterPortraitPath(name));
+	}
 	const path = whichWaySkin.skinPathOf(name);
 	if (path) return toBackgroundUrl(path);
 	return firstLayer(resolveBackgroundImage(scratch => HTMLDivElement.prototype.setBackground.call(scratch, name, "character")));
@@ -366,10 +392,14 @@ function installPrototypeRedirect() {
 	 * 重入时一律走引擎原版，不参与 gate，避免无限递归。
 	 */
 	function gateSetBackground(this: HTMLDivElement, name: any, type: any, ext: any, subfolder: any) {
+		//`"noskin"` 是引擎约定的「忽略皮肤配置、画角色原图」标记（`init/polyfill.ts:145-149`）：
+		//千幻的「经典形象」预览格、引擎「更改皮肤」里的经典按钮都靠它要原图。
+		//不认它的话，这些位置会被画成「当前选中的皮肤」—— 即「设了皮肤后经典形象显示成该皮肤」。
+		const forceClassic = ext === "noskin";
 		if (setBackgroundDepth === 0 && type === "character" && isArkOperator(name) && isPortraitNode(this)) {
 			setBackgroundDepth++;
 			try {
-				paintPortrait(this, name);
+				paintPortrait(this, name, forceClassic);
 			} catch (error) {
 				console.error("[whichWaySkin] 双层立绘绘制失败，回落到引擎原流程", error);
 				return engineSetBackground.call(this, name, type, ext, subfolder);
@@ -393,7 +423,7 @@ function installPrototypeRedirect() {
 	proto.qhly_origin_setBackground = function (this: HTMLDivElement, name: any, type: any, ext: any, subfolder: any) {
 		if (type === "character" && isArkOperator(name) && isPortraitNode(this)) {
 			try {
-				paintPortrait(this, name);
+				paintPortrait(this, name, ext === "noskin");
 				return this;
 			} catch (error) {
 				console.error("[whichWaySkin] 双层立绘绘制失败，回落到引擎原流程", error);
