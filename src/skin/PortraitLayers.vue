@@ -40,9 +40,6 @@ const props = withDefaults(
 	}
 );
 
-//背板路径要读 lib.assetURL，取值推迟到渲染时
-const backdrop = computed(() => `url("${whichWayFile.compilePath("ui:background/default.png")}")`);
-
 /**
  * 「立绘/皮肤直接用cover铺满」：开启时忽略 pos.json 的偏移与缩放。
  *
@@ -70,9 +67,18 @@ const imgSrc = computed(() => {
 
 const wrapperEl = ref<HTMLDivElement>();
 const imgEl = ref<HTMLImageElement>();
-
 /** 这张图加载失败过：失败就别留 `<img>` 在这儿，否则会卡正中间显示一枚碎图图标 */
 const imgBroken = ref(false);
+
+/**
+ * 背板：`ui:background/default.png`。
+ *
+ * 它**不是**灰色遮罩的来源 —— 之前那块灰是引擎的 `default_silhouette_*.jpg`
+ * 被 `setBackgroundImage([立绘, 保底图])` 原样写回节点造成的（两层叠在一起），
+ * 与这张背板无关。背板是立绘透明处的**设计底色**，去掉会让卡面看起来「背景不见了」。
+ */
+const backdrop = computed(() => `url("${whichWayFile.compilePath("ui:background/default.png")}")`);
+
 /** 原图宽高比（宽/高）；0 表示还不知道 */
 const imgAspect = ref(0);
 /** 框宽高比（宽/高）；0 表示还没量到 */

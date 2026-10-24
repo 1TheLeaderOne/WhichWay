@@ -163,18 +163,23 @@ function firstLayer(backgroundImage: string) {
 const toBackgroundUrl = (src: string) => `url("${whichWayFile.toCssUrl(src)}")`;
 
 /**
- * 写「影子副本」到节点内联样式，并标记这是本扩展的写入。
+ * 清掉节点自身的内联立绘，**同时**让 `watchExternalBackground` 放行这次写入。
  *
- * 影子副本供**读不到子元素**的地方使用：`game.logv` 的战报卡头像是 `cloneNode()`（浅克隆，
- * 只带内联样式）、`smoothAvatar` 的淡出层抄 `getComputedStyle`、`ui.fakeme` 抄内联
- * `background-image`、十周年UI 的 `checkAndAddExperienceSuffix` 也是读内联样式判断图能不能加载。
+ * 为什么不能像以前那样写一份「影子副本」到内联样式：背板 `ui:background/default.png`
+ * 是 1024×576、四角 RGBA 为 (65,65,65,196) / (42,42,42,223)，全图 0.5% 的像素 alpha < 255
+ * —— 子元素那层在边缘**是半透明的**，节点自身再留一份立绘就会从边上透出来；
+ * 而副本是「未调位的原样」、内层是 cover 放大后的画面（实测 453%×366%），两张构图不同，
+ * 叠起来就是同时开千幻/十周年时看到的那种重影。
  *
- * 标记的作用：`watchExternalBackground` 的 `MutationObserver` 会收到这次变化，必须放行，
- * 否则同一张图会被反复当成「外部改图」回灌。用微任务在观察者回调之后解除标记。
+ * 代价：`game.logv` 的战报卡头像是 `player.node.avatar.cloneNode()`（浅克隆，只带内联样式）、
+ * `smoothAvatar` 的淡出层抄 `getComputedStyle`、`ui.fakeme` 抄内联 `background-image` ——
+ * 这几处读不到子元素会变空白。它们是既有取舍里较轻的一边：重影是全局可见的 bug，而这几处
+ * 只是个别面板的头像。将来要补，应该给那几处单独画（**不要**退回给节点写内联副本）。
  */
-function writeInlineBackground(node: HTMLDivElement, url: string) {
+function clearInlineBackground(node: HTMLDivElement) {
+	if (!node.style.backgroundImage) return;
 	selfWritingNodes.add(node);
-	node.style.backgroundImage = url;
+	node.style.backgroundImage = "";
 	queueMicrotask(() => selfWritingNodes.delete(node));
 }
 
@@ -248,7 +253,14 @@ function paintPortrait(node: HTMLDivElement, name: string, forceClassic = false)
 	//一律走 lib.config.skin，到不了那个分支
 	if (!url) return;
 	layers.setImage(url);
-	writeInlineBackground(node, url);
+	//**不写影子副本**：背板 `ui:background/default.png` 四边 alpha 只有 196~223（中心才 255），
+	//子元素那层在边缘是半透明的 ⇒ 节点自身再留一份「未调位的原样」立绘就会从边上透出来，
+	//与内层 cover 放大后的画面（实测 453%×366%）叠成重影。
+	//
+	//取舍：`game.logv` 的战报卡头像是 `cloneNode()` 浅克隆、`smoothAvatar`/`ui.fakeme` 抄内联样式，
+	//这几处读不到子元素会变空白。但「场上/选将/武将卡三重影」是必须解决的问题，而这三处
+	//只是个别面板的头像 —— 需要时再单独给它们补一层（不要退回写内联副本）。
+	clearInlineBackground(node);
 }
 
 /**
@@ -377,6 +389,32 @@ let setBackgroundDepth = 0;
  * - 千幻先加载 ⇒ `qhly_origin_setBackground` 是引擎原版，我们把它换成同一个 gate；
  * - 千幻后加载 ⇒ 它会把我们的 gate 存成 `qhly_origin_setBackground`，其调用照样进 gate。
  */
+/**
+ * 千幻「选将界面显示原皮」此刻是否生效 **并且** 这个节点正好是它要管的选将按钮。
+ *
+ * 为什么要在本扩展的拦截层里让路：千幻自己的 `setBackground` 补丁
+ * （`Qhly_NewView/qhly_newViewRefresh.js:179-185`）确实对 `.button.character` 做了
+ * 「`qhly_chooseButtonOrigin` 开启 ⇒ 直接走原皮」的短路，但我们的 gate 安装在
+ * `HTMLDivElement.prototype.setBackground` / `setBackgroundImage` 上、**比它更外层**——
+ * 不放行的话，干员在选将界面会被我们画成「当前皮肤」，那个设置看起来完全不生效。
+ *
+ * 判据必须与千幻逐字对齐，否则会出现「设置开着但某些格子仍是皮肤」的半生效状态。
+ * 不要求 `isArkOperator`：本体武将、其它扩展角色也可能挂在同一个选将按钮上。
+ */
+function yieldToQhlyOriginButton(node: HTMLElement): boolean {
+	const config = (lib.config ?? {}) as any;
+	//⚠️ 必须用 **truthy** 判断，与千幻逐字一致（`qhly_newViewRefresh.js:179` 也是 `if(lib.config.qhly_chooseButtonOrigin)`）：
+	//`game.saveConfig` 存下来的可能是布尔 `true`，也可能是字符串 `"true"`（不同版本的配置项写法不同），
+	//用 `=== true` 会在后者上静默失效，表现就是「设置开着但选将界面照样显示皮肤」。
+	if (!config.qhly_chooseButtonOrigin) return false;
+	//千幻没启用时它根本不会跑，这个设置也就没有意义
+	const list = config.extensions;
+	if (!Array.isArray(list) || !list.includes("千幻聆音")) return false;
+	if (config["extension_千幻聆音_enable"] === false) return false;
+	//与千幻 `:179-184` 完全同构：同时带 `character` / `button` 两个类
+	return node.classList.contains("character") && node.classList.contains("button");
+}
+
 function installPrototypeRedirect() {
 	if (prototypeRedirectInstalled) return;
 	prototypeRedirectInstalled = true;
@@ -397,9 +435,17 @@ function installPrototypeRedirect() {
 		//不认它的话，这些位置会被画成「当前选中的皮肤」—— 即「设了皮肤后经典形象显示成该皮肤」。
 		const forceClassic = ext === "noskin";
 		if (setBackgroundDepth === 0 && type === "character" && isArkOperator(name) && isPortraitNode(this)) {
+			//「选将界面显示原皮」：**仍然由我们画**，只是把图换成立绘（`forceClassic`）。
+			//
+			// ⚠️ 不能像以前那样 `return engineSetBackground(...)` 把节点交回去：
+			// 引擎的 `setBackground` 最后一步是 `setBackgroundImage([立绘, 保底图])`，
+			// 交回去就等于把 `url(立绘), url(default_silhouette_*.jpg)` 两层写回节点 ——
+			// 灰色剪影重新出现，同时本扩展的背板也没了（表现为「背景不见了 + 剪影回来了」）。
+			// 我们的两层结构本来就能画立绘，直接复用它即可。
+			const showOrigin = forceClassic || yieldToQhlyOriginButton(this);
 			setBackgroundDepth++;
 			try {
-				paintPortrait(this, name, forceClassic);
+				paintPortrait(this, name, showOrigin);
 			} catch (error) {
 				console.error("[whichWaySkin] 双层立绘绘制失败，回落到引擎原流程", error);
 				return engineSetBackground.call(this, name, type, ext, subfolder);
@@ -422,8 +468,11 @@ function installPrototypeRedirect() {
 	//千幻的「按原样画」入口也接到同一个 gate 上；非白名单节点直接走引擎原版，不经过千幻的包装层
 	proto.qhly_origin_setBackground = function (this: HTMLDivElement, name: any, type: any, ext: any, subfolder: any) {
 		if (type === "character" && isArkOperator(name) && isPortraitNode(this)) {
+			//「选将界面显示原皮」/ `noskin`：由我们画立绘（两层结构照旧，只换图）。
+			//同样**不能**交回 `engineSetBackground` —— 那会写回 `[立绘, default_silhouette_*]` 两层。
+			const showOrigin = ext === "noskin" || yieldToQhlyOriginButton(this);
 			try {
-				paintPortrait(this, name, ext === "noskin");
+				paintPortrait(this, name, showOrigin);
 				return this;
 			} catch (error) {
 				console.error("[whichWaySkin] 双层立绘绘制失败，回落到引擎原流程", error);
@@ -478,16 +527,55 @@ function installPrototypeBackgroundImageRedirect() {
 
 	const previous = proto.setBackgroundImage;
 	proto.setBackgroundImage = function (this: HTMLDivElement, img: any) {
+		//⚠️ 重入保护（顺序必须在最前面）：`gateSetBackground` 在 `setBackgroundDepth++` 期间
+		//会调 `paintPortrait`，而引擎 `setBackground` 内部还会再调一次
+		//`setBackgroundImage([立绘, 保底图])` —— 那一次必须**原样透传**。
+		//不拦的话它会命中下面的数组分支/让路分支，`dispose()` 掉刚建好的两层子元素，
+		//结果就是「开了显示原皮后图片直接没了」（节点上既没有 host 也没有 background-image）。
+		//但透传也不能原样给数组：那样 `default_silhouette` 又会被写回节点、从我们的透明处透出来。
+		//所以只取第一层（立绘/皮肤）——两层结构已经由 `paintPortrait` 负责画了。
+		if (setBackgroundDepth > 0) {
+			//两层结构已经由 `paintPortrait` 画好了：这一次**什么都不写**。
+			//写数组会带回 `default_silhouette`，写单层又会和子元素叠成重影 —— 直接吞掉最干净。
+			//（`paintPortrait` 末尾会 `clearInlineBackground`，节点内联保持为空。）
+			if (layersOf(this)) return this;
+			//没有两层结构（说明这次不是我们画的）：退回原实现，别改变引擎语义
+			return previous.call(this, img);
+		}
+		//⚠️ 数组入参必须单独处理：引擎 `setBackground` 最后一步是
+		//`setBackgroundImage([立绘, lib.characterDefaultPicturePath + sex])`，
+		//而 `isOperatorImage` 对数组恒返回 false（见它的注释），下面那个 `if` 会把它**整体透传**给原实现，
+		//于是 `url(立绘), url(default_silhouette_*.jpg)` 两层被原样写回节点 ——
+		//第二层那张**灰色剪影**就会从我们这层的透明/半透明处透出来，看起来就是「立绘上盖了一块灰色遮罩」。
+		//
+		//只处理「白名单节点 + 第一层确实是本扩展能认的干员立绘/皮肤」这种明确情形，
+		//其余数组（`db:`、`mode:`、本体武将的 `[img, 保底图]` 等）一律原样交回，不改变引擎语义。
+		if (Array.isArray(img)) {
+			const first = img.find((item: unknown) => typeof item === "string" && item.length > 0);
+			if (typeof first === "string" && isPortraitNode(this) && isOperatorImage(first)) {
+				const url = firstLayer(resolveBackgroundImage(scratch => previous.call(scratch, img)));
+				if (!url) return previous.call(this, img);
+				(layersOf(this) ?? ensureLayers(this)).setImage(url);
+				clearInlineBackground(this);
+				return this;
+			}
+			return previous.call(this, img);
+		}
 		if (!isPortraitNode(this) || !isOperatorImage(img)) {
 			return previous.call(this, img);
 		}
+		//「选将界面显示原皮」的取舍只在 `gateSetBackground` / `qhly_origin_setBackground` 那两处决定
+		//（它们直接调 `paintPortrait(..., showOrigin)`）；这里收到的是**已经算好的一张图**，
+		//照单贴进两层即可。以前这里也让路 + `dispose()`，结果是引擎随后写回
+		//`[立绘, 保底图]` 又被 MutationObserver 清空 ⇒ 「开了显示原皮后图片直接没了」。
 		try {
 			//先让原实现算一遍（它负责拼 lib.assetURL、处理数组、URL.canParse 等），再取出第一层
 			const url = firstLayer(resolveBackgroundImage(scratch => previous.call(scratch, img)));
 			if (!url) return previous.call(this, img);
 			const layers = layersOf(this) ?? ensureLayers(this);
 			layers.setImage(url);
-			writeInlineBackground(this, url);
+			//同 `paintPortrait`：背板边缘是半透明的，节点自身再留一份内联立绘就会叠出重影
+			clearInlineBackground(this);
 			return this;
 		} catch (error) {
 			console.error("[whichWaySkin] 同步皮肤图失败，回落到引擎原流程", error);
@@ -536,8 +624,17 @@ function watchExternalBackground(node: HTMLDivElement) {
 		const inline = node.style.backgroundImage;
 		if (!inline || inline === "none") return;
 		const external = firstLayer(inline);
-		//和我们画的是同一张（含仅引号/序列化差异）：不用处理
-		if (!external || external === current.url) return;
+		//和我们画的是同一张（含仅引号/序列化差异）：
+		//⚠️ 这里**也必须清掉节点内联**，不能直接 return。
+		//引擎的 `setBackgroundImage([立绘, lib.characterDefaultPicturePath + sex])` 写的是
+		//`url(立绘), url(default_silhouette_*.jpg)` —— `firstLayer` 取到的是立绘、正好等于
+		//`current.url`，早返回就会把**第二层那张灰色剪影**永久留在节点上；
+		//它会从我们这层的透明/半透明处透出来，观感就是「立绘上盖了一块灰色遮罩」。
+		//（`default_silhouette` 正是本扩展存在的理由，绝不能让它在别处漏回来。）
+		if (!external || external === current.url) {
+			clearInlineBackground(node);
+			return;
+		}
 		//外部改成了别的图（十周年UI 出框图、千幻预览图…）：以它为准，同步进两层背景
 		selfWritingNodes.add(node);
 		try {
@@ -590,8 +687,8 @@ export function mountPortrait(node: HTMLElement | null | undefined, image: strin
 	installRedirect(node);
 	const url = image.startsWith("url(") ? image : `url("${whichWayFile.compilePath(image)}")`;
 	ensureLayers(node).setImage(url, pos);
-	//影子副本：战报浅克隆、smoothAvatar、ui.fakeme 读的都是节点自身的背景
-	writeInlineBackground(node, url);
+	//同 `paintPortrait`：背板边缘半透明，节点自身再留一份内联立绘就会与子元素叠成重影
+	clearInlineBackground(node);
 	return true;
 }
 
@@ -638,8 +735,12 @@ onContent({
 				//因为 characterx 会在内部把 item 换成 lib.characterReplace 里的随机一个
 				const name = result?.link;
 				if (!isArkOperator(name)) return;
+				//⚠️ 这条路径**不经过** `setBackground` / `setBackgroundImage` 的 gate，它是直接调
+				//`paintPortrait` 的，所以「显示原皮」的判断要在这里再做一次 —— 但**仍然由我们画**，
+				//只是把图换成立绘（`showOrigin`）。不能 `dispose()` 后交给引擎：
+				//那样会写回 `[立绘, default_silhouette_*]`，剪影重现且背板消失。
 				installRedirect(result);
-				paintPortrait(result, name);
+				paintPortrait(result, name, yieldToQhlyOriginButton(result));
 			},
 		});
 	},
