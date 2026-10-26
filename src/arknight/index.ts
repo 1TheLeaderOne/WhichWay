@@ -145,6 +145,7 @@ class WhichWayArknight {
 	 * - charword_table.charDefaultTypeDict：仅 Object.keys().length
 	 * - charword_table.voiceLangTypeDict：Object.keys() 与 [lang].name
 	 * - charword_table.voiceLangDict[uid].dict：仅真值判断与 Object.keys()
+	 * - charword_table.charWords：**台词文本**（`getVoiceLines`），见下
 	 */
 	slimArknightData(raw: Record<string, any>): ArknightSlimData {
 		const rawCharacters: Record<string, ArknightCharacter> = raw.character_table ?? {};
@@ -180,11 +181,113 @@ class WhichWayArknight {
 			voiceLangDict[uid] = { dict };
 		}
 
+		const voiceLines = this.slimVoiceLines(rawVoice.charWords);
+		const skinVoice = this.slimSkinVoice(raw.skin_table);
+
 		return {
 			character_table,
 			char_patch_table: { patchChars },
-			charword_table: { charDefaultTypeDict, voiceLangTypeDict, voiceLangDict },
+			charword_table: { charDefaultTypeDict, voiceLangTypeDict, voiceLangDict, voiceLines },
+			skinVoice,
 		};
+	}
+
+	/**
+	 * 从 `skin_table.charSkins` 抽出「皮肤 → 语音库」映射。
+	 *
+	 * 只有 22 个皮肤带 `voiceId`（有专属语音），其余皮肤的 `voiceId` 为空、沿用基础语音。
+	 * 原始表 2.7MB，这里只留 22 条（约 1.1KB）：
+	 * ```
+	 * { "char_003_kalts@boc#6": "char_003_kalts_boc#6" }
+	 * ```
+	 *
+	 * 为什么需要这层映射：作者写的是 **skinId**（`@` 分隔），而语音库目录是 **voiceId**
+	 * （`_` 分隔），22 个里 22 个都不一样；且存在多对一
+	 * （`char_311_mudrok` 的 `#2`/`summer`/`wild`/`ambienceSynesthesia` 四个皮肤共用 `char_311_mudrok#1`）。
+	 *
+	 * ⚠️ `skin_table` 在 `loadSkipFiles` 里（运行期不整表加载），但这里是**裁剪阶段**，
+	 * `raw` 里已经拿到全量数据，所以能直接抽映射而不额外读盘。
+	 *
+	 * @param skinTable `skin_table` 原始数据
+	 */
+	slimSkinVoice(skinTable: Record<string, any> | undefined): Record<string, string> {
+		const skinVoice: Record<string, string> = {};
+		const charSkins = skinTable?.charSkins as Record<string, { voiceId?: string | null }> | undefined;
+		for (const skinId in charSkins ?? {}) {
+			const voiceId = charSkins![skinId]?.voiceId;
+			//空值表示「这个皮肤没有专属语音」，不收录（查不到就回落到基础语音）
+			if (typeof voiceId === "string" && voiceId) skinVoice[skinId] = voiceId;
+		}
+		return skinVoice;
+	}
+
+	/**
+	 * 皮肤 id → 语音库目录名（`voiceId`）；没有专属语音的皮肤返回 undefined。
+	 *
+	 * @param skinId 皮肤 id，如 `char_003_kalts@boc#6`
+	 */
+	getSkinVoiceId(skinId: string): string | undefined {
+		return this.arknightData?.skinVoice?.[skinId];
+	}
+
+	/**
+	 * 从 `charword_table.charWords` 抽出「台词文本」表。
+	 *
+	 * 原始结构是按 `charWordId`（`{干员uid}_{语言}_{序号}`）索引的扁平表，共 1.8 万条、约 8.7MB；
+	 * 运行时只需要「某个干员的某个配音标题对应哪句台词」，因此压成两级：
+	 *
+	 * ```ts
+	 * { [wordkey]: { [voiceTitle]: voiceText } }
+	 * ```
+	 *
+	 * `wordkey` 取自 `voiceAsset` 的**目录部分**（`char_102_texas/CN_001` → `char_102_texas`），
+	 * 这与本地音频目录、PRTS 的路径层级完全一致：方言/意大利语等变体的目录带后缀
+	 * （`char_308_swire_CN_TOPOLECT`），它们的文本和普通话版**确实不同**，必须分开存。
+	 *
+	 * ⚠️ **不按「驶舰之向的干员」过滤**，尽管那样能省约 40% 体积（2.08MB → 1.26MB）：
+	 * `packs/index.ts` 静态 import 本模块，所以本模块的 `init()`（含 `loadArknightData`）
+	 * 在 `packs` 的 `register()` 之前就跑完了，那时 `window.whichWaySave.allCharacters`
+	 * 还是空的 —— 按它过滤会把整张表清空。用「扫源文件名」之类的静态名单又会和
+	 * `import.meta.glob` 的收集规则漂移，代价大于收益。约 2MB / 20ms 的启动开销可以接受
+	 * （对比这张表全量 8.7MB，以及历史上 16MB 数据 650ms 同步块的问题）。
+	 *
+	 * @param charWords `charword_table.charWords` 原始表
+	 */
+	slimVoiceLines(charWords: Record<string, CharWords> | undefined): Record<string, Record<string, string>> {
+		const voiceLines: Record<string, Record<string, string>> = {};
+		if (!charWords) return voiceLines;
+		for (const key in charWords) {
+			const word = charWords[key];
+			const text = word?.voiceText;
+			//没有文本 / 没有标题 / 没有归属的条目直接丢掉（占位数据，补上台词反而会显示成空行）
+			if (!text || !word.voiceTitle || !word.charId) continue;
+			const asset = word.voiceAsset ?? "";
+			const slash = asset.lastIndexOf("/");
+			const wordkey = slash > 0 ? asset.slice(0, slash) : word.charId;
+			(voiceLines[wordkey] ??= {})[word.voiceTitle] = text;
+		}
+		return voiceLines;
+	}
+
+	/**
+	 * 取某个干员（某个音频目录）的全部台词：`{ 配音标题: 台词文本 }`。
+	 *
+	 * @param wordkey 音频目录名，通常是干员 uid；方言/意大利语等变体带后缀
+	 * @returns 没有数据时返回空对象（调用方无需判空）
+	 */
+	getVoiceLines(wordkey: string): Record<string, string> {
+		return this.arknightData?.charword_table?.voiceLines?.[wordkey] ?? {};
+	}
+
+	/**
+	 * 取某条配音的台词文本。
+	 *
+	 * @param wordkey 音频目录名（干员 uid / 带语言后缀的变体）
+	 * @param voiceTitle 配音标题（如「作战中1」「任命助理」）
+	 * @returns 台词文本；查不到返回 undefined
+	 */
+	getVoiceLine(wordkey: string, voiceTitle: string): string | undefined {
+		return this.getVoiceLines(wordkey)[voiceTitle];
 	}
 
 	/**
@@ -594,7 +697,7 @@ class WhichWayArknight {
 	 * 精简缓存的结构版本：白名单字段发生变化时必须 +1，否则老缓存不会被重建
 	 * （只靠扩展版本号覆盖不了「改了白名单但没升版本」的情况）
 	 */
-	private readonly slimCacheSchema = 2;
+	private readonly slimCacheSchema = 4;
 
 	/**
 	 * 本次启动是否重新下载过明日方舟数据。

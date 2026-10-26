@@ -692,6 +692,90 @@ export function mountPortrait(node: HTMLElement | null | undefined, image: strin
 	return true;
 }
 
+/**
+ * 觉醒动画（`Skill.skillAnimation`）的取图补丁。
+ *
+ * 引擎的链路是 `trySkillAnimate` → `$skill` → `$fullscreenpop`，最后一步里有一行
+ * **直接读头像节点的内联背景**：
+ * ```js
+ * node.firstChild.firstChild.style.backgroundImage = avatar.style.backgroundImage;
+ * ```
+ * 而本扩展为了消重影/灰罩，把立绘改画进子元素 `<img>`，节点内联是**空**的
+ * （见 `clearInlineBackground` 的注释）⇒ 动画取到的是一张空图。
+ *
+ * 处理方式：只在**这一次同步调用期间**把两层背景当前那张图临时写回节点内联，读完立刻还原。
+ * - 不常驻：常驻就是老写法，会重新叠出重影与灰色遮罩；
+ * - 不永久改写引擎：`$fullscreenpop` 读内联是同步的，写完还原即可，其它读取方（战报浅克隆等）行为不变；
+ * - 写的时候打 `selfWritingNodes` 标记，避免被 `watchExternalBackground` 当成「外部改图」回灌。
+ *
+ * ⚠️ 十周年UI 会**整个接管** `$skill`（`overrides/player/animations.js` 的 `playerSkill`），
+ * 走自家 `decadeUI.effect.skill`，它自己按 `lib.config.skin` / `char.img` 取图，**不读节点内联**。
+ * 所以那个钩子既不会受这里影响，也不需要我们做任何事 —— 本补丁只在「没有十周年」的
+ * `$fullscreenpop` 路径上生效。
+ */
+function installFullscreenPopPatch() {
+	const playerProto = (lib as any).element?.player;
+	if (!playerProto || typeof playerProto.$fullscreenpop !== "function") return;
+	//幂等：`onContent` 每局都会跑一遍，重复 `appendHook` 会套出多层包装
+	if (playerProto.__whichWayFullscreenPopPatched) return;
+	playerProto.__whichWayFullscreenPopPatched = true;
+
+	/**
+	 * 重入深度。
+	 *
+	 * `$fullscreenpop` 开头会 `game.broadcast(...)` 把**自己**再调一次（`broadcast !== false` 时），
+	 * 而 `game.broadcast` 在本机是同步执行的 ⇒ 会进到我们这层包装里来。
+	 * 若内层也在 `after` 里清空，外层原函数稍后读内联时就已经是空的（动画照样没图）。
+	 * 所以只在**最外层**写入、也只在最外层还原。
+	 */
+	let depth = 0;
+
+	whichWayAPIOverride.appendHook("lib.element.player.$fullscreenpop", {
+		before(this: any, _str: any, _nature: any, avatar: any) {
+			depth++;
+			if (depth > 1) return;
+			//`$fullscreenpop` 内部才把 `avatar` 从 `"vice"` / 真值换算成节点，这里按同一规则先算一遍
+			const node = resolveFullscreenAvatar(this, avatar);
+			if (!node) return;
+			const layers = layersOf(node);
+			if (!layers || !layers.url) return;
+			//标记 + 写入：标记要在整个「写 → 读 → 还原」窗口里都有效，
+			//否则 `watchExternalBackground` 会把这次写入当成外部改图再回灌一遍。
+			selfWritingNodes.add(node);
+			node.style.backgroundImage = layers.url;
+		},
+		after(this: any, result: any, _str: any, _nature: any, avatar: any) {
+			depth--;
+			if (depth > 0) return result;
+			const node = resolveFullscreenAvatar(this, avatar);
+			if (!node) return result;
+			//原地清空（不复用 `clearInlineBackground`：它会再 add 一次标记并各自 queueMicrotask，
+			//两条微任务互相抵消不掉，标记会被提前删掉）。这里统一在下一轮微任务里收尾。
+			node.style.backgroundImage = "";
+			queueMicrotask(() => selfWritingNodes.delete(node));
+			return result;
+		},
+	});
+}
+
+/**
+ * 复刻 `$fullscreenpop` 对 `avatar` 参数的解析（`player.js:16322-16336`）。
+ *
+ * 只认「本扩展接管了两层背景的节点」；其余情形返回 undefined ⇒ 钩子完全不动。
+ */
+function resolveFullscreenAvatar(player: any, avatar: any): HTMLDivElement | undefined {
+	if (!avatar || !player?.node) return undefined;
+	let node: any;
+	if (avatar === "vice") {
+		if (!lib.character[player.name2]) return undefined;
+		node = player.node.avatar2;
+	} else {
+		if (!lib.character[player.name]) return undefined;
+		node = player.node.avatar;
+	}
+	return node instanceof HTMLDivElement ? node : undefined;
+}
+
 onContent({
 	name: "whichWaySkinAvatarBackground",
 	fn: () => {
@@ -699,6 +783,7 @@ onContent({
 		//两者都幂等，重复调用无副作用。
 		installPrototypeRedirect();
 		installPrototypeBackgroundImageRedirect();
+		installFullscreenPopPatch();
 
 		whichWayAPIOverride.appendHook("lib.element.player.$init", {
 			before(this: any) {

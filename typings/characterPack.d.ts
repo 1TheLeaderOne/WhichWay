@@ -323,25 +323,214 @@ declare interface WhichWayObjectificationCharacterPack {
 	skill: Record<string, ExtendedSkill>;
 }
 
+/**
+ * 技能字段**覆盖表**：只允许写 {@link Skill} 里**已经声明**的字段，用来放宽 / 收窄其类型。
+ *
+ * ⚠️ 这里的键必须已经存在于 `Skill` 中。`CustomExtend` 只遍历 `keyof Skill`，
+ * 写一个 `Skill` 没有的键**既不会报错也不会生效** —— 它会落到 `Skill` 的
+ * `[key: string]: any` 索引签名上，最终类型退化成 `any`（`markimage` 以前就是这样失效的）。
+ * 要新增 `Skill` 没有的字段，请写到 {@link SkillSupplement}。
+ */
 interface SkillFieldOverrides {
-	audio?: number | string | boolean | [string, number] | Array<AudioTitle>;
+	/**
+	 * 技能配音配置。除了引擎原生的几种形态，本扩展额外支持**对象形态**：
+	 *
+	 * ```ts
+	 * audio: {
+	 *   default: ["部署2"],                        // 基础（非残余）的「部署2」
+	 *   "char_003_kalts@boc#6": ["部署1", "部署2"], // 残余皮肤的「部署1」「部署2」
+	 * }
+	 * ```
+	 *
+	 * 对象形态的含义：**key = 皮肤 id 或 `"default"`，value = 该皮肤下要用到的语音条目数组**。
+	 *
+	 * 为什么是「皮肤 → 条目数组」而不是「条目 → 皮肤」：同一个标题在**不同皮肤下是两条不同的音频**，
+	 * 反过来的写法没法同时表达「残余的部署1」和「非残余的部署1」——后者会把前者覆盖掉。
+	 *
+	 * - key 写明日方舟的 **skinId**（如 `char_003_kalts@boc#6`，不是显示名）；
+	 * - key 写 `"default"` 表示这一组用干员自己的（基础）语音；
+	 * - value 是配音标题数组（也可写单个字符串）；组内顺序就是播放顺序。
+	 *
+	 * **数组是语法糖**：`audio: ["作战中1", "作战中2"]` 等价于
+	 * `audio: { default: ["作战中1", "作战中2"] }`，内部会先归一化再处理，
+	 * 因此运行期只有「对象形态」这一条路径。
+	 *
+	 * 引擎本身不支持对象形态 —— 初始化时（`applySkillAudio`）会把它展开成
+	 * 「标题序列 + 语音库序列」并存进旁路表，`lib.skill[x].audio` 仍落成
+	 * `ext:WhichWay/audio/{语言}:{N}` 字符串。因此**运行期看到的永远是字符串**，
+	 * 不需要（也不应该）在别处判断对象形态。
+	 */
+	audio?:
+		| number
+		| string
+		| boolean
+		| [string, number]
+		| Array<AudioTitle>
+		| Partial<Record<AudioSkinId, AudioTitle | AudioTitle[]>>;
 	locked?: boolean | ((skill: string, player: Player) => boolean);
 	filter?: (event: GameEvent, player: Player, name: string, target: Player) => any;
 	subSkill?: Record<string, ExtendedSkill>;
+}
+
+/**
+ * 技能字段**补充表**：收录引擎会读取、但 {@link Skill} 没有声明的字段。
+ *
+ * 与 {@link SkillFieldOverrides} 的分工（两者最终都会合并进 {@link ExtendedSkill}，
+ * 使用时没有任何区别，分开写只是为了「一眼看出哪个是覆盖、哪个是新增」）：
+ * - `SkillFieldOverrides`：`Skill` 里**已有**的字段 ⇒ 只改类型；
+ * - `SkillSupplement`：`Skill` 里**没有**的字段 ⇒ 纯新增。
+ *
+ * 下面每个字段都注明引擎的读取位置。若无名杀本体日后给 `Skill` 补上了其中某个字段，
+ * 底部的编译期自检会报错，届时把该字段从本表删掉即可（`Skill` 会直接提供它）。
+ */
+interface SkillSupplement {
 	/**
-	 * 连招技tag，仅标识，无其他用途
+	 * 标记显示图片（与 `marktext` 同理，只不过显示的是图片而不是文字）
+	 *
+	 * 读取处：`Player#markSkill`（`library/element/player.js`）
 	 */
-	comboSkill?:boolean;
+	markimage?: string;
 	/**
-	 * 同marktext一样,只不过显示的是图片
+	 * 次级标记显示图片，绘制在 `.background.skillmark` 节点上（`markimage` 为空时才生效）
+	 *
+	 * 读取处：`Player#markSkill`（`library/element/player.js`）
 	 */
-	markimage?:string;
+	markimage2?: string;
+	/**
+	 * 连招技：仅作技能分类标签，无其他用途
+	 *
+	 * 读取处：`get.skillCategoriesOf`（`get/index.js`）
+	 */
+	comboSkill?: boolean;
+	/**
+	 * 隐匿技（技能分类标签）
+	 *
+	 * 读取处：`get.skillCategoriesOf`（`get/index.js`）
+	 */
+	hiddenSkill?: boolean;
+	/**
+	 * 宗族技（技能分类标签）
+	 *
+	 * 读取处：`get.skillCategoriesOf`（`get/index.js`）
+	 */
+	clanSkill?: boolean;
+	/**
+	 * 使命技（技能分类标签）
+	 *
+	 * 读取处：`get.skillCategoriesOf`（`get/index.js`）
+	 */
+	dutySkill?: boolean;
+	/**
+	 * 阵法技（技能分类标签）
+	 *
+	 * 读取处：`get.skillCategoriesOf`（`get/index.js`）
+	 */
+	zhenfa?: boolean;
+	/**
+	 * 主将技（技能分类标签）
+	 *
+	 * 读取处：`get.skillCategoriesOf`（`get/index.js`）
+	 */
+	mainSkill?: boolean;
+	/**
+	 * 副将技（技能分类标签）
+	 *
+	 * 读取处：`get.skillCategoriesOf`（`get/index.js`）
+	 */
+	viceSkill?: boolean;
+	/**
+	 * 君主技（技能分类标签）
+	 *
+	 * 读取处：`get.skillCategoriesOf`（`get/index.js`）
+	 */
+	lordSkill?: boolean;
+	/**
+	 * 蓄能技（技能分类标签）
+	 *
+	 * 读取处：`get.skillCategoriesOf`（`get/index.js`）
+	 */
+	chargingSkill?: boolean;
+	/**
+	 * 昂扬技（技能分类标签）
+	 *
+	 * 读取处：`get.skillCategoriesOf`（`get/index.js`）
+	 */
+	sunbenSkill?: boolean;
+	/**
+	 * 威主技（技能分类标签）
+	 *
+	 * 读取处：`get.skillCategoriesOf`（`get/index.js`）
+	 */
+	feedPigSkill?: boolean;
+	/**
+	 * 蓄力技：既作技能分类标签，又作蓄力值上限
+	 *
+	 * - 作标签：`get.skillCategoriesOf`（`get/index.js`），此时取值 `true` 即可；
+	 * - 作上限：`Player#getMaxCharge`（`library/element/player.js`）会累加**数值型**取值，
+	 *   `Infinity` 表示无上限。注意 `typeof true != "number"`，写 `true` 不会增加上限。
+	 */
+	chargeSkill?: boolean | number;
 }
 
 type AudioTitle = "任命助理" | "交谈1" | "交谈2" | "交谈3" | "晋升后交谈1" | "晋升后交谈2" | "信赖提升后交谈1" | "信赖提升后交谈2" | "信赖提升后交谈3" | "闲置" | "干员报到" | "观看作战记录" | "精英化晋升1" | "精英化晋升2" | "编入队伍" | "任命队长" | "行动出发" | "行动开始" | "选中干员1" | "选中干员2" | "部署1" | "部署2" | "作战中1" | "作战中2" | "作战中3" | "作战中4" | "完成高难行动" | "3星结束行动" | "非3星结束行动" | "行动失败" | "进驻设施" | "戳一下" | "信赖触摸" | "标题" | "新年祝福" | "问候" | "生日" | "周年庆典";
+
+/**
+ * `audio` 对象形态里 **key** 的取值：**皮肤 id** 或 `"default"`。
+ *
+ * - `"default"`：这一组用干员自己的（基础）语音；
+ * - 其余字符串：明日方舟 **skinId**，形如 `char_003_kalts@boc#6`（`@` 前是干员 id，
+ *   `@` 后是皮肤组与序号）。⚠️ 不是皮肤显示名（「残余」），也不是语音库名
+ *   （`char_003_kalts_boc#6`）——扩展会自动查 `skin_table` 做转换。
+ *
+ * 用 `(string & {})` 而不是纯 `string`：既保留字面量补全（IDE 里能看到 `"default"`），
+ * 又允许写任意皮肤 id（皮肤 id 太多、且会随版本新增，不适合枚举）。
+ */
+type AudioSkinId = "default" | (string & {});
 
 type CustomExtend<T, O extends Partial<Record<keyof T, any>>> = {
 	[K in keyof T]: K extends keyof O ? O[K] : T[K];
 };
 
-type ExtendedSkill = CustomExtend<Skill, SkillFieldOverrides>;
+/**
+ * 驶舰之向技能类型 = `Skill` 本体 + 字段覆盖 + 字段补充。
+ *
+ * ⚠️ 这里必须用 `interface extends` 而不是交叉类型 `A & B`：
+ * 交叉类型会让**嵌套对象字面量里方法**的 `this` 从字面量本身退化成 `{}`，
+ * 导致 `this.cardManager` / `this.loseSlot()` 这类写法报「Property 'x' does not exist on type '{}'」
+ * （`char_4016_kazema.ts` 的 `cardManager` 就会踩到）。`interface extends` 没有这个副作用。
+ *
+ * 另外，补充字段**不能**塞进 `CustomExtend` 的第二个参数：`CustomExtend` 只遍历 `keyof Skill`，
+ * 那些键不在其中，会被静默丢掉并退化成 `any`（这正是 `markimage` 以前失效的原因）。
+ */
+interface ExtendedSkill extends CustomExtend<Skill, SkillFieldOverrides>, SkillSupplement {}
+
+// ===== 编译期自检：确保「覆盖」与「新增」两张表不会互相放错位置 =====
+
+/** 是否为 `any`（`Skill` 有 `[key: string]: any` 索引签名，非具名成员会被解析成 `any`） */
+type IsAny<T> = 0 extends 1 & T ? true : false;
+
+/** 取出 `Skill` 中键 `K` 的类型；不是具名成员时退化为索引签名的 `any` */
+type SkillMemberType<K extends PropertyKey> = K extends keyof Skill ? Skill[K] : never;
+
+/** `K` 是 `Skill` 的具名成员时为 `true`（`Skill` 现有 146 个具名成员，没有一个是 `any`） */
+type IsSkillMember<K extends PropertyKey> = IsAny<SkillMemberType<K>> extends true ? false : true;
+
+/** 挑出「`Skill` 里不存在、却被写进覆盖表」的键（应为 `never`） */
+type BadOverrideKeys<O> = {
+	[K in keyof O]-?: IsSkillMember<K> extends true ? never : K;
+}[keyof O];
+
+/** 挑出「`Skill` 里已存在、却被写进补充表」的键（应为 `never`，说明该从补充表删掉） */
+type BadSupplementKeys<S> = {
+	[K in keyof S]-?: IsSkillMember<K> extends true ? K : never;
+}[keyof S];
+
+type AssertNever<T extends never> = T;
+
+/**
+ * 若这两行报错，按报错里出现的键名处理：
+ * - `_AssertSkillFieldOverrides` 报错 ⇒ 该键 `Skill` 里没有，请从 `SkillFieldOverrides` 移到 `SkillSupplement`；
+ * - `_AssertSkillSupplement` 报错 ⇒ 该键 `Skill` 里已声明，请从 `SkillSupplement` 删掉（`Skill` 已提供）。
+ */
+type _AssertSkillFieldOverrides = AssertNever<BadOverrideKeys<SkillFieldOverrides>>;
+type _AssertSkillSupplement = AssertNever<BadSupplementKeys<SkillSupplement>>;

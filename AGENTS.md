@@ -216,6 +216,58 @@ line({ "#lushimrfz1": "……", "#lushimrfz2": "……" }, false);      // 批�
 - 同一键重复注册会直接抛错（而不是静默覆盖）：一个音频地址只能对应一条台词，要先 `audio: 2` 这类多段配音，请用带编号的键且 `autoPrefix` 传 `false`。
 - ⚠️ **按技能名写就够了，不要手写 `ext:` 键**：音频模块的 `applySkillAudio` 会在 `arenaReady` 把 `audio` 改写成 `ext:WhichWay/audio/{语言}:{N}`，此时引擎查台词的地址变成 `#ext:WhichWay/audio/{语言}/{技能名}{序号}`。`mirrorSkillLines()` 会自动把 `#技能名N` 镜像到该地址（阵亡同理：`#角色名:die` → `#ext:WhichWay/audio/{语言}/die/{角色名}:die`），并且**只补不覆盖**，所以显式写地址键仍然优先。若哪天改了地址格式，镜像逻辑要跟着改，否则 `textList` 会静默变空（语音照常能播，很难发现）。
 - 显示端：驶舰之向武将卡的技能面板（`src/characterCard/panels/SkillPanel.vue`）里，技能名旁的「台词」按钮（`line.png`）开合该技能的台词区，读 `get.Audio.skill(...).audioList`——**一个音频文件一条**（`text` 可以为空），所以「有声无词」的干员照样能逐条试听，文本位显示「无台词」。每条台词前的播放键走 `whichWayAudio.playSkillLineAudio(skill, name, index)`，按序号精确取 `fileList[index]`；技能名旁原来的试听键走 `playSkillAudio`（随机一条）。两者共用同一个试听通道：再点一次即停，播放时图标切 `Pause.png`。
+- **在线配音的台词兜底**：走 PRTS 在线配音的干员不需要作者写 `line()`——`applySkillAudio` 末尾会调 `fillOnlineLines()`，从 `charword_table`（`json/arknight/charword_table.json`，精简后进 `json/cache/arknight.json` 的 `charword_table.voiceLines`）按「配音标题」取对应文本，写到 `#ext:WhichWay/audio/{语言}/{技能名}{序号}`。要点：
+  - **只补空位、绝不覆盖**，作者手写 / `line()` 的台词永远优先，且幂等；
+  - 条件是「该干员有明日方舟 uid 且语言不是 `CUSTOM`」——不依赖本地文件是否存在，因为在线配音下载成本地 mp3 后 `exists` 会变 true，若按它判断会导致下次启动台词全丢（`lib.translate` 不落盘）；
+  - 序号按 `getSkillVoices()` 的标题顺序对齐：数组型 `audio`（作者点名标题）最精确，数字型的标题是启动期从默认池随机固化的，可能与磁盘那一条有出入——仍是该技能该干员的真台词，作为兜底可接受；
+  - 变体语言必须查各自的 wordkey：`ITA` → `{uid}_ITA`、`CN_TOPOLECT` → `{uid}_CN_TOPOLECT`，这两类的文本与普通话版**确实不同**，见 `getVoiceWordkey()`。
+
+#### `audio` 的对象形态：按皮肤指定语音条目
+
+部分干员有**皮肤专属语音**（凯尔希「残余」与基础版的 37/38 条台词都不同）。写法（**无名杀本体不支持，本扩展会在初始化时归一化**）：
+
+```ts
+skill({
+	qinghemrfz: {
+		// key = 皮肤 id（明日方舟 skinId）或 "default"；value = 该皮肤下要用到的语音条目
+		audio: {
+			default: ["部署2"],                          // 基础语音的「部署2」
+			"char_003_kalts@boc#6": ["部署1", "部署2"],   // 残余皮肤的「部署1」「部署2」
+		},
+	},
+});
+```
+
+- **key 写明日方舟 `skinId`**（`char_003_kalts@boc#6`，`@` 前是干员、`@` 后是皮肤组与序号），
+  **不是**皮肤显示名（「残余」），也**不是**语音库名（`char_003_kalts_boc#6`）。扩展会查
+  `skin_table.charSkins[].voiceId` 自动转换——22 个有语音的皮肤里这 22 个值全都不同，且存在
+  多对一（泥岩 4 个皮肤共用 `char_311_mudrok#1`）。
+- **value 是标题数组**（单字符串也接受）。**为什么不是「标题 → 皮肤」**：同一个标题在不同
+  皮肤下是**两条不同的音频**，反过来的写法没法同时表达「残余的部署1」和「非残余的部署1」
+  —— 后者会把前者覆盖掉。这是本设计的关键。
+- `"default"` 表示这一组用干员自己的基础语音。
+- **数组是语法糖**：`audio: ["作战中1", "作战中2"]` ⇒ `{ default: ["作战中1", "作战中2"] }`；
+  `audio: 2` ⇒ `{ default: 2 }`（数量形态）。内部统一由 `normalizeAudio()` 归一化，
+  **之后只有对象形态一条处理路径**。
+- 转换结果：`applySkillAudio` 把它展开成「标题序列 + 语音库序列」，`lib.skill[x].audio` 仍然
+  落成 **字符串** `ext:WhichWay/audio/{语言}:{N}`（数组会破坏 `getSkillAudioPath` /
+  `logAudio` 里的 `.replace`）；皮肤序列存在旁路表 `_skinEntries`（`skinTitlesOf()` /
+  `skinVoicesOf()` 读取，二者顺序严格对应，**不要分别从两个来源取标题和语音库**）。
+- 组间顺序：`default` 恒排在最前，其余按书写顺序；组内顺序即播放顺序。
+- 引擎完全不知道有对象这回事，所以**运行期读到的永远是字符串**，别在别处判断对象形态。
+- 类型定义在 `typings/characterPack.d.ts` 的 `SkillFieldOverrides.audio`（`AudioSkinId` 类型）。
+- ⚠️ **PRTS 的皮肤语音目录命名与 skinId 不同**：`@` → `_`，`#` → **双下划线 `__`**。
+  ```
+  char_003_kalts_boc#6  →  voice_cn/char_003_kalts_boc__6/cn_014.wav
+  ```
+  见 `prtsVoiceDir()`。已实测 22 个皮肤 × 4 种语言共 88 个组合全部可访问。
+- ⚠️ **`charword` 查台词用大写后缀、PRTS URL 用小写后缀**，两边是独立命名空间：
+  charword 的键是 `char_427_vigil_ITA` / `char_308_swire_CN_TOPOLECT`，而 URL 目录是
+  `char_427_vigil_ita` / `char_2024_chyue_cn_topolect`。混用会查不到数据。
+- 不是所有皮肤都有所有语言：纯烬艾雅法拉「后来的故事」、新约能天使「寻翼之歌」、
+  罗小黑 `#2` 只有 CN/JP（基础版有 KR/EN）。这类皮肤在缺语言时会 404，属于游戏素材本身的缺失。
+- 皮肤指定的语音同样参与在线配音下载与台词兜底（`getMissingAudioList` / `fillOnlineLines`
+  都按条目取对应的语音库）。
 
 `WhichWayPackManager`（`src/packs/index.ts`）用 `import.meta.glob("./character/*mrfz.{ts,js}")` 与 `import.meta.glob("./character/*mrfz/index.{ts,js}")`（`card/` 同构）在**构建期**确定模块清单：新增干员/卡牌仍然是「丢文件即可」，无需改任何代码，但必须重新 `build`。这些模块在 `packs/index.ts` 被 import 时（即 `packs(新)` 阶段）全部求值，并被 rollup 合并进**单个 chunk**（`chunks/packs-*.js`），因此启动期不再有 267 次模块请求。
 

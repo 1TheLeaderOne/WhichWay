@@ -347,6 +347,8 @@ class WhichWayAudio {
 		this._referCache.clear();
 		this._suffixSkills.clear();
 		this._webPlayMap.clear();
+		//按皮肤分组的旁路表同样要清：重建时会按（可能已还原的）原始 audio 重新归一化
+		this._skinEntries.clear();
 	}
 
 	/** 配置变更后重建整套音频索引 */
@@ -455,12 +457,33 @@ class WhichWayAudio {
 		//引用到核心技能（如 audio: "eagle"）时不干预，交给引擎默认处理
 		if (!targetInfo || !window.whichWaySave.hasSkill(target)) return;
 
+		//统一走归一化：数组是 `{ default: [...] }` 的语法糖，最终只处理对象形态。
+		//展开结果（按皮肤分组 → 扁平序列）落在旁路表里，info.audio 本身仍然只写字符串。
+		const normalized = this.normalizeAudio(targetInfo.audio);
+		if (normalized && !this.isCountOnlyAudio(normalized)) {
+			const entries = this.expandAudioEntries(normalized);
+			if (entries?.length) {
+				//按皮肤重新分组存起来：skinTitlesOf / skinVoicesOf 会按顺序摊平
+				const groups: { skinId: string; voiceId?: string; titles: string[] }[] = [];
+				for (const entry of entries) {
+					const last = groups[groups.length - 1];
+					if (last && last.voiceId === entry.voiceId) last.titles.push(entry.title);
+					else groups.push({ skinId: entry.voiceId ?? "default", voiceId: entry.voiceId, titles: [entry.title] });
+				}
+				this._skinEntries.set(`${skill}|${char}`, groups);
+			} else {
+				this._skinEntries.delete(`${skill}|${char}`);
+			}
+		} else {
+			this._skinEntries.delete(`${skill}|${char}`);
+		}
+
 		const parsed = this.parseAudioCount(targetInfo.audio);
 		if (!parsed) {
 			this.clearWebPlay(skill, char);
 			return;
 		}
-		//数组型 audio 指定了具体配音标题（如 ["作战中1","作战中2"]），先固化下来：
+		//数组型 / 对象型 audio 指定了具体配音标题，先固化下来：
 		//下面会把 info.audio 改写成路径字符串，之后再解析就只剩数量、拿不到标题了
 		if (parsed.voices.length) this.cacheSkillVoices(skill, char, parsed.voices);
 
@@ -478,8 +501,8 @@ class WhichWayAudio {
 			//覆盖共同完成。
 			this.clearWebPlay(skill, char);
 		} else if (lang !== "CUSTOM") {
-			//本地缺失 → 在线配音（按干员独立）
-			this.setWebPlay(skill, char, new whichWayWebPlay(skill, char, parsed.voices, base));
+			//本地缺失 → 在线配音（按干员独立）。把「每条来自哪个皮肤的语音库」一并传进去
+			this.setWebPlay(skill, char, new whichWayWebPlay(skill, char, parsed.voices, base, this.skinVoicesOf(skill, char)));
 		} else {
 			//CUSTOM 语言又没有本地文件 → 确实无音可播
 			this.clearWebPlay(skill, char);
@@ -498,6 +521,124 @@ class WhichWayAudio {
 		(info as any).audio = `ext:WhichWay/audio/${lang}:${finalCount}`;
 		//地址改写成 ext: 之后，引擎取台词用的键也跟着变了，必须同步一次别名（详见方法注释）
 		this.mirrorSkillLines(skill, char, base, lang, finalCount);
+		//在线配音（含「曾在线播放、后来下载成本地文件」的）用明日方舟的 charword 文本兜底。
+		//放在 mirrorSkillLines 之后：作者手写 / line() 的台词已经镜像到目标键，这里只补空位。
+		this.fillOnlineLines(skill, char, base, lang, finalCount);
+	}
+
+	/**
+	 * 在线配音的台词兜底：从 `charword_table` 取文本补到 `#[音频地址]` 上。
+	 *
+	 * 背景：本地配音的台词由作者用 `line()` 写（见 packs/hooks.ts），在线配音的角色
+	 * 往往一条都没写，于是武将卡里台词区是空的、只有语音能播。而明日方舟本身给每句配音
+	 * 都配了文本（`charword_table`），文案与 PRTS 播的那句完全对应，直接拿来当兜底最省事。
+	 *
+	 * **触发条件**：干员有明日方舟 uid（`getVoiceWordkey` 能取到）、配音语言不是 `CUSTOM`
+	 * （CUSTOM 是本扩展原创干员的自定义录音，明日方舟那边没有对应文本）。
+	 *
+	 * 与手动设置的关系：**只补空位、绝不覆盖**（`copyLine` 同款规则）。作者写了就用作者的，
+	 * 这里多跑几次也不会改掉已有内容；切换配音语言会重跑，文本相同所以幂等。
+	 *
+	 * 序号对齐：引擎按 `{前缀}1..N` 生成候选，第 i 条对应 `getSkillVoices()` 返回的第 i 个
+	 * 配音标题。数组型 `audio` 是作者显式点名的标题，最精确；数字型是启动期从默认池
+	 * 随机固化的，可能与磁盘上那一条的具体内容有出入——但仍是该技能该干员的真台词，
+	 * 作为兜底可以接受（总比整块空着强）。
+	 *
+	 * ⚠️ **不能只在「本地无文件」时做**：在线配音一旦被下载成本地 mp3，`exists` 就变成 true，
+	 * 若只在 else 分支补，下次启动台词就全没了（`lib.translate` 是运行期数据、不落盘）。
+	 * 所以判断依据是「这个干员在这个语言下有没有 charword 文本」，而不是「有没有本地文件」。
+	 */
+	private fillOnlineLines(skill: string, char: string, base: string, lang: string, count: number): void {
+		//CUSTOM 语言是本扩展原创干员的自定义录音，明日方舟没有对应文本
+		if (!lang || lang === "CUSTOM") return;
+
+		//⚠ 标题与语音库必须**成对**取自同一份归一化结果：
+		//同一个标题现在可以出现在多个皮肤下（残余的「部署1」+ 基础的「部署1」），
+		//若标题来自 getSkillVoices()、语音库来自另一张表，下标就会错位、配错台词。
+		const skinTitles = this.skinTitlesOf(skill, char);
+		const skinVoices = this.skinVoicesOf(skill, char);
+		const titles = skinTitles.length ? skinTitles : this.getSkillVoices(skill, char);
+		if (!titles.length) return;
+
+		const dir = `ext:WhichWay/audio/${lang}/`;
+		const names = this.lineAddressNames(skill, char, base);
+		const baseWordkey = this.getVoiceWordkey(char, lang);
+		const linesCache = new Map<string, Record<string, string>>();
+		const linesOf = (voiceId: string | undefined) => {
+			//voiceId 是语音库目录名，本身就是 charword 里的键；没有皮肤时退回干员的
+			const key = voiceId ? this.applyLangVariant(voiceId, lang) : baseWordkey;
+			if (!key) return undefined;
+			let cached = linesCache.get(key);
+			if (!cached) {
+				cached = whichWayArknight.getVoiceLines(key);
+				linesCache.set(key, cached);
+			}
+			return Object.keys(cached).length ? cached : undefined;
+		};
+
+		for (let i = 0; i < count; i++) {
+			const lines = linesOf(skinVoices[i]) ?? linesOf(undefined);
+			if (!lines) continue;
+			const text = lines[titles[i]];
+			if (!text) continue;
+			for (const name of names) {
+				const key = `#${dir}${name}${i + 1}`;
+				if (lib.translate[key] === void 0) lib.translate[key] = text;
+			}
+		}
+	}
+
+	/**
+	 * 给语音库名加语言变体后缀 —— **只用于 `charword` 查表**（台词）。
+	 *
+	 * ⚠️ 这里的大小写与 {@link compileVoicePath} 里给 URL 用的后缀**故意不同**，两边是两个独立命名空间：
+	 * - `charword_table` 的键：`char_427_vigil_ITA`、`char_308_swire_CN_TOPOLECT`（**大写**）
+	 * - PRTS 目录名：`char_427_vigil_ita`、`char_2024_chyue_cn_topolect`（**小写**）
+	 * 混用会查不到数据（台词为空 / 404）。
+	 *
+	 * 意大利语与中文方言的台词是独立录制的，charword 里是另一个目录。皮肤语音与语言变体
+	 * 理论上可以叠加；实测 22 个皮肤都没有这两种变体，所以叠加时查不到就自动回退基础。
+	 */
+	private applyLangVariant(voiceId: string, lang: string): string {
+		if (lang === "CN_TOPOLECT") return `${voiceId}_CN_TOPOLECT`;
+		if (lang === "ITA") return `${voiceId}_ITA`;
+		return voiceId;
+	}
+
+	/**
+	 * 一个技能在「某个干员名下」可能出现的**文件名候选**（台词的键就是
+	 * `#ext:WhichWay/audio/{语言}/{候选}{序号}`）。
+	 *
+	 * 三个来源缺一不可，去掉任何一个都会让某类技能的台词漏写：
+	 * - `skill`：作者按技能名写的台词（`line()` 的常规写法）；
+	 * - `base`：引擎实际使用的文件名前缀。借用配音（`audio: "其它技能"`）时它是引用链终点，
+	 *   与技能名不同；共享技能启用后缀命名时它还是 `{终点}_{干员}`；
+	 * - `{skill}_{char}`：`audioname` 命中干员但没触发后缀命名时，引擎仍会追加 `_干员`。
+	 *
+	 * @returns 去重后的候选名（保持稳定顺序，便于调试）
+	 */
+	private lineAddressNames(skill: string, char: string, base?: string): Set<string> {
+		const names = new Set<string>([skill]);
+		if (base) names.add(base);
+		const suffix = Array.isArray(lib.skill[skill]?.audioname) && lib.skill[skill].audioname.includes(char) ? `_${char}` : "";
+		if (suffix) names.add(`${skill}${suffix}`);
+		return names;
+	}
+
+	/**
+	 * 干员在某个配音语言下的台词表键（即 `charword_table` 里 `voiceAsset` 的目录名）。
+	 *
+	 * 绝大多数语言共用一个文本（`char_102_texas`），只有意大利语与中文方言有独立文本，
+	 * 目录名带 `_ITA` / `_CN_TOPOLECT` 后缀——这两种必须分开取，否则会显示成普通话版。
+	 *
+	 * @returns 台词表键；该干员不是明日方舟角色、或数据未加载时返回 undefined
+	 */
+	getVoiceWordkey(char: string, lang: string): string | undefined {
+		const arkCharId = get.character(char)?.whichWay?.arknight?.charId;
+		if (!arkCharId) return undefined;
+		if (lang === "ITA") return `${arkCharId}_ITA`;
+		if (lang === "CN_TOPOLECT") return `${arkCharId}_CN_TOPOLECT`;
+		return arkCharId;
 	}
 
 	/**
@@ -523,15 +664,14 @@ class WhichWayAudio {
 	 */
 	private mirrorSkillLines(skill: string, char: string, base: string, lang: string, count: number): void {
 		const dir = `ext:WhichWay/audio/${lang}/`;
-		const suffix = Array.isArray(lib.skill[skill]?.audioname) && lib.skill[skill].audioname.includes(char) ? `_${char}` : "";
-		//同名镜像：技能名 / 引用链终点名（借用配音时两者不同，各搬一份不会互相覆盖）
-		const names = new Set<string>([skill, `${skill}${suffix}`]);
-		if (base) names.add(base);
+		const names = this.lineAddressNames(skill, char, base);
 		for (const name of names) {
 			this.copyLine(`#${name}`, `#${dir}${name}`);
 			for (let i = 1; i <= count; i++) this.copyLine(`#${name}${i}`, `#${dir}${name}${i}`);
 		}
-		//地址带 `_干员` 后缀、但作者只写了不带后缀的台词：再补一份带后缀的（已显式写的优先，不会被覆盖）
+		//地址带 `_干员` 后缀、但作者只写了不带后缀的台词（最常见）：
+		//从 `#技能名N` 直接补一份到 `#dir/技能名_干员N`。已显式写的不覆盖。
+		const suffix = Array.isArray(lib.skill[skill]?.audioname) && lib.skill[skill].audioname.includes(char) ? `_${char}` : "";
 		if (suffix) {
 			this.copyLine(`#${skill}`, `#${dir}${skill}${suffix}`);
 			for (let i = 1; i <= count; i++) this.copyLine(`#${skill}${i}`, `#${dir}${skill}${suffix}${i}`);
@@ -546,19 +686,184 @@ class WhichWayAudio {
 	}
 
 	/**
-	 * 解析 audio 配置得到音频数量与（可选的）配音标题列表
+	 * 解析 `audio` 配置得到音频数量与（可选的）配音标题列表。
+	 *
+	 * 统一走 {@link normalizeAudio}：数组先归一化成 `{ default: [...] }`，
+	 * 之后只有「对象形态」一条处理路径。
 	 */
 	private parseAudioCount(audio: unknown): { count: number; voices: string[] } | undefined {
-		if (audio === false || audio === undefined || audio === null) return undefined;
-		if (audio === true) return { count: 1, voices: [] };
-		if (typeof audio === "number") return { count: audio, voices: [] };
-		if (Array.isArray(audio)) return { count: audio.length, voices: audio.slice() };
-		if (typeof audio === "string") {
-			//形如 "ext:WhichWay/audio/CN_MANDARIN:2"
-			const matched = audio.match(/:(\d+)$/);
-			if (matched) return { count: parseInt(matched[1]), voices: [] };
+		const normalized = this.normalizeAudio(audio);
+		if (!normalized) return undefined;
+
+		//数量形态（`audio: 2` / `true`）：没有具体标题
+		if (this.isCountOnlyAudio(normalized)) {
+			const count = normalized.default as number;
+			//`true` 归一化成 1，与引擎语义一致
+			return { count: Math.max(1, count), voices: [] };
 		}
-		return undefined;
+
+		const entries = this.expandAudioEntries(normalized);
+		if (!entries) return undefined;
+		return { count: entries.length, voices: entries.map(entry => entry.title) };
+	}
+
+	// ============ 按皮肤指定语音（audio 为对象） ============
+	//
+	// 归一化：**只处理对象形态**。
+	//   audio: ["作战中1","作战中2"]        ⇒ { default: ["作战中1","作战中2"] }
+	//   audio: 2 / true                     ⇒ { default: 2 }（数字保持数字，语义交给下游）
+	// 对象形态：key = 皮肤 id 或 "default"，value = 该皮肤下要用到的语音条目。
+	//   同一个标题可以出现在多个皮肤下（残余的「部署1」与基础的「部署1」是两条不同的音频）。
+
+	/**
+	 * 「技能|干员」→ 归一化后的「肤色 id → 条目列表」。
+	 *
+	 * 为什么单独存表、而不是塞进 `info.audio`：
+	 * `lib.skill[x].audio` 必须保持**字符串**形态（`ext:WhichWay/audio/{语言}:{N}`），
+	 * 因为扩展内有多处代码对它做字符串操作（`nonameEx/custom/skill.ts` 的 `getSkillAudioPath`、
+	 * `char_1044_hsgma2.ts` 的 `logAudio`，都是 `path.replace(path.slice(-2), "")`），
+	 * 一旦变成数组就会当场抛错。皮肤信息只影响「取哪条 URL」，与引擎解析路径无关，因此旁路存放。
+	 *
+	 * 这里的 key 已从**皮肤 id** 解析成**语音库目录名**（`voiceId`），`undefined` 表示基础语音。
+	 */
+	private _skinEntries = new Map<string, { skinId: string; voiceId?: string; titles: string[] }[]>();
+
+	/**
+	 * 该 (技能, 干员) 归一化后的条目组（按皮肤分组）。
+	 *
+	 * 返回的是**展开后的扁平序列**：把每个皮肤下的条目依次摊平，每条带上它的语音库，
+	 * 顺序即最终 `fileList` 的顺序。这样「残余的部署1」和「基础的部署1」会各占一个下标，
+	 * 互不覆盖。
+	 */
+	skinVoicesOf(skill: string, char: string): Array<string | undefined> {
+		const groups = this._skinEntries.get(`${skill}|${char}`);
+		if (!groups?.length) return [];
+		const flat: Array<string | undefined> = [];
+		for (const group of groups) for (let i = 0; i < group.titles.length; i++) flat.push(group.voiceId);
+		return flat;
+	}
+
+	/** 该 (技能, 干员) 展开后的配音标题序列（与 `skinVoicesOf` 等长） */
+	skinTitlesOf(skill: string, char: string): string[] {
+		const groups = this._skinEntries.get(`${skill}|${char}`);
+		if (!groups?.length) return [];
+		return groups.flatMap(group => group.titles);
+	}
+
+	/**
+	 * 把 `audio` 归一化成**对象形态**（key = 皮肤 id 或 `"default"`，value = 条目列表）。
+	 *
+	 * 这是本模块唯一接受的输入形态，其它写法都当语法糖先转过来：
+	 * ```ts
+	 * audio: ["作战中1", "作战中2"]   // 语法糖
+	 * // ⇒ { default: ["作战中1", "作战中2"] }
+	 *
+	 * audio: { default: ["部署1"], "char_003_kalts@boc#6": ["部署1"] }
+	 * // 同一个标题「部署1」在两个皮肤下各有一条，谁都不会覆盖谁
+	 * ```
+	 *
+	 * 数字 / 布尔的处理：`audio: 2` 表示「用默认池随机挑 2 条」，没有标题可言，
+	 * 因此转成 `{ default: 2 }`，由下游按「数字 = 数量」处理（见 {@link isCountOnlyAudio}）。
+	 *
+	 * @returns 归一化后的对象；无法识别时返回 undefined
+	 */
+	normalizeAudio(audio: unknown): Record<string, string[] | number> | undefined {
+		if (audio === false || audio === undefined || audio === null) return undefined;
+		//数字 / true：数量形态，没有具体标题
+		if (typeof audio === "number") return { default: audio };
+		if (audio === true) return { default: 1 };
+		//数组：语法糖 ⇒ { default: [...] }
+		if (Array.isArray(audio)) return { default: audio.map(String) };
+		//字符串：引用其它技能 / 已是 ext: 路径，不属于本次归一化的范畴
+		if (typeof audio === "string") {
+			//已被本模块改写过的形态（`ext:WhichWay/audio/{语言}:{N}`）：
+			//从尾部数字还原成「数量」，这样重复调用 applySkillAudio 也能正确解析
+			const matched = audio.match(/:(\d+)$/);
+			if (matched) return { default: parseInt(matched[1]) };
+			return undefined;
+		}
+		if (typeof audio !== "object") return undefined;
+
+		const result: Record<string, string[] | number> = {};
+		for (const [skinId, value] of Object.entries(audio as Record<string, unknown>)) {
+			//value 允许单个标题（写法更省事）或标题数组
+			if (typeof value === "string") result[skinId] = [value];
+			else if (typeof value === "number") result[skinId] = value;
+			else if (Array.isArray(value)) result[skinId] = value.map(String);
+			//其它类型（对象/布尔/null）忽略：类型上不允许，运行期硬写就当没写
+		}
+		return Object.keys(result).length ? result : undefined;
+	}
+
+	/** 归一化结果是否只有数量、没有具体标题（`audio: 2` 这类） */
+	private isCountOnlyAudio(normalized: Record<string, string[] | number>): boolean {
+		const keys = Object.keys(normalized);
+		return keys.length === 1 && keys[0] === "default" && typeof normalized.default === "number";
+	}
+
+	/**
+	 * 展开成引擎可用的扁平序列：`[{ title, voiceId }]`。
+	 *
+	 * - `"default"` 组不解析语音库（`voiceId` 为 undefined，即干员自己的）；
+	 * - 其它组按 `skinId → voiceId` 解析，查不到则整组**丢弃并 warn**（不能拼出必然 404 的 URL）；
+	 * - 组内顺序 = 作者书写顺序；组间顺序 = 对象键顺序，但 `default` 始终排在最前
+	 *   （保证「基础语音」在下标 0..N 起点，便于人工排查）。
+	 *
+	 * @returns 扁平条目序列；数量形态（没有标题）时返回 undefined
+	 */
+	private expandAudioEntries(normalized: Record<string, string[] | number>): Array<{ title: string; voiceId?: string }> | undefined {
+		const skinIds = Object.keys(normalized);
+		//default 在前，其余保持书写顺序
+		skinIds.sort((a, b) => (a === "default" ? -1 : b === "default" ? 1 : 0));
+
+		const entries: Array<{ title: string; voiceId?: string }> = [];
+		for (const skinId of skinIds) {
+			const value = normalized[skinId];
+			//数量形态没有标题，交给下游按「数量」处理
+			if (typeof value === "number") return undefined;
+			if (!value.length) continue;
+
+			let voiceId: string | undefined;
+			if (skinId !== "default") {
+				voiceId = this.getVoiceIdBySkinId(skinId);
+				if (voiceId === void 0) {
+					console.warn(`[whichWayAudio] 皮肤 ${skinId} 找不到对应语音库，该组（${value.length} 条）将被忽略`);
+					continue;
+				}
+			}
+			for (const title of value) entries.push({ title, voiceId });
+		}
+		return entries.length ? entries : undefined;
+	}
+
+	/**
+	 * 把作者写的 **skinId** 解析成 **voiceId**（真正的语音库目录名）。
+	 *
+	 * 这两者几乎总是不同（22 个有语音的皮肤里 22 个都不同）：
+	 * ```
+	 * char_003_kalts@boc#6     → char_003_kalts_boc#6   （残余）
+	 * char_311_mudrok@summer#6 → char_311_mudrok#1      （多个皮肤共用一个语音库）
+	 * ```
+	 * 数据来自 `skin_table.charSkins[].voiceId` 的精简映射（见 arknight 模块）。
+	 *
+	 * @param skinId 作者写的皮肤 id
+	 * @returns 语音库目录名；查不到时返回 undefined（调用方按基础语音处理）
+	 */
+	getVoiceIdBySkinId(skinId: string): string | undefined {
+		return whichWayArknight.getSkinVoiceId(skinId);
+	}
+
+	/**
+	 * 把 voiceId 拼成 PRTS 的目录名。
+	 *
+	 * PRTS 的路径规则与 skinId 不同：`@` → `_`，`#` → **`__`（双下划线）**。
+	 * ```
+	 * char_003_kalts_boc#6 → char_003_kalts_boc__6
+	 * ```
+	 * 已实测：22 个皮肤 × 4 种语言共 88 个组合全部 200。
+	 */
+	prtsVoiceDir(voiceId: string): string {
+		return voiceId.replace(/@/g, "_").replace(/#/g, "__");
 	}
 
 	/**
@@ -842,18 +1147,22 @@ class WhichWayAudio {
 			for (const skill of charData.skills) {
 				if (!window.whichWaySave.hasSkill(skill)) continue;
 				const base = this.getAudioBaseName(skill, char);
+				//按皮肤指定的语音：第 i 条要从对应皮肤的语音库下载
+				const skinVoices = this.skinVoicesOf(skill, char);
 				for (const lang of langsToCheck) {
 					if (lang === "CUSTOM") continue;
 					if (!allLangs && this._audioExistCache!.has(whichWayFile.compilePath(`audio:${lang}/${base}1.mp3`))) {
 						continue;
 					}
-					const voiceTitles = this.getSkillVoices(skill, char);
-					if (!voiceTitles.length) continue;
+					//标题与语音库必须成对取自同一份归一化结果（同一标题可出现在多个皮肤下）
+					const voiceTitles = this.skinTitlesOf(skill, char);
+					const titles = voiceTitles.length ? voiceTitles : this.getSkillVoices(skill, char);
+					if (!titles.length) continue;
 					tasks.push({
 						type: "skill",
 						skill,
 						char,
-						urls: voiceTitles.map(title => this.compileVoicePath(char, lang, title)),
+						urls: titles.map((title, i) => this.compileVoicePath(char, lang, title, skinVoices[i])),
 						lang,
 					});
 				}
@@ -1024,7 +1333,8 @@ class WhichWayAudio {
 		const audioList = get.Audio.skill({ skill, player: name }).fileList;
 		//试听是明确的一次点击，不该被引擎的 1 秒去重吃掉（「播→停→再播」很容易落在 1 秒内）
 		this.clearAudioDedupe(audioList);
-		const audio = game.tryAudio({ audioList });
+		//autoplay 默认 true，所以返回值一定是音频元素而不是「延迟播放」的闭包
+		const audio = game.tryAudio({ audioList }) as HTMLAudioElement;
 		if (audio) this.trackPreview(audio, { skill, name });
 		return audio;
 	}
@@ -1232,10 +1542,10 @@ class WhichWayAudio {
 				else if (langs.includes(audioSave.default)) lang = audioSave.default;
 				else lang = langs[0];
 			}
-			this._charLangCache.set(char, lang);
+			this._charLangCache.set(char, lang!);
 		}
 
-		return translate ? whichWayArknight.getVoiceLangTranslation(lang)! : lang;
+		return translate ? whichWayArknight.getVoiceLangTranslation(lang!)! : lang!;
 	}
 
 	/**
@@ -1537,19 +1847,27 @@ class WhichWayAudio {
 	 * @param {string} uid 角色UID
 	 * @param {string} lang 配音语言
 	 * @param {string} voiceTitle 音频标题
+	 * @param {string} [voiceId] 语音库目录名（来自 `skin_table` 的 `voiceId`）；
+	 *   留空表示用干员自己的基础语音。注意**不是** skinId——两者不同，先用
+	 *   {@link getVoiceIdBySkinId} 转换。
 	 * @returns {string} 音频路径
 	 */
-	compileVoicePath(uid: string, lang: string, voiceTitle: string): string {
+	compileVoicePath(uid: string, lang: string, voiceTitle: string, voiceId?: string): string {
 		uid = whichWayArknight.shcema.transfer(uid, "character", "whichWayUID") || uid;
+
+		//语言变体后缀与「皮肤语音库」是两个独立维度，可以叠加：
+		//`char_2024_chyue` + CN_TOPOLECT → `char_2024_chyue_cn_topolect`
+		//`char_003_kalts_boc#6` + CN_TOPOLECT → `char_003_kalts_boc#6_cn_topolect`（若该皮肤有此语言）
+		let dirName = voiceId ? this.prtsVoiceDir(voiceId) : uid;
 		if (lang === "CN_TOPOLECT") {
-			uid = `${uid}_cn_topolect`;
-		} else if(lang === "ITA"){
+			dirName = `${dirName}_cn_topolect`;
+		} else if (lang === "ITA") {
 			//整个custom组就意大利语搞特殊是何意味
-			uid = `${uid}_ita`;
+			dirName = `${dirName}_ita`;
 		}
 		voiceTitle = this.transferVoiceTitle(voiceTitle);
 		lang = this.transferLang(lang);
-		return `${this.resourceUrl}assets/audio/${lang}/${uid}/${voiceTitle}.wav`;
+		return `${this.resourceUrl}assets/audio/${lang}/${dirName}/${voiceTitle}.wav`;
 	}
 
 	/**

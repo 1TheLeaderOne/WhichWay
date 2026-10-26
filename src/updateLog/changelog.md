@@ -2,6 +2,50 @@
 
 ## 2026-10-26
 
+### 新增：技能 `audio` 支持对象形态，可指定「哪个皮肤下的哪些语音条目」
+
+- **背景**：部分干员有皮肤专属语音。凯尔希的「残余」皮肤与基础版**38 条里有 37 条台词和语音都不同**（`部署1` 基础是「到达指定位置了。」，残余是「开始实行计划。」）。此前 `audio` 只能用 `number` / `string` / `[技能, 数量]` / 标题数组，无法表达「残余的部署1 和 非残余的部署1 同时存在」。
+- **写法**（无名杀本体不支持，本扩展在初始化时归一化）：
+  ```ts
+  skill({
+    qinghemrfz: {
+      // key = 皮肤 id（明日方舟 skinId）或 "default"；value = 该皮肤下要用到的语音条目
+      audio: {
+        default: ["部署2"],                          // 基础语音的「部署2」
+        "char_003_kalts@boc#6": ["部署1", "部署2"],   // 残余皮肤的「部署1」「部署2」
+      },
+    },
+  });
+  ```
+- **为什么 key 是皮肤、value 是条目数组**（这是本次设计的核心）：同一个标题在不同皮肤下是**两条不同的音频**。若反过来写成「标题 → 皮肤」，就无法同时表达「残余的部署1」和「非残余的部署1」——后者会把前者覆盖掉。
+- **数组是语法糖**：`audio: ["作战中1", "作战中2"]` ⇒ `{ default: ["作战中1", "作战中2"] }`；`audio: 2` ⇒ `{ default: 2 }`。新增 `normalizeAudio()` 做这一步归一化，**之后内部只有「对象形态」一条处理路径**。
+- **实现**：
+  - `src/arknight/index.ts`：`slimArknightData` 新增 `skinVoice` —— 从 `skin_table.charSkins[].voiceId` 抽出「皮肤 → 语音库」映射（**只有 22 个皮肤带专属语音**，其余为空；2.7MB 的表压成 1.1KB）。新增 `getSkinVoiceId()`。`slimCacheSchema` 3 → 4。
+  - `src/audio/index.ts`：`normalizeAudio()` 归一化 → `expandAudioEntries()` 展开成扁平条目序列（每条带 `{ title, voiceId }`）→ 旁路表 `_skinEntries` 按皮肤分组保存。新增 `getVoiceIdBySkinId()`、`prtsVoiceDir()`；`compileVoicePath()` 增加可选 `voiceId`。
+  - `src/audio/webPlay.ts`：`whichWayWebPlay` 增加 `voiceIds`，按条目取各自语音库的 URL。
+  - `typings/characterPack.d.ts`：`SkillFieldOverrides.audio` 增加对象形态 `Partial<Record<AudioSkinId, AudioTitle | AudioTitle[]>>`，新增 `AudioSkinId = "default" | (string & {})`。
+- **关键设计**：
+  1. **`lib.skill[x].audio` 仍然落成字符串** `ext:WhichWay/audio/{语言}:{N}`。扩展内 `getSkillAudioPath()`（`nonameEx/custom/skill.ts`）和 `char_1044_hsgma2.ts` 的 `logAudio()` 都对这个值做 `path.replace(path.slice(-2), "")`，落成数组会当场抛错。皮肤信息因此走旁路表。
+  2. **标题与语音库必须成对取自同一份归一化结果**。同一标题现在可以出现在多个皮肤下，若标题来自 `getSkillVoices()`、语音库来自另一张表，下标就会错位、配错台词。因此新增 `skinTitlesOf()` / `skinVoicesOf()`，二者顺序严格对应。
+  3. **PRTS 的皮肤目录命名与 skinId 不同**：`@` → `_`，`#` → **双下划线 `__`**。已实测 22 个皮肤 × 4 种语言共 88 个组合全部可访问。
+  4. **查台词与查 URL 的后缀大小写不同**：`charword` 的键用大写（`char_427_vigil_ITA`），PRTS 目录用小写（`char_427_vigil_ita`）。混用会查不到数据。
+  5. 组间顺序：`default` 恒排在最前，其余按书写顺序；组内顺序即播放顺序。查不到语音库的整组丢弃并 warn，不会拼出必然 404 的 URL。
+- **本地下载不加后缀**：一个技能只会有一套配音（只是来源可能不同），文件命名沿用 `{base}{n}.mp3`，不产生新文件也不影响已有音频。
+- **校验**：`pnpm eslint` 0 报错；`WW_SKIP_STATIC_COPY=1 vite build` 通过。用**源码切片**（esbuild 去类型后跑真实实现）跑了 41 项断言：数组语法糖归一化、数字/布尔/字符串各形态、对象形态、单字符串 value、扁平展开、`default` 优先排序、非法皮肤整组丢弃、PRTS 目录规则、22 条映射、以及**同一「部署1」在基础与残余下各自拿到对应台词**（「到达指定位置了。」vs「开始实行计划。」）。另有 4 项类型测试（合法写法 / 非法标题 / 非法 value / **旧写法现已被拒绝**）、4 项真实网络验证 URL 全部 200。**未实机验证**。
+
+### 新增：在线配音干员的技能台词自动补全（用明日方舟的 charword 文本兜底）
+
+- **背景**：走 PRTS 在线配音的干员，台词要靠作者手写 `line()`；实际上绝大多数都没写，于是武将卡里语音能播、台词区却是空的。而明日方舟本身给每句配音都配了文本（`charword_table.json`，1.8 万条、约 8.7MB），文案与 PRTS 播的那句完全对应。
+- **做法**：
+  - `src/arknight/index.ts`：`slimArknightData()` 新增 `charword_table.voiceLines` —— 把原始扁平表（按 `charWordId` 索引）压成 `{ [音频目录名]: { [配音标题]: 台词文本 } }` 两级结构。键取自 `voiceAsset` 的目录部分（`char_102_texas/CN_001` → `char_102_texas`），与本地 `audio/{语言}/`、PRTS 的路径层级完全一致；方言/意大利语变体的目录带后缀（`char_308_swire_CN_TOPOLECT`），**文本与普通话版确实不同**，因此分开存。新增 `getVoiceLines()` / `getVoiceLine()` 读取接口。
+  - `src/audio/index.ts`：`applySkillAudio()` 末尾调 `fillOnlineLines()`，用 `getSkillVoices()` 拿到的标题序列逐个去 `charword` 里对文本，写到 `#ext:WhichWay/audio/{语言}/{技能名}{序号}`；`getVoiceWordkey()` 负责变体语言到目录名的映射（`ITA` → `{uid}_ITA`、`CN_TOPOLECT` → `{uid}_CN_TOPOLECT`）。
+- **与手动设置的关系**：**只补空位、绝不覆盖**。作者用 `line()` 或 `translate()` 手写过的键原样保留，兜底只填空的；重复执行幂等（切换配音语言会重跑）。
+- **两个关键设计点（踩过的坑）**：
+  1. **不能按「本地有没有文件」判断**：在线配音下载成本地 mp3 之后 `exists` 会变 true，若只在 else 分支补，下次启动台词就全没了（`lib.translate` 是运行期数据、不落盘）。所以判断依据是「该干员有明日方舟 uid 且语言不是 `CUSTOM`」。
+  2. **不能按 `allCharacters` 过滤精简缓存**：`packs/index.ts` 静态 import 了 `arknight`，所以 `loadArknightData()` 在 `register()` 之前就跑完，那时 `allCharacters` 还是空的——按它过滤会把整张表清空。因此收录全部 491 个 wordkey（2.08MB），而不是只收本扩展的 282 个（1.26MB）。
+- **性能**：完整精简缓存从约 0.2MB 涨到 2.28MB，读盘+解析实测 18.7ms（对比全量 `charword_table` 8.27MB / 92.1ms，省 79.8%）。`slimCacheSchema` 由 2 升到 3，老缓存自动失效重建。
+- **校验**：`pnpm eslint` 0 报错；`WW_SKIP_STATIC_COPY=1 vite build` 通过。用**引擎真实 `get/audio.ts`** + 真实 `charword_table` 跑了 18 项断言：阿米娅「作战中2」「完成高难行动」两条文本与 charword 原文逐字一致、下载本地化后仍能补、手写台词不被覆盖、意大利语/方言取各自变体、`CUSTOM` 与无数据干员不写、共享技能带 `_干员` 后缀的地址也补上。另用源码切片（esbuild 去类型）验证 `slimVoiceLines` 收录完整：18351 条非空文本全部保留，无遗漏。**未实机验证**。
+
 ### 调整：武将卡台词改为按钮开合，支持逐条试听；试听按钮支持暂停
 
 - **台词入口从「技能条目内的折叠区」改为「技能名旁的按钮」**（`src/characterCard/panels/SkillPanel.vue`）：`.headWrapper` 里 `.audioBtn` 之后新增 `.lineBtn`（图标 `image/ui/line.png`），点一下展开、再点收起（`item.showLines`）。原来那套「衍生区同款」的 `derivationTitle` 折叠结构去掉——台词不再占着标题行，也不用和衍生区抢折叠语义。

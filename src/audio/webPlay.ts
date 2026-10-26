@@ -15,12 +15,23 @@ export class whichWayWebPlay {
 	 * @param {string} char 角色名
 	 * @param {string[]} [voices] 配音标题，为空时按 (技能, 干员) 取/生成
 	 * @param {string} [audioBaseName] 本地下载时的文件名前缀（共享技能为「技能_干员」）
+	 * @param {Array<string|undefined>} [voiceIds] 每条语音来自哪个语音库（`skin_table` 的
+	 *   `voiceId`），与 `voices` 等长；`undefined` 表示用干员自己的基础语音。
+	 *   来自对象形态的 `audio`（`{ "char_003_kalts@boc#6": ["部署1"] }`），
+	 *   见 `whichWayAudio.skinVoicesOf`。
 	 */
-	constructor(skill: string, char: string, voices: string[] = [], audioBaseName?: string) {
+	constructor(
+		skill: string,
+		char: string,
+		voices: string[] = [],
+		audioBaseName?: string,
+		voiceIds: Array<string | undefined> = []
+	) {
 		this.skill = skill;
 		this.char = char;
 		this.audioBaseName = audioBaseName || skill;
 		this.voicesTitle = voices.length > 0 ? voices.slice() : whichWayAudio.getSkillVoices(skill, char);
+		this.voiceIds = voiceIds.slice();
 	}
 	/**
 	 * PRTS路径
@@ -33,6 +44,8 @@ export class whichWayWebPlay {
 	 */
 	audioBaseName: string;
 	voicesTitle: string[] = [];
+	/** 与 `voicesTitle` 等长：第 i 条用哪个语音库（`undefined` = 基础语音） */
+	voiceIds: Array<string | undefined> = [];
 
 	get useLocalAudio(): boolean {
 		return whichWayUtil.config("useLocalAudio") || false;
@@ -43,7 +56,7 @@ export class whichWayWebPlay {
 	}
 
 	get voiceUrl(): string[] {
-		return this.voicesTitle.map(title => whichWayAudio.compileVoicePath(this.char, this.lang, title));
+		return this.voicesTitle.map((title, i) => whichWayAudio.compileVoicePath(this.char, this.lang, title, this.voiceIds[i]));
 	}
 
 	get autoDownloadAudio(): boolean {

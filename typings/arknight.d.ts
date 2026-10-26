@@ -363,15 +363,29 @@ declare interface ArknightCharacterPatchSlim {
 }
 
 /**
- * charword_table 只需「键」级信息：
+ * charword_table 的运行时子集：
  * - charDefaultTypeDict：仅用 Object.keys().length
  * - voiceLangTypeDict：用 Object.keys() 与 [lang].name
  * - voiceLangDict[uid].dict：仅用真值判断与 Object.keys()
+ * - voiceLines：**台词文本**，供在线配音补全技能台词（`getVoiceLines` / `getVoiceLine`）
  */
 declare interface ArknightVoiceSlim {
 	charDefaultTypeDict: Record<string, boolean>;
 	voiceLangTypeDict: Record<string, { name: string }>;
 	voiceLangDict: Record<string, { dict: Record<string, boolean> }>;
+	/**
+	 * 台词表：`{ [音频目录名]: { [配音标题]: 台词文本 } }`。
+	 *
+	 * 音频目录名取自 `voiceAsset` 的目录部分（`char_102_texas/CN_001` → `char_102_texas`），
+	 * 与本地 `audio/{语言}/`、PRTS 的路径层级一致；方言/意大利语等变体自带后缀
+	 * （`char_308_swire_CN_TOPOLECT`）。
+	 *
+	 * 收录明日方舟全部干员（约 2.08MB），**不按驶舰之向的干员筛**：本模块的 `init()`
+	 * 在 `packs` 的 `register()` 之前执行，那时 `allCharacters` 还是空的。
+	 *
+	 * 老版精简缓存（schema 2 及之前）没有这个字段，读取方按「无台词」处理。
+	 */
+	voiceLines?: Record<string, Record<string, string>>;
 }
 
 /** 精简后的明日方舟数据（json/cache/arknight.json 的 data 字段，也是 arknightData 的实际结构） */
@@ -379,4 +393,14 @@ declare interface ArknightSlimData {
 	character_table: Record<string, ArknightCharacterSlim>;
 	char_patch_table: ArknightCharacterPatchSlim;
 	charword_table: ArknightVoiceSlim;
+	/**
+	 * 皮肤 id → 语音库目录名（`skin_table.charSkins[].voiceId`）。
+	 *
+	 * 只有 22 个皮肤带专属语音，其余不收录（查不到 = 用基础语音）。
+	 * 注意 skinId 用 `@` 分隔、voiceId 用 `_` 分隔，且存在多对一
+	 * （泥岩的 4 个皮肤共用一个语音库）。
+	 *
+	 * 老版精简缓存（schema 3 及之前）没有这个字段，读取方按「无专属语音」处理。
+	 */
+	skinVoice?: Record<string, string>;
 }
