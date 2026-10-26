@@ -1,11 +1,12 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { whichWayUtil } from "../../utill.js";
 
 character("char_106_franka", { pack: "epicSJZX", sex: "female", group: "gemrfz", hp: 3, skills: ["jifengmrfz", "xiqiaomrfz"] });
 
 skill({
 	jifengmrfz: {
-		audio: 2,
+		audio: ["部署2","作战中2"],
 		trigger: {
 			player: "useCard2",
 		},
@@ -18,7 +19,7 @@ skill({
 		},
 		prompt: function (event, player) {
 			let target = event.targets[0],
-				list:string[] = [];
+				list: string[] = [];
 			if (!target.hasEmptySlot(2)) list.push("无视防具");
 			if (target.countCards("h") > 0) list.push("此【杀】需要两张闪才可抵消");
 			if (target.hujia > 0) list.push("无视护甲");
@@ -128,7 +129,7 @@ skill({
 		},
 	},
 	xiqiaomrfz: {
-		audio: 2,
+		audio: ["完成高难行动","观看作战记录"],
 		trigger: {
 			player: ["chooseToRespondBegin", "chooseToUseBegin"],
 		},
@@ -143,8 +144,8 @@ skill({
 		async content(event, trigger, player) {
 			player.addTempSkill("xiqiaomrfz_used", "phaseEnd");
 			const next = player.chooseToDiscard({
-				position:"he",
-				forced:true
+				position: "he",
+				forced: true,
 			});
 			next.set("prompt", "【细巧】:你可以弃置一张牌，然后摸一张牌并展示之，若类型不同，视为使用或打出一张【闪】");
 
@@ -154,7 +155,7 @@ skill({
 
 			let cardl = result.cards[0];
 
-			const { cards } = await player.draw().set("visible",true).forResult();
+			const { cards } = await player.draw().set("visible", true).forResult();
 
 			if (!cards) return;
 			let card = cards[0];
@@ -191,3 +192,5 @@ translate({
 });
 
 characterIntro("char_106_franka", "芙兰卡，黑钢国际生化防护相应人员安全保障专员，在行动护卫、战术突击、战术协同方面拥有丰富经验与强悍战力。</br>现于罗德岛接受矿石病治疗，并作为黑钢行动干员为罗德岛提供专业安保服务。");
+
+characterTitle("char_106_franka",whichWayUtil.colorize("铝热利剑"));

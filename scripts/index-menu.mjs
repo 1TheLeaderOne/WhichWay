@@ -42,6 +42,8 @@ const CATALOG = {
 	"update-arknight-data.bat": { group: "游戏数据", summary: "一键更新 json/arknight 的五张明日方舟数据表" },
 	"find-arkid.bat": { group: "游戏数据", summary: "干员中文名 / id 片段 → 干员id 查询" },
 	"find-arkid.mjs": { group: "游戏数据", summary: "同 find-arkid.bat（它是实现体，可脱离 bat 直接用 node 跑）" },
+	"find-skinvoice.bat": { group: "游戏数据", summary: "干员id / 中文名 → 该干员「带专属语音的皮肤」的 skinId（填进 skill 的 audio）" },
+	"find-skinvoice.mjs": { group: "游戏数据", summary: "同 find-skinvoice.bat（它是实现体，可脱离 bat 直接用 node 跑）" },
 	"update-portraits.mjs": { group: "立绘 / 图片", summary: "从 torappu 补齐缺失干员立绘（只新增，不覆盖；GitHub 走不稳可加 --proxy）" },
 	"split-illustration.mjs": { group: "立绘 / 图片", summary: "按 skin_table 把 illustration/source 分离到 character/skin（默认剪切！）" },
 	"compress-skin.mjs": { group: "立绘 / 图片", summary: "缩放 + 256 色量化压缩图片（默认写镜像目录，--inplace 才就地替换）" },
