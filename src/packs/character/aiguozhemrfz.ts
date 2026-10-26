@@ -6,6 +6,11 @@ character("aiguozhemrfz", { pack: "plotSJZX",
 			group: "zhmrfz",
 			hp: 4,
 			skills: ["xinjunxingmrfz","youjimrfz"],
+			whichWay:{
+				arknight:{
+					camp:"ReunionMovement"
+				},
+			},
 		});
 
 skill({

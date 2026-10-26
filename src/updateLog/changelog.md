@@ -1,5 +1,31 @@
 # 瑰丽理想 WhichWay 更新日志
 
+## 2026-10-26
+
+### 调整：武将卡台词改为按钮开合，支持逐条试听；试听按钮支持暂停
+
+- **台词入口从「技能条目内的折叠区」改为「技能名旁的按钮」**（`src/characterCard/panels/SkillPanel.vue`）：`.headWrapper` 里 `.audioBtn` 之后新增 `.lineBtn`（图标 `image/ui/line.png`），点一下展开、再点收起（`item.showLines`）。原来那套「衍生区同款」的 `derivationTitle` 折叠结构去掉——台词不再占着标题行，也不用和衍生区抢折叠语义。
+- **没有台词的武将也能打开**：台词区改为按**音频条目**渲染，而不是「过滤后的台词列表」。`get.Audio.skill(...).audioList` 里一个音频文件一条（含 `text` 可能为空），所以「有声无词」的干员照样能看到面板、能逐条试听，文本位显示「无台词」；连音频都没有时整块只显示一行「无台词」。
+- **逐条试听**：每条台词前加一个播放键（`.linePlayBtn`，同样 Play ⇄ Pause）。新增 `whichWayAudio.playSkillLineAudio(skill, name, line, player?)`：按 `get.Audio.skill(...).fileList[line]` **精确**取那一句，交给 `game.playAudio`（`addVideo: false`，试听不写进录像）。原来只能随机播一条，因为 `game.tryAudio` 就是随机取。
+  - 在线配音（PRTS）没有"第几条"的本地映射，改为按 `voicesTitle[line]` 播放（`whichWayWebPlay.playLine(index)`）——`voicesTitle[i]` 就是下载后会写成 `{前缀}{i+1}.mp3` 的那一句，序号语义与本地一致；越界返回 `undefined` 而不是随机播别的。
+- **试听按钮点击后切 Pause 并可中断播放**：`playSkillAudio` / `playSkillLineAudio` 现在由音频模块持有实例（`_previewAudio` + `_previewTarget`），`stopPreviewAudio()` 停止；界面通过 `onPreviewChange()` / `getPreviewTarget()` 同步图标，`.audioBtn` 与 `.linePlayBtn` 在播放时都显示 Pause.png，再点一次即停。
+  - 停止时不只 `pause()`：`game.playAudio` 的 `src` 是异步挂的、还设了 `autoplay` 并在 `oncanplay` 里无条件 `play()`，所以 `silenceAudio()` 会同时关掉 `autoplay`、摘掉 `oncanplay`、`pause()` 并 `remove()` 元素——否则用户在加载完成前点停止，声音仍会在 canplay 到达时冒出来。**不动 `src`**：清 src 会触发 `error` → 引擎 `onError` 重试链。
+  - 同一时刻只保留一条试听（点别的会先停上一条）；离开技能面板（`onBeforeUnmount`）自动停掉并退订，避免关掉界面后声音继续响。
+- **校验**：`pnpm eslint` 三个改动文件 0 报错；`WW_SKIP_STATIC_COPY=1 vite build` 通过。逻辑用**引擎真实 `get/audio.ts`**（esbuild 去类型后跑在 node）+ 斗士塔露拉三技能的 `ext:` 地址跑了 27 项断言：`audioList` / `fileList` / `textList` 三者等长且逐项对齐、指定第 0/1 条取到的正是 `yinghuomrfz1.mp3` / `yinghuomrfz2.mp3`、越界返回 `undefined`、只有音频没台词时 `audioList` 仍有一条而 `textList` 为空。另核对构建产物：`lineBtn` / `linePlayBtn` / `lineEmpty` 等 scoped 样式均落在当前组件的 `data-v` 下，`line.png` / `Play.png` / `Pause.png` 三张图都已内联且内容互不相同。**未实机验证**：需进游戏点开任一干员确认按钮开合、逐条播放与暂停图标。
+
+## 2026-10-25
+
+### 修复：扩展干员的技能台词不显示（`line()` 写的键与引擎实际查询的地址对不上）
+
+- **现象**：斗士塔露拉（以及颉等剧情干员）的技能台词在任何界面都不出现——本体武将卡的「技能台词」段落整段没有，千幻聆音的台词页同样为空。语音本身**能正常播放**，所以很难联想到是台词的问题。
+- **根因（两层，缺一不可）**：
+  1. **音频模块改写了音频地址**（`src/audio/index.ts` 的 `applySkillAudio`）：扩展干员进 `arenaReady` 时，`lib.skill[x].audio` 会从 `2` 被改写成 `ext:WhichWay/audio/{语言}:2`（本地 `audio/{语言}/` 下有文件时）。引擎取台词的键是「`#[音频地址]`」（`get/audio.ts` 的 `textMap`，只有地址仍在默认路径 `skill/` 时才会被剥成技能名），于是它实际查的是 `#ext:WhichWay/audio/CUSTOM/yinghuomrfz1`，而 `line()` 按约定写的是 `#yinghuomrfz1` ⇒ `get.Audio.skill(...).textList` 恒为 `[]`，调用方一律判定「没有台词」。台词 `line()` 那次提交自己记录的「实机未验证」正好没覆盖到这一步。
+  2. **驶舰之向自己的武将卡没有台词区块**：`CharacterCard` 的技能面板只有技能名 / 描述 / 衍生技能 / 衍生卡牌 / 试听，`src/characterCard/` 全目录不读 `textList`，所以就算键对得上也看不见。
+- **修法**：
+  - `src/audio/index.ts` 新增 `mirrorSkillLines(skill, char, base, lang, count)`：`applySkillAudio` 改写 `audio` 之后，把按技能名写的台词镜像到实际地址上（`#技能名N` → `#ext:WhichWay/audio/{语言}/{技能名}N`），同时覆盖引用链终点名与 `audioname` 的 `_干员` 后缀两种地址；`initDieAudio` 里同样补 `#角色名:die` → `#ext:WhichWay/audio/{语言}/die/{角色名}:die`。全部走 `copyLine()`：**只读 `lib.translate`、`to` 已有值时不覆盖**，因此作者显式写的地址键优先，重复调用（切配音语言会重建索引）也幂等。语音的 `fileList` 完全不受影响。
+  - `src/characterCard/panels/SkillPanel.vue` 新增「技能台词」区：每个技能条目内部一块，读 `get.Audio.skill({ skill, player: { name, skin: { name: 当前皮肤 }, tempname } }).textList`（与本体卡 `ui/click/index.js:4039` 同一套传参，扩展干员取本扩展皮肤、其它武将回退自身名字）。交互与「衍生技能 / 衍生卡牌」一致：标题整行可点、默认展开，`foldLines` 控制显隐，左侧色条与标题用红色系区分；多条台词自动加序号。没有台词的角色不渲染这一块，不会出现空标题。
+- **校验**：`pnpm eslint src/audio/index.ts src/characterCard/panels/SkillPanel.vue` 0 报错；`WW_SKIP_STATIC_COPY=1 vite build` 通过。逻辑用**从源码抽出的 `mirrorSkillLines` / `copyLine`** + 引擎真实 `get/audio.ts`（`noname` 换成 stub）跑了 10 组用例：塔露拉三技能改写前/改写后/切换语言、显式地址键优先、幂等、`audioname` 后缀、阵亡台词、无台词角色不凭空造键，全部通过。**未实机验证**：需进游戏点开斗士塔露拉确认「技能台词」两条都在、折叠按钮可切换。
+
 ## 2026-10-24
 
 ### 新增：武将包钩子 `line()`，用于给配音添加台词

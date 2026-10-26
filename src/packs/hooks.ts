@@ -48,6 +48,11 @@ class WhichWayPackHooks {
 	 * 的「台词配对」一节）；技能音频的地址就是技能名，所以 `audio: 2` 的技能对应
 	 * `#技能名1`、`#技能名2` 两个键，`audio: true` 对应 `#技能名`。
 	 *
+	 * ⚠️ 这只在音频地址仍是**默认路径** `skill/` 时成立。本项目音频模块的 `applySkillAudio`
+	 * 会把扩展技能的 `audio` 改写成 `ext:WhichWay/audio/{语言}:{N}`，届时引擎查询的键变成
+	 * `#ext:WhichWay/audio/{语言}/{技能名}{序号}` —— 那种地址上的台词由 `mirrorSkillLines`
+	 * 从这里的 `#技能名N` 自动镜像过去，所以**台词仍然照常按技能名写**，不要手写 `ext:` 键。
+	 *
 	 * 本钩子因此是 `translate()` 的语法糖：把「技能名」拼上 `#` 后交给 translate 队列，
 	 * 从而与普通翻译共用同一套流程——缓冲进 `pendingRun`、由 `onBeforeInit` 统一落库、
 	 * 重复键报错、`colorize` 预处理。

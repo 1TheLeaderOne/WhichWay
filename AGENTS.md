@@ -214,6 +214,8 @@ line({ "#lushimrfz1": "……", "#lushimrfz2": "……" }, false);      // 批�
 - 形态：`line(技能名, 台词, autoPrefix?)` 或 `line({ 技能名: 台词 }, autoPrefix?)`。
 - `autoPrefix` 缺省 `true`，自动补 `#`；已带 `#` 的键不会重复补齐。传 `false` 时第一个参数**原样**当作 `lib.translate` 的键，用于带编号（`#技能名1`）或带音频路径（`#ext:WhichWay/audio/skill/xxx`）的场合。
 - 同一键重复注册会直接抛错（而不是静默覆盖）：一个音频地址只能对应一条台词，要先 `audio: 2` 这类多段配音，请用带编号的键且 `autoPrefix` 传 `false`。
+- ⚠️ **按技能名写就够了，不要手写 `ext:` 键**：音频模块的 `applySkillAudio` 会在 `arenaReady` 把 `audio` 改写成 `ext:WhichWay/audio/{语言}:{N}`，此时引擎查台词的地址变成 `#ext:WhichWay/audio/{语言}/{技能名}{序号}`。`mirrorSkillLines()` 会自动把 `#技能名N` 镜像到该地址（阵亡同理：`#角色名:die` → `#ext:WhichWay/audio/{语言}/die/{角色名}:die`），并且**只补不覆盖**，所以显式写地址键仍然优先。若哪天改了地址格式，镜像逻辑要跟着改，否则 `textList` 会静默变空（语音照常能播，很难发现）。
+- 显示端：驶舰之向武将卡的技能面板（`src/characterCard/panels/SkillPanel.vue`）里，技能名旁的「台词」按钮（`line.png`）开合该技能的台词区，读 `get.Audio.skill(...).audioList`——**一个音频文件一条**（`text` 可以为空），所以「有声无词」的干员照样能逐条试听，文本位显示「无台词」。每条台词前的播放键走 `whichWayAudio.playSkillLineAudio(skill, name, index)`，按序号精确取 `fileList[index]`；技能名旁原来的试听键走 `playSkillAudio`（随机一条）。两者共用同一个试听通道：再点一次即停，播放时图标切 `Pause.png`。
 
 `WhichWayPackManager`（`src/packs/index.ts`）用 `import.meta.glob("./character/*mrfz.{ts,js}")` 与 `import.meta.glob("./character/*mrfz/index.{ts,js}")`（`card/` 同构）在**构建期**确定模块清单：新增干员/卡牌仍然是「丢文件即可」，无需改任何代码，但必须重新 `build`。这些模块在 `packs/index.ts` 被 import 时（即 `packs(新)` 阶段）全部求值，并被 rollup 合并进**单个 chunk**（`chunks/packs-*.js`），因此启动期不再有 267 次模块请求。
 

@@ -71,9 +71,31 @@ export class whichWayWebPlay {
 		this._playing = undefined;
 	}
 
-	play(): HTMLAudioElement {
-		// this.stop();
-		const audio = new Audio(this.voiceUrl.randomGet());
+	play(): HTMLAudioElement | undefined {
+		return this.playLine();
+	}
+
+	/**
+	 * 播放指定的一条在线配音。
+	 *
+	 * 序号与本地文件名一一对应：`voicesTitle[i]` 就是下载后会写成 `{前缀}{i+1}.mp3` 的那一句
+	 * （见 `downloadAudio` 的循环），所以「单条试听」在在线/本地两种来源下听到的是同一句。
+	 *
+	 * @param index `voicesTitle` 的下标；缺省随机取一条。显式传入但越界时返回 undefined
+	 *   （宁可不播，也不要随机播别的一句——用户点的是确定的第几条）
+	 */
+	playLine(index?: number): HTMLAudioElement | undefined {
+		const urls = this.voiceUrl;
+		let url: string | undefined;
+		if (typeof index === "number") {
+			url = urls[index];
+			if (!url) return undefined;
+		} else {
+			url = urls.randomGet();
+		}
+		if (!url) return undefined;
+
+		const audio = new Audio(url);
 		//与引擎自己的 game.playAudio 保持同一换算（volumn_audio 取值范围 0~8）
 		audio.volume = lib.config.volumn_audio / 8;
 		audio.play();

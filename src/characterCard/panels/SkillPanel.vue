@@ -4,7 +4,9 @@
 			<div class="headWrapper">
 				<div class="dragHandle">≡</div>
 				<div class="skillname">{{ item.label }}</div>
-				<div class="audioBtn" @click="playAudio(item.id)"></div>
+				<div class="audioBtn" :class="{ audioBtnPlaying: isSkillPlaying(item.id) }" @click="toggleAudio(item.id)"></div>
+				<!-- 台词开关：与试听按钮并排；没有台词的武将也能打开（面板里显示「无台词」，语音仍可试听） -->
+				<div class="lineBtn" :class="{ lineBtnOpened: item.showLines }" @click="toggleLines(item)"></div>
 				<div
 					v-if="item.frequent !== undefined"
 					class="autoSkill"
@@ -30,7 +32,7 @@
 						<div class="headWrapper">
 							<div class="dskillname">{{ d.label }}</div>
 							<!--试听按钮播的仍是主技能的音（与原实现一致）-->
-							<div class="audioBtn" @click="playAudio(item.id)"></div>
+							<div class="audioBtn" :class="{ audioBtnPlaying: isSkillPlaying(item.id) }" @click="toggleAudio(item.id)"></div>
 							<div
 								v-if="d.frequent !== undefined"
 								class="autoSkill"
@@ -59,6 +61,22 @@
 							<div class="derivationInfo" v-html="c.info"></div>
 						</div>
 					</div>
+				</div>
+			</div>
+
+			<!-- 台词界面：由 head 上的台词按钮开合；没有台词也保留这个入口（显示「无台词」），
+			     因为「有没有台词文本」与「有没有配音文件」是两件事，后者仍要能逐条试听 -->
+			<div v-show="item.showLines" class="derivationBox lineBox">
+				<div v-if="!item.audioEntries.length" class="lineItem lineEmpty">无台词</div>
+				<div v-for="entry in item.audioEntries" :key="entry.index" class="lineItem">
+					<div
+						class="linePlayBtn"
+						:class="{ linePlayBtnPlaying: isLinePlaying(item.id, entry.index) }"
+						@click="toggleLine(item.id, entry.index)"
+					></div>
+					<span v-if="item.audioEntries.length > 1" class="lineIndex">{{ entry.index + 1 }}.</span>
+					<span v-if="entry.text" class="lineText" v-html="entry.text"></span>
+					<span v-else class="lineText lineEmptyText">无台词</span>
 				</div>
 			</div>
 		</div>
@@ -101,6 +119,7 @@ import { nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 //lib 在上面那个 script 里（反查表要用），同一个 SFC 的两个 script 共用一份模块作用域
 import { game, ui, get } from "noname";
 import { whichWayAudio } from "../../audio/index.ts";
+import { whichWaySkin } from "../../skin/index.ts";
 import Sortable from "../../../lib/Sortable/Sortable.js";
 
 const props = defineProps({ name: { type: String, required: true } });
@@ -110,6 +129,15 @@ let sortable = null;
 
 /** 每个技能一条，衍生内容（技能 / 卡牌）挂在条目的 derivations / cards 里 */
 const skillItems = ref([]);
+/**
+ * 当前正在试听的那一条（`{ skill, name, line? }`）。
+ *
+ * 播放实例由音频模块持有（`whichWayAudio`），这里只是它的**响应式镜像**：
+ * 用来驱动 Play ⇄ Pause 图标与「哪一条在响」的高亮。两者必须同源，
+ * 所以订阅音频模块的状态变化来同步，而不是各自记一份。
+ */
+const activePreview = ref(null);
+let offPreviewChange = null;
 /** 每张衍生卡牌的挂载点：卡牌本体由引擎命令式生成，Vue 只负责留好空位 */
 const cardHosts = new Map();
 const setCardHost = (key, el) => {
@@ -143,6 +171,41 @@ const classifyDerivation = name => {
 	return lib.card[name] ? { type: "card", id: name } : { type: "skill", id: name };
 };
 
+/**
+ * 技能台词：与武将卡、悬停面板走同一条链路（`get.Audio.skill(...).textList`），
+ * 台词本身就是 `lib.translate` 里 `#[音频地址]` 的值。
+ *
+ * 返回的是**和音频文件一一对应的条目**（而不是只筛掉空项）：面板要给每条语音配一个播放键，
+ * 「有音频、没写台词」的技能（如斗士塔露拉之外的多数干员）也必须能逐条试听，
+ * 所以 `text` 可以为空，此时界面显示「无台词」。
+ *
+ * 关键点：解析要带上**当前皮肤**（与本体卡 `ui/click/index.js:4039` 的传参一致）——
+ * 引擎会拿 `name + skin.name + tempname` 去匹配技能的 `audioname`，换皮台词靠的就是它。
+ * 扩展武将走本扩展的皮肤系统（默认「经典形象」）；非扩展武将（样式开关设成「所有角色」
+ * 时会出现在这里）交回自身名字，等同于「没有额外换皮」。
+ *
+ * 台词能不能取到还取决于音频地址：`applySkillAudio` 把 `audio` 改写成
+ * `ext:WhichWay/audio/{语言}:N` 之后，地址变成 `ext:WhichWay/audio/{语言}/{技能}{序号}`，
+ * 对应的 `#地址` 键由音频模块的 `mirrorSkillLines` 从 `#技能名N` 镜像而来。
+ */
+const audioEntriesOf = skill => {
+	const skinName = window.whichWaySave?.hasChar?.(props.name) === true ? whichWaySkin.getCurentSkin(props.name) : props.name;
+	const player = { name: props.name, skin: { name: skinName }, tempname: [skinName] };
+	try {
+		const audio = get.Audio.skill({ skill, player });
+		//audioList 是「一个文件一条」的完整清单（file + 该条对应的 text），序号即它的下标
+		return audio.audioList.map((entry, index) => ({
+			index,
+			file: entry.file,
+			text: typeof entry.text === "string" && entry.text.length > 0 ? entry.text : "",
+		}));
+	} catch (e) {
+		//技能被别的扩展删掉等情况：台词拿不到属正常，不要打断整个面板
+		console.warn(`[whichWayCharacterCard] 读取技能 ${skill} 的台词失败：`, e);
+		return [];
+	}
+};
+
 const buildItems = () => {
 	const skills = get.character(props.name)?.skills || [];
 	const result = [];
@@ -156,7 +219,10 @@ const buildItems = () => {
 			info: infoOf(skill),
 			derivations: [],
 			cards: [],
-			//两块衍生区默认展开，点标题旁的按钮折叠
+			audioEntries: audioEntriesOf(skill),
+			//台词界面默认收起，由 head 上的台词按钮开合
+			showLines: false,
+			//衍生区默认展开，点标题折叠
 			foldDerivations: false,
 			foldCards: false,
 		};
@@ -193,8 +259,51 @@ const renderCards = () => {
 	}
 };
 
-function playAudio(name) {
-	whichWayAudio.playSkillAudio(name, props.name);
+function toggleLines(item) {
+	item.showLines = !item.showLines;
+}
+
+/**
+ * 播放 / 停止一条语音。
+ *
+ * 「单独播放某条」要按序号精确取文件，因此不走 `game.tryAudio`（那个随机取一条），
+ * 而是由音频模块的 `playSkillLineAudio` 取 `audioList[index]` 后直接播。
+ * 在线配音（PRTS）没有稳定的"第几条"映射，那边会退化成随机一条。
+ */
+function toggleLine(skill, index) {
+	const target = activePreview.value;
+	//再点同一条 = 停
+	if (target && target.skill === skill && target.line === index) {
+		whichWayAudio.stopPreviewAudio();
+		return;
+	}
+	whichWayAudio.playSkillLineAudio(skill, props.name, index, audioPlayerOf());
+}
+
+/** 传给引擎的 player 形态：皮肤名要带上，换皮台词/换皮配音都靠它 */
+function audioPlayerOf() {
+	const skinName = window.whichWaySave?.hasChar?.(props.name) === true ? whichWaySkin.getCurentSkin(props.name) : props.name;
+	return { name: props.name, skin: { name: skinName }, tempname: [skinName] };
+}
+
+/** 顶部那枚试听按钮：播整个技能（随机一条），再点即停 */
+function toggleAudio(skill) {
+	if (isSkillPlaying(skill)) {
+		whichWayAudio.stopPreviewAudio();
+		return;
+	}
+	whichWayAudio.playSkillAudio(skill, props.name);
+}
+
+function isSkillPlaying(skill) {
+	//正在播放该技能的某一条时，顶部按钮同样显示为「播放中」：两者共用同一个播放通道，
+	//同时只可能响一条，图标状态必须跟着走，否则会出现「两处都亮」的错觉
+	return activePreview.value?.skill === skill;
+}
+
+function isLinePlaying(skill, index) {
+	const target = activePreview.value;
+	return target?.skill === skill && target?.line === index;
 }
 
 function toggleAuto(item) {
@@ -214,12 +323,21 @@ onMounted(async () => {
 		animation: 150,
 		handle: ".dragHandle",
 	});
+	//试听状态只在「本面板的干员」上镜像：别人的试听（配音设置页）不应点亮这里的图标
+	offPreviewChange = whichWayAudio.onPreviewChange(() => {
+		const target = whichWayAudio.getPreviewTarget();
+		activePreview.value = target && target.name === props.name ? target : null;
+	});
 });
 
 onBeforeUnmount(() => {
 	sortable?.destroy?.();
 	sortable = null;
 	cardHosts.clear();
+	offPreviewChange?.();
+	offPreviewChange = null;
+	//面板关掉就没人能再点「停止」了，顺手把还在响的试听停掉（避免离开界面后声音一直循环）
+	whichWayAudio.stopPreviewAudio();
 });
 </script>
 
@@ -318,10 +436,38 @@ onBeforeUnmount(() => {
 	background-image: url("../../../image/ui/Play.png");
 	background-color: white;
 	border-radius: 50%;
+	cursor: pointer;
 }
 
+/* 暂停态：图标换成 Pause.png（点下去就是「正在响」，再点即停） */
 .skillWrapper > .headWrapper > .audioBtnPlaying {
 	background-image: url("../../../image/ui/Pause.png") !important;
+}
+
+/* 台词开关：与试听键同一尺寸/位置逻辑，图标用 line.png（白线稿，透明底不需要白色圆底） */
+.skillWrapper > .headWrapper > .lineBtn {
+	position: relative;
+	width: 25px;
+	height: 25px;
+	margin-left: 6px;
+	background-size: 100% 100%;
+	background-image: url("../../../image/ui/line.png");
+	background-repeat: no-repeat;
+	background-position: center;
+	cursor: pointer;
+	opacity: 0.7;
+	/* 与折叠标题的 +/− 保持同一套动效节奏：展开是常态，收起时整体压暗 */
+	transition: opacity var(--ak-dur-fast, 0.2s);
+}
+
+.skillWrapper > .headWrapper > .lineBtn:hover {
+	opacity: 1;
+}
+
+/* 已展开：高亮，表示「下方正在显示台词」；收起态是常态半透明 */
+.skillWrapper > .headWrapper > .lineBtnOpened {
+	opacity: 1;
+	filter: drop-shadow(0 0 4px rgba(255, 154, 154, 0.9));
 }
 
 /* ---------- 衍生区（技能 / 卡牌共用外壳） ---------- */
@@ -451,6 +597,77 @@ onBeforeUnmount(() => {
 	margin-bottom: 5px;
 	font-size: 18px;
 	font-family: SJZX_youyuan;
+}
+
+/* ---------- 技能台词 ---------- */
+/* 台词区沿用衍生区外壳（左边框 + 缩进），只换颜色，与「衍生技能/衍生卡牌」区分 */
+.lineBox {
+	border-left-color: rgba(255, 107, 107, 0.7);
+}
+
+/* 每条台词前的播放键：与 head 上的试听键同一套画法（Play ⇄ Pause），只是小一号 */
+.lineItem {
+	position: relative;
+	display: flex;
+	align-items: flex-start;
+	gap: 4px;
+	width: 100%;
+	margin-top: 4px;
+	font-size: 18px;
+	line-height: 24px;
+	font-family: SJZX_youyuan;
+	color: #f0f0f0;
+	word-break: break-word;
+}
+
+.lineItem > .linePlayBtn {
+	flex: none;
+	width: 18px;
+	height: 18px;
+	margin-top: 3px;
+	background-size: 100% 100%;
+	background-image: url("../../../image/ui/Play.png");
+	background-color: white;
+	border-radius: 50%;
+	cursor: pointer;
+	opacity: 0.75;
+	position: relative;
+}
+
+.lineItem > .linePlayBtn:hover {
+	opacity: 1;
+}
+
+.lineItem > .linePlayBtnPlaying {
+	background-image: url("../../../image/ui/Pause.png") !important;
+	opacity: 1;
+}
+
+/* 序号做成定宽左标，换行时正文仍能对齐在序号右侧 */
+.lineItem > .lineIndex {
+	position: relative;
+	flex: none;
+	min-width: 18px;
+	opacity: 0.75;
+}
+
+/* 「无台词」是缺省态，压暗一档，不与真台词抢注意力 */
+.lineEmpty,
+.lineEmptyText {
+	opacity: 0.55;
+	font-style: italic;
+	position: relative;
+}
+
+/* 文本块自己撑开剩余宽度：flex 容器里长台词才好换行 */
+.lineText {
+	flex: 1 1 auto;
+	min-width: 0;
+	position: relative;
+}
+
+.lineEmpty {
+	padding-left: 2px;
 }
 
 /* ---------- 衍生卡牌 ---------- */

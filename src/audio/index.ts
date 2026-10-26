@@ -494,7 +494,55 @@ class WhichWayAudio {
 		//首次改写前必须备份原值（含字符串形态的借用配音，如 audio: "eagle"），
 		//否则 refreshAudioIndex 还原时拿不到原值，借用语义会永久丢失
 		if (!this._originalAudio.has(skill)) this._originalAudio.set(skill, info.audio);
-		(info as any).audio = `ext:WhichWay/audio/${lang}:${existCount ? Math.max(1, Math.min(existCount, parsed.count)) : parsed.count}`;
+		const finalCount = existCount ? Math.max(1, Math.min(existCount, parsed.count)) : parsed.count;
+		(info as any).audio = `ext:WhichWay/audio/${lang}:${finalCount}`;
+		//地址改写成 ext: 之后，引擎取台词用的键也跟着变了，必须同步一次别名（详见方法注释）
+		this.mirrorSkillLines(skill, char, base, lang, finalCount);
+	}
+
+	/**
+	 * 把「按技能名注册的台词」镜像到「实际音频地址」上。
+	 *
+	 * 引擎取台词的键是 `#[音频地址]`（`get/audio.ts` 的 `textMap`）：地址在默认路径 `skill/`
+	 * 时会被剥成技能名，所以在 `audio: 2` 阶段写 `#yinghuomrfz1` 是对的。但
+	 * {@link applySkillAudio} 会把 `info.audio` 改写成 `ext:WhichWay/audio/{语言}:{N}`，
+	 * 地址随之变成 `ext:WhichWay/audio/{语言}/{技能名}{序号}`，引擎要查的键就是
+	 * `#ext:WhichWay/audio/{语言}/{技能名}{序号}` —— 与 `line()` / 手写的 `#技能名N`
+	 * 对不上，结果是 `get.Audio.skill(...).textList` 恒为空：武将卡、千幻聆音的台词都不显示，
+	 * 而语音照常能播（播放走 fileList，与 textList 无关），因此很难察觉。
+	 *
+	 * 这里在改写之后补一次别名：**同名的**键搬到新目录下；另外当引擎给地址加了 `_干员`
+	 * 后缀（`audioname` 命中，此时仍用不带后缀的 `#技能名N` 写台词），再额外搬一份到带后缀的地址。
+	 * 只读取 `lib.translate`、不覆盖已存在的地址键，可反复调用（切换配音语言会再跑一遍）。
+	 *
+	 * @param skill 技能名（台词通常就按它注册）
+	 * @param char 干员名（`audioname` 命中时引擎会给地址追加 `_干员`）
+	 * @param base 引擎实际使用的文件名前缀（见 `getAudioBaseName`，引用链终点可能与 `skill` 不同）
+	 * @param lang 配音语言（即地址里的目录名）
+	 * @param count 引擎会生成的候选数量（`audio: true` 为 1、`audio: 2` 为 2……）
+	 */
+	private mirrorSkillLines(skill: string, char: string, base: string, lang: string, count: number): void {
+		const dir = `ext:WhichWay/audio/${lang}/`;
+		const suffix = Array.isArray(lib.skill[skill]?.audioname) && lib.skill[skill].audioname.includes(char) ? `_${char}` : "";
+		//同名镜像：技能名 / 引用链终点名（借用配音时两者不同，各搬一份不会互相覆盖）
+		const names = new Set<string>([skill, `${skill}${suffix}`]);
+		if (base) names.add(base);
+		for (const name of names) {
+			this.copyLine(`#${name}`, `#${dir}${name}`);
+			for (let i = 1; i <= count; i++) this.copyLine(`#${name}${i}`, `#${dir}${name}${i}`);
+		}
+		//地址带 `_干员` 后缀、但作者只写了不带后缀的台词：再补一份带后缀的（已显式写的优先，不会被覆盖）
+		if (suffix) {
+			this.copyLine(`#${skill}`, `#${dir}${skill}${suffix}`);
+			for (let i = 1; i <= count; i++) this.copyLine(`#${skill}${i}`, `#${dir}${skill}${suffix}${i}`);
+		}
+	}
+
+	/** 台词别名：`to` 尚未登记时，把 `from` 的台词复制过去（`from` 不存在就什么都不做） */
+	private copyLine(from: string, to: string): void {
+		const text = lib.translate[from];
+		if (typeof text !== "string") return;
+		if (lib.translate[to] === void 0) lib.translate[to] = text;
 	}
 
 	/**
@@ -941,14 +989,202 @@ class WhichWayAudio {
 	}
 
 	/**
-	 * 播放技能音频(无视trySkillAudio的限制)
+	 * 当前正在播放的「试听」音频.
+	 *
+	 * 技能面板 / 配音设置里的试听按钮是**手动触发的单次播放**，与技能结算无关，
+	 * 因此由扩展自己持有实例，才能做到「再点一次就停」「点另一条先停这一条」。
+	 * 同一时刻只保留一条，避免两段配音叠在一起。
 	 */
-	playSkillAudio(skill: string, name: string) {
+	private _previewAudio?: HTMLAudioElement;
+	/** 当前试听的定位（技能 / 干员 / 第几条）；`line` 为空表示「整个技能随机一条」 */
+	private _previewTarget?: { skill: string; name: string; line?: number };
+	/** 试听开始 / 停止 / 自然结束时通知界面还原图标 */
+	private _previewListeners = new Set<() => void>();
+
+	/**
+	 * 播放技能音频（试听，随机一条，无视 trySkillAudio 的限制）。
+	 *
+	 * 与自动播放的区别：**返回值可用于反向停止**，并且会通知 {@link onPreviewChange}
+	 * 的订阅者，让界面把 Play 图标切成 Pause。
+	 *
+	 * @param skill 技能名
+	 * @param name 干员名
+	 * @returns 本次播放的音频实例；无音可播时返回 undefined
+	 */
+	playSkillAudio(skill: string, name: string): HTMLAudioElement | undefined {
+		this.stopPreviewAudio();
+
 		const web = this.findWebPlay(skill, name);
-		if (web) return web.play();
+		if (web) {
+			const audio = web.play();
+			if (audio) this.trackPreview(audio, { skill, name });
+			return audio;
+		}
 
 		const audioList = get.Audio.skill({ skill, player: name }).fileList;
-		return game.tryAudio({ audioList });
+		//试听是明确的一次点击，不该被引擎的 1 秒去重吃掉（「播→停→再播」很容易落在 1 秒内）
+		this.clearAudioDedupe(audioList);
+		const audio = game.tryAudio({ audioList });
+		if (audio) this.trackPreview(audio, { skill, name });
+		return audio;
+	}
+
+	/**
+	 * 清掉引擎对这批音频的「1 秒内不重复播」记录。
+	 *
+	 * `game.playAudio` 在开头有 `if (!lib.config.repeat_audio && _status.skillaudio.includes(parsedPath)) return;`
+	 * —— 它本意是防止技能反复触发时刷屏，但试听按钮是**用户明确点的一次**：
+	 * 点了播放、停掉、又点一次，若落在 1 秒内就会被这条规则静默吞掉，表现为「按钮没反应」。
+	 * 这里按引擎同一套路径归一化后把记录摘掉，只影响本扩展自己点名要播的那几条。
+	 */
+	private clearAudioDedupe(paths: string[]): void {
+		const list = (_status as any).skillaudio;
+		if (!Array.isArray(list) || !list.length) return;
+		for (const path of paths) {
+			if (typeof path !== "string" || !path) continue;
+			const parsed = path.startsWith("ext:") ? path.replace(/^ext:/, "extension/") : `audio/${path}`;
+			const index = list.indexOf(parsed);
+			if (index >= 0) list.splice(index, 1);
+		}
+	}
+
+	/**
+	 * 播放技能的**指定**一条配音（试听用）。
+	 *
+	 * 「单独播放某条语音」必须按序号精确取文件，因此不能走 `game.tryAudio`（它随机取一条）：
+	 * 这里直接拿 `get.Audio.skill(...).fileList[line]` 交给 `game.playAudio`。
+	 * 在线配音（PRTS）没有稳定的"第几条"映射，退化为 {@link playSkillAudio} 的随机播放。
+	 *
+	 * @param skill 技能名
+	 * @param name 干员名
+	 * @param line 第几条（从 0 开始，对应 `audioList` 的下标）
+	 * @param player 可选的完整 player 对象（需要带皮肤名时由调用方传入）
+	 * @returns 本次播放的音频实例；该序号没有音频时返回 undefined
+	 */
+	playSkillLineAudio(skill: string, name: string, line: number, player?: any): HTMLAudioElement | undefined {
+		this.stopPreviewAudio();
+
+		const web = this.findWebPlay(skill, name);
+		if (web) {
+			//在线配音：voicesTitle[i] 就是下载后会写成 {前缀}{i+1}.mp3 的那一句，序号语义与本地一致
+			const audio = web.playLine(line);
+			if (audio) this.trackPreview(audio, { skill, name, line });
+			return audio;
+		}
+
+		let path: string | undefined;
+		try {
+			path = get.Audio.skill({ skill, player: player || name }).fileList[line];
+		} catch (e) {
+			console.warn(`[whichWayAudio] 取技能 ${skill} 的第 ${line + 1} 条配音失败：`, e);
+			return undefined;
+		}
+		if (!path) return undefined;
+
+		//同 playSkillAudio：单次点击不该被 1 秒去重吞掉
+		this.clearAudioDedupe([path]);
+		//addVideo: false —— 试听是界面行为，不该写进录像回放
+		const audio = game.playAudio({ path, addVideo: false });
+		if (audio) this.trackPreview(audio, { skill, name, line });
+		return audio;
+	}
+
+	/**
+	 * 接管一个正在播放的音频：登记为当前试听、挂上结束回调。
+	 *
+	 * 只在 `ended` / `error` 上收回图标（`pause` 不收回：主动暂停也走 `pause`，
+	 * 而那是 {@link stopPreviewAudio} 自己触发的，收回交给调用方统一处理）。
+	 */
+	private trackPreview(audio: HTMLAudioElement, target: { skill: string; name: string; line?: number }): void {
+		this._previewAudio = audio;
+		this._previewTarget = target;
+		const done = () => {
+			//只处理"当前这一条"的结束，避免上一条的 ended 迟到把新一条的状态清掉
+			if (this._previewAudio !== audio) return;
+			this._previewAudio = undefined;
+			this._previewTarget = undefined;
+			this.emitPreviewChange();
+		};
+		audio.addEventListener("ended", done);
+		audio.addEventListener("error", done);
+		this.emitPreviewChange();
+	}
+
+	/**
+	 * 停止当前试听。可重复调用（没有在播时什么也不做）。
+	 *
+	 * @returns 是否确实停掉了一条
+	 */
+	stopPreviewAudio(): boolean {
+		const audio = this._previewAudio;
+		if (!audio) return false;
+		this._previewAudio = undefined;
+		this._previewTarget = undefined;
+		this.silenceAudio(audio);
+		this.emitPreviewChange();
+		return true;
+	}
+
+	/**
+	 * 让一条音频立刻静音并不可再自行响起。
+	 *
+	 * 不能只 `pause()`：`game.playAudio` 的 src 是**异步**挂上去的，而它同时设了
+	 * `autoplay = true` 并在 `oncanplay` 里无条件 `audio.play()`。若用户在加载完成前就点了停止，
+	 * 单靠 pause 会在 canplay 到达时又把声音放出来。因此这里把 autoplay 关掉、把 oncanplay 摘掉。
+	 * 不动 `src`：清 src 会触发 error → 引擎 onError 重试链，反而更糟。
+	 */
+	private silenceAudio(audio: HTMLAudioElement): void {
+		try {
+			audio.autoplay = false;
+			audio.oncanplay = null;
+			audio.pause();
+			//回到开头：再次播放时从头开始，而不是从上次的进度继续
+			audio.currentTime = 0;
+			//从 DOM 里摘掉：引擎只在 onended / onerror 里 remove()，被我们停在半路的那条会一直挂着
+			audio.remove();
+		} catch (e) {
+			//忽略：源还没加载完时 currentTime 可能抛错，不影响已经暂停的事实
+		}
+	}
+
+	/** 当前试听的定位（技能 / 干员 / 第几条）；没有在播时返回 undefined */
+	getPreviewTarget(): { skill: string; name: string; line?: number } | undefined {
+		if (!this._previewAudio || !this._previewTarget) return undefined;
+		return { ...this._previewTarget };
+	}
+
+	/**
+	 * 该 (技能, 干员) 的试听是否正在播放（不区分第几条）。
+	 *
+	 * 只认「登记在案的实例」而不看 `audio.paused`：`game.playAudio` 的 `src` 是异步挂上的，
+	 * 点击后到真正开始播放之间 `paused` 恒为 true，用它判断会让图标迟迟不切换。
+	 * 结束（`ended`）与出错（`error`）都会在 {@link trackPreview} 里清掉登记，状态不会滞留。
+	 */
+	isPreviewPlaying(skill: string, name: string): boolean {
+		const target = this._previewTarget;
+		if (!this._previewAudio || !target) return false;
+		return target.skill === skill && target.name === name;
+	}
+
+	/**
+	 * 订阅「试听状态变化」（开始 / 暂停 / 自然结束都会通知）。
+	 *
+	 * @returns 取消订阅的函数
+	 */
+	onPreviewChange(listener: () => void): () => void {
+		this._previewListeners.add(listener);
+		return () => this._previewListeners.delete(listener);
+	}
+
+	private emitPreviewChange(): void {
+		for (const listener of this._previewListeners) {
+			try {
+				listener();
+			} catch (e) {
+				//订阅方异常不应影响播放链路
+				console.warn("[whichWayAudio] 试听状态回调出错：", e);
+			}
+		}
 	}
 
 	/**
@@ -1236,12 +1472,15 @@ class WhichWayAudio {
 	initDieAudio(char: WhichWayCharacter): void {
 		if (!char?.whichWay?.charId) return;
 		const name = char.whichWay.charId;
+		const lang = this.getCharacterLang(name);
 
 		//阵亡语音必须写成 `ext:` 形态：game.playAudio 只认 blob:/data:/ext:/db:，其余一律前置 `audio/`
 		//（game/index.js:2488-2497）。旧写法（compilePath 产物 `extension/WhichWay/...`）会被拼成
 		//`audio/extension/WhichWay/...` ⇒ 每次必然 404，所以这里改用引擎能正确解析的 ext: 前缀。
 		//@ts-ignore
-		char.dieAudios = [`ext:WhichWay/audio/${this.getCharacterLang(name)}/die/${name}.mp3`];
+		char.dieAudios = [`ext:WhichWay/audio/${lang}/die/${name}.mp3`];
+		//阵亡台词的键也跟着地址走：`#角色名:die` → `#ext:WhichWay/audio/{语言}/die/{角色名}:die`
+		this.copyLine(`#${name}:die`, `#ext:WhichWay/audio/${lang}/die/${name}:die`);
 
 		//武将包自定义的 dieAudio（不是本模块挂的在线播放器）一律保留：
 		//模块只对自己挂的那个负责（缺本地语音时挂、有本地语音时清）
