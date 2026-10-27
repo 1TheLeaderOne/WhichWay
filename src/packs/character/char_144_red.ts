@@ -1,11 +1,12 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { whichWayUtil } from "../../utill.js";
 
 character("char_144_red", { pack: "epicSJZX", sex: "female", group: "luomrfz", hp: 4, skills: ["qunlangmrfz", "cigumrfz", "qingchumrfz"], hasHiddenSkill: true });
 
 skill({
 	qunlangmrfz: {
-		audio: 2,
+		audio: ["干员报到","行动出发"],
 		trigger: {
 			player: "showCharacterAfter",
 		},
@@ -49,7 +50,7 @@ skill({
 				if (!card.nature && card.name == "sha") return "stab";
 			},
 		},
-		audio: 2,
+		audio: ["作战中1","作战中2"],
 		trigger: {
 			global: ["respond", "useCard"],
 		},
@@ -71,7 +72,7 @@ skill({
 	},
 	qingchumrfz: {
 		group: ["qingchumrfz_sha", "qingchumrfz_shan"],
-		audio: 2,
+		audio: ["作战中3","作战中4"],
 		trigger: { player: ["useCard", "respond"] },
 		filter: function (event, player) {
 			let target = _status.currentPhase;
@@ -255,7 +256,8 @@ skill({
 						value: [5, 3, 1],
 					},
 					result: {
-						target: function (player, target, card, isLink) {
+						target: function (player, target, card) {
+							let isLink = target.isLinked();
 							let eff = (function () {
 								if (!isLink && player.hasSkill("jiu")) {
 									if (
@@ -333,3 +335,5 @@ translate({
 });
 
 characterIntro("char_144_red", "红，身份不明，履历缺失，由凯尔希医生接收、监护并担保。于机动作战，特种作战与隐秘作战中表现出极高天赋，成绩斐然。</br>现于凯尔希医生的指导下，作为特种干员为罗德岛提供服务。");
+
+characterTitle("char_144_red",whichWayUtil.colorize("#r阴影中的红狼#"));

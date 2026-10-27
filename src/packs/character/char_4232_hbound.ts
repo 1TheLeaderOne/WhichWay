@@ -240,7 +240,7 @@ const resigter = function (name = "char_4232_hbound") {
 						})
 						.forResult();
 					if (picked.bool && picked.links?.length && picked.targets?.length) {
-						await player.useCard(picked.links[0], picked.targets, "fenshenmrfz");
+						await player.useCard({ card: picked.links[0], targets: picked.targets, skill: "fenshenmrfz" });
 					}
 				} else if (key === "beishui") {
 					await player.loseMaxHp(1);

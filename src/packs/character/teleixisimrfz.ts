@@ -25,7 +25,7 @@ skill({
 			// @ts-ignore
 			async content(event, trigger, player) {
 				const { cards } = await player
-					.chooseCard(true)
+					.chooseCard({ forced: true })
 					.set("prompt", "【怨府】:请展示一张手牌")
 					.set("ai", card => {
 						var storage = player.storage.yuanfumrfz;
@@ -118,8 +118,7 @@ skill({
 			},
 			// @ts-ignore
 			async content(event, trigger, player) {
-				var { control } = await player
-					.chooseToDisable(true)
+				var { control } = await player.chooseToDisable({ horse: true })
 					.set("ai", function (event, player, list) {
 						if (list.includes("equip5")) return "equip5";
 						else if (list.includes("equip2")) return "equip2";
@@ -161,8 +160,7 @@ skill({
 					}
 					var list = getChooseList(event, player, target).list,
 						chooseList = getChooseList(event, player, target).chooseList;
-					var { control } = await target
-						.chooseControl(list)
+					var { control } = await target.chooseControl({ controls: list })
 						.set("choiceList", chooseList)
 						.set("prompt", "请选择一项")
 						.set("ai", () => {
@@ -188,13 +186,13 @@ skill({
 					}
 					switch (control) {
 						case "选项一":
-							target.chooseToDiscard(true, "【焚舟】:请弃置一张手牌", "h");
+							target.chooseToDiscard({ forced: true, prompt: "【焚舟】:请弃置一张手牌", position: "h" });
 							target.addMark("fenzhoumrfz_eff1", 1, false);
 							target.addTempSkill("fenzhoumrfz_eff1", { player: ["damageEnd", "phaseEnd"] });
 							break;
 						case "选项二":
 							var { cards } = await target
-								.chooseCard("h", `【焚舟】:请交给${get.translation(player)}一张手牌`, true)
+								.chooseCard({ position: "h", prompt: `【焚舟】:请交给${get.translation(player)}一张手牌`, forced: true })
 								.set("ai", card => {
 									var player = _status.event.player,
 										target = _status.event.target;

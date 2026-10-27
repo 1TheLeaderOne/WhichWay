@@ -411,7 +411,7 @@ skill({
 			if (enemyGains.length) {
 				for (let char of game.players) {
 					if (char === player) continue;
-					await char.gain(enemyGains.randomGet(), "gain2");
+					await char.gain({ cards: [enemyGains.randomGet()], animate: "gain2" });
 				}
 			} else {
 				player.chat("绝杀无解！");

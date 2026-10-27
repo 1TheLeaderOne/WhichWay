@@ -5,7 +5,7 @@ character("char_4110_delphn", { pack: "epicSJZX", sex: "female", group: "weimrfz
 
 skill({
 	zhuofengmrfz: {
-		audio: 2,
+		audio: ["作战中1", "作战中2"],
 		usable: 1,
 		enable: "phaseUse",
 		filter(event, player) {
@@ -63,7 +63,7 @@ skill({
 				if (card.name == "sha" && (!mark || mark == 0)) return true;
 			},
 		},
-		audio: 2,
+		audio: ["作战中3", "作战中4"],
 		trigger: {
 			player: "useCard",
 			source: "damageEnd",

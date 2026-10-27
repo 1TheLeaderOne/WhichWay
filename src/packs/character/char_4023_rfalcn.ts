@@ -10,7 +10,7 @@ skill({
 			name: "护",
 			content: "你有#个‘护’标记",
 		},
-		audio: 2,
+		audio: ["部署1","部署2"],
 		trigger: { player: "phaseDiscardBegin" },
 		forced: true,
 		filter: function (event, player) {
@@ -20,7 +20,7 @@ skill({
 			let num = player.countCards("e");
 			const { targets } = await player
 				.chooseTarget({
-					prompt:`【齿痕】:请选择至多${get.cnNumber(num)}角色，令这些角色获得一个‘护’`
+					prompt: `【齿痕】:请选择至多${get.cnNumber(num)}角色，令这些角色获得一个‘护’`,
 				})
 				.set("selectTarget", function () {
 					let num = _status.event.num;
@@ -66,7 +66,7 @@ skill({
 						eff = get.effect(target, trigger.card, trigger.player, trigger.player);
 					const { bool } = await trigger.player
 						.chooseToDiscard({
-							prompt:`【齿痕】:你须弃置一张牌，否则此牌(${get.translation(trigger.card)})对${get.translation(target)}无效`
+							prompt: `【齿痕】:你须弃置一张牌，否则此牌(${get.translation(trigger.card)})对${get.translation(target)}无效`,
 						})
 						.set("ai", function (card) {
 							if (_status.event.eff > 0) return 10 - get.value(card);
@@ -86,13 +86,13 @@ skill({
 		},
 	},
 	haomingmrfz: {
-		audio: 2,
+		audio: ["作战中1","作战中2"],
 		direct: true,
 		trigger: { source: "damageSource" },
 		usable: 1,
 		async content(event, trigger, player) {
 			const { control } = await player
-				.chooseControl({controls:["basic", "trick", "equip", "cancel2"]})
+				.chooseControl({ controls: ["basic", "trick", "equip", "cancel2"] })
 				.set("prompt", "【号鸣】:请选择你要获得的牌的类型")
 				.set("ai", function () {
 					let player = _status.event.player;
@@ -110,7 +110,7 @@ skill({
 			let card = get.cardPile2(function (card) {
 				return get.type(card, "trick") == control;
 			});
-			if (card) player.gain({cards:[card],animate:"gain2"});
+			if (card) player.gain({ cards: [card], animate: "gain2" });
 			else player.chat(`牌堆中没有${get.translation(control)}牌了！`);
 		},
 		group: ["haomingmrfz_jd", "haomingmrfz_find"],
@@ -136,7 +136,7 @@ skill({
 				async content(event, trigger, player) {
 					const { targets } = await player
 						.chooseTarget({
-							prompt:"【号鸣】:你可以选择一名其他角色，视为对其使用一张【决斗】"
+							prompt: "【号鸣】:你可以选择一名其他角色，视为对其使用一张【决斗】",
 						})
 						.set("filterTarget", (card, player, target) => {
 							return player.canUse("juedou", target);
@@ -159,15 +159,16 @@ skill({
 							if (trigger.name == "phaseJieshu") return;
 							let target = trigger.player,
 								num = Math.ceil(target.countCards("h") / 2);
-							if (num > 0) target.chooseToDiscard({
-								forced:true,
-								selectCard:num,
-								prompt: `【号鸣】:请弃置${get.translation(num)}张手牌`
-							});
+							if (num > 0)
+								target.chooseToDiscard({
+									forced: true,
+									selectCard: num,
+									prompt: `【号鸣】:请弃置${get.translation(num)}张手牌`,
+								});
 							target.addTempSkill("haomingmrfz_ban", { player: "phaseEnd" });
 						});
-						const card = get.autoViewAs({ name: "juedou", isCard: true, storage: { haomingmrfz: true } })
-					player.useCard({card,targets}).logSkill = "haomingmrfz";
+					const card = get.autoViewAs({ name: "juedou", isCard: true, storage: { haomingmrfz: true } });
+					player.useCard({ card, targets }).logSkill = "haomingmrfz";
 				},
 			},
 			find: {
@@ -196,7 +197,7 @@ skill({
 				async content(event, trigger, player) {
 					let cards = event.cards,
 						num = cards.length,
-						list:any[] = [];
+						list: any[] = [];
 					for (let i of ui.cardPile.childNodes) {
 						//@ts-ignore
 						if (get.cardNameLength(i) != num) continue;
@@ -212,9 +213,9 @@ skill({
 							? { links: [list[0]] }
 							: await player
 									.chooseCardButton({
-										prompt:"【号鸣】:请选择你要获得的牌",
-										forced:true,
-										cards:list
+										prompt: "【号鸣】:请选择你要获得的牌",
+										forced: true,
+										cards: list,
 									})
 									.set("ai", function (button) {
 										let name = button.name,
@@ -227,7 +228,7 @@ skill({
 					let card = get.cardPile2(function (card) {
 						return card == links[0];
 					});
-					if (card) player.gain({cards:[card],animate:"gain2"});
+					if (card) player.gain({ cards: [card], animate: "gain2" });
 					else player.chat(`牌堆中没有${get.translation(links)}了！`);
 				},
 				ai: {
@@ -250,3 +251,6 @@ translate({
 });
 
 characterIntro("char_4023_rfalcn", "红隼，萨尔贡人，舒巴特-阿尔萨兰地区前部落战士，曾与她的兄弟姐妹们一起被当地王酋军强制奴役。在一次逃离后与罗德岛相遇，重返矿场解救了与自己一同受难的工友，后主动申请加入罗德岛。现作为罗德岛萨尔贡办事处干员，接受治疗的同时参与各类外勤任务。");
+
+
+characterTitle("char_4023_rfalcn","捍卫者");

@@ -1,255 +1,248 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { whichWayUtil } from "../../utill.js";
 
-character("char_421_crow", { pack: "epicSJZX",
-			sex: "female",
-			group: "bomrfz",
-			hp: 4,
-			skills: ["tiaojiumrfz","rujingmrfz"],
-		});
+character("char_421_crow", { pack: "epicSJZX", sex: "female", group: "bomrfz", hp: 4, skills: ["tiaojiumrfz", "rujingmrfz"] });
+
+/** 判断角色是否有可用于转化（使用/打出）的【酒】 */
+function hasJiuCard(player) {
+	return player.hasCard(card => _status.connectMode || get.name(card) === "jiu", "hes");
+}
+
+/** 入境已达成的档位数（去重后的伤害类牌名数量） */
+function countRujing(player) {
+	return player.countMark("rujingmrfz");
+}
+
+/** 场上是否存在达成入境第5档的存活角色 */
+function hasRujingFull() {
+	return game.hasPlayer(player => player.isAlive() && player.hasSkill("rujingmrfz") && countRujing(player) >= 5);
+}
 
 skill({
-	"tiaojiumrfz": {
-			audio: 2,
-			audioname: ["char_486_takila"],
-			derivation: ["jiu"],
-			enable: "chooseToUse",
-			filterCard: function (card, player) {
-				if (ui.selected.cards.length) {
-					return get.color(card) != get.color(ui.selected.cards[0]);
-				}
-				return true;
-			},
-			complexCard: true,
-			selectCard: 2,
-			viewAs: {
-				name: "jiu",
-			},
-			position: "hs",
-			viewAsFilter: function (player) {
-				var hs = player.getCards("hs");
-				if (hs.length < 2) return false;
-				var bool = false,
-					map = {};
-				for (var card of hs) {
-					var color = get.color(card);
-					if (!map[color]) map[color] = true;
-					else {
-						bool = true;
-						break;
-					}
-				}
-				if (!bool) return false;
-				return true;
-			},
-			prompt: "【调酒】:将两张不同颜色的手牌当酒使用",
-			check: function (card) {
-				return 10 - get.value(card);
-			},
-			ai: {
-				threaten: 1.5,
-				order: () => {
-					let player = _status.event.player;
-					if (_status.event.dying) return 9;
-					let cards = player.getCards("h", card => {
-						return get.type(card) != "equip" && get.type(card) != "delay";
-					});
-					if (cards.length > 0) return 13;
-					return 0;
+	tiaojiumrfz: {
+		audio: ["行动开始", "行动出发"],
+		audioname: ["char_486_takila"],
+		forced: true,
+		trigger: {
+			global: "phaseBefore",
+			player: "enterGame",
+		},
+		locked: false,
+		filter(event, player) {
+			return event.name != "phase" || game.phaseNumber == 0;
+		},
+		async content(event, trigger, player) {
+			const suits = ["spade", "heart", "club", "diamond"];
+			const cards:Card[] = [];
+			for (let i = 0; i < 8; i++) {
+				cards.push(game.createCard2("jiu", suits[get.rand(0, suits.length - 1)], get.rand(1, 13)));
+			}
+			await player.$throw(cards);
+			await game.cardsGotoPile(cards, () => ui.cardPile.childNodes[get.rand(0, ui.cardPile.childNodes.length - 1)]);
+		},
+		group: ["tiaojiumrfz_wanjin"],
+		subSkill: {
+			wanjin: {
+				audio: "tiaojiumrfz",
+				enable: "chooseToUse",
+				filter(event, player) {
+					if (event.type === "wuxie") return false;
+					if (!hasJiuCard(player)) return false;
+					return get.inpileVCardList(info => {
+						if (info[0] !== "basic") return false;
+						return event.filterCard(get.autoViewAs({ name: info[2], nature: info[3] }), player, event);
+					}).length;
 				},
-				result: {
-					target: 1,
+				chooseButton: {
+					dialog(event, player) {
+						const vcards = get.inpileVCardList(info => {
+							if (info[0] !== "basic") return false;
+							return event.filterCard(get.autoViewAs({ name: info[2], nature: info[3] }), player, event);
+						});
+						return ui.create.dialog("调酒", [vcards, "vcard"]);
+					},
+					check(button) {
+						if (get.event().getParent()!.type !== "phase") return 1;
+						return get.player().getUseValue({ name: button.link[2], nature: button.link[3] });
+					},
+					backup(links, player) {
+						return {
+							audio: "tiaojiumrfz",
+							popname: true,
+							viewAs: { name: links[0][2], nature: links[0][3] },
+							filterCard(card) {
+								return get.name(card) === "jiu";
+							},
+							check(card) {
+								return 7 - get.value(card);
+							},
+							position: "hes",
+						};
+					},
+					prompt(links) {
+						return `将一张【酒】当${get.translation(links[0][3]) || ""}【${get.translation(links[0][2])}】使用`;
+					},
 				},
-				tag: {
-					save: 1,
-					recover: 0.1,
+				hiddenCard(player, name) {
+					if (get.type(name) !== "basic") return false;
+					return lib.inpile.includes(name) && hasJiuCard(player);
 				},
+				ai: {
+					order: 3,
+					result: {
+						player(player) {
+							return get.event().dying ? get.attitude(player, get.event().dying) : 1;
+						},
+					},
+				},
+			},
+			backup: {},
+		},
+	},
+	rujingmrfz: {
+		audio: ["作战中4", "作战中3"],
+		forced: true,
+		popup: false,
+		mark: true,
+		intro: {
+			content(storage, player) {
+				const num = countRujing(player);
+				const texts = [
+					"1.准备阶段，从牌堆或弃牌堆中获得一张【酒】",
+					"2.你可以将【酒】当【顺手牵羊】使用",
+					"3.你使用的【酒】的效果持续一回合",
+					"4.你【酒】的效果对所有伤害类牌均生效",
+					"5.没有【调酒】的角色无法使用【酒】",
+				];
+				return texts
+					.map((text, index) => {
+						if (num >= index + 1) return whichWayUtil.colorize(`#g√${text}#`);
+						return `·${text}`;
+					})
+					.join("<br>");
 			},
 		},
-	"rujingmrfz": {
-			audio: 2,
-			direct: true,
-			lastDo: true,
-			mark: true,
-			intro: {
-				content: function (event, player) {
-					var storage = player.storage.rujingmrfz;
-					storage["number"].sort(function (a, b) {
-						return a - b;
-					});
-					var str1 = "",
-						str2 = "";
-					if (storage["number"].length) str1 = str1 + storage["number"];
-					else str1 = "无";
-					if (storage["suit"].length) str2 = str2 + get.translation(storage["suit"]);
-					else str2 = "无";
-					return "记录的数字:" + str1 + "</br>" + "记录的花色:" + str2;
+		trigger: { player: "useCardAfter" },
+		filter(event, player) {
+			if (!event.card || !get.is.damageCard(event.card)) return false;
+			return !player.getStorage("rujingmrfz", []).includes(get.name(event.card));
+		},
+		async content(event, trigger, player) {
+			player.markAuto("rujingmrfz", [get.name(trigger.card)]);
+		},
+		init(player, skill) {
+			//补记技能获得前已使用过的伤害类牌
+			const names:string[] = [];
+			for (const history of player.getAllHistory("useCard")) {
+				const card = history.card;
+				if (!card || !get.is.damageCard(card)) continue;
+				const name = get.name(card)!;
+				if (!names.includes(name)) names.push(name);
+			}
+			if (names.length) player.setStorage("rujingmrfz", names, true);
+			//「没有调酒的角色无法使用酒」为全局规则，常驻注册后由自身 mod 判定是否生效
+			game.addGlobalSkill("rujingmrfz_nojiu");
+		},
+		group: ["rujingmrfz_phase1", "rujingmrfz_phase2", "rujingmrfz_phase3", "rujingmrfz_phase4"],
+		subSkill: {
+			//准备阶段，从牌堆或弃牌堆中获得一张【酒】
+			phase1: {
+				audio: "rujingmrfz",
+				forced: true,
+				popup: false,
+				trigger: { player: "phaseZhunbeiBegin" },
+				filter(event, player) {
+					return countRujing(player) >= 1;
+				},
+				async content(event, trigger, player) {
+					const card = get.cardPile("jiu");
+					if (card) await player.gain({cards:[card],animate: "gain2"});
 				},
 			},
-			init: player => {
-				player.storage.rujingmrfz = {
-					suit: [],
-					number: [],
-					ban: [],
-					card: [],
-				};
+			//你可以将【酒】当【顺手牵羊】使用
+			phase2: {
+				audio: "rujingmrfz",
+				enable: "chooseToUse",
+				filter(event, player) {
+					if (event.type === "wuxie") return false;
+					if (countRujing(player) < 2) return false;
+					return hasJiuCard(player);
+				},
+				filterCard(card) {
+					return get.name(card) === "jiu";
+				},
+				position: "hes",
+				viewAs: { name: "shunshou" },
+				viewAsFilter(player) {
+					return countRujing(player) >= 2 && hasJiuCard(player);
+				},
+				prompt: "将一张【酒】当【顺手牵羊】使用",
+				check(card) {
+					return 6 - get.value(card);
+				},
 			},
-			onremove: player => {
-				delete player.storage.rujingmrfz;
-			},
-			trigger: { player: "useCardAfter" },
-			filter: function (event, player) {
-				return event.card && (event.card.number || event.card.suit);
-			},
-			async content(event, trigger, player) {
-				if (!player.storage.rujingmrfz)
-					player.storage.rujingmrfz = {
-						suit: [],
-						number: [],
-						ban: [],
-						card: [],
-					};
-				var card = trigger.card,
-					storage = player.storage.rujingmrfz;
-				if (!storage["card"].includes(trigger.card)) {
-					if (card.number && !storage["number"].includes(card.number)) {
-						player.storage.rujingmrfz["number"].add(card.number);
-					}
-					if (card.suit && !storage["suit"].includes(card.suit) && card.suit != "none") {
-						player.storage.rujingmrfz["suit"].add(card.suit);
-					}
-				} else player.storage.rujingmrfz["card"].remove(trigger.card);
-			},
-			group: ["rujingmrfz_addcount", "rujingmrfz_clear"],
-			subSkill: {
-				clear: {
-					charlotte: true,
-					silent: true,
-					lastDo: true,
-					trigger: { player: "phaseUseEnd" },
-					filter: function (event, player) {
-						return player.storage.rujingmrfz;
-					},
-					async content(event, trigger, player) {
-						player.storage.rujingmrfz["ban"] = [];
+			//你使用的【酒】的效果持续一回合（使用后不消耗，本回合结束时才清除）
+			phase3: {
+				audio: "rujingmrfz",
+				ai: {
+					jiuSustain: true,
+					skillTagFilter(player, tag, name) {
+						if (name !== "useCard") return false;
+						return countRujing(player) >= 3;
 					},
 				},
-				addcount: {
-					audio: "rujingmrfz",
-					trigger: { player: "useCard" },
-					direct: true,
-					filter: function (event, player) {
-						var storage = player.storage.rujingmrfz;
-						if (!event.card || !(event.card.number && event.card.suit)) return false;
-						var cardNumber = event.card.number;
-						var cardSuit = event.card.suit;
-						if (!storage["number"].includes(cardNumber) && !storage["suit"].includes(cardSuit)) return false;
-						//@ts-ignore
-						if (get.type(event.card) == "equip" || get.type(event.card) == "delay") return false;
-						if (["shan", "wuxie"].includes(event.card.name)) return false;
-						return (
-							(storage["number"].includes(cardNumber) && !storage["ban"].includes("number")) ||
-							(storage["suit"].includes(cardSuit) && !storage["ban"].includes("suit"))
-						);
+			},
+			//你【酒】的效果对所有伤害类牌均生效
+			phase4: {
+				audio: "rujingmrfz",
+				forced: true,
+				popup: false,
+				trigger: { source: "damageBegin1" },
+				filter(event, player) {
+					if (countRujing(player) < 4) return false;
+					if (!event.card || get.name(event.card) === "sha") return false;
+					if (!get.is.damageCard(event.card)) return false;
+					return Number(player.storage.jiu) > 0;
+				},
+				async content(event, trigger, player) {
+					//第3档已使【酒】持续到回合结束，故此处不再消耗
+					trigger.num += Number(player.storage.jiu) || 0;
+				},
+			},
+			//没有【调酒】的角色无法使用【酒】（含濒死求酒）
+			nojiu: {
+				charlotte: true,
+				mod: {
+					cardEnabled2(card, player) {
+						if (get.name(card) !== "jiu") return;
+						if (player.hasSkill("tiaojiumrfz")) return;
+						if (hasRujingFull()) return false;
 					},
-					async content(event, trigger, player) {
-						let result;
-						let storage = player.storage.rujingmrfz,
-							number = trigger.card.number,
-							suit = trigger.card.suit;
-						const list = [];
-						if (storage["number"].includes(number) && !storage["ban"].includes("number")) list.add("number");
-						if (storage["suit"].includes(suit) && !storage["ban"].includes("suit")) list.add("suit");
-						event.list = list;
-						if (list.length == 1) {
-							var goon = true;
-							if (trigger.card.name == "du") goon = false;
-							if (trigger.card.name == "jiedao") goon = false;
-							if (trigger.card.name == "tao" && player.getDamagedHp() == 1) goon = false;
-							if (list.includes("suit")) {
-								result = await player
-									.chooseBool("【入境】:是否令此牌额外结算一次？（同花色）")
-									.set("ai", function () {
-										return _status.event.goon;
-									})
-									.set("goon", goon)
-									.forResult();
-							} else {
-								result = await player
-									.chooseBool("【入境】:是否令此牌额外结算一次？（同点数）")
-									.set("ai", function () {
-										return _status.event.goon;
-									})
-									.set("goon", goon)
-									.forResult();
-							}
-						} else {
-							result = await player
-								.chooseControl("点数", "花色", "全部", "cancel2")
-								.set("prompt", "【入境】:请选择一项")
-								.set("prompt2", "选择‘点数’或者‘花色’为额外结算一次，选择‘全部’为额外结算两次，选择‘取消’为不发动此技能")
-								.set("ai", function () {
-									var player = _status.event.player,
-										card = _status.event.card;
-									if (card.name == "du" || card.name == "jiedao") return "cancel2";
-									if (card.name == "tao") {
-										var hp = player.getDamagedHp();
-										switch (hp) {
-											case 0:
-												return "cancel2";
-											case 1:
-												return ["点数", "花色"].randomGet();
-											default:
-												return "全部";
-										}
-									}
-									return "全部";
-								})
-								.set("card", trigger.card)
-								.forResult();
-						}
-
-						if (result?.bool) {
-							player.storage.rujingmrfz["card"].add(trigger.card);
-							if (event.list.includes("suit")) {
-								trigger.effectCount++;
-								player.storage.rujingmrfz["ban"].add("suit");
-								player.storage.rujingmrfz["suit"].remove(suit);
-							} else {
-								trigger.effectCount++;
-								player.storage.rujingmrfz["ban"].add("number");
-								player.storage.rujingmrfz["number"].remove(number);
-							}
-						} else if (result.control != "cancel2" && result.bool != false) {
-							player.storage.rujingmrfz["card"].add(trigger.card);
-							if (result.control == "点数") {
-								trigger.effectCount++;
-								player.storage.rujingmrfz["ban"].add("number");
-								player.storage.rujingmrfz["number"].remove(number);
-							} else if (result.control == "花色") {
-								trigger.effectCount++;
-								player.storage.rujingmrfz["ban"].add("suit");
-								player.storage.rujingmrfz["suit"].remove(suit);
-							} else {
-								trigger.effectCount += 2;
-								player.storage.rujingmrfz["ban"].add("suit");
-								player.storage.rujingmrfz["suit"].remove(suit);
-								player.storage.rujingmrfz["ban"].add("number");
-								player.storage.rujingmrfz["number"].remove(number);
-							}
-						}
+					cardSavable(card, player) {
+						if (get.name(card) !== "jiu") return;
+						if (player.hasSkill("tiaojiumrfz")) return;
+						if (hasRujingFull()) return false;
 					},
 				},
 			},
 		},
+	},
 });
 
 translate({
-	"char_421_crow": "羽毛笔",
-	"tiaojiumrfz": "调酒",
-	"tiaojiumrfz_info": "①你可以将两张颜色不同的手牌当作【酒】使用。</br>②锁定技，你使用的【酒】的描述中‘本回合目标角色下一张使用的【杀】的伤害值基数+1’改成‘本回合目标角色下一张使用的基本牌（【酒】除外）和非延时锦囊牌额外结算一次’。",
-	"rujingmrfz": "入境",
-	"rujingmrfz_info": "①锁定技，当你使用牌后，你记录此牌的点数和花色。②出牌阶段每项限一次，当你使用牌时，若【入境①】中包含此牌的[①点数/②花色]，你可以令此牌额外结算一次，然后你清除【入境①】中记录的该[①点数/②花色]且此牌的点数和花色不能被【入境①】记录。",
+	char_421_crow: "羽毛笔",
+	tiaojiumrfz: "调酒",
+	tiaojiumrfz_info: "①锁定技，游戏开始时，你将八张【酒】置入牌堆之中;<br>②你可以将【酒】当任意基本牌使用。",
+	//杀 决斗 火攻 南蛮 万剑
+	rujingmrfz: "入境",
+	rujingmrfz_info:
+		"锁定技，根据你使用过伤害类牌的数量（相同牌名的牌仅记一次）获得对应的效果：<br>1.准备阶段，从牌堆或弃牌堆中获得一张【酒】;<br>2.你可以将【酒】当【顺手牵羊】使用;<br>3.你使用的【酒】的效果持续一回合;<br>4.你【酒】的效果对所有伤害类牌均生效;<br>5. 没有【调酒】的角色无法使用【酒】。",
 });
 
-characterIntro("char_421_crow", "羽毛笔，真正玻利瓦尔人某中尉之女，父亲死后被父亲战友潘乔收养，成为其养女，而后一同辗转至多索雷斯。</br>多索雷斯事件后，与龙舌兰一同来到罗德岛，由于身份特殊，经过会议审查，最终同意其加入罗德岛。");
+characterIntro(
+	"char_421_crow",
+	"羽毛笔，真正玻利瓦尔人某中尉之女，父亲死后被父亲战友潘乔收养，成为其养女，而后一同辗转至多索雷斯。</br>多索雷斯事件后，与龙舌兰一同来到罗德岛，由于身份特殊，经过会议审查，最终同意其加入罗德岛。"
+);
+
+characterTitle("char_421_crow", "多索雷斯的调酒师");

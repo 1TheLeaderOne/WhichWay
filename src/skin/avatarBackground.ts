@@ -163,23 +163,34 @@ function firstLayer(backgroundImage: string) {
 const toBackgroundUrl = (src: string) => `url("${whichWayFile.toCssUrl(src)}")`;
 
 /**
- * 清掉节点自身的内联立绘，**同时**让 `watchExternalBackground` 放行这次写入。
+ * 把节点自身的内联立绘清成 **`none`**（不是空串），并让 `watchExternalBackground` 放行这次写入。
  *
- * 为什么不能像以前那样写一份「影子副本」到内联样式：背板 `ui:background/default.png`
- * 是 1024×576、四角 RGBA 为 (65,65,65,196) / (42,42,42,223)，全图 0.5% 的像素 alpha < 255
- * —— 子元素那层在边缘**是半透明的**，节点自身再留一份立绘就会从边上透出来；
- * 而副本是「未调位的原样」、内层是 cover 放大后的画面（实测 453%×366%），两张构图不同，
- * 叠起来就是同时开千幻/十周年时看到的那种重影。
+ * ⚠️ 必须写 `none`，不能写 `""`：
+ * `""` 只是**移除内联声明**，随后主题样式表里的兜底规则就会生效 —— 无名杀自带的
+ * `theme/simple/style.css:28-46` 里有一条覆盖 `.button` / `.avatar` / `.avatar2` 等一大批容器的规则：
+ * ```css
+ * .button, .avatar, .avatar2, ... {
+ *     background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4));   // 40% 黑
+ * }
+ * ```
+ * 立绘被我们画进子元素后，节点自身一旦回到 CSS 的默认值，这层 40% 黑就会铺满卡片，
+ * 从立绘的透明/半透明处透出来 ⇒ 观感上就是「武将卡上盖了一层灰色遮罩」。
+ * 写 `none` 是内联声明，优先级高于主题选择器，能把它压住。
+ *
+ * 为什么不能像更早的版本那样写一份「影子副本」：背板 `ui:background/default.png` 边缘 alpha
+ * 只有 196~223，子元素那层在边缘半透明，节点自身再留一张立绘就会从边上透出来；
+ * 而副本是「未调位的原样」、内层是 cover 放大后的画面，两张构图不同 ⇒ 重影。
  *
  * 代价：`game.logv` 的战报卡头像是 `player.node.avatar.cloneNode()`（浅克隆，只带内联样式）、
  * `smoothAvatar` 的淡出层抄 `getComputedStyle`、`ui.fakeme` 抄内联 `background-image` ——
- * 这几处读不到子元素会变空白。它们是既有取舍里较轻的一边：重影是全局可见的 bug，而这几处
- * 只是个别面板的头像。将来要补，应该给那几处单独画（**不要**退回给节点写内联副本）。
+ * 这几处读不到子元素会变空白。它们是既有取舍里较轻的一边：重影/灰罩是全局可见的 bug，
+ * 而这几处只是个别面板的头像。将来要补，应该给那几处单独画（**不要**退回给节点写内联副本）。
  */
 function clearInlineBackground(node: HTMLDivElement) {
-	if (!node.style.backgroundImage) return;
+	//已经是 `none` 就不必再写（避免每帧都触发一次 MutationObserver）
+	if (node.style.backgroundImage === "none") return;
 	selfWritingNodes.add(node);
-	node.style.backgroundImage = "";
+	node.style.backgroundImage = "none";
 	queueMicrotask(() => selfWritingNodes.delete(node));
 }
 
@@ -190,10 +201,10 @@ function ensureLayers(node: HTMLDivElement): Layers {
 	const existing = layersOf(node);
 	if (existing) return existing;
 
-	//影子副本（见 paintPortrait）的贴合方式与引擎给立绘用的一致：cover + 水平居中。
-	//注意它不带内层那张画布的位置与倍率（默认 1.5 倍 + pos.json 的调位），所以只是「大致重合」：
-	//副本服务的是读不到子元素的三处（战报浅克隆、smoothAvatar 淡出层、fakeme），
-	//那几处只要有个正确的立绘在就行，没人拿它们和场上像素比对。
+	//建层这一瞬间就把节点自身的背景压成 `none`：主题的
+	//`.button, .avatar, .avatar2, … { background-image: linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.4)) }`
+	//会在内联为空时兜底铺一层 40% 黑 —— 立绘透明处透出来就是灰罩（见 `clearInlineBackground` 的注释）。
+	clearInlineBackground(node);
 	node.style.backgroundSize = "cover";
 	node.style.backgroundPositionX = "center";
 
@@ -639,8 +650,9 @@ function watchExternalBackground(node: HTMLDivElement) {
 		selfWritingNodes.add(node);
 		try {
 			current.setImage(external);
-			//清掉内联那份，否则会和子元素叠成两层
-			node.style.backgroundImage = "";
+			//清掉内联那份，否则会和子元素叠成两层。同样写 `none`（不是 `""`）：
+			//空串会让主题的 `.button { background-image: linear-gradient(40% 黑) }` 兜底生效 ⇒ 灰罩。
+			node.style.backgroundImage = "none";
 		} finally {
 			//MutationObserver 是异步批送的：等这一批回调走完再解除标记
 			queueMicrotask(() => selfWritingNodes.delete(node));
@@ -729,6 +741,15 @@ function installFullscreenPopPatch() {
 	 * 所以只在**最外层**写入、也只在最外层还原。
 	 */
 	let depth = 0;
+	/**
+	 * 本次调用里**真的写进去过**的节点。
+	 *
+	 * ⚠️ 还原必须以此为准，不能无条件清空：`before` 在「节点没有两层背景」「`layers.url` 为空」
+	 * 等情况下会提前返回，此时节点内联可能是**引擎自己刚写好的**立绘（非本扩展接管的角色、
+	 * 或本局还没走过 `paintPortrait`）。无条件清空会把那张图抹掉 ⇒
+	 * 「觉醒动画播完，武将的图片被删了」。这正是上一版的现象。
+	 */
+	const touched: HTMLDivElement[] = [];
 
 	whichWayAPIOverride.appendHook("lib.element.player.$fullscreenpop", {
 		before(this: any, _str: any, _nature: any, avatar: any) {
@@ -743,16 +764,20 @@ function installFullscreenPopPatch() {
 			//否则 `watchExternalBackground` 会把这次写入当成外部改图再回灌一遍。
 			selfWritingNodes.add(node);
 			node.style.backgroundImage = layers.url;
+			touched.push(node);
 		},
-		after(this: any, result: any, _str: any, _nature: any, avatar: any) {
+		after(this: any, result: any, _str: any, _nature: any, _avatar: any) {
 			depth--;
 			if (depth > 0) return result;
-			const node = resolveFullscreenAvatar(this, avatar);
-			if (!node) return result;
-			//原地清空（不复用 `clearInlineBackground`：它会再 add 一次标记并各自 queueMicrotask，
-			//两条微任务互相抵消不掉，标记会被提前删掉）。这里统一在下一轮微任务里收尾。
-			node.style.backgroundImage = "";
-			queueMicrotask(() => selfWritingNodes.delete(node));
+			//只还原**我们写过**的那些节点；没写过的（引擎自己画的）一律不动
+			while (touched.length > 0) {
+				const node = touched.pop();
+				if (!node) continue;
+				//还原成 `none` 而不是空串：空串会让主题的 `.button { background-image: linear-gradient(40% 黑) }`
+				//兜底生效 ⇒ 动画播完后立绘又被一层灰罩盖住。`none` 是内联声明，优先级高于主题选择器。
+				node.style.backgroundImage = "none";
+				queueMicrotask(() => selfWritingNodes.delete(node));
+			}
 			return result;
 		},
 	});

@@ -23,7 +23,7 @@ function longtengCanAddTarget(card, player, target) {
 	const evt = _status.event;
 	const user = evt.player;
 	if (evt.targets.includes(target)) return false;
-	if (user.canUse(evt.card, target, true) === false) return false;
+	if (user.canUse(evt.card, target, false) === false) return false;
 	return lib.filter.targetEnabled2(evt.card, user, target);
 }
 
@@ -35,7 +35,7 @@ function longtengAddTargetAI(target) {
 
 skill({
 	kanchamrfz: {
-		audio: 2,
+		audio: ["信赖提升后交谈1","信赖提升后交谈3"],
 		enable: "phaseUse",
 		usable: 1,
 		filter: function (event, player) {
@@ -116,7 +116,7 @@ skill({
 		},
 	},
 	longtengmrfz: {
-		audio: 8,
+		audio: ["编入队伍","任命队长","行动开始","作战中1","作战中2","作战中3","作战中4","观看作战记录"],
 		markimage: "extension/WhichWay/image/skill/mrfz_LTF.png",
 		intro: {
 			content: "expansion",
@@ -180,7 +180,7 @@ skill({
 			if (!result?.targets?.length) return;
 
 			const target = result.targets[0];
-			const next = target.addToExpansion(cards, target, "give");
+			const next = target.addToExpansion({ cards, source: target, animate: "give" });
 			next.gaintag.add("longtengmrfz");
 			await next;
 			target.addSkill("longtengmrfz_changeI");
@@ -239,6 +239,7 @@ skill({
 					if (!player.isTypeExpansions("longtengmrfz", "trick")) return false;
 					if (get.type(event.card, "trick") !== "trick") return false;
 					const info = get.info(event.card);
+					//@ts-ignore
 					if (info.allowMultiple === false || info.multitarget || !event.targets) return false;
 					return game.hasPlayer(current => lib.filter.targetEnabled2(event.card, player, current) && !event.targets.includes(current));
 				},

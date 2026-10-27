@@ -5,7 +5,7 @@ character("char_4191_tippi", { pack: "epicSJZX", sex: "female", group: "gemrfz",
 
 skill({
 	penhuimrfz: {
-		audio: 3,
+		audio: ["作战中1","作战中2","作战中3"],
 		trigger: {
 			player: "useCardAfter",
 		},
@@ -61,7 +61,7 @@ skill({
 			};
 
 			let minDist = Infinity;
-			let closestType:string | null = null;
+			let closestType: string | null = null;
 
 			for (let key in colorCenters) {
 				const dist = getDistance(rgb, colorCenters[key]);
@@ -287,7 +287,7 @@ skill({
 					player.markSkill("penhuimrfz_mark");
 					player
 						.when({ player: "useCardEnd" })
-						.then(async (event,trigger,player) => {
+						.then(async (event, trigger, player) => {
 							player.unmarkSkill("penhuimrfz_mark");
 						})
 						.assign({
@@ -302,7 +302,7 @@ skill({
 				case "red": {
 					const { targets } = await player
 						.chooseTarget()
-						.set("forced",true)
+						.set("forced", true)
 						.set("prompt", `对一名其他角色造成一点伤害`)
 						.set("ai", target => get.attitude(player, target) < 0)
 						.set("filterTarget", lib.filter.notMe)

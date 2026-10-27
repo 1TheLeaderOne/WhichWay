@@ -370,7 +370,7 @@ export class PlayerExt extends lib.element.Player {
 	/**
 	 * @description: 重新隐匿
 	 * @param {boolean} noChange 是否不改变体力/体力上限
-	 * @return {void}
+	 * @return { Promise<undefined> }
 	 */
 	async reUnseen(noChange) {
 		var player = this;
@@ -390,18 +390,18 @@ export class PlayerExt extends lib.element.Player {
 				maxHp: player.maxHp,
 			};
 			player.addTempSkill(skillName, { player: "showCharacterAfter" });
-			player
-				.when("showCharacterAfter")
-				.then(() => {
-					player.hp = hp;
-					player.maxHp = maxHp;
-					delete player.storage[skillName];
-				})
-				.vars({
+			const record = {
 					hp: player.hp,
 					maxHp: player.maxHp,
 					skillName: skillName,
-				});
+				}
+			player
+				.when("showCharacterAfter")
+				.then(async (event,trigger,player) => {
+					player.hp = record.hp;
+					player.maxHp = record.maxHp;
+					delete player.storage[record.skillName];
+				})
 			// .emb({ firstDo: true });
 		}
 		if (name && lib.character[name]) {
@@ -419,7 +419,7 @@ export class PlayerExt extends lib.element.Player {
 					skills.add(i);
 				}
 			}
-			for (var i = 0; i < skills.length; i++) {
+			for (let i = 0; i < skills.length; i++) {
 				if (!lib.translate[skills[i] + "_info"]) {
 					skills.splice(i--, 1);
 				}

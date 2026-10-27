@@ -5,7 +5,7 @@ character("char_4195_radian", { pack: "legendSJZX", sex: "female", group: "luomr
 
 skill({
 	gandianmrfz: {
-		audio: 2,
+		audio: ["作战中1","作战中2"],
 		forced: true,
 		trigger: {
 			global: "roundStart",
@@ -42,7 +42,7 @@ skill({
 
 			const { control } = await player
 				.chooseControl({
-					controls:["red", "black"]
+					controls: ["red", "black"],
 				})
 				.set("prompt", "【感电】：请选择令一种颜色的牌称之为“小轴”，其余颜色的牌则称之为“小树”")
 				.set("ai", () => {
@@ -105,7 +105,7 @@ skill({
 						player: "phaseUseBegin",
 						global: "phaseBefore",
 					})
-					.then(async (event,trigger,player) => {
+					.then(async (event, trigger, player) => {
 						if (trigger.name === "phaseUse") {
 							let shu = player.countCards("h", card => card.hasGaintag("gandianmrfz_shu"));
 							let zhou = player.countCards("h", card => card.hasGaintag("gandianmrfz_zhou"));
@@ -118,7 +118,7 @@ skill({
 						}
 					});
 			});
-			player.discard({cards:cards!});
+			player.discard({ cards: cards! });
 		},
 		ai: {
 			viewHandcard: true,
@@ -187,7 +187,7 @@ skill({
 						if (!evt || !evt.respondTo || !storage.some(i => i.cardid == evt.respondTo[1].cardid)) {
 							return;
 						}
-						const color = get.color((card as Card));
+						const color = get.color(card as Card);
 						//@ts-ignore
 						let zhouColor = _status.gandianmrfzColor;
 						//@ts-ignore

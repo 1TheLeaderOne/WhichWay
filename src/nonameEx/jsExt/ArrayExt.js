@@ -1,8 +1,25 @@
 export class ArrayExt extends Array {
 	/**
+	 * 令一群玩家受到伤害
+	 * 数组必须是Player[]
+	 * @param { number | import("@/library/element/Player/type").EventDamageParams } [params]
+	 * @returns { Promise<GameEvent[]> }
+	 */
+	async damages(params) {
+		const results = [];
+		for (const player of this) {
+			if (typeof player.damage !== "function") {
+				throw new Error("数组中必须全是Player！");
+			}
+			results.push(await player.damage(params));
+		}
+		return results;
+	}
+
+	/**
 	 * 判断两个数组是否相等
 	 * @param { Array } arr
-	 * @returns { boolean } 
+	 * @returns { boolean }
 	 */
 	isEquip(arr) {
 		if (this.length !== arr.length) return false;
@@ -124,4 +141,3 @@ export class ArrayExt extends Array {
 		}
 	}
 }
-

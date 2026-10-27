@@ -5,7 +5,7 @@ character("char_4186_tmoris", { pack: "epicSJZX", sex: "female", group: "othermr
 
 skill({
 	chendiemrfz: {
-		audio: 2,
+		audio: ["作战中1","作战中2"],
 		trigger: { player: "useCardBegin" },
 		filter(event, player) {
 			let num = lib.skill.wuweimrfz.getNum(player, "chendiemrfz");
@@ -33,7 +33,7 @@ skill({
 		},
 	},
 	umiri_chenxianmrfz: {
-		audio: 2,
+		audio: ["作战中4","作战中3"],
 		forced: true,
 		trigger: {
 			player: "gainAfter",

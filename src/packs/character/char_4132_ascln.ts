@@ -33,7 +33,7 @@ skill({
 				game.log(cards, "进入了弃牌堆");
 			}
 		},
-		audio: 2,
+		audio: ["作战中1","作战中2"],
 		trigger: {
 			player: "phaseJieshuBegin",
 		},
@@ -113,7 +113,7 @@ skill({
 		},
 	},
 	niximrfz: {
-		audio: 2,
+		audio: ["作战中3","作战中4"],
 		trigger: { global: "phaseJieshuBegin" },
 		filter(event, player) {
 			return event.player.isIn() && event.player != player && player.canUse("sha", event.player, false);
@@ -121,19 +121,17 @@ skill({
 		direct: true,
 		async content(event, trigger, player) {
 			const { cards } = await player
-				.chooseToUse(
-					{
-						prompt:"【匿袭】是否对" + get.translation(trigger.player) + "使用一张杀？",
-						filterCard(card, player) {
-							if (get.name(card) != "sha") return false;
-							return lib.filter.filterCard.apply(this, [card, player, get.event()]);
-						},
-						filterTarget(card, player, target) {
-							if (target != _status.event.sourcex && !ui.selected.targets.includes(_status.event.sourcex)) return false;
-							return lib.filter.targetEnabled.apply(this, arguments);
-						},
-					}
-				)
+				.chooseToUse({
+					prompt: "【匿袭】是否对" + get.translation(trigger.player) + "使用一张杀？",
+					filterCard(card, player) {
+						if (get.name(card) != "sha") return false;
+						return lib.filter.filterCard.apply(this, [card, player, get.event()]);
+					},
+					filterTarget(card, player, target) {
+						if (target != _status.event.sourcex && !ui.selected.targets.includes(_status.event.sourcex)) return false;
+						return lib.filter.targetEnabled.apply(this, arguments);
+					},
+				})
 				.set("logSkill", "niximrfz")
 				.set("complexSelect", true)
 				.set("sourcex", trigger.player)
@@ -152,11 +150,13 @@ skill({
 			if (!isDamaged && player.isIn() && trigger.player.isIn()) {
 				let target = trigger.player,
 					targetx = trigger.player,
-					list:Player[] = [];
+					list: Player[] = [];
 				if (target.getNext() == player) return;
-				const result= await player.chooseBool({
-					prompt:`【匿袭】:是否将座位移到${get.translation(trigger.player)}下家？`
-				}).forResult();
+				const result = await player
+					.chooseBool({
+						prompt: `【匿袭】:是否将座位移到${get.translation(trigger.player)}下家？`,
+					})
+					.forResult();
 				const bool = result.bool;
 				if (!bool) return;
 				while (targetx.getNext() != player) {
@@ -188,3 +188,5 @@ translate({
 });
 
 characterIntro("char_4132_ascln", "阿斯卡纶，巴别塔时期担任情报官，后作为S.W.E.E.P.负责人，为罗德岛负责反渗透工作。");
+
+characterTitle("char_4132_ascln","情报主脑");

@@ -1,6 +1,6 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { whichWayUtil } from "../../utill.js";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../hooks.ts";
 
 character("char_4166_varkis", { pack: "epicSJZX", sex: "male", group: "mimrfz", hp: 4, skills: ["wenchoumrfz"] });
 
@@ -119,3 +119,9 @@ translate({
 characterTitle("char_4166_varkis", "<font color = #a52a2a>血色旧往</font>");
 
 characterIntro("char_4166_varkis", "赞索斯，移动城市雅赛努斯中特尔斐运河的前任渡口管理者，河流的摆渡人。在第一神殿的文物交换仪式之后辞去了这一职务，经干员调香师介绍来到罗德岛接受矿石病的治疗，以近卫干员的身份为罗德岛提供服务。");
+
+dynamicTranslate("wenchoumrfz", function (player) {
+	return whichWayUtil.colorize(
+		`你的任意阶段开始时，你可以重铸一张牌，若你重铸的牌是：<br>①【杀】或武器牌：令包含你在内的至多两名角色将手牌调整至#r${player?.storage?.wenchoumrfz || 4}#并跳过此阶段；<br>②非伤害类基本牌：你视为使用一张无距离和次数限制的【杀】，然后此技能本回合失效，并令此技能中的红色数字-1。`
+	);
+});

@@ -1,301 +1,201 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { gameUtils } from "../../nonameEx/custom/gameUtils.ts";
+import { whichwayAI } from "../../ai/index.ts";
 
-character("char_322_lmlee", { pack: "legendSJZX",
-			sex: "male",
-			group: "limrfz",
-			hp: 3,
-			skills: ["linhuamrfz","mingshimrfz","jixiongmrfz"],
-		});
+character("char_322_lmlee", { pack: "legendSJZX", sex: "male", group: "limrfz", hp: 3, skills: ["linhuamrfz", "yourenmrfz", "beiyumrfz"] });
 
 skill({
-	"linhuamrfz": {
-			audio: 4,
-			forced: true,
-			trigger: { source: "damageBegin3" },
-			filter: function (event, player) {
-				return event.source != undefined;
-			},
-			async content(event, trigger, player) {
-				trigger.cancel();
-				trigger.player.damage("nosource", trigger.num);
-			},
-			group: ["linhuamrfz_anti", "linhuamrfz_skip"],
-			subSkill: {
-				anti: {
-					direct: true,
-					trigger: { player: "damageBegin3" },
-					filter: function (event, player) {
-						if (!event.nature) return false;
-						return player.countCards("he") >= 2 && event.source != undefined;
-					},
-					logTarget: "source",
-					async content(event, trigger, player) {
-						const result = await player
-							.chooseToDiscard("he", false, 2, "你可以弃置两张牌将此伤害转移给" + get.translation(trigger.source))
-							.forResult();
-
-						if (result.cards) {
-							trigger.cancel();
-							trigger.source.damage(trigger.num, trigger.nature);
-							//@ts-ignore
-							player.logSkill("linhuamrfz", trigger.source);
-						}
-					},
-				},
-				skip: {
-					direct: true,
-					trigger: { player: "phaseJudgeBegin" },
-					filter: function (event, player) {
-						return player.countCards("h") >= 2 && player.countCards("j");
-					},
-					async content(event, trigger, player) {
-						let result;
-
-						// step 0
-						result = await player
-							.chooseToDiscard("h", false, 2, "你可以弃置两张牌并移动一张你判定区内的一张牌")
-							.set("ai", card => {
-								return 6 - get.value(card);
-							})
-							.forResult();
-
-						// step 1
-						if (result.cards && result.cards.length) {
-							const cards = player.getCards("j");
-							result = await player.chooseButton(["将你判定区的一张牌移动至一名角色的判定区", cards]).forResult();
-						} else {
-							return;
-						}
-
-						// step 2
-						if (result.links && result.links.length) {
-							event.card = result.links[0];
-							result = await player
-								.chooseTarget(true, "选择" + get.translation(event.card) + "的移动目标", (card, player, target) => {
-									return target !== player && target.canAddJudge(event.card);
-								})
-								.forResult();
-						} else {
-							return;
-						}
-
-						// step 3
-						if (result.targets) {
-							const target = result.targets[0];
-							player.$give(event.card, target);
-							await game.delayx();
-							//@ts-ignore
-							player.logSkill("linhuamrfz");
-							//@ts-ignore
-							const name = event.card.viewAs || event.card.name;
-							if (event.card.name !== name) {
-								//@ts-ignore
-								target.addJudge(name, event.card);
-							} else {
-								//@ts-ignore
-								target.addJudge(event.card);
-							}
-						}
-					},
-				},
+	linhuamrfz: {
+		mod: {
+			targetEnabled(card: Card) {
+				if (get.type(card) == "delay") {
+					return false;
+				}
 			},
 		},
-	"mingshimrfz": {
-			audio: 2,
-			enable: "phaseUse",
-			usable: 2,
-			filterTarget: function (card, player, target) {
-				return target != player && !target.hasSkill("mingshimrfz2");
-			},
-			selectTarget: 1,
-			filter: function (event, player) {
-				return player.countCards("he") > 0;
-			},
-			async content(event, trigger, player) {
-				const { target } = event;
-				let result;
-
-				// step 0
-				result = await player
-					.chooseCard("he", "请选择一张牌交给" + get.translation(target), true)
-					.set("ai", card => {
-						return 6 - get.value(card);
-					})
-					.forResult();
-				player.addTempSkill("mingshimrfz2");
-
-				// step 1
-				if (result.cards && result.cards.length) {
-					await player.give(result.cards, target);
-					target.addTempSkill("mingshimrfz2");
-					player.line(target);
-				}
-
-				// step 2
-				player.viewHandcards(target);
-				game.log(player, "观看了", target, "的手牌");
-				if (target.countCards("h") > 3) {
-					await player.discardPlayerCard(target, "h", [1, 3]).set("forceAuto", true);
-					target.addSkill("mingshimrfz_draw1");
-					return;
-				} else {
-					result = await player
-						.chooseControl("令其摸一张", "令其摸两张")
-						.set("prompt", "【明事】:请选择一项")
-						.set("prompt2", "你可以令其摸[2/1]张牌，然后于下一个准备阶段弃置[1/2]张牌")
-						.set("ai", () => {
-							const att = get.attitude(target, player);
-							if (att > 0) return 1;
-							return 0;
-						})
-						.forResult();
-				}
-
-				// step 3
-				if (result.index === 0) {
-					await target.draw();
-					target.addSkill("mingshimrfz_dis2");
-				} else {
-					await target.draw(2);
-					target.addSkill("mingshimrfz_dis1");
-				}
-			},
-			group: "mingshimrfz_ed",
-			subSkill: {
-				ed: {
-					charlotte: true,
-					direct: true,
-					trigger: { player: "phaseJieshuBegin" },
-					filter: function (event, player) {
-						return player.hasSkill("mingshimrfz2");
-					},
-					async content(event, trigger, player) {
-						player.draw();
-					},
-				},
-				draw1: {
-					direct: true,
-					charlotte: true,
-					trigger: { player: "phaseJieshuBegin" },
-					async content(event, trigger, player) {
-						player.draw();
-						player.removeSkill("mingshimrfz_draw1");
-					},
-				},
-				dis1: {
-					charlotte: true,
-					direct: true,
-					trigger: { player: "phaseZhunbeiBegin" },
-					filter: function (event, player) {
-						return player.countCards("he") > 0;
-					},
-					async content(event, trigger, player) {
-						player.chooseToDiscard("he", true, "【明事】:弃置一张牌");
-						player.removeSkill("mingshimrfz_dis1");
-					},
-				},
-				dis2: {
-					charlotte: true,
-					direct: true,
-					trigger: { player: "phaseZhunbeiBegin" },
-					filter: function (event, player) {
-						return player.countCards("he") > 0;
-					},
-					async content(event, trigger, player) {
-						player.chooseToDiscard("he", true, 2, "【明事】:弃置两张牌");
-						player.removeSkill("mingshimrfz_dis2");
-					},
-				},
-			},
-			ai: {
-				order: 1,
-				expose: 0.2,
-				threaten: 1.2,
-				result: {
-					target: function (player, target) {
-						var att = get.attitude(player, target);
-						if (att > 0 && target.countCards("h") < 3) return 1;
-						if (att < 0) return -1;
-					},
-				},
-			},
+		audio: ["作战中1", "作战中2"],
+		trigger: { source: "damageBefore" },
+		forced: true,
+		async content(event, trigger, player) {
+			trigger.cancel();
+			trigger.player.damage({
+				num: trigger.num,
+				nature: trigger.nature,
+				nosource: true,
+				nocard: true,
+			});
 		},
-	"jixiongmrfz": {
-			group: "jixiongmrfz2",
-			audio: 2,
-			forced: true,
-			trigger: { global: "phaseZhunbeiBegin" },
-			filter: function (event, player) {
-				return event.player.hasMark("jixiongxmrfz");
-			},
-			async content(event, trigger, player) {
-				let result;
-
-				while (true) {
-					// step 0
-					result = await trigger.player
-						.judge(card => {
-							const color = get.color(card);
-							if (color === "black") return 4;
-							return -4;
+	},
+	yourenmrfz: {
+		audio: ["作战中4", "部署2"],
+		trigger: { global: "useCardAfter" },
+		filter(event, player, name, target) {
+			const damaged = player.hasHistory("damage", evt => evt.card && evt.getParent(2) == event);
+			const num = Math.min(player.getHandcardLimit(), 5);
+			if (event.card && event.cards && get.is.damageCard(event.card) && event.targets?.includes(player)) {
+				if (damaged) return (num > 0 && player.countCards("he", card => player.canRecast(card)) > 0) || event.cards.filterInD().length > 0;
+				return player.countCards("h") < num;
+			}
+			return false;
+		},
+		async cost(event, trigger, player) {
+			const damaged = player.hasHistory("damage", evt => evt.card && evt.getParent(2) == trigger);
+			const num = Math.min(player.getHandcardLimit(), 5);
+			event.result = await player
+				.chooseBool({
+					prompt: get.prompt("yourenmrfz"),
+					prompt2: damaged ? `是否获得对你造成伤害的牌（${get.translation(trigger.cards.filterInD())}）${num > 0 ? `并重铸至多${get.cnNumber(num)}张牌` : ``}？` : `是否将手牌补至${get.cnNumber(num)}？`,
+					ai(event, player) {
+						return true;
+					},
+				})
+				.forResult();
+		},
+		async content(event, trigger, player) {
+			const damaged = player.hasHistory("damage", evt => evt.card && evt.getParent(2) == trigger);
+			const num = Math.min(player.getHandcardLimit(), 5);
+			if (!damaged) {
+				await player.drawTo(num);
+			} else {
+				const cards = trigger.cards.filterInD();
+				if (cards.length > 0) {
+					await player.gain({
+						cards,
+						animate: "gain2",
+					});
+				}
+				if (num > 0 && player.countCards("he", card => player.canRecast(card)) > 0) {
+					const result = await player
+						.chooseCard({
+							prompt: `请重铸至多${get.cnNumber(num)}张牌`,
+							filterCard(card, player, event) {
+								return player.canRecast(card);
+							},
+							selectCard: [1, num],
+							position:"he",
+							ai(card) {
+								let val = 8 - get.value(card);
+								if (whichwayAI.triggerBaiyin(player)) val += 10;
+								if (player.hasSkill("linhuamrfz") && get.name(card) === "shandian") val += 5;
+								return val;
+							},
 						})
 						.forResult();
-					trigger.player.removeMark("jixiongxmrfz");
-
-					// step 1
-					if (result.color === "black") {
-						result = await trigger.player.chooseToDiscard("he", true, "【吉凶】:请弃置一张牌").forResult();
-						await trigger.player.loseHp();
-					} else {
-						// step 2 (仅当非黑色时执行)
-						if (result.cards && result.cards.length) {
-							await player.gain(result.cards, "gain2");
-						}
+					if (result.cards) {
+						await player.recast(result.cards);
 					}
-					// event.goto(0) / event.finish() 由 while 循环条件控制
+				}
+			}
+		},
+	},
+	beiyumrfz: {
+		mod: {
+			maxHandcard(player, num) {
+				return (num += player.countMark("beiyumrfz"));
+			},
+		},
+		intro: {
+			content(storage, player, skill) {
+				return `·手牌上限+${storage}`;
+			},
+		},
+		audio: ["行动开始", "选中干员2"],
+		trigger: {
+			global: "roundStart",
+		},
+		onremove: true,
+		check: () => true,
+		async content(event, trigger, player) {
+			const cards = lib.inpile.map(name => get.autoViewAs({ name, suit: "none" })).filter(i => ["trick", "basic"].includes(get.type2(i)));
+			const result = await player
+				.chooseFakeCard({
+					tagName: "待声明",
+					cards,
+					selectCard: [1, 2],
+					filterCard: () => true,
+					ai(card) {
+						let val = Math.random();
+						let name = get.name(card)!;
+						if (name === "sha") val += 0.2;
+						if (name === "juedou") val += 0.1;
+						if (name === "nanman") val += 0.15;
+						if (name === "wanjian") val += 0.05;
+						if( ["shan","wuxie"].includes(name)) val -= 100;
+						if(get.is.damageCard(get.autoViewAs({name}))) val += 0.1;
+						return val;
+					},
+					forced: true,
+					prompt: "请声明至多两种牌，当你于本轮首次成为你声明的牌的目标后，你摸一张牌或使用一张手牌",
+				})
+				.forResult();
+			if (result.cards) {
+				game.log(player, "声明了一些牌");
+				player.storage.beiyumrfz_eff ??= [];
+				player.storage.beiyumrfz_eff.push(...result.cards.map(i => get.name(i)));
+				player.addTempSkill("beiyumrfz_eff", { global: "roundEnd" });
+			}
+		},
+		subSkill: {
+			eff: {
+				audio: "beiyumrfz",
+				charlotte: true,
+				forced: true,
+				trigger: { target: "useCardToTargeted" },
+				onremove(player, type) {
+					player.storage["beiyumrfz_eff"] = [];
+				},
+				mark: true,
+				intro: {
+					content(x, player, skill) {
+						const storage: string[] | undefined = player.storage["beiyumrfz_eff"];
+						if (player.isUnderControl(true)) {
+							return storage ? `声明的牌:${get.translation(storage)}` : `没有声明的牌或声明的牌均已被触发`;
+						}
+						return `猜猜看呐~`;
+					},
+				},
+				filter(event, player, name, target) {
+					const names: string[] | undefined = player.storage.beiyumrfz_eff;
+					return names && event.card && names.includes(get.name(event.card)!);
+				},
+				async content(event, trigger, player) {
+					player.storage.beiyumrfz_eff.remove(get.name(trigger.card));
 
-					if (!trigger.player.hasMark("jixiongxmrfz")) break;
-				}
-			},
-			ai: {
-				expose: 0.9,
-			},
-		},
-	"jixiongmrfz2": {
-			trigger: { global: "gainEnd" },
-			filter: function (event, player) {
-				return event.source && event.source.hasSkill("jixiongmrfz");
-			},
-			logTarget: "source",
-			direct: true,
-			async content(event, trigger, player) {
-				const result = await player
-					.chooseControl("确定", "取消")
-					.set("prompt", "是否发动【吉凶】？")
-					.set("ai", function () {
-						var att = get.attitude(trigger.source, player);
-						if (att > 0) return 1;
-						return 0;
-					})
-					.forResult();
-				if (result.control == "确定") {
-					trigger.player.addMark("jixiongxmrfz");
-				}
+					const result = await player
+						.chooseToUse({
+							prompt: "【备豫】：你可以使用一张手牌，若不使用手牌则摸一张牌",
+							filterCard(card, player, event) {
+								if (get.itemtype(card) != "card" || !["h", "s"].includes(get.position(card))) {
+									return false;
+								}
+								return lib.filter.filterCard.apply(this, arguments);
+							},
+							filterTarget(card, player, target) {
+								return lib.filter.targetEnabled.apply(this, arguments);
+							},
+						})
+						.set("addCount", false)
+						.set("nodistance", true)
+						.forResult();
+					if (result.bool === false) await player.draw();
+					player.addMark("beiyumrfz", 1, false);
+				},
 			},
 		},
-	"mingshimrfz2": {},
+	},
 });
 
 translate({
-	"char_322_lmlee": "老鲤",
-	"linhuamrfz": "鳞滑",
-	"linhuamrfz_info": "①锁定技，当你造成伤害时，改为对其造成等量的无来源伤害。②当你受到属性伤害时，你可以弃置两张牌改为你对伤害来源造成等量伤害。③准备阶段，当你的判定区有牌时，你可以弃置两张手牌移动之。",
-	"mingshimrfz": "明事",
-	"mingshimrfz_info": "出牌阶段限两次，每名角色每回合限一次，你可以交给一名其他角色一张牌，然后观看其手牌，若其手牌在交予牌后：①大于3：你弃置其至多三张手牌，其于下个结束阶段摸一张牌；②小于等于3：你可以令其摸[2/1]张牌，然后于下一个准备阶段弃置[1/2]张牌。发动该技能后，你于结束阶段摸一张牌。",
-	"jixiongmrfz": "吉凶",
-	"jixiongmrfz_info": "当有其他角色获得你的牌的时候，你可以令其获得“符纸”标记；锁定技，有‘符纸’标记的角色的准备阶段开始时，其进行一次判定且移除一个‘符纸’标记，若判定结果为黑色，则其须弃置一张牌并流失一点体力，然后你获得其弃置的牌，若其仍有‘符纸’标记，重复此流程。",
-	"jixiongmrfz2": "吉凶",
+	char_322_lmlee: "老鲤",
+	linhuamrfz: "鳞滑",
+	linhuamrfz_info: "锁定技，你造成的伤害始终视为无卡牌且无来源伤害;你不能成为延时锦囊的目标。",
+	yourenmrfz: "游刃",
+	yourenmrfz_info: "当其他角色对你使用的伤害类牌结算完毕后，若此牌没有对你造成伤害，你可以将手牌补至X，否则你可以获得此牌并重铸至多X张牌。（X=你的手牌上限，X至多为5）",
+	beiyumrfz: "备豫",
+	beiyumrfz_info: "每轮开始时，你可以秘密声明至多两种基本牌或普通锦囊牌，当你于本轮首次成为你声明的牌的目标后，你摸一张牌或使用一张手牌(无距离次数限制)，然后你的手牌上限+1。",
 });
 
 characterIntro("char_322_lmlee", "老鲤，私家侦探，龙门鲤氏侦探事务所的创办者。在罗德岛于龙门发展业务的过程中与罗德岛相识，随后建立合作关系。为罗德岛提供关于龙门本地信息的咨询服务，也向罗德岛引荐过一些人才。");
+
+characterTitle("char_322_lmlee","但思善恶");

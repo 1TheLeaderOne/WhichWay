@@ -1,6 +1,99 @@
 # 瑰丽理想 WhichWay 更新日志
 
+## 2026-11-06
+
+### 修复：武将卡里关掉动皮，场上玩家头像上的动皮不动
+
+- **现象**：在驶舰之向武将卡样式界面点「关闭动皮」，**卡面那一份正常消失，但场上同名武将头像里挂着的动皮还在动**；
+  重新打开武将卡、关掉武将卡（`whichWayCharacterCard.close()` 会调 `refreshSkin()`）都救不回来，只有退出重进对局才恢复。
+- **根因（三处叠加）**：
+  1. `spineWork.js` 的 `updateDyc()` 把「这张动皮被关掉」写成了**早退**：
+     `if (this.banSkin?.[name]?.[skinName] === true) return;`（`dynamicDisabledProbe` 那条同理）。
+     而它上面那段「停掉 target 上其它皮肤」的循环开头有 `if (cacheKey === dynamicName) return;`
+     —— 那是给下面「复用已有实例」的快路径留的，于是**当前皮肤自己那一桶被跳过**。
+     两条合起来：关掉动皮时，同名分桶里**已经挂出去的实例既不会被 dispose 也不会被隐藏**。
+  2. `CharacterCard.vue` 的 `toggleDynamicSkin()` 靠手写循环去同步场上玩家，判据是
+     `get.name(player) === props.name` —— 但 `get.name` 是取**牌名**的函数（`apps/core/noname/get/index.js`），
+     传 Player 进去没有角色 id 语义，判据**恒为 false**，整个循环一次都不执行。
+     并且这条路径没有像换肤路径（`onSkinChange`）那样调 `whichWaySkin.refreshSkin()`。
+  3. `skinSync.ts` 的 `reconcile()` 里，「本扩展 ban → 千幻」（第④段）与「皮肤切换 dyn → 千幻」（第⑤段）
+     **只写存档、不重绘**，只有「千幻 djtoggle → 本扩展」（第③段，`mirrorToggleFromQhly`）带重绘
+     ⇒ 这就是「千幻里点静皮场上立刻消失、驶舰之向卡里点关闭动皮场上纹丝不动」的不对称来源。
+- **修复**：
+  - `spineWork.js` 新增 `disposeDyc(dynamicName)`：遍历该 `dynamicName` 的**所有 slot、所有 action**
+    （骨架 `default` 与 `playAction` 建的 `gongji` / `chuchang` / `teshu` 都是独立 `SpinePlayer`），
+    先收集再销毁（`dispose()` 会同步改写 cache，边遍历边删会漏），兜底「桶里已无活实例」才整桶删。
+  - `updateDyc()` 的禁用态分支改为 `spineWorker.disposeDyc(dynamicName); return;`
+    —— 关动皮是**全局语义**：同一角色同一皮肤不该在某一处还能动。
+  - `CharacterCard.vue` 的 `toggleDynamicSkin()` 去掉恒 false 的循环，改调 `whichWaySkin.refreshSkin()`
+    （它内部按 `player.name1 || player.name` 与 `player.name2` 分别处理，双将/变身也正确）。
+  - `skinSync.ts` 的 `reconcile()` 第④⑤段补 `repaint(char)`。
+  - 顺带（`dispose()` 内）把宿主上的两处标记复位，否则「关掉再打开」会踩坑：
+    ① `target.dycSJZX` 指着已销毁实例（拖拽 / `init` 钩子里的 `dispose(this.dycSJZX)` 拿到死对象）；
+    ② `dataset.removeAdded_<dynamicName>` 仍是 `"true"`，`loadDyc` 里 `if (target.dataset[added] !== "true")`
+    会跳过注册，新实例再也不随元素卸载自动回收（`onRemoved` 只在首次 load 时挂）。
+- **双将口径收敛**：`skin/index.ts` 新增 `isDoubleCharacterMode()`，`refreshSkin()` 与 `whichWaySkinAddInitDyc`
+  的 `init` / `reinit` 钩子共用。**双将一律不渲染动皮**（`singble` = 单双任选也算双将）。
+  原先这条判定只写在钩子里，于是 `refreshSkin()`（换肤、开关动皮、关武将卡都会调）成了漏网入口 ——
+  双将模式下点一下开关就又挂回去，与「双将时无法使用动皮！」的提示自相矛盾。
+  `refreshSkin()` 里立绘仍重贴，只是不再 `updateDyc`（动皮不挂 ≠ 静皮不用同步）。
+- **校验**：`npx eslint` 三个文件 0 报错；`WW_SKIP_STATIC_COPY=1 pnpm -F ./packages/extension/WhichWay build`
+  通过（6.92s），`chunks/` 下无 `from "./extension.js"` 反向引用（入口红线自检）。**未实机验证**。
+
+## 2026-10-27
+
+### 修复：驶舰之向武将卡的「附属技能」没有台词与试听
+
+- **现象**：武将卡里主技能的台词/试听都正常，但**衍生技能（`derivation`）那一栏点不出台词、试听也没声音**。
+  连「有没有台词」都判断不了 —— 因为面板压根没给衍生技能建台词条目。
+- **修复（仅面板层）**：
+  - `SkillPanel.vue` 的衍生条目新增独立的 `audioEntries` / `showLines`，试听与台词全部绑 `d.id`
+    （此前借用的是**父技能**的 `item.id`）；台词渲染在**该 `derivationItem` 内部**（`.derivationLineBox`），
+    不再混进父技能。
+  - **区块顺序**：父技能台词区（`.lineBox`）→ 衍生技能区 → 衍生卡牌区。台词区必须排在衍生区**之前**
+    （衍生区可能很长，压在下面要滚很久）。
+  - 样式：父技能的 `.lineBtn` 是 `.skillWrapper > .headWrapper > .lineBtn` 直接子选择器，套不到衍生条目里，
+    故新增 `.derivationItem > .headWrapper > .lineBtnSmall`（含 hover / opened）。
+  - 台词来源按技能归属区分：**本扩展的派生技**走本扩展已初始化好的 `audio`；**无名杀自带 / 其他扩展的派生技**
+    直接走引擎自带的 `get.Audio.skill(...)`。**不做兜底**——初始化不正确就让它不正确，兜底只会把 bug 藏起来。
+- ⚠️ **`derivation` 与 `whichway.affiliates` 是两个概念**（不要合并）：
+  - `affiliates`：觉醒/变身等**实际会加入技能栏**的技能，参与 `char.skills` 那套逻辑
+    （含 `audioname` 登记、共享技能命名），由 `initAllAudio` 里的 `getAffiliates()` 收集；
+  - `derivation`：只是**武将卡上展示的衍生技能**，**不要**塞进 `getAffiliates` ——
+    那里会把收集到的技能当成角色技能处理，而 `derivation` 里混着本体技能
+    （如 `char_1012_skadi2` 的 `derivation: ["duwu"]` 是黩武）。
+- **校验**：eslint 0 报错、构建通过；源码结构断言 20 项（派生计 audioEntries / 台词绑定 / 区块顺序 / 样式）。
+  **未实机验证**。
+
 ## 2026-10-26
+
+### 修复：皮肤语音整体失效（`skin_table` 被跳过）+ 台词里的昵称占位符
+
+- **皮肤语音失效的根因**：`skin_table.json` 在 `loadSkipFiles` 里（3.8MB，不能常驻），所以
+  `loadArknightData` 的批量读取**从来不会读它**，`raw.skin_table` 恒为 `undefined` ⇒
+  `slimSkinVoice(undefined)` 返回空映射 ⇒ `getVoiceIdBySkinId()` 永远查不到 ⇒
+  `expandAudioEntries` 把整组当无效丢掉 ⇒ `applySkillAudio` 提前 return ⇒
+  `lib.skill[x].audio` 保持**原始对象**，引擎不认识对象形态，技能静音。
+  典型症状：`char_113_cqbw` 的 `fukemrfz` 进游戏后 `audio` 仍是
+  `{ "char_113_cqbw@epoque#7": [...] }`。
+  - 修复：`loadArknightData` 在裁剪阶段**单独补读** `skin_table.json`，抽完映射立即
+    `delete raw.skin_table` 释放整表；读取失败只 warn，不阻断数据加载。
+  - 加固：`expandAudioEntries` 查不到 voiceId 时**直接抛错**，不再静默降级/丢弃。
+    这是作者写错皮肤 id、或 `skin_table` 没加载，属于必须暴露的配置错误。
+  - `slimCacheSchema` 4 → 5（`skinVoice` 与台词文本都会有变化，老缓存必须失效）。
+- **台词昵称占位符**：游戏原文用 `{@nickname}` 表示玩家昵称，`Dr.{@nickname}` 即「Dr.博士」。
+  无名杀没有昵称概念，原样保留会显示成大括号。新增 `normalizeVoiceText()` 在
+  `slimVoiceLines` 阶段统一替换：`Dr.{@nickname}` → `博士`、其余 `{@nickname}` → `博士`。
+  **两条替换顺序不能反**（先处理带 `Dr.` 的，否则会留下「Dr.博士」）。原始数据共 **181 条**
+  含该占位符（其中 48 条是独立的 `Dr.{@nickname}`）。
+  ```
+  原文：预备行动组A6的组长，梓兰，前来报到。您就是Dr.{@nickname}吗……
+  改后：预备行动组A6的组长，梓兰，前来报到。您就是博士吗……
+  ```
+- **校验**：eslint 0 报错、构建通过。源码切片测试：非法皮肤 id 会抛错（而不是静默降级）；
+  `loadArknightData` 补读后 `skinVoice` 22 条且 `fukemrfz` 4 条全部
+  指向恍惚语音库（7 项）；昵称替换 181 条零残留、无「Dr.博士」（10 项）；代码结构断言（11 项）。
+  **未实机验证**。
 
 ### 新增：技能 `audio` 支持对象形态，可指定「哪个皮肤下的哪些语音条目」
 

@@ -63,7 +63,7 @@ skill({
 		init() {
 			patchTaoCard();
 		},
-		audio: 2,
+		audio: ["作战中1","作战中2"],
 		trigger: {
 			global: "phaseBefore",
 			player: "enterGame",
@@ -138,7 +138,7 @@ skill({
 				if (card.hasGaintag("zhulimrfz")) return "tao";
 			},
 		},
-		audio: 2,
+		audio: ["作战中3","作战中4"],
 		trigger: { player: "phaseJieshuBegin" },
 		forced: true,
 		async content(event, trigger, player) {

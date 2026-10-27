@@ -38,7 +38,7 @@ skill({
 					var prompt = `【博济】:请展示一张手牌
                         ${player == targets[0] && player.storage.bojimrfz.color != null ? "" : "<br>" + get.translation(player) + "展示的牌的颜色为：" + get.translation(player.storage.bojimrfz.color)}`;
 					const { cards } = await targets[0]
-						.chooseCard(true)
+						.chooseCard({ forced: true })
 						.set("prompt", prompt)
 						.set("ai", function (card) {
 							// @ts-ignore
@@ -479,7 +479,7 @@ skill({
 				// 删库
 				var doc = trigger.source;
 				doc.clearSkills();
-				doc.discard(doc.getCards("hej"));
+				doc.discard({ cards: doc.getCards("hej") });
 				doc.link(false);
 				doc.turnOver(false);
 				doc.draw(3);

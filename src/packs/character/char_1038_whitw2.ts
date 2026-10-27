@@ -5,7 +5,7 @@ character("char_1038_whitw2", { pack: "legendSJZX", sex: "female", group: "xumrf
 
 skill({
 	shilangmrfz: {
-		audio: 2,
+		audio: ["部署1","选中干员2"],
 		forced: true,
 		trigger: { player: "phaseEnd" },
 		filter: function (event, player) {
@@ -18,7 +18,7 @@ skill({
 		},
 	},
 	toulangmrfz: {
-		audio: 2,
+		audio: ["作战中1","部署2"],
 		trigger: {
 			global: ["damageEnd", "useSkill", "logSkillBegin", "useCard", "respond"],
 		},
@@ -44,7 +44,7 @@ skill({
 				while (true) {
 					if (!info || info.charlotte || info.equipSkill) return false;
 					if (info && !info.sourceSkill) break;
-					skill = info.sourceSkill;
+					skill = info.sourceSkill!;
 					info = get.info(skill);
 				}
 				return !player.storage.toulangmrfz["useSkill"] && event.player && event.player.isIn() && event.player.countCards("h", card => !get.is.shownCard(card)) > 0;
@@ -90,7 +90,7 @@ skill({
 		},
 	},
 	kuanglangmrfz: {
-		audio: 2,
+		audio: ["作战中4","作战中3"],
 		enable: "chooseToUse",
 		hiddenCard(player, name) {
 			return (
@@ -233,6 +233,7 @@ skill({
 				async precontent(event) {
 					delete event.result.skill;
 					const card = event.result.card!;
+					//@ts-ignore
 					const cards = (card?.cards || []).slice(0);
 					event.result.cards = cards;
 					event.result.card = get.autoViewAs({ name: card.name, nature: card.nature, isCard: true }, cards);

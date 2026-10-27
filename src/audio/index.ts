@@ -132,7 +132,7 @@ class WhichWayAudio {
 		return foreign.concat(own.randomGet());
 	}
 
-	customVoiceGroup:string[] = ["CN_TOPOLECT","ITA","GER","RUS","FRE","SPA"]
+	customVoiceGroup: string[] = ["CN_TOPOLECT", "ITA", "GER", "RUS", "FRE", "SPA"];
 
 	/**
 	 * 配音组件初始化
@@ -387,8 +387,13 @@ class WhichWayAudio {
 		const characters: Array<[string, string[]]> = [];
 		const owners = new Map<string, string[]>();
 		for (const name of window.whichWaySave.allCharacters) {
-			const skills = get.character(name)?.skills;
-			if (!skills?.length) continue;
+			const skills_org = get.character(name)?.skills;
+			if (!skills_org?.length) continue;
+			const skills = skills_org.slice();
+
+			const expanded = getAffiliates(skills);
+			if (expanded.length > 0) skills.push(...expanded);
+
 			characters.push([name, skills]);
 			for (const skill of skills) {
 				let list = owners.get(skill);
@@ -415,6 +420,29 @@ class WhichWayAudio {
 		for (const [name, skills] of characters) {
 			this.initDieAudio(get.character(name));
 			for (const skill of skills) this.applySkillAudio(skill, name);
+		}
+
+		//获取所有附属技能
+		function getAffiliates(skills: string[]): string[] {
+			const result = new Set<string>();
+			const expanded = new Set<string>();
+			const stack = [...skills];
+
+			while (stack.length > 0) {
+				const skill = stack.pop()!;
+				if (expanded.has(skill)) continue;
+				expanded.add(skill);
+
+				const affiliates = (lib.skill[skill] as ExtendedSkill | undefined)?.whichway?.affiliates;
+				if (!affiliates?.length) continue;
+
+				for (const aff of affiliates) {
+					result.add(aff);
+					if (!expanded.has(aff)) stack.push(aff);
+				}
+			}
+
+			return [...result];
 		}
 	}
 
@@ -805,7 +833,9 @@ class WhichWayAudio {
 	 * 展开成引擎可用的扁平序列：`[{ title, voiceId }]`。
 	 *
 	 * - `"default"` 组不解析语音库（`voiceId` 为 undefined，即干员自己的）；
-	 * - 其它组按 `skinId → voiceId` 解析，查不到则整组**丢弃并 warn**（不能拼出必然 404 的 URL）；
+	 * - 其它组按 `skinId → voiceId` 解析。⚠️ **查不到就抛错、不要兜底**：
+	 *   这是作者写错了皮肤 id 或 `skin_table` 没加载，属于必须暴露的配置错误。
+	 *   静默降级/丢弃只会让「配音不响」变成查不出原因的悬案。
 	 * - 组内顺序 = 作者书写顺序；组间顺序 = 对象键顺序，但 `default` 始终排在最前
 	 *   （保证「基础语音」在下标 0..N 起点，便于人工排查）。
 	 *
@@ -827,8 +857,7 @@ class WhichWayAudio {
 			if (skinId !== "default") {
 				voiceId = this.getVoiceIdBySkinId(skinId);
 				if (voiceId === void 0) {
-					console.warn(`[whichWayAudio] 皮肤 ${skinId} 找不到对应语音库，该组（${value.length} 条）将被忽略`);
-					continue;
+					throw new Error(`[whichWayAudio] 皮肤 ${skinId} 找不到对应语音库：skin_table 未加载，或该皮肤没有专属语音（voiceId 为空）`);
 				}
 			}
 			for (const title of value) entries.push({ title, voiceId });
@@ -1129,9 +1158,7 @@ class WhichWayAudio {
 	 * @param {boolean} [allLangs=false] 是否获取所有可用语言的配音，而不仅仅是当前语言
 	 * @returns {Promise<Array<{type: 'skill'|'die', skill?: string, char: string, urls: string[], lang: string}>>}
 	 */
-	async getMissingAudioList(
-		allLangs: boolean = false
-	): Promise<Array<{ type: "skill" | "die"; skill?: string; char: string; urls: string[]; lang: string }>> {
+	async getMissingAudioList(allLangs: boolean = false): Promise<Array<{ type: "skill" | "die"; skill?: string; char: string; urls: string[]; lang: string }>> {
 		await this.ensureAudioCache();
 		const tasks: Array<{ type: "skill" | "die"; skill?: string; char: string; urls: string[]; lang: string }> = [];
 
@@ -1604,12 +1631,7 @@ class WhichWayAudio {
 		const auditKey = own.map(item => item.file).join(",");
 		if (this._auditedKeys.has(auditKey)) return;
 		this._auditedKeys.add(auditKey);
-		console.warn(
-			`[whichWayAudio] 本扩展的 ${own.length} 条候选语音里有 ${missing.length} 条在本地找不到` +
-				`（${missing.length < own.length ? "部分缺失：播放已裁剪为一条确实存在的文件，但配音变体数量与技能配置不一致" : "全部缺失：本次不播放，若该干员应本地配音请检查下载是否完整"}）` +
-				`。候选与缺失项如下：`,
-			{ 候选: own.map(item => item.file), 缺失: missing }
-		);
+		console.warn(`[whichWayAudio] 本扩展的 ${own.length} 条候选语音里有 ${missing.length} 条在本地找不到` + `（${missing.length < own.length ? "部分缺失：播放已裁剪为一条确实存在的文件，但配音变体数量与技能配置不一致" : "全部缺失：本次不播放，若该干员应本地配音请检查下载是否完整"}）` + `。候选与缺失项如下：`, { 候选: own.map(item => item.file), 缺失: missing });
 	}
 
 	/**
@@ -1724,12 +1746,7 @@ class WhichWayAudio {
 			3: "解码失败(DECODE)",
 			4: "源不支持(SRC_NOT_SUPPORTED)",
 		};
-		console.warn(
-			`[whichWayAudio] 扩展语音加载失败，本次触发将静默且不再重试：${path}\n` +
-				`  · 实际请求地址：${audio?.currentSrc || audio?.src || "(未知)"}\n` +
-				`  · MediaError.code：${code ?? "(无)"} ${code != null ? codeText[code] || "" : ""}\n` +
-				`  · readyState=${audio?.readyState ?? "?"} networkState=${audio?.networkState ?? "?"}`
-		);
+		console.warn(`[whichWayAudio] 扩展语音加载失败，本次触发将静默且不再重试：${path}\n` + `  · 实际请求地址：${audio?.currentSrc || audio?.src || "(未知)"}\n` + `  · MediaError.code：${code ?? "(无)"} ${code != null ? codeText[code] || "" : ""}\n` + `  · readyState=${audio?.readyState ?? "?"} networkState=${audio?.networkState ?? "?"}`);
 	}
 
 	/**

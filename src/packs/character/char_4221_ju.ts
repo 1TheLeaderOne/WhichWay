@@ -63,7 +63,7 @@ skill({
 				player.loseHp();
 				return;
 			}
-			player.gain(cards, "gain2");
+			player.gain({ cards, animate: "gain2" });
 		},
 	},
 	qiaoqimrfz: {
@@ -81,8 +81,7 @@ skill({
 			const suits = Array.from(new Set(player.getHistory("useCard", evt => evt.card && get.suit(evt.card)).map(evt => get.suit(evt.card))));
 			player.addTip("qiaoqimrfz_tips", `巧器 ${suits.map(i => get.translation(i)).join(" ")}`, true);
 
-			const result = await player
-				.chooseControl("牌堆顶", "牌堆底", "弃牌堆顶", "弃牌堆底", "cancel2")
+			const result = await player.chooseControl({ controls: ["牌堆顶", "牌堆底", "弃牌堆顶", "弃牌堆底", "cancel2"] })
 				.set(
 					"prompt",
 					`【巧器】:你可以将【${get.translation(trigger.card)}】置于牌堆顶或底、或弃牌堆顶或底，然后若弃牌堆（${getSingleDigit(ui.cardPile.childNodes.length)}）和牌堆数（${getSingleDigit(ui.discardPile.childNodes.length)}）的个位数相等，你摸一张牌。`

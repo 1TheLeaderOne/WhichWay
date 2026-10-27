@@ -225,7 +225,7 @@ card(CARDNAME, {
 				byOwner.get(owner).push(save);
 			}
 			for (const [owner, saves] of byOwner) {
-				await owner.lose(saves, ui.discardPile);
+				await owner.lose({ cards: saves, position: ui.discardPile });
 				game.log(card, "掉落了", saves);
 				saves.forEach(i => i.removeGaintag(STRUCT_TAG));
 			}

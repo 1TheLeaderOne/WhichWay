@@ -1,11 +1,11 @@
 import { lib, game, ui, get, ai, _status } from "noname";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../hooks.ts";
 
 character("char_4145_ulpia", { pack: "legendSJZX", sex: "male", group: "a_groupmrfz", hp: 4, skills: ["guqianmrfz", "piweimrfz", "tongmaimrfz"], clans: ["深海猎人"] });
 
 skill({
 	piweimrfz: {
-		audio: 2,
+		audio: ["作战中1","作战中2"],
 		trigger: {
 			player: "turnOverAfter",
 		},
@@ -15,7 +15,7 @@ skill({
 		async cost(event, trigger, player) {
 			const result = await player
 				.chooseControl({
-					controls:lib.suit.slice().add("cancel2")
+					controls: lib.suit.slice().add("cancel2"),
 				})
 				.set("prompt", "你可以将一种颜色的所有手牌当做任意花色且伤害基数为2的【出其不意】使用，若此牌造成伤害，受到伤害的角色依次弃置装备区和手牌区的一张牌。")
 				.set("ai", () => {
@@ -67,7 +67,7 @@ skill({
 				// 	name: "chuqibuyi",
 				// 	suit: suit,
 				// 	piweimrfz_chuqi: true,
-				// },
+				// 	},
 				// typeof control === "string" ? player.getCards("h", { color: control }) : control
 				{
 					card: get.autoViewAs({
@@ -139,7 +139,7 @@ skill({
 		},
 	},
 	guqianmrfz: {
-		audio: 2,
+		audio: ["作战中3","作战中4"],
 		trigger: {
 			global: ["loseAfter", "loseAsyncAfter"],
 		},
@@ -167,7 +167,7 @@ skill({
 		},
 	},
 	tongmaimrfz: {
-		audio: 2,
+		audio: ["交谈1","交谈2"],
 		audioname: ["char_4145_ulpia", "char_1023_ghost2", "char_263_skadi", "char_474_glady", "char_218_cuttle"],
 		init(player, skill) {
 			player.storage[skill] = [];
@@ -267,6 +267,15 @@ translate({
 	guqianmrfz_info: "每回合限一次，当其他角色有牌因弃置而进入弃牌堆后，你可以摸一张牌，然后若你手牌中没有相同花色的牌，你重置此技能，反之，你将武将牌翻面。",
 	tongmaimrfz: "同脉",
 	tongmaimrfz_info: "宗族技，每轮每项限一次，当你于回合外造成伤害后，你可以令一名深海猎人角色回复一点体力或复原武将牌。",
+});
+
+dynamicTranslate("tongmaimrfz", function (player) {
+	let str = `你可以令一名深海猎人的角色回复一点体力或复原武将牌`,
+		storage = player.storage.tongmaimrfz;
+	if (!storage) storage = [];
+	if (storage.includes(0)) str = str.replace("回复一点体力", "<font color=#696969>回复一点体力</font>");
+	if (storage.includes(1)) str = str.replace("复原武将牌", "<font color=#696969>复原武将牌</font>");
+	return `宗族技，每轮每项限一次，当你于回合外造成伤害后，${str}。`;
 });
 
 characterTitle("char_4145_ulpia", "<font color=#00868B>阴影中的求路人</font>");

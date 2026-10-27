@@ -6,7 +6,7 @@ character("char_485_pallas", { pack: "legendSJZX", sex: "female", group: "mimrfz
 
 skill({
 	yingzhumrfz: {
-		audio: 2,
+		audio: ["行动出发","行动开始"],
 		trigger: { player: "phaseBegin" },
 		filter: function (event, player) {
 			return !player.storage.yingzhumrfz;
@@ -52,31 +52,33 @@ skill({
 				audio: "yingzhumrfz",
 				trigger: { global: "roundStart" },
 				async cost(event, trigger, player) {
-					const result = await player.chooseTargetControl({
-						prompt:get.prompt("yingzhumrfz"),
-						prompt2:"你可以选择一名其他角色，令其于任一阶段结束后额外执行一次此阶段",
-						filterTarget:lib.filter.notMe,
-						ai(target) {
-							const aiPlayer = _status.event.player;
-							const att = get.attitude(aiPlayer, target);
-							return att;
-						},
-						controls:["准备", "判定", "摸牌", "出牌", "弃牌", "结束","cancel2"],
-						controlAi(event, player) {
-							return 2;
-						},
-					}).forResult();
+					const result = await player
+						.chooseTargetControl({
+							prompt: get.prompt("yingzhumrfz"),
+							prompt2: "你可以选择一名其他角色，令其于任一阶段结束后额外执行一次此阶段",
+							filterTarget: lib.filter.notMe,
+							ai(target) {
+								const aiPlayer = _status.event.player;
+								const att = get.attitude(aiPlayer, target);
+								return att;
+							},
+							controls: ["准备", "判定", "摸牌", "出牌", "弃牌", "结束", "cancel2"],
+							controlAi(event, player) {
+								return 2;
+							},
+						})
+						.forResult();
 
 					console.log(result);
 
 					event.result = {
 						...result,
-						cost_data:result
-					}
+						cost_data: result,
+					};
 				},
 				async content(event, trigger, player) {
 					const result = event.cost_data;
-					const targets:Player[] = result.targets;
+					const targets: Player[] = result.targets;
 					const list = ["yingzhumrfz_Zhunbei", "yingzhumrfz_judge", "yingzhumrfz_draw", "yingzhumrfz_use", "yingzhumrfz_discard", "yingzhumrfz_jieshu"];
 					if (result && result.index && targets) {
 						targets[0].addSkill(list[result.index]);
@@ -175,7 +177,7 @@ skill({
 	},
 	yingdanmrfz: {
 		global: ["yingdanmrfz_clear"],
-		audio: 2,
+		audio: ["非3星结束行动","作战中4"],
 		silent: true,
 		charlotte: true,
 		onremove(player, type) {
@@ -239,25 +241,29 @@ skill({
 		},
 	},
 	yingfenmrfz: {
-		audio: 2,
+		audio: ["选中干员1","选中干员2"],
 		trigger: { player: "useCardAfter" },
 		filter: function (event, player) {
 			return event.card.name == "tao";
 		},
 		async cost(event, trigger, player) {
-			event.result = await player.chooseTarget({
-				prompt:get.prompt("yingfenmrfz"),
-				prompt2:"你可以令一名其他角色恢复一点体力",
-				filterTarget(card, player, target) {
-					return target !== player && target.isDamaged();
-				},
-				ai(target) {
-					return get.attitude2(target);
-				},
-			}).forResult();
+			event.result = await player
+				.chooseTarget({
+					prompt: get.prompt("yingfenmrfz"),
+					prompt2: "你可以令一名其他角色恢复一点体力",
+					filterTarget(card, player, target) {
+						return target !== player && target.isDamaged();
+					},
+					ai(target) {
+						return get.attitude2(target);
+					},
+				})
+				.forResult();
 		},
 		async content(event, trigger, player) {
-			const { targets:[target] } = event;
+			const {
+				targets: [target],
+			} = event;
 			if (target) {
 				target.recover();
 				player.line(target);

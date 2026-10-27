@@ -84,7 +84,7 @@ skill({
 		async content(event, trigger, player) {
 			let { gain, discard } = lib.skill.newtongganmrfz.findGainAndDiscardHistory();
 			await player.draw(gain.length);
-			if (discard.length) player.chooseToDiscard(discard.length, true, `【同感】:请弃置${discard.length}张牌`, "he");
+			if (discard.length) player.chooseToDiscard({ selectCard: discard.length, forced: true, prompt: `【同感】:请弃置${discard.length}张牌`, position: "he" });
 		},
 	},
 	shijiemrfz: {

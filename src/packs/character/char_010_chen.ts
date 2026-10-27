@@ -136,9 +136,9 @@ skill({
 
 			player.chooseUseTarget(
 				// {
-				// 	name: "sha",
-				// 	isCard: true,
-				// },
+					// 	name: "sha",
+					// 	isCard: true,
+				// 	},
 				// "请选择【杀】的目标（雷【杀】：2/2；普通【杀】:1/1）",
 				// false,
 				// "nodistance"

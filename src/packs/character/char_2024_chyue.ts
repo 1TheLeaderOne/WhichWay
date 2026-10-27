@@ -63,67 +63,68 @@ skill({
 		trigger: {
 			player: ["useCardAfter", "respondAfter"],
 		},
-		mark:true,
-		intro:{
+		mark: true,
+		intro: {
 			content(storage, player, skill) {
-				if(isChanged(player)){
-					return `<span class=firetext>【气收秋毫平】</span></br>·已累计使用/打出${getCount(player,get.event(),"all")}张牌`
+				if (isChanged(player)) {
+					return `<span class=firetext>【气收秋毫平】</span></br>·已累计使用/打出${getCount(player, get.event(), "all")}张牌`;
 				}
-				return `<span class=firetext>【劲发江潮落】</span></br>·已累计使用${getCount(player,get.event(),"useCard")}张牌<br>·已累计使用${player.getAllHistory("useSkill",evt=>evt.skill === "wowumrfz").length}次【我无】`
+				return `<span class=firetext>【劲发江潮落】</span></br>·已累计使用${getCount(player, get.event(), "useCard")}张牌<br>·已累计使用${player.getAllHistory("useSkill", evt => evt.skill === "wowumrfz").length}次【我无】`;
 			},
 		},
 		filter(event, player, name, target) {
 			const card = get.autoViewAs({ name: "sha" });
 			//修改后
 			if (isChanged(player)) {
-				return player.hasUseTarget(card, false, false) && getCount(player,event,"all") %3 === 0;
+				return player.hasUseTarget(card, false, false) && getCount(player, event, "all") % 3 === 0;
 			}
 			//修改前
-			return event.name === "useCard" && player.hasUseTarget(card, true ,false)&& getCount(player,event,"useCard") %3 === 0;
+			return event.name === "useCard" && player.hasUseTarget(card, true, false) && getCount(player, event, "useCard") % 3 === 0;
 		},
 		prompt2(event, player) {
 			return isChanged(player) ? "视为使用一张无距离限制且不计入次数的【杀】，然后你摸一张牌" : "视为使用一张不计入次数的【杀】，若此【杀】造成了伤害，你摸一张牌";
 		},
-		async content(event,trigger,player){
-			const card = get.autoViewAs({ name: "sha" , storage:{wowumrfz:true},isCard:true});
-			await player.chooseUseTarget({
-				card,
-				forced:true,
-				prompt:isChanged(player) ? "视为使用一张无距离限制且不计入次数的【杀】，然后你摸一张牌" : "视为使用一张不计入次数的【杀】，若此【杀】造成了伤害，你摸一张牌"
-			})
-			.set("addCount",false)
-			.set("nodistance",!isChanged(player));
-			if(isChanged(player)){
+		async content(event, trigger, player) {
+			const card = get.autoViewAs({ name: "sha", storage: { wowumrfz: true }, isCard: true });
+			await player
+				.chooseUseTarget({
+					card,
+					forced: true,
+					prompt: isChanged(player) ? "视为使用一张无距离限制且不计入次数的【杀】，然后你摸一张牌" : "视为使用一张不计入次数的【杀】，若此【杀】造成了伤害，你摸一张牌",
+				})
+				.set("addCount", false)
+				.set("nodistance", !isChanged(player));
+			if (isChanged(player)) {
 				player.draw();
 				player.logSkill("wowumrfz");
 			}
 		},
-		group:["wowumrfz_draw","wowumrfz_change"],
-		subSkill:{
-			draw:{
-				audio:"wowumrfz",
-				trigger:{
-					source:"damageSource"
+		group: ["wowumrfz_draw", "wowumrfz_change"],
+		subSkill: {
+			draw: {
+				audio: "wowumrfz",
+				trigger: {
+					source: "damageSource",
 				},
 				filter(event, player, name, target) {
 					return event.card && event.card.name === "sha" && event.card.storage.wowumrfz && !isChanged(player);
 				},
-				charlotte:true,
-				forced:true,
-				async content(event,trigger,player){
+				charlotte: true,
+				forced: true,
+				async content(event, trigger, player) {
 					player.draw();
 				},
 			},
-			change:{
-				silent:true,
-				charlotte:true,
-				trigger:{
-					player:"wowumrfzAfter"
+			change: {
+				silent: true,
+				charlotte: true,
+				trigger: {
+					player: "wowumrfzAfter",
 				},
 				filter(event, player, name, target) {
-					return !isChanged(player) && player.getAllHistory("useSkill",evt=>evt.skill === "wowumrfz").length >= 5;
+					return !isChanged(player) && player.getAllHistory("useSkill", evt => evt.skill === "wowumrfz").length >= 5;
 				},
-				async content(event,trigger,player){
+				async content(event, trigger, player) {
 					player.logSkill("wowumrfz");
 					player.popup("修改【我无】");
 					player.storage.wowumrfz = true;
@@ -149,8 +150,8 @@ skill({
 			if (source.countDiscardableCards(player, "e")) {
 				player
 					.discardPlayerCard({
-						position:"e",
-						target:source
+						position: "e",
+						target: source,
 					})
 					.set("complexSelect", true)
 					.set("ai", lib.card.guohe.ai.button)
@@ -198,8 +199,8 @@ translate({
 	shubianmrfz_info: "当你受到其他角色造成的伤害后，你可以令伤害来源本回合手牌上限+2（不可叠加）且无法使用手牌中的伤害类牌，然后你可以弃置伤害来源装备区的一张牌。",
 });
 
-dynamicTranslate("wowumrfz",player=>{
-	return isChanged(player) ? "<span class=firetext>【气收秋毫平】</span></br>每当你累计使用或打出三张牌时，你可以视为使用一张【杀】（不计入次数且无距离限制），然后你摸一张牌。" : "<span class=firetext>【劲发江潮落】</span></br>①你的回合内，你每使用三张牌可视为使用一张【杀】（不计入次数），若此【杀】造成了伤害，你摸一张牌。<br>②锁定技，当你本局游戏累计发动5次【我无】时，修改此技能。"
+dynamicTranslate("wowumrfz", player => {
+	return isChanged(player) ? "<span class=firetext>【气收秋毫平】</span></br>每当你累计使用或打出三张牌时，你可以视为使用一张【杀】（不计入次数且无距离限制），然后你摸一张牌。" : "<span class=firetext>【劲发江潮落】</span></br>①你的回合内，你每使用三张牌可视为使用一张【杀】（不计入次数），若此【杀】造成了伤害，你摸一张牌。<br>②锁定技，当你本局游戏累计发动5次【我无】时，修改此技能。";
 });
 
 characterTitle("char_2024_chyue", "<font color=#FFF68F>玉门戍卫</font>");
@@ -211,13 +212,13 @@ function isChanged(player: Player): boolean {
 }
 
 function getCount(player: Player, event: GameEvent, type: "useCard" | "respond" | "all"): number {
-	let list:any[] = [];
+	let list: any[] = [];
 
-	const filters:string[] = [];
+	const filters: string[] = [];
 
-	if(type === "useCard") filters.push("useCard");
-	else if(type === "respond") filters.push("respond");
-	else filters.push(...["useCard","respond"])
+	if (type === "useCard") filters.push("useCard");
+	else if (type === "respond") filters.push("respond");
+	else filters.push(...["useCard", "respond"]);
 
 	const history = game.getAllGlobalHistory("everything", evt => filters.includes(evt.name) && evt.player == player, event);
 	return history.length;

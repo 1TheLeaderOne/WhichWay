@@ -5,7 +5,7 @@ character("char_4123_ela", { pack: "legendSJZX", sex: "female", group: "othermrf
 
 skill({
 	zuzhimrfz: {
-		audio: 2,
+		audio: ["作战中1","作战中2"],
 		trigger: { source: "damageEnd" },
 		filter(event, player) {
 			return event.card && get.color(event.card) != "none" && event.player && event.player.isIn() && (!event.player.storage.zuzhimrfz || !event.player.storage.zuzhimrfz.includes(get.color(event.card)));
@@ -61,7 +61,7 @@ skill({
 				} else return `有${player.storage.leimingmrfz.length}个记录的内容`;
 			},
 		},
-		audio: 2,
+		audio: ["作战中3","作战中4"],
 		trigger: { global: "roundStart" },
 		direct: true,
 		async content(event, trigger, player) {
@@ -261,3 +261,5 @@ translate({
 });
 
 characterIntro("char_4123_ela", "艾拉是彩虹小队成员之一，独立、叛逆，适应能力强，同时具备相当的领导能力。<br>艾拉习惯用被她称为“雷鸣地雷”的装置在战斗中获取优势。这种爆炸物通过巨响和震荡干扰敌人行动，乃至使其失能，是一种极为实用的非致命性武器。");
+
+characterTitle("char_4123_ela","反抗者");

@@ -6,7 +6,7 @@ character("char_4100_caper", { pack: "rareSJZX", sex: "female", group: "bomrfz",
 skill({
 	xiyumrfz: {
 		onremove: true,
-		audio: 2,
+		audio: ["作战中1","作战中2"],
 		enable: "phaseUse",
 		usable: 1,
 

@@ -88,7 +88,7 @@ skill({
 			const result = await player
 				.choosePlayerCard({
 					target,
-                    position:"h",
+					position: "h",
 					prompt: `【龙箭】:展示${get.translation(target)}一张手牌`,
 					forced: true,
 					ai(button) {

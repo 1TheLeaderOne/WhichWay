@@ -5,7 +5,7 @@ character("char_4055_bgsnow", { pack: "legendSJZX", sex: "female", group: "luomr
 
 skill({
 	ruibimrfz: {
-		audio: 3,
+		audio: ["作战中1","作战中2"],
 		enable: "phaseUse",
 		derivation: ["dazijimrfzskill"],
 		usable: 1,
@@ -55,7 +55,7 @@ skill({
 		},
 	},
 	sujimrfz: {
-		audio: 2,
+		audio: ["作战中3","作战中4"],
 		trigger: {
 			source: "damageSource",
 		},
@@ -126,8 +126,8 @@ skill({
 		charlotte: true,
 		mark: true,
 		intro: {
-			content: "鸿雪记住了你的弱点"
-		}
+			content: "鸿雪记住了你的弱点",
+		},
 	},
 });
 
@@ -148,3 +148,5 @@ translate({
 });
 
 characterIntro("char_4055_bgsnow", "鸿雪，自称阿芙朵嘉·锐笔。可确认阿芙朵嘉为其本名，但本人不愿透露真实姓氏。在风险研判后，人事部决定不进行进一步的询问。");
+
+characterTitle("char_4055_bgsnow","际崖居民");

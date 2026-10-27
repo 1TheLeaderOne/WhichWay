@@ -5,7 +5,7 @@ character("char_445_wscoot", { pack: "rareSJZX", sex: "male", group: "yanmrfz", 
 
 skill({
 	xiadaomrfz: {
-		audio: 2,
+		audio: ["作战中1","作战中2"],
 		trigger: {
 			global: ["gainAfter", "loseAsyncAfter"],
 		},
@@ -14,28 +14,28 @@ skill({
 			lib.translate["xiadaomrfz_tag_allocated"] = "已分配";
 		},
 		filter(event, player) {
-			if (event.getParent(2).name === "xiadaomrfz") return false;
+			if (event.getParent(2)!.name === "xiadaomrfz") return false;
 			return event.player !== player && event.cards && event.cards.filter(i => get.position(i) === "h").length > 1;
 		},
 		async cost(event, trigger, player) {
 			trigger.player.addTempSkill("xiadaomrfz_damage", { global: "xiadaoAfter" });
 
 			event.result = await player
-				.chooseToUse(
-					{
-						filterCard(card, player, event) {
-							if (get.name(card) != "sha") return false;
-							return lib.filter.filterCard.apply(this, arguments);
-						},
-						filterTarget(card, player, target) {
-							if (target != _status.event.sourcex && !ui.selected.targets.includes(_status.event.sourcex)) return false;
-							return lib.filter.targetEnabled.apply(this, arguments);
-						},
-						prompt:`【侠盗】:是否对${get.translation(trigger.player)}使用一张【杀】，若造成伤害，你获得其本次获得的（${get.cnNumber(trigger.cards.filter(i => get.position(i) === "h").length)}张）牌？`
-					}
-				)
+				.chooseToUse({
+					filterCard(card, player, event) {
+						if (get.name(card) != "sha") return false;
+						return lib.filter.filterCard.apply(this, arguments);
+					},
+					filterTarget(card, player, target) {
+						if (target != _status.event.sourcex && !ui.selected.targets.includes(_status.event.sourcex)) return false;
+						return lib.filter.targetEnabled.apply(this, arguments);
+					},
+					prompt: `【侠盗】:是否对${get.translation(trigger.player)}使用一张【杀】，若造成伤害，你获得其本次获得的（${get.cnNumber(trigger.cards.filter(i => get.position(i) === "h").length)}张）牌？`,
+				})
 				.set("complexSelect", true)
-				.set("sourcex", trigger.player).forResult();
+				.set("sourcex", trigger.player)
+				.forResult();
+			if(event.result.bool) player.logSkill("xiadaomrfz");
 		},
 
 		async content(event, trigger, player) {
@@ -52,34 +52,36 @@ skill({
 				return cardx;
 			});
 			await player.directgains(cardsx, null, "xiadaomrfz_tag");
-			let list:any[] = [];
+			let list: any[] = [];
 			while (player.countCards("s", card => card.hasGaintag("xiadaomrfz_tag")) > 0) {
-				const result = await player.chooseCardTarget({
-					forced: true,
-					prompt: `分配获得的牌`,
-					filterCard(card) {
-						return card.hasGaintag("xiadaomrfz_tag");
-					},
-					selectCard: [1, Infinity],
-					selectTarget: [1, Infinity],
-					position: "s",
+				const result = await player
+					.chooseCardTarget({
+						forced: true,
+						prompt: `分配获得的牌`,
+						filterCard(card) {
+							return card.hasGaintag("xiadaomrfz_tag");
+						},
+						selectCard: [1, Infinity],
+						selectTarget: [1, Infinity],
+						position: "s",
 
-					ai1: card => {
-						if (ui.selected.cards.length === 0) return 1;
-						return 0;
-					},
-					ai2: target => {
-						const att = get.attitude(_status.event.player, target);
-						if (get.value(ui.selected.cards[0], target) < 0) {
-							return -att;
-						} else if (att > 0) {
-							return att / (1 + target.countCards("h"));
-						} else {
-							return att / 100;
-						}
-					},
-				}).forResult();
-				if(!result.targets || !result.cards) return;
+						ai1: card => {
+							if (ui.selected.cards.length === 0) return 1;
+							return 0;
+						},
+						ai2: target => {
+							const att = get.attitude(_status.event.player, target);
+							if (get.value(ui.selected.cards[0], target) < 0) {
+								return -att;
+							} else if (att > 0) {
+								return att / (1 + target.countCards("h"));
+							} else {
+								return att / 100;
+							}
+						},
+					})
+					.forResult();
+				if (!result.targets || !result.cards) return;
 				list.add([result.targets[0], result.cards]);
 				result.cards.forEach(i => {
 					i.removeGaintag("xiadaomrfz_tag");
@@ -101,7 +103,7 @@ skill({
 			if (player == game.me) ui.updatehl();
 			list = list.map(arr => {
 				let cards = arr[1];
-				let gain:any[] = [];
+				let gain: any[] = [];
 				let j = trigger.player.getCards("h");
 				for (let card of j) {
 					if (cards.some(cardx => cardx._cardid == card.cardid)) gain.push(card);
@@ -137,9 +139,9 @@ skill({
 		},
 	},
 	qunxiamrfz: {
-		audio: 2,
-		getUntapped(player:Player) {
-			let result:any[] = [];
+		audio: ["作战中3","作战中4"],
+		getUntapped(player: Player) {
+			let result: any[] = [];
 			player.getRoundHistory("useCard", evt => {
 				if (evt.player === player) {
 					result.add(get.suit(evt.card));

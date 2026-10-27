@@ -5,7 +5,7 @@ character("char_4148_philae", { pack: "epicSJZX", sex: "female", group: "samrfz"
 
 skill({
 	qianxiumrfz: {
-		audio: 2,
+		audio: ["作战中1","作战中2"],
 		intro: {
 			content(event, player) {
 				return `少女祈祷中...`;
@@ -26,13 +26,13 @@ skill({
 			let shows = game.cardsGotoOrdering(get.cards(player.maxHp)).cards;
 			await player.showCards(shows, get.translation(player) + "发动了【虔修】");
 			if (shows.filter(i => get.tag(i, "damage") > 0).length < 1) {
-				player.gain({cards:shows});
+				player.gain({ cards: shows });
 				if (player.countMark("qianxiumrfz") < 5) player.addMark("qianxiumrfz", 1, false);
 				return;
 			}
 			const { links } = await player
 				.chooseButton({
-					createDialog:["【虔修】:你可以使用一张带有伤害类标签的牌", shows]
+					createDialog: ["【虔修】:你可以使用一张带有伤害类标签的牌", shows],
 				})
 				.set("filterButton", button => {
 					let player = get.player();
@@ -48,9 +48,9 @@ skill({
 				let nums = player.countMark("qianxiumrfz");
 				links[0].storage.qianxiumrfz = nums;
 				player.removeMark("qianxiumrfz", 1145141919810);
-				player.chooseUseTarget(links[0]);
+				player.chooseUseTarget({ card: links[0] });
 			} else {
-				player.gain({cards:shows});
+				player.gain({ cards: shows });
 				if (player.countMark("qianxiumrfz") < 5) player.addMark("qianxiumrfz", 1, false);
 			}
 		},
@@ -71,7 +71,7 @@ skill({
 		},
 	},
 	mingzhoumrfz: {
-		audio: 2,
+		audio: ["作战中3","作战中4"],
 		forced: true,
 		trigger: {
 			player: "gainAfter",
@@ -80,15 +80,17 @@ skill({
 			return event.cards.length > 0 && _status.currentPhase !== player;
 		},
 		async content(event, trigger, player) {
-			player.chooseToDiscard({
-				position:"he",
-				forced:true,
-				prompt:`请弃置${trigger.cards.length}张牌`,
-				selectCard() {
-					return trigger.cards.length;
-				},
-				filterCard:()=>true
-			}).set("ai", card => -get.value(card));
+			player
+				.chooseToDiscard({
+					position: "he",
+					forced: true,
+					prompt: `请弃置${trigger.cards.length}张牌`,
+					selectCard() {
+						return trigger.cards.length;
+					},
+					filterCard: () => true,
+				})
+				.set("ai", card => -get.value(card));
 		},
 		ai: {
 			threaten: 0.9,

@@ -194,16 +194,50 @@ class SpineWorker {
 		player.disposed = true;
 
 		//移除缓存中的记录
+		//
+		//⚠️ 两处曾经的错误，都会导致「换回原皮肤时拿到一个已销毁的实例」：
+		//① `cache.get(...)` 可能拿到 `undefined`（这张动皮已经清过了），`Object.keys(undefined)` 直接抛；
+		//② 判据写的是 `info.from === player.container`，但 `from` 存的是**宿主 Player / 元素**
+		//   （见 `dycSkin[playerid]["from"] = target`），`container` 是本扩展建的 spine 容器 DOM
+		//   —— 两者永远不相等，缓存条目不删，`dynamicName` 一直残留。
+		//正确做法：按实例自己反查它属于哪个键（缓存结构是 `dynamicName → playerid|className → { from, action… }`）。
 		let cache = this.spineCache;
 		let dycSave = cache.get(player.config.dynamicName);
-		if (Object.keys(dycSave).length === 1) cache.delete(player.config.dynamicName);
-		else {
-			for (let name in dycSave) {
-				let info = dycSave[name];
-				if (info.from === player.container) {
-					delete dycSave[name];
+		if (dycSave) {
+			for (let key in dycSave) {
+				let info = dycSave[key];
+				if (!info || typeof info !== "object") continue;
+				//摘掉「值 === 本实例」的那些 action 条目
+				let touched = false;
+				for (let action in info) {
+					if (action !== "from" && info[action] === player) {
+						delete info[action];
+						touched = true;
+					}
 				}
+				//顺手把宿主上的两处标记复位，否则「关掉再打开」会踩两个坑：
+				//① `target.dycSJZX` 指着已销毁的实例（拖拽 / init 钩子里的 dispose 会拿到死对象）；
+				//② `dataset.removeAdded_<dynamicName>` 还是 `"true"`，`loadDyc` 会跳过注册，
+				//   新挂的实例就再也不随元素卸载自动回收（`onRemoved` 只在首次 load 时挂）。
+				//
+				//⚠️ 只在**本条记录里确实摘掉了本实例**时才复位：同一个 `dynamicName` 下可能同时挂着
+				//玩家头像（`playerid` 键）与武将卡面（`className` 键）两桶，关掉其中一个不该把另一个
+				//还在用的宿主标记清掉 —— 那样它下次 load 会再挂一个 observer，旧的那个也不会退订。
+				if (touched) {
+					const from = info.from;
+					if (from && typeof from === "object") {
+						if (from.dycSJZX === player) delete from.dycSJZX;
+						if (from.dataset && player.config.dynamicName) delete from.dataset[`removeAdded_${player.config.dynamicName}`];
+					}
+				}
+				//该宿主条目里已经没有 action 实例了 ⇒ 整条删掉（只留 `from` 没有意义）
+				let hasInstance = false;
+				for (let action in info) {
+					if (action !== "from") hasInstance = true;
+				}
+				if (!hasInstance) delete dycSave[key];
 			}
+			if (Object.keys(dycSave).length === 0) cache.delete(player.config.dynamicName);
 		}
 
 		window.removeEventListener("resize", player.drawFrame);
@@ -214,6 +248,16 @@ class SpineWorker {
 
 		if (player.cancelId) {
 			clearTimeout(player.cancelId);
+		}
+
+		//动作层（`playAction` 建的 `gongji` / `chuchang` / `teshu`）在实例上挂了 `timer`，
+		//到点会去读 `dycSkin[playerid][action].parent`，并把立绘层 `display` 放回来。
+		//关动皮时这些实例可能正处在倒计时里：`dispose()` 已经把缓存条目删掉，
+		//回调里的 `dycSkin[playerid][action]` 就变成 `undefined`，`.parent` 直接抛 TypeError
+		//（发生在 setTimeout 里，是未捕获异常）⇒ 必须先清掉定时器。
+		if (player.timer) {
+			clearTimeout(player.timer);
+			player.timer = null;
 		}
 
 		if (player.animationState) {
@@ -250,6 +294,64 @@ class SpineWorker {
 		container?.__whichWayResizeObserver?.disconnect?.();
 
 		if (container) container.remove();
+	}
+
+	/**
+	 * 把某张动皮（`dynamicName` = `角色_皮肤`）在所有宿主上的实例全部拆掉。
+	 *
+	 * 「关闭动皮」的语义是全局的：同一角色同一皮肤不该在武将卡里关掉、玩家头像上还继续动。
+	 * 缓存结构是 `dynamicName → slot(playerid | className) → { from, default, 动作… }`，
+	 * 而骨架（`default`）与动作层（`playAction` 建的 `gongji` / `chuchang`…）都可能是独立的
+	 * SpinePlayer，所以必须遍历**所有 slot 的所有 action**，不能只盯着当前 target 那一个。
+	 *
+	 * @param {string} dynamicName 形如 `keluxiermrfz_经典形象`
+	 * @returns {number} 实际销毁的实例数（0 表示本来就没挂）
+	 */
+	disposeDyc(dynamicName) {
+		const bucket = this.spineCache.get(dynamicName);
+		if (!bucket) return 0;
+
+		//先收集再销毁：`dispose()` 会同步改写 cache（`delete info[action]` / `delete dycSave[key]` /
+		//`cache.delete(dynamicName)`），边遍历边删会漏掉后面的条目。
+		const victims = [];
+		for (const slot in bucket) {
+			const info = bucket[slot];
+			if (!info || typeof info !== "object") continue;
+			for (const action in info) {
+				if (action === "from") continue;
+				const instance = info[action];
+				//`instanceof HTMLElement` 排除误存进缓存的 DOM（历史预留形态），`disposed` 幂等跳过
+				if (!instance || instance instanceof HTMLElement || instance.disposed) continue;
+				victims.push(instance);
+			}
+		}
+
+		for (const instance of victims) {
+			try {
+				this.dispose(instance);
+			} catch (error) {
+				console.error("[WhichWay] 关闭动皮失败", error);
+			}
+		}
+
+		//兜底清理：`dispose()` 反查缓存用的是 `player.config.dynamicName`，某个实例的 config 被改过就会漏删。
+		//只有当桶里已经不存在「活着的实例」时才整桶删 —— 否则会把仍在渲染的实例变成没有句柄的孤儿。
+		const left = this.spineCache.get(dynamicName);
+		if (left) {
+			let alive = false;
+			for (const slot in left) {
+				const info = left[slot];
+				if (!info || typeof info !== "object") continue;
+				for (const action in info) {
+					if (action === "from") continue;
+					const instance = info[action];
+					if (instance && !(instance instanceof HTMLElement) && !instance.disposed) alive = true;
+				}
+			}
+			if (!alive) this.spineCache.delete(dynamicName);
+		}
+
+		return victims.length;
 	}
 
 	loadDyc(charName, skinName, target, config) {
@@ -1007,31 +1109,63 @@ class SpineWorker {
 
 		let cache = spineWorker.spineCache;
 
-		//停止target中所有其他动皮的播放
-		cache.forEach(obj => {
+		//停止并移除 target 上**其它皮肤**的动皮
+		//
+		//⚠️ 这里必须只处理「真正的 spine 实例」，不能把 `info` 的每个键都当实例：
+		//`info` 里除了 `default` / `gongji` / `chuchang` 等 action 键，还有 `from`（宿主 Player 或元素）。
+		//旧写法直接 `for (let action in info) { let player = info[action]; ... }`，
+		//遍历到 `from` 时 `player` 是个 Player 对象、没有 `.parent` ⇒ `player.parent.style.display`
+		//抛 TypeError，`updateDyc` 是 async，异常变成未捕获的 rejection，**后面的换肤逻辑全部不执行** ——
+		//表现就是「换了皮肤，动皮还在」。顺带清了残留容器，避免 `display:none` 被别处重置后复现。
+		cache.forEach((obj, cacheKey) => {
+			//当前皮肤自己的动皮不能删：下面还要复用它（`cache.has(dynamicName)` 那条快路径）
+			if (cacheKey === dynamicName) return;
 			for (let key in obj) {
 				let info = obj[key];
+				if (!info || typeof info !== "object") continue;
 				if (info.from !== target) continue;
 				for (let action in info) {
-					let player = info[action];
-					if (player instanceof HTMLElement) continue;
-					player.parent.style.display = "none";
+					if (action === "from") continue;
+					let instance = info[action];
+					if (!instance || instance instanceof HTMLElement) continue;
+					//已经销毁过的跳过（`dispose` 里会把自己从 cache 摘掉，遍历中可能撞到）
+					if (instance.disposed) continue;
+					try {
+						spineWorker.dispose(instance);
+					} catch (error) {
+						console.error("[WhichWay] 停用旧动皮失败", error);
+					}
 				}
 			}
 		});
 
-		if (this.banSkin?.[name]?.[skinName] === true) return;
-		//千幻把这张皮肤切成「静皮」了：与上面同一个出口，别再往上叠动皮
-		if (dynamicDisabledProbe?.(name, skinName) === true) return;
+		//这张动皮被关掉了（本扩展的开关，或千幻/皮肤切换把这张皮肤切成「静皮」）。
+		//
+		//⚠️ 这里**不能直接 return**：上面的清理循环按 `if (cacheKey === dynamicName) return` 跳过了
+		//当前皮肤自己那一桶（那是为了下面复用），所以「关闭动皮」若在这里早退，同名分桶里
+		//**已经挂出去的实例**（玩家头像、武将卡面…）既不会被 dispose 也不会被隐藏 ——
+		//表现就是「武将卡里点了关闭动皮，卡面没了，但场上玩家的头像还在动」。
+		//关闭是全局语义：同一角色同一皮肤不该在某一处还能动，因此这里把整桶实例一起拆掉。
+		if (this.banSkin?.[name]?.[skinName] === true || dynamicDisabledProbe?.(name, skinName) === true) {
+			spineWorker.disposeDyc(dynamicName);
+			return;
+		}
 
+		//快路径：这张动皮已经加载过 ⇒ 复用，把它从 `display:none` 里放回来
+		//⚠️ 必须判 `disposed` 与 `parent` 是否还在：`dispose()` 会 `container.remove()`，
+		//之后 `instance.parent` 可能是 `null`，直接 `.parent.style.display` 会抛错，
+		//而 `updateDyc` 是 async —— 一抛就整条换肤链路中断（又是「换了皮肤没反应」）。
 		if (cache.has(dynamicName)) {
-			if (get.itemtype(target) === "player" && cache.get(dynamicName)?.[target.playerid]?.[action]) {
-				cache.get(dynamicName)[target.playerid][action].parent.style.display = "";
-				return;
-			} else if (cache.get(dynamicName)?.[target.className]?.[action]) {
-				cache.get(dynamicName)[target.className][action].parent.style.display = "";
+			const instance =
+				get.itemtype(target) === "player" ? cache.get(dynamicName)?.[target.playerid]?.[action] : cache.get(dynamicName)?.[target.className]?.[action];
+			if (instance && !instance.disposed && instance.parent) {
+				instance.parent.style.display = "";
 				return;
 			}
+			//缓存里的实例已失效（被 dispose 过）⇒ 把这条缓存清掉，走下面的重新加载
+			const slot = get.itemtype(target) === "player" ? target.playerid : target.className;
+			if (cache.get(dynamicName)) delete cache.get(dynamicName)[slot];
+			if (cache.get(dynamicName) && Object.keys(cache.get(dynamicName)).length === 0) cache.delete(dynamicName);
 		}
 
 		if (skin) {

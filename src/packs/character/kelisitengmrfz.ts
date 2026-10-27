@@ -78,7 +78,7 @@ skill({
 				const cards = [];
 				for (var i of targets) {
 					const result = await i
-						.chooseCard("【星途】:你可以重铸一张牌", "he", lib.filter.cardRecastable)
+						.chooseCard({ prompt: "【星途】:你可以重铸一张牌", position: "he", filterCard: lib.filter.cardRecastable })
 						.set("ai", function (card) {
 							return 8 - get.value(card);
 						})
@@ -104,8 +104,7 @@ skill({
 							}
 						}
 						if (list.length) {
-							const result1 = await targety
-								.chooseControl(list)
+							const result1 = await targety.chooseControl({ controls: list })
 								.set("prompt", "【星途】:请选择一项")
 								.set("ai", () => {
 									if (
@@ -203,8 +202,11 @@ skill({
 				while (event.num < 6) {
 					// step 1
 					result = await player
-						.chooseCard("he", card => {
-							return !event.showed.includes(card);
+						.chooseCard({
+							position: "he",
+							filterCard: card => {
+								return !event.showed.includes(card);
+							},
 						})
 						.forResult();
 
@@ -246,7 +248,7 @@ skill({
 					player.addSkill("jiexiangmrfz");
 					player.gainMaxHp(3);
 					player.recoverTo(player.maxHp);
-					await player.gain(event.pd, "gain2");
+					await player.gain({ cards: event.pd, animate: "gain2" });
 				} else {
 					player.popup("失败");
 				}
@@ -365,13 +367,13 @@ skill({
 				while (event.targets.length) {
 					const num = player.countCards("he") - event.targets.length;
 					result = await player
-						.chooseCard("【揭相】:请选择至少一张牌将其分配给" + get.translation(event.targets[0]), [1, num + 1], "he")
+						.chooseCard({ prompt: "【揭相】:请选择至少一张牌将其分配给" + get.translation(event.targets[0]), selectCard: [1, num + 1], position: "he" })
 						.set("forced", true)
 						.forResult();
 
 					if (result.cards && result.cards.length) {
 						const target = event.targets[0];
-						await target.gain(result.cards, "gain2");
+						await target.gain({ cards: result.cards, animate: "gain2" });
 					}
 					event.targets.shift();
 				}

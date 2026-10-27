@@ -5,7 +5,7 @@ character("char_4058_pepe", { pack: "legendSJZX", sex: "female", group: "samrfz"
 
 skill({
 	boqingmrfz: {
-		audio: 2,
+		audio: ["任命队长","行动出发"],
 		trigger: {
 			player: "drawBegin",
 			global: "judgeBegin",
@@ -15,8 +15,8 @@ skill({
 			let originalHandCards = player.getCards("h");
 			const { moved } = await player
 				.chooseToMove({
-					prompt:"【博青】:你可以交换牌堆顶和你的手牌并任意顺序放回牌堆顶或牌堆底",
-					list:[["牌堆顶", cards], ["牌堆底"], ["你的手牌", player.getCards("h")]]
+					prompt: "【博青】:你可以交换牌堆顶和你的手牌并任意顺序放回牌堆顶或牌堆底",
+					list: [["牌堆顶", cards], ["牌堆底"], ["你的手牌", player.getCards("h")]],
 				})
 				.set("processAI", list => {
 					let moved = [[], [], []];
@@ -69,7 +69,7 @@ skill({
 			const gains = cards.filter(i => moved[2].includes(i));
 			if (puts.length && gains.length) {
 				player.$throw(puts.length, 1000);
-				await player.gain({cards:gains,animate:"giveAuto"});
+				await player.gain({ cards: gains, animate: "giveAuto" });
 			}
 
 			const top = moved[0];
@@ -89,11 +89,11 @@ skill({
 		},
 	},
 	kuisuimrfz: {
-		audio: 2,
+		audio: ["选中干员1","选中干员2"],
 		usable: 1,
 		enable: "phaseUse",
 		getLastAction(player) {
-			const cards:Card[] = [];
+			const cards: Card[] = [];
 			const history = game.getAllGlobalHistory();
 			if (history.length < 2) return [];
 			const last = history[history.length - 2];
@@ -120,14 +120,14 @@ skill({
 		async content(event, trigger, player) {
 			let card = event.cards[0];
 			let names = [...new Set(lib.skill.kuisuimrfz.getLastAction(player).map(i => i.name))];
-			let list:any[] = [];
+			let list: any[] = [];
 			for (let i = 0; i < names.length; i++) {
-				let name:any = names[i];
+				let name: any = names[i];
 				if (get.type(name) == "basic") list.push(["基本", "", name]);
 				else if (get.type(name) == "trick") list.push(["锦囊", "", name]);
 			}
 			const { links } = await player
-				.chooseButton({createDialog:["窥岁", [list, "vcard"]]})
+				.chooseButton({ createDialog: ["窥岁", [list, "vcard"]] })
 				.set("ai", button => {
 					let player = get.player(),
 						card = {
@@ -138,8 +138,8 @@ skill({
 				.forResult();
 			if (!links) return;
 			player.chooseUseTarget({
-				card:get.autoViewAs({ name: links[0][2], isCard: true }),
-				cards:event.cards
+				card: get.autoViewAs({ name: links[0][2], isCard: true }),
+				cards: event.cards,
 			});
 		},
 		ai: {
@@ -150,7 +150,7 @@ skill({
 		},
 	},
 	lianwenmrfz: {
-		audio: 2,
+		audio: ["作战中3","作战中4"],
 		trigger: { player: "damageBegin4" },
 		usable: 1,
 		filter(event, player) {

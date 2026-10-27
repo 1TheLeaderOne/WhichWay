@@ -277,7 +277,7 @@ const resigter = function (name = "char_4217_makoto") {
 						})
 						.forResult();
 					if (result.bool === false) {
-						await player.damage(3, "thunder", "nosource");
+						await player.damage({ num: 3, nature: "thunder", nosource: true });
 					}
 					return result;
 				}

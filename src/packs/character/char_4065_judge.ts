@@ -31,7 +31,7 @@ skill({
 		init: (player, skill) => {
 			player.storage[skill] = [];
 		},
-		audio: "zhidianmrfz",
+		audio: ["作战中1","作战中2"],
 		enable: "phaseUse",
 		usable: 114514,
 		filter: function (event, player) {
@@ -201,7 +201,7 @@ skill({
 		},
 	},
 	newpijimrfz: {
-		audio: "pijimrfz",
+		audio: ["作战中3","作战中4"],
 		trigger: {
 			player: "useCard",
 		},

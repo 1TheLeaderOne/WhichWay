@@ -5,7 +5,7 @@ character("char_174_slbell", { pack: "epicSJZX", sex: "female", group: "xiemrfz"
 
 skill({
 	shengnvmrfz: {
-		audio: 2,
+		audio: ["行动开始","作战中2"],
 		enable: "phaseUse",
 		usable: 1,
 		filter: function (event, player) {
@@ -20,20 +20,21 @@ skill({
 		multitarget: true,
 		multiline: true,
 		async content(event, trigger, player) {
-			let targets:Player[] = event.targets,
-				targets2:any[] = [],
+			let targets: Player[] = event.targets,
+				targets2: any[] = [],
 				// [<第二名角色的选项>，<第一名角色的选项>]
-				csn:any[] = [undefined, undefined];
+				csn: any[] = [undefined, undefined];
 			while (targets.length > 0) {
 				let target = targets[0],
-					list:string[] = [],
+					list: string[] = [],
 					csList = ["收回所有装备区的牌", "将一张手牌当【乐不思蜀】置于你的判定区", "不能响应下一张指定你为目标的基本牌或普通锦囊牌"];
 				if (target.countCards("e") > 0) {
 					list.push("选项一");
 				} else csList[0] = '<span style="opacity:0.5; ">' + csList[0] + "（不可选：装备区没有牌）" + "</span>";
 				for (let i of target.getCards("h")) {
-					const card = get.autoViewAs({name:"lebu" , cards:[i]},[i]);
-					if (!target.canAddJudge(card,player)) continue;
+					const card = get.autoViewAs({ name: "lebu", cards: [i] }, [i]);
+					//@ts-ignore
+					if (!target.canAddJudge(card, player)) continue;
 					list.push("选项二");
 					break;
 				}
@@ -41,7 +42,7 @@ skill({
 				list.push("选项三");
 				if (list.length == 0) continue;
 				const { control } = await target
-					.chooseControl({controls:list})
+					.chooseControl({ controls: list })
 					.set("choiceList", csList)
 					.set("ai", function () {
 						let list = _status.event.list;
@@ -57,18 +58,19 @@ skill({
 				switch (control) {
 					case "选项一":
 						target.gain({
-							cards:target.getCards("e"),
-							animate:"gain2"
+							cards: target.getCards("e"),
+							animate: "gain2",
 						});
 						break;
 					case "选项二": {
 						const { cards } = await target
 							.chooseCard()
-							.set("forced",true)
+							.set("forced", true)
 							.set("prompt", "【圣女】:请选择一张手牌当【乐不思蜀】置于你的判定区")
 							.set("filterCard", card => {
-								const cardx = get.autoViewAs({name:"lebu" , cards:[card]},[card]);
-								return target.canAddJudge(cardx,get.player());
+								const cardx = get.autoViewAs({ name: "lebu", cards: [card] }, [card]);
+								//@ts-ignore
+								return target.canAddJudge(cardx, get.player());
 							})
 							.set("ai", card => {
 								return 6 - get.value(card);
@@ -76,9 +78,9 @@ skill({
 							.forResult();
 						if (!cards) break;
 						target.useCard({
-							card:get.autoViewAs({name:"lebu" , cards:cards},cards),
-							targets:[target],
-							cards
+							card: get.autoViewAs({ name: "lebu", cards: cards }, cards),
+							targets: [target],
+							cards,
 						});
 						break;
 					}
@@ -91,11 +93,13 @@ skill({
 			if (csn[0] != csn[1]) {
 				for (let i of targets2) {
 					if (!i.countGainableCards(player, "he")) continue;
-					player.gainPlayerCard({
-						position:"he",
-						target:i,
-						forced:true
-					}).set("ai", lib.card.shunshou.ai.button);
+					player
+						.gainPlayerCard({
+							position: "he",
+							target: i,
+							forced: true,
+						})
+						.set("ai", lib.card.shunshou.ai.button);
 				}
 			} else player.draw(2);
 		},
@@ -131,7 +135,7 @@ skill({
 		},
 	},
 	shenshemrfz: {
-		audio: 2,
+		audio: ["编入队伍","任命队长"],
 		forced: true,
 		trigger: { target: "useCardToTargeted" },
 		filter: function (event, player) {
@@ -139,14 +143,14 @@ skill({
 			let max = 0,
 				shown = player.getCards("h", card => get.is.shownCard(card));
 			for (let i of shown) {
-				if ((i?.number || 0) > max) max = (i.number || 0);
+				if ((i?.number || 0) > max) max = i.number || 0;
 			}
 			let number = get.number(event.card);
 			if (number != null && Number(number) > max) return false;
 			return event.player.countCards("he") > 0 && event.player != player && get.tag(event.card, "damage") > 0;
 		},
 		async content(event, trigger, player) {
-			let list:string[] = [],
+			let list: string[] = [],
 				source = trigger.player,
 				tranTmp = function (str) {
 					let list = ["e", "h"];
@@ -161,7 +165,7 @@ skill({
 			if (num == 0) return;
 			source
 				.chooseToDiscard()
-				.set("forced",true)
+				.set("forced", true)
 				.set("position", "he")
 				.set("prompt", `【神慑】:请弃置${list.length > 1 ? tranTmp(list[0]) + "和" + tranTmp(list[1]) : tranTmp(list[0])}区的一张牌`)
 				.set("selectCard", num)
@@ -191,8 +195,8 @@ skill({
 					let hs = player.getCards("h", card => !get.is.shownCard(card));
 					if (hs.length == 0) return;
 					player.addShownCards({
-						cards:hs,
-						gaintag:["visible_shenshemrfz"]
+						cards: hs,
+						gaintag: ["visible_shenshemrfz"],
 					});
 				},
 			},

@@ -73,7 +73,7 @@ skill({
 			// @ts-ignore
 			cardcopy.neihuamrfz = true;
 			// @ts-ignore
-			player.addToExpansion(cardcopy, player, "give").gaintag.add("neihuamrfz");
+			player.addToExpansion({ cards: cardcopy, source: player, animate: "give" }).gaintag.add("neihuamrfz");
 		},
 		group: ["neihuamrfz_snyc", "neihuamrfz_destroy", "neihuamrfz_snyc_lose"],
 		subSkill: {

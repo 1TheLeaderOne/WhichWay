@@ -6,7 +6,7 @@ character("char_4072_ironmn", { pack: "legendSJZX", sex: "male", group: "weimrfz
 skill({
 	jigongmrfz: {
 		derivation: ["jigongmrfz_card"],
-		audio: 2,
+		audio: ["作战中1","作战中2"],
 		trigger: {
 			global: "phaseBefore",
 			player: "enterGame",
@@ -34,7 +34,7 @@ skill({
 				if (result.index === i) {
 					//@ts-ignore
 					event.card = game.createCard(list[i], ["heart", "spade"].randomGet(), [1, 2, 6, 8].randomGet());
-					await player.gain(event.card, "gain2");
+					await player.gain({ cards: [event.card], animate: "gain2" });
 					event.card2 = list[i];
 				}
 			}
@@ -43,7 +43,7 @@ skill({
 			const card = event.card;
 			//@ts-ignore
 			if (player.getCards("h").includes(card) && get.name(card, player) === event.card2) {
-				await player.chooseUseTarget(card, "nopopup", true);
+				await player.chooseUseTarget({ card, nopopup: true, forced: true });
 			}
 		},
 		group: ["jigongmrfz_gcard", "jigongmrfz_zb", "jigongmrfz_discard"],
@@ -83,7 +83,7 @@ skill({
 								event.card = player.getCards("e", card => {
 									return card.name === list[i];
 								});
-								await player.lose(event.card, ui.ordering, "visible");
+								await player.lose({ cards: [event.card], position: ui.ordering, visible: true });
 								player.line(result.targets[0]);
 								event.target = result.targets[0];
 							}
@@ -126,7 +126,7 @@ skill({
 						if (result.index === i) {
 							//@ts-ignore
 							event.card = game.createCard(list[i], ["heart", "spade"].randomGet(), [1, 2, 6, 8].randomGet());
-							await player.gain(event.card, "gain2");
+							await player.gain({ cards: [event.card], animate: "gain2" });
 							event.card2 = list[i];
 						}
 					}
@@ -135,7 +135,7 @@ skill({
 					const card = event.card;
 					//@ts-ignore
 					if (player.getCards("h").includes(card) && get.name(card, player) === event.card2) {
-						await player.chooseUseTarget(card, "nopopup", true);
+						await player.chooseUseTarget({ card, nopopup: true, forced: true });
 					}
 					//@ts-ignore
 					player.logSkill("jigongmrfz");
@@ -167,7 +167,7 @@ skill({
 		},
 	},
 	jiefeimrfz: {
-		audio: 2,
+		audio: ["作战中3","作战中4"],
 		trigger: { global: ["loseEnd", "cardsDiscardEnd"] },
 		direct: true,
 		popup: false,
@@ -231,14 +231,12 @@ skill({
 			if (result.color === "red") {
 				await player.draw();
 				result = await player
-					.chooseTarget(
-					{
-						prompt:"你可以令一名角色装备【支援装备】",
+					.chooseTarget({
+						prompt: "你可以令一名角色装备【支援装备】",
 						filterTarget(card, player, target) {
 							return !target.getEquip(5) && !target.hasEnabledSlot(5);
 						},
-					}
-					)
+					})
 					.set("ai", target => {
 						return get.attitude(player, target);
 					})
@@ -251,7 +249,7 @@ skill({
 			if (result.targets) {
 				const cards = game.createCard(event.card, ["heart", "spade"].randomGet(), [1, 2, 6, 8].randomGet());
 				const target = result.targets[0];
-				await target.gain(cards, "gain2");
+				await target.gain({ cards: [cards], animate: "gain2" });
 				target.equip(cards);
 				//@ts-ignore
 				player.logSkill("jiefeimrfz");
@@ -271,3 +269,5 @@ translate({
 });
 
 characterIntro("char_4072_ironmn", "白铁，机械工程师，伦蒂尼姆市民自救军十一小队队长。于伦蒂尼姆事件中与罗德岛协同作战，后与罗德岛签订长期合作条款，作为工程干员与行动队成员活跃在维多利亚地区的各项任务中。");
+
+characterTitle("char_4072_ironmn","自救军");

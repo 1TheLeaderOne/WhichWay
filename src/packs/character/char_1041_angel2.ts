@@ -5,7 +5,7 @@ character("char_1041_angel2", { pack: "legendSJZX", sex: "female", group: "lamrf
 
 skill({
 	youhuomrfz: {
-		audio: 2,
+		audio: ["作战中3","作战中4"],
 		trigger: { player: "useCard" },
 		filter(event, player) {
 			return event.card.name === "sha" && player.countCards("h", card => player.canRecast(card)) > 0;
@@ -69,7 +69,7 @@ skill({
 		},
 	},
 	letianmrfz: {
-		audio: 2,
+		audio: ["完成高难行动","非3星结束行动"],
 		init() {
 			lib.translate["letianmrfz_tips"] = "旧约";
 		},
@@ -79,7 +79,6 @@ skill({
 			return player.countCards("h", card => card.hasGaintag("letianmrfz_tips")) < 1;
 		},
 		async content(event, trigger, player) {
-			//@ts-ignore
 			player.drawTo(4);
 			player.removeGaintag("letianmrfz_tips");
 		},

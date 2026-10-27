@@ -5,7 +5,7 @@ character("char_487_bobb", { pack: "epicSJZX", sex: "male", group: "gemrfz", hp:
 
 skill({
 	qingtingmrfz: {
-		audio: 2,
+		audio: ["行动开始","选中干员1"],
 		trigger: { player: ["loseBegin", "loseAsyncBegin"] },
 		filter(event, player) {
 			let evt = event.getParent();
@@ -43,7 +43,7 @@ skill({
 		},
 	},
 	qingtanmrfz: {
-		audio: 2,
+		audio: ["选中干员2","作战中4"],
 		enable: "phaseUse",
 		usable: 1,
 		filterTarget(card, player, target) {

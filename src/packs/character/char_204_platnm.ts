@@ -1,5 +1,5 @@
 import { lib, game, ui, get, ai, _status } from "noname";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../hooks.ts";
 
 character("char_204_platnm", { pack: "epicSJZX", sex: "female", group: "kamrfz", hp: 3, skills: ["xujimrfz", "shiyumrfz"] });
 
@@ -22,7 +22,7 @@ skill({
 				return str;
 			},
 		},
-		audio: 3,
+		audio: ["作战中1", "作战中2", "作战中3"],
 		trigger: { player: "phaseDiscardBegin" },
 		frequent: true,
 		filter: function (event, player) {
@@ -43,33 +43,38 @@ skill({
 
 			player.storage.xujimrfz["damage"] += 1;
 			player.storage.xujimrfz["maxhand"] += 5;
-			if (player.hasUseTarget("sha", false) && player.hasSha())
+			if (player.hasUseTarget("sha", false)) {
 				result = await player
 					.chooseControl({ controls: ["摸牌", "出杀"] })
 					.set("prompt", "【蓄击】:请选择一项")
 					.forResult();
-			else {
+			} else {
 				let num = 2 + player.storage.shiyumrfz_buff;
 				player.draw(num || 2);
-				event.finish();
+				// event.finish();
+				return;
 			}
 
-			if (result && result.index == 0) {
+			if (result && result.index === 0) {
 				let num = 2 + player.storage.shiyumrfz_buff;
 				player.draw(num || 2);
 			} else {
 				player.addTempSkill("xujimrfz_sha", "xujimrfzAfter");
 				player
-					.chooseToUse({
+					.chooseUseTarget({
 						forced: true,
-						prompt: "【蓄击】：请你使用一张【杀】",
-						filterCard(card, player, event) {
-							if (get.name(card) != "sha") return false;
-							return lib.filter.filterCard.apply(this, arguments);
-						},
+						prompt: "【蓄击】：视为使用一张【杀】",
+						card: get.autoViewAs({ name: "sha", isCard: true }),
 					})
-					.set("logSkill", "xujimrfz")
-					.set("complexSelect", true);
+					.set("logSkill", "xujimrfz");
+				// player
+				// 	.chooseToUse({
+				// 		forced: true,
+				// 		prompt: "【蓄击】：请你使用一张【杀】",
+
+				// 	})
+				// 	.set("logSkill", "xujimrfz")
+				// 	.set("complexSelect", true);
 			}
 		},
 		group: ["xujimrfz_clear", "xujimrfz_dam"],
@@ -82,7 +87,7 @@ skill({
 				},
 				filter: function (event, player) {
 					const evt = event.getParent();
-					return event.card.name == "sha" && (evt && !evt.directHit.includes(event.target));
+					return event.card.name == "sha" && evt && !evt.directHit.includes(event.target);
 				},
 				logTarget: "target",
 				async content(event, trigger, player) {
@@ -118,7 +123,8 @@ skill({
 			},
 			dam: {
 				charlotte: true,
-				direct: true,
+				audio:"xujimrfz",
+				forced:true,
 				trigger: { player: "useCard" },
 				filter: function (event, player) {
 					if (player.storage.xujimrfz["damage"] < 1) return false;
@@ -126,7 +132,7 @@ skill({
 				},
 				async content(event, trigger, player) {
 					const storage = player.storage.xujimrfz["damage"];
-					player.logSkill("xujimrfz");
+					// player.logSkill("xujimrfz");
 					if (!trigger.baseDamage) trigger.baseDamage = 1;
 					trigger.baseDamage += storage;
 					player.storage.xujimrfz["damage"] = 0;
@@ -135,7 +141,7 @@ skill({
 		},
 	},
 	shiyumrfz: {
-		audio: 2,
+		audio: ["作战中4", "完成高难行动"],
 		skillAnimation: true,
 		animationColor: "wood",
 		juexingji: true,
@@ -174,9 +180,23 @@ skill({
 translate({
 	char_204_platnm: "白金",
 	xujimrfz: "蓄击",
-	xujimrfz_info: "弃牌阶段开始时，若你本回合出牌阶段没有使用伤害类牌指定其他角色为目标，你可以令你下一张【杀】的伤害基数+1，然后你的手牌上限+5且选择一项:1.摸[ 2 ]张牌；2.使用一张【杀】且此杀需要[ 2 ]张【闪】才可抵消。",
+	xujimrfz_info: "弃牌阶段开始时，若你本回合出牌阶段没有使用伤害类牌指定其他角色为目标，你可以令你下一张【杀】的伤害基数+1，然后你的手牌上限+5且选择一项:1.摸[ 2 ]张牌；2.视为使用一张【杀】且此杀需要[ 2 ]张【闪】才可抵消。",
 	shiyumrfz: "视域",
 	shiyumrfz_info: "觉醒技，当你一次造成至少两点伤害后，你获得如下效果并令【蓄击】中[ ]内的数字+1：</br>1.攻击距离+1；</br>2.攻击范围内的其他角色的手牌均对你可见。",
 });
 
 characterIntro("char_204_platnm", "白金，卡西米尔无胄盟刺客，其他履历缺失。在机动作战、歼灭战与巷战中皆表现出极高的战斗技巧与特殊的战术素养。</br>现于凯尔希医生的指导下，作为狙击干员为罗德岛提供服务。");
+
+characterTitle("char_204_platnm", "无胄盟刺客");
+
+dynamicTranslate("xujimrfz", function (player) {
+	var storage = player.storage.shiyumrfz_buff;
+	if (!storage) storage = 0;
+	return (
+		"弃牌阶段开始时，若你本回合出牌阶段没有使用牌指定其他角色为目标，你可以令你下一张【杀】的伤害基数+1，然后你的手牌上限+5且选择一项:1.摸[ " +
+		(2 + storage) +
+		" ]张牌；2.使用一张【杀】且此杀需要[ " +
+		(2 + storage) +
+		" ]张【闪】才可抵消。"
+	);
+});

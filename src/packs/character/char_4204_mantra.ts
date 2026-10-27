@@ -88,7 +88,7 @@ skill({
 			async cost(event, trigger, player) {
 				let target = trigger.player;
 				event.result = await player
-					.choosePlayerCard(target)
+					.choosePlayerCard({ target })
 					.set("prompt", get.prompt("lianganmrfz"))
 					.set("prompt2", `你可以连接${get.translation(target)}的一张手牌`)
 					.set("ai", button => get.value(button.link))
@@ -182,7 +182,7 @@ skill({
 					targets: [target],
 				} = event;
 				const { cards } = await player
-					.choosePlayerCard(target, true)
+					.choosePlayerCard({ target, forced: true })
 					.set("prompt", `请以弃置的方式将${get.translation(target)}的一张手牌当【顺手牵羊】使用`)
 					.set("nodistance", true)
 					.set("ai", button => {
@@ -192,7 +192,7 @@ skill({
 						return val;
 					})
 					.forResult();
-				player.chooseUseTarget({ name: "shunshou" }, cards).set("forced", true).set("qinyinmrfz", true);
+				player.chooseUseTarget({ card: { name: "shunshou" }, cards }).set("forced", true).set("qinyinmrfz", true);
 			},
 			ai: {
 				result: {
@@ -238,7 +238,7 @@ skill({
 					},
 					async content(event, trigger, player) {
 						for (let target of trigger.targets) {
-							await target.discard(trigger.cards);
+							await target.discard({ cards: trigger.cards });
 						}
 					},
 				},

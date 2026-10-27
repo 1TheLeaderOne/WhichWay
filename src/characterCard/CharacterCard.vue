@@ -127,7 +127,7 @@
  * - 默认展示「技能」面板（与原实现打开后调用 `click.skill()` 一致）。
  */
 import { computed, nextTick, onMounted, ref } from "vue";
-import { lib, game, get } from "noname";
+import { lib, get } from "noname";
 import { whichWayFile } from "../file.js";
 import { whichWayUtil } from "../utill.js";
 import { whichWaySkin } from "../skin/index.ts";
@@ -324,9 +324,13 @@ async function toggleDynamicSkin() {
 	await spineWorker.toggleDycSkin(props.name, skin);
 	refreshDynamicSkin();
 	await mountDyc();
-	for (const player of game.players) {
-		if (get.name(player) === props.name) await spineWorker.updateDyc(props.name, player);
-	}
+	//场上玩家按 name1 / name2 对齐重绘。
+	//⚠️ 原来这里手写 `get.name(player) === props.name`：`get.name` 是取**牌名**的函数
+	//（apps/core/noname/get/index.js），传 Player 进去没有角色 id 语义，判据恒为 false，
+	//整个循环一次都不执行 ⇒ 卡面关了动皮、玩家头像上那份没人管。
+	//`refreshSkin()` 内部按 `player.name1 || player.name` 与 `player.name2` 分别处理（双将/变身也正确），
+	//是「场上动皮对齐」的唯一正确入口，换肤路径（onSkinChange）用的也是它。
+	whichWaySkin.refreshSkin();
 }
 
 function close() {

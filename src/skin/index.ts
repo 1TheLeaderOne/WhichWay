@@ -97,17 +97,7 @@ class WhichWaySkin {
 						before(character, character2) {
 							// @ts-ignore
 							if (this.dycSJZX) spineWorker.dispose(this.dycSJZX);
-							if (
-								(function () {
-									let mode = lib.config.mode;
-									switch (mode) {
-										case "single":
-											return get.config("double_character", mode) !== "single";
-										default:
-											return get.config("double_character", mode);
-									}
-								})()
-							) {
+							if (whichWaySkin.isDoubleCharacterMode()) {
 								whichWayToast.showToast("【驶舰之向】:双将时无法使用动皮！", 5000, "bottomCenter", "sjzx_doubleCharacterWarn");
 							} else spineWorker.updateDyc(character, this);
 						},
@@ -117,17 +107,7 @@ class WhichWaySkin {
 						before(character, character2) {
 							// @ts-ignore
 							if (this.dycSJZX) spineWorker.dispose(this.dycSJZX);
-							if (
-								(function () {
-									let mode = lib.config.mode;
-									switch (mode) {
-										case "single":
-											return get.config("double_character", mode) !== "single";
-										default:
-											return get.config("double_character", mode);
-									}
-								})()
-							) {
+							if (whichWaySkin.isDoubleCharacterMode()) {
 								whichWayToast.showToast("【驶舰之向】:双将时无法使用动皮！", 5000, "bottomCenter", "sjzx_doubleCharacterWarn");
 							} else spineWorker.updateDyc(character, this);
 						},
@@ -466,6 +446,24 @@ class WhichWaySkin {
 	}
 
 	/**
+	 * 当前对局是否是双将。
+	 *
+	 * 动皮在双将模式下**一律不渲染**（头像里要同时塞两个人的立绘，动皮会盖住副将）。
+	 * 这条判定原先只写在 `whichWaySkinAddInitDyc` 的 init/reinit 钩子里，于是
+	 * `refreshSkin()`（换肤、开关动皮、关武将卡都会调）成了漏网入口 —— 双将模式下
+	 * 点一下开关就又把动皮挂回去了，与「双将时无法使用动皮！」的提示自相矛盾。
+	 * 现在收敛到这一个方法，钩子与 `refreshSkin()` 共用。
+	 *
+	 * 判定口径同本体：`single` 模式的 `double_character` 是 `single | double | singble`
+	 * （见 `apps/core/noname/library/index.js` 的机制配置），`singble` = 单双任选，此时仍算双将。
+	 */
+	isDoubleCharacterMode(): boolean {
+		const mode = lib.config.mode;
+		if (mode === "single") return get.config("double_character", mode) !== "single";
+		return !!get.config("double_character", mode);
+	}
+
+	/**
 	 * 按当前皮肤配置重绘场上的玩家。
 	 *
 	 * 引擎的 `setBackground` 只管「角色 id → 立绘」，对干员来说皮肤是另一套配置（`lib.config.skin`），
@@ -475,15 +473,23 @@ class WhichWaySkin {
 	refreshSkin() {
 		const allPlayers = game.players.concat(game.dead);
 		if (allPlayers.length === 0) return;
+		//双将模式不渲染动皮：`updateDyc` 会照常把「关掉的那张」清掉，但不会再挂新的。
+		//立绘仍要重贴 —— 动皮不挂不等于静皮不用同步。
+		const allowDyc = !this.isDoubleCharacterMode();
 		for (const player of allPlayers) {
+			//双将要主动拆：`init` / `reinit` 钩子里那句 `dispose(this.dycSJZX)` 只在开局面板切换时执行，
+			//而 `refreshSkin()` 是换肤、开关动皮、关武将卡都能走到的入口。少了这一步，双将模式下
+			//点一下开关（或换个皮肤）就会把上一份动皮留在双人头像上继续动。
+			//`dispose()` 幂等，且现在会把 `player.dycSJZX` 摘掉，所以连着跑多次也安全。
+			if (!allowDyc && player.dycSJZX) spineWorker.dispose(player.dycSJZX);
 			const name1 = player.name1 || player.name;
 			if (name1 && player.node?.avatar) {
 				player.node.avatar.setBackground(name1, "character");
-				spineWorker.updateDyc(name1, player);
+				if (allowDyc) spineWorker.updateDyc(name1, player);
 			}
 			if (player.name2 && player.node?.avatar2) {
 				player.node.avatar2.setBackground(player.name2, "character");
-				spineWorker.updateDyc(player.name2, player);
+				if (allowDyc) spineWorker.updateDyc(player.name2, player);
 			}
 		}
 	}

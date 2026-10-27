@@ -18,7 +18,7 @@ skill({
 				if (card.hasGaintag && card.hasGaintag("zhengyimrfz")) return true;
 			},
 		},
-		audio: ["完成高难行动","行动出发","行动开始","作战中4"],
+		audio: ["完成高难行动", "行动出发", "行动开始", "作战中4"],
 		trigger: {
 			global: "die",
 		},
@@ -32,7 +32,7 @@ skill({
 		async content(event, trigger, player) {
 			event.togain = trigger.player.getCards("hej");
 
-			player.gain(event.togain, trigger.player, "giveAuto", "bySelf").gaintag.add("zhengyimrfz");
+			player.gain({ cards: event.togain, source: trigger.player, animate: "giveAuto", bySelf: true }).gaintag.add("zhengyimrfz");
 		},
 		group: "zhengyimrfz_draw",
 		subSkill: {
@@ -59,11 +59,11 @@ skill({
 		},
 	},
 	daosimrfz: {
-		audio: ["作战中1","作战中2"],
+		audio: ["作战中1", "作战中2"],
 		enable: ["chooseToUse", "chooseToRespond"],
 		filter(event, player) {
 			//@ts-ignore
-			const card:Card = ui.discardPile.lastChild;
+			const card: Card = ui.discardPile.lastChild;
 			return ui.discardPile.lastChild && get.type(card) != "equip" && event.filterCard({ name: card.name }, player, event);
 		},
 		filterCard: true,
@@ -72,7 +72,7 @@ skill({
 		},
 		viewAs() {
 			//@ts-ignore
-			const card:Card = ui.discardPile.lastChild;
+			const card: Card = ui.discardPile.lastChild;
 			return {
 				name: card.name,
 

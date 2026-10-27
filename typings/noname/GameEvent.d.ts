@@ -6,6 +6,11 @@ declare module "@/library/element" {
         effectCount?:number;
 
 		/**
+		 * 用于锁定phaseDraw的摸牌数
+		 */
+		numFixed?:boolean;
+
+		/**
 		 * 是否是第一个目标，通常用在“指定目标”场景中使用
 		 */
 		isFirstTarget?:boolean;
