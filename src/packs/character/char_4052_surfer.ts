@@ -87,7 +87,7 @@ skill({
 				}
 
 				const { cards: cards2 } = await target
-					.chooseCard([1, 2], true)
+					.chooseCard({ selectCard: [1, 2], forced: true })
 					.set("filterCard", card => {
 						return get.event().playerx.canRecast(card);
 					})
@@ -119,11 +119,11 @@ skill({
 					if (num < 1) return;
 					if (target.countGainableCards(player, "h"))
 						await player
-							.gainPlayerCard("h", target, num, true)
+							.gainPlayerCard({ position: "h", target, selectButton: num, forced: true })
 							.set("target", target)
 							.set("complexSelect", false)
 							.set("ai", lib.card.shunshou.ai.button);
-					await target.damage(num, player);
+					await target.damage({ num, source: player });
 				} else {
 					player.disableSkill("dongximrfz", ["dongximrfz"]);
 					player.addTempSkill("dongximrfz_restore", { player: "phaseUseEnd" });

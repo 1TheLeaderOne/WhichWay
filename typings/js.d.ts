@@ -9,6 +9,14 @@ interface HTMLDivElement {
 
 interface Array<T> {
 	/**
+	 * 令一群玩家受到伤害
+	 * 数组必须是Player[]
+	 * @param { number | import("@/library/element/Player/type").EventDamageParams } [params]
+	 * @returns { Promise<GameEvent[]> }
+	 */
+	damages(params:number | import("@/library/element/Player/type").EventDamageParams):Promise<GameEvent[]>
+
+	/**
 	 * 判断两个数组是否相等
 	 * @param { Array } arr
 	 * @returns { boolean } 

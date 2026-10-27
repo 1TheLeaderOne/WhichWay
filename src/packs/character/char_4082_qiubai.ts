@@ -25,11 +25,13 @@ skill({
 				let result;
 
 				// step 0
-				const next = player.judge(card => {
-					const suit = get.suit(card);
-					if (suit === "spade") return -2;
-					if (suit === "club") return -4;
-					return 0;
+				const next = player.judge({
+					judge: card => {
+						const suit = get.suit(card);
+						if (suit === "spade") return -2;
+						if (suit === "club") return -4;
+						return 0;
+					},
 				});
 				next.judge2 = result => {
 					return result.bool === false;
@@ -68,11 +70,10 @@ skill({
 						}
 
 						// step 1
-						result = await player
-							.chooseBool(
-								get.prompt("ruximrfz"),
-								"【入隙】:是否摸一张牌</br>选择取消则为弃置" + get.translation(target) + "的区域内一张牌"
-							)
+						result = await player.chooseBool({
+							prompt: get.prompt("ruximrfz"),
+							prompt2: "【入隙】:是否摸一张牌</br>选择取消则为弃置" + get.translation(target) + "的区域内一张牌",
+						})
 							.set("ai", () => {
 								const aiPlayer = _status.event.player;
 								const att = get.attitude(aiPlayer, target);
@@ -86,7 +87,7 @@ skill({
 						if (result.bool) {
 							await player.draw();
 						} else {
-							await player.discardPlayerCard(target, "hej", true);
+							await player.discardPlayerCard({ target, position: "hej", forced: true });
 							player.line(target);
 						}
 					},
@@ -110,19 +111,19 @@ skill({
 			direct: true,
 			async content(event, trigger, player) {
 				const result = await player
-					.chooseTarget(
-						[1, 2],
-						get.prompt("wenxuemrfz"),
-						"为" + get.translation(trigger.card) + "增加至多两个目标",
-						function (card, player, target) {
+					.chooseTarget({
+						selectTarget: [1, 2],
+						prompt: get.prompt("wenxuemrfz"),
+						prompt2: "为" + get.translation(trigger.card) + "增加至多两个目标",
+						filterTarget: function (card, player, target) {
 							return (
 								!_status.event.sourcex.includes(target) &&
 								player.inRange(target) &&
 								player.canUse(_status.event.card, target) &&
 								(target.isLinked() || target.countCards("j") > 0)
 							);
-						}
-					)
+						},
+					})
 					.set("sourcex", trigger.targets)
 					.set("ai", function (target) {
 						var player = _status.event.player;
@@ -165,19 +166,16 @@ skill({
 							return evt.card.name === "sha" && evt.cards && evt.cards.length === 1;
 						});
 						event.num = history.length / 2;
-						result = await player.chooseBool(get.prompt("wenxuemrfz"), "可以使用" + event.num + "张【杀】").forResult();
+						result = await player.chooseBool({ prompt: get.prompt("wenxuemrfz"), prompt2: "可以使用" + event.num + "张【杀】" }).forResult();
 
 						// step 1 loop (original event.redo())
 						if (result.bool) {
 							while (event.num > 0) {
-								await player.chooseUseTarget(
-									{
-										name: "sha",
-										isCard: true,
-									},
-									"请选择【杀】的目标 (还可使用" + event.num + "张【杀】)",
-									false
-								);
+								await player.chooseUseTarget({
+									card: get.autoViewAs({ name: "sha", isCard: true }),
+									prompt: "请选择【杀】的目标 (还可使用" + event.num + "张【杀】)",
+									addCount: false,
+								});
 								event.num--;
 								//@ts-ignore
 								player.logSkill("wenxuemrfz");

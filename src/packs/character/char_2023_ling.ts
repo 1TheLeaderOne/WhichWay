@@ -16,7 +16,7 @@ skill({
 			},
 			onremove: function (player, skill) {
 				var cards = player.getExpansions(skill);
-				if (cards.length) player.loseToDiscardpile(cards);
+				if (cards.length) player.loseToDiscardpile({ cards });
 			},
 			mark: true,
 			audio: 6,
@@ -48,7 +48,7 @@ skill({
 						return `【诗形】：弃置因此技能而置于武将牌上的所有牌（当前武将牌上的牌的类型：${get.translation(exps[0])}），然后选择两张牌置于武将牌上`
 					}
 				}
-				const { cards } = await player.chooseCard("h")
+				const { cards } = await player.chooseCard({ position: "h" })
 					.set("prompt",prompt(player))
 					.set("filterCard",(card)=>{
 						const player = get.player(),cards = ui.selected.cards;
@@ -80,13 +80,13 @@ skill({
 				if(!cards) return;
 
 				if(expansions.length < 1){
-					player.addToExpansion(cards,player,"giveAuto").gaintag.add("shixingmrfz");
+					player.addToExpansion({ cards, source: player, animate: "giveAuto" }).gaintag.add("shixingmrfz");
 				} else{
 					if(expansions.length === 1 && cards.length === 1 && get.type2(cards[0]) === get.type2(expansions[0])){
-						player.addToExpansion(cards,player,"giveAuto").gaintag.add("shixingmrfz");
+						player.addToExpansion({ cards, source: player, animate: "giveAuto" }).gaintag.add("shixingmrfz");
 					} else {
-						await player.discard(expansions);
-						player.addToExpansion(cards,player,"giveAuto").gaintag.add("shixingmrfz");
+						await player.discard({ cards: expansions });
+						player.addToExpansion({ cards, source: player, animate: "giveAuto" }).gaintag.add("shixingmrfz");
 					}
 				}
 			},
@@ -122,7 +122,7 @@ skill({
 									return get.type2(card) === "basic";
 								});
 								if(card){
-									player.gain(card, "gain2");
+									player.gain({ cards: [card], animate: "gain2" });
 								} else {
 									player.chat("牌堆中没有基本牌！");
 								}
@@ -144,7 +144,7 @@ skill({
 										.set("ai",target=>get.attitude2(target)<0)
 										.forResult();
 									if(!targets) break;
-									player.discardPlayerCard(targets[0],true,"he")
+									player.discardPlayerCard({ target: targets[0], forced: true, position: "he" })
 										.set("prompt","【诗形】:请选择你要弃置的牌");
 								}
 							}
@@ -167,14 +167,14 @@ skill({
 
 						// step 0
 						if (cards.length) {
-							result = await player.chooseButton([`选择移去一张"清平"`, cards], true).forResult();
+							result = await player.chooseButton({ createDialog: [`选择移去一张"清平"`, cards], forced: true }).forResult();
 						} else {
 							return;
 						}
 
 						// step 1
 						if (result.bool) {
-							await player.loseToDiscardpile(result.links);
+							await player.loseToDiscardpile({ cards: result.links });
 						}
 						trigger.num--;
 						player.popup("清平");
@@ -277,15 +277,15 @@ skill({
 						player.addTempSkill("shixingmrfz_sha", "useCardAfter");
 
 						// step 1
-						await player.useCard({ name: "sha", isCard: true }, true, target);
+						await player.useCard({ card: get.autoViewAs({ name: "sha", isCard: true }), targets: [target], addCount: true });
 						game.log(player, "视为对", target, "使用【杀】");
 						player.logSkill("shixingmrfz");
 
 						// step 2
 						if (!player.storage.shixingmrfz_damage) {
-							await player.loseToDiscardpile(card);
+							await player.loseToDiscardpile({ cards: [card] });
 						} else {
-							await player.gain(card, "gain2");
+							await player.gain({ cards: [card], animate: "gain2" });
 							player.storage.shixingmrfz_damage = false;
 						}
 
@@ -373,13 +373,13 @@ skill({
 				// step 0
 				player.awakenSkill(event.name);
 				player.storage.zuimengmrfz = true;
-				await player.chooseToUse(
-					true,
-					(card, player, event) => {
+				await player.chooseToUse({
+					forced: true,
+					filterCard: (card, player, event) => {
 						return get.name(card) === "jiu";
 					},
-					"使用一张【酒】"
-				);
+					prompt: "使用一张【酒】",
+				});
 				event.num = 0;
 
 				// step 1-2 loop (原 event.goto(1) 转换为 continue)
@@ -387,13 +387,13 @@ skill({
 					// step 1
 					event.num++;
 					result = await player
-						.chooseTarget(
-							true,
-							"【醉梦" + event.num + "/" + game.players.length + "】：选择一名角色，获得其区域内一张牌",
-							(card, player, target) => {
+						.chooseTarget({
+							forced: true,
+							prompt: "【醉梦" + event.num + "/" + game.players.length + "】：选择一名角色，获得其区域内一张牌",
+							filterTarget: (card, player, target) => {
 								return target.countMark("zuimengmrfz_remove") < 2;
-							}
-						)
+							},
+						})
 						.set("ai", target => {
 							const aiPlayer = _status.event.player;
 							const att = get.attitude(aiPlayer, target);
@@ -411,7 +411,7 @@ skill({
 						if (!target.hasSkill("zuimengmrfz_remove")) {
 							target.addTempSkill("zuimengmrfz_remove");
 						}
-						await player.gainPlayerCard("hej", target, true);
+						await player.gainPlayerCard({ position: "hej", target, forced: true });
 						target.addMark("zuimengmrfz_remove", 1);
 						continue; // goto 1: 回到循环开头
 					} else {

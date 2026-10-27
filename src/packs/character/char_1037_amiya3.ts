@@ -20,7 +20,7 @@ skill({
 			}
 		},
 		// marktext: "情绪",
-		markimage:whichWayFile.compilePath("skill:tongqingmrfz.png"),
+		markimage: whichWayFile.compilePath("skill:tongqingmrfz.png"),
 		intro: {
 			name: "情绪",
 			mark(dialog, content, player) {
@@ -35,7 +35,7 @@ skill({
 				}
 			},
 		},
-		audio: 2,
+		audio: ["作战中4","3星结束行动"],
 		trigger: { global: "phaseJieshuBegin" },
 		getDiscard: function (event, player) {
 			let cards = [] as Card[];
@@ -87,7 +87,7 @@ skill({
 		},
 	},
 	cibeimrfz: {
-		audio: 2,
+		audio: ["作战中1","作战中2"],
 		trigger: { player: "loseAfter" },
 		filter(event, player) {
 			let position = event.cards.map(i => i.original);

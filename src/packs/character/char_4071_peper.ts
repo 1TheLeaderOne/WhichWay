@@ -35,8 +35,9 @@ skill({
 				game.log(player, `的`, `#g【索赜】`, `记录了`, trigger.card.name);
 				var cards = get.cards(player.maxHp);
 				let cardsc = cards.slice(0);
-				const { moved } = await player
-					.chooseToMove(`【索赜】:请选择你要交换的牌（至多交换${player.storage.suozemrfz.length}张牌）`)
+				const { moved } = await player.chooseToMove({
+					prompt: `【索赜】:请选择你要交换的牌（至多交换${player.storage.suozemrfz.length}张牌）`,
+				})
 					.set("filterMove", (from, to) => {
 						return typeof to !== "number";
 					})
@@ -84,8 +85,8 @@ skill({
 				const gains = cardsc.filter(i => moved[1].includes(i));
 				if (puts.length && gains.length) {
 					player.$throw(puts.length, 1000);
-					await player.lose(puts, ui.special);
-					await player.gain(gains, "giveAuto");
+					await player.lose({ cards: puts, position: ui.special });
+					await player.gain({ cards: gains, animate: "giveAuto" });
 				}
 				cardsc = moved[0].slice();
 				if (cardsc.length) {
@@ -113,8 +114,7 @@ skill({
 					if (get.type(name) == "basic") list.push(["基本", "", name]);
 					else if (get.type(name) == "trick") list.push(["锦囊", "", name]);
 				}
-				let { links } = await player
-					.chooseButton([`游移:请移除${Math.ceil(list.length / 2)}张牌`, [list, "vcard"]], true)
+				let { links } = await player.chooseButton({ createDialog: [`游移:请移除${Math.ceil(list.length / 2)}张牌`, [list, "vcard"]], forced: true })
 					.set("selectButton", Math.ceil(list.length / 2))
 					.set("ai", button => {
 						return _status.event.player.getUseValue(button.link, null, true);
@@ -128,14 +128,13 @@ skill({
 				let { links2 } =
 					names.length == 1
 						? { links2: names }
-						: await player
-								.chooseButton(["游移:请选择一张你要使用的牌", [names, "vcard"]], true)
+						: await player.chooseButton({ createDialog: ["游移:请选择一张你要使用的牌", [names, "vcard"]], forced: true })
 								.set("ai", button => {
 									return _status.event.player.getUseValue({ name: button.link[2] }, undefined, true);
 								})
 								.forResult();
 				if (!links2) return;
-				player.chooseUseTarget({ name: links2[0][2] }, true);
+				player.chooseUseTarget({ card: { name: links2[0][2] }, forced: true });
 			},
 		},
 });

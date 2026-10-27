@@ -15,7 +15,7 @@ skill({
 			let cards = player.getExpansions(skill);
 			if (cards.length) player.loseToDiscardpile({ cards });
 		},
-		audio: 4,
+		audio: ["行动出发", "行动开始", "作战中1", "部署2"],
 		enable: "phaseUse",
 		filter: function (event, player) {
 			if (player.getExpansions("nianshoumrfz").length >= 2) return false;
@@ -40,6 +40,7 @@ skill({
 		group: ["nianshoumrfz_disable", "nianshoumrfz_usesha", "nianshoumrfz_eff1", "nianshoumrfz_eff2", "nianshoumrfz_eff3", "nianshoumrfz_eff4", "nianshoumrfz_eff5"],
 		subSkill: {
 			disable: {
+				audio:"nianshoumrfz",
 				trigger: {
 					global: "phaseBefore",
 					player: "enterGame",
@@ -50,29 +51,48 @@ skill({
 					return event.name != "phase" || game.phaseNumber == 0;
 				},
 				async content(event, trigger, player) {
-					// step 0
-					player.logSkill("nianshoumrfz");
-					event.num = 0;
 					player.disableEquip({
 						source: player,
 						slots: ["equip1"],
 					});
 
 					// step 1 loop (original event.redo())
-					while (event.num < 2) {
-						event.num++;
+					// while (event.num < 2) {
+					// 	event.num++;
+					// 	const card = get.cardPile2(c => {
+					// 		return get.subtype(c) === "equip1";
+					// 	});
+					// 	if (card) {
+					// 		await player.gain({
+					// 			cards: [card],
+					// 			animate: "give",
+					// 		});
+					// 	} else {
+					// 		player.chat("牌堆中没有武器牌了");
+					// 	}
+					// }
+					for (let i of ["林登万", "TheLeaderOne"]) {
 						const card = get.cardPile2(c => {
 							return get.subtype(c) === "equip1";
 						});
 						if (card) {
-							await player.gain({
+							await player.addToExpansion({
 								cards: [card],
+								source: player,
 								animate: "give",
+								gaintag: ["nianshoumrfz"],
 							});
 						} else {
 							player.chat("牌堆中没有武器牌了");
+							break;
 						}
 					}
+					// 		player.addToExpansion({
+					// 	cards,
+					// 	source: player,
+					// 	animate: "give",
+					// 	gaintag: ["nianshoumrfz"],
+					// });
 				},
 			},
 			usesha: {
@@ -113,7 +133,7 @@ skill({
 								return _status.event.targets.includes(target);
 							}
 								 */
-								forced:true,
+								forced: true,
 								filterTarget(card, player, target) {
 									return _status.event.targets.includes(target);
 								},
@@ -136,14 +156,16 @@ skill({
 					 * @type { Player }
 					 */
 					const target = event.cost_data.target;
-					const { links } = await player.chooseButton({
-						createDialog:["选择一个'巨剑'", player.getExpansions("nianshoumrfz")],
-						forced:true
-					}).forResult();
+					const { links } = await player
+						.chooseButton({
+							createDialog: ["选择一个'巨剑'", player.getExpansions("nianshoumrfz")],
+							forced: true,
+						})
+						.forResult();
 
 					if ((links?.length || 0) < 1) return;
 
-					target.addToExpansion(links, "give").gaintag.add("nianshoumrfz");
+					target.addToExpansion({ cards: links, animate: "give" }).gaintag.add("nianshoumrfz");
 				},
 			},
 			eff1: {
@@ -246,15 +268,15 @@ skill({
 								if (game.players[i].countCards(list[j]) > 0) {
 									player.gain({
 										//game.players[i].getCards(list[j]).randomGet(), "give"
-										cards:[game.players[i].getCards(list[j]).randomGet()],
-										animate:"give"
+										cards: [game.players[i].getCards(list[j]).randomGet()],
+										animate: "give",
 									});
 									game.log(player, "获得了", game.players[i], "的" + get.translation(game.players[i].getCards(list[j]).randomGet()));
 								}
 							}
 							player.gain({
-								cards:game.players[i].getExpansions("nianshoumrfz"),
-								animate:"give"
+								cards: game.players[i].getExpansions("nianshoumrfz"),
+								animate: "give",
 							});
 
 							//@ts-ignore
@@ -272,15 +294,26 @@ skill({
 		},
 	},
 	zhangyimrfz: {
-		charlotte: true,
+		forced: true,
+		audio: ["非3星结束行动", "观看作战记录"],
 		mod: {
 			attackRange: function (player, num) {
 				if (player.getExpansions("nianshoumrfz").length) return num + player.getExpansions("nianshoumrfz").length;
 			},
 		},
+		trigger: {
+			player: "phaseDrawBegin2",
+		},
+		filter(event, player, name, target) {
+			const cards = player.getExpansions("nianshoumrfz");
+			return !event.numFixed && cards.length > 0;
+		},
+		async content(event, trigger, player) {
+			trigger.num += player.getExpansions("nianshoumrfz").length;
+		},
 	},
 	chongjimrfz: {
-		audio: 2,
+		audio: ["作战中4", "作战中2"],
 		trigger: { source: "damageEnd" },
 		direct: true,
 		filter: function (event, player) {
@@ -298,8 +331,8 @@ skill({
 					return (target == targets.getNext() || target == targets.getPrevious()) && target != player;
 				}
 					 */
-					prompt:get.prompt("chongjimrfz"),
-					prompt2:"你可以对" + get.translation(targets) + "的上家或下家造成一点伤害",
+					prompt: get.prompt("chongjimrfz"),
+					prompt2: "你可以对" + get.translation(targets) + "的上家或下家造成一点伤害",
 					filterTarget(card, player, target) {
 						return (target == targets.getNext() || target == targets.getPrevious()) && target != player;
 					},
@@ -308,16 +341,17 @@ skill({
 				.forResult();
 			if (result.bool && result.targets) {
 				result.targets[0].damage();
-				if (trigger.num > 0) result.targets[0].chooseToDiscard({
-					/**"h", true, get.prompt("chongjimrfz"), "请选择弃置" + trigger.num + "张手牌", trigger.num */
-					position:"h",
-					forced:true,
-					prompt:get.prompt("chongjimrfz"),
-					prompt2:"请选择弃置" + trigger.num + "张手牌",
-					selectCard() {
-						return [trigger.num,trigger.num]
-					},
-				});
+				if (trigger.num > 0)
+					result.targets[0].chooseToDiscard({
+						/**"h", true, get.prompt("chongjimrfz"), "请选择弃置" + trigger.num + "张手牌", trigger.num */
+						position: "h",
+						forced: true,
+						prompt: get.prompt("chongjimrfz"),
+						prompt2: "请选择弃置" + trigger.num + "张手牌",
+						selectCard() {
+							return [trigger.num, trigger.num];
+						},
+					});
 				//@ts-ignore
 				player.logSkill("chongjimrfz", result.targets[0]);
 			}
@@ -328,10 +362,11 @@ skill({
 translate({
 	char_391_rosmon: "迷迭香",
 	nianshoumrfz: "念手",
-	nianshoumrfz_info: "①出牌阶段，你可以将一张武器牌置于你的武将牌上，称为‘巨剑’（上限为2），你视为装备了‘巨剑’。②当你使用【杀】指定目标后，若目标武将牌上的‘巨剑’小于等于1，你可以选择获得一张‘巨剑’并将其置于目标的武将牌上，使其摸牌阶段摸牌数和本回合第一次对你造成的伤害-X（X=其‘巨剑’标记数）。③锁定技，你的准备阶段，你随机获得所有有‘巨剑’标记角色的装备区和手牌的各一张牌，然后你获得其武将牌上的所有‘巨剑’牌；游戏开始时，你从牌堆中获得两张武器牌并废除你的武器栏。",
+	//①出牌阶段，你可以将一张武器牌置于你的武将牌上，称为“巨剑”（上限为2），你视为装备了“巨剑”。②当你使用【杀】指定目标后，若目标武将牌上的“巨剑”小于等于1，你可以选择获得一张“巨剑”并将其置于目标的武将牌上，使其摸牌阶段摸牌数和本回合第一次对你造成的伤害-X（X=其“巨剑”标记数）。③锁定技，你的准备阶段，你随机获得所有有“巨剑”标记角色的装备区和手牌的各一张牌，然后你获得其武将牌上的所有“巨剑”牌；游戏开始时，你从牌堆中获得两张武器牌并废除你的武器栏。
+	nianshoumrfz_info: "①锁定技，游戏开始时，你获得如下效果：<br>1.废除你的武器栏并将牌堆中的两张武器牌置于你的武将牌上，称之为“巨剑”（上限为2）;<br>2.出牌阶段你可将任意张武器牌置于武将牌上，称之为“巨剑”（上限为2）。<br>②当你使用【杀】指定目标后，你可以将“巨剑”置于其武将牌上，然后其获得下列效果直到你的准备阶段结束：<br>1.额定摸牌数-1;<br>2.其每回合首次对你造成的伤害-X（X=其“巨剑”标记数）;<br>3.准备阶段，你获得其武将牌上的所有“巨剑”。",
 	nianshoumrfz2: "念手",
 	zhangyimrfz: "胀意",
-	zhangyimrfz_info: "锁定技，若你有‘巨剑’标记，你的攻击范围+X。（X=你的‘巨剑’标记的数量）",
+	zhangyimrfz_info: "锁定技，若你有“巨剑”标记，你的攻击范围+X和额定摸牌数+X。（X=你的“巨剑”的数量）",
 	chongjimrfz: "冲击",
 	chongjimrfz_info: "当你使用的【杀】造成伤害后，你可以对与受伤角色座次相邻的其他角色造成一点伤害，然后其弃置X张手牌。（X=本次你造成的伤害数）",
 });

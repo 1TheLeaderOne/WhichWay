@@ -47,16 +47,16 @@ skill({
 				let num = game.getRoundHistory("everything", evt => evt.name === "xianchoumrfz").length;
 
 				for (let i = 0; i < num; i++) {
-					await target.useCard({ name: "wuzhong", isCard: true, xianchoumrfz: true }, target);
+					await target.useCard({ card: get.autoViewAs({ name: "wuzhong", isCard: true, xianchoumrfz: true }), targets: [target] });
 				}
 
-				await target.chooseToDiscard(num, true, "he").set("ai", card => {
+				await target.chooseToDiscard({ selectCard: num, forced: true, position: "he" }).set("ai", card => {
 					const evt = _status.event;
 					return evt.name === "phaseUse" && evt.player === get.player() ? -get.player().getUseValue(card) : -get.value(card);
 				});
 
 				const { cards } = await target
-					.chooseCard([0, num])
+					.chooseCard({ selectCard: [0, num] })
 					.set("filterCard", card => {
 						return !card.hasGaintag("xianchoumrfz");
 					})

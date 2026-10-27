@@ -65,10 +65,10 @@ skill({
 				//@ts-ignore
 				let target = _status.currentPhase;
 				target.draw();
-				await player.gain(trigger.cards, "gain2");
+				await player.gain({ cards: trigger.cards, animate: "gain2" });
 				if (player.countCards("h", card => get.name(card) !== "ying") < 1) return;
 				const { cards } = await player
-					.chooseCard(1, true)
+					.chooseCard({ selectCard: 1, forced: true })
 					.set("prompt", "请选择一张手牌视为【影】")
 					.set("ai", card => -get.value(card))
 					.forResult();

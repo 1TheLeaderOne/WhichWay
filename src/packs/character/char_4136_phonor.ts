@@ -38,12 +38,12 @@ skill({
 						cards.map(i=>get.name(i)).length !== new Set(cards.map(i=>get.name(i))).size
 					) break;
 
-					const {bool} = await player.chooseBool(get.prompt("songgemrfz"))
+					const {bool} = await player.chooseBool({ prompt: get.prompt("songgemrfz") })
 						.set("frequentSkill","songgemrfz").forResult();
 					if(bool !== true) break; 
 				}
 				cards = cards.filterInD();
-				if(cards.length) player.gain(cards,"gain2");
+				if(cards.length) player.gain({ cards, animate: "gain2" });
 			},
 			ai:{
 				threaten:0.5,

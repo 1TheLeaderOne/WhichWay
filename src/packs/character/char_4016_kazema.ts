@@ -358,7 +358,7 @@ skill({
 				//@ts-ignore
 				equip._destroy = true;
 				//@ts-ignore
-				player.loseToDiscardpile(equip).log = false;
+				player.loseToDiscardpile({ cards: [equip] }).log = false;
 				await manager.change(player, equip);
 				manager.addSlot(player, subtype);
 				if (info?.characterManager) {

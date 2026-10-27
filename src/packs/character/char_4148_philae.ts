@@ -48,7 +48,7 @@ skill({
 				let nums = player.countMark("qianxiumrfz");
 				links[0].storage.qianxiumrfz = nums;
 				player.removeMark("qianxiumrfz", 1145141919810);
-				player.chooseUseTarget(links[0]);
+				player.chooseUseTarget({ card: links[0] });
 			} else {
 				player.gain({cards:shows});
 				if (player.countMark("qianxiumrfz") < 5) player.addMark("qianxiumrfz", 1, false);

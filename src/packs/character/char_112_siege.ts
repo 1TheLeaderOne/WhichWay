@@ -1,5 +1,5 @@
 import { lib, game, ui, get, ai, _status } from "noname";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../hooks.ts";
 import { whichWayUtil } from "../../utill.js";
 
 character("char_112_siege", { pack: "legendSJZX", sex: "female", group: "weimrfz", hp: 4, skills: ["fensuimrfz", "yuechuimrfz"] });
@@ -89,3 +89,8 @@ translate({
 characterIntro("char_112_siege", "推进之王，本名维娜，维多利亚公民，大部分履历缺失。存在数项未被证实的指控记录。在歼灭战、攻坚战、对抗硬目标等任务中表现出色。于多个测试中皆获得优异成绩，遂获准加入罗德岛。现作为先锋人员，于罗德岛某作战小队担任队长。");
 
 characterTitle("char_112_siege",whichWayUtil.colorize("#y街头的女王#"));
+
+dynamicTranslate("yuechuimrfz", function (player) {
+	var mark = player.countMark("yuechuimrfz") > 0 ? player.countMark("yuechuimrfz") : 1;
+	return `当你使用【杀】后，你可以摸[ ${mark} ]张牌，然后你可以选择依次执行下列任意个效果:<br>1.弃置一张装备牌，令[]中的数字+1（至多为3）;<br>2.对与其距离为1的一名其他角色造成一点伤害。`;
+});

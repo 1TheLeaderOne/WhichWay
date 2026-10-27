@@ -1,5 +1,5 @@
 import { lib, game, ui, get, ai, _status } from "noname";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../hooks.ts";
 
 character("char_4187_graceb", { pack: "epicSJZX",
 			sex: "female",
@@ -48,7 +48,7 @@ skill({
 						});
 				} else {
 					let card = get.cardPile2("sha", "random");
-					if (card) player.gain(card, "gain2");
+					if (card) player.gain({ cards: [card], animate: "gain2" });
 				}
 			},
 		},
@@ -92,7 +92,7 @@ skill({
 					target.getCards("h").length <= 3
 						? { cards: target.getCards("h") }
 						: await player
-								.choosePlayerCard("h", target, true)
+								.choosePlayerCard({ position: "h", target, forced: true })
 								// @ts-ignore
 								.set("ai", card => get.rand(0, 1))
 								.set("prompt", `请展示${get.translation(target)}的三张手牌`)
@@ -104,7 +104,7 @@ skill({
 				let damage = cards.filter(card => get.tag(card, "damage")).length;
 				if (damage > 0) {
 					player.line(target);
-					target.damage(damage, player).set("qiancimrfz", true);
+					target.damage({ num: damage, source: player }).set("qiancimrfz", true);
 				}
 			},
 			group: ["qiancimrfz_recover"],
@@ -163,3 +163,8 @@ translate({
 characterTitle("char_4187_graceb", "<font color='#6495ed'>至虔修女</font>");
 
 characterIntro("char_4187_graceb", "聆音，来自玻利瓦尔的修女，经干员信仰搅拌机推荐加入罗德岛，目前已经返回家乡玻利瓦尔，于当地办事处担任近卫干员。");
+
+dynamicTranslate("qiancimrfz", function (player) {
+	let cnNum = get.cnNumber((player.storage.qiancimrfz || 0) + 1);
+	return `出牌阶段限${cnNum}次，你可以将一张手牌交给一名其他角色，并展示其三张手牌，对其造成X点伤害，然后若你因此:<br>1.造成了伤害，你回复一点体力；<br>2.杀死了一名角色，你令本技能出牌阶段可发动的次数+1。<br>（X=展示的牌中伤害类牌的数量）`;
+});

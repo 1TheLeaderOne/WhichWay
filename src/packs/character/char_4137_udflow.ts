@@ -25,7 +25,7 @@ skill({
 			async content(event, trigger, player) {
 				let targets = event.targets;
 				const { links } = await player
-					.choosePlayerCard(player, "hej", true)
+					.choosePlayerCard({ target: player, position: "hej", forced: true })
 					.set("prompt", `【御潮】:请选择你的拼点牌`)
 					.set("ai", function (button) {
 						var card = button.link;

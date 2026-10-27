@@ -1,5 +1,5 @@
 import { lib, game, ui, get, ai, _status } from "noname";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../hooks.ts";
 
 character("char_4064_mlynar", { pack: "legendSJZX",
 			sex: "male",
@@ -41,7 +41,7 @@ skill({
 				//@ts-ignore
 				let num = get.cardNameLength(trigger.card);
 				const { cards } = await player
-					.chooseCard(`【敛芒】:请重铸至多${get.cnNumber(num)}张牌`, [0, num], true)
+					.chooseCard({ prompt: `【敛芒】:请重铸至多${get.cnNumber(num)}张牌`, selectCard: [0, num], forced: true })
 					.set("ai", function (card) {
 						if (get.tag(card, "damage")) return 10 - get.value(card);
 						return 6 - get.value(card);
@@ -86,8 +86,7 @@ skill({
 						const { control } =
 							list.length == 1
 								? player.draw(num)
-								: await player
-										.chooseControl(list)
+								: await player.chooseControl({ controls: list })
 										.set("choiceList", chooseList)
 										.set("prompt", "【敛芒】:请选择一项")
 										.set("ai", function () {
@@ -191,7 +190,7 @@ skill({
 			async content(event, trigger, player) {
 				let list = lib.skill.xingyimrfz.getDamagedTarget(event, player);
 				const { targets } = await player
-					.chooseTarget("【行义】:你可以受到一点伤害并令一名本回合受到过伤害的其他角色回复一点体力")
+					.chooseTarget({ prompt: "【行义】:你可以受到一点伤害并令一名本回合受到过伤害的其他角色回复一点体力" })
 					.set("filterTarget", function (card, player, target) {
 						var list = _status.event.list;
 						return list.includes(target);
@@ -205,7 +204,7 @@ skill({
 					.forResult();
 				if (!targets) return;
 				targets[0].recover();
-				player.damage("nosource");
+				player.damage({ nosource: true });
 				//@ts-ignore
 				player.logSkill("xingyimrfz", targets[0]);
 			},
@@ -223,3 +222,9 @@ translate({
 });
 
 characterIntro("char_4064_mlynar", "设计：落尘星河/林登万<br>玛恩纳·临光，临光家前家主，干员临光与瑕光的叔叔，迄今并未获得过任何形式的骑士封号。于特锦赛后约两个月，接受罗德岛的合作邀请，协助罗德岛处理卡西米尔地区的各项事务。");
+
+dynamicTranslate("lianmangmrfz", function (player) {
+	var str =
+		"锁定技。<br>①当你成为其他角色使用牌的目标后，你重铸至多X张牌（X=此牌牌名的字数），若你：1.因此重铸了带有伤害类标签的牌，你摸一张牌；2.因此重铸了所有手牌，对使用者造成一点伤害，然后你不能使用或打出手牌直到此牌结算完毕或你进入濒死状态。<br>②当你造成伤害时，你改为令你回复等量体力或摸等量的牌。";
+	return player.hasSkill("zhanmangmrfz_ban") ? "<font color=#696969>" + str + "</font>" : str;
+});

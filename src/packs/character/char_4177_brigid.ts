@@ -1,5 +1,5 @@
 import { lib, game, ui, get, ai, _status } from "noname";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../hooks.ts";
 
 character("char_4177_brigid", { pack: "epicSJZX",
 			sex: "female",
@@ -129,7 +129,7 @@ skill({
 					let target = targets.shift();
 					if (target) {
 						let { cards: cardsx } = await target
-							.chooseCard(true)
+							.chooseCard({ forced: true })
 							.set("ai", card => -get.value(card))
 							.set("prompt", "【冬去】:请重铸一张手牌")
 							// @ts-ignore
@@ -164,3 +164,13 @@ translate({
 characterTitle("char_4177_brigid", "<font color='#8b008b'>火与生命</font>");
 
 characterIntro("char_4177_brigid", "水灯心，本名布莉吉，游牧民。据称来自塔拉某支古老的游牧部族，其成员长久以来在平原、丘陵地区从事游牧活动，兼领天灾预警、传信相关职责。现经干员苇草推荐与罗德岛合作，在接受矿石病治疗的同时，作为狙击干员协助战斗。");
+
+dynamicTranslate("sanyanmrfz", function (player) {
+	let str = ["任意角色的回合结束时，其每满足下列一项你便摸两张牌并删除此项直到本轮结束：", "1.回复过体力值；", "2.使用过装备牌；", "3.获得过牌。", "然后你可以令至多X名其他角色摸一张牌。（X=满足的项数）"];
+	if (!player?.storage?.sanyanmrfz) return str.join("<br>");
+	let stroage = player.storage.sanyanmrfz;
+	if (!stroage.includes("recover")) str[1] = `<s>${str[1]}</s>`;
+	if (!stroage.includes("useCard")) str[2] = `<s>${str[2]}</s>`;
+	if (!stroage.includes("gain")) str[3] = `<s>${str[3]}</s>`;
+	return str.join("<br>");
+});

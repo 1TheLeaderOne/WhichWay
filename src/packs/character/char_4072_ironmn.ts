@@ -34,7 +34,7 @@ skill({
 				if (result.index === i) {
 					//@ts-ignore
 					event.card = game.createCard(list[i], ["heart", "spade"].randomGet(), [1, 2, 6, 8].randomGet());
-					await player.gain(event.card, "gain2");
+					await player.gain({ cards: [event.card], animate: "gain2" });
 					event.card2 = list[i];
 				}
 			}
@@ -43,7 +43,7 @@ skill({
 			const card = event.card;
 			//@ts-ignore
 			if (player.getCards("h").includes(card) && get.name(card, player) === event.card2) {
-				await player.chooseUseTarget(card, "nopopup", true);
+				await player.chooseUseTarget({ card, nopopup: true, forced: true });
 			}
 		},
 		group: ["jigongmrfz_gcard", "jigongmrfz_zb", "jigongmrfz_discard"],
@@ -83,7 +83,7 @@ skill({
 								event.card = player.getCards("e", card => {
 									return card.name === list[i];
 								});
-								await player.lose(event.card, ui.ordering, "visible");
+								await player.lose({ cards: [event.card], position: ui.ordering, visible: true });
 								player.line(result.targets[0]);
 								event.target = result.targets[0];
 							}
@@ -126,7 +126,7 @@ skill({
 						if (result.index === i) {
 							//@ts-ignore
 							event.card = game.createCard(list[i], ["heart", "spade"].randomGet(), [1, 2, 6, 8].randomGet());
-							await player.gain(event.card, "gain2");
+							await player.gain({ cards: [event.card], animate: "gain2" });
 							event.card2 = list[i];
 						}
 					}
@@ -135,7 +135,7 @@ skill({
 					const card = event.card;
 					//@ts-ignore
 					if (player.getCards("h").includes(card) && get.name(card, player) === event.card2) {
-						await player.chooseUseTarget(card, "nopopup", true);
+						await player.chooseUseTarget({ card, nopopup: true, forced: true });
 					}
 					//@ts-ignore
 					player.logSkill("jigongmrfz");
@@ -251,7 +251,7 @@ skill({
 			if (result.targets) {
 				const cards = game.createCard(event.card, ["heart", "spade"].randomGet(), [1, 2, 6, 8].randomGet());
 				const target = result.targets[0];
-				await target.gain(cards, "gain2");
+				await target.gain({ cards: [cards], animate: "gain2" });
 				target.equip(cards);
 				//@ts-ignore
 				player.logSkill("jiefeimrfz");

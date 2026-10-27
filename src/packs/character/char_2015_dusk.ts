@@ -1,5 +1,5 @@
 import { lib, game, ui, get, ai, _status } from "noname";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../hooks.ts";
 
 character("char_2015_dusk", { pack: "legendSJZX",
 			sex: "female",
@@ -193,11 +193,11 @@ skill({
 				});
 				var cardf = get.cardPile2(trigger.card.name);
 				if (player.storage.dianjingmrfz == true) {
-					if (cardt) player.gain(cardt, "gain2", "log");
+					if (cardt) player.gain({ cards: [cardt], animate: "gain2" });
 					//@ts-ignore
 					else player.chat("牌堆中没有", cardt, "牌");
 				} else {
-					if (cardf) player.gain(cardf, "gain2", "log");
+					if (cardf) player.gain({ cards: [cardf], animate: "gain2" });
 					else player.chat("牌堆中没有【" + get.translation(trigger.card.name) + "】");
 				}
 				player.changeZhuanhuanji("dianjingmrfz");
@@ -253,3 +253,9 @@ translate({
 characterTitle("char_2015_dusk", "<font color=#f6b3fa>工笔入画</font>");
 
 characterIntro("char_2015_dusk", "夕，炎国画家，待业。在留舰人员年的积极行动下，被以访客身份挟持至罗德岛。擅长绘画，尤其是炎国传统绘画。现寓居罗德岛某偏僻走道的墙内。");
+
+dynamicTranslate("dianjingmrfz", function (player) {
+	return !player.storage.dianjingmrfz
+		? "转换技，当你使用转化牌时，你可以从牌堆中获得与你使用的转化牌的<span class=thundertext>阳:牌名相同</span><font color=#696969>；阴:类型相同</font>的牌。"
+		: "转换技，当你使用转化牌时，你可以从牌堆中获得与你使用的转化牌的<font color=#696969>阳:牌名相同；</font><span class=thundertext>阴:类型相同</span>的牌。";
+});

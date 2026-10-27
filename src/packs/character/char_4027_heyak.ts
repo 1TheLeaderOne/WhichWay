@@ -1,5 +1,5 @@
 import { lib, game, ui, get, ai, _status } from "noname";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../hooks.ts";
 
 const tmpSave = window.whichWaySave.tmpSave
 
@@ -469,7 +469,7 @@ skill({
 							count += 4;
 						}
 
-						const packsResult = await player.chooseButton(buttonList).set("forced", true).forResult();
+						const packsResult = await player.chooseButton({ createDialog: buttonList }).set("forced", true).forResult();
 						//@ts-ignore
 						let choosePack = packs[packsResult.buttons[0].link];
 
@@ -488,7 +488,7 @@ skill({
 							count_sorts += 4;
 						}
 
-						const sortsResult = await player.chooseButton(buttonList_sorts).set("forced", true).forResult();
+						const sortsResult = await player.chooseButton({ createDialog: buttonList_sorts }).set("forced", true).forResult();
 
 						//@ts-ignore
 						let chooseSort = sorts[sortsResult.buttons[0].link];
@@ -527,3 +527,9 @@ translate({
 characterTitle("char_4027_heyak", "<font color=#00868B>但为求索</font>");
 
 characterIntro("char_4027_heyak", "投稿来源：涵涵<br>霍尔海雅，前梅兰德基金会所属特工，在凯尔希医生与博士的引荐下加入罗德岛。</br>擅长单兵作战，并且能够应对各种极端环境，在各类隐秘行动中发挥了重大价值。");
+
+dynamicTranslate("kuangyumrfz", function (player) {
+	if (player.storage.kuangyumrfz)
+		return "每回合每名角色限一次，当你使用单一目标的锦囊牌指定其他角色为目标后，若该角色没有‘风起’标志，你可以使其获得一个“风起”标记（持续到其回合结束），且令其下回合随机跳过两个阶段，若该角色在你的攻击范围内，其于此牌结算完成之前，你对有‘风起’标记的角色造成的伤害+1。";
+	return "每回合每名角色限一次，当你使用单一目标的普通锦囊牌或【杀】指定其他角色为目标后，若该角色没有‘风起’标志，你可以使其获得一个“风起”标记（持续到其回合结束），且令其下回合随机跳过两个阶段，若该角色在你的攻击范围内，其于此牌结算完成之前，你对有‘风起’标记的角色造成的伤害+1，然后若对其造成了伤害，你修改【狂语】直到下一轮开始。";
+});

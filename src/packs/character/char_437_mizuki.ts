@@ -1,161 +1,98 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
 
-character("char_437_mizuki", { pack: "legendSJZX",
-			sex: "male",
-			group: "dongmrfz",
-			hp: 3,
-			skills: ["liqunmrfz","chuangshangmrfz","jinghuamrfz"],
-		});
+character("char_437_mizuki", { pack: "legendSJZX", sex: "male", group: "dongmrfz", hp: 3, skills: ["liqunmrfz", "chuangshangmrfz", "jinghuamrfz"] });
+
+//创伤：统计满足的项数
+function chuangshangNum(target, player) {
+	return (
+		(target.isMinHp() ? 1 : 0) +
+		(player.getDamagedHp() > 0 ? 1 : 0) +
+		(game.hasPlayer(current => current !== player && player.inRange(current) && current.getHp() * 2 <= current.maxHp) ? 1 : 0)
+	);
+}
+
+//镜花：正在响应的牌若与弃置牌同花色则禁用，返回 false 即禁止
+function banSuit(card, player) {
+	let evt = get.event();
+	if (evt.name !== "chooseToRespond" && evt.name !== "chooseToUse") {
+		evt = evt.getParent(current => current.name === "chooseToRespond" || current.name === "chooseToUse");
+	}
+	if (evt?.respondTo?.[1]?.storage?.jinghuamrfz?.includes(get.suit(card, player))) {
+		return false;
+	}
+}
 
 skill({
-	"liqunmrfz": {
-			audio: 2,
-			trigger: { target: "useCardToTargeted" },
-			filter: function (event, player) {
-				if (event.player == player) return false;
-				return event.cards.length < 2 || get.distance(player, event.target) < 2;
-			},
-			usable: 1,
-			check: function (event, player) {
-				if (event.card.name == "wugu" || event.card.name == "tao") return false;
-				if (get.attitude(player, event.target) > 2 && event.card.name == "sha") return false;
-				return true;
-			},
-			async content(event, trigger, player) {
-				if (trigger.parent) trigger.parent.excluded.add(player);
-			},
-		},
-	"chuangshangmrfz": {
-			audio: 2,
-			trigger: { source: "damageEnd" },
-			filter: function (event, player) {
-				if (event.getParent()?.name == "chuangshangmrfz") return false;
-				if (event.player == player) return false;
-				return (
-					event.player.isMinHp() ||
-					game.hasPlayer(function (current) {
-						return current != player && player.inRange(current) && current.maxHp / 2 >= current.hp;
-					})
-				);
-			},
-			async content(event, trigger, player) {
-				const target = trigger.player;
-				let result;
-
-				// step 0
-				const str1 = "摸两张牌";
-				const str2 = "对" + get.translation(target) + "造成一点伤害";
-				if (
-					target.isMinHp() &&
-					game.hasPlayer(current => {
-						return current !== player && player.inRange(current) && current.maxHp / 2 >= current.hp;
-					})
-				) {
-					result = await player
-						.chooseControl(str1, str2)
-						.set("prompt", get.prompt("chuangshangmrfz"))
-						.set("prompt2", "请选择一项")
-						.set("ai", () => {
-							const aiPlayer = _status.event.player;
-							if (aiPlayer.hp < 2 && aiPlayer.countCards("h") < 3) return 0;
-							return 1;
-						})
-						.forResult();
-				} else {
-					await player.draw();
-					return;
-				}
-
-				// step 1
-				if (result.index === 0) {
-					await player.draw(2);
-				} else {
-					await target.damage();
-				}
-			},
-		},
-	"jinghuamrfz": {
-			audio: 2,
-			trigger: { player: "useCardToPlayered" },
-			usable: 1,
-			filter: function (event, player) {
-				if (event.getParent()?.triggeredTargets3?.length > 1) return false;
-				if (event.card.name != "sha") return false;
-				return game.hasPlayer(function (current) {
-					return current != player && current != event.target;
-				});
-			},
-			check: function (event, player) {
-				if (player.hp < 3) return false;
-				if (
-					!game.hasPlayer(function (current) {
-						return current != event.target && current != player && current != event.player && get.attitude(player, current) < 2;
-					})
-				)
+	liqunmrfz: {
+		audio: ["编入队伍", "任命队长"],
+		mod: {
+			playerEnabled(card, player, target) {
+				if (target !== player && !player.inRange(target)) {
 					return false;
-				return true;
+				}
 			},
-			async content(event, trigger, player) {
-				let result;
-
-				// step 0
-				result = await player
-					.chooseTarget(
-						true,
-						[1, 2],
-						get.prompt("jinghuamrfz"),
-						"为" + get.translation(trigger.card) + "增加至多两个目标",
-						(card, player, target) => {
-							return !_status.event.sourcex.includes(target) && player.canUse(_status.event.card, target, false);
-						}
-					)
-					.set("sourcex", trigger.targets)
-					.set("ai", target => {
-						const aiPlayer = _status.event.player;
-						return get.effect(target, _status.event.card, aiPlayer, aiPlayer);
-					})
-					.set("card", trigger.card)
-					.setHiddenSkill(event.name)
-					.forResult();
-
-				// step 1
-				if (result.targets) {
-					player.addTempSkill("jinghuamrfz2", {
-						player: "useCardAfter",
-					});
-					for (const target of result.targets) {
-						trigger.targets.push(target);
-						player.line(target);
-					}
+			targetEnabled(card, player, target) {
+				if (player !== target && !target.inRange(player)) {
+					return false;
 				}
 			},
 		},
-	"jinghuamrfz2": {
-			charlotte: true,
-			direct: true,
-			trigger: { player: "useCardEnd" },
-			filter: function (event, player) {
-				if (event.card.name != "sha") return false;
-				return player.getHistory("sourceDamage", function (evt) {
-					return evt.card == event.card;
-				}).length <= 2;
-			},
-			async content(event, trigger, player) {
-				player.loseHp();
-			}
+	},
+	chuangshangmrfz: {
+		audio: ["作战中3", "作战中4"],
+		trigger: { source: "damageEnd" },
+		filter(event, player) {
+			return event.player !== player && chuangshangNum(event.player, player) > 0;
 		},
+		async content(event, trigger, player) {
+			await player.draw(chuangshangNum(trigger.player, player));
+		},
+	},
+	jinghuamrfz: {
+		audio: ["作战中2", "作战中1"],
+		usable: 1,
+		trigger: { player: "useCard" },
+		filter(event, player) {
+			return get.is.damageCard(event.card) && player.countDiscardableCards(player, "he") > 0;
+		},
+		async cost(event, trigger, player) {
+			event.result = await player.chooseToDiscard({ prompt: get.prompt2(event.skill), selectCard: [1, Infinity], position: "he" }).forResult();
+		},
+		async content(event, trigger, player) {
+			const card = trigger.card;
+			card.storage ??= {};
+			card.storage.jinghuamrfz = event.cards.map(current => get.suit(current, player)).unique();
+			game.filterPlayer(current => current !== player).forEach(current => current.addTempSkill("jinghuamrfz_ban"));
+			player.when({ player: "useCardAfter" }).filter(evt => evt.card === card).step(async (evt, trigger, player) => {
+				delete card.storage.jinghuamrfz;
+				if (!player.getHistory("sourceDamage", current => current.card === card).length) {
+					await player.loseHp();
+				}
+			});
+		},
+		subSkill: {
+			ban: {
+				charlotte: true,
+				mod: {
+					cardEnabled: banSuit,
+					cardRespondable: banSuit,
+				},
+			},
+		},
+	},
 });
 
 translate({
-	"char_437_mizuki": "水月",
-	"liqunmrfz": "离群",
-	"liqunmrfz_info": "每回合限一次，当你成为其他角色使用牌的目标时，若此牌目标为1或使用者与你距离大于1，取消之。",
-	"chuangshangmrfz": "创伤",
-	"chuangshangmrfz_info": "当你不因【创伤】而对其他角色造成伤害后，每满足下列一项你便可以摸一张牌，若满足所有选项，你可以放弃摸牌，然后对受伤角色造成一点伤害：①目标是场上体力值最少的角色；②你的攻击范围内有生命值不大于一半的其他角色。",
-	"jinghuamrfz": "镜花",
-	"jinghuamrfz_info": "每回合限一次，当你使用【杀】时，你可以额外指定至多两个目标（无距离限制），若你造成的伤害不大于2，你流失一点体力。",
-	"jinghuamrfz2": "镜花",
+	char_437_mizuki: "水月",
+	liqunmrfz: "离群",
+	liqunmrfz_info: "锁定技，你只能指定攻击范围内的角色为目标，不在你攻击范围的其他角色不能指定你为目标。",
+	chuangshangmrfz: "创伤",
+	chuangshangmrfz_info: "当你对其他角色造成伤害后，每满足下列一项你便可以摸一张牌：①目标是场上体力值最少的角色；②你的攻击范围内有生命值不大于一半的其他角色；③你损失的体力值不小于1。",
+	jinghuamrfz: "镜花",
+	jinghuamrfz_info: "每回合限一次，当你使用伤害类牌时，你可以弃置任意张牌，然后其他角色不能用与你弃置的牌相同花色的牌响应此牌，然后若此牌没有造成伤害，你失去一点体力。",
 });
 
 characterIntro("char_437_mizuki", "水月于玻利瓦尔的多索雷斯城与我们的部分干员有所接触，并随行至本舰，经相关干员初步问询考察后批准其暂时留舰。</br>其学习能力较为优秀，现阶段已经能协助完成相当一部分的文职工作内容，或可考虑往干员的方向培养。经调查与评估后批准其长期留舰。");
+
+characterTitle("char_437_mizuki","深蓝之籽");

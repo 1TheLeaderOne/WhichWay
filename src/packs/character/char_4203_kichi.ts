@@ -1,5 +1,5 @@
 import { lib, game, ui, get, ai, _status } from "noname";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../hooks.ts";
 
 character("char_4203_kichi", { pack: "epicSJZX",
 			sex: "female",
@@ -47,7 +47,7 @@ skill({
 			async content(event, trigger, player) {
 				let card = event.cards[0];
 				//@ts-ignore
-				await player.gain(_status.pileTop);
+				await player.gain({ cards: [_status.pileTop] });
 				ui.cardPile.insertBefore(card, ui.cardPile.firstChild);
 				//@ts-ignore
 				let name = trigger.phaseList[trigger.num + 1] ? trigger.phaseList[trigger.num + 1] + "End" : "phaseEnd";
@@ -108,7 +108,7 @@ skill({
 					})
 					.set("judge2", result => result.bool === false)
 					.forResult();
-				if (get.position(card) === "d") player.gain(card, "gain2");
+				if (get.position(card) === "d") player.gain({ cards: [card], animate: "gain2" });
 				if (color === "red") {
 					player.storage.tiandingmrfz++;
 					if (!player.hasSkill("tiandingmrfz_eff")) player.addTempSkill("tiandingmrfz_eff", { player: "phaseEnd" });
@@ -164,3 +164,9 @@ translate({
 characterTitle("char_4203_kichi", "<font color = #a52a2a>命由天定</font>");
 
 characterIntro("char_4203_kichi", "吉星，活跃在锻冶町的珠宝鉴定师，杂货铺“吉星”的所有者，在金石会事件后失去了店铺与家，经介绍来到罗德岛接受矿石病治疗，现作为狙击干员为罗德岛提供服务。");
+
+dynamicTranslate("tiandingmrfz", function (player) {
+	let used = player.getHistory("useSkill", evt => evt.skill === "tiandingmrfz").length;
+	let num = player.storage.tiandingmrfz || 2;
+	return `每回合限${get.cnNumber(num)}次(已使用<font color="red">${get.cnNumber(used)}</font>次)，每个阶段开始时，你可以进行一次判定并获得判定牌，若判定牌为红，你本回合使用【杀】的次数和攻击距离+1且本技能本回合发动次数+1，反之你跳过此阶段。`;
+});

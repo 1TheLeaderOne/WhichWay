@@ -36,8 +36,7 @@ skill({
 			async content(event, trigger, player) {
 				let cards = lib.skill.mushoumrfz.getCanUseCard(trigger, player);
 				while (true) {
-					const { bool, links } = await player
-						.chooseButton(["【牧兽】：是否使用这些牌？", cards])
+					const { bool, links } = await player.chooseButton({ createDialog: ["【牧兽】：是否使用这些牌？", cards] })
 						.set("filterButton", button => {
 							return _status.event.player.hasUseTarget(button.link);
 						})
@@ -47,7 +46,7 @@ skill({
 					if (!bool || !links) return;
 					cards.remove(links[0]);
 					player.$gain2(links[0], false);
-					player.chooseUseTarget(links[0], true);
+					player.chooseUseTarget({ card: links[0], forced: true });
 					//@ts-ignore
 					player.logSkill("mushoumrfz");
 					cards = cards.filter(card => {

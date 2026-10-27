@@ -1,5 +1,5 @@
 import { lib, game, ui, get, ai, _status } from "noname";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../hooks.ts";
 
 character("char_4080_lin", { pack: "legendSJZX",
 			sex: "female",
@@ -121,13 +121,13 @@ skill({
 					playerx.removeMark("yinbimrfz");
 				}
 				result = await playerx
-					.chooseTarget(
-						get.prompt("zhenzamrfz"),
-						"你可以随机获得攻击范围内一名其他角色的" + (player.storage.liuliemrfz ? "两张牌" : "一张牌") + "并对其造成一点伤害",
-						(card, player, target) => {
+					.chooseTarget({
+						prompt: get.prompt("zhenzamrfz"),
+						prompt2: "你可以随机获得攻击范围内一名其他角色的" + (player.storage.liuliemrfz ? "两张牌" : "一张牌") + "并对其造成一点伤害",
+						filterTarget: (card, player, target) => {
 							return target !== player && player.inRangeOf(target);
-						}
-					)
+						},
+					})
 					.set("ai", target => {
 						const aiTrigger = _status.event.getTrigger();
 						const aiPlayer = _status.event.player;
@@ -148,8 +148,8 @@ skill({
 							i--;
 						}
 					}
-					await playerx.gain(cardg, target, "giveAuto", "bySelf");
-					await target.damage(playerx || "nosource", "nocard");
+					await playerx.gain({ cards: cardg, source: target, animate: "giveAuto", bySelf: true });
+					await target.damage({ source: playerx || undefined, nosource: !playerx, nocard: true });
 					//@ts-ignore
 					playerx.logSkill("zhenzamrfz", target);
 				}
@@ -237,3 +237,15 @@ translate({
 });
 
 characterIntro("char_4080_lin", "林，本名林雨霞，龙门人。本职工作不明，本人提供的档案资料信息十分有限，同样存疑。</br>于“玉门事件”后，主动提出与罗德岛正式建立合作。为罗德岛在龙门收治感染者的工作提供帮助。");
+
+dynamicTranslate("zhenzamrfz", function (player) {
+	return (
+		"①锁定技，游戏开始时你获得一个‘壁’标记；当有角色获得‘壁’标记时，若其没有护甲，其获得一点护甲；每轮各限两次，每名角色的准备阶段(<span class=thundertext>已发动:" +
+		(player.hasMark("zhenzamrfz_time1") ? player.countMark("zhenzamrfz_time1") : 0) +
+		"次</span>)或有其他角色因你造成的伤害而进入濒死状态时(<span class=thundertext>已发动:" +
+		(player.hasMark("zhenzamrfz_time2") ? player.countMark("zhenzamrfz_time2") : 0) +
+		"次</span>)，若你没有‘壁’标记，你获得一个‘壁’标记。②有‘壁’标记的角色受到伤害后，若其因此伤害触发过护甲且没有护甲，其可以随机获得攻击范围内一名其他角色的" +
+		(player.storage.liuliemrfz ? "两" : "一") +
+		"张牌并对其造成一点伤害。"
+	);
+});

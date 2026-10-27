@@ -216,6 +216,16 @@ line({ "#lushimrfz1": "……", "#lushimrfz2": "……" }, false);      // 批�
 - 同一键重复注册会直接抛错（而不是静默覆盖）：一个音频地址只能对应一条台词，要先 `audio: 2` 这类多段配音，请用带编号的键且 `autoPrefix` 传 `false`。
 - ⚠️ **按技能名写就够了，不要手写 `ext:` 键**：音频模块的 `applySkillAudio` 会在 `arenaReady` 把 `audio` 改写成 `ext:WhichWay/audio/{语言}:{N}`，此时引擎查台词的地址变成 `#ext:WhichWay/audio/{语言}/{技能名}{序号}`。`mirrorSkillLines()` 会自动把 `#技能名N` 镜像到该地址（阵亡同理：`#角色名:die` → `#ext:WhichWay/audio/{语言}/die/{角色名}:die`），并且**只补不覆盖**，所以显式写地址键仍然优先。若哪天改了地址格式，镜像逻辑要跟着改，否则 `textList` 会静默变空（语音照常能播，很难发现）。
 - 显示端：驶舰之向武将卡的技能面板（`src/characterCard/panels/SkillPanel.vue`）里，技能名旁的「台词」按钮（`line.png`）开合该技能的台词区，读 `get.Audio.skill(...).audioList`——**一个音频文件一条**（`text` 可以为空），所以「有声无词」的干员照样能逐条试听，文本位显示「无台词」。每条台词前的播放键走 `whichWayAudio.playSkillLineAudio(skill, name, index)`，按序号精确取 `fileList[index]`；技能名旁原来的试听键走 `playSkillAudio`（随机一条）。两者共用同一个试听通道：再点一次即停，播放时图标切 `Pause.png`。
+  - **派生技能（`derivation`）也有自己的一套**：每个衍生条目在 `d.id` 上有独立的 `audioEntries` / `showLines`，试听与台词都绑 `d.id`（**不能借用父技能的 `item.id`**），台词渲染在该 `derivationItem` **内部**（`.derivationLineBox`）。
+  - **区块顺序**：父技能台词区（`.lineBox`）→ 衍生技能区 → 衍生卡牌区。台词区跟着技能名走，必须排在衍生区**之前**（衍生区可能很长，压在下面要滚很久）。
+  - 样式注意：父技能的 `.lineBtn` 用的是 `.skillWrapper > .headWrapper > .lineBtn` 直接子选择器，**套不到衍生条目里**，所以衍生条目的开关要单独写 `.derivationItem > .headWrapper > .lineBtnSmall`（含 `:hover` 与 `.lineBtnOpened`）。
+  - **派生技能不走额外的音频初始化**：`derivation` 里可能是**无名杀自带技能或其他扩展的技能**（如 `char_1012_skadi2` 的 `derivation: ["duwu"]` 是黩武），也可能只是展示用途、根本不发音。所以：
+    - 本扩展的派生技 → 它的 `audio` 会随 [`initAllAudio` 的技能清单] 正常初始化；
+    - 本体 / 其他扩展的派生技 → 直接走引擎自带的 `get.Audio.skill(...)`，**不做任何兜底**；
+    - 初始化不正确就是不正确 —— **不要加降级、不要加静默跳过**。兜底会把 bug 藏起来，排查成本远高于暴露出来。
+- ⚠️ **`derivation` 与 `whichway.affiliates` 是两个概念，不要混**：
+  - `affiliates`：觉醒/变身等**实际会加入技能栏**的技能，要参与 `char.skills` 那套逻辑（含 `audioname` 登记、共享技能命名），由 `initAllAudio` 里的 `getAffiliates()` 收集；
+  - `derivation`：只是**武将卡上展示的衍生技能**，**不要**塞进 `getAffiliates` —— 那里会把收集到的技能当成角色技能处理，而 `derivation` 里混着本体技能。
 - **在线配音的台词兜底**：走 PRTS 在线配音的干员不需要作者写 `line()`——`applySkillAudio` 末尾会调 `fillOnlineLines()`，从 `charword_table`（`json/arknight/charword_table.json`，精简后进 `json/cache/arknight.json` 的 `charword_table.voiceLines`）按「配音标题」取对应文本，写到 `#ext:WhichWay/audio/{语言}/{技能名}{序号}`。要点：
   - **只补空位、绝不覆盖**，作者手写 / `line()` 的台词永远优先，且幂等；
   - 条件是「该干员有明日方舟 uid 且语言不是 `CUSTOM`」——不依赖本地文件是否存在，因为在线配音下载成本地 mp3 后 `exists` 会变 true，若按它判断会导致下次启动台词全丢（`lib.translate` 不落盘）；
@@ -268,6 +278,15 @@ skill({
   罗小黑 `#2` 只有 CN/JP（基础版有 KR/EN）。这类皮肤在缺语言时会 404，属于游戏素材本身的缺失。
 - 皮肤指定的语音同样参与在线配音下载与台词兜底（`getMissingAudioList` / `fillOnlineLines`
   都按条目取对应的语音库）。
+- ⚠️ **`skinVoice` 依赖 `skin_table.json`，而它在 `loadSkipFiles` 里**（3.8MB 不能常驻）。
+  `loadArknightData` 会**单独补读一次**、抽完映射立即 `delete raw.skin_table`。
+  漏掉这一步的后果是 `raw.skin_table` 恒为 `undefined` ⇒ 映射恒为空 ⇒ 对象形态整体失效
+  （历史 bug：曾表现为某个技能进游戏后 `audio` 仍是原始对象、完全没声音）。
+- ⛔ **查不到 voiceId 时直接抛错，不要兜底**：这是作者写错皮肤 id、或 `skin_table` 没加载，
+  属于必须暴露的配置错误。静默降级 / 丢弃只会让「配音不响」变成查不出原因的悬案。
+- 台词里的 `{@nickname}`（游戏原文的「玩家昵称」占位符）由 `normalizeVoiceText()` 在
+  `slimVoiceLines` 阶段统一替换：`Dr.{@nickname}` → `博士`、其余 `{@nickname}` → `博士`。
+  两条替换顺序不能反（先处理带 `Dr.` 的，否则会留下「Dr.博士」）。原始数据共 181 条含该占位符。
 
 `WhichWayPackManager`（`src/packs/index.ts`）用 `import.meta.glob("./character/*mrfz.{ts,js}")` 与 `import.meta.glob("./character/*mrfz/index.{ts,js}")`（`card/` 同构）在**构建期**确定模块清单：新增干员/卡牌仍然是「丢文件即可」，无需改任何代码，但必须重新 `build`。这些模块在 `packs/index.ts` 被 import 时（即 `packs(新)` 阶段）全部求值，并被 rollup 合并进**单个 chunk**（`chunks/packs-*.js`），因此启动期不再有 267 次模块请求。
 

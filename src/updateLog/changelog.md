@@ -1,6 +1,59 @@
 # 瑰丽理想 WhichWay 更新日志
 
+## 2026-10-27
+
+### 修复：驶舰之向武将卡的「附属技能」没有台词与试听
+
+- **现象**：武将卡里主技能的台词/试听都正常，但**衍生技能（`derivation`）那一栏点不出台词、试听也没声音**。
+  连「有没有台词」都判断不了 —— 因为面板压根没给衍生技能建台词条目。
+- **修复（仅面板层）**：
+  - `SkillPanel.vue` 的衍生条目新增独立的 `audioEntries` / `showLines`，试听与台词全部绑 `d.id`
+    （此前借用的是**父技能**的 `item.id`）；台词渲染在**该 `derivationItem` 内部**（`.derivationLineBox`），
+    不再混进父技能。
+  - **区块顺序**：父技能台词区（`.lineBox`）→ 衍生技能区 → 衍生卡牌区。台词区必须排在衍生区**之前**
+    （衍生区可能很长，压在下面要滚很久）。
+  - 样式：父技能的 `.lineBtn` 是 `.skillWrapper > .headWrapper > .lineBtn` 直接子选择器，套不到衍生条目里，
+    故新增 `.derivationItem > .headWrapper > .lineBtnSmall`（含 hover / opened）。
+  - 台词来源按技能归属区分：**本扩展的派生技**走本扩展已初始化好的 `audio`；**无名杀自带 / 其他扩展的派生技**
+    直接走引擎自带的 `get.Audio.skill(...)`。**不做兜底**——初始化不正确就让它不正确，兜底只会把 bug 藏起来。
+- ⚠️ **`derivation` 与 `whichway.affiliates` 是两个概念**（不要合并）：
+  - `affiliates`：觉醒/变身等**实际会加入技能栏**的技能，参与 `char.skills` 那套逻辑
+    （含 `audioname` 登记、共享技能命名），由 `initAllAudio` 里的 `getAffiliates()` 收集；
+  - `derivation`：只是**武将卡上展示的衍生技能**，**不要**塞进 `getAffiliates` ——
+    那里会把收集到的技能当成角色技能处理，而 `derivation` 里混着本体技能
+    （如 `char_1012_skadi2` 的 `derivation: ["duwu"]` 是黩武）。
+- **校验**：eslint 0 报错、构建通过；源码结构断言 20 项（派生计 audioEntries / 台词绑定 / 区块顺序 / 样式）。
+  **未实机验证**。
+
 ## 2026-10-26
+
+### 修复：皮肤语音整体失效（`skin_table` 被跳过）+ 台词里的昵称占位符
+
+- **皮肤语音失效的根因**：`skin_table.json` 在 `loadSkipFiles` 里（3.8MB，不能常驻），所以
+  `loadArknightData` 的批量读取**从来不会读它**，`raw.skin_table` 恒为 `undefined` ⇒
+  `slimSkinVoice(undefined)` 返回空映射 ⇒ `getVoiceIdBySkinId()` 永远查不到 ⇒
+  `expandAudioEntries` 把整组当无效丢掉 ⇒ `applySkillAudio` 提前 return ⇒
+  `lib.skill[x].audio` 保持**原始对象**，引擎不认识对象形态，技能静音。
+  典型症状：`char_113_cqbw` 的 `fukemrfz` 进游戏后 `audio` 仍是
+  `{ "char_113_cqbw@epoque#7": [...] }`。
+  - 修复：`loadArknightData` 在裁剪阶段**单独补读** `skin_table.json`，抽完映射立即
+    `delete raw.skin_table` 释放整表；读取失败只 warn，不阻断数据加载。
+  - 加固：`expandAudioEntries` 查不到 voiceId 时**直接抛错**，不再静默降级/丢弃。
+    这是作者写错皮肤 id、或 `skin_table` 没加载，属于必须暴露的配置错误。
+  - `slimCacheSchema` 4 → 5（`skinVoice` 与台词文本都会有变化，老缓存必须失效）。
+- **台词昵称占位符**：游戏原文用 `{@nickname}` 表示玩家昵称，`Dr.{@nickname}` 即「Dr.博士」。
+  无名杀没有昵称概念，原样保留会显示成大括号。新增 `normalizeVoiceText()` 在
+  `slimVoiceLines` 阶段统一替换：`Dr.{@nickname}` → `博士`、其余 `{@nickname}` → `博士`。
+  **两条替换顺序不能反**（先处理带 `Dr.` 的，否则会留下「Dr.博士」）。原始数据共 **181 条**
+  含该占位符（其中 48 条是独立的 `Dr.{@nickname}`）。
+  ```
+  原文：预备行动组A6的组长，梓兰，前来报到。您就是Dr.{@nickname}吗……
+  改后：预备行动组A6的组长，梓兰，前来报到。您就是博士吗……
+  ```
+- **校验**：eslint 0 报错、构建通过。源码切片测试：非法皮肤 id 会抛错（而不是静默降级）；
+  `loadArknightData` 补读后 `skinVoice` 22 条且 `fukemrfz` 4 条全部
+  指向恍惚语音库（7 项）；昵称替换 181 条零残留、无「Dr.博士」（10 项）；代码结构断言（11 项）。
+  **未实机验证**。
 
 ### 新增：技能 `audio` 支持对象形态，可指定「哪个皮肤下的哪些语音条目」
 

@@ -1,6 +1,6 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { skillCustomFunc } from "../../nonameEx/custom/skill.ts";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../hooks.ts";
 
 const tmpSave = window.whichWaySave.tmpSave;
 
@@ -443,3 +443,12 @@ translate({
 characterTitle("char_1044_hsgma2", "<font color = #a52a2a>斩金执义</font>");
 
 characterIntro("char_1044_hsgma2", "星熊，现任龙门近卫局特别督察组组长。仍作为重装干员协助罗德岛行动，主要职能维持不变。<br>顺带一提，在星熊向博士讲述了她早年在东国度过的时光，并默许博士将其中一部分转述给我们之后，我们调整了她基础档案中战斗经验的时间。");
+
+dynamicTranslate({
+	wozhimrfz(player) {
+		return get.skillInfoTranslation(player.storage.zhanyemrfz ? "wozhimrfz_rewrite" : "wozhimrfz");
+	},
+	guishimrfz(player) {
+		return get.skillInfoTranslation(player.storage.zhanyemrfz ? "guishimrfz_rewrite" : "guishimrfz");
+	},
+});

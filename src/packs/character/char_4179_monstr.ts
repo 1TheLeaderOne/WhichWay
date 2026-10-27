@@ -27,8 +27,8 @@ skill({
 			async content(event, trigger, player) {
 				const discardPlie = Array.from(ui.discardPile.childNodes);
 				const cards = player.getCards("h");
-				await player.lose(cards);
-				await player.gain(discardPlie, "gain2");
+				await player.lose({ cards });
+				await player.gain({ cards: discardPlie, animate: "gain2" });
 
 				player.addTempSkill("ronghuimrfz_lose", { player: "phaseUseEnd" });
 				player
@@ -45,8 +45,8 @@ skill({
 				player.when({ player: "phaseDiscardBegin" }).step(async (event, trigger, player) => {
 					const discardPlie = Array.from(ui.discardPile.childNodes);
 					const cards = player.getCards("h");
-					await player.lose(cards);
-					await player.gain(discardPlie, "gain2");
+					await player.lose({ cards });
+					await player.gain({ cards: discardPlie, animate: "gain2" });
 					//@ts-ignore
 					player.logSkill("ronghuimrfz");
 				});

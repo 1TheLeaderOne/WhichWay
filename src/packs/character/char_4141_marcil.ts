@@ -160,8 +160,7 @@ skill({
 					event.result.bool = false;
 					return;
 				}
-				event.result = await player
-					.chooseControl("选项一", "选项二", "cancel2")
+				event.result = await player.chooseControl({ controls: ["选项一", "选项二", "cancel2"] })
 					.set("choiceList", [`摸${Math.min(player.getCardUsable("sha"), player.maxHp)}张牌`, `使用【杀】的次数+1`])
 					.set("ai", () => {
 						const player = get.player();

@@ -62,7 +62,7 @@ skill({
 						// @ts-ignore
 						async content(event, trigger, player) {
 							const bool = await player
-								.chooseToDiscard(true, "弃置两种不同颜色的牌，获得“固国”", 2)
+								.chooseToDiscard({ forced: true, prompt: "弃置两种不同颜色的牌，获得“固国”", selectCard: 2 })
 								.set("ai", card => 8 - get.value(card))
 								.set(
 									"filterCard",
@@ -95,7 +95,7 @@ skill({
 						// @ts-ignore
 						async content(event, trigger, player) {
 							const bool = await player
-								.chooseToDiscard(true, "弃置三种不同类型的牌，获得“兴军”", 3)
+								.chooseToDiscard({ forced: true, prompt: "弃置三种不同类型的牌，获得“兴军”", selectCard: 3 })
 								.set("ai", card => 8 - get.value(card))
 								.set(
 									"filterCard",
@@ -128,7 +128,7 @@ skill({
 						// @ts-ignore
 						async content(event, trigger, player) {
 							const bool = await player
-								.chooseToDiscard(true, "弃置四种不同花色的牌，获得“大同”", 4)
+								.chooseToDiscard({ forced: true, prompt: "弃置四种不同花色的牌，获得“大同”", selectCard: 4 })
 								.set("ai", card => 8 - get.value(card))
 								.set(
 									"filterCard",

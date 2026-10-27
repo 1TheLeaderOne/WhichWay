@@ -97,7 +97,7 @@ skill({
 			async content(event, trigger, player) {
 				let [card] = event.cost_data.cards;
 				player.recast(card);
-				player.chooseUseTarget(card, true);
+				player.chooseUseTarget({ card, forced: true });
 			},
 		},
 	"wuweimrfz": {

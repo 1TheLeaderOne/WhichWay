@@ -354,7 +354,7 @@ skill({
 							if (current.hasSkill("yingshaomrfz_ban")) {
 								current.removeSkill("yingshaomrfz_ban");
 								if (current.hasSkill("yingshaomrfz_ban2")) current.removeSkill("yingshaomrfz_ban2");
-								current.damage(player);
+								current.damage({ source: player });
 							}
 							return false;
 						});

@@ -29,8 +29,7 @@ skill({
 			frequent: true,
 			async content(event, trigger, player) {
 				var list = Array.from({ length: lib.phaseName.length }, (_, index) => (index + 1).toString());
-				const { index } = await player
-					.chooseControl(list)
+				const { index } = await player.chooseControl({ controls: list })
 					.set("prompt", "【万顷】:请选择你要跳过的阶段数")
 					.set("ai", function () {
 						var player = _status.event.player;
@@ -56,10 +55,11 @@ skill({
 					.when("phaseEnd")
 					.then(async (event, trigger, player) => {
 						const result = await player
-							.chooseTarget(true, `【应风】:请选择至多${get.cnNumber(index)}名角色，令其摸${get.cnNumber(Math.floor(index / 2))}张牌`, [
-								1,
-								index,
-							])
+							.chooseTarget({
+								forced: true,
+								prompt: `【应风】:请选择至多${get.cnNumber(index)}名角色，令其摸${get.cnNumber(Math.floor(index / 2))}张牌`,
+								selectTarget: [1, index],
+							})
 							.set("ai", target => get.attitude(player, target) > 0)
 							.forResult();
 						if (result.targets) {
@@ -71,8 +71,7 @@ skill({
 									player.removeSkill(list[0]);
 									event.finish();
 								} else {
-									const { control } = await player
-										.chooseControl(list)
+									const { control } = await player.chooseControl({ controls: list })
 										.set("prompt", "【应风】:请选择失去一个技能")
 										.set("ai", function () {
 											var list = _status.event.list;

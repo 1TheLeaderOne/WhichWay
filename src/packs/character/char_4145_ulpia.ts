@@ -1,5 +1,5 @@
 import { lib, game, ui, get, ai, _status } from "noname";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../hooks.ts";
 
 character("char_4145_ulpia", { pack: "legendSJZX", sex: "male", group: "a_groupmrfz", hp: 4, skills: ["guqianmrfz", "piweimrfz", "tongmaimrfz"], clans: ["深海猎人"] });
 
@@ -64,10 +64,10 @@ skill({
 							.forResult();
 			player.chooseUseTarget(
 				// {
-				// 	name: "chuqibuyi",
-				// 	suit: suit,
-				// 	piweimrfz_chuqi: true,
-				// },
+					// 	name: "chuqibuyi",
+					// 	suit: suit,
+					// 	piweimrfz_chuqi: true,
+				// 	},
 				// typeof control === "string" ? player.getCards("h", { color: control }) : control
 				{
 					card: get.autoViewAs({
@@ -267,6 +267,15 @@ translate({
 	guqianmrfz_info: "每回合限一次，当其他角色有牌因弃置而进入弃牌堆后，你可以摸一张牌，然后若你手牌中没有相同花色的牌，你重置此技能，反之，你将武将牌翻面。",
 	tongmaimrfz: "同脉",
 	tongmaimrfz_info: "宗族技，每轮每项限一次，当你于回合外造成伤害后，你可以令一名深海猎人角色回复一点体力或复原武将牌。",
+});
+
+dynamicTranslate("tongmaimrfz", function (player) {
+	let str = `你可以令一名深海猎人的角色回复一点体力或复原武将牌`,
+		storage = player.storage.tongmaimrfz;
+	if (!storage) storage = [];
+	if (storage.includes(0)) str = str.replace("回复一点体力", "<font color=#696969>回复一点体力</font>");
+	if (storage.includes(1)) str = str.replace("复原武将牌", "<font color=#696969>复原武将牌</font>");
+	return `宗族技，每轮每项限一次，当你于回合外造成伤害后，${str}。`;
 });
 
 characterTitle("char_4145_ulpia", "<font color=#00868B>阴影中的求路人</font>");

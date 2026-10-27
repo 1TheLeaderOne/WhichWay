@@ -148,8 +148,7 @@ skill({
 				player.storage.tangongmrfz.add(trigger.name);
 
 				let autoMode = false;
-				const { bool } = await player
-					.chooseBool(`是否让系统帮你组方阵？`)
+				const { bool } = await player.chooseBool({ prompt: `是否让系统帮你组方阵？` })
 					.set("ai", () => true)
 					.forResult();
 				if (bool) autoMode = true;
@@ -258,8 +257,7 @@ skill({
 
 				if (!hasDuplicates) {
 					const isDraw = trigger.name === "draw" ? true : false;
-					const { control } = await player
-						.chooseControl(`减半`, `翻倍`)
+					const { control } = await player.chooseControl({ controls: [`减半`, `翻倍`] })
 						.set("prompt", `令${trigger.name === "draw" ? "摸牌数" : "伤害值"}(${trigger.num})翻倍或减半`)
 						.set("ai", () => {
 							return get.event().isDraw ? "翻倍" : "减半";

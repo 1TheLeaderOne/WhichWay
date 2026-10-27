@@ -29,9 +29,9 @@ skill({
 				return player === event.target || event.getParent().triggeredTargets3.length === 1;
 			},
 			async content(event, trigger, player) {
-				await player.gain(lib.card.ying.getYing(1), "gain2");
+				await player.gain({ cards: lib.card.ying.getYing(1), animate: "gain2" });
 				let needShown = player.getCards("h", card => get.name(card) === "ying" && !get.is.shownCard(card));
-				if (needShown.length > 0) player.addShownCards(needShown, "visible_xiuyuanmrfz");
+				if (needShown.length > 0) player.addShownCards({ cards: needShown, gaintag: ["visible_xiuyuanmrfz"] });
 			},
 			mod: {
 				ignoredHandcard: function (card, player) {
@@ -60,7 +60,7 @@ skill({
 				};
 				if (player.countCards("h", "ying") > 0) {
 					const { cards } = await player
-						.chooseCard("h")
+						.chooseCard({ position: "h" })
 						.set("prompt", get.prompt("zhengningmrfz"))
 						.set(
 							"prompt2",
@@ -120,7 +120,7 @@ skill({
 				const { discards, links, num } = event.cost_data;
 
 				if (num > 0) {
-					await player.discard(discards);
+					await player.discard({ cards: discards });
 					await player.draw(num);
 					for (let i of links) await i.link(true);
 				}
@@ -136,7 +136,7 @@ skill({
 					.set("filterCard", card => get.suit(card) === suit)
 					.forResult();
 				if (bool === true) {
-					await target.damage("thunder", player).set("zhengningmrfz", true);
+					await target.damage({ nature: "thunder", source: player }).set("zhengningmrfz", true);
 					if (
 						player.hasHistory("sourceDamage", evt => {
 							//@ts-ignore

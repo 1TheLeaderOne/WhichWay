@@ -70,7 +70,7 @@ skill({
 
 					if (target.isAlive()) {
 						await player
-							.chooseUseTarget(card, true, "nodistance")
+							.chooseUseTarget({ card, forced: true, nodistance: true })
 							.set("filterTarget", (card, player, target) => {
 								let evt = _status.event;
 								//@ts-ignore
@@ -97,7 +97,7 @@ skill({
 
 			// step 3
 			if (result?.links?.length) {
-				await player.gain(result.links, "gain2");
+				await player.gain({ cards: result.links, animate: "gain2" });
 			}
 		},
 		ai: {

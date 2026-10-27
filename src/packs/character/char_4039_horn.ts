@@ -1,5 +1,5 @@
 import { lib, game, ui, get, ai, _status } from "noname";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../hooks.ts";
 
 character("char_4039_horn", { pack: "legendSJZX", sex: "female", group: "weimrfz", hp: 4, skills: ["xuezhanmrfz", "dunpaomrfz", "biaohaomrfz"] });
 
@@ -231,3 +231,22 @@ translate({
 characterTitle("char_4039_horn", "<font color=#ed7e78>维多利亚的白狼</font>");
 
 characterIntro("char_4039_horn", "号角，毕业于维多利亚皇家近卫学校，现为维多利亚风暴突击队第二分队指挥官。于伦蒂尼姆事件中与罗德岛协同作战，经精英干员Misery介绍，与罗德岛签订战略合作条款。");
+
+dynamicTranslate({
+	xuezhanmrfz(player) {
+		if (!player.storage.xuezhanmrfz) return "锁定技，当你首次即将死亡时，取消之，然后你将体力值和体力上限调整至2，并摸4张牌。";
+		return "<font color=#696969>锁定技，当你首次即将死亡时，取消之，然后你将体力值和体力上限调整至2，并摸4张牌。</font>";
+	},
+	dunpaomrfz(player) {
+		if (!player.storage.dunpaomrfz)
+			return "锁定技，你的攻击范围+5，你不能指定与你距离为1的角色为目标；当你使用【杀】对距离你大于1的角色造成伤害时，该角色进行判断，若不为红色，此伤害+1；回合开始时，你可以修改此技能。";
+		return "锁定技，你的手牌上限+2。";
+	},
+	biaohaomrfz(player) {
+		return (
+			"蓄力技（<font color=#e00500>" +
+			player.countMark("charge") +
+			"</font>/4），出牌阶段限两次，你可以弃置一张带有伤害类标签的牌，然后你增加一点蓄力值；你可以按照下列规则消耗蓄力值：①：消耗1点蓄力值，视为使用一张【杀】；②：出牌阶段，消耗4点蓄力值，视为使用三张【杀】和一张【万箭齐发】，然后失去3点体力。"
+		);
+	},
+});

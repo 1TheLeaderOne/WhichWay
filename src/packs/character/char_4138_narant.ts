@@ -51,7 +51,7 @@ skill({
 								.set("selectCard", num)
 								.forResult();
 				if (!cards) return;
-				target.addShownCards(cards, "visible_eyanmrfz");
+				target.addShownCards({ cards, gaintag: ["visible_eyanmrfz"] });
 			},
 		},
 	"shafeimrfz": {
@@ -66,7 +66,7 @@ skill({
 			},
 			async content(event, trigger, player) {
 				const cards = trigger.player.getCards("h", card => get.is.shownCard(card));
-				player.gain(cards, "gain2");
+				player.gain({ cards, animate: "gain2" });
 			},
 		},
 });

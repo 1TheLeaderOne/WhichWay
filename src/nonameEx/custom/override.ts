@@ -1,78 +1,79 @@
 import { lib, game, ui, get, ai, _status, Game, Get } from "noname";
 import { whichWayAPIOverride } from "../../override/index.js";
 
-/**
- * 修改酒
- * 用于技能：调酒
- */
-whichWayAPIOverride.overrideAPI("lib.skill.jiu", {
-	trigger: {
-		player: "useCard1",
-	},
-	filter: function (event, player) {
-		if (player.hasSkill("tiaojiumrfz")) {
-			return event.card && (get.type(event.card) == "trick" || get.type(event.card) == "basic") && event.card.name != "jiu";
-		}
-		return event.card && event.card.name == "sha";
-	},
-	forced: true,
-	charlotte: true,
-	firstDo: true,
-	content: async function (event, trigger, player) {
-		/**@ts-ignore */
-		if (!player.hasSkill("tiaojiumrfz")) {
-			/**@ts-ignore */
-			if (!trigger.baseDamage) trigger.baseDamage = 1;
-			/**@ts-ignore */
-			trigger.baseDamage += player.storage.jiu;
-		} else {
-			/**@ts-ignore */
-			trigger.effectCount += player.storage.jiu;
-		}
-		/**@ts-ignore */
-		trigger.jiu = true;
-		/**@ts-ignore */
-		trigger.jiu_add = player.storage.jiu;
-		/**@ts-ignore */
-		game.addVideo("jiuNode", player, false);
-		/**@ts-ignore */
-		game.broadcastAll(function (player) {
-			player.removeSkill("jiu");
-			/**@ts-ignore */
-		}, player);
-	},
-	temp: true,
-	vanish: true,
-	silent: true,
-	popup: false,
-	nopop: true,
-	onremove: function (player) {
-		if (player.node.jiu) {
-			player.node.jiu.delete();
-			player.node.jiu2.delete();
-			delete player.node.jiu;
-			delete player.node.jiu2;
-		}
-		delete player.storage.jiu;
-	},
-	ai: {
-		damageBonus: true,
-		skillTagFilter: function (player, tag, arg) {
-			if (tag === "damageBonus") return arg && arg.card && arg.card.name === "sha" && !player.hasSkill("tiaojiumrfz");
-		},
-	},
-	group: "jiu2",
-} as CardInfo);
-whichWayAPIOverride.overrideAPI("lib.skill.jiu2.filter", function (event, player) {
-	if (player.hasSkillTag("jiuSustain", null, event.name)) return false;
-	if (event.name == "useCard") {
-		if (player.hasSkill("tiaojiumrfz")) {
-			return event.card && (get.type(event.card) == "trick" || get.type(event.card) == "basic") && event.card.name != "jiu";
-		}
-		return event.card && event.card.name == "sha";
-	}
-	return true;
-});
+// 已废弃
+// /**
+//  * 修改酒
+//  * 用于技能：调酒
+//  */
+// whichWayAPIOverride.overrideAPI("lib.skill.jiu", {
+// 	trigger: {
+// 		player: "useCard1",
+// 	},
+// 	filter: function (event, player) {
+// 		if (player.hasSkill("tiaojiumrfz")) {
+// 			return event.card && (get.type(event.card) == "trick" || get.type(event.card) == "basic") && event.card.name != "jiu";
+// 		}
+// 		return event.card && event.card.name == "sha";
+// 	},
+// 	forced: true,
+// 	charlotte: true,
+// 	firstDo: true,
+// 	content: async function (event, trigger, player) {
+// 		/**@ts-ignore */
+// 		if (!player.hasSkill("tiaojiumrfz")) {
+// 			/**@ts-ignore */
+// 			if (!trigger.baseDamage) trigger.baseDamage = 1;
+// 			/**@ts-ignore */
+// 			trigger.baseDamage += player.storage.jiu;
+// 		} else {
+// 			/**@ts-ignore */
+// 			trigger.effectCount += player.storage.jiu;
+// 		}
+// 		/**@ts-ignore */
+// 		trigger.jiu = true;
+// 		/**@ts-ignore */
+// 		trigger.jiu_add = player.storage.jiu;
+// 		/**@ts-ignore */
+// 		game.addVideo("jiuNode", player, false);
+// 		/**@ts-ignore */
+// 		game.broadcastAll(function (player) {
+// 			player.removeSkill("jiu");
+// 			/**@ts-ignore */
+// 		}, player);
+// 	},
+// 	temp: true,
+// 	vanish: true,
+// 	silent: true,
+// 	popup: false,
+// 	nopop: true,
+// 	onremove: function (player) {
+// 		if (player.node.jiu) {
+// 			player.node.jiu.delete();
+// 			player.node.jiu2.delete();
+// 			delete player.node.jiu;
+// 			delete player.node.jiu2;
+// 		}
+// 		delete player.storage.jiu;
+// 	},
+// 	ai: {
+// 		damageBonus: true,
+// 		skillTagFilter: function (player, tag, arg) {
+// 			if (tag === "damageBonus") return arg && arg.card && arg.card.name === "sha" && !player.hasSkill("tiaojiumrfz");
+// 		},
+// 	},
+// 	group: "jiu2",
+// } as CardInfo);
+// whichWayAPIOverride.overrideAPI("lib.skill.jiu2.filter", function (event, player) {
+// 	if (player.hasSkillTag("jiuSustain", null, event.name)) return false;
+// 	if (event.name == "useCard") {
+// 		if (player.hasSkill("tiaojiumrfz")) {
+// 			return event.card && (get.type(event.card) == "trick" || get.type(event.card) == "basic") && event.card.name != "jiu";
+// 		}
+// 		return event.card && event.card.name == "sha";
+// 	}
+// 	return true;
+// });
 
 // 将兵临城下模式的【兵临城下】添加到lib.card中
 if (!lib.card.binglinchengxia) {

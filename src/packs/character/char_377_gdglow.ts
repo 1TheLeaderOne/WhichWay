@@ -15,7 +15,7 @@ skill({
 				return "锁定技，当你成为其他角色使用的黑色牌的目标时,你弃置一名其他角色一张牌。";
 			},
 		},
-		audio: "dianyongmrfz",
+		audio: ["作战中4","作战中1"],
 		trigger: {
 			target: "useCardToTargeted",
 		},
@@ -56,15 +56,15 @@ skill({
 			}
 			if (result.bool && result.targets) {
 				if (player.storage.dianshanmrfz == true) {
-					result.targets[0].damage("thunder");
+					result.targets[0].damage({ nature: "thunder" });
 				} else {
-					player.discardPlayerCard(result.targets[0], 1, "he", true);
+					player.discardPlayerCard({ target: result.targets[0], selectButton: 1, position: "he", forced: true });
 				}
 			}
 		},
 	},
 	shidemrfz: {
-		audio: "fuxiemrfz",
+		audio: ["3星结束行动","非3星结束行动"],
 		direct: true,
 		trigger: {
 			player: ["useCard", "respond", "loseAfter"],
@@ -110,3 +110,5 @@ translate({
 });
 
 characterIntro("char_377_gdglow", "澄闪，罗德岛后勤干员，主要工作地点为罗德岛理发室，一般情况下不作为外勤干员派遣。使用特殊形制的法杖，操控“浮标”对敌人进行打击。");
+
+characterTitle("char_377_gdglow","理发师之梦");

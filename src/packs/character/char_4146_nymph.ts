@@ -25,7 +25,7 @@ skill({
 			async content(event, trigger, player) {
 				const target = event.targets[0];
 				const { cards } = await player
-					.choosePlayerCard("h", target)
+					.choosePlayerCard({ position: "h", target })
 					.set("prompt", `请选择明置${get.translation(target)}一张手牌`)
 					.set("visible", true)
 					.set("filterButton", button => {
@@ -44,7 +44,7 @@ skill({
 					.set("target", target)
 					.forResult();
 				if (!cards) return;
-				await target.addShownCards(cards, "visible_xunxinmrfz");
+				await target.addShownCards({ cards, gaintag: ["visible_xunxinmrfz"] });
 
 				let showncards = [];
 				for (let char of game.players) {
@@ -130,8 +130,8 @@ skill({
 			async content(event, trigger, player) {
 				const target = trigger.player;
 				for (let card of target.getCards("h")) {
-					if (get.is.shownCard(card)) target.hideShownCards(card);
-					else target.addShownCards(card, "visible_xunxinmrfz");
+					if (get.is.shownCard(card)) target.hideShownCards({ cards: [card] });
+					else target.addShownCards({ cards: [card], gaintag: ["visible_xunxinmrfz"] });
 				}
 				let { promise, resolve } = Promise.withResolvers();
 				setTimeout(() => {
@@ -140,7 +140,7 @@ skill({
 				await promise;
 				if (target.countCards("h", card => !get.is.shownCard(card)) > 0) {
 					target
-						.chooseToDiscard(true, 2)
+						.chooseToDiscard({ forced: true, selectCard: 2 })
 						.set("prompt", `【溃心】:请弃置两张暗置的牌`)
 						.set("filterCard", card => !get.is.shownCard(card))
 						.set("ai", card => get.value({ name: card.name }));

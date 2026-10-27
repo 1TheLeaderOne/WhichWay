@@ -46,7 +46,7 @@ skill({
 				return player.hasUseTarget("tao");
 			},
 			async content(event, trigger, player) {
-				player.chooseUseTarget({ name: "tao" }, true);
+				player.chooseUseTarget({ card: { name: "tao" }, forced: true });
 			},
 		},
 });

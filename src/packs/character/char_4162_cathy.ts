@@ -40,7 +40,7 @@ skill({
 						var card = get.cardPile(function (card) {
 							return get.name(card) == "ksl_lulitongxinmrfz";
 						});
-						if (card) player.gain(card, "gain2", "log");
+						if (card) player.gain({ cards: [card], animate: "gain2" });
 						else player.draw();
 					},
 				},

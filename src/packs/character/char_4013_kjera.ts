@@ -171,8 +171,7 @@ skill({
 				return 8 - get.value(card);
 			},
 			async content(event, trigger, player) {
-				await player
-					.chooseUseTarget({ name: "huogong", xueweimrfz: true }, event.cards, event.targets)
+				await player.chooseUseTarget({ card: { name: "huogong", xueweimrfz: true }, cards: event.cards, targets: event.targets })
 					//@ts-ignore
 					.set("filterTarget", (card, player, target) => get.event().targetx.includes(target))
 					.set("selectTarget", event.targets.length)

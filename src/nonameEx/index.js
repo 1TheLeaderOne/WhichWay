@@ -10,6 +10,7 @@ import { skillCustomFunc } from "./custom/skill.ts";
 import { ArrayExt } from "./jsExt/ArrayExt.js";
 import { HTMLDivElementExt } from "./jsExt/HTMLDivElementExt.js";
 import { weinaData } from "./custom/weina.js";
+import { gameUtils } from "./custom/gameUtils.ts";
 // import { Player } from "@/library/element/index.js";
 // import { Card } from "@/library/element/index.js";
 
@@ -22,6 +23,7 @@ const nonameEx = window.whichWay.nonameEx;
  */
 nonameEx["customFuc"] = {
 	skill: skillCustomFunc,
+	gameUtils
 };
 
 /**

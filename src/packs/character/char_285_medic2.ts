@@ -1,81 +1,82 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
 
-character("char_285_medic2", { pack: "mediocreSJZX",
-			hp: 4,
-			group: "luomrfz",
-			sex: "female",
-			skills: ["linyuanmrfz"],
-		});
+character("char_285_medic2", { pack: "mediocreSJZX", hp: 4, group: "luomrfz", sex: "female", skills: ["linyuanmrfz"] });
 
 skill({
-	"linyuanmrfz": {
-			audio: ["行动开始", "作战中2", "作战中3", "作战中4"],
-			trigger: { global: "roundStart" },
-			filter(event, player) {
-				return ["wugu", "taoyuan", "yiyi"].some(name => player.hasUseTarget(name));
-			},
-			async cost(event, trigger, player) {
-				let names = ["wugu", "taoyuan", "yiyi"];
-				let result = {};
-				for (let name of names) {
-					let resultx = await player
-						.chooseTarget()
-						.set("prompt", get.prompt("linyuanmrfz"))
-						.set("prompt2", `请选择${get.translation(name)}的目标`)
-						.set("filterTarget", (card, player, target) => {
-							//@ts-ignore
-							return player.canUse(get.event().namex, target);
-						})
-						.set("selectTarget", [1, Infinity])
-						.set("namex", name)
-						.forResult();
-					if (resultx.bool === true) result[name] = resultx;
-				}
-				if (Object.keys(result).length > 0) {
-					event.result = {
-						bool: true,
-						cost_data: result,
-					};
-				}
-			},
-			async content(event, trigger, player) {
-				for (let name in event.cost_data) {
-					let info = event.cost_data[name];
-					await player
-						.chooseUseTarget({ name: name }, info.targets)
-						.set("forced", true)
-						.set("filterTarget", () => true);
-				}
-			},
-			group: "linyuanmrfz_yiyi",
-			subSkill: {
-				yiyi: {
-					charlotte: true,
-					silent: true,
-					trigger: { player: "chooseTargetBegin" },
-					filter(event, player) {
+	linyuanmrfz: {
+		audio: ["行动开始", "作战中2", "作战中3", "作战中4"],
+		trigger: { global: ["roundStart","roundEnd"] },
+		filter(event, player) {
+			return ["wugu", "taoyuan", "yiyi"].some(name => player.hasUseTarget(name));
+		},
+		async cost(event, trigger, player) {
+			let names = ["wugu", "taoyuan", "yiyi"];
+			let result = {};
+			for (let name of names) {
+				let resultx = await player
+					.chooseTarget()
+					.set("prompt", get.prompt("linyuanmrfz"))
+					.set("prompt2", `请选择${get.translation(name)}的目标`)
+					.set("filterTarget", (card, player, target) => {
 						//@ts-ignore
-						return event.getParent(2)?.name === "linyuanmrfz";
-					},
-					async content(event, trigger, player) {
-						trigger.result = {
-							bool: true,
-							confirm: "ok",
-							//@ts-ignore
-							targets: trigger.getParent().targets,
-						};
-						trigger.cancel();
-					},
+						return player.canUse(get.event().namex, target);
+					})
+					.set("selectTarget", [1, Infinity])
+					.set("namex", name)
+					.forResult();
+				if (resultx.bool === true) result[name] = resultx;
+			}
+			if (Object.keys(result).length > 0) {
+				event.result = {
+					bool: true,
+					cost_data: result,
+				};
+			}
+		},
+		async content(event, trigger, player) {
+			for (let name in event.cost_data) {
+				let info = event.cost_data[name];
+				await player
+					.chooseUseTarget({
+						//{ name: name }, info.targets
+						card: get.autoViewAs({ name }),
+						filterTarget(card, player, target) {
+							return (info.targets as Player[]).includes(target);
+						},
+					})
+					.set("forced", true)
+					.set("filterTarget", () => true);
+			}
+		},
+		group: "linyuanmrfz_yiyi",
+		subSkill: {
+			yiyi: {
+				charlotte: true,
+				silent: true,
+				trigger: { player: "chooseTargetBegin" },
+				filter(event, player) {
+					//@ts-ignore
+					return event.getParent(2)?.name === "linyuanmrfz";
+				},
+				async content(event, trigger, player) {
+					trigger.result = {
+						bool: true,
+						confirm: "ok",
+						//@ts-ignore
+						targets: trigger.getParent().targets,
+					};
+					trigger.cancel();
 				},
 			},
 		},
+	},
 });
 
 translate({
-	"char_285_medic2": "Lancet-2",
-	"linyuanmrfz": "临援",
-	"linyuanmrfz_info": "每轮开始时，你可以视为使用指定任意目标的【五谷丰登】、【桃园结义】和【以逸待劳】。",
+	char_285_medic2: "Lancet-2",
+	linyuanmrfz: "临援",
+	linyuanmrfz_info: "每轮开始或结束时，你可以视为使用指定任意目标的【五谷丰登】、【桃园结义】和【以逸待劳】。",
 });
 
 characterTitle("char_285_medic2", "<font color = #b7229c66>一喷起效</font>");

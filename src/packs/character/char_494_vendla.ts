@@ -5,7 +5,7 @@ character("char_494_vendla", { pack: "epicSJZX", sex: "female", group: "weimrfz"
 
 skill({
 	huabumrfz: {
-		audio: 2,
+		audio: ["作战中3","作战中4"],
 		global: "huabumrfz_eff",
 		subSkill: {
 			eff: {
@@ -33,15 +33,13 @@ skill({
 						// goto 2: skip target selection, proceed to draw
 					} else if (targets.length > 1) {
 						result = await player
-							.chooseTarget(
-							{
-								forced:true,
-								prompt:"选择【花卜】的目标",
+							.chooseTarget({
+								forced: true,
+								prompt: "选择【花卜】的目标",
 								filterTarget(card, player, target) {
 									return _status.event.list.includes(target);
 								},
-							}
-							)
+							})
 							.set("list", targets)
 							.set("ai", target => {
 								const aiPlayer = _status.event.player;
@@ -82,7 +80,7 @@ skill({
 
 						result = await (target as Player)
 							.chooseControl({
-								controls:["有", "没有"]
+								controls: ["有", "没有"],
 							})
 							.set("prompt", "【花卜】:" + get.translation(player) + "手牌中是否有与" + get.translation(card) + "(" + get.translation(get.type2(card)) + ")" + "类型相同的牌？")
 							.set("ai", () => {
@@ -108,7 +106,7 @@ skill({
 							await player.draw();
 							await target.draw();
 						} else {
-							await target.chooseToDiscard("【花卜】:请选择弃置一张牌", true);
+							await target.chooseToDiscard({ prompt: "【花卜】:请选择弃置一张牌", forced: true });
 						}
 					}
 				},
@@ -131,7 +129,7 @@ skill({
 		},
 	},
 	shixinmrfz: {
-		audio: 2,
+		audio: ["部署1","部署2"],
 		trigger: { player: "gainAfter" },
 		filter: function (event, player) {
 			if (!_status.currentPhase) return false;
@@ -162,3 +160,5 @@ translate({
 });
 
 characterIntro("char_494_vendla", "刺玫，本名玛格达尔·肖，布伦特伍德镇上血魔大君仪式的幸存者，小镇近乎大半被夷为废墟，她所珍爱的家传温室也被彻底摧毁。</br>受伦蒂尼姆市民自救军成员洛洛与费斯特的邀请，玛格达尔加入自救军，以后勤人员的身份提供帮助，后加入罗德岛。伦蒂尼姆事件结束之后，玛格达尔主动申请回到维多利亚重建家乡，并担任当地罗德岛办事处的联络员。");
+
+characterTitle("char_494_vendla","花匠");

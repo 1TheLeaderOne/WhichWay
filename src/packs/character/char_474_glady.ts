@@ -20,7 +20,7 @@ skill({
 				return false;
 			});
 		},
-		audio: "ronghangmrfz",
+		audio: ["部署1","部署2"],
 		trigger: { player: "useCard" },
 		filter(event, player) {
 			return (
@@ -139,7 +139,7 @@ skill({
 		},
 	},
 	newxunxiangmrfz: {
-		audio: "xunxiangmrfz",
+		audio: ["行动出发","行动开始"],
 		trigger: {
 			global: "phaseJieshuBegin",
 		},
@@ -160,8 +160,7 @@ skill({
 				const { links } =
 					new Set(discards.map(i => get.type(i))).size <= 1
 						? { links: discards }
-						: await player
-								.chooseCardButton(discards)
+						: await player.chooseCardButton({ cards: discards })
 								.set("prompt", `请选择不同类型的牌`)
 								.set("selectButton", [0, Infinity])
 								.set("filterButton", button => {
@@ -174,7 +173,7 @@ skill({
 									return get.value(button.link, _status.event.player);
 								})
 								.forResult();
-				if (links) player.gain(links, "gain2");
+				if (links) player.gain({ cards: links, animate: "gain2" });
 				let cards = [result.player, result.target];
 				cards = cards.filter(i => get.position(i) == "d");
 				if (
@@ -199,7 +198,7 @@ skill({
 		},
 	},
 	xueshuomrfz: {
-		audio: 2,
+		audio: ["作战中1","作战中3"],
 		trigger: {
 			source: "damageBegin3",
 		},

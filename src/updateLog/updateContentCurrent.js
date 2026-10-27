@@ -6,13 +6,22 @@ export const upDataContentCurrent = {
 	md: `
 ### 更新概要
 - **新增动皮**: （剧情）可露希尔 
-- **技能 / 武将调整**: 斯卡蒂、风笛、缪尔赛思、斗士塔露拉、钼铅、德克萨斯、W
-- **优化**: 新增整合运动势力的logo
-- **修复**：开启驶舰之向时，本体武将选择的动皮重开游戏后变回原皮的 bug
-- **修复**：千幻聆音里驶舰之向动皮对应的静皮显示两张（png / jpg 同名）的 bug
-- **修复**：干员原画、皮肤在部分场景下显示为空白（立绘/皮肤路径未解析）的 bug
+- **技能 / 武将调整**: 斯卡蒂、风笛、缪尔赛思、斗士塔露拉、钼铅、德克萨斯、W、伊芙利特、星熊、闪灵、因陀罗、天火、艾雅法拉、赫拉格、霜叶、塞雷娅、白金、莫斯提马、陨星、阿、梅尔、凯尔希、山、柏喙、Lancet-2、安洁莉娜、棘刺、泥岩、惊蛰、菲亚梅塔、老鲤、铃兰、迷迭香、瑕光、卡涅利安、水月、ASH、缄默德克萨斯、百炼嘉维尔
+
+- **修复**：与千幻聆音和十周年UI的兼容性问题
 - **修复**：海蒂【暗信】在特殊情况报错的 bug
 - **修复**：岳羽由加莉分包不正确的 bug
+- **修复**：霜叶仍然使用了\`StepContent\`的 bug
+- **修复**：深靛仍然使用了\`StepContent\`的 bug
+- **修复**：予愿安洁莉娜【飞笺】友方角色也会选择弃牌而不是摸牌的 bug
+- **修复**：\`Player.reUnseen\`仍然使用了\`StepContent\`的 bug
+- **修复**：晓歌使用【万全】之后不会刷新卡牌提示的 bug
+
+- **新增**：驶舰之向武将卡台词功能
+
+- **优化**：对扩展内所有武将进行了重构，删除了非剧情干员的所有本地配音，自本版本开始，不再提供本地配音，需要的请自行下载
+- **优化**：为扩展内所有武将新增了称号
+- **优化**: 新增整合运动势力的logo
 `,
 
 	/**
@@ -23,7 +32,7 @@ export const upDataContentCurrent = {
 		/** 本版新增的干员 */
 		add: [],
 		/** 本版调整过技能 / 数据的干员 */
-		adjust: ["char_263_skadi","char_222_bpipe","char_249_mlyss","doushitalulamrfz","char_4171_wulfen","char_102_texas","char_113_cqbw"],
+		adjust: ["char_263_skadi","char_222_bpipe","char_249_mlyss","doushitalulamrfz","char_4171_wulfen","char_102_texas","char_113_cqbw","char_134_ifrit","char_136_hsguma","char_147_shining","char_155_tiger","char_166_skfire","char_180_amgoat","char_188_helage","char_193_frostl","char_202_demkni","char_204_platnm","char_213_mostma","char_219_meteo","char_225_haak","char_242_otter","char_003_kalts","char_264_f12yin","char_252_bibeak","char_285_medic2","char_291_aglina","char_293_thorns","char_311_mudrok","char_306_leizi","char_300_phenxi","char_322_lmlee","char_358_lisa","char_391_rosmon","char_423_blemsh","char_426_billro","char_437_mizuki","char_456_ash","char_1028_texas2","char_1026_gvial2"],
 	},
 
 	/**

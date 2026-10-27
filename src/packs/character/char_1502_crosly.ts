@@ -53,7 +53,7 @@ skill({
 			},
 			async content(event, trigger, player) {
 				const { cards, targets } = event.cost_data;
-				await player.discard(cards);
+				await player.discard({ cards });
 				for (let target of targets) {
 					target.addSkill("xingxingmrfz");
 				}
@@ -93,13 +93,13 @@ skill({
 			},
 			async content(event, trigger, player) {
 				player
-					.chooseToUse(
-						function (card, player, event) {
+					.chooseToUse({
+						filterCard: function (card, player, event) {
 							if (get.name(card) != "sha") return false;
 							return lib.filter.filterCard.apply(this, arguments);
 						},
-						"【行刑】:是否对" + get.translation(trigger.player) + "使用一张杀？"
-					)
+						prompt: "【行刑】:是否对" + get.translation(trigger.player) + "使用一张杀？",
+					})
 					.set("logSkill", "xingxingmrfz")
 					.set("complexSelect", true)
 					.set("filterTarget", function (card, player, target) {
@@ -119,10 +119,12 @@ skill({
 					async content(event, trigger, player) {
 						player.logSkill("xingxingmrfz");
 						const { color } = await player
-							.judge(function (card) {
-								var color = get.color(card);
-								if (color == "black") return -4;
-								return 0;
+							.judge({
+								judge: function (card) {
+									var color = get.color(card);
+									if (color == "black") return -4;
+									return 0;
+								},
 							})
 							.forResult();
 						if (color !== "black") trigger.cancel();
@@ -173,12 +175,15 @@ skill({
 					},
 					async content(event, trigger, player) {
 						const { cards } = await trigger.player
-							.chooseCard("he", true)
-							.set("prompt", `请交给${get.translation(player)}一张牌`)
-							.set("ai", card => -get.value(card))
+							.chooseCard({
+								position: "he",
+								forced: true,
+								prompt: `请交给${get.translation(player)}一张牌`,
+								ai: card => -get.value(card),
+							})
 							.forResult();
 						if (!cards) return;
-						player.gain(cards);
+						player.gain({ cards });
 					},
 				},
 			},

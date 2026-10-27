@@ -58,8 +58,7 @@ skill({
 					//@ts-ignore
 					if (cards.length < 1) player.draw().log = false;
 					else {
-						const result = await player
-							.chooseCardButton("【诡影】:请选择你要获得的牌<br>选择‘取消’则模一张牌", cards)
+						const result = await player.chooseCardButton({ cards, prompt: "【诡影】:请选择你要获得的牌<br>选择‘取消’则模一张牌" })
 							.set("ai", card => get.value(card) > 8)
 							.forResult();
 						if (result.bool === false) {
@@ -67,7 +66,7 @@ skill({
 							player.draw().log = false;
 						} else {
 							//@ts-ignore
-							player.gain(result.links[0]).log = false;
+							player.gain({ cards: [result.links[0]] }).log = false;
 						}
 					}
 				}
@@ -85,8 +84,7 @@ skill({
 				return player.countCards("h", card => canRespond.includes(get.name(card) || "")) > 0;
 			},
 			async cost(event, trigger, player) {
-				const result = await player
-					.chooseControl("cancel2")
+				const result = await player.chooseControl({ controls: ["cancel2"] })
 					.set("choiceList", [`视为对${trigger.source && trigger.source.isIn() ? get.translation(trigger.source) : "上天（不存在伤害来源）"}使用一张【杀】`, "回复一点体力、摸两张牌且此技能本回合失效"])
 					.set("ai", () => {
 						let { source, player } = get.event();

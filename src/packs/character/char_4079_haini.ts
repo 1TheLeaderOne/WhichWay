@@ -90,8 +90,7 @@ skill({
 			},
 			async cost(event, trigger, player) {
 				let cards = lib.skill.cehuimrfz.getDiscardCards(trigger);
-				const result = await player
-					.chooseCardButton(cards)
+				const result = await player.chooseCardButton({ cards })
 					.set("prompt2", `你可以选择一张牌并与一名其他角色进行拼点，若你赢，你使用牌堆顶3张牌`)
 					.set("ai", link => get.number(link))
 					.forResult();
@@ -138,7 +137,7 @@ skill({
 										.forResult();
 						if (!links) continue;
 						await player
-							.chooseUseTarget(links[0])
+							.chooseUseTarget({ card: links[0] })
 							.set("nodistance", true)
 							.set("prompt", `请选择${get.translation(links[0])}的目标`);
 						canUse.remove(links[0]);

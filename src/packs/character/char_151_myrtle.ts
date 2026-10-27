@@ -197,6 +197,7 @@ skill({
 					if (event.yuyimrfz_tao) {
 						return false;
 					}
+					//@ts-ignore
 					return event.filterCard(get.autoViewAs({ name: "tao" }, "unsure"), player, event) && Object.keys(player.storage?.yuyimrfz?.tao || {}).length > 0;
 				},
 				delay: false,
@@ -206,9 +207,9 @@ skill({
 						accumulate: number;
 						cards: Array<Card>;
 					};
-                    const evt = event.getParent(2)!;
+					const evt = event.getParent(2)!;
 
-                    evt.set("yuyimrfz_tao",true);
+					evt.set("yuyimrfz_tao", true);
 
 					const taos = player.storage?.yuyimrfz?.tao;
 					const group = Object.keys(taos).length;
@@ -245,7 +246,7 @@ skill({
 					evt.set("_backupevent", "yuyimrfz_backup");
 					evt.set("openskilldialog", "请选择【桃】的目标");
 					evt.backup("yuyimrfz_backup");
-                    evt.goto(0);
+					evt.goto(0);
 				},
 			},
 			eff: {
@@ -284,9 +285,10 @@ skill({
 				},
 			},
 			backup: {
-				async precontent(event,trigger,player) {
-					let name = event.result.card.name,
-						cards = event.result.card.cards.slice(0);
+				async precontent(event, trigger, player) {
+					let name = event.result.card!.name,
+						//@ts-ignore
+						cards = (event.result.card!.cards).slice(0);
 					event.result.cards = cards;
 					let rcard = cards[0],
 						card;
@@ -326,7 +328,7 @@ skill({
 							return get.attitude2(target) > 0 ? 1145141919810 - target.countCards("h") : -1;
 						},
 						selectTarget: [0, trigger.cards.length],
-                        filterTarget:()=>true,
+						filterTarget: () => true,
 					})
 					.forResult();
 				if (result.targets) {

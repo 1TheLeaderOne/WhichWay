@@ -18,7 +18,7 @@ skill({
 			},
 			onremove: function (player, skill) {
 				var cards = player.getExpansions(skill);
-				if (cards.length) player.loseToDiscardpile(cards);
+				if (cards.length) player.loseToDiscardpile({ cards });
 			},
 			audio: 2,
 			forced: true,
@@ -46,7 +46,7 @@ skill({
 					cards.addArray(cardsx);
 				}
 				if (cards.length) {
-					player.addToExpansion(cards, player, "giveAuto").gaintag.add("char_4172_xingzh");
+					player.addToExpansion({ cards, source: player, animate: "giveAuto" }).gaintag.add("char_4172_xingzh");
 				}
 			},
 			group: ["xingzhumrfz_start", "xingzhumrfz_check", "xingzhumrfz_init"],
@@ -65,8 +65,7 @@ skill({
 					async content(event, trigger, player) {
 						let cards = player.getExpansions("char_4172_xingzh");
 						if (cards.length >= 9) {
-							const { links } = await player
-								.chooseCardButton(`【行著】:请弃置${Math.max(1, cards.length - 9)}张‘帙’`, true, cards)
+							const { links } = await player.chooseCardButton({ cards, forced: true, prompt: `【行著】:请弃置${Math.max(1, cards.length - 9)}张‘帙’` })
 								.set("selectButton", () => {
 									let cards2 = get.player().getExpansions("char_4172_xingzh");
 									return Math.max(1, cards2.length - 9);
@@ -76,7 +75,7 @@ skill({
 								})
 								.forResult();
 							if (!links) return;
-							player.loseToDiscardpile(links);
+							player.loseToDiscardpile({ cards: links });
 						}
 					},
 				},
@@ -91,7 +90,7 @@ skill({
 						return event.name != "phase" || game.phaseNumber == 0;
 					},
 					async content(event, trigger, player) {
-						player.addToExpansion(get.cards(3), "draw").gaintag.add("char_4172_xingzh");
+						player.addToExpansion({ cards: get.cards(3), animate: "draw" }).gaintag.add("char_4172_xingzh");
 					},
 				},
 				init: {
@@ -270,7 +269,7 @@ skill({
 			},
 			async content(event, trigger, player) {
 				player.storage.zhizhumrfz.push(get.suit(trigger.card));
-				player.addToExpansion(trigger.cards, player, "giveAuto").gaintag.add("char_4172_xingzh");
+				player.addToExpansion({ cards: trigger.cards, source: player, animate: "giveAuto" }).gaintag.add("char_4172_xingzh");
 			},
 			group: ["zhizhumrfz_check", "zhizhumrfz_remove"],
 			subSkill: {

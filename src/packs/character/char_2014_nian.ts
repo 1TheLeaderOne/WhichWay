@@ -21,7 +21,7 @@ skill({
 			async content(event, trigger, player) {
 				let result;
 				result = await player
-					.chooseToDiscard("he", get.prompt("zhujimrfz"), "【铸极】:你可以重铸一张牌")
+					.chooseToDiscard({ position: "he", prompt: get.prompt("zhujimrfz"), prompt2: "【铸极】:你可以重铸一张牌" })
 					.set("ai", function (card) {
 						return 6 - get.value(card);
 					})
@@ -55,24 +55,24 @@ skill({
 				}
 
 				result = await trigger.source
-					.chooseToDiscard(
-						"he",
-						true,
-						"【铜印】:请选择弃置一张非基本或" + get.translation(Math.min(player.getDamagedHp() + 1, 1)) + "张基本牌"
-					)
+					.chooseToDiscard({
+						position: "he",
+						forced: true,
+						prompt: "【铜印】:请选择弃置一张非基本或" + get.translation(Math.min(player.getDamagedHp() + 1, 1)) + "张基本牌",
+					})
 					.forResult();
 				if (player.getDamagedHp() < 2) event.finish();
 
 				if (result && result.cards && get.type(result.cards[0]) == "basic") {
 					trigger.source
-						.chooseToDiscard(
-							true,
-							"【铜印】:请选择弃置" + get.translation(player.getDamagedHp() - 1) + "张基本牌",
-							[1, player.getDamagedHp() - 1],
-							function (card) {
+						.chooseToDiscard({
+							forced: true,
+							prompt: "【铜印】:请选择弃置" + get.translation(player.getDamagedHp() - 1) + "张基本牌",
+							selectCard: [1, player.getDamagedHp() - 1],
+							filterCard: function (card) {
 								return get.type(card) == "basic";
-							}
-						)
+							},
+						})
 						.set("ai", function (card) {
 							return 6 - get.value(card);
 						});

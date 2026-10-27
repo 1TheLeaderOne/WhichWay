@@ -135,7 +135,7 @@ skill({
 
 			for (const card of cards) {
 				await player
-					.chooseUseTarget(card)
+					.chooseUseTarget({ card })
 					.set("addCount", false)
 					.set("nodistance", true)
 					.set("prompt", `【天喟】:你可以视为使用一张${get.translation(card)}(无距离次数限制)？`)

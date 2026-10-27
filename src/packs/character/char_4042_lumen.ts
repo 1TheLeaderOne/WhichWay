@@ -102,14 +102,14 @@ skill({
 						const owner = get.owner(trigger.card);
 						//@ts-ignore
 						if (owner && owner.getCards("hej").includes(trigger.card)) {
-							await owner.lose(trigger.card, ui.discardPile);
+							await owner.lose({ cards: [trigger.card], position: ui.discardPile });
 						} else {
 							//@ts-ignore
 							game.cardsDiscard(trigger.card);
 						}
 						game.log(trigger.card, "进入了弃牌堆");
 					}
-					await target.chooseToDiscard(true, "j", target.countCards("j"));
+					await target.chooseToDiscard({ forced: true, position: "j", selectCard: target.countCards("j") });
 					num--;
 				}
 				await target.draw(num);

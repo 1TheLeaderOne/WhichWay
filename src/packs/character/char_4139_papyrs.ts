@@ -151,8 +151,7 @@ skill({
 			async content(event, trigger, player) {
 				const storage = player.storage.lanjuanmrfz;
 
-				const { control } = await player
-					.chooseControl("自动选择", "手动选择")
+				const { control } = await player.chooseControl({ controls: ["自动选择", "手动选择"] })
 					.set("prompt", "【行路】:是否让系统自动为你提供方案？")
 					.set("ai", () => "自动选择")
 					.forResult();
@@ -179,7 +178,7 @@ skill({
 						? { links: [maxIndex] }
 						: await player.chooseButton().set("createDialog", dialogAuto).set("cards", cards).forResult();
 					if (!result || !result.links) return;
-					player.gain(cards[result.links[0]], "gain2", "log");
+					player.gain({ cards: [cards[result.links[0]]], animate: "gain2" });
 					return;
 				}
 
@@ -216,7 +215,7 @@ skill({
 					number: links.filter(i => typeof i === "number"),
 				};
 				let cards = lib.skill.xinglumrfz.findCards(info);
-				if (cards.length > 0) player.gain(cards, "gain2", "log");
+				if (cards.length > 0) player.gain({ cards, animate: "gain2" });
 				else {
 					player.popup("没有符合条件的组合");
 				}

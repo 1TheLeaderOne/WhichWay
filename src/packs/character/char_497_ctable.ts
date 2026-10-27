@@ -139,7 +139,7 @@ skill({
                 charlotte:true,
                 silent:true,
                 trigger:{
-                    player:["phaseUseBegin","useCardAfter","gainAfter"]
+                    player:["phaseUseBegin","useCardAfter","gainAfter","wanquanmrfzAfter"]
                 },
                 lastDo:true,
                 async content(event,trigger,player){

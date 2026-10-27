@@ -32,7 +32,7 @@ skill({
 		async content(event, trigger, player) {
 			event.togain = trigger.player.getCards("hej");
 
-			player.gain(event.togain, trigger.player, "giveAuto", "bySelf").gaintag.add("zhengyimrfz");
+			player.gain({ cards: event.togain, source: trigger.player, animate: "giveAuto", bySelf: true }).gaintag.add("zhengyimrfz");
 		},
 		group: "zhengyimrfz_draw",
 		subSkill: {

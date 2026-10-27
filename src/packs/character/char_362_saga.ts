@@ -16,7 +16,7 @@ skill({
 			return !player.isPhaseUsing() && event.cards.length > 0 && event.getParent()!.name !== "huanyoumrfz";
 		},
 		async content(event, trigger, player) {
-			player.gain(lib.card.ying.getYing(trigger.cards.length), "gain2");
+			player.gain({ cards: lib.card.ying.getYing(trigger.cards.length), animate: "gain2" });
 		},
 		group: ["huanyoumrfz_hideHandCards"],
 		subSkill: {
@@ -238,7 +238,7 @@ skill({
 					content: "·每个摸牌阶段开始时获得一张【影】<br>·如真似幻，扑朔迷离。",
 				},
 				async content(event, trigger, player) {
-					player.gain(lib.card.ying.getYing(1), "gain2");
+					player.gain({ cards: lib.card.ying.getYing(1), animate: "gain2" });
 				},
 			},
 		},

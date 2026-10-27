@@ -1,5 +1,6 @@
 import { lib, game, ui, get, ai, _status } from "noname";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { whichWayUtil } from "../../utill.js";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../hooks.ts";
 
 character("char_394_hadiya", { pack: "epicSJZX", sex: "female", group: "samrfz", hp: 4, skills: ["juetumrfz"] });
 
@@ -66,3 +67,9 @@ translate({
 characterTitle("char_394_hadiya", "<font color = #be9b1c66>再造剑角</font>");
 
 characterIntro("char_394_hadiya", "哈蒂娅，萨尔贡裔哥伦比亚人，沙漠传奇战士部族剑角的后代。为学习战斗技巧于萨尔贡主动加入罗德岛，现作为罗德岛驻萨尔贡办事处干员，接受战斗训练的同时参与各类外勤任务。");
+
+dynamicTranslate("juetumrfz", function (player) {
+	let num = player?.storage?.juetumrfz?.draw || 3;
+	let str = `出牌阶段限一次，你可以摸#r${num}#张牌，并与一名其他角色进行拼点，没有赢的角色受到一点伤害，若你首次以该点数拼点获胜，本技能红色数字+1，反之若你没赢，本技能红色数字-1（红色数字至少为1）。`;
+	return whichWayUtil.colorize(str);
+});

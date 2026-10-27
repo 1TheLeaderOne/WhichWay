@@ -47,7 +47,7 @@ skill({
 				if (!result) return;
 				if (result.winner === player) {
 					player
-						.gainPlayerCard(target, true, "h")
+						.gainPlayerCard({ target, forced: true, position: "h" })
 						.set("visible", true)
 						.set("filterButton", () => true)
 						.set("prompt", `获得${get.translation(target)}的一张手牌`);

@@ -35,7 +35,7 @@ skill({
 							if (card.storage && typeof card.storage.extraChooseNum === "number") {
 								num += card.storage.extraChooseNum;
 							}
-							const next = target.chooseButton(true);
+							const next = target.chooseButton({ forced: true });
 							next.set("ai", button => {
 								const aiPlayer = _status.event.player;
 								const btnCard = button.link;
@@ -88,7 +88,7 @@ skill({
 						dialog.buttons.remove(...buttons);
 						const capt = get.translation(target) + "选择了" + get.translation(buttons.map(i => i.link));
 						if (cards && cards.length > 0) {
-							await target.gain(cards, "visible");
+							await target.gain({ cards, animate: "visible" });
 							target.$gain2(cards);
 							game.broadcast(
 								function (cards, id, name, capt) {
@@ -204,18 +204,18 @@ skill({
 						return j.find(i => i.cardid === card._cardid);
 					});
 				console.log(cards);
-				await player.useCard(
-					{
+				await player.useCard({
+					card: get.autoViewAs({
 						name: "wugu",
 						storage: {
 							extraCardsNum: targets.length,
 							extraChooseNum: 1,
 						},
-					},
+					}),
 					targets,
 					cards,
-					false
-				);
+					addCount: false,
+				});
 			},
 		},
 	"qizaomrfz": {
@@ -232,7 +232,7 @@ skill({
 			async content(event, trigger, player) {
 				await player.draw();
 				const { cards } = await player
-					.chooseCard(true, "【起灶】:请蓄谋一次")
+					.chooseCard({ forced: true, prompt: "【起灶】:请蓄谋一次" })
 					.set("ai", card => {
 						const player = get.player();
 						if (player.hasValueTarget(card)) return player.getUseValue(card);

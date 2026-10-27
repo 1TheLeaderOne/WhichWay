@@ -1,5 +1,6 @@
 import { lib, game, ui, get, ai, _status } from "noname";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { whichWayUtil } from "../../utill.js";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../hooks.ts";
 
 character("char_4051_akkord", { pack: "rareSJZX",
 			sex: "female",
@@ -131,11 +132,11 @@ skill({
 				let name = get.name(event.cards[0]);
 
 				//@ts-ignore
-				if (Object.keys(event.getParent("phaseUse")).length>0 && event.getParent("phaseUse").player === player) await player.chooseUseTarget({ name: name }, [event.cards[1]]).set("forced", true);
+				if (Object.keys(event.getParent("phaseUse")).length>0 && event.getParent("phaseUse").player === player) await player.chooseUseTarget({ card: { name }, cards: [event.cards[1]] }).set("forced", true);
 				else {
 					//@ts-ignore
 					if (name === "wuxie") event._trigger = event.getParent(2)._trigger;
-					const result = await player.useCard({ name: name }, [event.cards[1]]).set("forced", true).forResult();
+					const result = await player.useCard({ card: { name }, cards: [event.cards[1]] }).set("forced", true).forResult();
 					//@ts-ignore
 					event.getParent(2)._result = result;
 				}
@@ -171,3 +172,22 @@ translate({
 characterTitle("char_4051_akkord", "<font color = #8b9dda66>绝对音准</font>");
 
 characterIntro("char_4051_akkord", "协律，本名托妮娅·克朗，来自莱塔尼亚偏远小镇的调谐师。于一场暴风雪导致的声场核心过载事故中不慎感染上矿石病，后来经介绍来到罗德岛，接受治疗的同时，致力于为罗德岛的音乐环境提供力所能及的支持与辅助，并作为术师干员协助战斗。");
+
+dynamicTranslate("lvmaimrfz", function (player) {
+	let str = `转换技，当你使用或打出一张牌后，你可以重铸至多一张牌，然后若你的手牌中最多的花色为①♠︎②♣︎③♥︎④♦︎，你摸一张牌。`;
+	switch (player.storage.lvmaimrfz) {
+		case 0:
+			str = `转换技，当你使用或打出一张牌后，你可以重铸至多一张牌，然后若你的手牌中最多的花色为#s①♠︎#s②♣︎③♥︎④♦︎#，你摸一张牌。`;
+			break;
+		case 1:
+			str = `转换技，当你使用或打出一张牌后，你可以重铸至多一张牌，然后若你的手牌中最多的花色为#s①♠︎#②♣︎③#s♥︎④♦︎#，你摸一张牌。`;
+			break;
+		case 2:
+			str = `转换技，当你使用或打出一张牌后，你可以重铸至多一张牌，然后若你的手牌中最多的花色为#s①♠︎②♣︎#③♥︎#s④♦︎#，你摸一张牌。`;
+			break;
+		case 3:
+			str = `转换技，当你使用或打出一张牌后，你可以重铸至多一张牌，然后若你的手牌中最多的花色为#s①♠︎②♣︎③♥︎#④♦︎，你摸一张牌。`;
+			break;
+	}
+	return whichWayUtil.colorize(str);
+});

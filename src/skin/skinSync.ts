@@ -267,13 +267,30 @@ export function applyAll(char: string, sel: Selection, src: "whichWay" | "qhly" 
 	}
 }
 
-/** 让场上同名武将立刻重画（换肤后不重画就要等下一次 `setBackground`） */
+/**
+ * 让场上同名武将立刻重画（换肤后不重画就要等下一次 `setBackground`）。
+ *
+ * ⚠️ 必须**同时**驱动动皮（`updateDyc`），不能只 `setBackground`：
+ * - `setBackground` 只重画两层的静态立绘（`paintPortrait`）；
+ * - 动皮是挂在 `node.avatar` 里的 spine 容器，由 `updateDyc` 负责「换肤 → 停掉旧动皮 / 复用或加载新动皮」。
+ *
+ * 只调 `setBackground` 的话，动皮容器会一直留在节点上盖住新皮肤 ——
+ * 表现就是「角色装备过动皮后，切成别的皮肤，动皮不会被隐藏/删除」。
+ * `avatarBackground.ts` 里的 `ensureDynamicSkin` 只在 `$init` / `$reinit` 触发，
+ * 换肤这条路径根本不经过它，所以这里必须显式补一次。
+ */
 function repaint(char: string) {
 	const players = (game.players ?? []).concat(game.dead ?? []);
 	for (const player of players) {
 		if (!player?.node) continue;
-		if (player.name1 === char || player.name === char) player.node.avatar?.setBackground?.(char, "character");
-		if (player.name2 === char) player.node.avatar2?.setBackground?.(char, "character");
+		if (player.name1 === char || player.name === char) {
+			player.node.avatar?.setBackground?.(char, "character");
+			spineRef?.updateDyc?.(char, player);
+		}
+		if (player.name2 === char) {
+			player.node.avatar2?.setBackground?.(char, "character");
+			spineRef?.updateDyc?.(char, player);
+		}
 	}
 }
 

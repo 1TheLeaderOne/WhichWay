@@ -18,6 +18,24 @@
 			</div>
 			<div class="skillInfo" v-html="item.info"></div>
 
+			<!-- 台词界面：由 head 上的台词按钮开合；没有台词也保留这个入口（显示「无台词」），
+			     因为「有没有台词文本」与「有没有配音文件」是两件事，后者仍要能逐条试听。
+			     ⚠️ 必须排在「衍生技能」之前：台词区跟着技能名走，先看台词再看衍生内容更顺，
+			     而且衍生区可能很长，把台词压在下面要滚很久才能看到。 -->
+			<div v-show="item.showLines" class="derivationBox lineBox">
+				<div v-if="!item.audioEntries.length" class="lineItem lineEmpty">无台词</div>
+				<div v-for="entry in item.audioEntries" :key="entry.index" class="lineItem">
+					<div
+						class="linePlayBtn"
+						:class="{ linePlayBtnPlaying: isLinePlaying(item.id, entry.index) }"
+						@click="toggleLine(item.id, entry.index)"
+					></div>
+					<span v-if="item.audioEntries.length > 1" class="lineIndex">{{ entry.index + 1 }}.</span>
+					<span v-if="entry.text" class="lineText" v-html="entry.text"></span>
+					<span v-else class="lineText lineEmptyText">无台词</span>
+				</div>
+			</div>
+
 			<!-- 衍生技能：挂在所属技能条目内部，不再另起一个顶层条目 -->
 			<div v-if="item.derivations.length" class="derivationBox">
 				<div
@@ -31,8 +49,10 @@
 					<div v-for="d in item.derivations" :key="d.id" class="derivationItem">
 						<div class="headWrapper">
 							<div class="dskillname">{{ d.label }}</div>
-							<!--试听按钮播的仍是主技能的音（与原实现一致）-->
-							<div class="audioBtn" :class="{ audioBtnPlaying: isSkillPlaying(item.id) }" @click="toggleAudio(item.id)"></div>
+							<!-- 附属技能有自己的 audio（如 reed2 的 newminghuomrfz），
+							     试听与台词都必须走 d.id，不能借用父技能的 -->
+							<div class="audioBtn" :class="{ audioBtnPlaying: isSkillPlaying(d.id) }" @click="toggleAudio(d.id)"></div>
+							<div class="lineBtn lineBtnSmall" :class="{ lineBtnOpened: d.showLines }" @click="toggleLines(d)"></div>
 							<div
 								v-if="d.frequent !== undefined"
 								class="autoSkill"
@@ -43,6 +63,21 @@
 							</div>
 						</div>
 						<div class="derivationInfo" v-html="d.info"></div>
+
+						<!-- 附属技能的台词：显示在它自己的条目里，不混进父技能 -->
+						<div v-show="d.showLines" class="derivationLineBox">
+							<div v-if="!d.audioEntries.length" class="lineItem lineEmpty">无台词</div>
+							<div v-for="entry in d.audioEntries" :key="entry.index" class="lineItem">
+								<div
+									class="linePlayBtn"
+									:class="{ linePlayBtnPlaying: isLinePlaying(d.id, entry.index) }"
+									@click="toggleLine(d.id, entry.index)"
+								></div>
+								<span v-if="d.audioEntries.length > 1" class="lineIndex">{{ entry.index + 1 }}.</span>
+								<span v-if="entry.text" class="lineText" v-html="entry.text"></span>
+								<span v-else class="lineText lineEmptyText">无台词</span>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -61,22 +96,6 @@
 							<div class="derivationInfo" v-html="c.info"></div>
 						</div>
 					</div>
-				</div>
-			</div>
-
-			<!-- 台词界面：由 head 上的台词按钮开合；没有台词也保留这个入口（显示「无台词」），
-			     因为「有没有台词文本」与「有没有配音文件」是两件事，后者仍要能逐条试听 -->
-			<div v-show="item.showLines" class="derivationBox lineBox">
-				<div v-if="!item.audioEntries.length" class="lineItem lineEmpty">无台词</div>
-				<div v-for="entry in item.audioEntries" :key="entry.index" class="lineItem">
-					<div
-						class="linePlayBtn"
-						:class="{ linePlayBtnPlaying: isLinePlaying(item.id, entry.index) }"
-						@click="toggleLine(item.id, entry.index)"
-					></div>
-					<span v-if="item.audioEntries.length > 1" class="lineIndex">{{ entry.index + 1 }}.</span>
-					<span v-if="entry.text" class="lineText" v-html="entry.text"></span>
-					<span v-else class="lineText lineEmptyText">无台词</span>
 				</div>
 			</div>
 		</div>
@@ -235,7 +254,18 @@ const buildItems = () => {
 				continue;
 			}
 			const dAuto = frequentOf(name);
-			item.derivations.push({ id: name, label: get.translation(name), frequent: dAuto, auto: dAuto, info: infoOf(name) });
+			item.derivations.push({
+				id: name,
+				label: get.translation(name),
+				frequent: dAuto,
+				auto: dAuto,
+				info: infoOf(name),
+				//附属技能有自己的 audio（如 reed2 的 newminghuomrfz: ["3星结束行动","任命队长"]），
+				//台词与试听必须各自独立，不能借用父技能的
+				audioEntries: audioEntriesOf(name),
+				//每个附属技能的台词区单独开合，默认收起
+				showLines: false,
+			});
 		}
 		result.push(item);
 	}
@@ -668,6 +698,43 @@ onBeforeUnmount(() => {
 
 .lineEmpty {
 	padding-left: 2px;
+}
+
+/* 附属技能自己的台词区：套在 .derivationItem 内部，所以再缩进一档、边框更细，
+   与父技能的台词区（.lineBox）在视觉上区分开 */
+.derivationLineBox {
+	position: relative;
+	width: calc(100% - 10px);
+	margin: 4px 0 6px 8px;
+	padding-left: 8px;
+	box-sizing: border-box;
+	border-left: 2px solid rgba(255, 107, 107, 0.55);
+}
+
+/* 附属技能 head 上的台词开关：父级样式用的是 `.skillWrapper > .headWrapper > .lineBtn`
+   直接子选择器，套不到衍生条目里，所以这里要整套重写一遍。
+   尺寸比父技能的小一号（22px 的试听键旁边放 25px 会顶出去）。 */
+.derivationItem > .headWrapper > .lineBtnSmall {
+	position: relative;
+	width: 20px;
+	height: 20px;
+	margin-left: 4px;
+	background-image: url("../../../image/ui/line.png");
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
+	background-position: center;
+	cursor: pointer;
+	opacity: 0.7;
+	transition: opacity var(--ak-dur-fast, 0.2s);
+}
+
+.derivationItem > .headWrapper > .lineBtnSmall:hover {
+	opacity: 1;
+}
+
+.derivationItem > .headWrapper > .lineBtnOpened {
+	opacity: 1;
+	filter: drop-shadow(0 0 4px rgba(255, 154, 154, 0.9));
 }
 
 /* ---------- 衍生卡牌 ---------- */

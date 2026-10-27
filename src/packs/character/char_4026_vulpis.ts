@@ -1,5 +1,5 @@
 import { lib, game, ui, get, ai, _status } from "noname";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../hooks.ts";
 
 character("char_4026_vulpis", { pack: "legendSJZX",
 			sex: "female",
@@ -75,7 +75,7 @@ skill({
 				return target != player && !!player.canUse("juedou", target) && player.inRange(target);
 			},
 			async content(event, trigger, player) {
-				player.useCard({ name: "juedou", zhuixiongmrfz: true }, true, event.targets[0]);
+				player.useCard({ card: get.autoViewAs({ name: "juedou", zhuixiongmrfz: true }), targets: [event.targets[0]], addCount: true });
 			},
 			group: ["zhuixiongmrfz_nowuxie", "zhuixiongmrfz_damage"],
 			subSkill: {
@@ -135,3 +135,8 @@ translate({
 characterTitle("char_4026_vulpis", "<font color='#d2691e'>完美主义杀手</font>");
 
 characterIntro("char_4026_vulpis", "忍冬，本名英格丽，铃兰干员的母亲，曾为叙拉古灰厅十二家族之一——威尼斯家族的核心成员，多执行暗杀任务，擅长歼灭战与突袭战，后因故从家族脱离。现以罗德岛驻舰干员身份活动。");
+
+dynamicTranslate("zhuixiongmrfz", function (player) {
+	let hasSkill = player.hasSkill("yinhumrfz_addcount");
+	return `出牌阶段限${hasSkill ? "两" : "一"}次，你可以视为对一名在你攻击范围内的其他角色使用一张不可被【无懈可击】响应的【决斗】，此决斗的造成的伤害+Y（Y=因此决斗而打出的【杀】）。`;
+});

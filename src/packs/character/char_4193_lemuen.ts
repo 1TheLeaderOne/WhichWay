@@ -264,8 +264,7 @@ skill({
 								},
 							};
 						} else {
-							const { index } = await player
-								.chooseControl("选项一", "选项二", "cancel2")
+							const { index } = await player.chooseControl({ controls: ["选项一", "选项二", "cancel2"] })
 								.set("choiceList", list)
 								.set("ai", () => {
 									let player = get.player();
@@ -289,7 +288,7 @@ skill({
 						if (index === 0) {
 							player.draw();
 						} else {
-							trigger.target.damage(player);
+							trigger.target.damage({ source: player });
 							player.line(trigger.target);
 						}
 						trigger.target.storage.zhuijimrfz.push(index === 0 ? "draw" : "damage");

@@ -108,32 +108,36 @@ function refreshGuizhouMark(player: Player): void {
  */
 function installGuizhouIgnoreLimit(skillName: string, homeGroup: string): void {
 	//@ts-ignore
-	game.broadcastAll((name, originGroup) => {
-		const info = lib.skill[name];
-		if (!info) return;
-		//同一个技能可能被多个势力的牌池收录，以最后一次授予的势力为准
-		info.guizhouGroup = originGroup;
-		if (info.guizhouWrapped) return;
-		info.guizhouWrapped = true;
-		const originFilter = info.filter;
-		info.guizhouOriginFilter = originFilter;
-		info.filter = function (event, player, triggerName, indexedData) {
-			if (!player.hasSkill("guizhoumrfz")) {
-				return originFilter ? originFilter(event, player, triggerName, indexedData) : true;
-			}
-			const zhuBefore = player.isZhu;
-			const groupBefore = player.group;
-			const group = lib.skill[name].guizhouGroup;
-			player.isZhu = true;
-			if (group) player.group = group;
-			try {
-				return originFilter ? originFilter(event, player, triggerName, indexedData) : true;
-			} finally {
-				player.isZhu = zhuBefore;
-				player.group = groupBefore;
-			}
-		};
-	}, skillName, homeGroup);
+	game.broadcastAll(
+		(name, originGroup) => {
+			const info = lib.skill[name];
+			if (!info) return;
+			//同一个技能可能被多个势力的牌池收录，以最后一次授予的势力为准
+			info.guizhouGroup = originGroup;
+			if (info.guizhouWrapped) return;
+			info.guizhouWrapped = true;
+			const originFilter = info.filter;
+			info.guizhouOriginFilter = originFilter;
+			info.filter = function (event, player, triggerName, indexedData) {
+				if (!player.hasSkill("guizhoumrfz")) {
+					return originFilter ? originFilter(event, player, triggerName, indexedData) : true;
+				}
+				const zhuBefore = player.isZhu;
+				const groupBefore = player.group;
+				const group = lib.skill[name].guizhouGroup;
+				player.isZhu = true;
+				if (group) player.group = group;
+				try {
+					return originFilter ? originFilter(event, player, triggerName, indexedData) : true;
+				} finally {
+					player.isZhu = zhuBefore;
+					player.group = groupBefore;
+				}
+			};
+		},
+		skillName,
+		homeGroup
+	);
 }
 
 /**
@@ -160,9 +164,9 @@ async function guizhouCompensate(player: Player): Promise<void> {
 	if (!target) return;
 
 	//由该角色自己选择
-	await target.chooseDrawRecover({ target, forced: true, num1: 2, num2: 1, logSkill: "guizhoumrfz" });
+	await target.chooseDrawRecover({ target, forced: true, num1: 2, num2: 1 }).set("logSkill", "guizhoumrfz");
 	if (target != player) {
-		await player.chooseDrawRecover({ target: player, forced: true, num1: 2, num2: 1, logSkill: "guizhoumrfz" });
+		await player.chooseDrawRecover({ target: player, forced: true, num1: 2, num2: 1 }).set("logSkill", "guizhoumrfz");
 	}
 }
 
@@ -184,11 +188,11 @@ const resigter = (name = "char_393_toledo") => {
 		[name]: "托莱多",
 
 		guizhoumrfz: "贵胄",
-		"guizhoumrfz_info": "锁定技，游戏开始时，你从每个势力中随机获得两个主公技；你发动主公技时，无视其发动条件中的身份和势力限制;当你失去主公技后，你令一名角色选择摸两张牌或回复一点体力，若该角色不是你，你执行一次相同的效果。",
+		guizhoumrfz_info: "锁定技，游戏开始时，你从每个势力中随机获得两个主公技；你发动主公技时，无视其发动条件中的身份和势力限制;当你失去主公技后，你令一名角色选择摸两张牌或回复一点体力，若该角色不是你，你执行一次相同的效果。",
 		weiyanmrfz: "危言",
-		"weiyanmrfz_info": `锁定技，出牌阶段开始时，你选择失去一个主公技或失去一点体力上限，然后你对一名其他角色造成一点伤害。`,
+		weiyanmrfz_info: `锁定技，出牌阶段开始时，你选择失去一个主公技或失去一点体力上限，然后你对一名其他角色造成一点伤害。`,
 		weiyimrfz: "伪裔",
-		"weiyimrfz_info": `主公技，每轮开始时，根据你拥有势力的主公技数获得下列效果：<br>1.手牌上限+1;<br>2.额定摸牌数+1;<br>3.视为拥有${get.poptip("jsrgbahu")};<br>4.视为拥有${get.poptip("jsrghuozhong")}。`,
+		weiyimrfz_info: `主公技，每轮开始时，根据你拥有势力的主公技数获得下列效果：<br>1.手牌上限+1;<br>2.额定摸牌数+1;<br>3.视为拥有${get.poptip("jsrgbahu")};<br>4.视为拥有${get.poptip("jsrghuozhong")}。`,
 	});
 
 	skill({
@@ -358,7 +362,7 @@ const resigter = (name = "char_393_toledo") => {
 			forced: true,
 			mark: true,
 			onremove: true,
-			derivation:weiyiBorrowSkills.map(i=>i.skill),
+			derivation: weiyiBorrowSkills.map(i => i.skill),
 			intro: {
 				content: function (storage, player: Player) {
 					const num = player.storage.weiyimrfz || 0;

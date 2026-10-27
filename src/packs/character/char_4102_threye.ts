@@ -46,7 +46,7 @@ skill({
 			direct: true,
 			async content(event, trigger, player) {
 				const { cards } = await player
-					.chooseToDiscard("he")
+					.chooseToDiscard({ position: "he" })
 					.set(
 						"prompt",
 						`【揭示】:你可以弃置一张牌，然后猜测${trigger.player == player ? "你" : get.translation(trigger.player)}本阶段前三张牌分别使用的类型（对${trigger.player == player ? "你" : get.translation(trigger.player)}不可见）。`
@@ -62,8 +62,9 @@ skill({
 					["待选择的牌的类型", [["basic", "basic", "basic", "trick", "trick", "trick", "equip", "equip", "equip"], "vcard"]],
 					["请调整顺序<br>从左到右:第一、二、三张牌", []],
 				];
-				const { moved } = await player
-					.chooseToMove(`【揭示】:请猜测${trigger.player == player ? "你" : get.translation(trigger.player)}本阶段前三张牌分别使用的类型`)
+				const { moved } = await player.chooseToMove({
+					prompt: `【揭示】:请猜测${trigger.player == player ? "你" : get.translation(trigger.player)}本阶段前三张牌分别使用的类型`,
+				})
 					.set("list", list)
 					.set("filterMove", function (from, to, moved) {
 						return (to == 1 && moved[1].length < 3) || to == 0 || typeof to !== "number";
@@ -138,11 +139,10 @@ skill({
 							target.draw(_status.tmpTotal_jieshimrfz);
 							if (_status.tmpTotal_jieshimrfz > 1) {
 								var num = Math.min(_status.tmpTotal_jieshimrfz - 1, 1);
-								const { bool } = await target
-									.chooseBool(`【揭示】:是否对${get.translation(player)}造成${get.cnNumber(num)}点伤害？`)
+								const { bool } = await target.chooseBool({ prompt: `【揭示】:是否对${get.translation(player)}造成${get.cnNumber(num)}点伤害？` })
 									.set("ai", () => get.damageEffect(target, player) > 0)
 									.forResult();
-								if (bool) player.damage(num, target);
+								if (bool) player.damage({ num, source: target });
 							}
 						} else {
 							if (target == player)

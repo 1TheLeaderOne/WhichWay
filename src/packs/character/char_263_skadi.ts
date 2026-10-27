@@ -157,13 +157,13 @@ skill({
 			let target = event.target_jingliemrfz,
 				card = event.card_jingliemrfz;
 			await target
-				.chooseToUse(
-					function (card, player, event) {
+				.chooseToUse({
+					filterCard: function (card, player, event) {
 						if (get.name(card) != "sha") return false;
 						return true;
 					},
-					"【鲸猎】:对" + get.translation(player) + "使用一张杀"
-				)
+					prompt: "【鲸猎】:对" + get.translation(player) + "使用一张杀",
+				})
 				.set("forced", true)
 				.set("targetRequired", true)
 				.set("complexSelect", true)

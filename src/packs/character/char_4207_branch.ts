@@ -116,7 +116,7 @@ skill({
 							//@ts-ignore
 							if (!player.canUse(card, target, true, false)) info[0].remove(target);
 						});
-						await player.useCard(card, targets, false);
+						await player.useCard({ card, targets, addCount: false });
 					}
 
 					player.storage.zhiyanmrfz = [];

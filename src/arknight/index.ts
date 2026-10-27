@@ -104,8 +104,26 @@ class WhichWayArknight {
 			raw[file.name.replace(".json", "")] = jsonDatas[i];
 		});
 
+		// `skin_table` 在 loadSkipFiles 里（3.8MB，运行期只需要里面 22 条 voiceId），
+		// 所以上面那批不会读它。但精简缓存的 `skinVoice` 必须从它抽，漏读就会让
+		// 「audio 对象形态指向皮肤语音」整体失效（映射为空 → 查不到 voiceId → 整组被丢弃）。
+		// 这里单独读一次，读完立刻只留映射，不把整表塞进内存。
+		if (raw.skin_table === void 0) {
+			const skinTableFile = files.find(file => file.name === "skin_table.json");
+			if (skinTableFile) {
+				try {
+					raw.skin_table = await whichWayFile.readFile(skinTableFile.path);
+				} catch (e) {
+					//读不到只影响皮肤语音，不该阻断整个数据加载
+					console.warn("[WhichWay] 读取 skin_table.json 失败，皮肤专属语音将不可用", e);
+				}
+			}
+		}
+
 		const slim = this.slimArknightData(raw);
 		Object.assign(this.arknightData, slim);
+		//裁剪完就把整张表丢掉，别让它一直挂在 raw 上
+		delete raw.skin_table;
 
 		//写回精简缓存供下次启动使用；写失败只影响下次启动速度，不影响本次运行
 		try {
@@ -205,8 +223,10 @@ class WhichWayArknight {
 	 * （`_` 分隔），22 个里 22 个都不一样；且存在多对一
 	 * （`char_311_mudrok` 的 `#2`/`summer`/`wild`/`ambienceSynesthesia` 四个皮肤共用 `char_311_mudrok#1`）。
 	 *
-	 * ⚠️ `skin_table` 在 `loadSkipFiles` 里（运行期不整表加载），但这里是**裁剪阶段**，
-	 * `raw` 里已经拿到全量数据，所以能直接抽映射而不额外读盘。
+	 * ⚠️ `skin_table` 在 `loadSkipFiles` 里（3.8MB，不能整表并入 `raw` 那批常驻内存），
+	 * 但**裁剪阶段又必须用到它**，所以 `loadArknightData` 会单独补读一次、只抽出这份映射后立即释放。
+	 * 历史坑：最初漏了这一步，`raw.skin_table` 恒为 `undefined` ⇒ 映射恒为空 ⇒
+	 * 「audio 对象形态指向皮肤语音」整体失效（且当时查不到会丢弃整组，表现为技能静音）。
 	 *
 	 * @param skinTable `skin_table` 原始数据
 	 */
@@ -264,9 +284,26 @@ class WhichWayArknight {
 			const asset = word.voiceAsset ?? "";
 			const slash = asset.lastIndexOf("/");
 			const wordkey = slash > 0 ? asset.slice(0, slash) : word.charId;
-			(voiceLines[wordkey] ??= {})[word.voiceTitle] = text;
+			(voiceLines[wordkey] ??= {})[word.voiceTitle] = this.normalizeVoiceText(text);
 		}
 		return voiceLines;
+	}
+
+	/**
+	 * 把台词里的明日方舟占位符换成固定文本。
+	 *
+	 * 游戏原文用 `{@nickname}` 表示「玩家昵称」，`Dr.{@nickname}` 就是「Dr.博士」。
+	 * 无名杀没有昵称概念，直接留着会原样显示成大括号，所以要替换掉：
+	 * - `Dr.{@nickname}` → `博士`（整个前缀一起去掉，否则会变成「Dr.博士」）
+	 * - 其余 `{@nickname}` → `博士`
+	 *
+	 * 这两条顺序不能反：先处理带 `Dr.` 的，否则 `Dr.` 会被单独留下。
+	 *
+	 * @param text 原始台词
+	 * @returns 替换后的台词
+	 */
+	normalizeVoiceText(text: string): string {
+		return text.replace(/Dr\.\{@nickname\}/g, "博士").replace(/\{@nickname\}/g, "博士");
 	}
 
 	/**
@@ -697,7 +734,7 @@ class WhichWayArknight {
 	 * 精简缓存的结构版本：白名单字段发生变化时必须 +1，否则老缓存不会被重建
 	 * （只靠扩展版本号覆盖不了「改了白名单但没升版本」的情况）
 	 */
-	private readonly slimCacheSchema = 4;
+	private readonly slimCacheSchema = 5;
 
 	/**
 	 * 本次启动是否重新下载过明日方舟数据。

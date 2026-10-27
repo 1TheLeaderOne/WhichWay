@@ -1,69 +1,64 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
 
-character("char_376_therex", { pack: "mediocreSJZX",
-			hp: 6,
-			group: "luomrfz",
-			sex: "male",
-			skills: ["reqingmrfz", "nuanrenmrfz"],
-		});
+character("char_376_therex", { pack: "mediocreSJZX", hp: 6, group: "luomrfz", sex: "male", skills: ["reqingmrfz", "nuanrenmrfz"] });
 
 skill({
-	"reqingmrfz": {
-			audio: ["观看作战记录", "编入队伍"],
-			forced: true,
-			trigger: {
-				player: "phaseDrawBegin",
-				source: "damageEnd",
-			},
-			filter(event, player) {
-				return event.name === "damage" ? event.num > 0 && event.player !== player : true;
-			},
-			async content(event, trigger, player) {
-				if (trigger.name === "damage") player.draw(trigger.num);
-				else {
-					player.recover(trigger.num);
-					trigger.cancel();
-				}
-			},
-			ai: {
-				combo: "nuanrenmrfz",
-				threaten: 0.8,
-			},
+	reqingmrfz: {
+		audio: ["观看作战记录", "编入队伍"],
+		forced: true,
+		trigger: {
+			player: "phaseDrawBegin",
+			source: "damageEnd",
 		},
-	"nuanrenmrfz": {
-			audio: ["行动出发", "作战中1", "作战中2", "作战中3", "作战中4"],
-			trigger: { player: "phaseZhunbeiBegin" },
-			async cost(event, trigger, player) {
-				const half = char => Math.max(1, Math.floor(char.hp / 2));
-				event.result = await player
-					.chooseTarget()
-					.set("prompt", get.prompt("nuanrenmrfz"))
-					.set("prompt2", `你可以对自己造成${half(player)}点伤害并对一名其他角色造成相当于其体力值一半（向下取整）的伤害`)
-					.set("ai", target => {
-						let player = get.player();
-						if (get.attitude2(target) > 0) return -1;
-						if (player.hp < 3 && player.countCards("hs", card => ["tao", "jiu"].includes(get.name(card) || ""))) return -1;
-						return target.hp / 2;
-					})
-					.set("targetprompt2", [target => `${get.cnNumber(half(target))}点伤害`])
-					.set("filterTarget", lib.filter.notMe)
-					.forResult();
-			},
-			async content(event, trigger, player) {
-				const half = char => Math.max(1, Math.floor(char.hp / 2));
-				event.targets[0].damage(half(event.targets[0]));
-				player.damage(half(player));
-			},
+		filter(event, player) {
+			return event.name === "damage" ? event.num > 0 && event.player !== player : true;
 		},
+		async content(event, trigger, player) {
+			if (trigger.name === "damage") player.draw(trigger.num);
+			else {
+				player.recover(trigger.num);
+				trigger.cancel();
+			}
+		},
+		ai: {
+			combo: "nuanrenmrfz",
+			threaten: 0.8,
+		},
+	},
+	nuanrenmrfz: {
+		audio: ["行动出发", "作战中1", "作战中2", "作战中3", "作战中4"],
+		trigger: { player: "phaseZhunbeiBegin" },
+		async cost(event, trigger, player) {
+			const half = char => Math.max(1, Math.floor(char.hp / 2));
+			event.result = await player
+				.chooseTarget()
+				.set("prompt", get.prompt("nuanrenmrfz"))
+				.set("prompt2", `你可以对自己造成${half(player)}点伤害并对一名其他角色造成相当于其体力值一半（向下取整）的伤害`)
+				.set("ai", target => {
+					let player = get.player();
+					if (get.attitude2(target) > 0) return -1;
+					if (player.hp < 3 && player.countCards("hs", card => ["tao", "jiu"].includes(get.name(card) || ""))) return -1;
+					return target.hp / 2;
+				})
+				.set("targetprompt2", [target => `${get.cnNumber(half(target))}点伤害`])
+				.set("filterTarget", lib.filter.notMe)
+				.forResult();
+		},
+		async content(event, trigger, player) {
+			const half = char => Math.max(1, Math.floor(char.hp / 2));
+			event.targets[0].damage({ num: half(event.targets[0]) });
+			player.damage({ num: half(player) });
+		},
+	},
 });
 
 translate({
-	"char_376_therex": "THRM-EX",
-	"reqingmrfz": "热情",
-	"reqingmrfz_info": "锁定技，你的摸牌阶段改为回复额定摸牌数的体力值；当你对其他角色造成伤害后，你摸等量张牌。",
-	"nuanrenmrfz": "暖人",
-	"nuanrenmrfz_info": "准备阶段，你可以对自己和一名其他角色造成相当于各自体力值一半（向下取整，至少为1）的伤害。",
+	char_376_therex: "THRM-EX",
+	reqingmrfz: "热情",
+	reqingmrfz_info: "锁定技，你的摸牌阶段改为回复额定摸牌数的体力值；当你对其他角色造成伤害后，你摸等量张牌。",
+	nuanrenmrfz: "暖人",
+	nuanrenmrfz_info: "准备阶段，你可以对自己和一名其他角色造成相当于各自体力值一半（向下取整，至少为1）的伤害。",
 });
 
 characterTitle("char_376_therex", "<font color = #b7229c66>炙热冲击！</font>");

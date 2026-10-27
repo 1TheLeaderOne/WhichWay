@@ -49,8 +49,7 @@ skill({
 				if (used.some(i => cards.map(j => get.color(j)).includes(i))) {
 					player.addMark("kuangshimrfz", 1, false);
 				} else player.storage.kuangshimrfz_used.addArray(cards.map(j => get.color(j)));
-				await player
-					.chooseUseTarget({ name: "juedou" }, cards, targets)
+				await player.chooseUseTarget({ card: { name: "juedou" }, cards, targets })
 					.set("forced", true)
 					//@ts-ignore
 					.set("filterTarget", (card, player, target) => get.event().targetsx.includes(target))
@@ -88,7 +87,7 @@ skill({
 						const num = player.countCards("h") - player.getHandcardLimit();
 						if (num === 0) {
 							//
-						} else if (num > 0) await player.chooseToDiscard("h", num, true, `请弃置${get.cnNumber(num)}张牌`);
+						} else if (num > 0) await player.chooseToDiscard({ position: "h", selectCard: num, forced: true, prompt: `请弃置${get.cnNumber(num)}张牌` });
 						else await player.draw(Math.abs(num));
 						let evt = event.getParent("phaseUse");
 						if (evt) {

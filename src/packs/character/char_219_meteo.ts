@@ -1,56 +1,46 @@
 import { lib, game, ui, get, ai, _status } from "noname";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../hooks.ts";
+import { gameUtils } from "../../nonameEx/custom/gameUtils.ts";
 
-character("char_219_meteo", { pack: "epicSJZX",
-			sex: "female",
-			group: "luomrfz",
-			hp: 4,
-			skills: ["yxliumingmrfz","dingyuanmrfz"],
-		});
+character("char_219_meteo", { pack: "epicSJZX", sex: "female", group: "luomrfz", hp: 4, skills: ["yxliumingmrfz", "dingyuanmrfz"] });
+
+const exps_tag = "yxliumingmrfz";
 
 skill({
 	zhimingmrfz: {
 		mark: true,
 		intro: {
 			content: function (event, player) {
-				let storage = player.storage.yxliumingmrfz_count;
-				if (player.awakenedSkills && player.awakenedSkills.includes("dingyuanmrfz")) {
-					return "置于过武将牌上的牌（装备牌和延时锦囊除外）:" + get.translation(storage["card"]);
-				}
-				return "已置于过武将牌上" + storage["count"] + "张牌</br>置于过武将牌上的牌（装备牌和延时锦囊除外）:" + get.translation(storage["card"]);
+				return `·获得过的“铭”:${get.translation(getNameplate(player))}`;
 			},
 		},
-		audio: 2,
+		audio: ["部署2", "作战中3"],
 		enable: ["chooseToUse", "chooseToRespond"],
 		hiddenCard: function (player, name) {
-			let cards = player.storage.yxliumingmrfz_count["card"];
-			if (player.countCards("he") < 1 || !cards || player.hasSkill("zhimingmrfz_ban")) return false;
-			for (let i of cards) {
-				if (name == i) return true;
+			const names = getNameplate(player);
+			if (player.countCards("he") < 1 || player.hasSkill("zhimingmrfz_ban")) return false;
+			for (let i of names) {
+				if (name === i) return true;
 			}
 			return false;
 		},
 		filter: function (event, player) {
-			let cards = player.storage.yxliumingmrfz_count["card"];
-			if (player.countCards("he") < 1 || !cards || player.hasSkill("zhimingmrfz_ban")) return false;
-			for (let i of cards) {
+			const names = getNameplate(player);
+			if (player.countCards("he") < 1 || player.hasSkill("zhimingmrfz_ban")) return false;
+			for (let i of names) {
 				if (event.filterCard({ name: i, isCard: true }, player, event)) return true;
 			}
 			return false;
 		},
 		chooseButton: {
 			dialog: function (event, player) {
-				let vcards:any[] = [];
-				let list = player.storage.yxliumingmrfz_count["card"];
-				for (let name of list) {
+				let vcards: any[] = [];
+				const names = getNameplate(player);
+				for (let name of names) {
 					let card = { name: name, isCard: true };
 					let type = get.type(name);
 					if (event.filterCard(card, player, event)) vcards.push([type, "", name]);
 				}
-				/**
-				 * @type { Dialog }
-				 */
-				//@ts-ignore
 				let dialog = ui.create.dialog("祗铭", [vcards, "vcard"], "hidden");
 				//@ts-ignore
 				dialog.direct = true;
@@ -64,8 +54,10 @@ skill({
 						name: links[0][2],
 					},
 					position: "he",
+					check(card: Card) {
+						return 8 - get.value(card);
+					},
 					async precontent(event, trigger, player) {
-						//@ts-ignore
 						player.logSkill("zhimingmrfz");
 						player.addTempSkill("zhimingmrfz_ban", { global: "phaseEnd" });
 					},
@@ -87,239 +79,212 @@ skill({
 			},
 		},
 	},
-	"dingyuanmrfz": {
-			derivation: "zhimingmrfz",
-			mark: true,
-			intro: {
-				content: function (event, player) {
-					var storage = player.storage.yxliumingmrfz_count;
-					if (player.awakenedSkills && player.awakenedSkills.includes("dingyuanmrfz")) {
-						return "置于过武将牌上的牌:" + get.translation(storage["card"]);
-					}
+	dingyuanmrfz: {
+		whichway: {
+			affiliates: ["zhimingmrfz"],
+		},
+		derivation: "zhimingmrfz",
+		mark: true,
+		intro: {
+			content: function (event, player) {
+				return countNamePlate(player) < 3 ? `·“铭”的数量:${countNamePlate(player)}/3` : `·条件已完成，努力活到准备阶段吧！`;
+			},
+		},
+		onremove: true,
+		audio: ["晋升后交谈1", "晋升后交谈2"],
+		forced: true,
+		skillAnimation: true,
+		animationColor: "thunder",
+		unique: true,
+		juexingji: true,
+		trigger: {
+			player: "phaseZhunbeiBegin",
+		},
+		filter: function (event, player) {
+			return countNamePlate(player) >= 3;
+		},
+		async content(event, trigger, player) {
+			player.awakenSkill("dingyuanmrfz");
+			player.loseMaxHp();
+			player.addSkill("zhimingmrfz");
+			player.storage.dingyuanmrfz_rewrite = true;
+		},
+		ai: {
+			combo: "yxliumingmrfz",
+		},
+	},
+	yxliumingmrfz: {
+		derivation: ["yxliumingmrfz_rewrite"],
+		mod: {
+			targetEnabled(card: Card, player, target) {
+				const exps = target.getExpansions(exps_tag);
+				if (exps.map(c => get.suit(c)).includes(get.suit(card)) && target !== player) {
+					return false;
+				}
+			},
+		},
+		init(player, skill) {
+			game.broadcastAll(() => {
+				lib.translate["yxliumingmrfz_cost_gaintag"] = "造成伤害的牌";
+			});
+		},
+		audio: ["信赖提升后交谈3", "完成高难行动"],
+		onremove(player, type) {
+			const cards = player.getExpansions(exps_tag);
+			if (cards.length) player.loseToDiscardpile({ cards });
+		},
+		intro: {
+			mark(dialog, storage, player, event, skill) {
+				const cards = player.getExpansions(exps_tag);
+				if (cards.length < 1) {
+					dialog.addText("没有“铭”");
+					return;
+				}
+				if (player.hasSkill("dingyuanmrfz") && !player.hasSkill("zhimingmrfz")) {
+					dialog.addText(`·获得过的“铭”（去重）：${get.translation(getNameplate(player))}`);
+					dialog.addText("当前的“铭”:");
+				}
+				dialog.addAuto(cards);
+			},
+		},
+		trigger: {
+			global: "damageEnd",
+		},
+		filter(event, player, name, target) {
+			return event.card && event.card.cards.length > 0 && event.cards.filter(c => ["o", "d"].includes(get.position(c)));
+		},
+		async cost(event, trigger, player) {
+			const cards = player.getExpansions(exps_tag);
+			const curCards = trigger.cards.filter(c => ["o", "d"].includes(get.position(c)));
+			const curTrans = get.translation(curCards);
+			const result = await player
+				.chooseFakeCard({
+					tagName: "yxliumingmrfz_cost_gaintag",
+					cards: curCards,
+					prompt: get.prompt(exps_tag),
+					prompt2: `你可以${cards.length > 0 ? `获得${get.translation(cards)}并将` : `将`}${curTrans}置于你的武将牌上,称之为"铭"`,
+					ai(card) {
+						let val = get.value(card);
+						if (get.color(card) === "black") val += 2;
+						if (!getNameplate(player).includes(get.name(card)!)) val += 2;
+						if (["tao", "jiu", "wuxie", "lebu"].filter(name => !getNameplate(player).includes(name)).includes(get.name(card)!)) val += 5;
+						return val;
+					},
+				})
+				.forResult();
+			console.log(result);
+			if (result.bool === true) {
+				event.result = gameUtils.createResult({ bool: true, cards: result.links });
+			}
+		},
+		async content(event, trigger, player) {
+			const cards = event.cards,
+				exps = player.getExpansions(exps_tag);
+			if (exps.length > 0) {
+				await player.gain({
+					cards: exps,
+					animate: "gain2",
+				});
+			}
+			player.addToExpansion({
+				cards,
+				source: trigger.source,
+				gaintag: [exps_tag],
+				animate: "giveAuto",
+			});
+		},
+		group: ["yxliumingmrfz_rewrite", "yxliumingmrfz_tips"],
+		subSkill: {
+			rewrite: {
+				audio: "yxliumingmrfz",
+				trigger: {
+					player: "useCard",
+				},
+				filter(event, player, name, target) {
+					if (!player.storage.dingyuanmrfz_rewrite) return false;
 					return (
-						"已置于过武将牌上" +
-						storage["count"] +
-						"张牌</br>置于过武将牌上的牌（装备牌和延时锦囊除外）:" +
-						get.translation(storage["card"])
+						event.card &&
+						(get.type(event.card) == "trick" || (get.type(event.card) == "basic" && !["shan", "tao", "jiu", "du"].includes(event.card.name))) &&
+						player
+							.getExpansions(exps_tag)
+							.map(c => get.suit(c))
+							.includes(get.suit(event.card))
 					);
 				},
-			},
-			onremove: true,
-			audio: 2,
-			forced: true,
-			skillAnimation: true,
-			animationColor: "thunder",
-			unique: true,
-			juexingji: true,
-			trigger: {
-				player: "phaseZhunbeiBegin",
-			},
-			filter: function (event, player) {
-				return player.storage.yxliumingmrfz_count["count"] >= 3;
-			},
-			async content(event, trigger, player) {
-				player.awakenSkill("dingyuanmrfz");
-				player.loseMaxHp();
-				player.addSkill("zhimingmrfz");
-			},
-		},
-	"yxliumingmrfz": {
-			audio: 2,
-			forced: true,
-			trigger: {
-				global: "phaseBegin",
-			},
-			marktext: "铭",
-			intro: {
-				content: "expansion",
-				markcount: "expansion",
-			},
-			onremove: function (player, skill) {
-				var cards = player.getExpansions(skill);
-				if (cards.length) player.loseToDiscardpile(cards);
-			},
-			filter: function (event, player) {
-				return player.getExpansions("yxliumingmrfz").length < 1;
-			},
-			async content(event, trigger, player) {
-				var cards = game.cardsGotoOrdering(get.cards(1)).cards[0];
-				player.addToExpansion(cards, player, "giveAuto").gaintag.add("yxliumingmrfz");
-			},
-			group: ["yxliumingmrfz_target", "yxliumingmrfz_use", "yxliumingmrfz_count"],
-			subSkill: {
-				count: {
-					init: function (player) {
-						player.storage.yxliumingmrfz_count = {
-							count: 0,
-							card: [],
-						};
-					},
-					onremove: function (player) {
-						delete player.storage.yxliumingmrfz_count;
-					},
-					silent: true,
-					charlotte: true,
-					trigger: {
-						player: "addToExpansionAfter",
-					},
-					filter: function (event, player) {
-						//@ts-ignore
-						return event.getParent().name == "yxliumingmrfz";
-					},
-					async content(event, trigger, player) {
-						if (!player.storage.yxliumingmrfz_count)
-							player.storage.yxliumingmrfz_count = {
-								count: 0,
-								card: [],
-							};
-						if (!player.awakenedSkills || !player.awakenedSkills.includes("dingyuanmrfz")) player.storage.yxliumingmrfz_count["count"]++;
-						if (trigger.cards) {
-							for (var i of trigger.cards) {
-								if (get.type(i) == "equip" || get.type(i) == "delay") continue;
-								if (player.storage.yxliumingmrfz_count["card"].includes(i.name)) continue;
-								player.storage.yxliumingmrfz_count["card"].add(i.name);
-							}
-						}
+				forced: true,
+				async content(event, trigger, player) {
+					trigger.directHit.addArray(game.players.filter(i => i !== player));
+				},
+				ai: {
+					directHit_ai: true,
+					skillTagFilter(player, tag, arg) {
+						const card: Card = arg?.card;
+						const exps = player.getExpansions(exps_tag);
+						if (!card || exps.length < 1 || !player.storage.dingyuanmrfz_rewrite) return false;
+						return get.suit(card) === get.suit(exps[0]);
 					},
 				},
-				ban: {
-					charlotte: true,
+			},
+			tips: {
+				silent: true,
+				charlotte: true,
+				trigger: {
+					player: ["loseAfter", "changeHp", "gainMaxHpAfter", "loseMaxHpAfter"],
+					global: ["equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
 				},
-				use: {
-					enable: "chooseToUse",
-					hiddenCard: function (player, name) {
-						if (player.getExpansions("yxliumingmrfz").length < 1) return false;
-						return name == player.getExpansions("yxliumingmrfz")[0].name;
-					},
-					filter: function (event, player) {
-						if (player.getExpansions("yxliumingmrfz").length < 1) return false;
-						return event.filterCard({ name: player.getExpansions("yxliumingmrfz")[0].name, isCard: true }, player, event);
-					},
-					chooseButton: {
-						dialog: function (event, player) {
-							var vcards = [];
-							var card = player.getExpansions("yxliumingmrfz")[0].name;
-							var type = get.translation(get.type2(card));
-							if (event.filterCard({ name: card, isCard: true }, player, event)) vcards.push([type, "", card]);
+				filter(event, player, name, target) {
+					return !!player.storage.dingyuanmrfz_rewrite;
+				},
+				async content(event,trigger,player){
+					const exps = player.getExpansions(exps_tag);
+					const tag = "yxliumingmrfz_tips_id";
+					player.removePromptSJZX(tag);
 
-							/**
-							 * @type { Dialog }
-							 */
-							//@ts-ignore
-							var dialog = ui.create.dialog("流铭", [vcards, "vcard"], "hidden");
-							//@ts-ignore
-							dialog.direct = true;
-							return dialog;
-						},
-						backup: function (links, player) {
-							return {
-								filterCard: card => {
-									var player = _status.event.player;
-									return !!player.getExpansions("yxliumingmrfz")[0];
-								},
-								selectCard: -1,
-								position: "x",
-								viewAs: {
-									name: links[0][2],
-									nature: links[0][3],
-								},
-								async precontent(event, trigger, player) {
-									//@ts-ignore
-									player.logSkill("yxliumingmrfz");
-								},
-							};
-						},
-						prompt: function (links, player) {
-							return (
-								"【流铭】：使用一张" + (links[0][3] ? get.translation(links[0][3]) : "") + "【" + get.translation(links[0][2]) + "】"
-							);
-						},
-					},
-					ai: {
-						order: function () {
-							var player = _status.event.player;
-							var card = player.getExpansions("yxliumingmrfz")[0];
-							return get.order(card) + 0.1;
-						},
-						result: {
-							player: 1,
-						},
-					},
-				},
-				target: {
-					trigger: {
-						target: "useCardToPlayered",
-					},
-					filter: function (event, player) {
-						if (event.player == player) return false;
-						if (player.getExpansions("yxliumingmrfz").length == 0 || !event.card) return false;
-						var suit = get.suit(event.card);
-						return !!player.getExpansions("yxliumingmrfz").filter(function (magic) {
-							return get.suit(magic) == suit || magic.number != event.card.number;
-						}).length;
-					},
-					forced: true,
-					async content(event, trigger, player) {
-						const card = player.getExpansions("yxliumingmrfz")[0];
-						var num1 = card.number,
-							num2 = trigger.card.number;
-						if (num1 != num2) {
-							var type = get.type2(card);
-							var eff = get.effect(player, trigger.card, trigger.player, trigger.player);
-							const result = await trigger.player
-								.chooseToDiscard(
-									"【流铭】:请弃置一张" + get.translation(get.type(card)) + "牌，否则此牌对" + get.translation(player) + "无效"
-								)
-								.set("filterCard", function (card) {
-									return get.type2(card) == _status.event.type;
-								})
-								.set("ai", function (card) {
-									if (_status.event.eff > 0) {
-										return 10 - get.value(card);
-									}
-									return 0;
-								})
-								.set("eff", eff)
-								.set("type", type)
-								.forResult();
+					if(exps.length<0) return;
+					const suit = get.suit(exps[0]);
 
-							if (result.bool == false) {
-								trigger.targets.remove(player);
-								//@ts-ignore
-								trigger.getParent().triggeredTargets2.remove(player);
-								trigger.untrigger();
-								player.removeSkill("yxliumingmrfz_target");
-								player.addTempSkill("yxliumingmrfz_reget", { global: "phaseBegin" });
-								player.addTempSkill("yxliumingmrfz_ban", { global: "phaseEnd" });
-							}
-						}
-						const cardx = player.getExpansions("yxliumingmrfz")[0];
-						if (get.suit(cardx) == get.suit(trigger.card)) {
-							player.gain(cardx, "gain2");
-						}
-						//@ts-ignore
-						player.logSkill("yxliumingmrfz");
-					},
-				},
-				reget: {
-					silent: true,
-					trigger: { global: "phaseEnd" },
-					async content(event, trigger, player) {
-						player.addSkill("yxliumingmrfz_target");
-					},
+					for(const card of player.getCards("hs")){
+						if(get.suit(card) === suit) card.addPromptSJZX("不可响应",tag);
+					}
 				},
 			},
 		},
+	},
 });
 
+function getNameplate(player: Player, removal: boolean = true): string[] {
+	const names: string[] = [];
+	//everything里可能堆了一坨数据,避免使用函数式
+	for (const evt of game.getAllGlobalHistory("everything", evt => evt.name === "addToExpansion" && evt.player === player && evt.gaintag?.includes(exps_tag) && !!evt.cards?.length)) {
+		for (const card of evt.cards ?? []) {
+			const name = get.name(card);
+			if (name != null) names.push(name);
+		}
+	}
+	return removal ? Array.from(new Set(names)) : names;
+}
+
+function countNamePlate(player: Player): number {
+	return getNameplate(player, false).length;
+}
+
 translate({
-	"char_219_meteo": "陨星",
-	"dingyuanmrfz": "定愿",
-	"dingyuanmrfz_info": "觉醒技，准备阶段，若你于本局游戏中置于武将牌上过至少三张‘铭’，你失去一点体力上限并获得技能【祗铭】。",
-	"yxliumingmrfz": "流铭",
-	"yxliumingmrfz_info": "①锁定技，一名角色的回合开始时，若你武将牌上没有‘铭’，你将牌堆顶的一张牌置于你的武将牌上，称之为‘铭’。②锁定技，当你成为其他角色使用的牌的目标后，若此牌[花色/点数]与‘铭’[相同/不同]，则[你获得武将牌上的‘铭’/其须弃置一张与‘铭’类型一致的牌，否则此牌对你无效且你失去此技能直到本回合结束]。③你可以使用‘铭’。",
+	char_219_meteo: "陨星",
+	dingyuanmrfz: "定愿",
+	dingyuanmrfz_info: "觉醒技，准备阶段，若你于本局游戏中置于武将牌上过至少三张“铭”，你失去一点体力上限、获得技能【祗铭】并修改【流铭】。",
+	yxliumingmrfz: "流铭",
+	yxliumingmrfz_info: "任意角色受到伤害后，你可以获得所有“铭”并将对其造成伤害牌中的一张置于你的武将牌上，称之为“铭”，当你武将牌上有“铭”时，其他角色不能使用与“铭”相同花色的牌指定你为目标。",
+	yxliumingmrfz_rewrite: "流铭",
+	yxliumingmrfz_rewrite_info: "任意角色受到伤害后，你可以获得所有“铭”并将对其造成伤害牌中的一张置于你的武将牌上，称之为“铭”，当你武将牌上有“铭”时，其他角色不能使用与“铭”相同花色的牌指定你为目标且你与“铭”花色相同的牌不可被其他角色相应。",
 	zhimingmrfz: "祗铭",
-	zhimingmrfz_info: "每回合限一次，你可以将一张牌当作与本局游戏中你获得过的‘铭’的同名牌（装备牌和延时锦囊牌除外）使用或打出。",
+	zhimingmrfz_info: "每回合限一次，你可以将一张牌当作与本局游戏中你获得过的“铭”的同名牌使用或打出。",
+});
+
+dynamicTranslate("yxliumingmrfz", player => {
+	const changed = player.storage.dingyuanmrfz_rewrite === true;
+	return get.skillInfoTranslation(changed ? "yxliumingmrfz_rewrite" : "yxliumingmrfz");
 });
 
 characterIntro("char_219_meteo", "陨星，前“守林人”组织成员，现自由佣兵，此外履历不详。</br>现作为狙击干员为罗德岛服务，使用手中的弩炮发挥出卓越的范围杀伤力。");
+
+characterTitle("char_219_meteo", "流浪佣兵");

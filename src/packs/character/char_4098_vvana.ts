@@ -35,7 +35,7 @@ skill({
 			async content(event, trigger, player) {
 				const cards = player.getCards("h");
 				trigger.player.storage.zhanjumrfz = true;
-				player.useCard({ name: "tao" }, cards, trigger.player);
+				player.useCard({ card: get.autoViewAs({ name: "tao" }), cards, targets: [trigger.player] });
 			},
 			group: "zhanjumrfz_recast",
 			subSkill: {
@@ -51,7 +51,7 @@ skill({
 						if (player.countCards("hej") == 0) event.finish();
 						else {
 							const result = await player
-								.chooseCard("【盏菊】:你可以重铸一张你区域内的牌", "hej")
+								.chooseCard({ prompt: "【盏菊】:你可以重铸一张你区域内的牌", position: "hej" })
 								.set("ai", card => 8 - get.value(card))
 								.forResult();
 
@@ -128,8 +128,7 @@ skill({
 						}
 						event.num = num;
 
-						result = await player
-							.chooseControl("发牌", "摸牌", "cancel2")
+						result = await player.chooseControl({ controls: ["发牌", "摸牌", "cancel2"] })
 							.set("prompt", "是否发动【烛火】？")
 							.set("ai", () => {
 								const aiPlayer = _status.event.player;
@@ -155,7 +154,7 @@ skill({
 							} else {
 								const selectNum = event.num;
 								result = await player
-									.chooseTarget(true, "【烛火】:你可以选择至多" + selectNum + "名角色，令其各摸一张牌", [1, selectNum])
+									.chooseTarget({ forced: true, prompt: "【烛火】:你可以选择至多" + selectNum + "名角色，令其各摸一张牌", selectTarget: [1, selectNum] })
 									.set("ai", target => {
 										return get.attitude(target, player) > 2;
 									})

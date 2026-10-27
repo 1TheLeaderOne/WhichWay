@@ -26,7 +26,7 @@ skill({
 			async cost(event, trigger, player) {
 				let sourceCards = trigger.cards || undefined;
 				const result = await player
-					.chooseToDiscard("he")
+					.chooseToDiscard({ position: "he" })
 					.set("prompt", get.prompt("baidumrfz"))
 					.set(
 						"prompt2",
@@ -58,7 +58,7 @@ skill({
 				for (var i of sourceCards) {
 					if (get.position(i, true) == "o") gaincard.push(i);
 				}
-				if (gaincard.length > 0) player.gain(gaincard, "gain2");
+				if (gaincard.length > 0) player.gain({ cards: gaincard, animate: "gain2" });
 				//@ts-ignore
 				var num = Math.abs(get.cardNameLength(trigger.card) - get.cardNameLength(cards[0]));
 				if (num > 0) trigger.player.draw(num);

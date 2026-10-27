@@ -120,7 +120,7 @@ skill({
 			},
 			async content(event, trigger, player) {
 				const num = player.getCards("j").length;
-				player.discardPlayerCard(player, num, "j", true);
+				player.discardPlayerCard({ target: player, selectButton: num, position: "j", forced: true });
 				player.loseHp();
 			},
 		},

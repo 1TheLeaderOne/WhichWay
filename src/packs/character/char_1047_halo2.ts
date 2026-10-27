@@ -1,6 +1,6 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { whichWayTips } from "../../tips/index.ts";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../hooks.ts";
 
 character("char_1047_halo2", { pack: "legendSJZX",
 			sex: "female",
@@ -194,3 +194,14 @@ translate({
 characterTitle("char_1047_halo2", "<font color = green>溯光求源</font>");
 
 characterIntro("char_1047_halo2", "莱茵生命能量科研究员，埃琳娜·乌比卡博士，如今作为谢拉格观测站的能量组组长活跃在研究一线。谢拉格天灾事件的主要调查者之一。");
+
+dynamicTranslate({
+	yulimrfz(player) {
+		return player.storage.yulimrfz ? get.skillInfoTranslation("yulimrfz_rewirte") : get.skillInfoTranslation("yulimrfz");
+	},
+	sulimrfz(player) {
+		return player.storage.yulimrfz
+			? "出牌阶段，你可以弃置至多两张本阶段未以此法弃置过的类型的牌,若这两张牌的类型均不为你手牌中唯一最多的类型,你摸X张牌。（X=你手牌中没有的类型的数量）"
+			: get.skillInfoTranslation("sulimrfz");
+	},
+});

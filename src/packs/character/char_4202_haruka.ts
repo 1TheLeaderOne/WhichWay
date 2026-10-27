@@ -1,5 +1,5 @@
 import { lib, game, ui, get, ai, _status } from "noname";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../hooks.ts";
 
 character("char_4202_haruka", { pack: "legendSJZX",
 			sex: "female",
@@ -225,7 +225,7 @@ skill({
 						target.countMark("fuyingmrfz") > target.countCards("he")
 							? { bool: false }
 							: await target
-									.chooseToDiscard("he")
+									.chooseToDiscard({ position: "he" })
 									.set("filterCard", card => {
 										let cards = ui.selected.cards;
 										if (cards.length > 1) {
@@ -266,3 +266,8 @@ translate({
 characterTitle("char_4202_haruka", "<font color = red>浮生若梦</font>");
 
 characterIntro("char_4202_haruka", "紫野遥，在东国南院有相当名气的艺人。艺名羽生萌萌香。受干员星熊推荐，与罗德岛签订合约，负责罗德岛与东国的交流工作。鉴于本人的要求，也会参与一部分外勤任务。");
+
+dynamicTranslate("youlinmrfz", function (player) {
+	let cnNum = player.hasSkill("youlinmrfz_addCount") ? "两" : "一";
+	return `出牌阶段限${cnNum}次，你可以展示M张手牌并展示N张牌堆顶的牌（M+N=3），选择至多三名角色，然后根据你展示的牌这些角色执行对应的选项并获得X-M个“沫”标记：<br>1.点数均不同：获得一点护甲;<br>2.花色均不同：摸X张牌;<br>3.类型均不同：本技能本阶段改成“出牌阶段限两次”。（X=执行的选项数）`;
+});

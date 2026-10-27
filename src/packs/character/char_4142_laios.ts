@@ -18,7 +18,7 @@ skill({
 			},
 			async cost(event, trigger, player) {
 				event.result = await player
-					.chooseToDiscard(`【拾剑】:你可以弃置一张牌，将【剑助】置入你的武器栏`, "he")
+					.chooseToDiscard({ prompt: `【拾剑】:你可以弃置一张牌，将【剑助】置入你的武器栏`, position: "he" })
 					.set("ai", card => {
 						return 6 - get.value(card);
 					})

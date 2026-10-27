@@ -23,14 +23,13 @@ skill({
 			},
 			async cost(event, trigger, player) {
 				let cards = trigger.getd().filter(i => get.position(i, true) == "d");
-				event.result = await player
-					.chooseCardButton("【觅材】:你可以获得一张牌", cards)
+				event.result = await player.chooseCardButton({ cards, prompt: "【觅材】:你可以获得一张牌" })
 					.set("ai", button => get.value(button))
 					.forResult();
 				event.result.cost_data = event.result;
 			},
 			async content(event, trigger, player) {
-				player.gain(event.cost_data.links, "gain2");
+				player.gain({ cards: event.cost_data.links, animate: "gain2" });
 			},
 		},
 	"beicaimrfz": {
@@ -57,7 +56,7 @@ skill({
 			},
 			async cost(event, trigger, player) {
 				event.result = await player
-					.chooseCard("h")
+					.chooseCard({ position: "h" })
 					.set("prompt2", "你可以将一张手牌视为任意小于此牌字数的一张牌。")
 					.set("prompt", "是否发动【备材】？")
 					.set("filterCard", card => get.cardNameLength(card) > 1)
@@ -75,8 +74,7 @@ skill({
 			},
 			async content(event, trigger, player) {
 				const list = lib.skill.beicaimrfz.lessNameLength(event.cards[0]);
-				const { links } = await player
-					.chooseButton([`备材<br>把${get.translation(event.cards)}视为：`, [list, "vcard"]], true)
+				const { links } = await player.chooseButton({ createDialog: [`备材<br>把${get.translation(event.cards)}视为：`, [list, "vcard"]], forced: true })
 					.set("ai", button => {
 						const player = get.player(),
 							card = {
@@ -144,7 +142,7 @@ skill({
 			multiline: true,
 			async content(event, trigger, player) {
 				player.storage.pengcaimrfz = event.targets.slice();
-				await player.useCard({ name: "wugu", pengcaimrfz: true }, event.targets, event.cards, false, "pengcaimrfz");
+				await player.useCard({ card: get.autoViewAs({ name: "wugu", pengcaimrfz: true }), targets: event.targets, cards: event.cards, addCount: false, skill: "pengcaimrfz" });
 				const store = player.storage.pengcaimrfz;
 				if (!Array.isArray(store)) return;
 				let type = [];
@@ -156,7 +154,7 @@ skill({
 				}
 				let SetType = new Set(type.slice());
 				if (SetType.size !== type.length) return;
-				await player.useCard({ name: "wugu", pengcaimrfz: true }, event.targets, event.cards, false, "pengcaimrfz");
+				await player.useCard({ card: get.autoViewAs({ name: "wugu", pengcaimrfz: true }), targets: event.targets, cards: event.cards, addCount: false, skill: "pengcaimrfz" });
 				delete player.storage.pengcaimrfz;
 			},
 			group: ["pengcaimrfz_wugu"],

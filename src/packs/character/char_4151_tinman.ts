@@ -38,7 +38,7 @@ skill({
 									.set("ai", button => get.player().getUseValue(button, undefined, true))
 									.forResult();
 					if (!links) return;
-					await player.chooseUseTarget(links[0]).set("nodistance", true).set("addCount", false);
+					await player.chooseUseTarget({ card: links[0] }).set("nodistance", true).set("addCount", false);
 					cards.remove(links[0]);
 				}
 			},

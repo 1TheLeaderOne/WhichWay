@@ -1,7 +1,7 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { whichWayTips } from "../../tips/index.ts";
 import { whichWayUtil } from "../../utill.js";
-import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
+import { character, skill, translate, characterTitle, characterIntro, dynamicTranslate } from "../hooks.ts";
 
 character("char_4056_titi", { pack: "legendSJZX",
 			sex: "female",
@@ -44,7 +44,7 @@ skill({
 					//@ts-ignore
 					cards: [card2],
 				} = await target
-					.chooseCard("he")
+					.chooseCard({ position: "he" })
 					.set("forced", true)
 					.set("position", "he")
 					.set("prompt", whichWayUtil.colorize(`【修使】:请选择你要交给${get.translation(player)}的牌，若为#r装备牌#，你与其各摸一张牌`))
@@ -210,3 +210,9 @@ translate({
 characterTitle("char_4056_titi", "<font color = #a52a2a>拂扫除垢</font>");
 
 characterIntro("char_4056_titi", "法尔贾万达巴德博物馆现任馆长梅捷缇克缇，只有朋友才可以称她“缇缇”。现以外勤干员的身份与罗德岛展开合作。她也希望能尽自己的全力，修复萨尔贡与米诺斯的关系。");
+
+dynamicTranslate("titimrfz_mingshimrfz", function (player) {
+	return whichWayUtil.colorize(
+		`转换技，${player.storage.titimrfz_mingshimrfz ? "#s阳：出牌阶段限一次#;#y阴：当你受到伤害后#" : "#r阳：出牌阶段限一次#;#s阴：当你受到伤害后#"}。你可以展示手牌，并使用其中一张普通锦囊牌，你因此使用的普通锦囊牌额外结算Y次。（Y=你手牌中普通锦囊牌的数量）`
+	);
+});

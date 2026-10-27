@@ -30,8 +30,12 @@ skill({
 			async content(event, trigger, player) {
 				const { targets } = await player
 					// @ts-ignore
-					.chooseTarget(get.prompt("chongxiemrfz"), "你可以弃置其中一名角色的手牌", function (card, player, target) {
-						return (_status.event.targets.includes(target) || target == player) && target.countDiscardableCards(player, "h");
+					.chooseTarget({
+						prompt: get.prompt("chongxiemrfz"),
+						prompt2: "你可以弃置其中一名角色的手牌",
+						filterTarget: function (card, player, target) {
+							return (_status.event.targets.includes(target) || target == player) && target.countDiscardableCards(player, "h");
+						},
 					})
 					.set("ai", function (target) {
 						var player = _status.event.player;
@@ -51,7 +55,7 @@ skill({
 				// @ts-ignore
 				player.logSkill("chongxiemrfz", target);
 				const { links } = await player
-					.discardPlayerCard("h", target, true)
+					.discardPlayerCard({ position: "h", target, forced: true })
 					.set("target", target)
 					.set("complexSelect", false)
 					.set("ai", lib.card.guohe.ai.button)
@@ -78,7 +82,7 @@ skill({
 			},
 			// @ts-ignore
 			async content(event, trigger, player) {
-				await player.chooseUseTarget({ name: "sha", nature: "thunder", isCard: true }, true, "nodistance");
+				await player.chooseUseTarget({ card: { name: "sha", nature: "thunder", isCard: true }, forced: true, nodistance: true });
 				player.removeMark("chongxiemrfz", 1, false);
 			},
 			ai: {
@@ -113,7 +117,7 @@ skill({
 			async content(event, trigger, player) {
 				player.removeMark("chongxiemrfz", 6, false);
 				const { targets } = await player
-					.chooseTarget(true, "【雷霆】:请选择一个其他角色，对其使用6张雷【杀】")
+					.chooseTarget({ forced: true, prompt: "【雷霆】:请选择一个其他角色，对其使用6张雷【杀】" })
 					// @ts-ignore
 					.set("filterTarget", (card, player, target) => {
 						return player.canUse({ name: "sha", nature: "thunder", isCard: true }, target, false) && player != target;
@@ -127,7 +131,7 @@ skill({
 				while (num > 0) {
 					if (!targets[0].isIn()) break;
 					if (player.canUse({ name: "sha", nature: "thunder", isCard: true }, targets[0], false)) {
-						await player.useCard({ name: "sha", nature: "thunder", isCard: true }, targets[0]);
+						await player.useCard({ card: get.autoViewAs({ name: "sha", nature: "thunder", isCard: true }), targets: [targets[0]] });
 					}
 					num--;
 				}

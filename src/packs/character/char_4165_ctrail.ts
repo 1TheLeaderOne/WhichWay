@@ -73,7 +73,7 @@ skill({
 						.forResult();
 				} else {
 					event.result = await player
-						.chooseCard("he")
+						.chooseCard({ position: "he" })
 						.set("prompt", get.prompt("mijianmrfz"))
 						.set("prompt2", `你可以制衡${count + 1}`)
 						.set("selectCard", () => {
@@ -98,7 +98,7 @@ skill({
 							break;
 						}
 					}
-					await player.discard(event.cards);
+					await player.discard({ cards: event.cards });
 					await player.draw(event.cards.length + num);
 				}
 			},

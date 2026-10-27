@@ -59,7 +59,7 @@ skill({
 			},
 			// @ts-ignore
 			async content(event, trigger, player) {
-				const next = player.addToExpansion(event.cost_data.cards, player, "give");
+				const next = player.addToExpansion({ cards: event.cost_data.cards, source: player, animate: "give" });
 				// @ts-ignore
 				next.gaintag.add("mixumrfz");
 				await next;
@@ -209,7 +209,7 @@ skill({
 						async content(event, trigger, player) {
 							const lines = ["Are people so unhappy when they love?", "Pitiful creature of darkness, what kind of life have you known? God, give me courage to show you you are not alone!", "I am your angel of music."];
 							const cards = lib.skill.yashimrfz_backup.card;
-							await player.loseToDiscardpile(cards);
+							await player.loseToDiscardpile({ cards });
 							await player.draw(cards.length);
 
 							const cardsx = player.getExpansions("mixumrfz");

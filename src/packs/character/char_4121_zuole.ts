@@ -116,7 +116,7 @@ skill({
 					list2.push(targets[0]);
 				}
 				for (let i = 0; i < list2.length; i++) {
-					list2[i].addToExpansion(list[i][0], list2[i], "giveAuto").gaintag.add("bingzhumrfz");
+					list2[i].addToExpansion({ cards: list[i][0], source: list2[i], animate: "giveAuto" }).gaintag.add("bingzhumrfz");
 				}
 			},
 			group: ["bingzhumrfz_clear", "bingzhumrfz_eff"],

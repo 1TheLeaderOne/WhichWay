@@ -21,7 +21,7 @@ translate({
 	[`${NAME}_prefix`]: "予愿",
 
 	feijianmrfz: "飞笺",
-	feijianmrfz_info: "使命技，每种类型的牌限一次，你可以视为使用你手牌中的一张基本牌或普通锦囊牌并将此牌交给一名其他角色，获得此牌的角色选择令你模一张牌或弃置此牌。<br>成功：你因【飞笺】而摸至少两次牌：回复一点体力。",
+	feijianmrfz_info: "使命技，每种类型的牌每回合限一次，你可以视为使用你手牌中的一张基本牌或普通锦囊牌并将此牌交给一名其他角色，获得此牌的角色选择令你模一张牌或弃置此牌。<br>成功：你因【飞笺】而摸至少两次牌：回复一点体力。",
 
     "feijianmrfz_draw":"invisible",
 });
@@ -145,8 +145,8 @@ skill({
 						},
 						ai(card) {
 							const player = get.player();
-							const { target } = get.event();
-							if (get.attitude(player, target) > 0) return -1;
+							const { targetx } = get.event();
+							if (get.attitude(player, targetx) > 0) return -1;
 							return 6 - get.value(card);
 						},
 					})
@@ -161,6 +161,16 @@ skill({
 		},
         group:["feijianmrfz_achieve","feijianmrfz_count"],
         subSkill:{
+			clear:{
+				charlotte:true,
+                silent:true,
+				trigger:{
+					player:"phaseEnd"
+				},
+				async content(event,trigger,player){
+					player.storage.feijianmrfz = [];
+				},
+			},
             count:{
                 charlotte:true,
                 silent:true,
@@ -169,7 +179,7 @@ skill({
                 },
                 filter(event, player, name, target) {
                     const tags = event.gaintag as any[] || undefined;
-                    console.log(event,tags,tags.includes("feijianmrfz_draw"))
+                    // console.log(event,tags,tags.includes("feijianmrfz_draw"))
                     return tags && tags.includes("feijianmrfz_draw");
                 },
                 async content(event, trigger, player) {
