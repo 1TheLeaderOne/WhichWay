@@ -1,114 +1,120 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
 
-character("char_4199_makiri", { pack: "epicSJZX", sex: "male", hp: 3, maxHp: 4, group: "dongmrfz", skills: ["xianchoumrfz"] });
+character("char_4199_makiri", { pack: "epicSJZX",
+			sex: "male",
+			hp: 3,
+			maxHp: 4,
+			group: "dongmrfz",
+			skills: ["xianchoumrfz"],
+		});
 
 skill({
-	xianchoumrfz: {
-		audio: ["作战中1","作战中2"],
-		trigger: { player: "useCardAfter" },
-		init(player, skill) {
-			player.storage[skill] = [];
-		},
-		mark: true,
-		intro: {
-			content(_, player) {
-				let str: any[] = [];
-				if (player.hasSkill("xianchoumrfz")) {
-					str.push(`·已经使用过的类型:${get.translation(player.storage["xianchoumrfz"])}`);
-				}
-				return str.join("<br>");
+	"xianchoumrfz": {
+			audio: 2,
+			trigger: { player: "useCardAfter" },
+			init(player, skill) {
+				player.storage[skill] = [];
 			},
-		},
-		filter(event, player) {
-			//@ts-ignore
-			return event.card && !event.card.xianchoumrfz && !player.storage["xianchoumrfz"].includes(get.type2(event.card));
-		},
-		async cost(event, trigger, player) {
-			//@ts-ignore
-			let num = game.getRoundHistory("everything", evt => evt.name === "xianchoumrfz").length + 1;
-			event.result = await player
-				.chooseTarget()
-				.set("prompt", `你可以令一名其他角色视为使用${num}张【无中生有】并弃置${num}张牌`)
-				.set("ai", target => get.attitude2(target) > 0)
-				.forResult();
-			player.storage["xianchoumrfz"].add(get.type2(trigger.card));
-		},
-		// @ts-ignore
-		async content(event, trigger, player) {
-			const [target] = event.targets;
-			//@ts-ignore
-			let num = game.getRoundHistory("everything", evt => evt.name === "xianchoumrfz").length;
+			mark: true,
+			intro: {
+				content(_, player) {
+					let str = [];
+					if (player.hasSkill("xianchoumrfz")) {
+						str.push(`·已经使用过的类型:${get.translation(player.storage["xianchoumrfz"])}`);
+					}
+					return str.join("<br>");
+				},
+			},
+			filter(event, player) {
+				//@ts-ignore
+				return event.card && !event.card.xianchoumrfz && !player.storage["xianchoumrfz"].includes(get.type2(event.card));
+			},
+			async cost(event, trigger, player) {
+				//@ts-ignore
+				let num = game.getRoundHistory("everything", evt => evt.name === "xianchoumrfz").length + 1;
+				event.result = await player
+					.chooseTarget()
+					.set("prompt", `你可以令一名其他角色视为使用${num}张【无中生有】并弃置${num}张牌`)
+					.set("ai", target => get.attitude2(target) > 0)
+					.forResult();
+				player.storage["xianchoumrfz"].add(get.type2(trigger.card));
+			},
+			// @ts-ignore
+			async content(event, trigger, player) {
+				const [target] = event.targets;
+				//@ts-ignore
+				let num = game.getRoundHistory("everything", evt => evt.name === "xianchoumrfz").length;
 
-			for (let i = 0; i < num; i++) {
-				await target.useCard({ card: get.autoViewAs({ name: "wuzhong", isCard: true, xianchoumrfz: true }), targets: [target] });
-			}
-
-			await target.chooseToDiscard({ selectCard: num, forced: true, position: "he" }).set("ai", card => {
-				const evt = _status.event;
-				return evt.name === "phaseUse" && evt.player === get.player() ? -get.player().getUseValue(card) : -get.value(card);
-			});
-
-			const { cards } = await target
-				.chooseCard({ selectCard: [0, num] })
-				.set("filterCard", card => {
-					return !card.hasGaintag("xianchoumrfz");
-				})
-				// @ts-ignore
-				.set("ai", (card, player) => {
-					let info = get.info(card);
-					if (typeof info.usable === "number") return 114514;
-					return get.value(card);
-				})
-				.set("prompt", `你可以令至多${num}张手牌本轮使用无次数限制`)
-				.forResult();
-
-			if (cards) {
-				target.addGaintag(cards, "xianchoumrfz");
-				if (!target.storage.xianchoumrfz_igCount) {
-					target.storage.xianchoumrfz_igCount = true;
-					target
-						.when({ global: "roundStart" })
-						.then(async (event, trigger, player) => {
-							delete player.storage.xianchoumrfz_igCount;
-							player.removeGaintag("xianchoumrfz");
-						})
-						.assign({
-							mod: {
-								// @ts-ignore
-								cardUsable(card, player, num) {
-									//@ts-ignore
-									if (card.cards && card.cards.length === 1 && card.cards[0].hasGaintag("xianchoumrfz")) return Infinity;
-								},
-								// @ts-ignore
-								aiOrder(player, card, num) {
-									if (card.hasGaintag && card.hasGaintag("xianchoumrfz")) return (num -= 0.1);
-								},
-							},
-						});
+				for (let i = 0; i < num; i++) {
+					await target.useCard({ card: get.autoViewAs({ name: "wuzhong", isCard: true, xianchoumrfz: true }), targets: [target] });
 				}
-			}
-		},
-		group: ["xianchoumrfz_clear"],
-		subSkill: {
-			clear: {
-				charlotte: true,
-				silent: true,
-				trigger: { global: "roundStart" },
-				firstDo: true,
-				// @ts-ignore
-				async content(event, trigger, player) {
-					player.storage["xianchoumrfz"] = [];
+
+				await target.chooseToDiscard({ selectCard: num, forced: true, position: "he" }).set("ai", card => {
+					const evt = _status.event;
+					return evt.name === "phaseUse" && evt.player === get.player() ? -get.player().getUseValue(card) : -get.value(card);
+				});
+
+				const { cards } = await target
+					.chooseCard({ selectCard: [0, num] })
+					.set("filterCard", card => {
+						return !card.hasGaintag("xianchoumrfz");
+					})
+					// @ts-ignore
+					.set("ai", (card, player) => {
+						let info = get.info(card);
+						if (typeof info.usable === "number") return 114514;
+						return get.value(card);
+					})
+					.set("prompt", `你可以令至多${num}张手牌本轮使用无次数限制`)
+					.forResult();
+
+				if (cards) {
+					target.addGaintag(cards, "xianchoumrfz");
+					if (!target.storage.xianchoumrfz_igCount) {
+						target.storage.xianchoumrfz_igCount = true;
+						target
+							.when({ global: "roundStart" })
+							.then(async (event, trigger, player) => {
+								delete player.storage.xianchoumrfz_igCount;
+								player.removeGaintag("xianchoumrfz");
+							})
+							.assign({
+								mod: {
+									// @ts-ignore
+									cardUsable(card, player, num) {
+										//@ts-ignore
+										if (card.cards && card.cards.length === 1 && card.cards[0].hasGaintag("xianchoumrfz")) return Infinity;
+									},
+									// @ts-ignore
+									aiOrder(player, card, num) {
+										if (card.hasGaintag && card.hasGaintag("xianchoumrfz")) return (num -= 0.1);
+									},
+								},
+							});
+					}
+				}
+			},
+			group: ["xianchoumrfz_clear"],
+			subSkill: {
+				clear: {
+					charlotte: true,
+					silent: true,
+					trigger: { global: "roundStart" },
+					firstDo: true,
+					// @ts-ignore
+					async content(event, trigger, player) {
+						player.storage["xianchoumrfz"] = [];
+					},
 				},
 			},
 		},
-	},
 });
 
 translate({
-	char_4199_makiri: "松桐",
-	xianchoumrfz: "先筹",
-	xianchoumrfz_info: "当你不因此技能而于本轮首次使用一种类型的牌后，你可以令一名角色视为使用X张【无中生有】、弃置X张牌并令至多X张手牌本轮使用无次数限制。(X=本技能本轮发动的次数)",
+	"char_4199_makiri": "松桐",
+	"xianchoumrfz": "先筹",
+	"xianchoumrfz_info": "当你不因此技能而于本轮首次使用一种类型的牌后，你可以令一名角色视为使用X张【无中生有】、弃置X张牌并令至多X张手牌本轮使用无次数限制。(X=本技能本轮发动的次数)",
 });
 
 characterTitle("char_4199_makiri", "<font color = gray>见微知著</font>");

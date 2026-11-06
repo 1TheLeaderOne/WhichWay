@@ -1,64 +1,67 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { character, skill, translate, characterTitle, characterIntro } from "../hooks.ts";
 
-character("char_4122_grabds", { pack: "epicSJZX", sex: "female", group: "yanmrfz", hp: 4, skills: ["mushoumrfz"] });
+character("char_4122_grabds", { pack: "epicSJZX",
+			sex: "female",
+			group: "yanmrfz",
+			hp: 4,
+			skills: ["mushoumrfz"],
+		});
 
 skill({
-	mushoumrfz: {
-		audio: ["作战中1","作战中2","作战中3","作战中4"],
-		trigger: { global: "phaseEnd" },
-		direct: true,
-		getCanUseCard: function (event, player) {
-			let history = event.player.getHistory("lose", function (evt) {
-					return evt && evt.type == "discard";
-				}),
-				cards:any[] = [];
-			if (history.length == 0) return cards;
-			for (let i = 0; i < history.length; i++) {
-				let cardsList = history[i].cards;
-				for (let j = 0; j < cardsList.length; j++) {
-					if (!player.canUseToAnyone(cardsList[j])) continue;
-					if (get.position(cardsList[j], true) != "d") continue;
-					cards.push(cardsList[j]);
+	"mushoumrfz": {
+			audio: 2,
+			trigger: { global: "phaseEnd" },
+			direct: true,
+			getCanUseCard: function (event, player) {
+				var history = event.player.getHistory("lose", function (evt) {
+						return evt && evt.type == "discard";
+					}),
+					cards = [];
+				if (history.length == 0) return cards;
+				for (var i = 0; i < history.length; i++) {
+					var cardsList = history[i].cards;
+					for (var j = 0; j < cardsList.length; j++) {
+						if (!player.canUseToAnyone(cardsList[j])) continue;
+						if (get.position(cardsList[j], true) != "d") continue;
+						cards.push(cardsList[j]);
+					}
 				}
-			}
-			return cards;
+				return cards;
+			},
+			filter: function (event, player) {
+				var cards = lib.skill.mushoumrfz.getCanUseCard(event, player);
+				return cards.length > 0 && event.player != player;
+			},
+			async content(event, trigger, player) {
+				let cards = lib.skill.mushoumrfz.getCanUseCard(trigger, player);
+				while (true) {
+					const { bool, links } = await player.chooseButton({ createDialog: ["【牧兽】：是否使用这些牌？", cards] })
+						.set("filterButton", button => {
+							return _status.event.player.hasUseTarget(button.link);
+						})
+						.set("ai", button => {
+							return _status.event.player.getUseValue(button.link);
+						}).forResult();
+					if (!bool || !links) return;
+					cards.remove(links[0]);
+					player.$gain2(links[0], false);
+					player.chooseUseTarget({ card: links[0], forced: true });
+					//@ts-ignore
+					player.logSkill("mushoumrfz");
+					cards = cards.filter(card => {
+						return get.position(card, true) == "d" && player.hasUseTarget(card);
+					});
+					if (cards.length == 0) return;
+				}
+			},
 		},
-		filter: function (event, player) {
-			let cards = lib.skill.mushoumrfz.getCanUseCard(event, player);
-			return cards.length > 0 && event.player != player;
-		},
-		async content(event, trigger, player) {
-			let cards = lib.skill.mushoumrfz.getCanUseCard(trigger, player);
-			while (true) {
-				const { bool, links } = await player
-					.chooseButton({ createDialog: ["【牧兽】：是否使用这些牌？", cards] })
-					.set("filterButton", button => {
-						return _status.event.player.hasUseTarget(button.link);
-					})
-					.set("ai", button => {
-						return _status.event.player.getUseValue(button.link);
-					})
-					.forResult();
-				if (!bool || !links) return;
-				cards.remove(links[0]);
-				player.$gain2(links[0], false);
-				player.chooseUseTarget({ card: links[0], forced: true });
-				//@ts-ignore
-				player.logSkill("mushoumrfz");
-				cards = cards.filter(card => {
-					return get.position(card, true) == "d" && player.hasUseTarget(card);
-				});
-				if (cards.length == 0) return;
-			}
-		},
-	},
 });
 
 translate({
-	char_4122_grabds: "小满",
-	mushoumrfz: "牧兽",
-	mushoumrfz_info: "当一名其他角色回合结束时，你可以使用其本回合因弃置而进入弃牌堆的牌。",
+	"char_4122_grabds": "小满",
+	"mushoumrfz": "牧兽",
+	"mushoumrfz_info": "当一名其他角色回合结束时，你可以使用其本回合因弃置而进入弃牌堆的牌。",
 });
 
 characterTitle("char_4122_grabds", "<font color=#42b983>竹笛飞声</font>");

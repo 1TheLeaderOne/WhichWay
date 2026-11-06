@@ -1,45 +1,5 @@
 # 瑰丽理想 WhichWay 更新日志
 
-## 2026-11-06
-
-### 修复：武将卡里关掉动皮，场上玩家头像上的动皮不动
-
-- **现象**：在驶舰之向武将卡样式界面点「关闭动皮」，**卡面那一份正常消失，但场上同名武将头像里挂着的动皮还在动**；
-  重新打开武将卡、关掉武将卡（`whichWayCharacterCard.close()` 会调 `refreshSkin()`）都救不回来，只有退出重进对局才恢复。
-- **根因（三处叠加）**：
-  1. `spineWork.js` 的 `updateDyc()` 把「这张动皮被关掉」写成了**早退**：
-     `if (this.banSkin?.[name]?.[skinName] === true) return;`（`dynamicDisabledProbe` 那条同理）。
-     而它上面那段「停掉 target 上其它皮肤」的循环开头有 `if (cacheKey === dynamicName) return;`
-     —— 那是给下面「复用已有实例」的快路径留的，于是**当前皮肤自己那一桶被跳过**。
-     两条合起来：关掉动皮时，同名分桶里**已经挂出去的实例既不会被 dispose 也不会被隐藏**。
-  2. `CharacterCard.vue` 的 `toggleDynamicSkin()` 靠手写循环去同步场上玩家，判据是
-     `get.name(player) === props.name` —— 但 `get.name` 是取**牌名**的函数（`apps/core/noname/get/index.js`），
-     传 Player 进去没有角色 id 语义，判据**恒为 false**，整个循环一次都不执行。
-     并且这条路径没有像换肤路径（`onSkinChange`）那样调 `whichWaySkin.refreshSkin()`。
-  3. `skinSync.ts` 的 `reconcile()` 里，「本扩展 ban → 千幻」（第④段）与「皮肤切换 dyn → 千幻」（第⑤段）
-     **只写存档、不重绘**，只有「千幻 djtoggle → 本扩展」（第③段，`mirrorToggleFromQhly`）带重绘
-     ⇒ 这就是「千幻里点静皮场上立刻消失、驶舰之向卡里点关闭动皮场上纹丝不动」的不对称来源。
-- **修复**：
-  - `spineWork.js` 新增 `disposeDyc(dynamicName)`：遍历该 `dynamicName` 的**所有 slot、所有 action**
-    （骨架 `default` 与 `playAction` 建的 `gongji` / `chuchang` / `teshu` 都是独立 `SpinePlayer`），
-    先收集再销毁（`dispose()` 会同步改写 cache，边遍历边删会漏），兜底「桶里已无活实例」才整桶删。
-  - `updateDyc()` 的禁用态分支改为 `spineWorker.disposeDyc(dynamicName); return;`
-    —— 关动皮是**全局语义**：同一角色同一皮肤不该在某一处还能动。
-  - `CharacterCard.vue` 的 `toggleDynamicSkin()` 去掉恒 false 的循环，改调 `whichWaySkin.refreshSkin()`
-    （它内部按 `player.name1 || player.name` 与 `player.name2` 分别处理，双将/变身也正确）。
-  - `skinSync.ts` 的 `reconcile()` 第④⑤段补 `repaint(char)`。
-  - 顺带（`dispose()` 内）把宿主上的两处标记复位，否则「关掉再打开」会踩坑：
-    ① `target.dycSJZX` 指着已销毁实例（拖拽 / `init` 钩子里的 `dispose(this.dycSJZX)` 拿到死对象）；
-    ② `dataset.removeAdded_<dynamicName>` 仍是 `"true"`，`loadDyc` 里 `if (target.dataset[added] !== "true")`
-    会跳过注册，新实例再也不随元素卸载自动回收（`onRemoved` 只在首次 load 时挂）。
-- **双将口径收敛**：`skin/index.ts` 新增 `isDoubleCharacterMode()`，`refreshSkin()` 与 `whichWaySkinAddInitDyc`
-  的 `init` / `reinit` 钩子共用。**双将一律不渲染动皮**（`singble` = 单双任选也算双将）。
-  原先这条判定只写在钩子里，于是 `refreshSkin()`（换肤、开关动皮、关武将卡都会调）成了漏网入口 ——
-  双将模式下点一下开关就又挂回去，与「双将时无法使用动皮！」的提示自相矛盾。
-  `refreshSkin()` 里立绘仍重贴，只是不再 `updateDyc`（动皮不挂 ≠ 静皮不用同步）。
-- **校验**：`npx eslint` 三个文件 0 报错；`WW_SKIP_STATIC_COPY=1 pnpm -F ./packages/extension/WhichWay build`
-  通过（6.92s），`chunks/` 下无 `from "./extension.js"` 反向引用（入口红线自检）。**未实机验证**。
-
 ## 2026-10-27
 
 ### 修复：驶舰之向武将卡的「附属技能」没有台词与试听

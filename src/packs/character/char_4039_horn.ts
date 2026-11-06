@@ -6,7 +6,7 @@ character("char_4039_horn", { pack: "legendSJZX", sex: "female", group: "weimrfz
 skill({
 	dunpaomrfz: {
 		derivation: "dunpaomrfz_rewrite",
-		audio: ["编入队伍","行动开始"],
+		audio: 2,
 		trigger: { player: "phaseBegin" },
 		check: function (event, player) {
 			return (
@@ -65,7 +65,7 @@ skill({
 		},
 	},
 	biaohaomrfz: {
-		audio: ["作战中1","作战中2","作战中3","作战中4"],
+		audio: 6,
 		chargeSkill: true,
 		enable: "phaseUse",
 		usable: 2,
@@ -156,14 +156,16 @@ skill({
 					let num = 0;
 					while (num < 4) {
 						num++;
-						await player.chooseUseTarget({
-							card: get.autoViewAs({
-								name: num < 4 ? "sha" : "wanjian",
-								isCard: true,
-							}),
-							prompt: "请选择【杀】的目标 (【杀】:" + (num < 4 ? num : 3) + "/3;【万箭齐发】:0/1)",
-							addCount: false,
-						});
+						await player.chooseUseTarget(
+							{
+								card: get.autoViewAs({
+									name: num < 4 ? "sha" : "wanjian",
+									isCard: true,
+								}),
+								prompt: "请选择【杀】的目标 (【杀】:" + (num < 4 ? num : 3) + "/3;【万箭齐发】:0/1)",
+								addCount: false,
+							}
+						);
 						//@ts-ignore
 						player.logSkill("biaohaomrfz");
 					}
@@ -187,7 +189,7 @@ skill({
 		},
 	},
 	xuezhanmrfz: {
-		audio: ["完成高难行动","3星结束行动"],
+		audio: 2,
 		forced: true,
 		trigger: { player: "dieBegin" },
 		filter: function (event, player) {
@@ -196,8 +198,8 @@ skill({
 		async content(event, trigger, player) {
 			player.storage.xuezhanmrfz = true;
 			await player.chooseToDiscard({
-				position: "hej",
-				forced: true,
+				position:"hej",
+				forced:true,
 				selectCard() {
 					return get.player().countCards("hej");
 				},
@@ -236,10 +238,15 @@ dynamicTranslate({
 		return "<font color=#696969>锁定技，当你首次即将死亡时，取消之，然后你将体力值和体力上限调整至2，并摸4张牌。</font>";
 	},
 	dunpaomrfz(player) {
-		if (!player.storage.dunpaomrfz) return "锁定技，你的攻击范围+5，你不能指定与你距离为1的角色为目标；当你使用【杀】对距离你大于1的角色造成伤害时，该角色进行判断，若不为红色，此伤害+1；回合开始时，你可以修改此技能。";
+		if (!player.storage.dunpaomrfz)
+			return "锁定技，你的攻击范围+5，你不能指定与你距离为1的角色为目标；当你使用【杀】对距离你大于1的角色造成伤害时，该角色进行判断，若不为红色，此伤害+1；回合开始时，你可以修改此技能。";
 		return "锁定技，你的手牌上限+2。";
 	},
 	biaohaomrfz(player) {
-		return "蓄力技（<font color=#e00500>" + player.countMark("charge") + "</font>/4），出牌阶段限两次，你可以弃置一张带有伤害类标签的牌，然后你增加一点蓄力值；你可以按照下列规则消耗蓄力值：①：消耗1点蓄力值，视为使用一张【杀】；②：出牌阶段，消耗4点蓄力值，视为使用三张【杀】和一张【万箭齐发】，然后失去3点体力。";
+		return (
+			"蓄力技（<font color=#e00500>" +
+			player.countMark("charge") +
+			"</font>/4），出牌阶段限两次，你可以弃置一张带有伤害类标签的牌，然后你增加一点蓄力值；你可以按照下列规则消耗蓄力值：①：消耗1点蓄力值，视为使用一张【杀】；②：出牌阶段，消耗4点蓄力值，视为使用三张【杀】和一张【万箭齐发】，然后失去3点体力。"
+		);
 	},
 });
