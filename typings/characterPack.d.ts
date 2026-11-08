@@ -367,6 +367,55 @@ interface SkillFieldOverrides {
 		| [string, number]
 		| Array<AudioTitle>
 		| Partial<Record<AudioSkinId, AudioTitle | AudioTitle[]>>;
+	/**
+	 * 标记弹窗与角标配置（`Skill.intro` 的细化版）。
+	 *
+	 * 本表只重写 `markcount` 的类型与文档，其余字段（`mark` / `name` / `name2` /
+	 * `content` / `nocount` / `onunmark`）保持 {@link Skill} 里的声明不变。
+	 *
+	 * 引擎读取处：`Player#updateMark` / `Player#markSkill` / `Player#unmarkSkill`
+	 * （`library/element/player.js`），悬停内容走 `get.storageintro`（`get/index.js`）。
+	 */
+	intro?: Omit<NonNullable<Skill["intro"]>, "markcount"> & {
+		/**
+		 * 标记**角标**显示什么。角标的显隐与取值逻辑全部在 `Player#updateMark`
+		 * （`library/element/player.js`），优先级如下：
+		 *
+		 * 1. **函数**（优先级最高）：`(storage, player, skill) => number | string`
+		 *    - 第 1 参是 `player.storage[技能id]`（storage 为空时也会被调用，可能为 `undefined`），
+		 *      第 2 参是该玩家，第 3 参是技能 id（少写参数没问题，按需使用即可）；
+		 *    - 返回值直接赋给角标节点的 `innerHTML`，所以**字符串原样显示**：
+		 *      `"①"/"②"`、逗号串等任意文案都合法；返回 `Infinity` 显示 `∞`；
+		 *      返回 `0` / 空串等假值则隐藏角标（`storage => -storage` 这类负值也会原样显示）。
+		 * 2. **`"expansion"`**：显示武将牌区（`x` 区）中带该技能 `gaintag` 的牌数
+		 *    （`player.countCards("x", card => card.hasGaintag(技能id))`）——
+		 *    「牌置于武将牌上」类标记的标准写法，一般与 `content: "expansion"` 搭配。
+		 * 3. `player.storage[技能id + "_markcount"]`（数字）—— 临时覆盖角标数字时写这个；
+		 * 4. 技能 id 为 `ghujia` 时显示护甲值；
+		 * 5. `player.storage[技能id]`（数字）；
+		 * 6. `player.storage[技能id]`（数组）→ 取数组长度。
+		 *
+		 * 字符串 / 数字取值只作**真值开关**（`updateMark` 的取值链不会读 `markcount`
+		 * 自身的数字值，角标数字按上面 3-6 从 storage 取）：
+		 * - `"mark"`：常见搭配 `content: "mark"` 或带 `#` 占位符的 `content`；
+		 * - 数字或其它任意字符串：同理只作开关。
+		 *
+		 * **标记创建门槛**：`updateMark` 在标记尚不存在时，只要
+		 * `lib.skill[i].intro && (storage[i] || intro.markcount)` 就会 `markSkill(i)` ——
+		 * 所以 `markcount` 为真值（如 `"expansion"`）的标记即使 storage 为空也会显示出来。
+		 *
+		 * **与其它字段的联动**：
+		 * - `intro.nocount: true` 会整个隐藏角标；
+		 * - 设置了 `markimage`（角标为图片）时，只有写了 `storage[技能id + "_markcount"]`
+		 *   （数字）或技能 id 为 `ghujia` 才会显示数字角标。
+		 */
+		markcount?:
+			| "expansion"
+			| "mark"
+			| number
+			| ((storage: any, player: Player, skill?: string) => number | string)
+			| (string & {});
+	};
 	locked?: boolean | ((skill: string, player: Player) => boolean);
 	filter?: (event: GameEvent, player: Player, name: string, target: Player) => any;
 	subSkill?: Record<string, ExtendedSkill>;
