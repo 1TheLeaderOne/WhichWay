@@ -13,9 +13,11 @@ export const upDataContentCurrent = {
 - **修复**：岳羽由加莉分包不正确的 bug
 - **修复**：霜叶仍然使用了\`StepContent\`的 bug
 - **修复**：深靛仍然使用了\`StepContent\`的 bug
+- **修复**：弑君者仍然使用了\`StepContent\`的 bug 
 - **修复**：予愿安洁莉娜【飞笺】友方角色也会选择弃牌而不是摸牌的 bug
 - **修复**：\`Player.reUnseen\`仍然使用了\`StepContent\`的 bug
 - **修复**：晓歌使用【万全】之后不会刷新卡牌提示的 bug
+- **修复**：溯光星源【溯理】需要被删的描述没有正确被渲染成红色的 bug 
 
 - **新增**：驶舰之向武将卡台词功能
 

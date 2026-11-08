@@ -1,5 +1,64 @@
 # 瑰丽理想 WhichWay 更新日志
 
+## 2026-11-06
+
+### 修复：武将卡关掉动皮后，场上头像的动皮还在动
+
+- **现象**：在驶舰之向武将卡界面点「关闭动皮」，卡面的动皮立刻消失，但**场上该武将头像上的动皮照旧在动**。
+  重新打开武将卡、关掉武将卡都不管用，只有重开一局才会恢复。
+- **根因（三处叠加，缺一不可）**：
+  1. `spineWork.js` 的 `updateDyc` 在「禁用态」上是**早退**：`banSkin` / `dynamicDisabledProbe` 任一为真就 `return`，
+     什么也不拆、什么也不藏。而它上面的「清掉 target 上其它皮肤」循环又用 `if (cacheKey === dynamicName) return;`
+     跳过了同名桶（这行本身是为了给下面的快路径复用）——两步合起来，**当前这张动皮谁都不碰**，
+     于是 `CharacterCard.vue` 的 `mountDyc()` 只让卡面那份消失，玩家头像那份原地留着。
+  2. `CharacterCard.vue` 的 `toggleDynamicSkin()` 末尾用 `get.name(player) === props.name` 找场上玩家。
+     `get.name` 是**取牌名**的函数（`apps/core/noname/get/index.js`），传 Player 进去没有角色 id 语义，
+     判据**恒为 false**，那个循环一次都没执行过。
+  3. `skinSync.ts` 的 `reconcile()` 第 ④⑤ 段（本扩展 `banSkinSJZX` / 「皮肤切换」的 `dyn` → 千幻）只镜像存档、**不重绘**；
+     只有第 ③ 段（千幻 `djtoggle` 变更）会调 `updateDyc`。这就是「千幻里点静皮 ⇒ 场上立刻消失，
+     而驶舰之向卡里点关闭动皮 ⇒ 场上不动」这条不对称的来源。
+- **修复**：
+  - `spineWork.js` 新增 `disposeDyc(dynamicName)`：按**整桶**收集所有宿主上的活实例再逐个 `dispose()`，
+    最后一个都不剩才删桶。**关闭动皮是全局语义**——同一角色同一皮肤不该在某一处还能动。
+  - `updateDyc` 的禁用态不再早退，改为 `if (banSkin === true || probe === true) { disposeDyc(dynamicName); return; }`。
+  - `CharacterCard.vue` 的 `toggleDynamicSkin()` 改为调用 `whichWaySkin.refreshSkin()`
+    （它内部按 `player.name1 || player.name` 与 `player.name2` 分别处理，双将/变身也正确）。
+  - `skinSync.ts` 的 `reconcile()` 第 ④⑤ 段补 `repaint(char)`；至此四段全部会重绘，与 `mirrorToggleFromQhly` 一致。
+  - `skin/index.ts` 抽出 `isDoubleCharacterMode()`，把双将判定从 `init` / `reinit` 钩子**下沉到 `refreshSkin()`**：
+    换肤、开关动皮、关闭武将卡这些入口都会走到 `refreshSkin()`，双将时主动把已挂的动皮拆掉
+    （原来只有开局面板切换时才拆）。口径与引擎一致：`single` 模式的 `singble`（单双任选）也算双将，
+    对齐 `apps/core/noname/library/index.js` 的 `["double","singble"].includes(...)`。
+  - `spineWork.js` 的 `dispose()` 补两处收尾：复位宿主上的 `dycSJZX` 与 `dataset.removeAdded_<dynamicName>`
+    （不复位的话，新实例会因为标记还在而**不注册**卸载回调）；清掉 `player.timer`
+    （`playAction` 的收尾定时器会在缓存删掉后读 `undefined.parent` 抛未捕获异常）。
+- **顺带修掉：同一个头像上会挂出两个动皮容器**
+  - **根因**：`loadDyc` 写缓存时按 target 类型分叉选键 —— Player 用 `target.playerid`，元素用 `target.className`。
+    而 `resolveHost()` 会让两条路径**最终落到同一个 `.avatar`**，于是同一头像被登记成两条互不相识的槽位，
+    `updateDyc` 的快路径各找各的槽，各 append 一个 `.sjzxDycWrapper`。
+    实测条目形如 `["avatar", "e2ePlayer"]` 两桶在同一节点下各挂一份 canvas。
+  - **不能简单改调用方**：`ensureDynamicSkin()` 的第一道闸是 `layersOf(node)`（按 DOM 节点查的 `WeakMap`），
+    传 Player 永远是 `undefined`，所以它只能传元素。
+  - **修复**：槽位键统一为**宿主元素**。新增模块级 `slotIds = new WeakMap()` + `slotIdOf(node)`（生成 `dycSlot_N`），
+    `loadDyc` 先 `resolveHost` 再取槽位并额外记 `host` 字段；`updateDyc` 的清理判据、快路径、
+    `playAction` 的动作层记账全部改用 `slotIdOf(resolveHost(...))`；`dispose()` 的标记复位看 `info.host ?? info.from`。
+    用 `WeakMap` 的好处：不往 DOM 上写属性，节点回收后自动失效。
+  - 没选「同宿主已有就拆旧的」：`refreshSkin()` 与 `ensureDynamicSkin()` 在 `$init` 的同一 tick 里都会跑，
+    那样会互相拆对方刚挂上的实例，产生挂→拆→挂的抖动；`dispose()` 引发的 `onRemoved` 还有 10ms 延迟，容易闪。
+- **另一个实机测出来的坑**：`onRemoved` 只被 patch 到 `HTMLDivElement.prototype` 上
+  （`nonameEx/jsExt/HTMLDivElementExt.js`），`document.body` 这类宿主没有该方法。
+  原来 `loadDyc` 直接调，一抛就把整条 async 链路中断。现加守卫：
+  `if (watchNode?.dataset && typeof watchNode.onRemoved === "function" && ...)`，没有就退化成「不注册卸载回调」。
+- **验证**：`npx eslint` 三个改动文件 0 错误；`WW_SKIP_STATIC_COPY=1` 构建通过；
+  构建产物 `chunks/` 下无 `from "./extension.js"` 反向引用。
+  **已在真实运行的游戏里实机点过按钮**（不再是「未实机验证」）：
+  - 双路径同一头像：`updateDyc(Player)` + `updateDyc(avatar)` → 只有 **1** 个 wrapper（修复前是 2 个）；
+  - 真实武将卡按钮：开→关→再开，三阶段卡面 canvas 与玩家 wrapper **同步**增删，`spineCache` 桶同步清空/重建；
+  - 跨 target 整桶拆：玩家与卡面两条槽位都挂着时，只对卡面点关闭，玩家那份也一起消失；
+  - 双将：`double_character` 置真后 `refreshSkin()` → wrapper 归零、`dycSJZX` 清空；
+  - 压力：连续开关 5 次 + 往 `document.body` 这种非 div 宿主调用 → `console.error` 拦截为 **0**。
+- **未做**：`enableWhichWayDynamicSkin` / `WhichWayDynamicSkinSwitch` 的**运行中切换**仍未加 `onConfig` 处理，
+  改这两项依旧需要重开一局才生效（与本次问题无关，留待后续）。
+
 ## 2026-10-27
 
 ### 修复：驶舰之向武将卡的「附属技能」没有台词与试听

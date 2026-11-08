@@ -480,8 +480,12 @@ class WhichWaySkin {
 			//双将要主动拆：`init` / `reinit` 钩子里那句 `dispose(this.dycSJZX)` 只在开局面板切换时执行，
 			//而 `refreshSkin()` 是换肤、开关动皮、关武将卡都能走到的入口。少了这一步，双将模式下
 			//点一下开关（或换个皮肤）就会把上一份动皮留在双人头像上继续动。
-			//`dispose()` 幂等，且现在会把 `player.dycSJZX` 摘掉，所以连着跑多次也安全。
-			if (!allowDyc && player.dycSJZX) spineWorker.dispose(player.dycSJZX);
+			//`dycSJZX` 现在会同时挂在 Player 与宿主元素上（两条路径合一），所以三处都要认。
+			//`dispose()` 幂等，且会把这两处标记摘掉，所以连着跑多次也安全。
+			if (!allowDyc) {
+				const dyc = player.dycSJZX || player.node?.avatar?.dycSJZX || player.node?.avatar2?.dycSJZX;
+				if (dyc) spineWorker.dispose(dyc);
+			}
 			const name1 = player.name1 || player.name;
 			if (name1 && player.node?.avatar) {
 				player.node.avatar.setBackground(name1, "character");
