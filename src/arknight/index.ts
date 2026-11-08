@@ -760,7 +760,7 @@ class WhichWayArknight {
 	/**
 	 * 需要更新的JSON文件名
 	 *
-	 * ⚠️ 与 scripts/update-arknight-data.bat 的 FILES 清单是一对镜像，改一边就要改另一边
+	 * ⚠️ 与 scripts/tools/update-arknight-data.bat 的 FILES 清单是一对镜像，改一边就要改另一边
 	 * （那边的头部注释写明了这条约束）。
 	 */
 	updateFile: Array<string> = ["character_table", "charword_table", "handbook_team_table", "char_patch_table", "skin_table"];

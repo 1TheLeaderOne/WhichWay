@@ -49,8 +49,8 @@ REM  - Keep this file ASCII-only + CRLF (cmd batch requirement).
 REM ============================================================
 
 REM ---- paths derived from this script (no hardcoded drive) ----
-set "SCRIPTS=%~dp0"
-for %%I in ("%SCRIPTS%..") do set "REPO=%%~fI"
+set "TOOLS=%~dp0"
+for %%I in ("%TOOLS%..\..") do set "REPO=%%~fI"
 for %%I in ("%REPO%\..\..\..") do set "ROOT=%%~fI"
 set "DATADIR=%REPO%\json\arknight"
 set "EXTDIR=%ROOT%\apps\core\extension\WhichWay"
@@ -235,7 +235,7 @@ for %%F in (%FILES%) do (
 echo.
 echo Next:
 echo   - commit the data : git add json/arknight ^&^& git commit -m "data: update arknights data"
-echo   - or repack       : scripts\release.bat vX.Y.Z
+echo   - or repack       : scripts\tools\release.bat vX.Y.Z
 echo   - the game reads the new data after a restart.
 goto :end_ok
 

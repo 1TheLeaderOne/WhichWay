@@ -2,9 +2,9 @@
  * 查询某个干员「带专属语音的皮肤」的 skinId（find-skinvoice.bat 的实现体）
  *
  * 用法：
- *   node scripts/find-skinvoice.mjs 凯尔希         一次性查询，可一次给多个
- *   node scripts/find-skinvoice.mjs char_003_kalts  直接用干员 id 查
- *   node scripts/find-skinvoice.mjs                交互模式，q 或空行退出（管道/重定向同样可用）
+ *   node scripts/tools/find-skinvoice.mjs 凯尔希         一次性查询，可一次给多个
+ *   node scripts/tools/find-skinvoice.mjs char_003_kalts  直接用干员 id 查
+ *   node scripts/tools/find-skinvoice.mjs                交互模式，q 或空行退出（管道/重定向同样可用）
  *   命令行用户请跑 find-skinvoice.bat，它只是加上 node 存在性检查后调本文件。
  *
  * 输出的是 `audio` 对象形态里 **key** 该填的东西：
@@ -20,7 +20,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.dirname(HERE);
+const ROOT = path.dirname(path.dirname(HERE));
 const JSON_DIR = path.join(ROOT, "json", "arknight");
 
 /**
@@ -217,12 +217,12 @@ loadVoiceSkins();
 
 if (characters.length === 0) {
 	console.error("[ERROR] 找不到明日方舟干员数据（character_table.json）。");
-	console.error("        先跑 scripts\\update-arknight-data.bat 把数据下下来。");
+	console.error("        先跑 scripts\\tools\\update-arknight-data.bat 把数据下下来。");
 	process.exit(1);
 }
 if (voiceSkins.size === 0) {
 	console.error("[ERROR] 找不到皮肤语音数据（skin_table.json），或其中没有任何带 voiceId 的皮肤。");
-	console.error("        先跑 scripts\\update-arknight-data.bat 把数据下下来。");
+	console.error("        先跑 scripts\\tools\\update-arknight-data.bat 把数据下下来。");
 	process.exit(1);
 }
 

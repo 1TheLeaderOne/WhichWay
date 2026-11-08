@@ -15,14 +15,14 @@
  * `<目录名>_backup_original/`；转格式时同名 .png/.jpg 会被新格式取代）。依赖 ImageMagick 7 的 `magick`。
  *
  * 用法示例：
- *   node scripts/compress-skin.mjs                     # 缩到 1280 + 量化到 256 色 PNG，写入 skin_compressed/
- *   node scripts/compress-skin.mjs --max 1024          # 更小的长边上限
- *   node scripts/compress-skin.mjs --colors 0          # 真彩 PNG（不量化，仅缩放+强压缩）
- *   node scripts/compress-skin.mjs --colors 128        # 更激进量化（更小、更易出色带）
- *   node scripts/compress-skin.mjs --dither            # 量化时加抖动（渐变更平滑、体积更大）
- *   node scripts/compress-skin.mjs --format jpg        # 转 JPG（透明区拍平到 --bg）
- *   node scripts/compress-skin.mjs --inplace           # 就地覆盖（自动备份原件）
- *   node scripts/compress-skin.mjs --dry-run           # 只预测体积
+ *   node scripts/tools/compress-skin.mjs                     # 缩到 1280 + 量化到 256 色 PNG，写入 skin_compressed/
+ *   node scripts/tools/compress-skin.mjs --max 1024          # 更小的长边上限
+ *   node scripts/tools/compress-skin.mjs --colors 0          # 真彩 PNG（不量化，仅缩放+强压缩）
+ *   node scripts/tools/compress-skin.mjs --colors 128        # 更激进量化（更小、更易出色带）
+ *   node scripts/tools/compress-skin.mjs --dither            # 量化时加抖动（渐变更平滑、体积更大）
+ *   node scripts/tools/compress-skin.mjs --format jpg        # 转 JPG（透明区拍平到 --bg）
+ *   node scripts/tools/compress-skin.mjs --inplace           # 就地覆盖（自动备份原件）
+ *   node scripts/tools/compress-skin.mjs --dry-run           # 只预测体积
  */
 import fs from "node:fs";
 import path from "node:path";

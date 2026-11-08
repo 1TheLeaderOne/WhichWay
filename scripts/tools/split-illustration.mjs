@@ -16,17 +16,17 @@
  *   先加 --dry-run 预览计划，确认无误再正式跑。目标已存在或计划内部撞名都会跳过并报告，不覆盖。
  *
  * 用法：
- *   node scripts/split-illustration.mjs --dry-run          # 只打印分离计划，不动文件
- *   node scripts/split-illustration.mjs                    # 正式剪切分离
- *   node scripts/split-illustration.mjs --copy             # 复制而非剪切（保留 source 原件）
- *   node scripts/split-illustration.mjs --dir <源目录> --out <image/illustration> --gamedata <skin_table.json>
+ *   node scripts/tools/split-illustration.mjs --dry-run          # 只打印分离计划，不动文件
+ *   node scripts/tools/split-illustration.mjs                    # 正式剪切分离
+ *   node scripts/tools/split-illustration.mjs --copy             # 复制而非剪切（保留 source 原件）
+ *   node scripts/tools/split-illustration.mjs --dir <源目录> --out <image/illustration> --gamedata <skin_table.json>
  */
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const HERE = path.dirname(fileURLToPath(import.meta.url)); // .../scripts
-const ROOT = path.dirname(HERE); // 扩展包根目录
+const HERE = path.dirname(fileURLToPath(import.meta.url)); // .../scripts/tools
+const ROOT = path.dirname(path.dirname(HERE)); // 扩展包根目录
 
 // ---------- 参数 ----------
 const argv = process.argv.slice(2);

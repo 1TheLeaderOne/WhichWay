@@ -103,7 +103,8 @@ REM  - Keep this file ASCII-only + CRLF (cmd batch requirement).
 REM ============================================================
 
 REM ---- derive paths from script location (no hardcoded drive) ----
-set "SCRIPTS=%~dp0"
+set "TOOLS=%~dp0"
+for %%I in ("%TOOLS%..") do set "SCRIPTS=%%~fI\"
 for %%I in ("%SCRIPTS%..") do set "REPO=%%~fI"
 for %%I in ("%REPO%\..\..\..") do set "ROOT=%%~fI"
 set "BUILD=%ROOT%\apps\core\extension\WhichWay"
@@ -228,7 +229,7 @@ if defined TAGEXIST (
 		echo.
 		echo         If this tag is YOUR finished release that never reached origin,
 		echo         do not rebuild - finish the push with:
-		echo             scripts\release.bat release --push-only %VERSION%
+		echo             scripts\tools\release.bat release --push-only %VERSION%
 	)
 	exit /b 1
 )
@@ -328,7 +329,7 @@ echo       output = !MERGE!  ^(tag %VERSION%^)
 
 REM ---- [4/6] output-core: incremental pack (Node helper handles CJK paths) ----
 echo [4/6] create output-core incremental pack ^(%BASELINE% -^> %VERSION%^)...
-node "%SCRIPTS%make-core-index.cjs" "%BASELINE%" "!MERGE!" "%COREIDX%"
+node "%TOOLS%make-core-index.cjs" "%BASELINE%" "!MERGE!" "%COREIDX%"
 if errorlevel 1 (
 	echo [ERROR] make-core-index failed.
 	exit /b 1
@@ -483,7 +484,7 @@ if errorlevel 1 (
 	echo.
 	echo [ERROR] push failed. With --atomic nothing was pushed; every commit and the
 	echo         tag are still local, so you can retry WITHOUT rebuilding:
-	echo             scripts\release.bat release --push-only %VERSION%
+	echo             scripts\tools\release.bat release --push-only %VERSION%
 	echo         Manual equivalent:
 	if defined PUSHTAG (
 		echo             git push --atomic origin !PUSHREFS! %VERSION%
@@ -516,7 +517,7 @@ echo          WhichWay-%VERSION%.zip        ^(output^)
 echo          WhichWay-%VERSION%-core.zip   ^(output-core^)
 echo          WhichWay-%VERSION%-dev.zip    ^(dev^)
 echo        local copies stayed in %RELDIR% - zip them with:
-echo            scripts\release.bat pack
+echo            scripts\tools\release.bat pack
 echo        still on !ORIGBRANCH!, worktree untouched.
 goto :the_end
 
@@ -530,7 +531,7 @@ echo.
 call :network_hints
 echo [HINT] Nothing was pushed and nothing else was touched. Once the network is
 echo [HINT] back, finish the release without rebuilding:
-echo [HINT]     scripts\release.bat release --push-only %VERSION%
+echo [HINT]     scripts\tools\release.bat release --push-only %VERSION%
 exit /b 1
 
 REM ============================================================
@@ -638,7 +639,7 @@ if errorlevel 1 (
 	echo.
 	echo [ERROR] push failed. The dev-output commit is still local, so you can retry without
 	echo         rebuilding:
-	echo             scripts\release.bat dev --push-only
+	echo             scripts\tools\release.bat dev --push-only
 	echo         Manual equivalent:
 	echo             git push origin dev-output
 	echo         Remote moved ahead ^(rejected as non-fast-forward^)? Check with:
@@ -740,7 +741,7 @@ set "PACKSHA="
 for /f "delims=" %%s in ('git rev-parse --verify --quiet "refs/heads/!PACKBRANCH!" 2^>nul') do set PACKSHA=%%s
 if "!PACKSHA!"=="" (
 	echo [ERROR] branch !PACKBRANCH! not found locally - nothing to pack.
-	echo         Create it with "scripts\release.bat release ^<version^>".
+	echo         Create it with "scripts\tools\release.bat release ^<version^>".
 	exit /b 1
 )
 set "PACKTREE="
@@ -863,7 +864,7 @@ set "DIFFTMP=%TEMPDIR%\core-diff-tree.tmp"
 del "%DIFFIDX%" "%DIFFTMP%" 2>nul
 
 echo [1/3] collect added/modified files...
-node "%SCRIPTS%make-core-index.cjs" "!OLDSHA!" "!NEWSHA!" "%DIFFIDX%"
+node "%TOOLS%make-core-index.cjs" "!OLDSHA!" "!NEWSHA!" "%DIFFIDX%"
 if errorlevel 1 (
 	del "%DIFFIDX%" "%DIFFTMP%" 2>nul
 	echo [ERROR] make-core-index failed.
@@ -951,7 +952,7 @@ if not exist "%TEMPDIR%" md "%TEMPDIR%" 2>nul
 del "%ZIPPASSFILE%" 2>nul
 if defined WW_ZIP_PASSWORD echo [INFO] using password from WW_ZIP_PASSWORD
 set "WW_PASSFILE=%ZIPPASSFILE%"
-powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPTS%zip-encrypt.ps1" -Mode prompt
+powershell -NoProfile -ExecutionPolicy Bypass -File "%TOOLS%zip-encrypt.ps1" -Mode prompt
 if errorlevel 1 (
 	echo [ERROR] no archive password was set - aborted.
 	if exist "%ZIPPASSFILE%" del "%ZIPPASSFILE%" 2>nul
@@ -1014,7 +1015,7 @@ set "WW_SRC=%~1"
 set "WW_ZIP=%~2"
 set "WW_PASSFILE=%ZIPPASSFILE%"
 set "WW_TAR=!TARBIN!"
-powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPTS%zip-encrypt.ps1" -Mode zip
+powershell -NoProfile -ExecutionPolicy Bypass -File "%TOOLS%zip-encrypt.ps1" -Mode zip
 if errorlevel 1 exit /b 1
 if not exist "%~2" exit /b 1
 exit /b 0
@@ -1077,7 +1078,7 @@ if defined ZIPENC (
 	set "WW_ZIP=!TARGET!"
 	set "WW_PASSFILE=%ZIPPASSFILE%"
 	set "WW_TAR=!TARBIN!"
-	powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPTS%zip-encrypt.ps1" -Mode zip
+	powershell -NoProfile -ExecutionPolicy Bypass -File "%TOOLS%zip-encrypt.ps1" -Mode zip
 	if errorlevel 1 (
 		del "!TARGET!" 2>nul
 		exit /b 1
@@ -1320,9 +1321,9 @@ echo [ERROR] different commit than the branch it was built from.
 echo.
 echo   1^) The tag is stale - put it on output, then push again:
 echo          git tag -d %VERSION%
-echo          scripts\release.bat release --push-only %VERSION%
+echo          scripts\tools\release.bat release --push-only %VERSION%
 echo   2^) output moved by mistake - re-run the full release as a NEW version:
-echo          scripts\release.bat release vX.Y.Z
+echo          scripts\tools\release.bat release vX.Y.Z
 echo.
 exit /b 1
 
@@ -1436,10 +1437,10 @@ REM ============================================================
 :usage
 echo WhichWay release toolkit
 echo.
-echo   scripts\release.bat release ^<version^> [baseline] [--push-only]
-echo   scripts\release.bat dev [--no-zip] [--push-only] [--password]
-echo   scripts\release.bat pack [output^|core^|all] [--password]
-echo   scripts\release.bat core ^<version^> ^<baseline^> [--password]
+echo   scripts\tools\release.bat release ^<version^> [baseline] [--push-only]
+echo   scripts\tools\release.bat dev [--no-zip] [--push-only] [--password]
+echo   scripts\tools\release.bat pack [output^|core^|all] [--password]
+echo   scripts\tools\release.bat core ^<version^> ^<baseline^> [--password]
 echo.
 echo   release   full release: build + dev-output + output(tag) + output-core
 echo             + export into release\ + atomic push of all refs and the tag

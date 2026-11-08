@@ -2,8 +2,8 @@
  * 明日方舟干员中文名 → 干员id 查询（find-arkid.bat 的实现体）
  *
  * 用法：
- *   node scripts/find-arkid.mjs 温米            一次性查询，可一次给多个名字
- *   node scripts/find-arkid.mjs                 交互模式，反复输入直到 q 或空行退出
+ *   node scripts/tools/find-arkid.mjs 温米            一次性查询，可一次给多个名字
+ *   node scripts/tools/find-arkid.mjs                 交互模式，反复输入直到 q 或空行退出
  *                                                 （管道/重定向的 stdin 同样可用）
  *   命令行用户请跑 find-arkid.bat，它只是加上 node 存在性检查后调本文件。
  *
@@ -17,7 +17,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.dirname(HERE);
+const ROOT = path.dirname(path.dirname(HERE));
 const JSON_DIR = path.join(ROOT, "json", "arknight");
 
 /**
@@ -63,7 +63,7 @@ function loadTable() {
 	}
 	if (table.length === 0) {
 		console.error(`[ERROR] 找不到明日方舟数据：${missing.join(" , ") || JSON_DIR}`);
-		console.error("        先跑 scripts\\update-arknight-data.bat 把数据下下来。");
+		console.error("        先跑 scripts\\tools\\update-arknight-data.bat 把数据下下来。");
 		process.exit(1);
 	}
 }

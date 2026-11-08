@@ -8,7 +8,7 @@ import legacyCharIdsJson from "../../json/legacyCharIds.json";
  * `arkidMigration` 必须赶在任何阶段模块求值之前把存档改写完（见其文件注释），
  * 换成异步读文件等于把一次性迁移压在 `game.promises` 上——环境不支持或读失败就是静默丢配置。
  *
- * 由 `node scripts/rename-to-arkid.mjs --gen-migration` 从 scripts/arkid-rename-map.json 生成，
+ * 由 `node scripts/tools/rename-to-arkid.mjs --gen-migration` 从 scripts/tools/arkid-rename-map.json 生成，
  * 请勿手工编辑 JSON。改名前的玩家存档（皮肤/配音/模组/冲突皮肤/战役进度）里的键仍是旧id，
  * 由 src/arknight/arkidMigration.ts 在启动时按此表一次性改写。
  *

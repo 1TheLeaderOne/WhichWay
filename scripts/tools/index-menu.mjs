@@ -1,10 +1,10 @@
 /**
- * scripts\ 目录下所有脚本的可视化启动器（index.bat 的实现体）
+ * scripts\tools\ 目录下所有脚本的可视化启动器（index.bat 的实现体）
  *
  * 用法：
- *   node scripts/index-menu.mjs                 交互菜单：输入编号执行对应脚本，q 退出
- *   node scripts/index-menu.mjs --list          只打印编号表（自动化核对/看编号用）
- *   node scripts/index-menu.mjs <编号> [参数…]  直接执行该编号脚本，不进菜单、不二次确认
+ *   node scripts/tools/index-menu.mjs                 交互菜单：输入编号执行对应脚本，q 退出
+ *   node scripts/tools/index-menu.mjs --list          只打印编号表（自动化核对/看编号用）
+ *   node scripts/tools/index-menu.mjs <编号> [参数…]  直接执行该编号脚本，不进菜单、不二次确认
  *
  * 菜单里显示的「使用说明」不是另写一份，而是从脚本自己的文档头里抠出来的：
  *   .bat / .cmd → 文件开头连续的 REM 块
@@ -20,8 +20,8 @@ import readline from "node:readline";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-const HERE = path.dirname(fileURLToPath(import.meta.url)); // .../WhichWay/scripts
-const ROOT = path.dirname(HERE); // 扩展包根目录
+const HERE = path.dirname(fileURLToPath(import.meta.url)); // .../WhichWay/scripts/tools
+const ROOT = path.dirname(path.dirname(HERE)); // 扩展包根目录
 
 /** 启动器自身不出现在列表里（列出来只是多一个套娃入口） */
 const SELF = new Set(["index.bat", "index-menu.mjs"]);
@@ -45,6 +45,7 @@ const CATALOG = {
 	"find-skinvoice.bat": { group: "游戏数据", summary: "干员id / 中文名 → 该干员「带专属语音的皮肤」的 skinId（填进 skill 的 audio）" },
 	"find-skinvoice.mjs": { group: "游戏数据", summary: "同 find-skinvoice.bat（它是实现体，可脱离 bat 直接用 node 跑）" },
 	"update-portraits.mjs": { group: "立绘 / 图片", summary: "从 torappu 补齐缺失干员立绘（只新增，不覆盖；GitHub 走不稳可加 --proxy）" },
+	"update-skins.mjs": { group: "立绘 / 图片", summary: "从 torappu 补齐缺失干员皮肤（含 _sp 异格；只新增，不覆盖）" },
 	"split-illustration.mjs": { group: "立绘 / 图片", summary: "按 skin_table 把 illustration/source 分离到 character/skin（默认剪切！）" },
 	"compress-skin.mjs": { group: "立绘 / 图片", summary: "缩放 + 256 色量化压缩图片（默认写镜像目录，--inplace 才就地替换）" },
 	"rename-to-arkid.mjs": { group: "一次性迁移", summary: "干员id → 明日方舟uid 批量改名（默认只检查，--apply 才落盘）" },
@@ -133,7 +134,7 @@ function pickWarnings(header) {
 }
 
 /**
- * 扫描 scripts\，按分类顺序编号。
+ * 扫描 scripts\tools\，按分类顺序编号。
  * @returns {{n:number,file:string,group:string,summary:string,header:string[]}[]}
  */
 function collect() {
@@ -190,7 +191,8 @@ function printInfo(entry) {
 		console.log("");
 		for (const line of warnings) console.log(`  ${line}`);
 	}
-	console.log(`  运行方式：${/\.(bat|cmd)$/i.test(entry.file) ? `cmd.exe /c "scripts\\${entry.file}"` : `node scripts\\${entry.file}`}`);
+	const shown = path.join("scripts", "tools", entry.file);
+	console.log(`  运行方式：${/\.(bat|cmd)$/i.test(entry.file) ? `cmd.exe /c "${shown}"` : `node ${shown}`}`);
 	console.log(`${"-".repeat(74)}`);
 }
 

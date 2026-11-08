@@ -337,7 +337,7 @@ skill({
 ## 明日方舟数据（src/arknight/）
 
 - 原始数据存放于 `json/arknight/`（`character_table.json` ≈7.5MB、`charword_table.json` ≈8.1MB、`handbook_team_table.json`、`char_patch_table.json`），启动时若缺失或扩展版本变化会从 PRTS（`https://torappu.prts.wiki/gamedata/latest/excel/`）自动下载更新。
-- **一键更新（打包/离线用）**：`scripts/update-arknight-data.bat`（与 `updateArknigtData()` 同一清单与地址）—— 下到 `%TEMP%` → node 校验（JSON 合法性 + 扩展实际读取的字段）→ 与已装数据比对 → **全部通过才写入** `json/arknight/`（校验/下载失败不动仓库），随后同步到已构建的扩展并删掉 `json/cache/arknight.json` 让精简缓存重建。选项：`--check`（只下载比对不写）、`--source-only`（跳过产物同步）、`--url <base>`（换镜像）、`--no-pause`。两个坑：curl 必须带 `--ssl-no-revoke`（本机 schannel 吊销检查会报 `CRYPT_E_REVOCATION_OFFLINE`）；bat 里内联的 node 脚本**不能出现 `!`**（delayed expansion 会把它吞掉）**与 `&`**（cmd 会当作命令分隔符拆行）。
+- **一键更新（打包/离线用）**：`scripts/tools/update-arknight-data.bat`（与 `updateArknigtData()` 同一清单与地址）—— 下到 `%TEMP%` → node 校验（JSON 合法性 + 扩展实际读取的字段）→ 与已装数据比对 → **全部通过才写入** `json/arknight/`（校验/下载失败不动仓库），随后同步到已构建的扩展并删掉 `json/cache/arknight.json` 让精简缓存重建。选项：`--check`（只下载比对不写）、`--source-only`（跳过产物同步）、`--url <base>`（换镜像）、`--no-pause`。两个坑：curl 必须带 `--ssl-no-revoke`（本机 schannel 吊销检查会报 `CRYPT_E_REVOCATION_OFFLINE`）；bat 里内联的 node 脚本**不能出现 `!`**（delayed expansion 会把它吞掉）**与 `&`**（cmd 会当作命令分隔符拆行）。
 - **精简缓存（性能红线）**：全量数据共约 16MB，启动期读盘 + `JSON.parse` 会长时间占住主线程（实测约 650ms 的同步块）。因此 `loadArknightData()` 改为两级：
   - **快路径**：读 `json/cache/arknight.json`（实测约 **153KB**），完全不触碰 `json/arknight/` 全量文件；
   - **慢路径**（首次启动 / 扩展版本变化 / `slimCacheSchema` 变化 / 本次下载过数据）：读全量 → 按 `slimArknightData()` 白名单裁剪 → 写回缓存。

@@ -15,7 +15,7 @@
  *   所以这张表不再是「没人管的孤儿」；但它运行时不读（在 `loadSkipFiles` 里），本地那份新到什么程度取决于最近一次有人跑更新脚本
  *   ⇒ 上面那条并集兜底与 `--update-tables` 都照旧保留。）
  *
- * 命名与分类规则与 scripts/split-illustration.mjs 严格一致：
+ * 命名与分类规则与 scripts/tools/split-illustration.mjs 严格一致：
  *   - 形态 id = skinId 里 `@`/`#` 之前的部分；远端立绘文件名 = `portraitId + "b" + 扩展名`，
  *     但低星干员只有不带 b 的版本（如 `char_123_fang_1.png`），所以先查 `{pid}b.png` 再查 `{pid}.png`（两个图片目录同一条规则）。
  *   - 目标 = `character/[形态id].png`：优先 ILLUST_2（精二），没有精二就退回 ILLUST_0（初始）——
@@ -50,21 +50,21 @@
  *   放大范围（`--scope any` / `--ids`）时请自觉配 `--limit`。
  *
  * ⚠ 只新增、从不覆盖：目标已存在（png 或 jpg 都算已有）直接跳过，已有资源永不被改写；
- *   压缩依赖 ImageMagick 7（`magick`，可用 MAGICK 环境变量指定），参数与 scripts/compress-skin.mjs 同构。
+ *   压缩依赖 ImageMagick 7（`magick`，可用 MAGICK 环境变量指定），参数与 scripts/tools/compress-skin.mjs 同构。
  *   PRTS 站点未知路径会拿 200 返回前端 HTML 而不是 404（GitHub 是正常的 404），所以每份响应都先校验 JSON/PNG 签名再落盘。
  *
  * 用法：
- *   node scripts/update-portraits.mjs --dry-run            # 只打印计划与缺口统计（每个来源目录最多一次清单，不下图）
- *   node scripts/update-portraits.mjs                      # 补齐「可获取干员」
- *   node scripts/update-portraits.mjs --scope char --limit 20   # 连预备干员/NPC 干员一起，本次最多 20 张
- *   node scripts/update-portraits.mjs --ids char_123_fang,char_208_melan
- *   node scripts/update-portraits.mjs --update-tables      # 先把远端两张表拉到缓存目录再比对（表过期时用；本地那份 skin_table 只在有人跑过更新脚本时才刷新，新干员常常还是得靠它）
- *   node scripts/update-portraits.mjs --sources char_arts,char_portrait --ids char_4231_clemnt   # 只收半身像兜底（默认不收）
- *   node scripts/update-portraits.mjs --sources github_skin --dry-run   # 看 GitHub 备份仓库能补多少
- *   node scripts/update-portraits.mjs --sources char_arts,github_skin     # PRTS 缺的再从 GitHub 补
- *   node scripts/update-portraits.mjs --refresh-index      # 强制重取远端目录清单
- *   node scripts/update-portraits.mjs --proxy http://127.0.0.1:7890 --sources github_skin --dry-run   # GitHub 走本地代理
- *   node scripts/update-portraits.mjs --delay 800 --max 1024 --colors 128 --keep-raw
+ *   node scripts/tools/update-portraits.mjs --dry-run            # 只打印计划与缺口统计（每个来源目录最多一次清单，不下图）
+ *   node scripts/tools/update-portraits.mjs                      # 补齐「可获取干员」
+ *   node scripts/tools/update-portraits.mjs --scope char --limit 20   # 连预备干员/NPC 干员一起，本次最多 20 张
+ *   node scripts/tools/update-portraits.mjs --ids char_123_fang,char_208_melan
+ *   node scripts/tools/update-portraits.mjs --update-tables      # 先把远端两张表拉到缓存目录再比对（表过期时用；本地那份 skin_table 只在有人跑过更新脚本时才刷新，新干员常常还是得靠它）
+ *   node scripts/tools/update-portraits.mjs --sources char_arts,char_portrait --ids char_4231_clemnt   # 只收半身像兜底（默认不收）
+ *   node scripts/tools/update-portraits.mjs --sources github_skin --dry-run   # 看 GitHub 备份仓库能补多少
+ *   node scripts/tools/update-portraits.mjs --sources char_arts,github_skin     # PRTS 缺的再从 GitHub 补
+ *   node scripts/tools/update-portraits.mjs --refresh-index      # 强制重取远端目录清单
+ *   node scripts/tools/update-portraits.mjs --proxy http://127.0.0.1:7890 --sources github_skin --dry-run   # GitHub 走本地代理
+ *   node scripts/tools/update-portraits.mjs --delay 800 --max 1024 --colors 128 --keep-raw
  *
  * 参数：--scope obtainable|char|any（默认 obtainable）、--ids 逗号分隔形态id、--limit 本次下载上限（0=不限）、
  *   --sources 图片来源目录（默认 char_arts，可加 char_portrait / github_skin / github_portrait，顺序即优先级）、
@@ -86,8 +86,8 @@ import { promisify } from "node:util";
 
 const exec = promisify(execFile);
 const MAGICK = process.env.MAGICK || "magick";
-const HERE = path.dirname(fileURLToPath(import.meta.url)); // .../scripts
-const ROOT = path.dirname(HERE); // 扩展包根目录
+const HERE = path.dirname(fileURLToPath(import.meta.url)); // .../scripts/tools
+const ROOT = path.dirname(path.dirname(HERE)); // 扩展包根目录
 
 // ---------- 参数 ----------
 const argv = process.argv.slice(2);
@@ -112,7 +112,7 @@ const TARGET_DIR = path.join(OUT, "character");
 const SKIN_TABLE = path.resolve(getOpt("gamedata", path.join(ROOT, "json", "arknight", "skin_table.json")));
 const CHAR_TABLE = path.resolve(getOpt("chartable", path.join(ROOT, "json", "arknight", "character_table.json")));
 const PATCH_TABLE = path.resolve(getOpt("patchtable", path.join(ROOT, "json", "arknight", "char_patch_table.json")));
-const CACHE = path.resolve(getOpt("cache", path.join(HERE, "cache"))); //清单缓存/原始图/--update-tables 的临时表都落在这里
+const CACHE = path.resolve(getOpt("cache", path.join(path.dirname(HERE), "cache"))); //清单缓存/原始图/--update-tables 的临时表都落在这里
 const RAW_DIR = path.join(CACHE, "arts");
 const GAMEDATA_BASE = `${ORIGIN}/gamedata/latest/excel`;
 
@@ -548,7 +548,7 @@ async function main() {
 		["char_patch_table", PATCH_TABLE],
 	]) {
 		if (!fs.existsSync(file)) {
-			console.error(`找不到${label}：${file}\n先跑 scripts/update-arknight-data.bat 或 --update-tables。`);
+			console.error(`找不到${label}：${file}\n先跑 scripts/tools/update-arknight-data.bat 或 --update-tables。`);
 			process.exit(1);
 		}
 	}

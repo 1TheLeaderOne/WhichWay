@@ -39,5 +39,5 @@ if errorlevel 1 (
 	exit /b 1
 )
 
-node "%SCRIPTS%index-menu.mjs" %*
+node "%SCRIPTS%tools\index-menu.mjs" %*
 exit /b %ERRORLEVEL%
