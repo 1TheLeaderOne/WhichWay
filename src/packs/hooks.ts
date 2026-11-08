@@ -1,8 +1,56 @@
 import { lib, game, ui, get, ai, _status } from "noname";
+import { whichWayUtil } from "../utill.js";
 
 type HookName = typeof WhichWayPackHooks._STRING_HOOKS[number] | typeof WhichWayPackHooks._ARRAY_HOOKS[number] | typeof WhichWayPackHooks._OBJECT_HOOKS[number] | typeof WhichWayPackHooks._FUNCTION_HOOKS[number] | typeof WhichWayPackHooks._CARD_HOOKS[number];
 
 type executeFn = (obj: any, key: string, hookName: string) => any | Promise<any>;
+
+/**
+ * `register()` 里 `skillInfo` 的单项内容。
+ */
+export interface RegisterSkillInfo {
+	/** 技能中文名，注册为 `lib.translate[技能名]`（技能面板上显示的技能名） */
+	skillName: string;
+	/** 技能描述，注册为 `lib.translate["{技能名}_info"]`（技能面板上显示的那段文字） */
+	info: string;
+	/** 技能本体，注册为 `lib.skill[技能名]` */
+	skill: ExtendedSkill;
+	/** 动态翻译（可选），注册为 `lib.dynamicTranslate[技能名]` */
+	dyncTrans?: (player: Player) => string;
+	/**
+	 * 台词（可选）。第 i 条经 `line()` 落成 `lib.translate["#{技能名}{i + 1}"]`，
+	 * 正好对上 `audio: 2` 这类多段配音的 `#技能名1` / `#技能名2`。
+	 */
+	line?: string[];
+}
+
+/**
+ * `register()` 的第二个参数。
+ *
+ * 必填：`character` / `characterTranslate` / `title` / `intro` / `skillInfo`；
+ * 可选：`translate` / `characterNamePrefix` / `skill`。
+ */
+export interface RegisterParams {
+	/** 武将本体（同 `character()` 的第二个参数；`name` 由 `register()` 第一个参数提供） */
+	character: WhichWayCharacter;
+	/** 额外翻译，原样交给 `translate()` */
+	translate?: Record<string, string>;
+	/** 武将名翻译（落 `lib.translate[name]`） */
+	characterTranslate: string;
+	/** 武将名前缀，落 `lib.translate["{name}_prefix"]`（引擎 `get.rawName` 据此裁掉名字前缀） */
+	characterNamePrefix?: string;
+	/**
+	 * 称号（同 `characterTitle(name, title)`）。会自动套 `whichWayUtil.colorize()`，
+	 * 所以直接写 `#r称号#` 这类颜色代码即可，不用自己包 `<font>` / `<span>`。
+	 */
+	title: string;
+	/** 介绍（同 `characterIntro(name, intro)`） */
+	intro: string;
+	/** 散装技能，原样交给 `skill()` */
+	skill?: Record<string, ExtendedSkill>;
+	/** 技能集合：一次补齐技能本体、描述、动态翻译与台词 */
+	skillInfo: Record<string, RegisterSkillInfo>;
+}
 
 class WhichWayPackHooks {
 	constructor() {
@@ -121,6 +169,112 @@ class WhichWayPackHooks {
 			);
 		}
 	}
+
+	// ===== 干员一键注册（语法糖） =====
+	/**
+	 * 干员注册语法糖：一次调用补齐「武将本体 + 名字翻译 + 名字前缀 + 称号 + 介绍 + 技能 + 技能名 + 技能描述 + 动态翻译 + 台词」，
+	 * 所有以 `name` 为键的项都由第一个参数提供，不用再手写一遍。
+	 *
+	 * ⚠️ 它只做**转发**：每一项都仍然调用原有的 `character()` / `translate()` / `characterTitle()` /
+	 * `characterIntro()` / `skill()` / `dynamicTranslate()` / `line()`，因此缓冲进 `pendingRun`、
+	 * `onBeforeInit` 统一落库、`translate` 的 `colorize` 预处理、重复键拦截等行为与手写完全一致，
+	 * 后续要统一调整注册流程只需改原 API。
+	 *
+	 * 必填：`character` / `characterTranslate` / `title` / `intro` / `skillInfo`；
+	 * 可选：`translate` / `characterNamePrefix` / `skill`。
+	 *
+	 * `title` 会自动套 `whichWayUtil.colorize()`，直接写 `#r称号#` 即可。
+	 *
+	 * @example
+	 * register("char_2027_wang", {
+	 * 	character: { sex: "male", group: "suimrfz", hp: 4, pack: "legendSJZX", skills: ["qushimrfz"] },
+	 * 	characterTranslate: "望",
+	 * 	characterNamePrefix: "炎国",
+	 * 	title: "#b胜天半子#", // 自动 colorize 成蓝色
+	 * 	intro: "望，曾担任炎国军事顾问……",
+	 * 	skillInfo: {
+	 * 		qushimrfz: {
+	 * 			skillName: "取势", // → lib.translate["qushimrfz"]
+	 * 			info: "锁定技，……",
+	 * 			skill: { trigger: { player: "useCardBegin" }, async content(event, trigger, player) {} },
+	 * 			line: ["劲发江潮落，气收秋毫平。"],
+	 * 		},
+	 * 	},
+	 * });
+	 * // ⇒ character("char_2027_wang", …) / translate("char_2027_wang", "望")
+	 * //   translate("char_2027_wang_prefix", "炎国") / characterTitle(…) / characterIntro(…)
+	 * //   skill("qushimrfz", …) / translate("qushimrfz", "取势") / translate("qushimrfz_info", …)
+	 * //   translate("#qushimrfz1", …)
+	 */
+	public register = (name: string, params: RegisterParams): void => {
+		// ===== 入参校验全部前置：避免注册到一半才抛错、留下半套数据 =====
+		if (typeof name !== "string" || !name) {
+			throw new Error(`[register] name 必须是非空字符串，收到 ${typeof name === "string" ? JSON.stringify(name) : typeof name}`);
+		}
+		if (!params || typeof params !== "object" || Array.isArray(params)) {
+			throw new Error(`[register] "${name}" 的第二个参数必须是对象`);
+		}
+		const raw = params as unknown as Record<string, unknown>;
+		const knownKeys = ["character", "translate", "characterTranslate", "characterNamePrefix", "title", "intro", "skill", "skillInfo"];
+		for (const key of Object.keys(raw)) {
+			if (!knownKeys.includes(key)) {
+				throw new Error(`[register] "${name}" 的 params 里有未知字段 "${key}"，可用字段：${knownKeys.join(", ")}`);
+			}
+		}
+		const requiredKeys = ["character", "characterTranslate", "title", "intro", "skillInfo"];
+		const missing = requiredKeys.filter(key => raw[key] === undefined);
+		if (missing.length) {
+			throw new Error(`[register] "${name}" 缺少必填字段：${missing.join(", ")}`);
+		}
+		if (typeof params.skillInfo !== "object" || params.skillInfo === null || Array.isArray(params.skillInfo)) {
+			throw new Error(`[register] "${name}" 的 skillInfo 必须是对象：Record<技能名, { skillName, info, skill, dyncTrans?, line? }>`);
+		}
+
+		// ===== 1. 武将本体（name 即注册名） =====
+		this.character(name, params.character);
+
+		// ===== 2. 武将名翻译 / 名字前缀 =====
+		this.translate(name, params.characterTranslate);
+		if (params.characterNamePrefix !== undefined) {
+			this.translate(`${name}_prefix`, params.characterNamePrefix);
+		}
+
+		// ===== 3. 称号 / 介绍 =====
+		//称号统一走 colorize：作者直接写 "#r称号#" 即可，不必自己包 <font> / <span>（与现有干员的手写习惯一致）
+		this.characterTitle(name, whichWayUtil.colorize(params.title));
+		this.characterIntro(name, params.intro);
+
+		// ===== 4. 额外翻译 / 散装技能 =====
+		if (params.translate !== undefined) this.translate(params.translate);
+		if (params.skill !== undefined) this.skill(params.skill);
+
+		// ===== 5. skillInfo：技能本体 + 技能名 + 描述 + 动态翻译 + 台词 =====
+		for (const skillName of Object.keys(params.skillInfo)) {
+			const info = params.skillInfo[skillName];
+			if (!info || typeof info !== "object") {
+				throw new Error(`[register] "${name}" 的 skillInfo["${skillName}"] 必须是对象`);
+			}
+			// 走批量形态：`skill()` 的 declare 把第二个参数写成了 Record<string, ExtendedSkill>，
+			// 单条形态直接传 ExtendedSkill 会类型报错（运行时两者等价）
+			this.skill({ [skillName]: info.skill });
+			this.translate(skillName, info.skillName);
+			this.translate(`${skillName}_info`, info.info);
+			if (info.dyncTrans !== undefined) this.dynamicTranslate(skillName, info.dyncTrans);
+			if (info.line !== undefined) {
+				if (!Array.isArray(info.line)) {
+					throw new Error(`[register] "${name}" 的 skillInfo["${skillName}"].line 必须是 string[]`);
+				}
+				if (info.line.length) {
+					// 交给 line() 统一处理：自动补 #、重复键校验、colorize 预处理都与手写台词一致
+					const lines: Record<string, string> = {};
+					info.line.forEach((text, index) => {
+						lines[`${skillName}${index + 1}`] = text;
+					});
+					this.line(lines);
+				}
+			}
+		}
+	};
 
 	// ===== 新增：注册 execute 预处理函数 =====
 	/**
@@ -411,6 +565,7 @@ export const {
 	cardSkill,
 	cardTranslate,
 	line,
+	register,
 	pendingRun,
 	registerExecute
 } = packHooks;
