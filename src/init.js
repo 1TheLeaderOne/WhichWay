@@ -140,6 +140,9 @@ export const whichWayInit = async () => {
 		//导入tips
 		{ name: "tips", load: () => import("./tips/index.ts") },
 
+		//导入新手帮助（任务链式引导；deps: file 因为默认头像/贴图要走 whichWayFile 解析）
+		{ name: "helper", deps: ["file"], load: () => import("./helper/index.ts") },
+
 		//导入角色卡片
 		{ name: "characterCard", load: () => import("./characterCard/index.ts") },
 

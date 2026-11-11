@@ -14,7 +14,14 @@
 				</div>
 
 				<!-- 按钮列表 -->
-				<div v-for="(panel, index) in panels" :key="index" class="funcButton" :class="{ selectedButton_ConfigUI_SJZX: currentPanel === panel.name }" @click="selectPanel(panel)">
+				<div
+					v-for="(panel, index) in panels"
+					:key="index"
+					class="funcButton"
+					:class="{ selectedButton_ConfigUI_SJZX: currentPanel === panel.name }"
+					:data-config-panel="panel.name"
+					@click="selectPanel(panel)"
+				>
 					{{ panel.name }}
 				</div>
 			</div>
@@ -36,7 +43,10 @@ import AudioSetting from "./component/audioSetting.vue";
 import ModuleSetting from "./component/moduleSetting.vue";
 import SolicitForth from "./component/solicitForth.vue";
 import PortraitPosSetting from "./component/portraitPosSetting.vue";
+import { buildConfigUIHelperChain, CONFIG_UI_HELPER_SEEN_KEY } from "./configUIhelper.js";
 import { whichWayUtil } from "../utill.js";
+import { whichWayHelper } from "../helper/index.js";
+import { whichWayToast } from "../toast/index.ts";
 
 let imgTitleSrc = "./extension/WhichWay/image/ui/painter.png";
 
@@ -61,6 +71,9 @@ const currentComponent = computed(() => {
 	return panel ? panel.component : null;
 });
 
+/** 当前实际存在的页签名；用于自动导览里过滤开发者页等不存在的步骤 */
+const panelNames = computed(() => panels.map(panel => panel.name));
+
 const displayAreaRef = ref(null);
 // 选择面板
 const selectPanel = async panel => {
@@ -80,6 +93,12 @@ const selectPanel = async panel => {
 		await nextTick();
 		panel.onLoad();
 	}
+};
+
+/** 按页签名跳转（自动导览的 onStep 用它同步当前页面） */
+const selectPanelByName = name => {
+	const panel = panels.find(item => item.name === name);
+	if (panel) selectPanel(panel);
 };
 
 // 内容加载完成回调
@@ -114,16 +133,104 @@ const getCurrentEl = () => {
 	return document.querySelector(".whichWayConfigUIApp");
 };
 
-const show = () => {
+/**
+ * 首次打开配置页时自动运行的功能导览。
+ *
+ * 导览期间点击左侧菜单会切换 currentPanel，子组件会随切页卸载，
+ * 所以链必须由本容器持有，不能把 run/stop 放在某个页签组件里。
+ */
+let guideActive = false;
+let guideStartPanel = "";
+let autoGuideTimer = null;
+
+const clearAutoGuideTimer = () => {
+	if (autoGuideTimer !== null) window.clearTimeout(autoGuideTimer);
+	autoGuideTimer = null;
+};
+
+const stopGuide = () => {
+	if (!guideActive) return;
+	guideActive = false;
+	guideStartPanel = "";
+	whichWayHelper.stop("configUI");
+};
+
+/** 进入下一步前把页面切到该步对应的功能，保证说明与页面一致 */
+const syncGuidePanel = step => {
+	const prefix = "configUIhelper-tour-";
+	if (!step || typeof step.id !== "string" || !step.id.startsWith(prefix)) return;
+	const panelName = step.id.slice(prefix.length);
+	if (panelName && panelName !== "welcome" && panelName !== "end") selectPanelByName(panelName);
+};
+
+/**
+ * 启动导览。
+ * @returns {boolean} 是否成功启动
+ */
+const startGuide = chain => {
+	if (!chain || !Array.isArray(chain.steps) || !chain.steps.length) return false;
+	try {
+		guideStartPanel = currentPanel.value;
+		guideActive = true;
+		whichWayHelper.run(chain, {
+			replace: true,
+			onStep: syncGuidePanel,
+			onFinish: () => {
+				const restore = guideStartPanel;
+				guideActive = false;
+				guideStartPanel = "";
+				// 导览结束后回到打开前的页面，避免停在最后一个功能
+				if (restore) selectPanelByName(restore);
+			},
+			onAbort: () => {
+				guideActive = false;
+				guideStartPanel = "";
+			},
+		});
+		return true;
+	} catch (error) {
+		guideActive = false;
+		guideStartPanel = "";
+		console.error("[configUIhelper] 启动导览失败", error);
+		whichWayToast.showToast("[驶舰之向] 新手指引启动失败，请查看控制台", 3000, "topLeft", "configUIhelperTourError");
+		return false;
+	}
+};
+
+/** 首次打开自动安排导览：等 configUI 渲染完再启动，避免高亮目标还不存在 */
+const scheduleAutoGuide = () => {
+	clearAutoGuideTimer();
+	if (whichWayUtil.config(CONFIG_UI_HELPER_SEEN_KEY) === true) return;
+	const chain = buildConfigUIHelperChain(panelNames.value);
+	if (!chain || !Array.isArray(chain.steps) || chain.steps.length <= 2) return;
+	autoGuideTimer = window.setTimeout(() => {
+		autoGuideTimer = null;
+		if (!configUIVisible.value) return;
+		const started = startGuide(chain);
+		if (started) whichWayUtil.saveConfig(CONFIG_UI_HELPER_SEEN_KEY, true);
+	}, 350);
+};
+
+const show = async () => {
+	const wasVisible = configUIVisible.value;
 	configUIVisible.value = true;
 	const el = getCurrentEl();
 	if (el) {
 		el.style.display = "";
 	}
 	game.pause2();
+	if (!wasVisible) {
+		clearAutoGuideTimer();
+		await nextTick();
+		if (!configUIVisible.value) return;
+		scheduleAutoGuide();
+	}
 };
 
 const hide = () => {
+	// 关闭设置页时一定要清掉待启动的导览与正在运行的导览
+	clearAutoGuideTimer();
+	stopGuide();
 	configUIVisible.value = false;
 	const el = getCurrentEl();
 	if (el) {
@@ -134,10 +241,18 @@ const hide = () => {
 
 const toggle = () => {
 	const el = getCurrentEl();
+	const willHide = !!el && el.style.display !== "none";
+	if (willHide) {
+		clearAutoGuideTimer();
+		stopGuide();
+	}
 	if (el) {
 		el.style.display = el.style.display === "none" ? "" : "none";
 	}
 	configUIVisible.value = !configUIVisible.value;
+	if (!willHide) {
+		void nextTick().then(scheduleAutoGuide);
+	}
 };
 
 defineExpose({
