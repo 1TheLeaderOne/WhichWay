@@ -1,0 +1,19 @@
+/* 隐匿（unseen）期间的立绘让位规则（逻辑见 src/skin/avatarBackground.ts 的 UNSEEN_CLASS 一段） */
+
+/*
+ * 动皮容器必须走 CSS，不能由 JS 逐个改内联 display：
+ * spineWork.updateDyc 的复用分支会把 `container.style.display` 写回 ""（换肤 / 刷新 / 重挂都会走），
+ * 内联写法会在那之后被顶掉，表现为「隐匿前几秒是对的，换一次皮肤又露出来」。
+ * 类规则同样能盖住「隐匿期间才新建」的动皮容器（loadDyc 是异步的）。
+ *
+ * 用 visibility 而不是 display：容器是 spine 的渲染宿主，display:none 会让画布在隐藏期间被
+ * resize 到 0，解除隐匿的那一帧可能闪出一帧压扁的画面；visibility 不动布局，恢复即所见。
+ *
+ * `transition: none` 不能省：无名杀的 `layout.css` 有一条全局 `div { transition: all 0.5s }`，
+ * 而 `visibility` 是离散属性 —— 它会跟着这条过渡「延迟」到约 250ms 才翻转，
+ * 也就是隐匿开始后小半秒动皮还明晃晃地挂着（实测踩到过）。这一层不需要任何 CSS 过渡。
+ */
+.sjzxUnseenPortrait > .sjzxDycWrapper {
+	visibility: hidden !important;
+	transition: none !important;
+}

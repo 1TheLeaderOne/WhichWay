@@ -44,14 +44,214 @@ const externalWatchers = new WeakMap<HTMLDivElement, MutationObserver>();
 /**
  * 正在由**本扩展**写内联样式的节点。
  *
- * 本扩展会把「两层背景当前那张图」再写一份到 `node.style.backgroundImage` 当影子副本
- * （供战报浅克隆、`smoothAvatar`、`ui.fakeme` 读取）。这份写入同样会触发 `watchExternalBackground`
- * 的 `MutationObserver`，如果不加标记就会被误当成「外部改图」，把同一张图反复回灌。
+ * 本扩展仍有几条路径会写节点自身的 `style.backgroundImage`：`clearInlineBackground` 把它压成 `none`、
+ * `$fullscreenpop` 在动画窗口内临时写回立绘、隐匿让位时收起影子副本（见本文件下半部分的
+ * `syncUnseenPortrait`）。这些写入同样会触发 `watchExternalBackground` 的 `MutationObserver`，
+ * 不加标记就会被误当成「外部改图」，把同一张图反复回灌。
  */
 const selfWritingNodes = new WeakSet<HTMLDivElement>();
 
 /** 已装重定向的节点 */
 const redirectedNodes = new WeakSet<HTMLDivElement>();
+
+// ==================== 隐匿（unseen）让位 ====================
+
+/**
+ * 隐匿期间挂在**头像节点**上的标记类（规则见 `css/portrait.css`）。
+ *
+ * 为什么让位要由本扩展自己做：立绘与动皮都被搬到了头像节点的**子元素**里
+ * （`ensureLayers` 的 host、`spineWork` 的 `.sjzxDycWrapper`），而隐匿表现是主题在**节点自身**上
+ * 换图（`hidden_image.jpg`）或压 opacity。子元素是绝对定位、盖在节点背景之上，而
+ * `layout/newlayout/global.css`、`layout/long*.css` 里根本没有 `.unseen` 的隐藏规则，
+ * 于是立绘整幅盖住了本该出现的隐匿表现。
+ *
+ * 为什么用「类 + CSS」而不是把每个子元素的 `display` 写死：
+ * - 动皮容器是异步/按需创建的（`spineWork.updateDyc` → `loadDyc`），隐匿期间也可能新挂一个；
+ * - `updateDyc` 的快路径会把容器内联 `display` 写回 `""`（`spineWork.js` 的复用分支），
+ *   逐个改内联会在下一次换肤/刷新时被顶掉。
+ * 类规则能同时盖住「已存在」和「之后才创建」的动皮容器。
+ */
+const UNSEEN_CLASS = "sjzxUnseenPortrait";
+
+/** 主将/副将各自的隐匿类（core `Player.$init` 里就是分开加的，这里也分开判，不共用一个标志位） */
+const UNSEEN_CLASS_OF_MAIN = "unseen";
+const UNSEEN_CLASS_OF_VICE = "unseen2";
+
+/**
+ * 头像节点 → 隐匿观察状态。
+ *
+ * `hidden` 是「当前是否已经让位」，用来做状态迁移；`shadow` 记录让位时**被收起的那份影子副本**
+ * （本扩展写在 `node.style.backgroundImage` 上的立绘，供战报浅克隆 / `smoothAvatar` / `ui.fakeme` 读），
+ * 解除隐匿时原样还原。
+ */
+type UnseenWatch = {
+	observer: MutationObserver;
+	player: any;
+	hidden: boolean;
+	shadow?: string;
+};
+
+const unseenWatches = new WeakMap<HTMLDivElement, UnseenWatch>();
+
+/**
+ * 头像节点所属的玩家节点。
+ *
+ * 引擎（`ui.create.div(".avatar", player, …)`）与十周年UI（`.primary-avatar`）都把头像建成
+ * `.player` 的**直接子元素**，但节点可能被挪动过，所以再退一步用 `closest` 找，
+ * 并用「它的 `node.avatar` / `node.avatar2` 确实是我」双重确认 ——
+ * 这样 `ui.fakeme` 那种只有类名、没有 `node` 的克隆节点、以及千幻自己建的卡片容器都不会被误判。
+ */
+function playerOfPortrait(node: HTMLDivElement): any {
+	const parent = node.parentNode;
+	const candidate =
+		parent instanceof HTMLElement && parent.classList.contains("player") ? parent : (node.closest(".player") as HTMLElement | null);
+	if (!candidate) return;
+	const holder: any = candidate;
+	if (holder.node && (holder.node.avatar === node || holder.node.avatar2 === node)) return holder;
+}
+
+/** 这个头像此刻该不该让位（主将看 `unseen`，副将看 `unseen2`，各判各的） */
+function isUnseenPortrait(node: HTMLDivElement): boolean {
+	const player = playerOfPortrait(node);
+	if (!player?.classList) return false;
+	if (player.node?.avatar2 === node) return player.classList.contains(UNSEEN_CLASS_OF_VICE);
+	return player.classList.contains(UNSEEN_CLASS_OF_MAIN);
+}
+
+/** 两张 `background-image` 是不是同一张图（浏览器序列化的引号/转义可能不同，比较前先归一） */
+function sameImage(a: string, b: string): boolean {
+	const norm = (value: string) =>
+		value
+			.trim()
+			.replace(/^url\(\s*/i, "")
+			.replace(/\s*\)$/, "")
+			.replace(/^["']|["']$/g, "");
+	return norm(a) === norm(b);
+}
+
+/**
+ * 隐匿期间把**我们自己的**影子副本收起来（写 `none`），并把原值记到 `watch.shadow` 上。
+ *
+ * 只收「本扩展画的干员立绘/皮肤」（当前那张，或隐匿期间换肤前的旧图）：主题的隐匿表现
+ * （十周年UI 的 `hidden_image.jpg`、千幻的换图、出框图、装饰图）必须原样留着，
+ * 否则会出现「隐匿时连隐匿图都没了」。
+ * @returns 是否动过内联样式
+ */
+function hideOwnShadow(node: HTMLDivElement, layers: Layers, watch: UnseenWatch): boolean {
+	const inline = node.style.backgroundImage;
+	if (!inline || inline === "none") return false;
+	//是不是「本扩展画的干员立绘/皮肤」：当前那张，或者是**上一次**画的那张（隐匿期间换了肤，
+	//`layers.url` 已经是新图、内联还留着旧图 —— 那也是我们写的，一样得收）
+	const current = !!layers.url && sameImage(inline, layers.url);
+	const ours = current || resolvePortraitKey(inline) !== undefined;
+	//不是我们的（主题的 `hidden_image.jpg`、出框图、外部装饰图）⇒ 原样留着
+	if (!ours) return false;
+	//只记「当前这张」用于解除后还原；过期副本直接丢掉，否则解除隐匿会把旧皮肤复活
+	if (current) watch.shadow = inline;
+	else watch.shadow = undefined;
+	selfWritingNodes.add(node);
+	node.style.backgroundImage = "none";
+	queueMicrotask(() => selfWritingNodes.delete(node));
+	return true;
+}
+
+/**
+ * 按玩家当前的隐匿状态，让位 / 恢复这个头像节点。
+ *
+ * 让位对象三件（缺一不可，见文件顶部的说明）：
+ * 1. `layers.host` —— 两层背景（立绘本体）；
+ * 2. 动皮容器 —— 由 `UNSEEN_CLASS` 在 `css/portrait.css` 里盖住（含之后才创建的）；
+ * 3. 节点自身的**影子副本** —— 本扩展写在 `node.style.backgroundImage` 上的立绘。
+ *    只藏子元素的话，在「主题没有 `.unseen` 样式」的布局里立绘照样会露出来（`apps/core` 本身没有这条 CSS）。
+ *    这里只收`hideOwnShadow` 认得的那些（本扩展画的立绘/皮肤），主题写的 `hidden_image.jpg` 原样留着。
+ *
+ * 幂等：状态没变时不重建观察者、不改 host 的 display，避免触发多余的样式观察回调。
+ */
+function syncUnseenPortrait(node?: HTMLDivElement | null) {
+	if (!node) return;
+	const layers = layersOf(node);
+	if (!layers) return;
+	const watch = ensureUnseenWatch(node);
+	//找不到玩家节点（千幻卡片、选将按钮、预览面板）：这里不是「场上头像」，不与隐匿联动，
+	//顺手把可能从别处继承来的标记类摘掉，别让这类节点被误盖。
+	if (!watch) {
+		node.classList.remove(UNSEEN_CLASS);
+		return;
+	}
+	const unseen = isUnseenPortrait(node);
+	const hidden = watch.hidden === true;
+	//类偶尔会被「克隆后重新挂载」「外部清类」弄丢，状态没变时也补正一次（纯 classList 操作，不触发 style 观察）
+	node.classList.toggle(UNSEEN_CLASS, unseen);
+
+	if (unseen) {
+		if (!hidden) {
+			watch.hidden = true;
+			layers.host.style.display = "none";
+		}
+		//影子副本**每次都要收**，不能只在「刚进入隐匿」那一次：
+		//隐匿期间照样会重绘（换肤、拖拽落盘、`$reinit` 之后的补画），那会把一份新的内联副本留在节点上。
+		hideOwnShadow(node, layers, watch);
+		return;
+	}
+
+	if (!hidden) return;
+
+	watch.hidden = false;
+	//解除：恢复子元素；影子副本只在「期间没人写过内联」时还原（主题若换了图，以它为准）
+	layers.host.style.display = "";
+	const shadow = watch.shadow;
+	watch.shadow = undefined;
+	const inline = node.style.backgroundImage;
+	if (shadow && (!inline || inline === "none")) {
+		selfWritingNodes.add(node);
+		node.style.backgroundImage = shadow;
+		queueMicrotask(() => selfWritingNodes.delete(node));
+	}
+}
+
+/**
+ * 给头像节点装（或取回）隐匿观察者。
+ *
+ * 为什么监听 class 变化，而不是只在「绘制时检查一次」：
+ * 带 `hasHiddenSkill` 的角色是在 `Player.$init` 里就 `classList.add("unseen")` 的，
+ * 那一刻绘制已经结束、之后**不会有第二次绘制**；而 `reUnseen()`（本扩展的隐匿）、
+ * `$showCharacter`、`lib.reinit`、国战 patch、以及 `$showCharacter` 里的 `game.broadcast`
+ * 又会在后续任意时刻加 / 摘这个类。挂绘制钩子只能覆盖前一半，class 观察是唯一能同时覆盖
+ * 「开局即有」与「后续亮明」的入口，而且主副将是同一个 `.player` 上的两个不同类，观察者对两者都有效。
+ */
+function ensureUnseenWatch(node: HTMLDivElement): UnseenWatch | undefined {
+	const player = playerOfPortrait(node);
+	if (!player) return;
+	let watch = unseenWatches.get(node);
+	if (watch && watch.player === player) return watch;
+	//头像被挪到另一个玩家节点上（换座/换人）：旧观察者作废，按新玩家重装
+	watch?.observer.disconnect();
+	watch = {
+		observer: new MutationObserver(() => syncUnseenPortrait(node)),
+		player,
+		hidden: false,
+	};
+	watch.observer.observe(player, { attributes: true, attributeFilter: ["class"] });
+	unseenWatches.set(node, watch);
+	return watch;
+}
+
+/** 摘掉观察者并复位（`dispose` / 节点被交回引擎时用） */
+function disposeUnseenWatch(node: HTMLDivElement) {
+	const watch = unseenWatches.get(node);
+	if (!watch) return;
+	watch.observer.disconnect();
+	unseenWatches.delete(node);
+	node.classList.remove(UNSEEN_CLASS);
+	watch.hidden = false;
+	if (watch.shadow) {
+		const shadow = watch.shadow;
+		watch.shadow = undefined;
+		selfWritingNodes.add(node);
+		node.style.backgroundImage = shadow;
+		queueMicrotask(() => selfWritingNodes.delete(node));
+	}
+}
 
 /**
  * 只有明日方舟干员才套两层背景。
@@ -187,6 +387,10 @@ const toBackgroundUrl = (src: string) => `url("${whichWayFile.toCssUrl(src)}")`;
  * 而这几处只是个别面板的头像。将来要补，应该给那几处单独画（**不要**退回给节点写内联副本）。
  */
 function clearInlineBackground(node: HTMLDivElement) {
+	//隐匿期间**不在这里动**内联背景：那里可能是主题的隐匿表现（十周年UI 的 `hidden_image.jpg`
+	//是用 `setProperty(…, "important")` 写进来的，被这里覆盖掉就再也回不来了）。
+	//我们自己的那份由 `hideOwnShadow` 按"是不是我们那张"精确处理，两者互不干扰。
+	if (node.classList.contains(UNSEEN_CLASS)) return;
 	//已经是 `none` 就不必再写（避免每帧都触发一次 MutationObserver）
 	if (node.style.backgroundImage === "none") return;
 	selfWritingNodes.add(node);
@@ -227,6 +431,8 @@ function ensureLayers(node: HTMLDivElement): Layers {
 			render(null, host);
 			host.remove();
 			layersMap.delete(node);
+			//交回引擎时不能留下观察者与标记类：否则换回普通角色后，节点上还会继续跟着 unseen 状态走
+			disposeUnseenWatch(node);
 		},
 	};
 	layers.setImage("");
@@ -239,20 +445,23 @@ function ensureLayers(node: HTMLDivElement): Layers {
 	//十周年UI 的出框图会绕过 setBackground/setBackgroundImage 直接写内联样式，
 	//挂上观察者才能把它同步进来（否则「子元素画立绘 + 内联写出框图」两层叠加）
 	watchExternalBackground(node);
+	//隐匿：先装观察者再同步一次 —— 带 hasHiddenSkill 的角色是在 $init 里就加类的，
+	//等到下一次绘制才处理的话，开局那一整段时间立绘都会压在隐匿表现上
+	syncUnseenPortrait(node);
 	return layers;
 }
 
 /**
- * 把立绘画进两层背景，同时在节点自身留一份**只贴立绘**的影子副本。
+ * 把立绘画进两层背景。
  *
- * 影子副本是给「读不到子元素的地方」准备的：`game.logv` 的战报卡头像是
- * `player.node.avatar.cloneNode()`（**浅克隆**，只带属性与内联样式），`smoothAvatar` 的淡出层抄的是
- * `getComputedStyle(.avatar).background`，`ui.fakeme` 抄的是 `.avatar` 的内联 background-image ——
- * 立绘只画在子元素上的话，这三处全是空白。
+ * 早期版本会同时往节点自身写一份**影子副本**；现已取消（见 `clearInlineBackground` 里「代价」一段），
+ * 只有在 `$fullscreenpop` 的同步窗口里才会临时写回。下面这段保留下来是为了说明「为什么读不到子元素」：
+ * `game.logv` 的战报卡头像是 `player.node.avatar.cloneNode()`（**浅克隆**，只带属性与内联样式），
+ * `smoothAvatar` 的淡出层抄的是 `getComputedStyle(.avatar).background`，`ui.fakeme` 抄的是
+ * `.avatar` 的内联 background-image —— 立绘只画在子元素上的话，这三处全是空白。
  *
- * 副本是**未调位的原样**：画布的放大与偏移只加在内层子元素上，加到节点自身就会连带动到
- * `.name`/`.hp` 等兄弟层。所以内层一旦偏移，透出来的副本就不完全重合 ——
- * 这是既有取舍（改动之前副本也从来不带内层那个默认缩放），换来的是上面三处不空白。
+ * 早期那份副本是**未调位的原样**：画布的放大与偏移只加在内层子元素上，加到节点自身就会连带动到
+ * `.name`/`.hp` 等兄弟层，所以内层一旦偏移，副本就不完全重合。这正是后来取消常驻副本的原因之一。
  *
  * @param forceClassic 调用方明确要「经典形象」（引擎的 `setBackground(name, type, "noskin")`）：
  *   此时**必须**画立绘，不能画当前皮肤。
@@ -272,6 +481,8 @@ function paintPortrait(node: HTMLDivElement, name: string, forceClassic = false)
 	//这几处读不到子元素会变空白。但「场上/选将/武将卡三重影」是必须解决的问题，而这三处
 	//只是个别面板的头像 —— 需要时再单独给它们补一层（不要退回写内联副本）。
 	clearInlineBackground(node);
+	//换肤/重绘可能发生在隐匿期间（`$reinit`、千幻换图、拖拽落盘）：画完再确认一次是否该让位
+	syncUnseenPortrait(node);
 }
 
 /**
@@ -632,6 +843,15 @@ function watchExternalBackground(node: HTMLDivElement) {
 		//这一轮内联样式是我们自己写的影子副本（paintPortrait / setBackgroundImage 同步），
 		//不是外部改动 —— 直接忽略，否则会把「我们画的图」又当成外部图回灌一遍。
 		if (selfWritingNodes.has(node)) return;
+		//隐匿期间：内联图可能是**主题的隐匿表现**（十周年UI 的 `hidden_image.jpg`、千幻的换图），
+		//也可能又轮到我们自己的影子副本（别人调了 setBackgroundImage / 觉醒动画的写入窗口）。
+		//前者必须原样留着，后者必须收起 —— 所以不能像下面那样"同步进两层"，
+		//交给 `hideOwnShadow` 按"是不是我们那张"分类处理。
+		if (node.classList.contains(UNSEEN_CLASS)) {
+			const watch = unseenWatches.get(node);
+			if (watch) hideOwnShadow(node, current, watch);
+			return;
+		}
 		const inline = node.style.backgroundImage;
 		if (!inline || inline === "none") return;
 		const external = firstLayer(inline);
@@ -760,6 +980,9 @@ function installFullscreenPopPatch() {
 			if (!node) return;
 			const layers = layersOf(node);
 			if (!layers || !layers.url) return;
+			//隐匿期间不能把立绘写回内联：觉醒动画的取图节点会照着露脸，而且这条写入是
+			//本扩展少数几个「影子副本」写入点之一（见文件顶部的说明），一写就会盖住隐匿表现。
+			if (node.classList.contains(UNSEEN_CLASS)) return;
 			//标记 + 写入：标记要在整个「写 → 读 → 还原」窗口里都有效，
 			//否则 `watchExternalBackground` 会把这次写入当成外部改图再回灌一遍。
 			selfWritingNodes.add(node);
@@ -822,6 +1045,10 @@ onContent({
 				//等整局初始化走完再确认一次，才不会出现「开局显示立绘、动皮没挂上」
 				ensureDynamicSkin(this.node?.avatar, character);
 				if (character2) ensureDynamicSkin(this.node?.avatar2, character2);
+				//带 hasHiddenSkill 的角色正是在 $init 里加的 unseen：这里补一次同步，
+				//保证开局那一帧起就让位（观察者会在之后的任意 class 变化上继续跟进）
+				syncUnseenPortrait(this.node?.avatar);
+				syncUnseenPortrait(this.node?.avatar2);
 				return result;
 			},
 		});
@@ -835,6 +1062,10 @@ onContent({
 			after(this: any, result: any, character: string, character2?: string) {
 				ensureDynamicSkin(this.node?.avatar, character);
 				if (character2) ensureDynamicSkin(this.node?.avatar2, character2);
+				//换将/重连后隐匿状态可能已经变了（$reinit 自己不动 unseen 类，见引擎 player.js），
+				//这里按节点当下的类再同步一次，避免「亮明之后换了将、立绘还藏着」
+				syncUnseenPortrait(this.node?.avatar);
+				syncUnseenPortrait(this.node?.avatar2);
 				return result;
 			},
 		});
