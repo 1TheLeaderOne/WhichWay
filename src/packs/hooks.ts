@@ -46,6 +46,19 @@ export interface RegisterParams {
 	title: string;
 	/** 介绍（同 `characterIntro(name, intro)`） */
 	intro: string;
+	/**
+	 * 阵亡台词（可选）。
+	 *
+	 * - 字符串：落成 `lib.translate["#{武将名}:die"]`（单条；若 `dieAudios` 有多条，
+	 *   它对应第 1 条）；
+	 * - `string[]`：第 i 条落成 `lib.translate["#{武将名}{i + 1}:die"]`，与
+	 *   `dieAudios` 展平后的第 i+1 条一一对应。
+	 *
+	 * 与技能台词一样只写「`#{武将名}:die`」这种**作者侧**的键即可：音频模块的
+	 * `mirrorDieLines` 会在初始化时把它镜像到实际地址
+	 * `#ext:WhichWay/audio/{语言}/die/{武将名}{序号}:die`，**只补空位、不覆盖**。
+	 */
+	dieLine?: string | string[];
 	/** 散装技能，原样交给 `skill()` */
 	skill?: Record<string, ExtendedSkill>;
 	/** 技能集合：一次补齐技能本体、描述、动态翻译与台词 */
@@ -181,7 +194,7 @@ class WhichWayPackHooks {
 	 * 后续要统一调整注册流程只需改原 API。
 	 *
 	 * 必填：`character` / `characterTranslate` / `title` / `intro` / `skillInfo`；
-	 * 可选：`translate` / `characterNamePrefix` / `skill`。
+	 * 可选：`translate` / `characterNamePrefix` / `skill` / `dieLine`。
 	 *
 	 * `title` 会自动套 `whichWayUtil.colorize()`，直接写 `#r称号#` 即可。
 	 *
@@ -192,6 +205,7 @@ class WhichWayPackHooks {
 	 * 	characterNamePrefix: "炎国",
 	 * 	title: "#b胜天半子#", // 自动 colorize 成蓝色
 	 * 	intro: "望，曾担任炎国军事顾问……",
+	 * 	dieLine: "落子无悔。", // 可选：→ lib.translate["#char_2027_wang:die"]
 	 * 	skillInfo: {
 	 * 		qushimrfz: {
 	 * 			skillName: "取势", // → lib.translate["qushimrfz"]
@@ -215,7 +229,7 @@ class WhichWayPackHooks {
 			throw new Error(`[register] "${name}" 的第二个参数必须是对象`);
 		}
 		const raw = params as unknown as Record<string, unknown>;
-		const knownKeys = ["character", "translate", "characterTranslate", "characterNamePrefix", "title", "intro", "skill", "skillInfo"];
+		const knownKeys = ["character", "translate", "characterTranslate", "characterNamePrefix", "title", "intro", "dieLine", "skill", "skillInfo"];
 		for (const key of Object.keys(raw)) {
 			if (!knownKeys.includes(key)) {
 				throw new Error(`[register] "${name}" 的 params 里有未知字段 "${key}"，可用字段：${knownKeys.join(", ")}`);
@@ -229,6 +243,8 @@ class WhichWayPackHooks {
 		if (typeof params.skillInfo !== "object" || params.skillInfo === null || Array.isArray(params.skillInfo)) {
 			throw new Error(`[register] "${name}" 的 skillInfo 必须是对象：Record<技能名, { skillName, info, skill, dyncTrans?, line? }>`);
 		}
+		//可选字段同样前置校验：避免武将/技能已经注册进队列、才因为 dieLine 写错而抛错
+		const dieLineEntries = params.dieLine === void 0 ? undefined : this.dieLineEntries(name, params.dieLine);
 
 		// ===== 1. 武将本体（name 即注册名） =====
 		this.character(name, params.character);
@@ -274,7 +290,40 @@ class WhichWayPackHooks {
 				}
 			}
 		}
+
+		// ===== 6. 阵亡台词（可选） =====
+		// 键的约定与音频模块 mirrorDieLines 的镜像规则一致：
+		// 单条 → `#{武将名}:die`（对应第 1 条）；多条 → `#{武将名}{序号}:die`
+		if (dieLineEntries && Object.keys(dieLineEntries).length) this.line(dieLineEntries);
 	};
+
+	/**
+	 * 把 `register()` 的 `dieLine` 规整成 `line()` 需要的 `{ 键: 台词 }`。
+	 *
+	 * - 字符串：`#{武将名}:die`（单条，对应 `dieAudios` 展平后的第 1 条）；
+	 * - 数组：`#{武将名}{i + 1}:die`，与 `dieAudios` 展平后的顺序一一对应。
+	 *
+	 * @param name 武将注册名
+	 * @param dieLine 作者写的阵亡台词
+	 * @returns 交给 `line()` 的键值对（未做 `#` 前缀，由 `line()` 统一补）
+	 */
+	private dieLineEntries(name: string, dieLine: string | string[]): Record<string, string> {
+		if (typeof dieLine === "string") {
+			if (!dieLine) throw new Error(`[register] "${name}" 的 dieLine 不能是空字符串`);
+			return { [`${name}:die`]: dieLine };
+		}
+		if (!Array.isArray(dieLine)) {
+			throw new Error(`[register] "${name}" 的 dieLine 必须是字符串或字符串数组`);
+		}
+		const entries: Record<string, string> = {};
+		dieLine.forEach((text, index) => {
+			if (typeof text !== "string" || !text) {
+				throw new Error(`[register] "${name}" 的 dieLine 第 ${index + 1} 条必须是非空字符串`);
+			}
+			entries[`${name}${index + 1}:die`] = text;
+		});
+		return entries;
+	}
 
 	// ===== 新增：注册 execute 预处理函数 =====
 	/**

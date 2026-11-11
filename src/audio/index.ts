@@ -18,6 +18,13 @@ const audioSave = window.whichWaySave.audioConfig;
 const DEFAULT_VOICE_TITLES = ["选中干员1", "选中干员2", "部署1", "部署2", "作战中1", "作战中2", "作战中3", "作战中4"];
 
 /**
+ * 阵亡配音的默认标题。
+ *
+ * 未配置 `dieAudios` 时播的就是这一条（与改动前一致）；下载时也按它去 PRTS 取音频。
+ */
+const DEFAULT_DIE_VOICE_TITLE = "行动失败";
+
+/**
  * 取出一个玩家所有可能的名字。
  *
  * 引擎的 audioname / audioname2 匹配会依次尝试 tempname、name、name1、name2
@@ -281,6 +288,50 @@ class WhichWayAudio {
 	private _originalAudio = new Map<string, unknown>();
 
 	/**
+	 * 武将 → 阵亡配音归一化后的条目组（按皮肤分组）。
+	 *
+	 * 与技能侧的 `_skinEntries` 完全同构：皮肤键只决定「这一句从哪个语音库取」，
+	 * 摊平后仍是一条 1..N 的序列，运行期不按皮肤切换播放。
+	 */
+	private _dieEntries = new Map<string, { skinId: string; voiceId?: string; titles: string[] }[]>();
+	/** 武将 → 作者写的原始 dieAudios（改写前备份，重复初始化时按它归一化） */
+	private _originalDieAudios = new Map<string, unknown>();
+	/** 武将 → 上次写回 dieAudios 的内容（用于识别「当前值是不是本模块写的」） */
+	private _writtenDieAudios = new Map<string, string[]>();
+
+	// ============ 按武将指定配音（audioname 对象形态） ============
+	//
+	// 作者侧（与 audio 的对象形态同构，但维度是「武将」而不是皮肤）：
+	//   audioname: {
+	//     default: ["作战中1"],
+	//     "char_003_kalts": ["部署1", "部署2"],
+	//     "char_148_nearl": "作战中1",          // 单条 = 单条数组的语法糖
+	//   }
+	// 初始化时一律归约成引擎原版的 string[]，每个武将的标题序列存在下面这张旁路表里，
+	// 运行期不再判断对象形态。
+
+	/** `目标技能|武将` → 该武将的专属配音标题（`目标技能|default` 是兜底组） */
+	private _charAudioTitles = new Map<string, string[]>();
+	/**
+	 * `目标技能|武将` → 该武将明确要求「走引擎原生路径」（对象里 value 写成 `"default"`）。
+	 *
+	 * 这类武将等同写进数组（`audioname: ["该武将"]`）：仍然追加 `_{武将名}` 后缀，
+	 * 但**不再套用** `default` 组的标题——这正是它和「漏配」的区别。
+	 */
+	private _nativeAudioname = new Set<string>();
+	/** 目标技能 → 作者写的原始 audioname（改写前备份，用于重建与还原） */
+	private _originalAudioname = new Map<string, unknown>();
+	/**
+	 * 目标技能 → 作者写的原始 `audio`（首次读到就备份）。
+	 *
+	 * 第一次处理某个干员时会把 `info.audio` 改写成 `ext:…:{N}`，而共享技能后续的干员还会读它——
+	 * 不备份就只能读到改写后的「数量」，拿不到作者写的标题与皮肤分组。
+	 */
+	private _originalTargetAudio = new Map<string, unknown>();
+	/** 目标技能 → 共享技能自动登记的拥有者（重建 audioname 时保留） */
+	private _autoAudioname = new Map<string, Set<string>>();
+
+	/**
 	 * 确保音频目录存在并建立存在性缓存（幂等，并发出一次）
 	 */
 	async ensureAudioCache(): Promise<void> {
@@ -349,6 +400,11 @@ class WhichWayAudio {
 		this._webPlayMap.clear();
 		//按皮肤分组的旁路表同样要清：重建时会按（可能已还原的）原始 audio 重新归一化
 		this._skinEntries.clear();
+		this._dieEntries.clear();
+		//按武将的配音标题同样要清：重建时从（已还原的）audioname 重新归约
+		this._charAudioTitles.clear();
+		this._nativeAudioname.clear();
+		this._autoAudioname.clear();
 	}
 
 	/** 配置变更后重建整套音频索引 */
@@ -359,6 +415,22 @@ class WhichWayAudio {
 			if (info) (info as any).audio = audio;
 		}
 		this._originalAudio.clear();
+		//目标技能的 audio 也要还原（借用配音时它和上面的 `skill` 不是同一个技能）
+		for (const [target, audio] of this._originalTargetAudio) {
+			const info = lib.skill[target];
+			if (!info) continue;
+			if (audio === void 0) delete (info as any).audio;
+			else (info as any).audio = audio;
+		}
+		this._originalTargetAudio.clear();
+		//audioname 同样要还原成作者原值（对象形态），否则重建时会把上次摊平的结果当成作者配置
+		for (const [target, audioname] of this._originalAudioname) {
+			const info = lib.skill[target];
+			if (!info) continue;
+			if (audioname === void 0) delete (info as any).audioname;
+			else (info as any).audioname = audioname;
+		}
+		this._originalAudioname.clear();
 		this.clearCaches();
 		await this.ensureAudioCache();
 		this.initAllAudio();
@@ -402,23 +474,26 @@ class WhichWayAudio {
 			}
 		}
 
-		//共享技能：决定是否启用 audioname 后缀命名，并把干员登记进引擎的 audioname
+		//共享技能：决定是否启用 audioname 后缀命名，并记下要自动登记的拥有者。
+		//这里**只收集、不直接改 info.audioname**：它可能是对象形态，必须由 prepareSkillAudioname 统一归约。
 		for (const [skill, list] of owners) {
 			if (list.length < 2) continue;
 			if (!this.shouldUseAudioNameSuffix(skill, list)) continue;
 			const target = this.getReferSkill(skill);
-			const info = lib.skill[target];
 			//与 applySkillAudio 保持一致：只登记本扩展的技能，避免把干员名写进本体技能的 audioname 共享数组
-			if (!info || !window.whichWaySave.hasSkill(target)) continue;
-			if (!Array.isArray(info.audioname)) info.audioname = [];
-			for (const char of list) {
-				if (!info.audioname.includes(char)) info.audioname.push(char);
-			}
+			if (!lib.skill[target] || !window.whichWaySave.hasSkill(target)) continue;
+			let auto = this._autoAudioname.get(target);
+			if (!auto) this._autoAudioname.set(target, (auto = new Set()));
+			for (const char of list) auto.add(char);
 			this._suffixSkills.add(skill);
 		}
 
+		//把对象形态的 audioname 归约成引擎原版的 string[]：对象里的武将名摊平进去，再加上自动登记的拥有者
+		for (const skill of owners.keys()) this.prepareSkillAudioname(skill);
+
 		for (const [name, skills] of characters) {
-			this.initDieAudio(get.character(name));
+			//阵亡配音的文件名由引擎用「武将注册名」拼出，这里把注册名一并传进去
+			this.initDieAudio(get.character(name), name);
 			for (const skill of skills) this.applySkillAudio(skill, name);
 		}
 
@@ -468,6 +543,155 @@ class WhichWayAudio {
 		return true;
 	}
 
+	// ============ 按武将指定配音（audioname 对象形态） ============
+	//
+	// 引擎原版 `audioname` 只有 `string[]`：命中玩家时给文件名追加 `_{武将名}`。
+	// 本扩展额外接受对象形态（key = 武将注册名 / `"default"`），初始化时一律归约成 `string[]`，
+	// 每个武将的标题序列落在 `_charAudioTitles`（键 `目标技能|武将`），运行期不再判断对象形态。
+
+	/**
+	 * 归一化一个技能的 `audioname`。
+	 *
+	 * - `string[]`：引擎原版形态，原样返回（现有干员包的「借用某武将配音」写法）；
+	 * - 对象：key = 武将注册名（`"default"` 为兜底组），value = 配音标题或标题数组；
+	 *   单字符串视为单条数组。
+	 * - value 写 `"default"`：这个武将**走引擎原生路径**（等同把它写进 `audioname` 数组，
+	 *   套用 `Skill.audio` 的标题与皮肤维度），且**不会被 `default` 组兜底**。
+	 *   `default` 这个键本身也接受 `"default"`，表示所有未列出的武将都走原生路径。
+	 *
+	 * ⚠ 值类型不对**直接抛错**：这是作者写错了配置，静默忽略只会让「配音不响」变成查不出原因的悬案
+	 * （与按皮肤配置时「查不到 voiceId 就抛错」同一套口径）。武将名查不到只告警，因为共享技能
+	 * 可能也被其它扩展的武将使用。
+	 *
+	 * @returns 摊平后的名字列表 + 每武将标题 + 显式要求走原生路径的武将；`undefined` 表示没有有效配置
+	 */
+	private normalizeAudioname(raw: unknown, target: string): { names: string[]; titles: Map<string, string[]>; native: string[]; defaultTitles?: string[] } | undefined {
+		if (raw === void 0 || raw === null) return undefined;
+		if (Array.isArray(raw)) {
+			const names = raw.filter((value): value is string => typeof value === "string" && !!value);
+			return names.length ? { names, titles: new Map(), native: [] } : undefined;
+		}
+		if (typeof raw !== "object") {
+			console.warn(`[whichWayAudio] 技能 ${target} 的 audioname 既不是数组也不是对象，已忽略：`, raw);
+			return undefined;
+		}
+
+		const names: string[] = [];
+		const native: string[] = [];
+		const titles = new Map<string, string[]>();
+		let defaultTitles: string[] | undefined;
+		for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+			//value 写 "default"：该武将走引擎原生路径，不存标题（因此也不会被 default 组兜底）
+			if (value === "default") {
+				if (key === "default") continue; //「所有未列出的武将都走原生」= 什么都不存
+				if (get.character(key)?.isNull) {
+					console.warn(`[whichWayAudio] 技能 ${target} 的 audioname 里列了未知武将 "${key}"（key 必须是武将注册名）`);
+				}
+				names.push(key);
+				native.push(key);
+				continue;
+			}
+			const list = this.toAudioTitleList(value, target, key);
+			if (!list.length) continue;
+			if (key === "default") {
+				defaultTitles = list;
+			} else {
+				if (get.character(key)?.isNull) {
+					console.warn(`[whichWayAudio] 技能 ${target} 的 audioname 里列了未知武将 "${key}"（key 必须是武将注册名）`);
+				}
+				titles.set(key, list);
+				names.push(key);
+			}
+		}
+		return { names, titles, native, defaultTitles };
+	}
+
+	/** 把一条 audioname 配置值规整成标题数组（单字符串 = 单条；类型不对抛错） */
+	private toAudioTitleList(value: unknown, target: string, key: string): string[] {
+		if (typeof value === "string") return value ? [value] : [];
+		if (Array.isArray(value)) {
+			const list = value.filter((item): item is string => typeof item === "string" && !!item);
+			if (list.length !== value.length) throw new Error(`[whichWayAudio] 技能 ${target} 的 audioname["${key}"] 里有非字符串的配音标题`);
+			return list;
+		}
+		throw new Error(`[whichWayAudio] 技能 ${target} 的 audioname["${key}"] 必须是配音标题或标题数组（取值见 AudioTitle）`);
+	}
+
+	/**
+	 * 归约并写回一个技能的 `audioname`（对象形态 → 引擎原版 `string[]`）。
+	 *
+	 * 写回内容 = 当前数组里已有的名字 ∪ 对象里的武将名 ∪ 自动登记的拥有者，**只增不减**，
+	 * 因此可以反复调用（initAllAudio / applySkillAudio / 下载后重建都不会重复登记）。
+	 * 作者原值在第一次调用时备份（`_originalAudioname`），`refreshAudioIndex` 会先还原再重建。
+	 *
+	 * @param skill 技能名（内部会解析到引用链终点——引擎解析音频与文件名都用终点技能）
+	 */
+	private prepareSkillAudioname(skill: string): void {
+		const target = this.getReferSkill(skill);
+		const info = lib.skill[target];
+		//只处理本扩展的技能，避免把干员名写进本体技能的 audioname 共享数组
+		if (!info || !window.whichWaySave.hasSkill(target)) return;
+
+		if (!this._originalAudioname.has(target)) this._originalAudioname.set(target, info.audioname);
+		const parsed = this.normalizeAudioname(this._originalAudioname.get(target), target);
+
+		//旁路表按目标技能整体重建，避免配置改动后残留旧的武将条目
+		const prefix = `${target}|`;
+		for (const key of [...this._charAudioTitles.keys()]) if (key.startsWith(prefix)) this._charAudioTitles.delete(key);
+		for (const key of [...this._nativeAudioname]) if (key.startsWith(prefix)) this._nativeAudioname.delete(key);
+		if (parsed) {
+			for (const [char, list] of parsed.titles) this._charAudioTitles.set(`${target}|${char}`, list);
+			for (const char of parsed.native) this._nativeAudioname.add(`${target}|${char}`);
+			if (parsed.defaultTitles?.length) this._charAudioTitles.set(`${target}|default`, parsed.defaultTitles);
+		}
+
+		//只增不减：保留数组里已有的名字（可能来自其它扩展，或本扩展上一次写入）
+		const names = new Set<string>(Array.isArray(info.audioname) ? info.audioname.filter((name): name is string => typeof name === "string" && !!name) : []);
+		for (const name of parsed?.names ?? []) names.add(name);
+		for (const name of this._autoAudioname.get(target) ?? []) names.add(name);
+		if (!names.size) {
+			//作者没配、也没有自动登记：不要把 audioname 从 undefined 改成空数组
+			delete (info as any).audioname;
+			return;
+		}
+		(info as any).audioname = [...names];
+	}
+
+	/**
+	 * 该 (技能, 武将) 由 `audioname` 对象指定的标题序列；没有配置时返回 undefined。
+	 *
+	 * 优先级：该武将的显式配置 > 对象的 `default` 组。查的是**引用链终点**技能。
+	 * 值写成 `"default"` 的武将**直接返回 undefined**（走引擎原生路径，且不吃 `default` 组）。
+	 */
+	private charAudioTitlesOf(skill: string, char: string): string[] | undefined {
+		const target = this.getReferSkill(skill);
+		if (this._nativeAudioname.has(`${target}|${char}`)) return undefined;
+		const titles = this._charAudioTitles.get(`${target}|${char}`) ?? this._charAudioTitles.get(`${target}|default`);
+		return titles?.length ? titles : undefined;
+	}
+
+	/** 该目标技能是否有明确要求「走引擎原生路径」的武将（value 写 `"default"` 的那些） */
+	private hasNativeAudioname(target: string): boolean {
+		const prefix = `${target}|`;
+		for (const key of this._nativeAudioname) if (key.startsWith(prefix)) return true;
+		return false;
+	}
+
+	/**
+	 * 该目标技能由 `audioname` 配置的最大条数（没有配置时返回 0）。
+	 *
+	 * 用于写回 `info.audio` 的数量：`info.audio` 是整条技能一份，不同武将条数不同时只能取最大值，
+	 * 否则条数少的武将会把条数多的武将的候选截断（多出来的候选由 `trimOwnAudioList` 在播放层滤掉）。
+	 */
+	private audionameTitleCount(target: string): number {
+		let max = 0;
+		const prefix = `${target}|`;
+		for (const [key, titles] of this._charAudioTitles) {
+			if (key.startsWith(prefix)) max = Math.max(max, titles.length);
+		}
+		return max;
+	}
+
 	/**
 	 * 为「技能 × 干员」这一组合确定音频来源并写入引擎可识别的位置。
 	 *
@@ -485,9 +709,18 @@ class WhichWayAudio {
 		//引用到核心技能（如 audio: "eagle"）时不干预，交给引擎默认处理
 		if (!targetInfo || !window.whichWaySave.hasSkill(target)) return;
 
+		//对象形态的 audioname 先归约成引擎原版的 string[]（幂等；正常情况下 initAllAudio 已经做过一次，
+		//这里兜住「运行期新增技能 / 下载后重建」等单独调用 applySkillAudio 的路径）
+		this.prepareSkillAudioname(skill);
+
+		//⚠ 必须读**作者原值**：下面会把 targetInfo.audio 改写成 `ext:…:{N}`，共享技能后续的干员
+		//再读它就只剩数量、拿不到标题与皮肤配置（这是「共享技能只有第一个干员有标题」的老问题来源）
+		if (!this._originalTargetAudio.has(target)) this._originalTargetAudio.set(target, targetInfo.audio);
+		const sourceAudio = this._originalTargetAudio.get(target);
+
 		//统一走归一化：数组是 `{ default: [...] }` 的语法糖，最终只处理对象形态。
 		//展开结果（按皮肤分组 → 扁平序列）落在旁路表里，info.audio 本身仍然只写字符串。
-		const normalized = this.normalizeAudio(targetInfo.audio);
+		const normalized = this.normalizeAudio(sourceAudio);
 		if (normalized && !this.isCountOnlyAudio(normalized)) {
 			const entries = this.expandAudioEntries(normalized);
 			if (entries?.length) {
@@ -506,7 +739,7 @@ class WhichWayAudio {
 			this._skinEntries.delete(`${skill}|${char}`);
 		}
 
-		const parsed = this.parseAudioCount(targetInfo.audio);
+		const parsed = this.parseAudioCount(sourceAudio);
 		if (!parsed) {
 			this.clearWebPlay(skill, char);
 			return;
@@ -514,6 +747,16 @@ class WhichWayAudio {
 		//数组型 / 对象型 audio 指定了具体配音标题，先固化下来：
 		//下面会把 info.audio 改写成路径字符串，之后再解析就只剩数量、拿不到标题了
 		if (parsed.voices.length) this.cacheSkillVoices(skill, char, parsed.voices);
+
+		//「标题 + 语音库」序列的优先级：
+		//   audioname 里该武将的配置 > audioname.default > Skill.audio 的皮肤分组（> 技能级 audio）
+		//三者必须成对取：标题来自一处、语音库来自另一处会让下标错位、配错台词。
+		//⚠ 武将自己的配置没有皮肤维度，它的每一条都按干员的基础语音库取音。
+		const perCharTitles = this.charAudioTitlesOf(skill, char);
+		const skinTitles = this.skinTitlesOf(skill, char);
+		const skinVoices = this.skinVoicesOf(skill, char);
+		const titles = perCharTitles?.length ? perCharTitles : skinTitles.length ? skinTitles : parsed.voices;
+		const voiceIds: Array<string | undefined> = perCharTitles?.length ? [] : skinTitles.length ? skinVoices : [];
 
 		const lang = this.getSkillLang(skill, char);
 		const base = this.getAudioBaseName(skill, char);
@@ -529,8 +772,9 @@ class WhichWayAudio {
 			//覆盖共同完成。
 			this.clearWebPlay(skill, char);
 		} else if (lang !== "CUSTOM") {
-			//本地缺失 → 在线配音（按干员独立）。把「每条来自哪个皮肤的语音库」一并传进去
-			this.setWebPlay(skill, char, new whichWayWebPlay(skill, char, parsed.voices, base, this.skinVoicesOf(skill, char)));
+			//本地缺失 → 在线配音（按干员独立）。把「本将的标题序列 + 每条来自哪个语音库」一并传进去，
+			//序号与下载后的 `{前缀}{i}.mp3` 一一对应（playLine(index) 的下标语义）
+			this.setWebPlay(skill, char, new whichWayWebPlay(skill, char, titles, base, voiceIds));
 		} else {
 			//CUSTOM 语言又没有本地文件 → 确实无音可播
 			this.clearWebPlay(skill, char);
@@ -545,7 +789,19 @@ class WhichWayAudio {
 		//首次改写前必须备份原值（含字符串形态的借用配音，如 audio: "eagle"），
 		//否则 refreshAudioIndex 还原时拿不到原值，借用语义会永久丢失
 		if (!this._originalAudio.has(skill)) this._originalAudio.set(skill, info.audio);
-		const finalCount = existCount ? Math.max(1, Math.min(existCount, parsed.count)) : parsed.count;
+		//有按武将的 audioname 配置时，数量取「各武将配置条数的最大值」：info.audio 是整条技能一份，
+		//不同武将条数不同也只能取最大值，否则条数少的武将会把条数多的武将的候选截断
+		//（多出来的候选文件由 trimOwnAudioList 在播放层滤掉，不会变成 404 重试）
+		const charCount = this.audionameTitleCount(target);
+		const hasDefaultTitles = this._charAudioTitles.has(`${target}|default`);
+		//有 default 组、且没有武将要求走原生路径时，每个武将都被覆盖，技能级的数量不参与；
+		//否则（未列出者回退 Skill.audio，或某些武将 value 写了 "default"）必须把技能级条数算进来
+		const fallbackCount = hasDefaultTitles && !this.hasNativeAudioname(target) ? 0 : parsed.count;
+		const finalCount = charCount
+			? Math.max(1, charCount, fallbackCount)
+			: existCount
+				? Math.max(1, Math.min(existCount, parsed.count))
+				: parsed.count;
 		(info as any).audio = `ext:WhichWay/audio/${lang}:${finalCount}`;
 		//地址改写成 ext: 之后，引擎取台词用的键也跟着变了，必须同步一次别名（详见方法注释）
 		this.mirrorSkillLines(skill, char, base, lang, finalCount);
@@ -583,10 +839,13 @@ class WhichWayAudio {
 		//⚠ 标题与语音库必须**成对**取自同一份归一化结果：
 		//同一个标题现在可以出现在多个皮肤下（残余的「部署1」+ 基础的「部署1」），
 		//若标题来自 getSkillVoices()、语音库来自另一张表，下标就会错位、配错台词。
+		//优先级与 applySkillAudio 完全一致：audioname 里该武将的配置 > audioname.default > 皮肤分组 > getSkillVoices()
+		const perCharTitles = this.charAudioTitlesOf(skill, char);
 		const skinTitles = this.skinTitlesOf(skill, char);
-		const skinVoices = this.skinVoicesOf(skill, char);
-		const titles = skinTitles.length ? skinTitles : this.getSkillVoices(skill, char);
+		const titles = perCharTitles?.length ? perCharTitles : skinTitles.length ? skinTitles : this.getSkillVoices(skill, char);
 		if (!titles.length) return;
+		//武将配置没有皮肤维度：每条都用干员自己的基础语音库
+		const voices = perCharTitles?.length ? [] : this.skinVoicesOf(skill, char);
 
 		const dir = `ext:WhichWay/audio/${lang}/`;
 		const names = this.lineAddressNames(skill, char, base);
@@ -605,7 +864,7 @@ class WhichWayAudio {
 		};
 
 		for (let i = 0; i < count; i++) {
-			const lines = linesOf(skinVoices[i]) ?? linesOf(undefined);
+			const lines = linesOf(voices[i]) ?? linesOf(undefined);
 			if (!lines) continue;
 			const text = lines[titles[i]];
 			if (!text) continue;
@@ -1137,11 +1396,12 @@ class WhichWayAudio {
 		}
 
 		const path = whichWayFile.compilePath(`audio:${lang}${dieAudio ? "/die" : ""}/`);
-		//文件名必须与引擎解析出的路径一致：引用技能用终点技能名，共享技能带干员后缀
+		//文件名必须与引擎解析出的路径一致：技能用「引用链终点技能名（共享技能带干员后缀）」，
+		//阵亡用引擎拼的 `DieAudio.name`（= 武将注册名）+ 序号，即 `die/{武将名}{i}.mp3`
 		const base = dieAudio ? char : this.getAudioBaseName(skill, char);
 
 		for (let i = 0; i < urls.length; i++) {
-			const file = `${dieAudio ? base : `${base}${i + 1}`}.mp3`;
+			const file = `${base}${i + 1}.mp3`;
 			await whichWayFile.download(urls[i], path, file);
 			//增量更新缓存，避免后续 initAudio/initDieAudio 误判为缺失
 			this._addAudioCacheEntry(`${path}${file}`);
@@ -1150,7 +1410,7 @@ class WhichWayAudio {
 		}
 
 		if (!dieAudio) await this.initAudio(skill, char);
-		else this.initDieAudio(get.character(char));
+		else this.initDieAudio(get.character(char), char);
 	}
 
 	/**
@@ -1174,22 +1434,24 @@ class WhichWayAudio {
 			for (const skill of charData.skills) {
 				if (!window.whichWaySave.hasSkill(skill)) continue;
 				const base = this.getAudioBaseName(skill, char);
-				//按皮肤指定的语音：第 i 条要从对应皮肤的语音库下载
-				const skinVoices = this.skinVoicesOf(skill, char);
+				//标题与语音库必须成对取自同一份归一化结果：
+				//audioname 里该武将的配置 > audioname.default > 皮肤分组 > getSkillVoices()
+				const perCharTitles = this.charAudioTitlesOf(skill, char);
+				const skinTitles = this.skinTitlesOf(skill, char);
+				const titles = perCharTitles?.length ? perCharTitles : skinTitles.length ? skinTitles : this.getSkillVoices(skill, char);
+				//按皮肤指定的语音：第 i 条要从对应皮肤的语音库下载；武将配置没有皮肤维度
+				const voices: Array<string | undefined> = perCharTitles?.length ? [] : this.skinVoicesOf(skill, char);
 				for (const lang of langsToCheck) {
 					if (lang === "CUSTOM") continue;
 					if (!allLangs && this._audioExistCache!.has(whichWayFile.compilePath(`audio:${lang}/${base}1.mp3`))) {
 						continue;
 					}
-					//标题与语音库必须成对取自同一份归一化结果（同一标题可出现在多个皮肤下）
-					const voiceTitles = this.skinTitlesOf(skill, char);
-					const titles = voiceTitles.length ? voiceTitles : this.getSkillVoices(skill, char);
 					if (!titles.length) continue;
 					tasks.push({
 						type: "skill",
 						skill,
 						char,
-						urls: titles.map((title, i) => this.compileVoicePath(char, lang, title, skinVoices[i])),
+						urls: titles.map((title, i) => this.compileVoicePath(char, lang, title, voices[i])),
 						lang,
 					});
 				}
@@ -1197,11 +1459,17 @@ class WhichWayAudio {
 
 			for (const lang of langsToCheck) {
 				if (lang === "CUSTOM") continue;
-				if (!allLangs && this.exsitAudioSync(null!, char, true)) continue;
+				//标题与语音库必须成对取自同一份归一化结果（对象形态按皮肤指定时也要下对语音库）
+				const dieTitles = this.dieTitlesOf(char);
+				const titles = dieTitles.length ? dieTitles : [DEFAULT_DIE_VOICE_TITLE];
+				const dieVoices = this.dieVoicesOf(char);
+				//旧命名的单条 `die/{武将名}.mp3` 也算「已有第 1 条」
+				const have = Math.max(this.getExistingDieAudioCount(char, lang), this.hasLegacyDieAudio(char, lang) ? 1 : 0);
+				if (!allLangs && have >= titles.length) continue;
 				tasks.push({
 					type: "die",
 					char,
-					urls: [this.compileVoicePath(char, lang, "行动失败")],
+					urls: titles.map((title, i) => this.compileVoicePath(char, lang, title, dieVoices[i])),
 					lang,
 				});
 			}
@@ -1594,7 +1862,8 @@ class WhichWayAudio {
 		if (!this._audioExistCache) return false;
 		if (dieAudio) {
 			const lang = this.getCharacterLang(char);
-			return this._audioExistCache.has(whichWayFile.compilePath(`audio:${lang}/die/${char}.mp3`));
+			//新命名（`die/{武将名}{i}.mp3`）与旧命名（`die/{武将名}.mp3`）都算「有阵亡配音」
+			return this.getExistingDieAudioCount(char, lang) > 0 || this.hasLegacyDieAudio(char, lang);
 		}
 		const lang = this.getSkillLang(skill, char);
 		const base = this.getAudioBaseName(skill, char);
@@ -1781,7 +2050,7 @@ class WhichWayAudio {
 		for (const skill of skills) {
 			this.applySkillAudio(skill, char);
 		}
-		this.initDieAudio(get.character(char));
+		this.initDieAudio(get.character(char), char);
 	}
 
 	/**
@@ -1792,28 +2061,245 @@ class WhichWayAudio {
 		this.applySkillAudio(skill, char);
 	}
 
+	// ============ 阵亡配音（dieAudios 对象形态） ============
+	//
+	// 与技能侧「按皮肤指定语音条目」同构：
+	//   dieAudios: ["行动失败", "部署1"]                              ⇒ { default: [...] }（语法糖）
+	//   dieAudios: { default: [...], "char_003_kalts@boc#6": [...] }   ⇒ 按皮肤分组
+	// 归一化 / 展开直接复用 normalizeAudio / expandAudioEntries，不另造一套语义。
+
 	/**
-	 * 初始化角色死亡音频
-	 * @param {WhichWayCharacter} char 角色
+	 * 作者写的原始 `dieAudios`。
+	 *
+	 * 本模块每次初始化都会把 `dieAudios` 改写成引擎原版格式，重复调用时读到的就是**自己写的**
+	 * 计数式字符串。因此改写前先备份原值：当前值若与上次写回的一致，就按备份归一化；
+	 * 否则视为作者改过配置，重新备份（与技能侧 `_originalAudio` 同一套思路）。
 	 */
-	initDieAudio(char: WhichWayCharacter): void {
+	private dieConfigOf(char: WhichWayCharacter, name: string): unknown {
+		const written = this._writtenDieAudios.get(name);
+		const current = char.dieAudios;
+		if (written && Array.isArray(current) && current.length === written.length && current.every((value, i) => value === written[i])) {
+			return this._originalDieAudios.get(name);
+		}
+		this._originalDieAudios.set(name, current);
+		return current;
+	}
+
+	/** 这个字符串是不是本扩展认识的配音标题（`AudioTitle`，或 PRTS 的 `001` 这类索引） */
+	private isVoiceTitle(value: string): boolean {
+		const schema = whichWayArknight.shcema.audio;
+		return schema.name.includes(value) || schema.index.includes(value);
+	}
+
+	/**
+	 * 是不是引擎给扩展武将补的默认值 `ext:{扩展名}/{武将名}.mp3`（扩展根目录、不在 `audio/` 下）。
+	 *
+	 * 引擎在加载扩展武将时会给没有阵亡语音的补一条（`init/loading.ts:291-294` /
+	 * `game/index.js:6096-6098`）。本扩展的配音都在 `audio/{语言}/die/` 下，所以根目录下的单条
+	 * 路径必然是引擎补的默认值，不能当作者配置原样保留。
+	 */
+	private isExtensionDefaultDieAudio(value: unknown, name?: string): boolean {
+		if (typeof value !== "string" || value.includes("/audio/")) return false;
+		if (name && (value === `ext:WhichWay/${name}.mp3` || value === `extension/WhichWay/${name}.mp3`)) return true;
+		return /^(?:ext:|extension\/)WhichWay\/[^/]+\.mp3$/.test(value);
+	}
+
+	/** 是否是「全部由已知标题组成」的数组（可嵌套）——只有这种数组才当标题列表，其余交给引擎 */
+	private isVoiceTitleList(list: unknown[]): boolean {
+		const flat = list.flat(Infinity) as unknown[];
+		return flat.length > 0 && flat.every(value => typeof value === "string" && this.isVoiceTitle(value));
+	}
+
+	/**
+	 * 归一化作者的 `dieAudios`。
+	 *
+	 * @returns `{ entries }`：展开后的扁平条目（顺序 = 配置顺序 = 文件序号 = 台词序号）；
+	 *   `{ passThrough: true }`：引擎原生形态（显式路径 / `"die:…"` / 借用其它武将 / 其它扩展
+	 *   地址 / `false`），原样保留、本模块不接管。
+	 */
+	private normalizeDieAudio(raw: unknown, name?: string): { entries?: Array<{ title: string; voiceId?: string }>; passThrough?: boolean } {
+		//空数组是引擎的初始值（`Character.dieAudios = []`），等同「没配」：走默认的一条
+		if (Array.isArray(raw) && !raw.length) return { entries: [{ title: DEFAULT_DIE_VOICE_TITLE }] };
+		//引擎给**扩展**武将自动补的默认阵亡语音（`ext:{扩展名}/{武将名}.mp3`，见 init/loading.ts:291
+		//与 game/index.js:6097）：不是作者写的，同样等同「没配」，否则会被当成显式路径而跳过接管
+		if (Array.isArray(raw) && raw.length === 1 && this.isExtensionDefaultDieAudio(raw[0], name)) {
+			return { entries: [{ title: DEFAULT_DIE_VOICE_TITLE }] };
+		}
+		//显式禁用（false）与引擎原生形态：不接管
+		if (raw === false || typeof raw === "string") return { passThrough: true };
+		if (Array.isArray(raw) && !this.isVoiceTitleList(raw)) return { passThrough: true };
+		if (raw !== void 0 && raw !== null && typeof raw !== "object" && raw !== true && typeof raw !== "number") return { passThrough: true };
+
+		//未配置 / true / 数字：与改动前一致 —— 单条「行动失败」
+		//（数字在旧版里同样被覆盖成一条，这里保持一致，不去猜「N 条该用哪些标题」）
+		if (raw === void 0 || raw === null || raw === true || typeof raw === "number") {
+			return { entries: [{ title: DEFAULT_DIE_VOICE_TITLE }] };
+		}
+
+		const normalized = this.normalizeAudio(raw);
+		if (!normalized || this.isCountOnlyAudio(normalized)) return { entries: [{ title: DEFAULT_DIE_VOICE_TITLE }] };
+		const entries = this.expandAudioEntries(normalized);
+		return { entries: entries ?? [{ title: DEFAULT_DIE_VOICE_TITLE }] };
+	}
+
+	/** 该武将展开后的阵亡配音标题序列（与 `dieVoicesOf` 等长同序） */
+	dieTitlesOf(char: string): string[] {
+		const groups = this._dieEntries.get(char);
+		if (!groups?.length) return [];
+		return groups.flatMap(group => group.titles);
+	}
+
+	/** 该武将每一条阵亡配音对应的语音库（`undefined` = 基础语音），与 `dieTitlesOf` 等长同序 */
+	dieVoicesOf(char: string): Array<string | undefined> {
+		const groups = this._dieEntries.get(char);
+		if (!groups?.length) return [];
+		const flat: Array<string | undefined> = [];
+		for (const group of groups) for (let i = 0; i < group.titles.length; i++) flat.push(group.voiceId);
+		return flat;
+	}
+
+	/** 本地**连续存在**的阵亡配音文件数（`die/{武将名}1.mp3` 起数到第一个缺失为止） */
+	getExistingDieAudioCount(char: string, lang: string): number {
+		if (!this._audioExistCache) return 0;
+		let count = 0;
+		//上限只是防御：正常不会有人配 32 条阵亡语音
+		while (count < 32) {
+			if (!this._audioExistCache.has(whichWayFile.compilePath(`audio:${lang}/die/${char}${count + 1}.mp3`))) break;
+			count++;
+		}
+		return count;
+	}
+
+	/** 旧命名（改动前下载的单条 `die/{武将名}.mp3`）是否存在 */
+	private hasLegacyDieAudio(char: string, lang: string): boolean {
+		return this._audioExistCache?.has(whichWayFile.compilePath(`audio:${lang}/die/${char}.mp3`)) ?? false;
+	}
+
+	/**
+	 * 把「按武将名注册的阵亡台词」镜像到实际音频地址上（技能侧 `mirrorSkillLines` 的阵亡版）。
+	 *
+	 * - `#{武将名}{i}:die` → `#ext:WhichWay/audio/{语言}/die/{武将名}{i}:die`；
+	 * - 不带序号的 `#{武将名}:die`（作者写单条台词时的既有写法，如安多恩 / 杰）→ 第 1 条。
+	 *
+	 * 只补空位、不覆盖：显式写地址键仍然优先，反复调用幂等。
+	 */
+	private mirrorDieLines(char: string, lang: string, count: number): void {
+		const dir = `ext:WhichWay/audio/${lang}/die/`;
+		this.copyLine(`#${char}:die`, `#${dir}${char}1:die`);
+		for (let i = 1; i <= count; i++) this.copyLine(`#${char}${i}:die`, `#${dir}${char}${i}:die`);
+	}
+
+	/**
+	 * 阵亡配音的台词兜底：从 `charword_table` 取文本补到 `#ext:…/die/{武将名}{序号}:die`。
+	 *
+	 * 与技能侧 `fillOnlineLines` 同一套规则：**只补空位、绝不覆盖**；标题与语音库成对取自
+	 * 同一份归一化结果；CUSTOM（本扩展原创干员的录音）没有明日方舟文本，直接跳过。
+	 */
+	private fillDieOnlineLines(char: string, lang: string, count: number, titles: string[], voices: Array<string | undefined>, legacy: boolean = false): void {
+		if (!lang || lang === "CUSTOM") return;
+		const baseWordkey = this.getVoiceWordkey(char, lang);
+		if (!baseWordkey) return;
+
+		const dir = `ext:WhichWay/audio/${lang}/die/`;
+		const linesCache = new Map<string, Record<string, string>>();
+		const linesOf = (voiceId: string | undefined) => {
+			//voiceId 是语音库目录名，本身就是 charword 里的键；没有皮肤时退回干员的
+			const key = voiceId ? this.applyLangVariant(voiceId, lang) : baseWordkey;
+			let cached = linesCache.get(key);
+			if (!cached) {
+				cached = whichWayArknight.getVoiceLines(key);
+				linesCache.set(key, cached);
+			}
+			return Object.keys(cached).length ? cached : undefined;
+		};
+
+		for (let i = 0; i < count; i++) {
+			const title = titles[i] ?? DEFAULT_DIE_VOICE_TITLE;
+			const lines = linesOf(voices[i]) ?? linesOf(undefined);
+			const text = lines?.[title];
+			if (!text) continue;
+			//旧命名的显式路径地址不带序号（`#ext:…/die/{武将名}:die`），键也必须跟着地址走
+			const key = legacy ? `#${dir}${char}:die` : `#${dir}${char}${i + 1}:die`;
+			if (lib.translate[key] === void 0) lib.translate[key] = text;
+		}
+	}
+
+	/**
+	 * 初始化角色死亡音频。
+	 *
+	 * 作者可以写引擎原生形态（原样保留），也可以写对象形态 / 标题数组（本模块归一化）。
+	 * 归一化结果一律归约成**引擎原版格式**写回 `char.dieAudios`：
+	 * - 本地有文件 → 计数式 `["ext:WhichWay/audio/{语言}/die:{N}"]`，引擎按 `DieAudio.name`
+	 *   （= `player.name`，换肤时是皮肤名）+ 序号拼出 `die/{名字}{i}.mp3`；
+	 * - 只有旧命名的单条 `die/{名字}.mp3`（改动前下载的产物）→ 仍写显式路径，避免改名后失效。
+	 *
+	 * @param char 角色
+	 * @param charName 角色注册名（= 引擎的 `player.name`）；缺省取 `char.whichWay.charId`
+	 */
+	initDieAudio(char: WhichWayCharacter, charName?: string): void {
 		if (!char?.whichWay?.charId) return;
-		const name = char.whichWay.charId;
+		//引擎用 player.name（武将注册名）拼文件名，它与 whichWay.charId 通常相同，但以注册名为准
+		const name = charName || char.whichWay.charId;
 		const lang = this.getCharacterLang(name);
 
+		const parsed = this.normalizeDieAudio(this.dieConfigOf(char, name), name);
+		if (parsed.passThrough) {
+			//作者写的是引擎原生形态：原样保留，本模块不接管（也不挂在线播放器）
+			this._dieEntries.delete(name);
+			if (char.whichWay.dieAudio instanceof whichWayWebPlayDie) char.whichWay.dieAudio = undefined;
+			return;
+		}
+
+		//旁路表：按皮肤重新分组存档（与技能侧 _skinEntries 同一形态）
+		const entries = parsed.entries ?? [{ title: DEFAULT_DIE_VOICE_TITLE }];
+		const groups: { skinId: string; voiceId?: string; titles: string[] }[] = [];
+		for (const entry of entries) {
+			const last = groups[groups.length - 1];
+			if (last && last.voiceId === entry.voiceId) last.titles.push(entry.title);
+			else groups.push({ skinId: entry.voiceId ?? "default", voiceId: entry.voiceId, titles: [entry.title] });
+		}
+		this._dieEntries.set(name, groups);
+
+		const titles = entries.map(entry => entry.title);
+		const voices = entries.map(entry => entry.voiceId);
+		const existCount = this.getExistingDieAudioCount(name, lang);
+		const legacyExists = this.hasLegacyDieAudio(name, lang);
+		const dir = `ext:WhichWay/audio/${lang}/die/`;
+
 		//阵亡语音必须写成 `ext:` 形态：game.playAudio 只认 blob:/data:/ext:/db:，其余一律前置 `audio/`
-		//（game/index.js:2488-2497）。旧写法（compilePath 产物 `extension/WhichWay/...`）会被拼成
-		//`audio/extension/WhichWay/...` ⇒ 每次必然 404，所以这里改用引擎能正确解析的 ext: 前缀。
-		//@ts-ignore
-		char.dieAudios = [`ext:WhichWay/audio/${lang}/die/${name}.mp3`];
-		//阵亡台词的键也跟着地址走：`#角色名:die` → `#ext:WhichWay/audio/{语言}/die/{角色名}:die`
-		this.copyLine(`#${name}:die`, `#ext:WhichWay/audio/${lang}/die/${name}:die`);
+		//（game/index.js:2488-2497），写成 compilePath 产物会被拼成 `audio/extension/...` ⇒ 必然 404。
+		if (existCount > 0) {
+			//本地已有新命名文件：数量取「磁盘实际存在」与「配置条数」的较小值（与技能侧一致）——
+			//引擎按这个数量生成候选，混入缺失文件会触发 tryAudio 的重试链
+			const count = Math.max(1, Math.min(existCount, titles.length));
+			char.dieAudios = [`ext:WhichWay/audio/${lang}/die:${count}`];
+			this.mirrorDieLines(name, lang, count);
+			this.fillDieOnlineLines(name, lang, count, titles, voices);
+		} else if (legacyExists) {
+			//旧命名兼容：改动前下载的单条 `die/{名字}.mp3` 仍按显式路径写回（引擎原版格式之一），
+			//避免改名后已下载的配音全部失效；重新下载后会落成新命名，下次初始化自动切到计数式
+			char.dieAudios = [`${dir}${name}.mp3`];
+			this.copyLine(`#${name}:die`, `#${dir}${name}:die`);
+			//显式路径的台词键同样不带序号
+			this.fillDieOnlineLines(name, lang, 1, titles, voices, true);
+		} else {
+			//本地没有文件：照配置条数写计数式，播放在线配音；下载后落成 `die/{名字}{i}.mp3`
+			const count = Math.max(1, titles.length);
+			char.dieAudios = [`ext:WhichWay/audio/${lang}/die:${count}`];
+			this.mirrorDieLines(name, lang, count);
+			this.fillDieOnlineLines(name, lang, count, titles, voices);
+		}
+		//记录本次写回的内容，下次调用就能认出「这是我写的」，从而回到作者原始配置
+		this._writtenDieAudios.set(name, (char.dieAudios as string[]).slice());
 
 		//武将包自定义的 dieAudio（不是本模块挂的在线播放器）一律保留：
 		//模块只对自己挂的那个负责（缺本地语音时挂、有本地语音时清）
 		const customDieAudio = !!char.whichWay.dieAudio && !(char.whichWay.dieAudio instanceof whichWayWebPlayDie);
-		if (!this.exsitAudioSync(null!, name, true)) {
-			if (!customDieAudio && whichWayArknight.inArknightChars(name)) char.whichWay.dieAudio = new whichWayWebPlayDie(char);
+		if (!existCount && !legacyExists) {
+			//CUSTOM 是本扩展原创干员的自定义录音，明日方舟那边没有对应音频（与技能侧 applySkillAudio 同口径）
+			if (!customDieAudio && lang !== "CUSTOM" && whichWayArknight.inArknightChars(name)) {
+				char.whichWay.dieAudio = new whichWayWebPlayDie(char, titles, voices, name);
+			}
 		} else if (char.whichWay.dieAudio && !customDieAudio) {
 			//@ts-ignore
 			char.whichWay.dieAudio = undefined;
