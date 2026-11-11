@@ -1,5 +1,122 @@
 # 瑰丽理想 WhichWay 更新日志
 
+## 2026-11-11
+
+### 新增：`register()` 语法糖支持可选 `dieLine`（阵亡台词）
+
+- **现象**：用 `register()` 注册的武将能顺手写技能台词（`skillInfo[x].line`），却没法顺手写阵亡台词——
+  只能再单独手写 `line({ "武将名:die": "……" })`，容易漏。
+- **改动**：`register(name, params)` 新增**可选**字段 `dieLine`：
+  - `dieLine: "……"` → `lib.translate["#{武将名}:die"]`（单条，对应 `dieAudios` 展平后的第 1 条）；
+  - `dieLine: ["……", "……"]` → `lib.translate["#{武将名}1:die"]`、`"#{武将名}2:die"`……，
+    与 `dieAudios` 的顺序一一对应。
+  仍交给 `line()` 统一处理（自动补 `#`、重复键拦截、`colorize`），初始化时由音频模块的
+  `mirrorDieLines` 镜像到实际地址 `#ext:WhichWay/audio/{语言}/die/{武将名}{序号}:die`。
+  字段缺失时行为完全不变；写错类型（数字 / 数组里混非字符串 / 空字符串）在**注册前**就抛错，
+  不会留下半套注册数据。
+- **验证**：桩测试 11 条断言全过（单条、多条、空数组、不写、与技能台词共存、4 类非法值、
+  未知字段白名单里能看到 `dieLine`）；`npx eslint` 0 错误；`vite build` 通过。
+  **未验证**：实机进游戏触发阵亡时看到/听到这条台词。
+
+### 调整：`Skill.audioname` 对象里 value 可写 `"default"`（该武将走引擎原生路径）
+
+- **现象**：对象形态里一旦写了 `default` 组，所有未列出的武将都会被它兜底；想「大部分武将用 A 方案、
+  个别武将沿用引擎原生配音」就表达不出来——`"default"` 这个键是给「没配的武将」用的，不能当值用。
+- **改动**：`audioname: { lvzemrfz: "default", xxx: ["部署1"] }` 中，value 写 `"default"` 的武将
+  等同把它写进 `audioname: ["lvzemrfz"]`：仍然登记进 `lib.skill[x].audioname`（因此保留 `_{武将名}`
+  后缀命名），标题与语音库完全按 `Skill.audio`（含皮肤维度）来，**并且不会被 `default` 组兜底**；
+  同一对象里其它武将仍按各自配置走。`default` 这个键本身也接受 `"default"`，表示所有未列出的武将都走原生。
+  实现上新增 `_nativeAudioname`（`目标技能|武将`），`charAudioTitlesOf()` 命中该集合时直接返回 undefined。
+- **验证**：真实 `initAllAudio` + 真实引擎 `get/audio.ts` 的桩测试（本次 17 条断言）全部通过：
+  原生武将不吃 `default` 组、仍登记并带 `_{武将名}` 后缀、按 `Skill.audio` 播 2 条且 `fileList`/`textList` 对齐、
+  同对象其它武将不受影响、`default: "default"` 全局原生、重建（重复 init / refresh）幂等、数组形态不变；
+  `npx eslint` 0 错误；`vite build` 通过。**未验证**：实机进游戏试听。
+
+### 新增：`Skill.audioname` 支持按武将指定配音（对象形态，初始化后归约为 `string[]`）
+
+- **现象**：共享技能没法给不同武将配不同台词。`audioname` 只能写 `string[]`（语义是「借用某位武将的配音文件」），
+  想让「凯尔希用这两句、其他干员用那两句」只能把技能拆开；在线配音也只能整条技能共用一份标题。
+- **根因**：
+  1. `applySkillAudio()` 读的是**整条技能**的 `Skill.audio`（一份配置），`audioname` 只在
+     `getAudioBaseName()` 里被当成「文件名要不要加 `_{武将名}`」的开关，没有「按武将取标题」的入口；
+  2. `initAllAudio()` 的共享技能自动登记用 `if (!Array.isArray(info.audioname)) info.audioname = []`，
+     对象形态会被当场**清空**；而 `lineAddressNames()` / `mirrorSkillLines()` / `getAudioBaseName()`
+     只认数组；
+  3. 顺带暴露一个老缺陷：`applySkillAudio()` 读的是 `targetInfo.audio`，而它在处理**上一个干员**时
+     已被改写成 `ext:WhichWay/audio/{语言}:{N}` —— 共享技能里只有第一个干员能拿到作者写的标题与皮肤分组，
+     后面的干员全部退化成 `getSkillVoices()` 的随机默认标题。
+- **改动**（只动 `packages/extension/WhichWay`）：
+  - `src/audio/index.ts` 新增 `normalizeAudioname()` / `toAudioTitleList()`：对象 → 每武将 `{ titles }`
+    （单字符串视为单条数组），数组形态走原路径不动；值类型不对直接抛错（与「皮肤 id 查不到就抛错」同口径），
+    武将名查不到只告警。
+  - 新增 `prepareSkillAudioname(skill)`：把对象里的武将名**摊平**进 `lib.skill[目标].audioname`
+    （`string[]`），与共享技能自动登记的拥有者合并，**只增不减、幂等**；作者原值首次调用时备份进
+    `_originalAudioname`，`refreshAudioIndex()` 先还原再重建。自动登记的拥有者改存 `_autoAudioname`
+    （不再直接往 `info.audioname` 里 push），避免把对象形态冲掉。
+  - 每武将的标题序列存 `_charAudioTitles`（键 `目标技能|武将`，`目标技能|default` 为兜底组）；
+    `charAudioTitlesOf()` 按「该武将显式配置 > `default` > `Skill.audio`（含皮肤维度）」取用，
+    `applySkillAudio` / `fillOnlineLines` / `getMissingAudioList` 三处统一走它，标题与语音库始终成对取。
+  - 新增 `_originalTargetAudio` 快照：`applySkillAudio` 归一化与计数改用**作者原值**，修掉上面第 3 条
+    「共享技能只有第一个干员有标题」的老缺陷；`refreshAudioIndex` 一并还原。
+  - `info.audio` 的数量：有 `audioname` 配置时取「各武将配置条数的最大值」（`info.audio` 是整条技能一份，
+    不同武将条数不同只能取最大值；多出来的候选由 `trimOwnAudioList` 在播放层滤掉）；有 `default` 组时
+    不再把技能级数量算进来。没有 `audioname` 的技能仍走原公式，行为不变。
+  - `typings/characterPack.d.ts`：在 `SkillFieldOverrides` 补 `audioname` 的覆盖声明与 JSDoc
+    （对象形态、单字符串语法糖、`default` 兜底、优先级、运行期只剩 `string[]`）。
+- **验证**（桩掉 IO，跑真实 `initAllAudio` + 真实引擎 `apps/core/noname/get/audio.ts`）：
+  - 40 条断言全过：对象摊平成 `string[]` 且无对象残留；每武将标题/语音库正确；
+    引擎 `get.Audio.skill(...).fileList` 带正确 `_{武将名}` 后缀、`textList` 与配置标题一一对应；
+    单字符串 = 单条；`default` 兜底；未列出者回退 `Skill.audio` 的皮肤分组；数组形态原样保留；
+    不写 `audioname` 的技能不留空数组；重复 `initAllAudio` 与 `refreshAudioIndex` 后配置不丢、不重复登记；
+    补缺 urls 按武将标题生成。
+  - `npx eslint` 0 错误；`vite build` 通过。
+  - **未验证**：实机进游戏听共享技能各武将的在线配音；真实下载落盘后 `{技能}_{武将}{i}.mp3` 的回放。
+- **本轮发现的既有问题（未修，另案）**：引用型技能（`audio: "另一个技能"`）的本地文件名前缀不一致——
+  `getAudioBaseName()` 用引用链终点（B），而引擎在 `A.audio` 被改写成 `ext:…:{N}` 之后按 **A** 拼文件名
+  （实测 `A` 得到 `A1.mp3`、扩展却按 `B1.mp3` 判存在与下载）。与本次改动无关，未在本次处理。
+
+### 新增：武将阵亡配音支持自定义（与技能配音同构）
+
+- **现象**：干员的阵亡语音固定只有一条「行动失败」。PRTS 上明明还有别的阵亡台词，游戏里也只能听这一句；
+  作者即便写 `dieAudios` 也会在初始化时被覆盖掉，皮肤专属的阵亡语音更无从表达。
+- **根因**：
+  1. `src/audio/webPlayDie.ts` 把 `voicesTitle` 写死成 `["行动失败"]`，`voiceUrl` 只传标题、不传语音库，也没有「第几条」的概念；
+  2. `initDieAudio()` 无条件把 `char.dieAudios` 覆盖成单文件 `die/{charId}.mp3`，台词只镜像 `#{name}:die` 一条；
+  3. `exsitAudioSync()` / `downloadAudio()` / `getMissingAudioList()` 的 die 分支全部按「一条、无序号」写死
+     （多条下载会写同一个文件名，互相覆盖）。
+- **改动**（只动 `packages/extension/WhichWay`）：
+  - `src/audio/index.ts`：新增阵亡侧旁路表 `_dieEntries` 与 `dieTitlesOf()` / `dieVoicesOf()`（与技能侧 `_skinEntries` 同构）；
+    归一化直接复用 `normalizeAudio()` / `expandAudioEntries()`，不另造语义。数组是 `{ default: [...] }` 的语法糖；
+    对象键（皮肤 id / `"default"`）只决定「这一句从哪个语音库取」，落盘仍是一条 1..N 的扁平序列，运行期不按皮肤切换。
+  - `initDieAudio(char, charName)` 按「配置顺序 = 文件序号 = 台词序号」归约成**引擎原版格式**写回 `dieAudios`：
+    本地有新命名文件时写计数式 `["ext:WhichWay/audio/{语言}/die:{N}"]`——引擎用 `DieAudio.name`（`player.name`，
+    换肤时是皮肤名）加序号拼出 `die/{武将名}{i}.mp3`，**不是** `whichWay.charId`；只有旧命名的单条
+    `die/{武将名}.mp3` 时仍写显式路径（见「兼容」）；两者都没有则写计数式并挂在线播放器。
+    未配置 / `true` / 数字 / 引擎给扩展武将自动补的 `ext:WhichWay/{武将名}.mp3` 一律按「默认一条『行动失败』」处理，
+    行为与改动前一致；显式路径、借用其它武将等引擎原生写法原样保留、本模块不接管。
+  - `downloadAudio()` 的 die 分支改用 `{武将名}{i+1}.mp3`（原来是 `{武将名}.mp3`）；
+    `getMissingAudioList()` 的 die 分支按归一化后的「标题 + 对应 voiceId」生成 urls，并允许补齐缺失的第 2..N 条。
+  - `src/audio/webPlayDie.ts` 与 `whichWayWebPlay` 对齐：构造参数新增 `voices` / `voiceIds` / `audioBaseName`，
+    新增 `playLine(index)` 与 `stop()`——单条试听的下标与本地文件序号一致；开启「自动下载缺失音频」时按条目下载。
+  - 台词：新增 `mirrorDieLines()`（`#{武将名}{i}:die` → `#ext:…/die/{武将名}{i}:die`；不带序号的 `#{武将名}:die` → 第 1 条）
+    与 `fillDieOnlineLines()`（技能侧 `fillOnlineLines` 的阵亡版，从 `charword_table` 取文本，**只补空位、不覆盖**）。
+  - `typings/characterPack.d.ts`：`dieAudios` 的声明与 JSDoc 按 `SkillFieldOverrides.audio` 的写法重写；
+    `whichWay.dieAudio` 接口同步补 `voiceIds` / `audioBaseName` / `playLine` / `stop`。
+- **兼容**：改动前下载的 `audio/{语言}/die/{武将名}.mp3` 不会因改名失效——检测到「只有旧命名、没有新命名文件」时仍写显式路径
+  `["ext:WhichWay/audio/{语言}/die/{武将名}.mp3"]`，台词键保持不带序号的地址；重新下载后落成新命名，下次初始化自动切到计数式。
+  没选「迁移/复制旧文件」是因为那要在运行期改磁盘（多一层失败面），而显式路径本身就是引擎原版格式之一。
+- **验证**：
+  - 用**真实引擎** `apps/core/noname/get/audio.ts`（仅桩 `lib`/`get`）跑 `Audio.die({ player })`：
+    计数式 3 条 → `fileList` 恰为 `ext:WhichWay/audio/CN_MANDARIN/die/{name}1..3.mp3` 且 `textList` 按序对应；
+    显式路径 → 单条且键不带序号；`true` / 数字 / 嵌套数组的原生展开均与文档一致。
+  - 用真实 `initDieAudio`（桩 IO）跑 10 组用例：默认/数组/对象（含皮肤 voiceId）/旧命名/部分文件/重复初始化/
+    引擎自动补值/显式路径/下载文件名/补缺 urls，全部符合预期。
+  - PRTS 实测 `voice_cn/char_003_kalts/cn_032.wav`（行动失败）与 `cn_023.wav`（部署1）均返回 200。
+  - `npx eslint` 三个改动文件 0 错误；`vite build` 通过。
+  - **未验证**：实机开局触发阵亡、皮肤在场时的阵亡配音、设置界面「死亡配音」试听按钮、真实下载落盘后的二次初始化。
+- **已知限制**：引擎在**换肤**状态下用皮肤名取音、且不继承基础武将的 `dieAudios`（`get/audio.ts` 的 `DieAudio`
+  构造逻辑），所以皮肤专属阵亡语音目前只影响在线/下载取哪条语音库，不会在「皮肤在场」时自动播放（与改动前一致）。
+
 ## 2026-11-06
 
 ### 修复：武将卡关掉动皮后，场上头像的动皮还在动
