@@ -53,7 +53,15 @@ declare type WhichWayCharConfig = {
 		get lang(): string;
 		get voiceUrl(): string[];
 		voicesTitle: string[];
-		play(): HTMLAudioElement;
+		/** 与 `voicesTitle` 等长：第 i 条来自哪个语音库（`undefined` = 干员自己的基础语音） */
+		voiceIds: Array<string | undefined>;
+		/** 本地下载时的文件名前缀（引擎拼出的 `DieAudio.name`，即武将的注册名） */
+		audioBaseName: string;
+		/** 播放指定的一条（下标与本地文件序号、`voicesTitle` 一致）；缺省随机 */
+		playLine(index?: number): HTMLAudioElement | undefined;
+		/** 停止上一次播放 */
+		stop(): void;
+		play(): HTMLAudioElement | undefined;
 	};
 
 	/**
@@ -248,10 +256,36 @@ interface WhichWayCharacterPrototype {
 	 */
 	img?: string | undefined;
 	/**
-	 * 武将牌拥有的全部阵亡语音
-	 * @type { string[] }
-	 **/
-	dieAudios?: string[];
+	 * 阵亡语音配置。除了引擎原生的几种形态，本扩展额外支持**对象形态**
+	 * （与技能配音 {@link SkillFieldOverrides.audio} 完全同构）：
+	 *
+	 * ```ts
+	 * dieAudios: {
+	 *   default: ["行动失败"],
+	 *   "char_003_kalts@boc#6": ["行动失败", "部署1"], // 残余皮肤的这两句
+	 * }
+	 * ```
+	 *
+	 * - key = 明日方舟 **skinId** 或 `"default"`，value = 配音标题（见 {@link AudioTitle}）或标题数组；
+	 * - **数组是语法糖**（等价于只有 `default` 一组）：
+	 *   `dieAudios: ["行动失败", "部署1"]` ⇒ `{ default: ["行动失败", "部署1"] }`；
+	 * - 皮肤键只决定「这一句从哪个语音库（`voiceId`）取」，落盘仍是一条 1..N 的**扁平序列**，
+	 *   运行期不按皮肤切换播放（与技能侧一致）；
+	 * - 组内顺序 = 文件序号 = 台词序号；`default` 恒排在最前，其余保持书写顺序。
+	 *
+	 * 引擎原生形态原样保留、由引擎自己解析（本扩展不接管）：`true` / 数字 / `"die:…"` /
+	 * `"ext:…:true"` / 显式文件路径 / 嵌套数组 / 借用其它武将的阵亡语音。
+	 *
+	 * 初始化时（`whichWayAudio.initDieAudio`）会把它归约成**引擎原版格式**写回 `dieAudios`：
+	 * 展平后第 i 条 ⇒ `ext:WhichWay/audio/{语言}/die/{文件名}{i}.mp3`，最终落成计数式
+	 * `["ext:WhichWay/audio/{语言}/die:{N}"]`（与技能侧 `ext:WhichWay/audio/{语言}:{N}` 对称）。
+	 * ⚠ 文件名由**引擎**用 `DieAudio.name`（= `player.name`，换肤时是皮肤名）加序号拼出，
+	 * 不是 `whichWay.charId`；因此**运行期读到的永远是字符串**，别在别处判断对象形态。
+	 *
+	 * 完全不写时行为与旧版一致：一条「行动失败」（本地旧命名的 `die/{武将名}.mp3` 仍按显式
+	 * 路径兼容，新下载落成 `die/{武将名}1.mp3`）。
+	 */
+	dieAudios?: number | string | boolean | Array<AudioTitle | AudioTitle[] | string | number> | Partial<Record<AudioSkinId, AudioTitle | AudioTitle[]>>;
 	/**
 	 * 武将牌“无法享受到的主公/地主红利”
 	 * @type { string[] }
@@ -367,6 +401,44 @@ interface SkillFieldOverrides {
 		| [string, number]
 		| Array<AudioTitle>
 		| Partial<Record<AudioSkinId, AudioTitle | AudioTitle[]>>;
+	/**
+	 * 技能配音的「按武将指定」配置。引擎原生只接受 `string[]`（命中玩家时给文件名追加
+	 * `_{武将名}`），本扩展额外支持**对象形态**（与 {@link audio} 的对象形态同构，
+	 * 但维度是**武将**而不是皮肤）：
+	 *
+	 * ```ts
+	 * audioname: {
+	 *   default: ["作战中1"],                 // 未在下面列出的武将走这里
+	 *   "char_003_kalts": ["部署1", "部署2"],  // 凯尔希用这两句
+	 *   "char_148_nearl": "作战中1",           // 单条 = 单条数组的语法糖
+	 *   lvzemrfz: "default",                  // 这个武将走引擎原生路径（等价于写进数组）
+	 * }
+	 * ```
+	 *
+	 * - key 一律写**武将注册名**（即 `player.name`，如 `char_003_kalts`、`lvzemrfz`），
+	 *   与引擎 `audioname2` 的键一致；不是皮肤 id，也不是显示名；
+	 * - value 是配音标题（见 {@link AudioTitle}）或标题数组，顺序 = 文件序号 = 台词序号；
+	 *   单字符串视为单条数组；
+	 * - **value 写 `"default"` 表示「这个武将走引擎原生路径」**：等同把它写进
+	 *   `audioname: ["该武将"]`（仍然追加 `_{武将名}` 后缀），标题与语音库完全按
+	 *   `Skill.audio`（含皮肤维度）来，**且不会被本对象的 `default` 组兜底**——
+	 *   当技能里混着「已配标题的武将」和「沿用原生配音的武将」时用它区分。
+	 *   `default` 这个键本身也接受 `"default"`，表示所有未列出的武将都走原生路径；
+	 * - **数组形态照旧合法**（`audioname: ["char_148_nearl"]` 表示借用那位武将的配音文件），
+	 *   对象形态是新增能力，不做迁移。
+	 *
+	 * 优先级（同一个武将）：**本对象里该武将的配置 > 本对象的 `default` > `Skill.audio`**。
+	 * 也就是说：只要写了对象形态，未列出的武将就走 `default`；只有对象里连 `default`
+	 * 都没有时，才回到 `Skill.audio`（含它的皮肤维度）。**武将配置本身没有皮肤维度**，
+	 * 它的每一条都按干员自己的基础语音库取音——需要「按皮肤换语音库」时请用 `Skill.audio`
+	 * 的对象形态，不要在本字段里混写。
+	 *
+	 * 引擎不认识对象形态：初始化时（`initAllAudio` / `applySkillAudio`）会把它归约成引擎原版的
+	 * `string[]`（对象里出现的武将名全部摊平进去，与共享技能自动登记的拥有者合并），
+	 * 每个武将的「标题序列 + 语音库序列」存进扩展旁路表（键 `目标技能|武将`）。
+	 * 因此**运行期读到的 `lib.skill[x].audioname` 永远是 `string[]`**，别在别处判断对象形态。
+	 */
+	audioname?: string[] | Partial<Record<string, AudioTitle | AudioTitle[] | "default">>;
 	/**
 	 * 标记弹窗与角标配置（`Skill.intro` 的细化版）。
 	 *
