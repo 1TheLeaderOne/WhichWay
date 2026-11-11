@@ -131,3 +131,5 @@ translate({
 });
 
 characterIntro("minermrfz", "矿工们自发组织的反抗队伍，成员多是青壮年。他们并非失去理智的暴民，他们只是想保护仍躲在地下的亲人。");
+
+characterTitle("minermrfz","众志成城");
